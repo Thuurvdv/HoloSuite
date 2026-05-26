@@ -22,7 +22,9 @@
     "prebuild": "npm run sync:styles",
     "build": "npm run build --workspaces --if-present",
     "check": "tsc --noEmit",
-    "verify": "npm run audit && npm run check && npm run build"
+    "pretest": "tsc security-cameras/src/camera-model.ts security-cameras/src/region-geometry.ts security-cameras/src/frame-crop.ts security-cameras/src/token-projection.ts pulse-scanner/src/scan-geometry.ts pulse-scanner/src/target-model.ts pulse-scanner/src/marker-geometry.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests --skipLibCheck",
+    "test": "node --test security-cameras/src/*.test.mjs pulse-scanner/src/*.test.mjs",
+    "verify": "npm run audit && npm run check && npm run test && npm run build"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

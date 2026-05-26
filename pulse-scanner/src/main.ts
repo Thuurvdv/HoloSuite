@@ -1,4 +1,37 @@
 // @ts-nocheck
+import {
+  COLOR_OPTIONS,
+  DEFAULT_MODE,
+  DEFAULT_SHAPE,
+  DEFAULT_TYPE,
+  MODE_META,
+  REGION_SHAPES,
+  SCANNER_MODES,
+  TARGET_STATUSES,
+  TARGET_TYPES,
+  TYPE_META,
+  VISIBILITY_MODES,
+  clamp,
+  getColorOptions as getModelColorOptions,
+  getTargetScanRadius as getModelTargetScanRadius,
+  inferModeForType as inferModelModeForType,
+  labelize,
+  normalizeColor as normalizeModelColor,
+  normalizeModeFilter as normalizeModelModeFilter,
+  normalizeTarget as normalizeModelTarget,
+  normalizeTypeFilter as normalizeModelTypeFilter,
+  sanitizeTargetForPulse as sanitizeModelTargetForPulse,
+  targetMatchesScan as modelTargetMatchesScan,
+  targetVisibleToPlayer,
+  toNumber
+} from "./target-model";
+import {
+  getResizeCursor as getMarkerResizeCursor,
+  getResizeHandlePositions,
+  getResizeUpdates,
+  isPointNearTarget
+} from "./marker-geometry";
+
 (() => {
   "use strict";
 
@@ -7,65 +40,6 @@
   const SOCKET_NAME = `module.${MODULE_ID}`;
   const TEMPLATE_ROOT = `modules/${MODULE_ID}/templates`;
   const TARGET_FLAG = "targets";
-  const DEFAULT_MODE = "structural";
-  const DEFAULT_TYPE = "breakable";
-  const DEFAULT_SHAPE = "circle";
-
-  const TARGET_TYPES = [
-    "breakable",
-    "hidden",
-    "trap",
-    "magic",
-    "tech",
-    "biological",
-    "radiation",
-    "evidence",
-    "loot",
-    "custom"
-  ];
-
-  const VISIBILITY_MODES = ["gm", "revealed", "always"];
-  const TARGET_STATUSES = ["active", "revealed", "resolved"];
-  const REGION_SHAPES = ["circle", "rectangle"];
-
-  const SCANNER_MODES = ["structural", "arcane", "thermal", "forensic", "tech", "biological"];
-
-  const MODE_META = {
-    structural: { label: "Structural", color: "#ffb347", icon: "fa-solid fa-building-shield", types: ["breakable", "hidden"] },
-    arcane: { label: "Arcane", color: "#c77dff", icon: "fa-solid fa-wand-sparkles", types: ["magic", "hidden", "custom"] },
-    thermal: { label: "Thermal", color: "#ff4d6d", icon: "fa-solid fa-temperature-high", types: ["trap", "biological", "radiation"] },
-    forensic: { label: "Forensic", color: "#f7f7f2", icon: "fa-solid fa-fingerprint", types: ["evidence", "loot", "biological"] },
-    tech: { label: "Tech", color: "#39ffb6", icon: "fa-solid fa-microchip", types: ["tech", "radiation", "hidden"] },
-    biological: { label: "Biological", color: "#8fd14f", icon: "fa-solid fa-dna", types: ["biological", "evidence"] }
-  };
-
-  const TYPE_META = {
-    breakable: { label: "Breakable Wall", color: "#ffb347", icon: "fa-solid fa-hammer" },
-    hidden: { label: "Hidden Passage", color: "#45d6ff", icon: "fa-solid fa-door-open" },
-    trap: { label: "Trap", color: "#ff4d6d", icon: "fa-solid fa-triangle-exclamation" },
-    magic: { label: "Magic Residue", color: "#c77dff", icon: "fa-solid fa-wand-sparkles" },
-    tech: { label: "Tech Signature", color: "#39ffb6", icon: "fa-solid fa-microchip" },
-    biological: { label: "Biological Trace", color: "#8fd14f", icon: "fa-solid fa-dna" },
-    radiation: { label: "Radiation Leak", color: "#f8f32b", icon: "fa-solid fa-radiation" },
-    evidence: { label: "Evidence", color: "#f7f7f2", icon: "fa-solid fa-magnifying-glass" },
-    loot: { label: "Loot Cache", color: "#ffd166", icon: "fa-solid fa-gem" },
-    custom: { label: "Custom", color: "#7df9ff", icon: "fa-solid fa-location-dot" }
-  };
-
-  const COLOR_OPTIONS = [
-    { label: "Amber", value: "#ffb347" },
-    { label: "Cyan", value: "#45d6ff" },
-    { label: "Red", value: "#ff4d6d" },
-    { label: "Violet", value: "#c77dff" },
-    { label: "Green", value: "#39ffb6" },
-    { label: "Bio Green", value: "#8fd14f" },
-    { label: "Radiation Yellow", value: "#f8f32b" },
-    { label: "White", value: "#f7f7f2" },
-    { label: "Gold", value: "#ffd166" },
-    { label: "Aqua", value: "#7df9ff" },
-    { label: "Resolved Grey", value: "#7b858c" }
-  ];
-
   const state = {
     manager: null,
     lastMouseScenePosition: null,
@@ -381,7 +355,7 @@
 
   function getTargets(sceneId = canvas?.scene?.id) {
     return getSceneTargets(sceneId)
-      .filter((target) => game.user?.isGM || target.visibility === "revealed" || target.visibility === "always")
+      .filter((target) => game.user?.isGM || targetVisibleToPlayer(target))
       .map((target) => game.user?.isGM
         ? foundry.utils.deepClone(target)
         : sanitizeTargetForPulse(target, true));
@@ -546,77 +520,38 @@
   }
 
   function normalizeTarget(data = {}) {
-    const type = TARGET_TYPES.includes(data.type) ? data.type : DEFAULT_TYPE;
-    const meta = TYPE_META[type] ?? TYPE_META.custom;
-    const mode = SCANNER_MODES.includes(data.mode) ? data.mode : inferModeForType(type);
-    const shape = REGION_SHAPES.includes(data.shape) ? data.shape : DEFAULT_SHAPE;
-    const status = TARGET_STATUSES.includes(data.status) ? data.status : (data.resolved ? "resolved" : "active");
-    return {
-      id: String(data.id || randomId()),
-      sceneId: String(data.sceneId || canvas?.scene?.id || ""),
-      x: toNumber(data.x, 0),
-      y: toNumber(data.y, 0),
-      radius: Math.max(0, toNumber(data.radius, 80)),
-      shape,
-      width: Math.max(0, toNumber(data.width, 160)),
-      height: Math.max(0, toNumber(data.height, 160)),
-      mode,
-      type,
-      label: String(data.label || meta.label),
-      description: String(data.description || ""),
-      integrity: clamp(toNumber(data.integrity, 100), 0, 100),
-      difficulty: toNumber(data.difficulty, 10),
-      visibility: VISIBILITY_MODES.includes(data.visibility) ? data.visibility : "gm",
-      status,
-      color: normalizeColor(data.color, meta.color),
-      icon: meta.icon
-    };
+    return normalizeModelTarget(data, {
+      createId: randomId,
+      sceneId: canvas?.scene?.id || ""
+    });
   }
 
   function inferModeForType(type) {
-    return SCANNER_MODES.find((mode) => MODE_META[mode]?.types?.includes(type)) ?? DEFAULT_MODE;
+    return inferModelModeForType(type);
   }
 
   function normalizeColor(value, fallback) {
-    const color = String(value || fallback || "").trim();
-    return color.startsWith("#") ? color.toLowerCase() : color;
+    return normalizeModelColor(value, fallback);
   }
 
   function getColorOptions(selectedColor) {
-    const color = normalizeColor(selectedColor, "");
-    if (!color || COLOR_OPTIONS.some((option) => option.value === color)) return COLOR_OPTIONS;
-    return [{ label: `Current (${color})`, value: color }, ...COLOR_OPTIONS];
+    return getModelColorOptions(selectedColor);
   }
 
   function targetMatchesScan(target, origin, radius, selectedTypes, selectedModes) {
-    if (target.status === "resolved") return false;
-    if (selectedTypes?.size && !selectedTypes.has(target.type)) return false;
-    if (selectedModes?.size && !selectedModes.has(target.mode)) return false;
-    const distance = Math.hypot(Number(target.x) - origin.x, Number(target.y) - origin.y);
-    return distance <= Number(radius) + getTargetScanRadius(target);
+    return modelTargetMatchesScan(target, origin, radius, selectedTypes, selectedModes);
   }
 
   function normalizeTypeFilter(types) {
-    if (!Array.isArray(types) || types.length === 0) return null;
-    const normalized = types
-      .map((type) => String(type).trim())
-      .filter((type) => TARGET_TYPES.includes(type));
-    return normalized.length ? new Set(normalized) : null;
+    return normalizeModelTypeFilter(types);
   }
 
   function normalizeModeFilter(modes) {
-    const source = Array.isArray(modes) ? modes : modes ? [modes] : [];
-    const normalized = source
-      .map((mode) => String(mode).trim())
-      .filter((mode) => SCANNER_MODES.includes(mode));
-    return normalized.length ? new Set(normalized) : null;
+    return normalizeModelModeFilter(modes);
   }
 
   function getTargetScanRadius(target) {
-    if (target.shape === "rectangle") {
-      return Math.hypot(Number(target.width || 0), Number(target.height || 0)) / 2;
-    }
-    return Number(target.radius || 0);
+    return getModelTargetScanRadius(target);
   }
 
   function buildScanPayload({ sceneId, origin, radius, duration, detected, userId, playerView, mode }) {
@@ -635,29 +570,7 @@
   }
 
   function sanitizeTargetForPulse(target, playerView) {
-    const hiddenFromPlayer = playerView && target.visibility === "gm";
-    const safeTypeLabel = TYPE_META[target.type]?.label || labelize(target.type);
-    const clean = {
-      id: target.id,
-      sceneId: target.sceneId,
-      x: target.x,
-      y: target.y,
-      radius: target.radius,
-      shape: target.shape,
-      width: target.width,
-      height: target.height,
-      mode: target.mode,
-      type: target.type,
-      label: hiddenFromPlayer ? `${safeTypeLabel} Signature` : target.label,
-      description: hiddenFromPlayer ? "" : target.description,
-      integrity: hiddenFromPlayer && target.type !== "breakable" ? null : target.integrity,
-      difficulty: hiddenFromPlayer ? null : target.difficulty,
-      visibility: target.visibility,
-      status: target.status,
-      color: target.color,
-      icon: target.icon
-    };
-    return clean;
+    return sanitizeModelTargetForPulse(target, playerView);
   }
 
   function renderScanEffect(payload = {}) {
@@ -837,29 +750,8 @@
   }
 
   function addResizeHandles(marker, target, color) {
-    if (target.shape === "rectangle") {
-      const halfWidth = Math.max(10, Number(target.width || 160) / 2);
-      const halfHeight = Math.max(10, Number(target.height || 160) / 2);
-      [
-        ["nw", -halfWidth, -halfHeight],
-        ["n", 0, -halfHeight],
-        ["ne", halfWidth, -halfHeight],
-        ["e", halfWidth, 0],
-        ["se", halfWidth, halfHeight],
-        ["s", 0, halfHeight],
-        ["sw", -halfWidth, halfHeight],
-        ["w", -halfWidth, 0]
-      ].forEach(([handle, x, y]) => marker.addChild(createResizeHandle(target, handle, x, y, color)));
-      return;
-    }
-
-    const radius = Math.max(12, Number(target.radius || 80));
-    [
-      ["radius-e", radius, 0],
-      ["radius-s", 0, radius],
-      ["radius-w", -radius, 0],
-      ["radius-n", 0, -radius]
-    ].forEach(([handle, x, y]) => marker.addChild(createResizeHandle(target, handle, x, y, color)));
+    getResizeHandlePositions(target)
+      .forEach(({ handle, x, y }) => marker.addChild(createResizeHandle(target, handle, x, y, color)));
   }
 
   function createResizeHandle(target, handle, x, y, color) {
@@ -891,12 +783,7 @@
   }
 
   function getResizeCursor(handle) {
-    if (handle.startsWith("radius")) return "move";
-    if (handle === "n" || handle === "s") return "ns-resize";
-    if (handle === "e" || handle === "w") return "ew-resize";
-    if (handle === "nw" || handle === "se") return "nwse-resize";
-    if (handle === "ne" || handle === "sw") return "nesw-resize";
-    return "move";
+    return getMarkerResizeCursor(handle);
   }
 
   function beginMarkerDrag(event, target, marker) {
@@ -967,17 +854,7 @@
     const target = getSceneTargets(canvas.scene.id).find((candidate) => candidate.id === state.resizingMarker.id);
     if (!target) return true;
 
-    const dx = point.x - Number(target.x);
-    const dy = point.y - Number(target.y);
-    const updates = {};
-
-    if (target.shape === "rectangle") {
-      const handle = state.resizingMarker.handle;
-      if (handle.includes("e") || handle.includes("w")) updates.width = Math.max(24, Math.round(Math.abs(dx) * 2));
-      if (handle.includes("n") || handle.includes("s")) updates.height = Math.max(24, Math.round(Math.abs(dy) * 2));
-    } else {
-      updates.radius = Math.max(12, Math.round(Math.hypot(dx, dy)));
-    }
+    const updates = getResizeUpdates(target, state.resizingMarker.handle, point);
 
     state.liveUpdates = updates;
     if (state.liveMarker) {
@@ -1090,10 +967,7 @@
   }
 
   function isNearExistingTarget(position) {
-    return getSceneTargets(canvas.scene?.id).some((target) => {
-      const threshold = Math.max(18, Math.min(getTargetScanRadius(target), 80));
-      return Math.hypot(target.x - position.x, target.y - position.y) <= threshold;
-    });
+    return getSceneTargets(canvas.scene?.id).some((target) => isPointNearTarget(position, target));
   }
 
   function sceneToClient(x, y) {

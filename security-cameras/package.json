@@ -4,7 +4,8 @@
   "version": "0.10.1",
   "type": "module",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "test": "node --test"
   },
   "devDependencies": {
     "vite": "^5.2.0",

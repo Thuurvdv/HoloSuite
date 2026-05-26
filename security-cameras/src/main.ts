@@ -1,5 +1,35 @@
 // @ts-nocheck
 import { createHoloSuiteSocket } from "../../shared/src/index";
+import {
+  DEFAULT_CAMERA,
+  DEFAULT_CAMERA_REGION_HEIGHT,
+  DEFAULT_CAMERA_REGION_WIDTH,
+  DISPLAY_MODE_CHOICES,
+  DISPLAY_MODES,
+  FEED_SOURCE_CHOICES,
+  STATUS_CHOICES,
+  normalizeCamera as normalizeCameraModel,
+  normalizeChoice,
+  normalizeNullableNumber,
+  normalizePositiveNumber,
+  validateCameraData as validateCameraDataModel
+} from "./camera-model";
+import {
+  getShapesRegionBounds,
+  toCameraRegionBounds
+} from "./region-geometry";
+import {
+  clampCrop,
+  getCameraCrop as getCameraCropRect,
+  getCropForSceneImage as getSceneImageCropRect,
+  getFullSourceCrop,
+  getScaledOutputSize
+} from "./frame-crop";
+import {
+  getTokenSceneBounds as getTokenDocumentBounds,
+  intersectsBounds,
+  projectBoundsToFrame
+} from "./token-projection";
 
 const MODULE_ID = "security-cameras";
 const SOCKET_NAME = `module.${MODULE_ID}`;
@@ -10,47 +40,8 @@ const moduleSocket = createHoloSuiteSocket(MODULE_ID, {
 const MONITOR_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/monitor.hbs`;
 const FEED_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/feed.hbs`;
 
-const CAMERA_STATUSES = new Set(["online", "offline", "corrupted", "restricted"]);
-const FEED_SOURCES = new Set(["live", "image"]);
-const DISPLAY_MODES = new Set(["window", "picture-in-picture"]);
 const LIVE_FRAME_INTERVAL_MS = 1250;
 const LIVE_FRAME_MAX_WIDTH = 960;
-const DEFAULT_CAMERA_REGION_WIDTH = 1200;
-const DEFAULT_CAMERA_REGION_HEIGHT = 675;
-
-const STATUS_CHOICES = [
-  { value: "online", label: "Online" },
-  { value: "offline", label: "Offline" },
-  { value: "corrupted", label: "Corrupted" },
-  { value: "restricted", label: "Restricted" }
-];
-
-const DISPLAY_MODE_CHOICES = [
-  { value: "window", label: "Window" },
-  { value: "picture-in-picture", label: "Picture-in-Picture" }
-];
-
-const FEED_SOURCE_CHOICES = [
-  { value: "live", label: "Live Canvas" },
-  { value: "image", label: "Static Image" }
-];
-
-const DEFAULT_CAMERA = {
-  id: "",
-  name: "Unnamed Camera",
-  sceneId: "",
-  location: "Unknown Location",
-  image: "",
-  feedSource: "image",
-  status: "online",
-  displayMode: "window",
-  regionId: "",
-  regionX: null,
-  regionY: null,
-  regionWidth: DEFAULT_CAMERA_REGION_WIDTH,
-  regionHeight: DEFAULT_CAMERA_REGION_HEIGHT,
-  notes: ""
-};
 
 let activeMonitor = null;
 let activeFeed = null;
@@ -76,67 +67,12 @@ function escapeHTML(value) {
   return element.innerHTML;
 }
 
-function normalizeChoice(value, allowed, fallback) {
-  const normalized = String(value ?? "").trim();
-  return allowed.has(normalized) ? normalized : fallback;
-}
-
-function normalizeNullableNumber(value) {
-  if (value === null || value === undefined || value === "") return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
-
-function normalizePositiveNumber(value, fallback) {
-  const number = Number(value);
-  return Number.isFinite(number) && number > 0 ? number : fallback;
-}
-
 function normalizeCamera(cameraData = {}, options = {}) {
-  const preserveId = options.preserveId === true;
-  const rawId = String(cameraData.id ?? "").trim();
-  const id = preserveId ? rawId : rawId || createCameraId();
-  const feedSource = normalizeChoice(cameraData.feedSource, FEED_SOURCES, DEFAULT_CAMERA.feedSource);
-  const status = normalizeChoice(cameraData.status, CAMERA_STATUSES, DEFAULT_CAMERA.status);
-  const displayMode = normalizeChoice(cameraData.displayMode, DISPLAY_MODES, DEFAULT_CAMERA.displayMode);
-
-  return {
-    ...DEFAULT_CAMERA,
-    id,
-    name: String(cameraData.name ?? DEFAULT_CAMERA.name).trim() || DEFAULT_CAMERA.name,
-    sceneId: String(cameraData.sceneId ?? "").trim(),
-    location: String(cameraData.location ?? DEFAULT_CAMERA.location).trim() || DEFAULT_CAMERA.location,
-    image: String(cameraData.image ?? "").trim(),
-    feedSource,
-    status,
-    displayMode,
-    regionId: String(cameraData.regionId ?? "").trim(),
-    regionX: normalizeNullableNumber(cameraData.regionX),
-    regionY: normalizeNullableNumber(cameraData.regionY),
-    regionWidth: normalizePositiveNumber(cameraData.regionWidth, DEFAULT_CAMERA_REGION_WIDTH),
-    regionHeight: normalizePositiveNumber(cameraData.regionHeight, DEFAULT_CAMERA_REGION_HEIGHT),
-    notes: String(cameraData.notes ?? "").trim()
-  };
+  return normalizeCameraModel(cameraData, { ...options, createId: createCameraId });
 }
 
 function validateCameraData(cameraData = {}, options = {}) {
-  const camera = normalizeCamera(cameraData, { preserveId: options.requireId === true });
-  const errors = [];
-  const rawFeedSource = String(cameraData.feedSource ?? DEFAULT_CAMERA.feedSource).trim();
-  const rawStatus = String(cameraData.status ?? DEFAULT_CAMERA.status).trim();
-  const rawDisplayMode = String(cameraData.displayMode ?? DEFAULT_CAMERA.displayMode).trim();
-
-  if (options.requireId && !camera.id) errors.push("Camera id is required.");
-  if (typeof cameraData.name === "string" && !cameraData.name.trim()) errors.push("Camera name is required.");
-  if (!FEED_SOURCES.has(rawFeedSource)) errors.push(`Invalid feed source: ${rawFeedSource}`);
-  if (!CAMERA_STATUSES.has(rawStatus)) errors.push(`Invalid status: ${rawStatus}`);
-  if (!DISPLAY_MODES.has(rawDisplayMode)) errors.push(`Invalid display mode: ${rawDisplayMode}`);
-
-  return {
-    ok: errors.length === 0,
-    camera: normalizeCamera(camera),
-    errors
-  };
+  return validateCameraDataModel(cameraData, { ...options, createId: createCameraId });
 }
 
 function getSceneName(sceneId) {
@@ -202,89 +138,21 @@ function getSelectedRegionDocument() {
   return canvas?.regions?.controlled?.[0]?.document ?? null;
 }
 
-function getShapeBounds(shape = {}) {
-  const points = Array.isArray(shape.points) ? shape.points : [];
-  if (points.length >= 4) {
-    const xs = [];
-    const ys = [];
-    for (let index = 0; index < points.length; index += 2) {
-      xs.push(Number(points[index]));
-      ys.push(Number(points[index + 1]));
-    }
-
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs);
-    const maxY = Math.max(...ys);
-    if ([minX, minY, maxX, maxY].every(Number.isFinite)) {
-      return {
-        x: minX,
-        y: minY,
-        width: maxX - minX,
-        height: maxY - minY
-      };
-    }
-  }
-
-  const x = normalizeNullableNumber(shape.x) ?? 0;
-  const y = normalizeNullableNumber(shape.y) ?? 0;
-  const width = normalizePositiveNumber(shape.width ?? shape.radiusX ?? shape.radius, 0);
-  const height = normalizePositiveNumber(shape.height ?? shape.radiusY ?? shape.radius, 0);
-  if (!width || !height) return null;
-
-  return { x, y, width, height };
-}
-
-function combineBounds(bounds) {
-  const valid = bounds.filter(Boolean);
-  if (!valid.length) return null;
-  const minX = Math.min(...valid.map((bound) => bound.x));
-  const minY = Math.min(...valid.map((bound) => bound.y));
-  const maxX = Math.max(...valid.map((bound) => bound.x + bound.width));
-  const maxY = Math.max(...valid.map((bound) => bound.y + bound.height));
-  return {
-    x: minX,
-    y: minY,
-    width: maxX - minX,
-    height: maxY - minY
-  };
-}
-
 function getRegionBounds(region) {
   const regionObject = region?.object ?? canvas?.regions?.placeables?.find?.((placeable) => placeable.document?.id === region?.id);
   const objectBounds = regionObject?.bounds;
   if (objectBounds?.width && objectBounds?.height) {
-    return {
-      regionX: normalizeNullableNumber(objectBounds.x) ?? 0,
-      regionY: normalizeNullableNumber(objectBounds.y) ?? 0,
-      regionWidth: normalizePositiveNumber(objectBounds.width, DEFAULT_CAMERA_REGION_WIDTH),
-      regionHeight: normalizePositiveNumber(objectBounds.height, DEFAULT_CAMERA_REGION_HEIGHT)
-    };
+    return toCameraRegionBounds(objectBounds);
   }
 
   const directBounds = region?.bounds;
   if (directBounds?.width && directBounds?.height) {
-    return {
-      regionX: normalizeNullableNumber(directBounds.x) ?? 0,
-      regionY: normalizeNullableNumber(directBounds.y) ?? 0,
-      regionWidth: normalizePositiveNumber(directBounds.width, DEFAULT_CAMERA_REGION_WIDTH),
-      regionHeight: normalizePositiveNumber(directBounds.height, DEFAULT_CAMERA_REGION_HEIGHT)
-    };
+    return toCameraRegionBounds(directBounds);
   }
 
   const source = region?.toObject?.() ?? region;
   const shapes = Array.isArray(region?.shapes) ? region.shapes : Array.isArray(source?.shapes) ? source.shapes : [];
-  const shapeBounds = combineBounds(shapes.map(getShapeBounds));
-  if (!shapeBounds) return null;
-
-  const width = normalizePositiveNumber(shapeBounds.width, DEFAULT_CAMERA_REGION_WIDTH);
-  const height = normalizePositiveNumber(shapeBounds.height, DEFAULT_CAMERA_REGION_HEIGHT);
-  return {
-    regionX: normalizeNullableNumber(shapeBounds.x) ?? 0,
-    regionY: normalizeNullableNumber(shapeBounds.y) ?? 0,
-    regionWidth: width,
-    regionHeight: height
-  };
+  return getShapesRegionBounds(shapes);
 }
 
 function applyLinkedRegionBounds(camera) {
@@ -881,55 +749,23 @@ function getRenderedCanvasSnapshot() {
 
 function getCameraCrop(sourceCanvas, camera) {
   const cameraWithRegion = applyLinkedRegionBounds(normalizeCamera(camera));
-  const hasRegion = Number.isFinite(cameraWithRegion.regionX) && Number.isFinite(cameraWithRegion.regionY);
-  if (!hasRegion) {
-    return {
-      sx: 0,
-      sy: 0,
-      sw: sourceCanvas.width,
-      sh: sourceCanvas.height
-    };
-  }
-
   const sceneWidth = canvas.dimensions?.width ?? canvas.scene?.width ?? 0;
   const sceneHeight = canvas.dimensions?.height ?? canvas.scene?.height ?? 0;
+  const sceneSize = sceneWidth && sceneHeight ? { width: sceneWidth, height: sceneHeight } : null;
 
-  if (sceneWidth && sceneHeight && sourceCanvas.width >= sceneWidth * 0.75 && sourceCanvas.height >= sceneHeight * 0.75) {
-    const scaleX = sourceCanvas.width / sceneWidth;
-    const scaleY = sourceCanvas.height / sceneHeight;
-    return {
-      sx: cameraWithRegion.regionX * scaleX,
-      sy: cameraWithRegion.regionY * scaleY,
-      sw: cameraWithRegion.regionWidth * scaleX,
-      sh: cameraWithRegion.regionHeight * scaleY
-    };
-  }
-
-  if (canvas.stage?.worldTransform?.apply && typeof PIXI !== "undefined") {
-    const topLeft = canvas.stage.worldTransform.apply(new PIXI.Point(cameraWithRegion.regionX, cameraWithRegion.regionY));
-    const bottomRight = canvas.stage.worldTransform.apply(new PIXI.Point(cameraWithRegion.regionX + cameraWithRegion.regionWidth, cameraWithRegion.regionY + cameraWithRegion.regionHeight));
-    return {
-      sx: topLeft.x,
-      sy: topLeft.y,
-      sw: bottomRight.x - topLeft.x,
-      sh: bottomRight.y - topLeft.y
-    };
-  }
-
-  return {
-    sx: 0,
-    sy: 0,
-    sw: sourceCanvas.width,
-    sh: sourceCanvas.height
-  };
-}
-
-function clampCrop(crop, sourceCanvas) {
-  const sx = Math.max(0, Math.min(sourceCanvas.width - 1, Math.round(crop.sx)));
-  const sy = Math.max(0, Math.min(sourceCanvas.height - 1, Math.round(crop.sy)));
-  const sw = Math.max(1, Math.min(sourceCanvas.width - sx, Math.round(crop.sw)));
-  const sh = Math.max(1, Math.min(sourceCanvas.height - sy, Math.round(crop.sh)));
-  return { sx, sy, sw, sh };
+  return getCameraCropRect(sourceCanvas, cameraWithRegion, sceneSize, () => {
+    if (canvas.stage?.worldTransform?.apply && typeof PIXI !== "undefined") {
+      const topLeft = canvas.stage.worldTransform.apply(new PIXI.Point(cameraWithRegion.regionX, cameraWithRegion.regionY));
+      const bottomRight = canvas.stage.worldTransform.apply(new PIXI.Point(cameraWithRegion.regionX + cameraWithRegion.regionWidth, cameraWithRegion.regionY + cameraWithRegion.regionHeight));
+      return {
+        sx: topLeft.x,
+        sy: topLeft.y,
+        sw: bottomRight.x - topLeft.x,
+        sh: bottomRight.y - topLeft.y
+      };
+    }
+    return null;
+  });
 }
 
 function getSceneDimensions(sceneId = "") {
@@ -946,26 +782,12 @@ function getSceneDimensions(sceneId = "") {
 
 function getCropForSceneImage(image, camera) {
   const cameraWithRegion = applyLinkedRegionBounds(normalizeCamera(camera));
-  const hasRegion = Number.isFinite(cameraWithRegion.regionX) && Number.isFinite(cameraWithRegion.regionY);
-  if (!hasRegion) {
-    return {
-      sx: 0,
-      sy: 0,
-      sw: image.naturalWidth,
-      sh: image.naturalHeight
-    };
+  if (!Number.isFinite(cameraWithRegion.regionX) || !Number.isFinite(cameraWithRegion.regionY)) {
+    return getFullSourceCrop({ width: image.naturalWidth, height: image.naturalHeight });
   }
 
   const sceneDimensions = getSceneDimensions(cameraWithRegion.sceneId);
-  const scaleX = image.naturalWidth / sceneDimensions.width;
-  const scaleY = image.naturalHeight / sceneDimensions.height;
-
-  return {
-    sx: (cameraWithRegion.regionX - sceneDimensions.x) * scaleX,
-    sy: (cameraWithRegion.regionY - sceneDimensions.y) * scaleY,
-    sw: cameraWithRegion.regionWidth * scaleX,
-    sh: cameraWithRegion.regionHeight * scaleY
-  };
+  return getSceneImageCropRect({ width: image.naturalWidth, height: image.naturalHeight }, cameraWithRegion, sceneDimensions);
 }
 
 function loadImage(path) {
@@ -1002,9 +824,7 @@ async function captureSceneBackgroundFrame(camera = {}) {
     width: image.naturalWidth,
     height: image.naturalHeight
   });
-  const scale = Math.min(1, LIVE_FRAME_MAX_WIDTH / crop.sw);
-  const width = Math.max(1, Math.round(crop.sw * scale));
-  const height = Math.max(1, Math.round(crop.sh * scale));
+  const { width, height } = getScaledOutputSize(crop, LIVE_FRAME_MAX_WIDTH);
   const output = document.createElement("canvas");
   output.width = width;
   output.height = height;
@@ -1021,26 +841,8 @@ async function captureSceneBackgroundFrame(camera = {}) {
 }
 
 function getTokenSceneBounds(token) {
-  const document = token?.document;
-  if (!document) return null;
   const gridSize = canvas?.dimensions?.size ?? canvas?.grid?.size ?? 100;
-  const x = normalizeNullableNumber(document.x);
-  const y = normalizeNullableNumber(document.y);
-  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
-
-  return {
-    x,
-    y,
-    width: normalizePositiveNumber(document.width, 1) * gridSize,
-    height: normalizePositiveNumber(document.height, 1) * gridSize
-  };
-}
-
-function intersectsBounds(a, b) {
-  return a.x < b.x + b.width
-    && a.x + a.width > b.x
-    && a.y < b.y + b.height
-    && a.y + a.height > b.y;
+  return getTokenDocumentBounds(token?.document, gridSize);
 }
 
 function shouldDrawToken(token) {
@@ -1076,10 +878,7 @@ async function drawTokensOnFrame(context, camera, crop, frameWidth, frameHeight)
     const image = await loadImage(imagePath);
     if (!image?.naturalWidth || !image?.naturalHeight) continue;
 
-    const dx = ((bounds.x - region.x) / region.width) * frameWidth;
-    const dy = ((bounds.y - region.y) / region.height) * frameHeight;
-    const dw = (bounds.width / region.width) * frameWidth;
-    const dh = (bounds.height / region.height) * frameHeight;
+    const { dx, dy, dw, dh } = projectBoundsToFrame(bounds, region, { width: frameWidth, height: frameHeight });
 
     context.save();
     context.globalAlpha = token.document.alpha ?? 1;
@@ -1110,9 +909,7 @@ function captureCanvasFrame(camera = {}) {
   if (!sourceCanvas?.width || !sourceCanvas?.height) return "";
 
   const crop = clampCrop(getCameraCrop(sourceCanvas, camera), sourceCanvas);
-  const scale = Math.min(1, LIVE_FRAME_MAX_WIDTH / crop.sw);
-  const width = Math.max(1, Math.round(crop.sw * scale));
-  const height = Math.max(1, Math.round(crop.sh * scale));
+  const { width, height } = getScaledOutputSize(crop, LIVE_FRAME_MAX_WIDTH);
   const output = document.createElement("canvas");
   output.width = width;
   output.height = height;
