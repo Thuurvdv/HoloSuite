@@ -99,19 +99,16 @@ export function normalizeBounty(source = {}) {
     claimedBy: normalizeString(source.claimedBy),
     notesGM: normalizeString(source.notesGM),
     notesPublic: normalizeString(source.notesPublic),
-    linkedJournalId: normalizeString(source.linkedJournalId),
-    linkedSceneId: normalizeString(source.linkedSceneId)
+    linkedJournalId: normalizeString(source.linkedJournalId)
   };
 }
 
 export function prepareBountyForDisplay(bounty) {
   const normalized = normalizeBounty(bounty);
   const linkedJournal = normalized.linkedJournalId ? game.journal?.get(normalized.linkedJournalId) ?? null : null;
-  const linkedScene = normalized.linkedSceneId ? game.scenes?.get(normalized.linkedSceneId) ?? null : null;
   const publicLinks = game.settings.get(MODULE_ID, SETTING_PUBLIC_DOCUMENT_LINKS) === true;
   const user = game.user;
   const canSeeJournal = Boolean(linkedJournal && (user?.isGM || publicLinks || linkedJournal.testUserPermission?.(user, "OBSERVER")));
-  const canSeeScene = Boolean(linkedScene && (user?.isGM || publicLinks || linkedScene.testUserPermission?.(user, "OBSERVER")));
 
   return {
     ...normalized,
@@ -121,9 +118,7 @@ export function prepareBountyForDisplay(bounty) {
     hasImage: Boolean(normalized.image),
     isVisibleToPlayers: isBountyVisibleToPlayers(normalized),
     linkedJournalName: linkedJournal?.name ?? "",
-    linkedSceneName: linkedScene?.name ?? "",
     canSeeJournal,
-    canSeeScene,
     canEdit: game.user?.isGM === true
   };
 }
@@ -394,8 +389,8 @@ export function registerSettings() {
   });
 
   game.settings.register(MODULE_ID, SETTING_PUBLIC_DOCUMENT_LINKS, {
-    name: "Show Linked Documents To Players",
-    hint: "Allow player-visible bounty cards to show linked scene and journal buttons when the bounty is published.",
+    name: "Show Linked Journals To Players",
+    hint: "Allow player-visible bounty cards to show linked journal buttons when the bounty is published.",
     scope: "world",
     config: true,
     type: Boolean,

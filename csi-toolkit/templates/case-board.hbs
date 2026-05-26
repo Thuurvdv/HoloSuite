@@ -39,7 +39,7 @@
       <main class="csi-board-layout">
         <aside class="csi-board-dossier">
           <section class="csi-report">
-            <div class="csi-stamp">Classified</div>
+            {{#if (csiEq case.status "classified")}}<div class="csi-stamp">Classified</div>{{/if}}
             <h2>Briefing</h2>
             <p>{{case.description}}</p>
           </section>

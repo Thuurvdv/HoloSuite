@@ -238,7 +238,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
       }
     ]
   };
-  let R = null;
+  let N = null;
   const z = /* @__PURE__ */ new Map();
   let f = null;
   const X = /* @__PURE__ */ new Map(), K = /* @__PURE__ */ new Set();
@@ -308,7 +308,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
     const t = document.createElement("div");
     return t.textContent = String(e ?? ""), t.innerHTML;
   }
-  function N(e, t) {
+  function R(e, t) {
     return e.map((i) => {
       const s = typeof i == "string" ? i : i.value, n = typeof i == "string" ? i : i.label;
       return `<option value="${d(s)}" ${s === t ? "selected" : ""}>${d(n)}</option>`;
@@ -514,7 +514,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
     const t = x();
     return t[e] ? (delete t[e], await k(t), kt(e), C(), !0) : !1;
   }
-  async function Re(e) {
+  async function Ae(e) {
     if (!w("duplicate galaxy maps")) return null;
     const t = M(e);
     if (!t)
@@ -526,7 +526,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
     }), s = x();
     return s[i.id] = i, await k(s), C(i.id), L(i);
   }
-  async function Ae(e, t = {}) {
+  async function Re(e, t = {}) {
     if (!w("save star systems")) return null;
     const i = x(), s = i[e];
     if (!s)
@@ -583,7 +583,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
     var o;
     if (!w("move star systems")) return null;
     const n = x(), a = n[e], r = (o = a == null ? void 0 : a.systems) == null ? void 0 : o.find((u) => u.id === t);
-    return r ? (r.x = F(G(i, r.x), 0, 100), r.y = F(G(s, r.y), 0, 100), n[e] = h(a), await k(n), R != null && R.rendered && R.render({ force: !0 }), game.socket.emit(v, { action: "refresh", mapId: e }), L(r)) : (y(`System "${t}" was not found.`), null);
+    return r ? (r.x = F(G(i, r.x), 0, 100), r.y = F(G(s, r.y), 0, 100), n[e] = h(a), await k(n), game.socket.emit(v, { action: "refresh", mapId: e }), L(r)) : (y(`System "${t}" was not found.`), null);
   }
   async function ce(e, t, { notify: i = !0 } = {}) {
     var r;
@@ -647,15 +647,15 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
         <input type="hidden" name="y" value="${d(n.y)}" />
         <label>Name <input type="text" name="name" value="${d(n.name)}" /></label>
         <div class="gmf-form-grid">
-          <label>Type <select name="type">${N(ve, n.type)}</select></label>
-          <label>Status <select name="status">${N(Se, n.status)}</select></label>
+          <label>Type <select name="type">${R(ve, n.type)}</select></label>
+          <label>Status <select name="status">${R(Se, n.status)}</select></label>
         </div>
         <div class="gmf-form-grid">
-          <label>Faction <select name="factionId">${N(a, n.factionId)}</select></label>
-          <label>Visibility <select name="visibility">${N(O, n.visibility)}</select></label>
+          <label>Faction <select name="factionId">${R(a, n.factionId)}</select></label>
+          <label>Visibility <select name="visibility">${R(O, n.visibility)}</select></label>
         </div>
         <div class="gmf-form-grid">
-          <label>Icon Style <select name="iconStyle">${N(Ie, n.iconStyle)}</select></label>
+          <label>Icon Style <select name="iconStyle">${R(Ie, n.iconStyle)}</select></label>
           <label>Icon Size <input type="range" name="iconSize" value="${d(n.iconSize)}" min="18" max="56" step="1" /></label>
         </div>
         <div class="gmf-form-grid">
@@ -686,12 +686,12 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
       <form class="gmf-crud-form">
         <input type="hidden" name="id" value="${d(r.id)}" />
         <div class="gmf-form-grid">
-          <label>From <select name="fromSystemId">${N(o, r.fromSystemId)}</select></label>
-          <label>To <select name="toSystemId">${N(o, r.toSystemId)}</select></label>
+          <label>From <select name="fromSystemId">${R(o, r.fromSystemId)}</select></label>
+          <label>To <select name="toSystemId">${R(o, r.toSystemId)}</select></label>
         </div>
         <div class="gmf-form-grid">
-          <label>Type <select name="type">${N(be, r.type)}</select></label>
-          <label>Visibility <select name="visibility">${N(O, r.visibility)}</select></label>
+          <label>Type <select name="type">${R(be, r.type)}</select></label>
+          <label>Visibility <select name="visibility">${R(O, r.visibility)}</select></label>
         </div>
         <div class="gmf-form-grid">
           <label>Travel Time <input type="text" name="travelTime" value="${d(r.travelTime)}" /></label>
@@ -709,7 +709,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
         <label>Name <input type="text" name="name" value="${d(t.name)}" /></label>
         <div class="gmf-form-grid">
           <label>Color <input type="color" name="color" value="${d(t.color)}" /></label>
-          <label>Visibility <select name="visibility">${N(O, t.visibility)}</select></label>
+          <label>Visibility <select name="visibility">${R(O, t.visibility)}</select></label>
         </div>
         <label>Description <textarea name="description">${d(t.description)}</textarea></label>
       </form>
@@ -728,7 +728,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
             <button type="button" data-browse-target="backgroundImage"><i class="fa-solid fa-folder-open"></i> Browse</button>
           </div>
         </label>
-        <label>Visibility <select name="visibility">${N(O, t.visibility)}</select></label>
+        <label>Visibility <select name="visibility">${R(O, t.visibility)}</select></label>
       </form>
     `;
   }
@@ -747,7 +747,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
       title: n ? "Edit Star System" : "Create Star System",
       content: mt(e, n ?? { id: P("system"), name: "New System" }, i),
       submitLabel: n ? "Save System" : "Create System",
-      onSubmit: (r) => Ae(e, { ...r, pulse: r.pulse === "true" })
+      onSubmit: (r) => Re(e, { ...r, pulse: r.pulse === "true" })
     });
   }
   function j(e, t = null, i = {}) {
@@ -853,7 +853,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
     return Object.values(x()).map(h);
   }
   function C(e = null) {
-    R != null && R.rendered && R.render({ force: !0 });
+    N != null && N.rendered && N.render({ force: !0 });
     for (const [t, i] of z.entries())
       (!e || t === e) && i.render({ force: !0 });
     f != null && f.rendered && (!e || f.mapId === e) && f.render({ force: !0 });
@@ -1046,7 +1046,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
     return s ? f = r : z.set(n, r), r.render({ force: !0 }), r;
   }
   function fe() {
-    return w("open the map manager") ? (R || (R = new ye()), R.render({ force: !0 }), R) : null;
+    return w("open the map manager") ? (N || (N = new ye()), N.render({ force: !0 }), N) : null;
   }
   function pe() {
     const e = ie().filter((s) => s.visibility === "players").sort((s, n) => s.title.localeCompare(n.title));
@@ -1163,7 +1163,7 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
         l.addEventListener("click", () => game.galaxyMap.showMapToPlayers(l.dataset.showMap));
       }), i.querySelectorAll("[data-duplicate-map]").forEach((l) => {
         l.addEventListener("click", async () => {
-          const $ = await Re(l.dataset.duplicateMap);
+          const $ = await Ae(l.dataset.duplicateMap);
           $ && (this.selectedMapId = $.id, this.jsonDraft = "", this.render({ force: !0 }));
         });
       }), i.querySelectorAll("[data-delete-map]").forEach((l) => {
@@ -1227,6 +1227,9 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
         title: "Delete Faction",
         content: "<p>Delete this faction? Systems assigned to it become unaffiliated.</p>"
       }) && await le(this.selectedMapId, t);
+    }
+    async close(t = {}) {
+      return N === this && (N = null), super.close(t);
     }
   }
   W(ye, "DEFAULT_OPTIONS", {
@@ -1564,8 +1567,8 @@ var W = (_, A, v) => Lt(_, typeof A != "symbol" ? A + "" : A, v);
       updateMap: _e,
       updateMapMetadata: Le,
       deleteMap: De,
-      duplicateMap: Re,
-      upsertSystem: Ae,
+      duplicateMap: Ae,
+      upsertSystem: Re,
       deleteSystem: re,
       upsertRoute: Ne,
       deleteRoute: oe,

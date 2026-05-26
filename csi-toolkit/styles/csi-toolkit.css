@@ -115,6 +115,10 @@
   color: var(--csi-muted);
 }
 
+.csi-panel-header p {
+  white-space: nowrap;
+}
+
 .csi-case-list-scroll {
   flex: 1;
   min-height: 0;

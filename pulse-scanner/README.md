@@ -17,6 +17,7 @@ scene.getFlag("pulse-scanner", "targets");
 4. Open a scene and use the Token controls side-menu buttons:
    - **Pulse Scanner Targets** opens the GM manager.
    - **Place Scan Target** toggles click-to-place canvas placement for GMs.
+5. Drag the included **Pulse Scanner** world item onto a player actor so they can trigger scans from that item or from the token HUD shortcut.
 
 For local development, symlink or copy this folder to `Data/modules/pulse-scanner`, edit files, then refresh Foundry with cache disabled.
 
@@ -33,6 +34,12 @@ For local development, symlink or copy this folder to `Data/modules/pulse-scanne
 ```js
 game.pulseScanner.openTargetManager();
 game.pulseScanner.scan(options);
+game.pulseScanner.usePulseScannerItem(options);
+game.pulseScanner.createPulseScannerItem(actorOrToken, options);
+game.pulseScanner.ensureWorldPulseScannerItem(options);
+game.pulseScanner.createWorldPulseScannerItem(options);
+game.pulseScanner.getPulseScannerItemData(options);
+game.pulseScanner.hasPulseScannerItem(actorOrToken);
 game.pulseScanner.createTarget(targetData);
 game.pulseScanner.getTargets(sceneId);
 game.pulseScanner.deleteTarget(targetId);
@@ -110,6 +117,17 @@ Status: `active`, `revealed`, `resolved`.
 6. Reveal one target, reveal all latest detections, hide a revealed target, or mark it resolved/destroyed.
 7. Use the JSON API macros below when moving target data between worlds.
 
+## Player Workflow
+
+Players use the scanner as an actor item first:
+
+1. The GM drags the included **Pulse Scanner** item from the Items sidebar onto the actor.
+2. The player selects their token.
+3. The player clicks **Scan** on the Pulse Scanner item sheet, or clicks the pulse icon in the token HUD.
+4. The pulse fires from the selected token and reveals only player-safe scan labels.
+
+When a GM loads the world, the module creates a flagged **Pulse Scanner** item in the world Items directory if one does not already exist. The target manager can create additional scanner item variants with different names, signals, and ranges. By default, players must have one of these scanner items to scan. GMs can turn off **Require Pulse Scanner Item** in module settings for macro-only or toolbar-only games, or turn off **Create World Pulse Scanner Item** if they prefer to manage the item manually.
+
 ## Macro Examples
 
 ### Open Target Manager
@@ -155,6 +173,20 @@ await game.pulseScanner.scan({
   tokenId: canvas.tokens.controlled[0]?.id,
   radius: 600,
   mode: "tech"
+});
+```
+
+### Give Selected Token a Pulse Scanner Item
+
+```js
+await game.pulseScanner.createPulseScannerItem(canvas.tokens.controlled[0]);
+```
+
+### Use Pulse Scanner Item From Selected Token
+
+```js
+await game.pulseScanner.usePulseScannerItem({
+  tokenId: canvas.tokens.controlled[0]?.id
 });
 ```
 

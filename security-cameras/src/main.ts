@@ -532,7 +532,7 @@ function renderFallbackMonitor(data) {
       </aside>
       ${preview}
       <form class="security-camera-editor" data-security-camera-form>
-        <header><span class="security-camera-kicker">Manager</span><h2>${data.isNewCamera ? "Create Camera" : "Edit Camera"}</h2></header>
+        <header><span class="security-camera-kicker">Manager</span><h2>${data.isNewCamera ? "ADDING Camera" : "Edit Camera"}</h2></header>
         <input type="hidden" name="originalId" value="${escapeHTML(editor.id)}">
         <label>ID <input type="text" name="id" value="${escapeHTML(editor.id)}" placeholder="auto-generated"></label>
         <label>Name <input type="text" name="name" value="${escapeHTML(editor.name)}" required></label>
@@ -1348,6 +1348,7 @@ function registerWithHoloSuite() {
     icon: "fa-solid fa-video",
     premium: false,
     featureId: MODULE_ID,
+    playerVisible: false,
     description: "Manage camera feeds and broadcast surveillance views.",
     open: () => openMonitor()
   });

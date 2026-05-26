@@ -357,6 +357,7 @@ function tryRegisterWithHoloSuite() {
     icon: "fa-solid fa-terminal",
     premium: false,
     featureId: MODULE_ID,
+    playerVisible: false,
     description: "Reusable hacking minigames for terminals, traces, and signal puzzles.",
     open: () => openLauncher()
   });

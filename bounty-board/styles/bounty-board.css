@@ -36,6 +36,10 @@
   color: var(--bb-text);
 }
 
+.bounty-board-window .window-content {
+  overflow-y: auto;
+}
+
 .bb-terminal,
 .bb-editor {
   min-height: 100%;

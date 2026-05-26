@@ -52,6 +52,10 @@ export class HackingLauncherApp extends LegacyApplication {
       event.preventDefault();
       this.submit(form);
     });
+    html.find("[data-action='test-self']").on("click", (event) => {
+      event.preventDefault();
+      this.testSelf(form);
+    });
     const formElement = html.is("form") ? html : html.find("form");
     formElement.on("submit", (event) => {
       event.preventDefault();
@@ -105,6 +109,30 @@ export class HackingLauncherApp extends LegacyApplication {
       onFailure: (result) => console.log(`${MODULE_ID} | Test failure callback`, result)
     });
     if (sent) this.close();
+  }
+
+  testSelf(form) {
+    if (!game.user?.isGM) {
+      ui.notifications?.warn?.("Only the GM can test HoloSuite Hacking minigames.");
+      return;
+    }
+    if (!form) {
+      ui.notifications?.error?.("HoloSuite Hacking launcher form was not found.");
+      return;
+    }
+
+    const minigameType = String(form.querySelector("[name='minigameType']")?.value || "node-intrusion");
+    const dc = Number(form.querySelector("[name='dc']")?.value ?? game.settings.get(MODULE_ID, "defaultDc") ?? 15);
+    this.api.startHack({
+      type: minigameType,
+      dc,
+      rollTotal: dc + 2,
+      actorName: game.user?.name ?? "GM",
+      userId: game.user?.id ?? "",
+      onSuccess: (result) => console.log(`${MODULE_ID} | GM test success`, result),
+      onFailure: (result) => console.log(`${MODULE_ID} | GM test failure`, result)
+    });
+    this.close();
   }
 
   syncUserToActor(html, actorId) {

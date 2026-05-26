@@ -3,6 +3,7 @@ export interface HoloSuiteAppRegistration {
   title: string;
   icon: string;
   premium?: boolean;
+  playerVisible?: boolean;
   description?: string;
   featureId?: string;
   open: () => unknown | Promise<unknown>;

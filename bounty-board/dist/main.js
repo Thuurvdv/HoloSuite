@@ -1,12 +1,12 @@
-var Rt = Object.defineProperty;
-var J = (e) => {
+var Mt = Object.defineProperty;
+var x = (e) => {
   throw TypeError(e);
 };
-var Pt = (e, t, n) => t in e ? Rt(e, t, { enumerable: !0, configurable: !0, writable: !0, value: n }) : e[t] = n;
-var I = (e, t, n) => Pt(e, typeof t != "symbol" ? t + "" : t, n), Gt = (e, t, n) => t.has(e) || J("Cannot " + n);
-var D = (e, t, n) => t.has(e) ? J("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(e) : t.set(e, n);
-var g = (e, t, n) => (Gt(e, t, "access private method"), n);
-const p = "bounty-board", ct = "Bounty Board", R = "bounties", ut = "postPublishChat", lt = "postResultChat", dt = "publicDocumentLinks", A = `modules/${p}/templates`, l = Object.freeze({
+var Ot = (e, t, n) => t in e ? Mt(e, t, { enumerable: !0, configurable: !0, writable: !0, value: n }) : e[t] = n;
+var L = (e, t, n) => Ot(e, typeof t != "symbol" ? t + "" : t, n), Nt = (e, t, n) => t.has(e) || x("Cannot " + n);
+var T = (e, t, n) => t.has(e) ? x("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(e) : t.set(e, n);
+var g = (e, t, n) => (Nt(e, t, "access private method"), n);
+const p = "bounty-board", rt = "Bounty Board", P = "bounties", it = "postPublishChat", st = "postResultChat", ot = "publicDocumentLinks", w = `modules/${p}/templates`, l = Object.freeze({
   AVAILABLE: "available",
   CLAIMED: "claimed",
   COMPLETED: "completed",
@@ -20,7 +20,7 @@ const p = "bounty-board", ct = "Bounty Board", R = "bounties", ut = "postPublish
   [l.FAILED]: "Failed",
   [l.HIDDEN]: "Hidden",
   [l.ARCHIVED]: "Archived"
-}), P = Object.freeze(["Low", "Moderate", "High", "Severe", "Extreme"]), $t = Object.freeze([
+}), R = Object.freeze(["Low", "Moderate", "High", "Severe", "Extreme"]), Ht = Object.freeze([
   "Smuggling",
   "Assassination",
   "Rescue",
@@ -29,7 +29,7 @@ const p = "bounty-board", ct = "Bounty Board", R = "bounties", ut = "postPublish
   "Recovery",
   "Escort",
   "Sabotage"
-]), jt = Object.freeze({
+]), kt = Object.freeze({
   id: "",
   title: "",
   targetName: "",
@@ -49,10 +49,9 @@ const p = "bounty-board", ct = "Bounty Board", R = "bounties", ut = "postPublish
   claimedBy: "",
   notesGM: "",
   notesPublic: "",
-  linkedJournalId: "",
-  linkedSceneId: ""
+  linkedJournalId: ""
 });
-function Vt(e = {}) {
+function Pt(e = {}) {
   const t = Number(e.rewardAmount ?? 0), n = e.rewardCurrency || "credits";
   return {
     ...e,
@@ -66,7 +65,7 @@ function Vt(e = {}) {
   };
 }
 async function G(e, t = "published") {
-  const n = Vt(e), a = await renderTemplate(`${A}/bounty-chat-card.hbs`, {
+  const n = Pt(e), a = await renderTemplate(`${w}/bounty-chat-card.hbs`, {
     bounty: n,
     mode: t,
     isResult: t === "result",
@@ -83,7 +82,7 @@ async function G(e, t = "published") {
     }
   });
 }
-function qt(e) {
+function Rt(e) {
   return foundry.utils.deepClone ? foundry.utils.deepClone(e) : foundry.utils.duplicate ? foundry.utils.duplicate(e) : JSON.parse(JSON.stringify(e ?? null));
 }
 function $() {
@@ -93,103 +92,100 @@ function C(e = "change bounty data") {
   var t, n, a;
   return (t = game.user) != null && t.isGM ? !0 : ((a = (n = ui.notifications) == null ? void 0 : n.warn) == null || a.call(n, `Only a GM can ${e}.`), !1);
 }
-function u(e, t = "") {
+function c(e, t = "") {
   return String(e ?? t).trim();
 }
-function Ft(e) {
-  return Array.isArray(e) ? e.map((t) => u(t)).filter(Boolean) : u(e).split(",").map((t) => t.trim()).filter(Boolean);
+function Gt(e) {
+  return Array.isArray(e) ? e.map((t) => c(t)).filter(Boolean) : c(e).split(",").map((t) => t.trim()).filter(Boolean);
 }
 function M(e) {
   const t = document.createElement("div");
   return t.textContent = String(e ?? ""), t.innerHTML;
 }
-function Ut(e, t = l.AVAILABLE) {
+function $t(e, t = l.AVAILABLE) {
   return Object.values(l).includes(e) ? e : t;
 }
-function xt(e) {
-  const t = u(e, "Moderate");
-  return P.includes(t) ? t : "Moderate";
+function jt(e) {
+  const t = c(e, "Moderate");
+  return R.includes(t) ? t : "Moderate";
 }
-function zt(e) {
+function Vt(e) {
   const t = Number(e);
   return Number.isFinite(t) && t >= 0 ? t : 0;
 }
-function gt(e) {
+function ut(e) {
   return O[e] ?? O[l.AVAILABLE];
 }
-function Jt(e) {
+function qt(e) {
   const t = Number((e == null ? void 0 : e.rewardAmount) ?? 0), n = (e == null ? void 0 : e.rewardCurrency) || "credits";
   return `${t.toLocaleString()} ${n}`;
 }
 function h(e = {}) {
-  const t = $(), n = u(e.id) || `bounty-${foundry.utils.randomID(12)}`, a = u(e.createdAt) || t, r = Ut(e.status);
+  const t = $(), n = c(e.id) || `bounty-${foundry.utils.randomID(12)}`, a = c(e.createdAt) || t, r = $t(e.status);
   return {
-    ...qt(jt),
+    ...Rt(kt),
     id: n,
-    title: u(e.title, "Untitled Bounty"),
-    targetName: u(e.targetName),
-    description: u(e.description),
-    longDescription: u(e.longDescription),
-    rewardAmount: zt(e.rewardAmount),
-    rewardCurrency: u(e.rewardCurrency, "credits") || "credits",
-    threatLevel: xt(e.threatLevel),
-    faction: u(e.faction),
-    location: u(e.location),
-    tags: Ft(e.tags),
+    title: c(e.title, "Untitled Bounty"),
+    targetName: c(e.targetName),
+    description: c(e.description),
+    longDescription: c(e.longDescription),
+    rewardAmount: Vt(e.rewardAmount),
+    rewardCurrency: c(e.rewardCurrency, "credits") || "credits",
+    threatLevel: jt(e.threatLevel),
+    faction: c(e.faction),
+    location: c(e.location),
+    tags: Gt(e.tags),
     status: r,
-    image: u(e.image),
+    image: c(e.image),
     createdAt: a,
-    updatedAt: u(e.updatedAt) || a,
+    updatedAt: c(e.updatedAt) || a,
     published: e.published === !0,
-    claimedBy: u(e.claimedBy),
-    notesGM: u(e.notesGM),
-    notesPublic: u(e.notesPublic),
-    linkedJournalId: u(e.linkedJournalId),
-    linkedSceneId: u(e.linkedSceneId)
+    claimedBy: c(e.claimedBy),
+    notesGM: c(e.notesGM),
+    notesPublic: c(e.notesPublic),
+    linkedJournalId: c(e.linkedJournalId)
   };
 }
-function Wt(e) {
-  var d, b, U, x, z;
-  const t = h(e), n = t.linkedJournalId ? ((d = game.journal) == null ? void 0 : d.get(t.linkedJournalId)) ?? null : null, a = t.linkedSceneId ? ((b = game.scenes) == null ? void 0 : b.get(t.linkedSceneId)) ?? null : null, r = game.settings.get(p, dt) === !0, i = game.user, s = !!(n && (i != null && i.isGM || r || (U = n.testUserPermission) != null && U.call(n, i, "OBSERVER"))), o = !!(a && (i != null && i.isGM || r || (x = a.testUserPermission) != null && x.call(a, i, "OBSERVER")));
+function Ft(e) {
+  var i, o, d;
+  const t = h(e), n = t.linkedJournalId ? ((i = game.journal) == null ? void 0 : i.get(t.linkedJournalId)) ?? null : null, a = game.settings.get(p, ot) === !0, r = game.user, s = !!(n && (r != null && r.isGM || a || (o = n.testUserPermission) != null && o.call(n, r, "OBSERVER")));
   return {
     ...t,
-    statusLabel: gt(t.status),
-    rewardLabel: Jt(t),
+    statusLabel: ut(t.status),
+    rewardLabel: qt(t),
     tagsText: t.tags.join(", "),
     hasImage: !!t.image,
-    isVisibleToPlayers: ft(t),
+    isVisibleToPlayers: ct(t),
     linkedJournalName: (n == null ? void 0 : n.name) ?? "",
-    linkedSceneName: (a == null ? void 0 : a.name) ?? "",
     canSeeJournal: s,
-    canSeeScene: o,
-    canEdit: ((z = game.user) == null ? void 0 : z.isGM) === !0
+    canEdit: ((d = game.user) == null ? void 0 : d.isGM) === !0
   };
 }
-function ft(e) {
+function ct(e) {
   const t = h(e);
   return t.published && ![l.HIDDEN, l.ARCHIVED].includes(t.status);
 }
-function B() {
-  const e = game.settings.get(p, R);
+function S() {
+  const e = game.settings.get(p, P);
   return e ? Array.isArray(e) ? Object.fromEntries(e.map(h).map((t) => [t.id, t])) : typeof e == "object" ? Object.fromEntries(Object.values(e).map(h).map((t) => [t.id, t])) : (console.warn(`${p} | Ignoring invalid bounty setting payload.`, e), {}) : {};
 }
 async function j(e) {
-  return C("save bounties") ? (await game.settings.set(p, R, e ?? {}), e) : B();
+  return C("save bounties") ? (await game.settings.set(p, P, e ?? {}), e) : S();
 }
 function V({ includeHidden: e = ((t) => (t = game.user) == null ? void 0 : t.isGM)() === !0 } = {}) {
-  const n = Object.values(B()).map(h);
-  return (e ? n : n.filter(ft)).sort((r, i) => String(i.updatedAt).localeCompare(String(r.updatedAt)));
+  const n = Object.values(S()).map(h);
+  return (e ? n : n.filter(ct)).sort((r, s) => String(s.updatedAt).localeCompare(String(r.updatedAt)));
 }
 function E(e) {
-  const t = B()[e];
+  const t = S()[e];
   return t ? h(t) : null;
 }
-function Yt(e) {
+function xt(e) {
   const t = [];
-  return u(e.title) || t.push("Title is required."), u(e.targetName) || t.push("Target name is required."), u(e.rewardCurrency) || t.push("Reward currency is required."), u(e.threatLevel) || t.push("Threat level is required."), t;
+  return c(e.title) || t.push("Title is required."), c(e.targetName) || t.push("Target name is required."), c(e.rewardCurrency) || t.push("Reward currency is required."), c(e.threatLevel) || t.push("Threat level is required."), t;
 }
 async function q(e) {
-  var s, o;
+  var i, o;
   if (!C("create or edit bounties")) return null;
   const t = e.id ? E(e.id) : null, n = $(), a = h({
     ...t,
@@ -197,60 +193,60 @@ async function q(e) {
     id: (t == null ? void 0 : t.id) || e.id || `bounty-${foundry.utils.randomID(12)}`,
     createdAt: (t == null ? void 0 : t.createdAt) || n,
     updatedAt: n
-  }), r = Yt(a);
+  }), r = xt(a);
   if (r.length)
-    return (o = (s = ui.notifications) == null ? void 0 : s.error) == null || o.call(s, r.join(" ")), null;
-  const i = B();
-  return i[a.id] = a, await j(i), a;
+    return (o = (i = ui.notifications) == null ? void 0 : i.error) == null || o.call(i, r.join(" ")), null;
+  const s = S();
+  return s[a.id] = a, await j(s), a;
 }
-async function pt(e) {
+async function lt(e) {
   if (!C("delete bounties") || !await Dialog.confirm({
     title: "Delete Bounty",
     content: "<p>Permanently delete this bounty from world data?</p>"
   })) return !1;
-  const n = B();
+  const n = S();
   return delete n[e], await j(n), !0;
 }
 async function v(e, t = {}, { chat: n = !1 } = {}) {
-  var i, s;
+  var s, i;
   if (!C("update bounty status")) return null;
   const a = E(e);
   if (!a)
-    return (s = (i = ui.notifications) == null ? void 0 : i.warn) == null || s.call(i, "Bounty not found."), null;
+    return (i = (s = ui.notifications) == null ? void 0 : s.warn) == null || i.call(s, "Bounty not found."), null;
   const r = await q({ ...a, ...t });
   return r ? (n && await G(r, t.status === l.AVAILABLE ? "published" : "result"), r) : null;
 }
-async function k(e, t = !0) {
+async function N(e, t = !0) {
   const n = await v(e, {
     published: t,
     status: t ? l.AVAILABLE : l.HIDDEN
   });
-  return n && t && game.settings.get(p, ut) && await G(n, "published"), n;
+  return n && t && game.settings.get(p, it) && await G(n, "published"), n;
 }
-async function W(e, t = !1) {
+async function U(e, t = !1) {
   const n = t ? l.FAILED : l.COMPLETED, a = await v(e, { status: n });
-  return a && game.settings.get(p, lt) && await G(a, "result"), a;
+  return a && game.settings.get(p, st) && await G(a, "result"), a;
 }
-async function mt(e) {
+async function dt(e) {
   return v(e, { status: l.ARCHIVED, published: !1 });
 }
-async function ht(e, t) {
-  return v(e, { status: l.CLAIMED, claimedBy: u(t) });
+async function gt(e, t) {
+  return v(e, { status: l.CLAIMED, claimedBy: c(t) });
 }
-function _t() {
-  const e = V({ includeHidden: !0 }), t = (n) => [...new Set(n.map(u).filter(Boolean))].sort((a, r) => a.localeCompare(r));
+function Ut() {
+  const e = V({ includeHidden: !0 }), t = (n) => [...new Set(n.map(c).filter(Boolean))].sort((a, r) => a.localeCompare(r));
   return {
-    statuses: Object.values(l).map((n) => ({ value: n, label: gt(n) })),
-    threatLevels: P,
+    statuses: Object.values(l).map((n) => ({ value: n, label: ut(n) })),
+    threatLevels: R,
     factions: t(e.map((n) => n.faction)),
-    tags: t([...$t, ...e.flatMap((n) => n.tags)])
+    tags: t([...Ht, ...e.flatMap((n) => n.tags)])
   };
 }
-function Y(e, t = {}) {
-  const n = u(t.status), a = u(t.threatLevel), r = u(t.faction).toLowerCase(), i = u(t.tag).toLowerCase(), s = u(t.search).toLowerCase();
+function z(e, t = {}) {
+  const n = c(t.status), a = c(t.threatLevel), r = c(t.faction).toLowerCase(), s = c(t.tag).toLowerCase(), i = c(t.search).toLowerCase();
   return e.filter((o) => {
     const d = h(o);
-    return !(n && d.status !== n || a && d.threatLevel !== a || r && d.faction.toLowerCase() !== r || i && !d.tags.some((b) => b.toLowerCase() === i) || s && ![
+    return !(n && d.status !== n || a && d.threatLevel !== a || r && d.faction.toLowerCase() !== r || s && !d.tags.some((B) => B.toLowerCase() === s) || i && ![
       d.title,
       d.targetName,
       d.description,
@@ -258,11 +254,11 @@ function Y(e, t = {}) {
       d.faction,
       d.location,
       d.tags.join(" ")
-    ].join(" ").toLowerCase().includes(s));
+    ].join(" ").toLowerCase().includes(i));
   });
 }
-async function Kt(e) {
-  var r, i, s;
+async function zt(e) {
+  var r, s, i;
   const t = E(e);
   if (!t) return;
   const n = ChatMessage.getSpeaker({ user: game.user }), a = `
@@ -276,10 +272,10 @@ async function Kt(e) {
     speaker: n,
     whisper: ChatMessage.getWhisperRecipients("GM").map((o) => o.id),
     content: a
-  }), (s = (i = ui.notifications) == null ? void 0 : i.info) == null || s.call(i, "Contract request sent to the GM.");
+  }), (i = (s = ui.notifications) == null ? void 0 : s.info) == null || i.call(s, "Contract request sent to the GM.");
 }
-async function Qt() {
-  var r, i;
+async function Jt() {
+  var r, s;
   if (!C("seed bounty test data")) return [];
   const e = $(), t = [
     {
@@ -317,50 +313,50 @@ async function Qt() {
       createdAt: e,
       updatedAt: e
     }
-  ], n = B(), a = [];
-  for (const s of t) {
-    const o = h({ ...s, id: `sample-${foundry.utils.randomID(8)}` });
+  ], n = S(), a = [];
+  for (const i of t) {
+    const o = h({ ...i, id: `sample-${foundry.utils.randomID(8)}` });
     n[o.id] = o, a.push(o);
   }
-  return await j(n), (i = (r = ui.notifications) == null ? void 0 : r.info) == null || i.call(r, `${ct}: seeded ${a.length} sample bounties.`), a;
+  return await j(n), (s = (r = ui.notifications) == null ? void 0 : r.info) == null || s.call(r, `${rt}: seeded ${a.length} sample bounties.`), a;
 }
-function Xt() {
-  game.settings.register(p, R, {
+function Wt() {
+  game.settings.register(p, P, {
     scope: "world",
     config: !1,
     type: Object,
     default: {}
-  }), game.settings.register(p, ut, {
+  }), game.settings.register(p, it, {
     name: "Post Chat Card When Publishing",
     hint: "Automatically post a contract card when the GM publishes a bounty.",
     scope: "world",
     config: !0,
     type: Boolean,
     default: !0
-  }), game.settings.register(p, lt, {
+  }), game.settings.register(p, st, {
     name: "Post Chat Card When Resolved",
     hint: "Automatically post a result card when the GM completes or fails a bounty.",
     scope: "world",
     config: !0,
     type: Boolean,
     default: !0
-  }), game.settings.register(p, dt, {
-    name: "Show Linked Documents To Players",
-    hint: "Allow player-visible bounty cards to show linked scene and journal buttons when the bounty is published.",
+  }), game.settings.register(p, ot, {
+    name: "Show Linked Journals To Players",
+    hint: "Allow player-visible bounty cards to show linked journal buttons when the bounty is published.",
     scope: "world",
     config: !0,
     type: Boolean,
     default: !1
   });
 }
-var tt, et;
-const _ = ((et = (tt = foundry.applications) == null ? void 0 : tt.api) == null ? void 0 : et.ApplicationV2) ?? Application;
-var nt, at;
-const K = (at = (nt = foundry.applications) == null ? void 0 : nt.api) == null ? void 0 : at.HandlebarsApplicationMixin, Zt = K ? K(_) : _;
-function Q(e) {
+var K, Q;
+const J = ((Q = (K = foundry.applications) == null ? void 0 : K.api) == null ? void 0 : Q.ApplicationV2) ?? Application;
+var X, Z;
+const W = (Z = (X = foundry.applications) == null ? void 0 : X.api) == null ? void 0 : Z.HandlebarsApplicationMixin, _t = W ? W(J) : J;
+function Yt(e) {
   return ((e == null ? void 0 : e.contents) ?? []).map((t) => ({ id: t.id, name: t.name }));
 }
-function te(e) {
+function Kt(e) {
   const t = new FormData(e);
   return {
     id: String(t.get("id") ?? ""),
@@ -378,12 +374,11 @@ function te(e) {
     image: String(t.get("image") ?? ""),
     published: t.get("published") === "on",
     claimedBy: String(t.get("claimedBy") ?? ""),
-    linkedJournalId: String(t.get("linkedJournalId") ?? ""),
-    linkedSceneId: String(t.get("linkedSceneId") ?? "")
+    linkedJournalId: String(t.get("linkedJournalId") ?? "")
   };
 }
-var S, yt, bt;
-const w = class w extends Zt {
+var A, ft, pt;
+const b = class b extends _t {
   constructor({ bountyId: t = null } = {}) {
     super(), this.bountyId = t;
   }
@@ -399,25 +394,24 @@ const w = class w extends Zt {
         tagsText: n.tags.join(", ")
       },
       statuses: Object.values(l),
-      threatLevels: P,
-      journals: Q(game.journal),
-      scenes: Q(game.scenes),
+      threatLevels: R,
+      journals: Yt(game.journal),
       canEdit: ((a = game.user) == null ? void 0 : a.isGM) === !0
     };
   }
   _onRender(t, n) {
-    var r, i;
-    (r = super._onRender) == null || r.call(this, t, n), (i = this.element.querySelector("[name='title']")) == null || i.focus();
+    var r, s;
+    (r = super._onRender) == null || r.call(this, t, n), (s = this.element.querySelector("[name='title']")) == null || s.focus();
   }
 };
-S = new WeakSet(), yt = async function(t, n, a) {
-  var i, s, o;
-  if (t.preventDefault(), !((i = game.user) != null && i.isGM)) {
-    (o = (s = ui.notifications) == null ? void 0 : s.warn) == null || o.call(s, "Only a GM can edit bounties.");
+A = new WeakSet(), ft = async function(t, n, a) {
+  var s, i, o;
+  if (t.preventDefault(), !((s = game.user) != null && s.isGM)) {
+    (o = (i = ui.notifications) == null ? void 0 : i.warn) == null || o.call(i, "Only a GM can edit bounties.");
     return;
   }
-  await q(te(n)) && ne();
-}, bt = function(t) {
+  await q(Kt(n)) && Xt();
+}, pt = function(t) {
   t.preventDefault();
   const n = this.element.querySelector("[name='image']");
   n && new FilePicker({
@@ -427,11 +421,11 @@ S = new WeakSet(), yt = async function(t, n, a) {
       n.value = a, n.dispatchEvent(new Event("change", { bubbles: !0 }));
     }
   }).browse();
-}, D(w, S), I(w, "DEFAULT_OPTIONS", {
+}, T(b, A), L(b, "DEFAULT_OPTIONS", {
   id: "bounty-editor-app",
   tag: "form",
   form: {
-    handler: g(w, S, yt),
+    handler: g(b, A, ft),
     submitOnChange: !1,
     closeOnSubmit: !0
   },
@@ -446,28 +440,28 @@ S = new WeakSet(), yt = async function(t, n, a) {
   },
   classes: ["bounty-editor-window"],
   actions: {
-    browseImage: g(w, S, bt)
+    browseImage: g(b, A, pt)
   }
-}), I(w, "PARTS", {
+}), L(b, "PARTS", {
   editor: {
-    template: `${A}/bounty-editor.hbs`
+    template: `${w}/bounty-editor.hbs`
   }
 });
-let T = w;
-var rt, it;
-const X = ((it = (rt = foundry.applications) == null ? void 0 : rt.api) == null ? void 0 : it.ApplicationV2) ?? Application;
-var st, ot;
-const Z = (ot = (st = foundry.applications) == null ? void 0 : st.api) == null ? void 0 : ot.HandlebarsApplicationMixin, ee = Z ? Z(X) : X;
+let D = b;
+var tt, et;
+const _ = ((et = (tt = foundry.applications) == null ? void 0 : tt.api) == null ? void 0 : et.ApplicationV2) ?? Application;
+var nt, at;
+const Y = (at = (nt = foundry.applications) == null ? void 0 : nt.api) == null ? void 0 : at.HandlebarsApplicationMixin, Qt = Y ? Y(_) : _;
 let y = null;
 function m(e) {
   var t;
   return (t = e.target.closest("[data-bounty-id]")) == null ? void 0 : t.dataset.bountyId;
 }
-var L, H, c, wt, At, St, Bt, It, Lt, Ct, Et, vt, Dt, Tt, Mt, Ot, kt, Nt;
-const f = class f extends ee {
+var I, k, u, mt, ht, yt, bt, wt, At, St, Bt, Lt, It, Ct, Et, vt, Tt;
+const f = class f extends Qt {
   constructor(n = {}) {
     super(n);
-    D(this, L);
+    T(this, I);
     this.filters = {
       status: "",
       threatLevel: "",
@@ -477,26 +471,26 @@ const f = class f extends ee {
     }, this.expanded = /* @__PURE__ */ new Set();
   }
   async _prepareContext(n) {
-    var i;
-    const a = ((i = game.user) == null ? void 0 : i.isGM) === !0, r = V({ includeHidden: a }).map(Wt).map((s) => ({ ...s, expanded: this.expanded.has(s.id) }));
+    var s;
+    const a = ((s = game.user) == null ? void 0 : s.isGM) === !0, r = V({ includeHidden: a }).map(Ft).map((i) => ({ ...i, expanded: this.expanded.has(i.id) }));
     return {
       isGM: a,
       filters: this.filters,
-      options: _t(),
-      bounties: Y(r, this.filters),
+      options: Ut(),
+      bounties: z(r, this.filters),
       totalCount: r.length,
-      visibleCount: Y(r, this.filters).length
+      visibleCount: z(r, this.filters).length
     };
   }
   _onRender(n, a) {
-    var i;
-    (i = super._onRender) == null || i.call(this, n, a);
+    var s;
+    (s = super._onRender) == null || s.call(this, n, a);
     const r = this.element;
-    r.querySelectorAll("[data-filter]").forEach((s) => {
-      s.addEventListener("change", () => g(this, L, H).call(this, s)), s.addEventListener("input", () => g(this, L, H).call(this, s));
-    }), r.querySelectorAll("[data-bounty-toggle]").forEach((s) => {
-      s.addEventListener("click", () => {
-        const o = s.dataset.bountyToggle;
+    r.querySelectorAll("[data-filter]").forEach((i) => {
+      i.addEventListener("change", () => g(this, I, k).call(this, i)), i.addEventListener("input", () => g(this, I, k).call(this, i));
+    }), r.querySelectorAll("[data-bounty-toggle]").forEach((i) => {
+      i.addEventListener("click", () => {
+        const o = i.dataset.bountyToggle;
         this.expanded.has(o) ? this.expanded.delete(o) : this.expanded.add(o), this.render({ force: !0 });
       });
     });
@@ -505,69 +499,65 @@ const f = class f extends ee {
     return y === this && (y = null), super.close(n);
   }
 };
-L = new WeakSet(), H = function(n) {
+I = new WeakSet(), k = function(n) {
   this.filters[n.dataset.filter] = n.value, this.render({ force: !0 });
-}, c = new WeakSet(), wt = function() {
-  new T().render({ force: !0 });
-}, At = function(n) {
+}, u = new WeakSet(), mt = function() {
+  new D().render({ force: !0 });
+}, ht = function(n) {
   const a = m(n);
-  a && new T({ bountyId: a }).render({ force: !0 });
+  a && new D({ bountyId: a }).render({ force: !0 });
+}, yt = async function(n) {
+  const a = m(n);
+  a && await lt(a) && this.render({ force: !0 });
+}, bt = async function(n) {
+  const a = m(n);
+  a && (await N(a, !0), this.render({ force: !0 }));
+}, wt = async function(n) {
+  const a = m(n);
+  a && (await N(a, !1), this.render({ force: !0 }));
+}, At = async function(n) {
+  const a = m(n);
+  a && (await dt(a), this.render({ force: !0 }));
 }, St = async function(n) {
   const a = m(n);
-  a && await pt(a) && this.render({ force: !0 });
+  a && (await U(a, !1), this.render({ force: !0 }));
 }, Bt = async function(n) {
   const a = m(n);
-  a && (await k(a, !0), this.render({ force: !0 }));
-}, It = async function(n) {
-  const a = m(n);
-  a && (await k(a, !1), this.render({ force: !0 }));
+  a && (await U(a, !0), this.render({ force: !0 }));
 }, Lt = async function(n) {
   const a = m(n);
-  a && (await mt(a), this.render({ force: !0 }));
+  a && (await v(a, { status: l.HIDDEN, published: !1 }), this.render({ force: !0 }));
+}, It = async function(n) {
+  var s, i;
+  const a = m(n), r = ((i = (s = n.target.closest("[data-bounty-id]")) == null ? void 0 : s.querySelector("[data-claimed-by]")) == null ? void 0 : i.value) ?? "";
+  a && (await gt(a, r), this.render({ force: !0 }));
 }, Ct = async function(n) {
   const a = m(n);
-  a && (await W(a, !1), this.render({ force: !0 }));
-}, Et = async function(n) {
-  const a = m(n);
-  a && (await W(a, !0), this.render({ force: !0 }));
-}, vt = async function(n) {
-  const a = m(n);
-  a && (await v(a, { status: l.HIDDEN, published: !1 }), this.render({ force: !0 }));
-}, Dt = async function(n) {
-  var i, s;
-  const a = m(n), r = ((s = (i = n.target.closest("[data-bounty-id]")) == null ? void 0 : i.querySelector("[data-claimed-by]")) == null ? void 0 : s.value) ?? "";
-  a && (await ht(a, r), this.render({ force: !0 }));
-}, Tt = async function(n) {
-  const a = m(n);
-  a && await Kt(a);
-}, Mt = function(n) {
-  var s, o, d, b;
-  const a = (s = n.target.closest("[data-image-src]")) == null ? void 0 : s.dataset.imageSrc;
+  a && await zt(a);
+}, Et = function(n) {
+  var i, o, d, B;
+  const a = (i = n.target.closest("[data-image-src]")) == null ? void 0 : i.dataset.imageSrc;
   if (!a) return;
-  const r = ((b = (d = (o = n.target.closest("[data-bounty-id]")) == null ? void 0 : o.querySelector(".bb-card-title")) == null ? void 0 : d.textContent) == null ? void 0 : b.trim()) || "Bounty Image";
+  const r = ((B = (d = (o = n.target.closest("[data-bounty-id]")) == null ? void 0 : o.querySelector(".bb-card-title")) == null ? void 0 : d.textContent) == null ? void 0 : B.trim()) || "Bounty Image";
   if (globalThis.ImagePopout) {
     new ImagePopout(a, { title: r }).render(!0);
     return;
   }
-  const i = String(a).replaceAll('"', "&quot;");
+  const s = String(a).replaceAll('"', "&quot;");
   new Dialog({
     title: r,
-    content: `<img class="bb-image-dialog" src="${i}" alt="" />`,
+    content: `<img class="bb-image-dialog" src="${s}" alt="" />`,
     buttons: {
       close: { label: "Close" }
     }
   }, { classes: ["bounty-board-window"], width: 720 }).render(!0);
-}, Ot = function(n) {
-  var r, i, s, o;
+}, vt = function(n) {
+  var r, s, i, o;
   const a = (r = n.target.closest("[data-open-journal]")) == null ? void 0 : r.dataset.openJournal;
-  (o = (s = (i = game.journal) == null ? void 0 : i.get(a)) == null ? void 0 : s.sheet) == null || o.render(!0);
-}, kt = function(n) {
-  var r, i, s, o;
-  const a = (r = n.target.closest("[data-open-scene]")) == null ? void 0 : r.dataset.openScene;
-  (o = (s = (i = game.scenes) == null ? void 0 : i.get(a)) == null ? void 0 : s.view) == null || o.call(s);
-}, Nt = function() {
+  (o = (i = (s = game.journal) == null ? void 0 : s.get(a)) == null ? void 0 : i.sheet) == null || o.render(!0);
+}, Tt = function() {
   this.filters = { status: "", threatLevel: "", faction: "", tag: "", search: "" }, this.render({ force: !0 });
-}, D(f, c), I(f, "DEFAULT_OPTIONS", {
+}, T(f, u), L(f, "DEFAULT_OPTIONS", {
   id: "bounty-board-app",
   tag: "section",
   window: {
@@ -581,36 +571,35 @@ L = new WeakSet(), H = function(n) {
   },
   classes: ["bounty-board-window"],
   actions: {
-    createBounty: g(f, c, wt),
-    editBounty: g(f, c, At),
-    deleteBounty: g(f, c, St),
-    publishBounty: g(f, c, Bt),
-    unpublishBounty: g(f, c, It),
-    archiveBounty: g(f, c, Lt),
-    completeBounty: g(f, c, Ct),
-    failBounty: g(f, c, Et),
-    hideBounty: g(f, c, vt),
-    claimBounty: g(f, c, Dt),
-    requestContract: g(f, c, Tt),
-    openImage: g(f, c, Mt),
-    openJournal: g(f, c, Ot),
-    openScene: g(f, c, kt),
-    clearFilters: g(f, c, Nt)
+    createBounty: g(f, u, mt),
+    editBounty: g(f, u, ht),
+    deleteBounty: g(f, u, yt),
+    publishBounty: g(f, u, bt),
+    unpublishBounty: g(f, u, wt),
+    archiveBounty: g(f, u, At),
+    completeBounty: g(f, u, St),
+    failBounty: g(f, u, Bt),
+    hideBounty: g(f, u, Lt),
+    claimBounty: g(f, u, It),
+    requestContract: g(f, u, Ct),
+    openImage: g(f, u, Et),
+    openJournal: g(f, u, vt),
+    clearFilters: g(f, u, Tt)
   }
-}), I(f, "PARTS", {
+}), L(f, "PARTS", {
   board: {
-    template: `${A}/bounty-board.hbs`
+    template: `${w}/bounty-board.hbs`
   }
 });
-let N = f;
+let H = f;
 function F() {
-  return y || (y = new N()), y.render({ force: !0 }), y;
+  return y || (y = new H()), y.render({ force: !0 }), y;
 }
-function ne() {
+function Xt() {
   y == null || y.render({ force: !0 });
 }
-function ae(e) {
-  var i, s;
+function Zt(e) {
+  var s, i;
   const t = () => F(), n = {
     name: "bounty-board",
     title: "Bounty Board",
@@ -622,47 +611,47 @@ function ae(e) {
   };
   if (Array.isArray(e)) {
     const o = e.find((d) => d.name === "token") ?? e[0];
-    o != null && o.tools && !((s = (i = o.tools).some) != null && s.call(i, (d) => d.name === n.name)) && o.tools.push(n);
+    o != null && o.tools && !((i = (s = o.tools).some) != null && i.call(s, (d) => d.name === n.name)) && o.tools.push(n);
     return;
   }
   const a = e ?? {}, r = a.tokens ?? a.token ?? Object.values(a)[0];
   !(r != null && r.tools) || r.tools[n.name] || (r.tools[n.name] = { ...n, order: Object.keys(r.tools).length });
 }
-function Ht() {
+function Dt() {
   const e = {
     open: F,
     getAllBounties: V,
     getBounty: E,
     upsertBounty: q,
-    deleteBounty: pt,
-    publishBounty: k,
-    archiveBounty: mt,
-    claimBounty: ht,
-    seedTestData: Qt
+    deleteBounty: lt,
+    publishBounty: N,
+    archiveBounty: dt,
+    claimBounty: gt,
+    seedTestData: Jt
     // Future extension hooks:
     // Patreon/premium gating can wrap open() or selected GM actions here.
     // Random bounty generator can call upsertBounty() with generated data.
     // Faction reputation systems can listen for completed/failed state changes.
-    // Galaxy map integration can use linkedSceneId/location metadata.
+    // Galaxy map integration can use location metadata.
     // HoloCall contact integration can add claimant/contact actions.
     // Security camera and crime scene modules can attach evidence links via notes or future document ids.
   }, t = game.modules.get(p);
   t && (t.api = e), game.scifiSuite ?? (game.scifiSuite = {}), game.scifiSuite.bountyBoard = e;
 }
 Hooks.once("init", async () => {
-  Xt(), Ht(), Handlebars.registerHelper("bbEq", (e, t) => e === t), Handlebars.registerHelper("bbIncludes", (e, t) => Array.isArray(e) && e.includes(t)), Handlebars.registerHelper("bbStatusClass", (e) => `bb-status--${String(e ?? "available").toLowerCase()}`), await loadTemplates([
-    `${A}/bounty-card.hbs`,
-    `${A}/bounty-board.hbs`,
-    `${A}/bounty-editor.hbs`,
-    `${A}/bounty-chat-card.hbs`
+  Wt(), Dt(), Handlebars.registerHelper("bbEq", (e, t) => e === t), Handlebars.registerHelper("bbIncludes", (e, t) => Array.isArray(e) && e.includes(t)), Handlebars.registerHelper("bbStatusClass", (e) => `bb-status--${String(e ?? "available").toLowerCase()}`), await loadTemplates([
+    `${w}/bounty-card.hbs`,
+    `${w}/bounty-board.hbs`,
+    `${w}/bounty-editor.hbs`,
+    `${w}/bounty-chat-card.hbs`
   ]);
 });
-Hooks.on("getSceneControlButtons", ae);
+Hooks.on("getSceneControlButtons", Zt);
 Hooks.once("ready", () => {
   var e, t, n;
-  Ht(), (n = (t = (e = game.modules.get("holosuite-core")) == null ? void 0 : e.api) == null ? void 0 : t.registerApp) == null || n.call(t, {
+  Dt(), (n = (t = (e = game.modules.get("holosuite-core")) == null ? void 0 : e.api) == null ? void 0 : t.registerApp) == null || n.call(t, {
     id: p,
-    title: ct,
+    title: rt,
     icon: "fa-solid fa-crosshairs",
     premium: !1,
     description: "Open the sci-fi contract terminal.",

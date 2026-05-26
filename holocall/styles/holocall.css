@@ -488,6 +488,21 @@
   grid-column: 1 / -1;
 }
 
+.holocall-composer-path-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 6px;
+}
+
+.holocall-composer-path-row button {
+  min-width: 38px;
+  padding: 0;
+  border: 1px solid rgba(94, 231, 255, 0.48);
+  border-radius: 4px;
+  background: rgba(0, 124, 190, 0.18);
+  color: var(--holocall-text);
+}
+
 .holocall-composer-range input {
   accent-color: var(--holocall-cyan);
 }

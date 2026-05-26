@@ -39,7 +39,10 @@
 
     <label class="holocall-composer-wide">
       <span>Portrait Image Path</span>
-      <input type="text" name="image" value="{{call.image}}" placeholder="path/to/image.webp">
+      <div class="holocall-composer-path-row">
+        <input type="text" name="image" value="{{call.image}}" placeholder="path/to/image.webp">
+        <button type="button" data-holocall-compose-action="browse-image" title="Browse portrait image"><i class="fa-solid fa-folder-open"></i></button>
+      </div>
     </label>
 
     <label class="holocall-composer-wide">

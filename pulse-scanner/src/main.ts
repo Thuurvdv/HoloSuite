@@ -40,6 +40,9 @@ import {
   const SOCKET_NAME = `module.${MODULE_ID}`;
   const TEMPLATE_ROOT = `modules/${MODULE_ID}/templates`;
   const TARGET_FLAG = "targets";
+  const SCANNER_ITEM_FLAG = "isPulseScanner";
+  const SCANNER_ITEM_NAME = "Pulse Scanner";
+  const SCANNER_ITEM_IMAGE = "icons/tools/scribal/magnifying-glass.webp";
   const state = {
     manager: null,
     lastMouseScenePosition: null,
@@ -52,7 +55,9 @@ import {
     resizingMarker: null,
     liveMarker: null,
     liveUpdates: null,
-    latestScan: null
+    latestScan: null,
+    sheetObserver: null,
+    sheetEnhanceTimeout: null
   };
 
   const LegacyApplication = globalThis.Application ?? foundry.appv1?.api?.Application;
@@ -72,6 +77,8 @@ import {
     const module = game.modules.get(MODULE_ID);
     if (module) module.api = game.pulseScanner;
     registerWithHoloSuite();
+    registerPlayerScannerHooks();
+    ensureWorldPulseScannerItem();
     game.socket?.on(SOCKET_NAME, handleSocketMessage);
     console.log(`${MODULE_TITLE} | API available at game.pulseScanner`);
   });
@@ -97,6 +104,51 @@ import {
     game.settings.register(MODULE_ID, "allowPlayersToScan", {
       name: "Allow Players to Scan",
       hint: "Allow non-GM users to activate scanner pulses from controlled tokens.",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: true
+    });
+
+    game.settings.register(MODULE_ID, "requireScannerItem", {
+      name: "Require Pulse Scanner Item",
+      hint: "Require players to have a Pulse Scanner item on the selected token's actor before scanning. GMs can always scan.",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: true
+    });
+
+    game.settings.register(MODULE_ID, "scannerItemName", {
+      name: "Pulse Scanner Item Name",
+      hint: "The actor item name players can use to trigger scanner pulses.",
+      scope: "world",
+      config: true,
+      type: String,
+      default: SCANNER_ITEM_NAME
+    });
+
+    game.settings.register(MODULE_ID, "scannerItemMode", {
+      name: "Pulse Scanner Item Signal",
+      hint: "The scanner mode used when players activate the Pulse Scanner item.",
+      scope: "world",
+      config: false,
+      type: String,
+      default: DEFAULT_MODE
+    });
+
+    game.settings.register(MODULE_ID, "scannerItemRadiusFeet", {
+      name: "Pulse Scanner Item Radius",
+      hint: "The Pulse Scanner item range in scene distance units, usually feet.",
+      scope: "world",
+      config: false,
+      type: Number,
+      default: 30
+    });
+
+    game.settings.register(MODULE_ID, "createWorldScannerItem", {
+      name: "Create World Pulse Scanner Item",
+      hint: "Create a ready-to-drag Pulse Scanner item in the world Items directory when a GM loads the world.",
       scope: "world",
       config: true,
       type: Boolean,
@@ -162,7 +214,13 @@ import {
       unresolveTarget,
       exportTargets,
       importTargets,
-      togglePlacementTool
+      togglePlacementTool,
+      usePulseScannerItem,
+      createPulseScannerItem,
+      hasPulseScannerItem,
+      ensureWorldPulseScannerItem,
+      createWorldPulseScannerItem,
+      getPulseScannerItemData
     };
   }
 
@@ -181,6 +239,133 @@ import {
       open: () => game.user?.isGM ? openTargetManager() : scan()
     });
     return true;
+  }
+
+  function registerPlayerScannerHooks() {
+    Hooks.on("renderTokenHUD", injectTokenHudScannerAction);
+    Hooks.on("getItemSheetHeaderButtons", injectPulseScannerItemHeaderButton);
+    Hooks.on("renderItemSheet", injectPulseScannerItemSheetButton);
+    Hooks.on("renderItemSheetV2", injectPulseScannerItemSheetButton);
+    Hooks.on("renderApplication", schedulePulseScannerSheetEnhancement);
+    Hooks.on("renderApplicationV2", schedulePulseScannerSheetEnhancement);
+    setupPulseScannerSheetObserver();
+  }
+
+  function injectTokenHudScannerAction(app, html) {
+    if (!game.settings.get(MODULE_ID, "allowPlayersToScan") && !game.user?.isGM) return;
+
+    const token = app.object?.document ? app.object : canvas.tokens?.get(app.object?.id);
+    if (!token?.actor) return;
+
+    const hasItem = Boolean(getPulseScannerItemForToken(token));
+    if (!hasItem) return;
+
+    const icon = $(`<div class="control-icon pulse-scanner-token-control" title="Use Pulse Scanner" data-action="pulse-scanner-scan"><i class="fa-solid fa-wave-square"></i></div>`);
+
+    icon.on("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      usePulseScannerItem({ tokenId: token.id ?? token.document?.id }).catch((error) => console.error(`${MODULE_TITLE} | Item scan failed`, error));
+    });
+
+    const root = html instanceof jQuery ? html : $(html);
+    const rightColumn = root.find(".col.right, .right").first();
+    if (rightColumn.length) rightColumn.append(icon);
+    else root.append(icon);
+  }
+
+  function injectPulseScannerItemHeaderButton(app, buttons) {
+    const item = getItemFromSheet(app);
+    if (!isPulseScannerItem(item)) return;
+    if (buttons.some((button) => button.class === "pulse-scanner-use-item")) return;
+    buttons.unshift({
+      label: "Scan",
+      class: "pulse-scanner-use-item",
+      icon: "fas fa-wave-square",
+      onclick: () => usePulseScannerItem({ item }).catch((error) => console.error(`${MODULE_TITLE} | Item scan failed`, error))
+    });
+  }
+
+  function injectPulseScannerItemSheetButton(app, html) {
+    const item = getItemFromSheet(app);
+    if (!isPulseScannerItem(item)) return;
+
+    const root = getSheetRoot(html);
+    if (!root) return;
+    insertPulseScannerItemButton(root, item);
+  }
+
+  function insertPulseScannerItemButton(root, item) {
+    if (!root || root.querySelector(".pulse-scanner-item-use")) return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "pulse-scanner-item-use";
+    button.innerHTML = `<i class="fa-solid fa-wave-square"></i> Use Pulse Scanner`;
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      usePulseScannerItem({ item }).catch((error) => console.error(`${MODULE_TITLE} | Item scan failed`, error));
+    });
+
+    const content = root.querySelector(".window-content") ?? root;
+    const sheetHeader = content.querySelector(".sheet-header, header.sheet-header, .item-header");
+    if (sheetHeader?.parentElement) sheetHeader.parentElement.insertBefore(button, sheetHeader.nextSibling);
+    else content.prepend(button);
+  }
+
+  function getItemFromSheet(app) {
+    const candidate = app?.object ?? app?.document ?? app?.item ?? null;
+    if (candidate?.documentName === "Item") return candidate;
+    if (candidate?.constructor?.documentName === "Item") return candidate;
+    return null;
+  }
+
+  function getSheetRoot(html) {
+    if (!html) return null;
+    if (html instanceof HTMLElement) return html;
+    if (Array.isArray(html)) return html.find((element) => element instanceof HTMLElement) ?? null;
+    if (html[0] instanceof HTMLElement) return html[0];
+    return null;
+  }
+
+  function schedulePulseScannerSheetEnhancement() {
+    window.clearTimeout(state.sheetEnhanceTimeout);
+    state.sheetEnhanceTimeout = window.setTimeout(enhanceOpenPulseScannerSheets, 40);
+  }
+
+  function setupPulseScannerSheetObserver() {
+    if (state.sheetObserver || !document.body) return;
+    state.sheetObserver = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.addedNodes.length)) schedulePulseScannerSheetEnhancement();
+    });
+    state.sheetObserver.observe(document.body, { childList: true, subtree: true });
+    schedulePulseScannerSheetEnhancement();
+  }
+
+  function enhanceOpenPulseScannerSheets() {
+    for (const app of getOpenApplications()) {
+      const item = getItemFromSheet(app);
+      if (!isPulseScannerItem(item)) continue;
+      const root = getApplicationRoot(app);
+      if (root) insertPulseScannerItemButton(root, item);
+    }
+  }
+
+  function getOpenApplications() {
+    const apps = [];
+    apps.push(...Object.values(ui.windows ?? {}));
+    const instances = foundry.applications?.instances;
+    if (instances instanceof Map) apps.push(...instances.values());
+    else if (instances && typeof instances === "object") apps.push(...Object.values(instances));
+    return [...new Set(apps)].filter(Boolean);
+  }
+
+  function getApplicationRoot(app) {
+    return getSheetRoot(app?.element)
+      ?? getSheetRoot(app?._element)
+      ?? document.querySelector(`[data-appid="${app?.appId}"]`)
+      ?? document.querySelector(`[data-application-id="${app?.id}"]`)
+      ?? null;
   }
 
   function addSceneControlsButton(controls) {
@@ -286,9 +471,11 @@ import {
 
     const token = resolveToken(options.tokenId);
     if (!token) {
-      console.warn(`${MODULE_TITLE}: select a token or pass tokenId.`);
+      notifyScannerWarning("Select a token before using the Pulse Scanner.");
       return [];
     }
+
+    if (!canTokenUseScanner(token, options)) return [];
 
     const radius = Number(options.radius ?? game.settings.get(MODULE_ID, "defaultScanRadius"));
     const selectedTypes = normalizeTypeFilter(options.types);
@@ -335,6 +522,132 @@ import {
     return game.user?.isGM
       ? foundry.utils.deepClone(detected)
       : detected.map((target) => sanitizeTargetForPulse(target, true));
+  }
+
+  async function usePulseScannerItem(options = {}) {
+    const token = resolveToken(options.tokenId) ?? resolveTokenForItem(options.item);
+    if (!token) {
+      notifyScannerWarning("Select a token with a Pulse Scanner item.");
+      return [];
+    }
+
+    const item = options.item ?? getPulseScannerItemForToken(token);
+    if (!game.user?.isGM && !item && playerRequiresScannerItem(options)) {
+      notifyScannerWarning("This token needs a Pulse Scanner item before it can scan.");
+      return [];
+    }
+
+    const itemFlags = item?.getFlag?.(MODULE_ID, "scan") ?? {};
+    const itemRadius = itemFlags.radiusFeet != null
+      ? feetToScenePixels(itemFlags.radiusFeet)
+      : itemFlags.radius;
+    return scan({
+      ...itemFlags,
+      ...options,
+      radius: options.radius ?? itemRadius,
+      tokenId: token.id ?? token.document?.id,
+      scannerItemId: item?.id ?? options.scannerItemId
+    });
+  }
+
+  async function createPulseScannerItem(target, options = {}) {
+    const actor = resolveActor(target);
+    if (!actor?.createEmbeddedDocuments) {
+      notifyScannerWarning("Select a token actor before creating a Pulse Scanner item.");
+      return null;
+    }
+
+    const existing = getPulseScannerItemForActor(actor);
+    if (existing && !options.duplicate) return existing;
+
+    const itemData = {
+      ...getPulseScannerItemData(options),
+      system: options.system ?? getPulseScannerItemData(options).system
+    };
+
+    const [item] = await actor.createEmbeddedDocuments("Item", [itemData]);
+    return item ?? null;
+  }
+
+  async function ensureWorldPulseScannerItem(options = {}) {
+    if (!game.user?.isGM || !game.items) return null;
+    if (!options.force && !game.settings.get(MODULE_ID, "createWorldScannerItem")) return null;
+
+    const existing = Array.from(game.items).find((item) => isPulseScannerItem(item));
+    if (existing && !options.duplicate) return existing;
+
+    const itemData = getPulseScannerItemData(options);
+    try {
+      const item = await Item.create(itemData, { renderSheet: false });
+      if (!options.silent) ui.notifications?.info?.(`${MODULE_TITLE}: created the Pulse Scanner item in the Items sidebar.`);
+      return item;
+    } catch (error) {
+      console.error(`${MODULE_TITLE} | Could not create world Pulse Scanner item`, error);
+      ui.notifications?.warn?.(`${MODULE_TITLE}: could not create the world item. Check the browser console for details.`);
+      return null;
+    }
+  }
+
+  async function createWorldPulseScannerItem(options = {}) {
+    if (!game.user?.isGM || !game.items) return null;
+    const itemData = getPulseScannerItemData(options);
+    try {
+      const item = await Item.create(itemData, { renderSheet: false });
+      if (!options.silent) ui.notifications?.info?.(`${MODULE_TITLE}: created ${item.name} in the Items sidebar.`);
+      return item;
+    } catch (error) {
+      console.error(`${MODULE_TITLE} | Could not create scanner item`, error);
+      ui.notifications?.warn?.(`${MODULE_TITLE}: could not create the scanner item. Check the browser console for details.`);
+      return null;
+    }
+  }
+
+  function getPulseScannerItemData(options = {}) {
+    const radiusFeet = toNumber(options.radiusFeet ?? game.settings.get(MODULE_ID, "scannerItemRadiusFeet"), 30);
+    const mode = SCANNER_MODES.includes(options.mode) ? options.mode : getScannerItemMode();
+    return {
+      name: options.name || getScannerItemName(),
+      type: options.type || getFallbackItemType(),
+      img: options.img || SCANNER_ITEM_IMAGE,
+      flags: {
+        [MODULE_ID]: {
+          [SCANNER_ITEM_FLAG]: true,
+          scan: {
+            radiusFeet,
+            mode
+          }
+        }
+      },
+      system: options.system ?? {}
+    };
+  }
+
+  function getScannerItemMode() {
+    const mode = game.settings.get(MODULE_ID, "scannerItemMode");
+    return SCANNER_MODES.includes(mode) ? mode : DEFAULT_MODE;
+  }
+
+  function feetToScenePixels(feet) {
+    const distance = Number(canvas?.scene?.grid?.distance ?? canvas?.dimensions?.distance ?? 5) || 5;
+    const size = Number(canvas?.grid?.size ?? canvas?.scene?.grid?.size ?? canvas?.dimensions?.size ?? 100) || 100;
+    return Math.max(0, toNumber(feet, 30)) * size / distance;
+  }
+
+  function hasPulseScannerItem(target) {
+    return Boolean(getPulseScannerItemForToken(resolveToken(target?.id ?? target)) ?? getPulseScannerItemForActor(resolveActor(target)));
+  }
+
+  function canTokenUseScanner(token, options = {}) {
+    if (game.user?.isGM) return true;
+    if (!playerRequiresScannerItem(options)) return true;
+    if (getPulseScannerItemForToken(token)) return true;
+    notifyScannerWarning("This token needs a Pulse Scanner item before it can scan.");
+    return false;
+  }
+
+  function playerRequiresScannerItem(options = {}) {
+    if (options.requireItem === false) return false;
+    return Boolean(game.settings.get(MODULE_ID, "requireScannerItem"));
   }
 
   async function createTarget(targetData = {}) {
@@ -1000,6 +1313,74 @@ import {
     return canvas.tokens?.controlled?.[0] ?? null;
   }
 
+  function resolveTokenForItem(item) {
+    const actor = item?.actor;
+    if (!actor) return null;
+    const controlled = canvas.tokens?.controlled?.find((token) => token.actor?.id === actor.id);
+    if (controlled) return controlled;
+    return canvas.tokens?.placeables?.find((token) => token.actor?.id === actor.id && tokenIsOwner(token)) ?? null;
+  }
+
+  function tokenIsOwner(token) {
+    return Boolean(token?.isOwner || token?.document?.isOwner || token?.actor?.isOwner);
+  }
+
+  function resolveActor(target) {
+    if (!target) return canvas.tokens?.controlled?.[0]?.actor ?? game.user?.character ?? null;
+    if (target.actor) return target.actor;
+    if (target.document?.actor) return target.document.actor;
+    if (target.items) return target;
+    if (typeof target === "string") {
+      const token = resolveToken(target);
+      return token?.actor ?? game.actors?.get(target) ?? null;
+    }
+    return null;
+  }
+
+  function getPulseScannerItemForToken(token) {
+    return token?.actor ? getPulseScannerItemForActor(token.actor) : null;
+  }
+
+  function getPulseScannerItemForActor(actor) {
+    const items = Array.from(actor?.items ?? []);
+    return items.find((item) => isPulseScannerItem(item)) ?? null;
+  }
+
+  function isPulseScannerItem(item) {
+    if (!item) return false;
+    if (item.getFlag?.(MODULE_ID, SCANNER_ITEM_FLAG)) return true;
+    return normalizeScannerItemName(item.name) === normalizeScannerItemName(getScannerItemName());
+  }
+
+  function getScannerItemName() {
+    return String(game.settings.get(MODULE_ID, "scannerItemName") || SCANNER_ITEM_NAME).trim() || SCANNER_ITEM_NAME;
+  }
+
+  function normalizeScannerItemName(name) {
+    return String(name || "").trim().toLowerCase();
+  }
+
+  function getFallbackItemType() {
+    const configuredTypes = game.system?.documentTypes?.Item ?? [];
+    const documentTypes = Array.isArray(configuredTypes)
+      ? configuredTypes
+      : configuredTypes instanceof Set
+        ? Array.from(configuredTypes)
+        : configuredTypes && typeof configuredTypes === "object"
+          ? Object.keys(configuredTypes)
+          : [];
+    if (documentTypes.includes("equipment")) return "equipment";
+    if (documentTypes.includes("tool")) return "tool";
+    if (documentTypes.includes("gear")) return "gear";
+    if (documentTypes.includes("loot")) return "loot";
+    return documentTypes[0] ?? "item";
+  }
+
+  function notifyScannerWarning(message) {
+    ui.notifications?.warn?.(message);
+    console.warn(`${MODULE_TITLE}: ${message}`);
+  }
+
   function getTokenCenter(token) {
     if (token.center) return { x: token.center.x, y: token.center.y };
     const document = token.document ?? token;
@@ -1150,14 +1531,17 @@ import {
         colorOptions: getColorOptions(selectedTarget.color),
         visibilityOptions: VISIBILITY_MODES.map((mode) => ({ value: mode, label: labelize(mode) })),
         statusOptions: TARGET_STATUSES.map((status) => ({ value: status, label: labelize(status) })),
-        defaultRadius: game.settings.get(MODULE_ID, "defaultScanRadius"),
         hasTargets: targets.length > 0,
         canUseMouse: Boolean(state.lastMouseScenePosition),
         placementActive: state.placementActive,
         placementShape: state.placementShape,
         placementCircle: state.placementShape === "circle",
         placementRectangle: state.placementShape === "rectangle",
-        latestScanCount: state.latestScan?.sceneId === scene?.id ? state.latestScan.targetIds.length : 0
+        scannerItem: {
+          name: getScannerItemName(),
+          mode: getScannerItemMode(),
+          radiusFeet: game.settings.get(MODULE_ID, "scannerItemRadiusFeet")
+        }
       };
     }
 
@@ -1190,12 +1574,11 @@ import {
 
       if (action === "new-manual") return this._startManualTarget();
       if (action === "save-target") return this._saveForm(button.closest("form"));
+      if (action === "create-scanner-item-config") return this._createScannerItemConfig(button.closest("form"));
       if (action === "delete-target") return this._deleteTarget(targetId);
-      if (action === "scan-selected") return scan({ radius: Number(game.settings.get(MODULE_ID, "defaultScanRadius")), mode: button.dataset.mode || this._getCurrentMode() });
       if (action === "toggle-placement") return this._togglePlacement();
       if (action === "set-placement-shape") return this._setPlacementShape(button.dataset.shape);
       if (action === "reveal-target") return this._revealTarget(targetId);
-      if (action === "reveal-latest") return this._revealLatest();
       if (action === "hide-target") return this._hideTarget(targetId);
       if (action === "toggle-resolved") return this._toggleResolved(targetId);
     }
@@ -1225,8 +1608,7 @@ import {
         x: data.x,
         y: data.y,
         radius: data.radius,
-        integrity: data.integrity,
-        difficulty: data.difficulty
+        integrity: data.integrity
       };
 
       if (data.id && getTargets(canvas.scene?.id).some((target) => target.id === data.id)) {
@@ -1237,6 +1619,20 @@ import {
         this.selectedTargetId = target?.id ?? this.selectedTargetId;
       }
       this.draftTarget = null;
+      this.render(false);
+    }
+
+    async _createScannerItemConfig(form) {
+      if (!form) return;
+      const formData = new FormData(form);
+      const name = String(formData.get("scannerItemName") || SCANNER_ITEM_NAME).trim() || SCANNER_ITEM_NAME;
+      const mode = SCANNER_MODES.includes(formData.get("scannerItemMode")) ? formData.get("scannerItemMode") : DEFAULT_MODE;
+      const radiusFeet = Math.max(0, toNumber(formData.get("scannerItemRadiusFeet"), 30));
+
+      await game.settings.set(MODULE_ID, "scannerItemName", name);
+      await game.settings.set(MODULE_ID, "scannerItemMode", mode);
+      await game.settings.set(MODULE_ID, "scannerItemRadiusFeet", radiusFeet);
+      await createWorldPulseScannerItem({ name, mode, radiusFeet });
       this.render(false);
     }
 

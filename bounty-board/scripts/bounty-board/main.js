@@ -53,7 +53,7 @@ function exposeApi() {
     // Patreon/premium gating can wrap open() or selected GM actions here.
     // Random bounty generator can call upsertBounty() with generated data.
     // Faction reputation systems can listen for completed/failed state changes.
-    // Galaxy map integration can use linkedSceneId/location metadata.
+    // Galaxy map integration can use location metadata.
     // HoloCall contact integration can add claimant/contact actions.
     // Security camera and crime scene modules can attach evidence links via notes or future document ids.
   };

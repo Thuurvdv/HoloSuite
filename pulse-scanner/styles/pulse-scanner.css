@@ -62,30 +62,46 @@
 }
 
 .pulse-scanner-header-actions {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   justify-content: flex-end;
-}
-
-.pulse-scanner-mode-row {
-  display: flex;
-  flex: 1 1 100%;
-  justify-content: flex-end;
-  gap: 6px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-
-.pulse-scanner-mode-row button {
-  flex: 0 1 auto;
-  white-space: nowrap;
 }
 
 .pulse-scanner-tool-row {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+.pulse-scanner-tool-row button {
+  white-space: nowrap;
+}
+
+.pulse-scanner-item-config {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.4fr) minmax(150px, 1fr) minmax(110px, 0.7fr) auto;
+  gap: 10px;
+  align-items: end;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--hs-line);
+  background: rgba(4, 14, 22, 0.62);
+}
+
+.pulse-scanner-item-config label {
+  display: grid;
+  gap: 4px;
+}
+
+.pulse-scanner-item-config span {
+  color: var(--hs-muted);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.pulse-scanner-item-config small {
+  color: rgba(255, 209, 102, 0.86);
+  font-size: 11px;
+  line-height: 1.25;
 }
 
 .pulse-scanner button {
@@ -111,6 +127,36 @@
 .pulse-scanner button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+}
+
+.pulse-scanner-token-control {
+  color: #7df9ff;
+}
+
+.pulse-scanner-token-control.disabled {
+  cursor: not-allowed;
+  color: #7b858c;
+  opacity: 0.58;
+}
+
+.pulse-scanner-item-use {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: calc(100% - 16px);
+  min-height: 34px;
+  margin: 8px;
+  border: 1px solid rgba(125, 249, 255, 0.42);
+  border-radius: 6px;
+  background: rgba(11, 22, 28, 0.82);
+  color: #dffcff;
+  font-weight: 700;
+}
+
+.pulse-scanner-item-use:hover {
+  border-color: rgba(125, 249, 255, 0.78);
+  box-shadow: 0 0 14px rgba(125, 249, 255, 0.24);
 }
 
 .pulse-scanner-layout {

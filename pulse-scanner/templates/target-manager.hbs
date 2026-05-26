@@ -5,20 +5,35 @@
       <p>{{#if scene}}{{scene.name}}{{else}}No active scene{{/if}}</p>
     </div>
     <div class="pulse-scanner-header-actions">
-      <div class="pulse-scanner-mode-row" aria-label="Scanner modes">
-      {{#each modeOptions}}
-        <button type="button" data-action="scan-selected" data-mode="{{value}}" title="{{label}} scan"><i class="fa-solid fa-satellite-dish"></i> {{label}}</button>
-      {{/each}}
-      </div>
       <div class="pulse-scanner-tool-row">
-      <button type="button" data-action="toggle-placement" class="{{#if placementActive}}is-active{{/if}}"><i class="fa-solid fa-map-pin"></i> Place</button>
-      <button type="button" data-action="set-placement-shape" data-shape="circle" class="{{#if placementCircle}}is-active{{/if}}" title="Place circular targets"><i class="fa-regular fa-circle"></i> Circle</button>
-      <button type="button" data-action="set-placement-shape" data-shape="rectangle" class="{{#if placementRectangle}}is-active{{/if}}" title="Place square or rectangular targets"><i class="fa-regular fa-square"></i> Square</button>
-      <button type="button" data-action="new-manual"><i class="fa-solid fa-plus"></i> Manual</button>
-      <button type="button" data-action="reveal-latest" {{#unless latestScanCount}}disabled{{/unless}}><i class="fa-solid fa-eye"></i> Reveal Latest {{#if latestScanCount}}({{latestScanCount}}){{/if}}</button>
+        <button type="button" data-action="toggle-placement" class="{{#if placementActive}}is-active{{/if}}"><i class="fa-solid fa-map-pin"></i> Place</button>
+        <button type="button" data-action="set-placement-shape" data-shape="circle" class="{{#if placementCircle}}is-active{{/if}}" title="Place circular targets"><i class="fa-regular fa-circle"></i> Circle</button>
+        <button type="button" data-action="set-placement-shape" data-shape="rectangle" class="{{#if placementRectangle}}is-active{{/if}}" title="Place square or rectangular targets"><i class="fa-regular fa-square"></i> Square</button>
+        <button type="button" data-action="new-manual"><i class="fa-solid fa-plus"></i> Manual</button>
       </div>
     </div>
   </header>
+
+  <form class="pulse-scanner-item-config" autocomplete="off">
+    <label>
+      <span>Item Name</span>
+      <input type="text" name="scannerItemName" value="{{scannerItem.name}}">
+    </label>
+    <label>
+      <span>Signal</span>
+      <select name="scannerItemMode">
+        {{#each modeOptions}}
+          <option value="{{value}}" {{psOption value ../scannerItem.mode}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>
+      <span>Radius (ft)</span>
+      <input type="number" name="scannerItemRadiusFeet" value="{{scannerItem.radiusFeet}}" min="0" step="5">
+      <small>For performance, keep scanner radius at 100 ft or less.</small>
+    </label>
+    <button type="button" data-action="create-scanner-item-config"><i class="fa-solid fa-plus"></i> Create Item</button>
+  </form>
 
   <div class="pulse-scanner-layout">
     <aside class="pulse-scanner-list">

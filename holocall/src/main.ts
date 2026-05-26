@@ -339,6 +339,26 @@ function bindComposerControls(app, html) {
         return;
       }
 
+      if (action === "browse-image") {
+        const input = form.elements.image;
+        const Picker = globalThis.FilePicker ?? globalThis.foundry?.applications?.apps?.FilePicker;
+        if (!input || !Picker) {
+          ui.notifications?.warn?.("Foundry FilePicker is unavailable.");
+          return;
+        }
+        const picker = new Picker({
+          type: "image",
+          current: input.value,
+          callback: (path) => {
+            input.value = path;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
+        if (typeof picker.browse === "function") picker.browse();
+        else picker.render?.(true);
+        return;
+      }
+
       if (action === "reset") {
         form.reset();
         updateComposerSignal(form);
@@ -471,7 +491,7 @@ function renderComposerFallbackTemplate(data) {
       </label>
       <label>Caller Name <input type="text" name="callerName" value="${escapeHTML(call.callerName)}"></label>
       <label>Subtitle / Faction <input type="text" name="subtitle" value="${escapeHTML(call.subtitle)}"></label>
-      <label>Portrait Image Path <input type="text" name="image" value="${escapeHTML(call.image)}"></label>
+      <label>Portrait Image Path <span class="holocall-composer-path-row"><input type="text" name="image" value="${escapeHTML(call.image)}"><button type="button" data-holocall-compose-action="browse-image">Browse</button></span></label>
       <label>Message <textarea name="message" rows="5">${escapeHTML(call.message)}</textarea></label>
       <label>Signal <input type="range" name="signal" min="0" max="100" value="${call.signal}"></label>
       <label>Variant

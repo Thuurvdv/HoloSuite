@@ -798,7 +798,6 @@
     system.y = clamp(normalizeNumber(y, system.y), 0, 100);
     maps[mapId] = normalizeMap(map);
     await saveMapStore(maps);
-    if (managerApp?.rendered) managerApp.render({ force: true });
     game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
     return clone(system);
   }
@@ -1509,7 +1508,7 @@
       order: Object.keys(control.tools).length,
       button: true,
       visible: true,
-      onChange: openGalaxyMapFromSceneControls
+      onClick: openGalaxyMapFromSceneControls
     };
   }
 
@@ -1736,6 +1735,11 @@
         content: "<p>Delete this faction? Systems assigned to it become unaffiliated.</p>"
       });
       if (confirmed) await deleteFaction(this.selectedMapId, factionId);
+    }
+
+    async close(options = {}) {
+      if (managerApp === this) managerApp = null;
+      return super.close(options);
     }
   }
 

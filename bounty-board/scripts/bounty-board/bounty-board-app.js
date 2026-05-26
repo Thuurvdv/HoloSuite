@@ -52,7 +52,6 @@ export class BountyBoardApp extends BaseApplication {
       requestContract: BountyBoardApp.#onRequestContract,
       openImage: BountyBoardApp.#onOpenImage,
       openJournal: BountyBoardApp.#onOpenJournal,
-      openScene: BountyBoardApp.#onOpenScene,
       clearFilters: BountyBoardApp.#onClearFilters
     }
   };
@@ -215,11 +214,6 @@ export class BountyBoardApp extends BaseApplication {
   static #onOpenJournal(event) {
     const id = event.target.closest("[data-open-journal]")?.dataset.openJournal;
     game.journal?.get(id)?.sheet?.render(true);
-  }
-
-  static #onOpenScene(event) {
-    const id = event.target.closest("[data-open-scene]")?.dataset.openScene;
-    game.scenes?.get(id)?.view?.();
   }
 
   static #onClearFilters() {

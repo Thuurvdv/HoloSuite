@@ -30,6 +30,7 @@ function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration |
     title,
     icon,
     premium: app.premium === true,
+    playerVisible: app.playerVisible !== false,
     description: String(app.description ?? "").trim(),
     featureId: String(app.featureId ?? id).trim() || id,
     open: app.open
@@ -37,12 +38,11 @@ function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration |
 }
 
 function renderOpenLauncherControl(controls: unknown): void {
-  if (!game.user?.isGM) return;
-
   const openLauncher = () => api.openLauncher();
+  const isGM = game.user?.isGM === true;
   const tool = {
     name: "holosuite-core-launcher",
-    title: "HoloSuite",
+    title: isGM ? "HoloSuite Command Deck" : "HoloSuite Player View",
     icon: "fa-solid fa-mobile-screen-button",
     button: true,
     visible: true,
@@ -122,10 +122,19 @@ function canOpenApp(app: HoloSuiteAppRegistration): boolean {
   return !app.premium || isFeatureAllowed(app.featureId ?? app.id);
 }
 
+function isAppVisibleToCurrentUser(app: HoloSuiteAppRegistration): boolean {
+  return game.user?.isGM === true || app.playerVisible !== false;
+}
+
 async function openRegisteredApp(appId: string): Promise<unknown> {
   const app = registeredApps.get(appId);
   if (!app) {
     ui.notifications?.warn?.(`HoloSuite app "${appId}" is not registered.`);
+    return null;
+  }
+
+  if (!isAppVisibleToCurrentUser(app)) {
+    ui.notifications?.warn?.(`${app.title} is not available from the player view.`);
     return null;
   }
 
@@ -139,8 +148,16 @@ async function openRegisteredApp(appId: string): Promise<unknown> {
 }
 
 function renderLauncherHtml(): string {
-  const apps = [...registeredApps.values()].sort((left, right) => left.title.localeCompare(right.title));
+  const isGM = game.user?.isGM === true;
+  const apps = [...registeredApps.values()]
+    .filter(isAppVisibleToCurrentUser)
+    .sort((left, right) => left.title.localeCompare(right.title));
   const status = licenseCache?.valid ? "Supporter link active" : "Free core mode";
+  const deckLabel = isGM ? "GM Command Deck" : "Player Link";
+  const screenTitle = isGM ? "Apps" : "Commlink";
+  const emptyLabel = isGM
+    ? "No HoloSuite apps have registered yet."
+    : "No player apps are available yet.";
 
   const appCards = apps.length
     ? apps.map((app) => {
@@ -155,7 +172,7 @@ function renderLauncherHtml(): string {
         </button>
       `;
     }).join("")
-    : '<p class="holosuite-empty">No HoloSuite apps have registered yet.</p>';
+    : `<p class="holosuite-empty">${escapeHtml(emptyLabel)}</p>`;
 
   return `
     <section class="holosuite-phone">
@@ -167,8 +184,8 @@ function renderLauncherHtml(): string {
         <main class="holosuite-screen">
           <div class="holosuite-screen-heading">
             <div>
-              <span class="holosuite-kicker">GM Command Deck</span>
-              <h2>Apps</h2>
+              <span class="holosuite-kicker">${escapeHtml(deckLabel)}</span>
+              <h2>${escapeHtml(screenTitle)}</h2>
             </div>
             <button type="button" class="holosuite-refresh" data-holosuite-action="check-license" title="Check license">
               <i class="fa-solid fa-arrows-rotate"></i>
@@ -236,10 +253,6 @@ const api = {
     return [...registeredApps.values()];
   },
   async openLauncher(): Promise<HoloSuiteLauncher | null> {
-    if (!game.user?.isGM) {
-      ui.notifications?.warn?.("Only the GM can open HoloSuite.");
-      return null;
-    }
     await checkLicense();
     if (!launcherApp) launcherApp = new HoloSuiteLauncher();
     await launcherApp.render(true);
