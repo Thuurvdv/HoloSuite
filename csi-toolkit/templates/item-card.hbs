@@ -1,0 +1,76 @@
+<article
+  class="csi-card csi-board-card csi-card--{{kind}} csi-layer-{{item.layer}} {{#if item.hidden}}is-hidden-entity{{/if}}"
+  data-csi-board-card
+  data-item-id="{{item.id}}"
+  data-collection="{{collection}}"
+  data-x="{{item.x}}"
+  data-y="{{item.y}}"
+  style="{{item.style}}"
+>
+  <div class="csi-card-ribbon">{{item.kindLabel}}</div>
+  <div class="csi-card-kind-icon csi-card-kind-icon--{{kind}}" title="{{item.kindLabel}}">
+    {{#if (csiEq kind "suspect")}}
+      <i class="fas fa-user-secret"></i>
+    {{else}}
+      {{#if (csiEq kind "location")}}
+        <i class="fas fa-map-marker-alt"></i>
+      {{else}}
+        {{#if (csiEq kind "timeline")}}
+          <i class="fas fa-clock"></i>
+        {{else}}
+          <i class="fas fa-fingerprint"></i>
+        {{/if}}
+      {{/if}}
+    {{/if}}
+  </div>
+
+  {{#if item.image}}
+    <img class="csi-card-image" src="{{item.image}}" alt="" />
+  {{else}}
+    <div class="csi-card-image csi-card-image--placeholder">
+      {{#if (csiEq kind "suspect")}}<i class="fas fa-user-secret"></i>{{else}}<i class="fas fa-fingerprint"></i>{{/if}}
+    </div>
+  {{/if}}
+
+  <div class="csi-card-body">
+    {{#if (csiEq kind "suspect")}}
+      <h3>{{item.name}}</h3>
+      {{#if item.alias}}<p class="csi-card-subtitle">AKA {{item.alias}}</p>{{/if}}
+      <p class="csi-pill csi-pill--{{item.status}}">{{csiLabel item.status}}</p>
+      {{#if item.motive}}<p><strong>Motive:</strong> {{item.motive}}</p>{{/if}}
+      {{#if item.alibi}}<p><strong>Alibi:</strong> {{item.alibi}}</p>{{/if}}
+    {{else}}
+      {{#if (csiEq kind "location")}}
+        <h3>{{item.name}}</h3>
+        {{#if item.sceneId}}<p class="csi-card-subtitle">Scene: {{item.sceneId}}</p>{{/if}}
+        {{#if item.description}}<p>{{item.description}}</p>{{/if}}
+      {{else}}
+        {{#if (csiEq kind "timeline")}}
+          <h3>{{item.title}}</h3>
+          {{#if item.time}}<p class="csi-card-subtitle">{{item.time}}</p>{{/if}}
+          {{#if item.description}}<p>{{item.description}}</p>{{/if}}
+        {{else}}
+          <h3>{{item.title}}</h3>
+          <p class="csi-pill csi-pill--{{item.status}} csi-evidence-tag--{{item.type}}">{{csiLabel item.status}}</p>
+          {{#if item.type}}<p class="csi-card-subtitle">{{csiLabel item.type}}</p>{{/if}}
+          {{#if item.description}}<p>{{item.description}}</p>{{/if}}
+        {{/if}}
+      {{/if}}
+    {{/if}}
+
+    {{#if item.notes}}
+      <div class="csi-gm-notes">
+        <strong>Notes</strong>
+        <p>{{item.notes}}</p>
+      </div>
+    {{/if}}
+
+    {{#if canEditBoard}}
+      <footer class="csi-card-actions">
+        <button type="button" data-action="edit-card" data-collection="{{collection}}" data-item-id="{{item.id}}" title="Edit card"><i class="fas fa-edit"></i></button>
+        <button type="button" data-action="start-connection" data-collection="{{collection}}" data-item-id="{{item.id}}" title="Start connection"><i class="fas fa-link"></i></button>
+        <button type="button" class="csi-danger" data-action="delete-board-item" data-collection="{{collection}}" data-item-id="{{item.id}}" title="Delete card"><i class="fas fa-trash"></i></button>
+      </footer>
+    {{/if}}
+  </div>
+</article>

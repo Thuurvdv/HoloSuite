@@ -1,0 +1,29 @@
+{
+  "id": "holosuite-hacking",
+  "title": "HoloSuite Hacking",
+  "description": "Reusable cyberpunk hacking minigames for Foundry VTT.",
+  "version": "0.1.0",
+  "socket": true,
+  "authors": [
+    {
+      "name": "HoloSuite Contributors"
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/hacking.css",
+    "styles/node-intrusion.css",
+    "styles/signal-alignment.css"
+  ],
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "license": "MIT",
+  "readme": "README.md"
+}

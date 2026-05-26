@@ -1,0 +1,388 @@
+.node-intrusion-window .window-content {
+  background: #05070d;
+  color: #d9fbff;
+  padding: 0;
+}
+
+.node-intrusion-shell {
+  position: relative;
+  min-height: 620px;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(83, 235, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(83, 235, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(circle at 22% 18%, rgba(0, 255, 209, 0.18), transparent 30%),
+    radial-gradient(circle at 78% 72%, rgba(255, 59, 133, 0.16), transparent 34%),
+    #05070d;
+  background-size: 28px 28px, 28px 28px, auto, auto, auto;
+  font-family: "Rajdhani", "Orbitron", "Segoe UI", sans-serif;
+}
+
+.node-intrusion-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.04) 1px, transparent 1px, transparent 5px);
+  opacity: calc(0.18 + var(--glitch-intensity) * 0.18);
+  mix-blend-mode: screen;
+}
+
+.node-intrusion-header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  padding: 22px 26px 16px;
+  border-bottom: 1px solid rgba(93, 245, 255, 0.22);
+}
+
+.node-intrusion-kicker {
+  margin: 0 0 4px;
+  color: #64f7ff;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.node-intrusion-header h2 {
+  margin: 0;
+  color: #f5feff;
+  font-size: 30px;
+  font-weight: 700;
+  text-shadow: 0 0 16px rgba(74, 230, 255, 0.75);
+}
+
+.node-intrusion-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  color: #9ffcff;
+  font-size: 13px;
+}
+
+.node-intrusion-status span {
+  border: 1px solid rgba(100, 247, 255, 0.28);
+  background: rgba(5, 20, 29, 0.72);
+  padding: 6px 9px;
+}
+
+.node-intrusion-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+.node-intrusion-panel {
+  position: relative;
+  z-index: 2;
+  border-right: 1px solid rgba(93, 245, 255, 0.2);
+  padding: 8px 16px 8px 8px;
+}
+
+.node-intrusion-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 8px;
+  color: #a8f7ff;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.node-intrusion-readout strong {
+  color: #ffffff;
+  font-size: 21px;
+  text-shadow: 0 0 12px rgba(255, 64, 128, 0.72);
+}
+
+.node-intrusion-trace {
+  height: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 70, 132, 0.55);
+  background: rgba(255, 70, 132, 0.08);
+  box-shadow: inset 0 0 14px rgba(255, 70, 132, 0.18);
+}
+
+.node-intrusion-trace div {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #28f7ff, #ff3f7f);
+  box-shadow: 0 0 18px rgba(255, 63, 127, 0.8);
+  transition: width 120ms linear;
+}
+
+.node-intrusion-specs {
+  display: grid;
+  gap: 8px;
+  margin: 22px 0;
+}
+
+.node-intrusion-specs div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(93, 245, 255, 0.16);
+  padding-bottom: 6px;
+}
+
+.node-intrusion-specs dt {
+  color: #72c8d6;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.node-intrusion-specs dd {
+  margin: 0;
+  color: #f2feff;
+  font-weight: 700;
+}
+
+.node-intrusion-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.node-intrusion-actions button {
+  width: 100%;
+  border: 1px solid rgba(100, 247, 255, 0.35);
+  background: rgba(10, 34, 45, 0.85);
+  color: #d9fbff;
+  padding: 8px 10px;
+}
+
+.node-intrusion-map {
+  position: relative;
+  min-height: 500px;
+  border: 1px solid rgba(93, 245, 255, 0.18);
+  background: rgba(1, 10, 17, 0.62);
+  box-shadow: inset 0 0 44px rgba(26, 234, 255, 0.08);
+}
+
+.node-intrusion-links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.node-intrusion-links line {
+  stroke: rgba(80, 226, 255, 0.32);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 4px rgba(80, 226, 255, 0.65));
+}
+
+.node-intrusion-links line.is-available {
+  stroke: rgba(255, 230, 111, 0.8);
+  stroke-width: 2.4;
+  stroke-dasharray: 4 3;
+}
+
+.node-intrusion-links line.is-visited-path {
+  stroke: rgba(77, 255, 155, 0.95);
+  stroke-width: 4.2;
+  stroke-dasharray: none;
+}
+
+.node-intrusion-links line.is-firewall-path {
+  stroke: rgba(255, 71, 126, 0.98);
+  stroke-width: 4.6;
+  stroke-dasharray: 2 2;
+  filter: drop-shadow(0 0 9px rgba(255, 71, 126, 0.9));
+}
+
+.node-intrusion-links line.is-decoy-path {
+  stroke: rgba(169, 135, 255, 0.98);
+  stroke-width: 4.6;
+  stroke-dasharray: 5 3;
+  filter: drop-shadow(0 0 9px rgba(169, 135, 255, 0.9));
+}
+
+.node-intrusion-node {
+  position: absolute;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border: 1px solid rgba(117, 244, 255, 0.75);
+  border-radius: 50%;
+  background: rgba(6, 23, 33, 0.95);
+  box-shadow: 0 0 16px rgba(91, 236, 255, 0.46);
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.node-intrusion-node span {
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: #7df9ff;
+  box-shadow: 0 0 14px #7df9ff;
+}
+
+.node-intrusion-node:hover,
+.node-intrusion-node.is-neighbor {
+  transform: scale(1.18);
+  border-color: #ffffff;
+}
+
+.node-intrusion-node.is-current {
+  z-index: 4;
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  border-color: #fff;
+  box-shadow: 0 0 28px rgba(100, 247, 255, 1), 0 0 0 7px rgba(100, 247, 255, 0.08);
+}
+
+.node-intrusion-current-icon,
+.node-intrusion-neighbor-icon {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.node-intrusion-current-icon {
+  inset: -18px auto auto 50%;
+  transform: translateX(-50%);
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.node-intrusion-neighbor-icon {
+  inset: auto -14px -10px auto;
+  color: #ffe66f;
+  font-size: 13px;
+  animation: node-intrusion-neighbor-nudge 900ms infinite ease-in-out;
+}
+
+.node-intrusion-node.is-current::after {
+  content: "ACTIVE";
+  position: absolute;
+  inset: auto auto -22px 50%;
+  transform: translateX(-50%);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.node-intrusion-node.type-start span {
+  background: #4dff9b;
+  box-shadow: 0 0 14px #4dff9b;
+}
+
+.node-intrusion-node.type-target {
+  border-radius: 4px;
+  border-color: #ffe66f;
+}
+
+.node-intrusion-node.type-target span {
+  border-radius: 2px;
+  background: #ffe66f;
+  box-shadow: 0 0 16px #ffe66f;
+}
+
+.node-intrusion-node.type-decoy.is-visited span,
+.node-intrusion-node.type-decoy.is-revealed.is-neighbor span {
+  background: #a987ff;
+  box-shadow: 0 0 14px #a987ff;
+}
+
+.node-intrusion-node.type-firewall.is-revealed,
+.node-intrusion-node.type-firewall.is-visited {
+  border-color: #ff477e;
+  box-shadow: 0 0 24px rgba(255, 71, 126, 0.8);
+}
+
+.node-intrusion-node.type-firewall.is-revealed span,
+.node-intrusion-node.type-firewall.is-visited span {
+  background: #ff477e;
+  box-shadow: 0 0 16px #ff477e;
+}
+
+.node-intrusion-result-screen {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  min-height: 520px;
+  margin: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 71, 126, 0.14), transparent 34%),
+    rgba(3, 9, 16, 0.92);
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 0 44px rgba(100, 247, 255, 0.24);
+}
+
+.node-intrusion-result-screen strong {
+  display: block;
+  color: #fff;
+  font-size: 34px;
+}
+
+.node-intrusion-result-screen span {
+  display: block;
+  color: #bdeff6;
+  font-size: 15px;
+}
+
+.node-intrusion-result-screen button {
+  border: 1px solid rgba(100, 247, 255, 0.35);
+  background: rgba(10, 34, 45, 0.85);
+  color: #d9fbff;
+  padding: 8px 12px;
+}
+
+.node-intrusion-result-screen.is-success {
+  border-color: rgba(77, 255, 155, 0.8);
+}
+
+.node-intrusion-result-screen.is-failure {
+  border-color: rgba(255, 71, 126, 0.8);
+}
+
+.invalid-pulse {
+  animation: node-intrusion-invalid 280ms ease;
+}
+
+.glitch-medium .node-intrusion-map,
+.glitch-high .node-intrusion-map {
+  animation: node-intrusion-glitch 3.8s infinite steps(2, end);
+}
+
+@keyframes node-intrusion-invalid {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+}
+
+@keyframes node-intrusion-glitch {
+  0%, 92%, 100% { filter: none; }
+  94% { filter: hue-rotate(24deg) saturate(1.5); }
+  96% { filter: hue-rotate(-18deg) contrast(1.2); }
+}
+
+@keyframes node-intrusion-neighbor-nudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+
+@media (max-width: 760px) {
+  .node-intrusion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .node-intrusion-panel {
+    border-right: 0;
+    border-bottom: 1px solid rgba(93, 245, 255, 0.2);
+    padding: 0 0 14px;
+  }
+}

@@ -1,0 +1,65 @@
+<form class="csi-board-edit-form" data-csi-board-item-form data-csi-item data-collection="{{collection}}" data-item-id="{{item.id}}">
+  {{#if item}}
+    {{#if isEvidence}}
+      <div class="csi-form-grid">
+        <label><span>Title</span><input type="text" name="title" value="{{item.title}}" /></label>
+        <label><span>Type</span><select name="type">{{#each options.evidenceTypes}}<option value="{{this}}" {{csiOption this ../item.type}}>{{csiLabel this}}</option>{{/each}}</select></label>
+        <label><span>Status</span><select name="status">{{#each options.evidenceStatuses}}<option value="{{this}}" {{csiOption this ../item.status}}>{{csiLabel this}}</option>{{/each}}</select></label>
+        <label class="csi-span-2 csi-image-field"><span>Image</span><div class="csi-field-with-button"><input type="text" name="image" value="{{item.image}}" /><button type="button" data-action="pick-image"><i class="fas fa-image"></i></button></div></label>
+        <label class="csi-span-2"><span>Description</span><textarea name="description" rows="4">{{item.description}}</textarea></label>
+        <label class="csi-span-2"><span>Notes</span><textarea name="notes" rows="3">{{item.notes}}</textarea></label>
+      </div>
+    {{/if}}
+
+    {{#if isSuspect}}
+      <div class="csi-form-grid">
+        <label><span>Name</span><input type="text" name="name" value="{{item.name}}" /></label>
+        <label><span>Alias</span><input type="text" name="alias" value="{{item.alias}}" /></label>
+        <label><span>Status</span><select name="status">{{#each options.suspectStatuses}}<option value="{{this}}" {{csiOption this ../item.status}}>{{csiLabel this}}</option>{{/each}}</select></label>
+        <label class="csi-span-2 csi-image-field"><span>Mugshot</span><div class="csi-field-with-button"><input type="text" name="image" value="{{item.image}}" /><button type="button" data-action="pick-image"><i class="fas fa-image"></i></button></div></label>
+        <label><span>Motive</span><textarea name="motive" rows="3">{{item.motive}}</textarea></label>
+        <label><span>Alibi</span><textarea name="alibi" rows="3">{{item.alibi}}</textarea></label>
+        <label class="csi-span-2"><span>Notes</span><textarea name="notes" rows="3">{{item.notes}}</textarea></label>
+      </div>
+    {{/if}}
+
+    {{#if isLocation}}
+      <div class="csi-form-grid">
+        <label><span>Name</span><input type="text" name="name" value="{{item.name}}" /></label>
+        <label><span>Scene ID</span><input type="text" name="sceneId" value="{{item.sceneId}}" /></label>
+        <label class="csi-image-field"><span>Image</span><div class="csi-field-with-button"><input type="text" name="image" value="{{item.image}}" /><button type="button" data-action="pick-image"><i class="fas fa-image"></i></button></div></label>
+        <label class="csi-span-2"><span>Description</span><textarea name="description" rows="4">{{item.description}}</textarea></label>
+        <label class="csi-span-2"><span>Notes</span><textarea name="notes" rows="3">{{item.notes}}</textarea></label>
+      </div>
+    {{/if}}
+
+    {{#if isTimeline}}
+      <div class="csi-form-grid">
+        <label><span>Time</span><input type="text" name="time" value="{{item.time}}" /></label>
+        <label><span>Title</span><input type="text" name="title" value="{{item.title}}" /></label>
+        <label class="csi-span-2"><span>Linked Item IDs</span><input type="text" name="linkedItemIds" value="{{csiJoin item.linkedItemIds}}" /></label>
+        <label class="csi-span-2"><span>Description</span><textarea name="description" rows="4">{{item.description}}</textarea></label>
+      </div>
+    {{/if}}
+
+    {{#if isConnection}}
+      <div class="csi-form-grid">
+        <label><span>From</span><select name="fromId"><option value="">Choose item</option>{{#each itemChoices}}<option value="{{id}}" {{csiOption id ../item.fromId}}>{{label}}</option>{{/each}}</select></label>
+        <label><span>To</span><select name="toId"><option value="">Choose item</option>{{#each itemChoices}}<option value="{{id}}" {{csiOption id ../item.toId}}>{{label}}</option>{{/each}}</select></label>
+        <label><span>Label</span><input type="text" name="label" value="{{item.label}}" /></label>
+        <label><span>Type</span><select name="type">{{#each options.connectionTypes}}<option value="{{this}}" {{csiOption this ../item.type}}>{{csiLabel this}}</option>{{/each}}</select></label>
+        <label><span>Line</span><select name="style">{{#each options.connectionStyles}}<option value="{{this}}" {{csiOption this ../item.style}}>{{csiLabel this}}</option>{{/each}}</select></label>
+        <label><span>Color</span><select name="color">{{#each options.connectionColors}}<option value="{{this}}" {{csiOption this ../item.color}}>{{csiLabel this}}</option>{{/each}}</select></label>
+      </div>
+    {{/if}}
+
+    <footer class="csi-editor-actions csi-board-edit-actions">
+      {{#unless isNew}}
+        <button type="button" class="csi-danger" data-action="delete-board-item"><i class="fas fa-trash"></i> Delete</button>
+      {{/unless}}
+      <button type="submit" class="csi-primary" data-action="save-board-item"><i class="fas fa-save"></i> Save</button>
+    </footer>
+  {{else}}
+    <p class="csi-empty-state">This card could not be found.</p>
+  {{/if}}
+</form>

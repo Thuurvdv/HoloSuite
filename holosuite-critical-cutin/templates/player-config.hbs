@@ -1,0 +1,92 @@
+<form class="hcci-config">
+  <header class="hcci-config-header">
+    <div>
+      <p class="hcci-kicker">HoloSuite Module</p>
+      <h2>Critical Cut-In</h2>
+    </div>
+    <div class="hcci-top-controls">
+      <label class="hcci-threshold">
+        <span>Default Threshold</span>
+        <input type="number" name="threshold" min="1" max="20" step="1" value="{{threshold}}">
+      </label>
+      <label class="hcci-threshold">
+        <span>Duration (ms)</span>
+        <input type="number" name="duration" min="800" max="8000" step="100" value="{{duration}}">
+      </label>
+    </div>
+  </header>
+
+  <section class="hcci-config-grid">
+    {{#each rows}}
+      <article class="hcci-config-row" data-hcci-row="{{key}}">
+        <div class="hcci-preview-wrap">
+          <img data-hcci-preview data-fallback-src="{{portrait}}" src="{{preview}}" alt="">
+          <span>{{typeLabel}}</span>
+        </div>
+
+        <div class="hcci-row-main">
+          <div class="hcci-row-title">
+            <h3>{{name}}</h3>
+            <label class="hcci-toggle">
+              <input type="checkbox" data-hcci-field="enabled" {{#if enabled}}checked{{/if}}>
+              <span>Enabled</span>
+            </label>
+          </div>
+
+          <div class="hcci-row-fields">
+            <label class="hcci-path-field">
+              <span>Image / Portrait</span>
+              <div>
+                <input type="text" data-hcci-field="imagePath" value="{{imagePath}}" placeholder="modules/holosuite-critical-cutin/assets/images/example.webp">
+                <button type="button" data-hcci-browse="imagePath" title="Choose image"><i class="fa-solid fa-image"></i></button>
+              </div>
+              <small>{{imageStatus}}</small>
+            </label>
+
+            <label class="hcci-path-field">
+              <span>Audio Sample</span>
+              <div>
+                <input type="text" data-hcci-field="audioPath" value="{{audioPath}}" placeholder="modules/holosuite-critical-cutin/assets/sounds/example.ogg">
+                <button type="button" data-hcci-browse="audioPath" title="Choose audio"><i class="fa-solid fa-music"></i></button>
+              </div>
+              <small>{{audioStatus}}</small>
+            </label>
+
+            <label>
+              <span>Min Roll</span>
+              <input type="number" data-hcci-field="threshold" min="1" max="20" step="1" value="{{threshold}}" placeholder="{{../threshold}}">
+            </label>
+
+            <label>
+              <span>Animation</span>
+              <select data-hcci-field="animationStyle">
+                {{#each animationStyles}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+            </label>
+
+            <label>
+              <span>Overlay Text</span>
+              <input type="text" data-hcci-field="overlayText" value="{{overlayText}}" placeholder="{{../defaultText}}">
+            </label>
+
+            <label>
+              <span>Accent Color</span>
+              <input type="color" data-hcci-field="accentColor" value="{{accentColor}}">
+            </label>
+          </div>
+
+          <p class="hcci-row-note">No custom image uses the actor portrait automatically.</p>
+        </div>
+      </article>
+    {{else}}
+      <p class="hcci-empty">No player-owned actors were found in this world.</p>
+    {{/each}}
+  </section>
+
+  <footer class="hcci-config-actions">
+    <button type="button" data-hcci-action="reset"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+    <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+  </footer>
+</form>

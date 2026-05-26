@@ -1,0 +1,74 @@
+<section class="bb-terminal">
+  <header class="bb-header">
+    <div>
+      <p class="bb-kicker">Contract Terminal</p>
+      <h2>Bounty Board</h2>
+      <p class="bb-subtitle">{{visibleCount}} of {{totalCount}} contracts displayed</p>
+    </div>
+    {{#if isGM}}
+      <button type="button" class="bb-primary" data-action="createBounty">
+        <i class="fa-solid fa-plus"></i>
+        New Contract
+      </button>
+    {{/if}}
+  </header>
+
+  <form class="bb-filters" autocomplete="off">
+    <label>
+      <span>Status</span>
+      <select data-filter="status" name="status">
+        <option value="">All Statuses</option>
+        {{#each options.statuses as |status|}}
+          <option value="{{status.value}}" {{#if (bbEq ../filters.status status.value)}}selected{{/if}}>{{status.label}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>
+      <span>Threat</span>
+      <select data-filter="threatLevel" name="threatLevel">
+        <option value="">All Threats</option>
+        {{#each options.threatLevels as |threat|}}
+          <option value="{{threat}}" {{#if (bbEq ../filters.threatLevel threat)}}selected{{/if}}>{{threat}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>
+      <span>Faction</span>
+      <select data-filter="faction" name="faction">
+        <option value="">All Factions</option>
+        {{#each options.factions as |faction|}}
+          <option value="{{faction}}" {{#if (bbEq ../filters.faction faction)}}selected{{/if}}>{{faction}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>
+      <span>Tag</span>
+      <select data-filter="tag" name="tag">
+        <option value="">All Tags</option>
+        {{#each options.tags as |tag|}}
+          <option value="{{tag}}" {{#if (bbEq ../filters.tag tag)}}selected{{/if}}>{{tag}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label class="bb-search">
+      <span>Search</span>
+      <input type="search" data-filter="search" name="search" value="{{filters.search}}" placeholder="Target, faction, location..." />
+    </label>
+    <button type="button" class="bb-icon-button" data-action="clearFilters" title="Clear filters">
+      <i class="fa-solid fa-filter-circle-xmark"></i>
+    </button>
+  </form>
+
+  {{#if bounties.length}}
+    <div class="bb-card-grid">
+      {{#each bounties as |bounty|}}
+        {{> "modules/bounty-board/templates/bounty-card.hbs" bounty=bounty isGM=../isGM}}
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="bb-empty">
+      <i class="fa-solid fa-satellite-dish"></i>
+      <p>No contracts match the current filters.</p>
+    </div>
+  {{/if}}
+</section>

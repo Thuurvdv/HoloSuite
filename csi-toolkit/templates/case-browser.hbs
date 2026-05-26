@@ -1,0 +1,31 @@
+<section class="csi-shell csi-browser-shell">
+  <header class="csi-browser-header">
+    <div>
+      <p class="csi-kicker">Shared Investigation Files</p>
+      <h1>Case Boards</h1>
+      <p>{{#if canContribute}}Shared board access{{else}}Read-only access{{/if}}</p>
+    </div>
+    {{#if isGM}}
+      <button type="button" data-action="open-manager" title="Open case manager"><i class="fas fa-folder-open"></i></button>
+    {{/if}}
+  </header>
+
+  <div class="csi-browser-list">
+    {{#each cases}}
+      <button type="button" class="csi-browser-case" data-action="open-board" data-case-id="{{id}}" title="Open board">
+        {{#if image}}
+          <img src="{{image}}" alt="" />
+        {{else}}
+          <span class="csi-browser-case-placeholder"><i class="fas fa-folder-open"></i></span>
+        {{/if}}
+        <span class="csi-browser-case-body">
+          <span class="csi-browser-case-title">{{title}}</span>
+          <span class="csi-browser-case-subtitle">{{csiFallback subtitle "No subtitle"}}</span>
+          <span class="csi-pill csi-pill--{{status}}">{{csiLabel status}}</span>
+        </span>
+      </button>
+    {{else}}
+      <p class="csi-empty-state">No case boards are available.</p>
+    {{/each}}
+  </div>
+</section>

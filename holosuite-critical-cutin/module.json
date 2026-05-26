@@ -1,0 +1,29 @@
+{
+  "id": "holosuite-critical-cutin",
+  "title": "HoloSuite Critical Cut-In",
+  "description": "A HoloSuite-compatible sci-fi critical cut-in animation module for qualifying natural d20 results.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "HoloSuite Contributors"
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/critical-cutin.css"
+  ],
+  "packs": [],
+  "languages": [],
+  "socket": true,
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "license": "MIT",
+  "readme": "README.md"
+}

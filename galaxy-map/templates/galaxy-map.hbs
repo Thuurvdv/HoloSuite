@@ -1,0 +1,146 @@
+{{#if missingMap}}
+  <section class="gmf-missing">
+    <h2>Galaxy Map Not Found</h2>
+    <p>The requested map no longer exists in world settings.</p>
+  </section>
+{{else}}
+  <section class="gmf-galaxy" style="{{#if map.backgroundImage}}--gmf-background-image: url('{{map.backgroundImage}}');{{/if}}">
+    <div class="gmf-galaxy__backdrop"></div>
+    <header class="gmf-galaxy__header">
+      <div>
+        <p class="gmf-kicker">{{#if playerMode}}Player Broadcast{{else}}GM Navigation{{/if}}</p>
+        <h2>{{map.title}}</h2>
+        {{#if map.subtitle}}<p>{{map.subtitle}}</p>{{/if}}
+      </div>
+      {{#if map.isGM}}
+        <div class="gmf-actions">
+          {{#unless playerMode}}
+            <button type="button" data-action="show-to-players">
+              <i class="fa-solid fa-satellite-dish"></i>
+              Show
+            </button>
+          {{/unless}}
+        </div>
+      {{/if}}
+    </header>
+
+    <div class="gmf-galaxy__content">
+      <main class="gmf-map-stage" aria-label="Interactive galaxy map">
+        <div class="gmf-map-toolbar">
+          <button type="button" data-action="zoom-out" title="Zoom out"><i class="fa-solid fa-minus"></i></button>
+          <span data-zoom-label>{{zoomPercent}}%</span>
+          <button type="button" data-action="zoom-in" title="Zoom in"><i class="fa-solid fa-plus"></i></button>
+          <button type="button" data-action="reset-view" title="Reset view"><i class="fa-solid fa-crosshairs"></i></button>
+          {{#if map.canEdit}}
+            <button type="button" data-action="open-map-menu" title="Open map actions"><i class="fa-solid fa-bars"></i></button>
+          {{/if}}
+        </div>
+
+        <div class="gmf-map-viewport" style="--gmf-pan-x: {{panX}}px; --gmf-pan-y: {{panY}}px; --gmf-zoom: {{zoom}};">
+          <svg class="gmf-routes" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {{#each map.routes as |route|}}
+              <line class="gmf-route-hit"
+                x1="{{route.from.x}}" y1="{{route.from.y}}"
+                x2="{{route.to.x}}" y2="{{route.to.y}}"
+                data-route-id="{{route.id}}"
+                data-route-from="{{route.fromSystemId}}"
+                data-route-to="{{route.toSystemId}}" />
+              <line class="gmf-route gmf-route--{{route.type}} {{#if route.isSelected}}is-selected{{/if}} {{#if route.gmOnly}}gmf-gm-only{{/if}}"
+                data-current-route="{{#if route.connectsCurrent}}true{{else}}false{{/if}}"
+                x1="{{route.from.x}}" y1="{{route.from.y}}"
+                x2="{{route.to.x}}" y2="{{route.to.y}}"
+                data-route-id="{{route.id}}"
+                data-route-from="{{route.fromSystemId}}"
+                data-route-to="{{route.toSystemId}}" />
+            {{/each}}
+          </svg>
+
+          <div class="gmf-system-layer">
+            {{#each map.systems as |system|}}
+              <button type="button"
+                class="gmf-system gmf-system--{{system.displayType}} gmf-icon--{{system.iconStyle}} gmf-status--{{system.displayStatus}} {{#if system.isSelected}}is-selected{{/if}} {{#if system.obscured}}is-obscured{{/if}} {{#if system.gmOnly}}gmf-gm-only{{/if}} {{#unless system.pulse}}gmf-no-pulse{{/unless}}"
+                style="left: {{gmfPercent system.x}}; top: {{gmfPercent system.y}}; --gmf-faction-color: {{system.factionColor}}; --gmf-system-size: {{system.iconSize}}px;"
+                data-system-id="{{system.id}}">
+                <span class="gmf-system__halo"></span>
+                <span class="gmf-system__core"></span>
+                {{#if system.isCurrent}}<span class="gmf-system__current" title="Current location"></span>{{/if}}
+                <span class="gmf-system__label">{{system.displayName}}</span>
+              </button>
+            {{/each}}
+          </div>
+          <div class="gmf-ship-layer" data-ship-layer></div>
+        </div>
+
+        {{#if map.canEdit}}
+          <div class="gmf-map-hint">
+            Drag systems to reposition. Right-click the map, a system, or a route for actions, or use the menu button.
+          </div>
+          <nav class="gmf-context-menu" data-gmf-context-menu hidden>
+            <button type="button" data-context-action="add-system" data-context-show="stage">
+              <i class="fa-solid fa-plus"></i>
+              Add System
+            </button>
+            <button type="button" data-context-action="add-route" data-context-show="stage">
+              <i class="fa-solid fa-route"></i>
+              Add Route
+            </button>
+            <button type="button" data-context-action="manage-factions" data-context-show="stage">
+              <i class="fa-solid fa-flag"></i>
+              Manage Factions
+            </button>
+            <button type="button" data-context-action="add-faction" data-context-show="stage">
+              <i class="fa-solid fa-plus"></i>
+              Add Faction
+            </button>
+            <button type="button" data-context-action="edit-map-details" data-context-show="stage">
+              <i class="fa-solid fa-pen-to-square"></i>
+              Edit Map Details
+            </button>
+            <button type="button" data-context-action="export-map" data-context-show="stage">
+              <i class="fa-solid fa-file-export"></i>
+              Export Map
+            </button>
+            <button type="button" data-context-action="edit-system" data-context-show="system">
+              <i class="fa-solid fa-pen"></i>
+              Edit System
+            </button>
+            <button type="button" data-context-action="add-system" data-context-show="system">
+              <i class="fa-solid fa-plus"></i>
+              Add System
+            </button>
+            <button type="button" data-context-action="add-route-from-system" data-context-show="system">
+              <i class="fa-solid fa-route"></i>
+              Add Route From Here
+            </button>
+            <button type="button" data-context-action="reveal-system" data-context-show="system">
+              <i class="fa-solid fa-eye"></i>
+              Reveal System
+            </button>
+            <button type="button" data-context-action="delete-system" data-context-show="system">
+              <i class="fa-solid fa-trash"></i>
+              Delete System
+            </button>
+            <button type="button" data-context-action="edit-route" data-context-show="route">
+              <i class="fa-solid fa-pen"></i>
+              Edit Route
+            </button>
+            <button type="button" data-context-action="reveal-route" data-context-show="route">
+              <i class="fa-solid fa-eye"></i>
+              Reveal Route
+            </button>
+            <button type="button" data-context-action="delete-route" data-context-show="route">
+              <i class="fa-solid fa-trash"></i>
+              Delete Route
+            </button>
+          </nav>
+        {{else}}
+          <div class="gmf-map-hint">
+            Drag empty space to pan. Scroll to zoom.
+          </div>
+        {{/if}}
+      </main>
+
+      {{> "modules/galaxy-map/templates/system-details.hbs" system=map.selectedSystem route=map.selectedRoute map=map playerMode=playerMode}}
+    </div>
+  </section>
+{{/if}}

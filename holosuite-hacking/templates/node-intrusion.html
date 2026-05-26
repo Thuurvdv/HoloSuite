@@ -1,0 +1,71 @@
+<section class="node-intrusion-shell {{glitchClass}}" style="--glitch-intensity: {{profile.visualGlitchIntensity}}">
+  <header class="node-intrusion-header">
+    <div>
+      <p class="node-intrusion-kicker">HoloSuite / intrusion layer</p>
+      <h2>Node Intrusion</h2>
+    </div>
+    <div class="node-intrusion-status">
+      <span>{{profile.label}}</span>
+      <span>Roll {{rollTotal}} / DC {{dc}}</span>
+    </div>
+  </header>
+
+  {{#if state.result}}
+    <main class="node-intrusion-result-screen is-{{state.result}}">
+      <strong>{{resultTitle}}</strong>
+      <span>{{resultDetail}}</span>
+      <button type="button" data-action="restart"><i class="fa-solid fa-rotate-right"></i> Restart</button>
+    </main>
+  {{else}}
+    <div class="node-intrusion-grid">
+      <aside class="node-intrusion-panel">
+        <div class="node-intrusion-readout">
+          <span>Trace</span>
+          <strong data-trace-text>{{state.traceProgress}}%</strong>
+        </div>
+        <div class="node-intrusion-trace">
+          <div data-trace-fill style="width: {{state.traceProgress}}%"></div>
+        </div>
+
+        <div class="node-intrusion-readout">
+          <span>Firewall strikes</span>
+          <strong data-mistake-text>{{state.mistakes}}/{{profile.maxMistakes}}</strong>
+        </div>
+
+        <dl class="node-intrusion-specs">
+          <div><dt>Nodes</dt><dd>{{profile.nodeCount}}</dd></div>
+          <div><dt>Firewalls</dt><dd>{{profile.firewallCount}}</dd></div>
+          <div><dt>Decoys</dt><dd>{{profile.decoyCount}}</dd></div>
+          <div><dt>Hints</dt><dd>{{#if profile.hintsEnabled}}online{{else}}masked{{/if}}</dd></div>
+        </dl>
+
+        <div class="node-intrusion-actions">
+          <button type="button" data-action="abort"><i class="fa-solid fa-power-off"></i> Abort</button>
+          <button type="button" data-action="restart"><i class="fa-solid fa-rotate-right"></i> Restart</button>
+        </div>
+      </aside>
+
+      <main class="node-intrusion-map" aria-label="Network graph">
+        <svg class="node-intrusion-links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          {{#each edges}}
+            <line class="{{#if isAvailable}}is-available{{/if}}{{#if isVisitedPath}} is-visited-path{{/if}}{{#if isFirewallPath}} is-firewall-path{{/if}}{{#if isDecoyPath}} is-decoy-path{{/if}}" x1="{{from.x}}" y1="{{from.y}}" x2="{{to.x}}" y2="{{to.y}}" />
+          {{/each}}
+        </svg>
+
+        {{#each nodes}}
+          <button
+            type="button"
+            class="node-intrusion-node type-{{type}}{{#if isCurrent}} is-current{{/if}}{{#if isVisited}} is-visited{{/if}}{{#if isNeighbor}} is-neighbor{{/if}}{{#if isDangerVisible}} is-revealed{{/if}}"
+            data-node-id="{{id}}"
+            style="left: {{x}}%; top: {{y}}%;"
+            title="{{id}}"
+          >
+            {{#if isCurrent}}<i class="fa-solid fa-location-crosshairs node-intrusion-current-icon"></i>{{/if}}
+            {{#if isNeighbor}}<i class="fa-solid fa-chevron-right node-intrusion-neighbor-icon"></i>{{/if}}
+            <span></span>
+          </button>
+        {{/each}}
+      </main>
+    </div>
+  {{/if}}
+</section>

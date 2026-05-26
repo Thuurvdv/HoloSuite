@@ -1,0 +1,29 @@
+{
+  "id": "holosuite-core",
+  "title": "HoloSuite Core",
+  "description": "A GM-only sci-fi phone launcher and registration API for HoloSuite Foundry VTT modules.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "HoloSuite Contributors"
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "esmodules": [
+    "dist/main.js"
+  ],
+  "styles": [
+    "styles/holosuite-core.css"
+  ],
+  "languages": [],
+  "packs": [],
+  "socket": false,
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "license": "MIT",
+  "readme": "README.md"
+}

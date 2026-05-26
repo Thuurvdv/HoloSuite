@@ -1,0 +1,75 @@
+<section class="gmf-manager">
+  <header class="gmf-manager__header">
+    <div>
+      <p class="gmf-kicker">Galaxy Map Framework</p>
+      <h2>Map Manager</h2>
+    </div>
+    <div class="gmf-actions">
+      <button type="button" data-action="create-map">
+        <i class="fa-solid fa-plus"></i>
+        Create Map
+      </button>
+      <button type="button" data-action="install-sample">
+        <i class="fa-solid fa-star"></i>
+        {{#if sampleInstalled}}Reset Sample{{else}}Install Sample{{/if}}
+      </button>
+      <button type="button" data-action="import-map">
+        <i class="fa-solid fa-file-import"></i>
+        Import JSON
+      </button>
+      <input type="file" name="map-import" accept="application/json,.json" hidden />
+    </div>
+  </header>
+
+  <div class="gmf-manager__body">
+    <aside class="gmf-map-list" aria-label="Galaxy maps">
+      {{#if hasMaps}}
+        {{#each maps as |map|}}
+          <article class="gmf-map-card {{#if (gmfEq ../selectedMapId map.id)}}is-selected{{/if}}">
+            <button type="button" class="gmf-map-card__select" data-select-map="{{map.id}}">
+              <span class="gmf-map-card__title">{{map.title}}</span>
+              <span class="gmf-map-card__meta">{{gmfFallback map.subtitle "No subtitle"}} - {{map.systems.length}} systems - {{map.routes.length}} routes</span>
+            </button>
+            <div class="gmf-map-card__buttons gmf-map-card__buttons--single">
+              <button type="button" data-open-map="{{map.id}}" title="Open map">
+                <i class="fa-solid fa-up-right-from-square"></i>
+                Open
+              </button>
+            </div>
+          </article>
+        {{/each}}
+      {{else}}
+        <div class="gmf-empty">
+          <i class="fa-solid fa-star"></i>
+          <p>No galaxy maps yet.</p>
+        </div>
+      {{/if}}
+    </aside>
+
+    <main class="gmf-manager-preview">
+      {{#if selectedMap}}
+        <section class="gmf-manager-preview__panel">
+          <div>
+            <p class="gmf-kicker">Selected Map</p>
+            <h3>{{selectedMap.title}}</h3>
+            <p>{{gmfFallback selectedMap.subtitle "No subtitle"}}</p>
+          </div>
+          <div class="gmf-actions">
+            <button type="button" data-open-map="{{selectedMap.id}}">
+              <i class="fa-solid fa-map-location-dot"></i>
+              Open Map
+            </button>
+          </div>
+          <p class="gmf-manager-preview__note">
+            Map editing now happens inside the galaxy map. Open it and right-click the map, a system, or a route to add and manage campaign content.
+          </p>
+        </section>
+      {{else}}
+        <div class="gmf-empty gmf-empty--large">
+          <i class="fa-solid fa-circle-nodes"></i>
+          <p>Create or import a map, then open it to edit systems, routes, factions, and details.</p>
+        </div>
+      {{/if}}
+    </main>
+  </div>
+</section>

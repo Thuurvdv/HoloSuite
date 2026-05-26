@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": false,
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "types": [],
+    "moduleDetection": "force"
+  },
+  "include": [
+    "holosuite-core/src",
+    "holocall/src",
+    "security-cameras/src",
+    "csi-toolkit/src",
+    "galaxy-map/src",
+    "pulse-scanner/src",
+    "shared/src"
+  ]
+}

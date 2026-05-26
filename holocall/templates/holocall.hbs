@@ -1,0 +1,54 @@
+<div class="holocall-panel holocall-{{call.variant}}{{#if call.fullscreen}} holocall-broadcast{{/if}}{{#if call.ringing}} holocall-ringing-panel{{/if}}{{#if call.accepted}} holocall-connected-panel{{/if}}" style="--holocall-signal: {{call.signal}}%;">
+  <div class="holocall-static" aria-hidden="true"></div>
+  <div class="holocall-reticle" aria-hidden="true"></div>
+
+  {{#unless call.accepted}}
+    <header class="holocall-header">
+      <div>
+        <div class="holocall-kicker">
+          {{call.kicker}}
+        </div>
+        <h2>{{call.callerName}}</h2>
+        <p>{{call.subtitle}}</p>
+      </div>
+
+      <div class="holocall-signal" title="Signal strength">
+        <span>{{call.signal}}%</span>
+        <div class="holocall-signal-bar" aria-hidden="true">
+          <i></i>
+        </div>
+      </div>
+    </header>
+  {{/unless}}
+
+  <main class="holocall-body">
+    <div class="holocall-portrait">
+      {{#if call.image}}
+        <img src="{{call.image}}" alt="{{call.callerName}}">
+      {{else}}
+        <div class="holocall-initials" aria-hidden="true">
+          {{call.initials}}
+        </div>
+      {{/if}}
+    </div>
+
+    {{#unless call.accepted}}
+      <blockquote>{{call.message}}</blockquote>
+    {{/unless}}
+  </main>
+
+  <footer class="holocall-actions">
+    {{#unless call.accepted}}
+      {{#if call.canAccept}}
+        <button type="button" data-holocall-action="accept">Accept</button>
+      {{/if}}
+      {{#if call.canDecline}}
+        <button type="button" data-holocall-action="decline">Decline</button>
+      {{/if}}
+      {{#if call.showBroadcast}}
+        <button type="button" data-holocall-action="broadcast">Broadcast</button>
+      {{/if}}
+    {{/unless}}
+    <button type="button" data-holocall-action="end">End Call</button>
+  </footer>
+</div>

@@ -1,0 +1,85 @@
+<article class="bb-card {{bbStatusClass bounty.status}}" data-bounty-id="{{bounty.id}}">
+  <button type="button" class="bb-card-header" data-bounty-toggle="{{bounty.id}}">
+    <span class="bb-card-title-wrap">
+      <span class="bb-card-title">{{bounty.title}}</span>
+    </span>
+    <span class="bb-card-topline">
+      <span class="bb-status-badge">{{bounty.statusLabel}}</span>
+      <span class="bb-threat">{{bounty.threatLevel}}</span>
+    </span>
+  </button>
+
+  <div class="bb-card-body">
+    <button type="button" class="bb-image-button" data-action="openImage" data-image-src="{{bounty.image}}" {{#unless bounty.hasImage}}disabled{{/unless}} title="Open bounty image">
+      {{#if bounty.hasImage}}
+        <img class="bb-card-image" src="{{bounty.image}}" alt="" />
+      {{else}}
+        <span class="bb-card-image bb-card-image--fallback"><i class="fa-solid fa-user-secret"></i></span>
+      {{/if}}
+    </button>
+    <div class="bb-card-summary">
+      <p class="bb-card-target"><i class="fa-solid fa-crosshairs"></i>{{bounty.targetName}}</p>
+      <p class="bb-card-description">{{bounty.description}}</p>
+      <div class="bb-card-meta">
+        <span><i class="fa-solid fa-coins"></i>{{bounty.rewardLabel}}</span>
+        <span><i class="fa-solid fa-flag"></i>{{#if bounty.faction}}{{bounty.faction}}{{else}}Unlisted{{/if}}</span>
+        <span><i class="fa-solid fa-location-dot"></i>{{#if bounty.location}}{{bounty.location}}{{else}}Unknown{{/if}}</span>
+      </div>
+    </div>
+  </div>
+
+  {{#if bounty.tags.length}}
+    <div class="bb-tags">
+      {{#each bounty.tags as |tag|}}
+        <span>{{tag}}</span>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{#if bounty.expanded}}
+    <section class="bb-card-details">
+      {{#if bounty.longDescription}}<p>{{bounty.longDescription}}</p>{{/if}}
+      {{#if (bbEq bounty.status "claimed")}}
+        <label class="bb-claim-field">
+          <span>Claimed By</span>
+          {{#if isGM}}
+            <input type="text" data-claimed-by value="{{bounty.claimedBy}}" placeholder="Party or player" />
+          {{else}}
+            <strong>{{#if bounty.claimedBy}}{{bounty.claimedBy}}{{else}}Assigned party{{/if}}</strong>
+          {{/if}}
+        </label>
+      {{/if}}
+
+      <div class="bb-link-actions">
+        {{#if bounty.canSeeJournal}}
+          <button type="button" data-action="openJournal" data-open-journal="{{bounty.linkedJournalId}}">
+            <i class="fa-solid fa-book-open"></i>
+            Open Linked Journal
+          </button>
+        {{/if}}
+      </div>
+    </section>
+  {{/if}}
+
+  <footer class="bb-card-actions">
+    {{#if isGM}}
+      <button type="button" title="Edit" data-action="editBounty"><i class="fa-solid fa-pen"></i></button>
+      {{#if bounty.published}}
+        <button type="button" title="Unpublish" data-action="unpublishBounty"><i class="fa-solid fa-eye-slash"></i></button>
+      {{else}}
+        <button type="button" title="Publish" data-action="publishBounty"><i class="fa-solid fa-bullhorn"></i></button>
+      {{/if}}
+      <button type="button" title="Assign claim" data-action="claimBounty"><i class="fa-solid fa-handshake"></i></button>
+      <button type="button" title="Complete" data-action="completeBounty"><i class="fa-solid fa-check"></i></button>
+      <button type="button" title="Fail" data-action="failBounty"><i class="fa-solid fa-xmark"></i></button>
+      <button type="button" title="Hide" data-action="hideBounty"><i class="fa-solid fa-user-lock"></i></button>
+      <button type="button" title="Archive" data-action="archiveBounty"><i class="fa-solid fa-box-archive"></i></button>
+      <button type="button" title="Delete" data-action="deleteBounty"><i class="fa-solid fa-trash"></i></button>
+    {{else}}
+      <button type="button" class="bb-primary" data-action="requestContract">
+        <i class="fa-solid fa-paper-plane"></i>
+        Request Contract
+      </button>
+    {{/if}}
+  </footer>
+</article>

@@ -1,0 +1,166 @@
+<section class="security-camera-manager">
+  <aside class="security-camera-monitor-list">
+    <header>
+      <span class="security-camera-kicker">Network</span>
+      <h2>Cameras</h2>
+    </header>
+
+    <div class="security-camera-list">
+      {{#if hasCameras}}
+        {{#each cameras}}
+          <button type="button" class="security-camera-list-item {{#if isSelected}}active{{/if}}" data-security-camera-id="{{id}}">
+            <span>{{name}}</span>
+            <small>{{location}}</small>
+            <i>{{status}}</i>
+          </button>
+        {{/each}}
+      {{else}}
+        <p class="security-camera-empty">No cameras registered.</p>
+      {{/if}}
+    </div>
+
+    <div class="security-camera-list-actions">
+      <button type="button" data-security-camera-action="new">New</button>
+      <button type="button" data-security-camera-action="duplicate">Duplicate</button>
+      <button type="button" data-security-camera-action="delete">Delete</button>
+    </div>
+  </aside>
+
+  {{#if selectedCamera}}
+    <section class="security-camera-monitor-preview {{selectedCamera.statusClass}}">
+      <header>
+        <div>
+          <span class="security-camera-kicker">Selected Feed</span>
+          <h3>{{selectedCamera.name}}</h3>
+        </div>
+        <strong>{{selectedCamera.status}}</strong>
+      </header>
+
+      <div class="security-camera-preview-frame">
+        {{#if selectedCamera.canDisplayImage}}
+          <img src="{{selectedCamera.image}}" alt="{{selectedCamera.name}}">
+        {{else}}
+          <div class="security-camera-placeholder">{{#if selectedCamera.isLive}}LIVE CANVAS FEED{{else}}{{selectedCamera.signalLabel}}{{/if}}</div>
+        {{/if}}
+      </div>
+
+      <dl>
+        <dt>Location</dt>
+        <dd>{{selectedCamera.location}}</dd>
+        <dt>Scene</dt>
+        <dd>{{selectedCamera.sceneName}}</dd>
+        <dt>Source</dt>
+        <dd>{{selectedCamera.feedSource}}</dd>
+        <dt>Region</dt>
+        <dd>{{#if selectedCamera.hasRegion}}{{selectedCamera.regionX}}, {{selectedCamera.regionY}} / {{selectedCamera.regionWidth}}x{{selectedCamera.regionHeight}}{{else}}No region{{/if}}</dd>
+        <dt>Mode</dt>
+        <dd>{{selectedCamera.displayMode}}</dd>
+        <dt>Notes</dt>
+        <dd>{{#if selectedCamera.notes}}{{selectedCamera.notes}}{{else}}No notes recorded.{{/if}}</dd>
+      </dl>
+
+      <div class="security-camera-preview-actions">
+        <button type="button" data-security-camera-action="show">Show to Players</button>
+        <button type="button" data-security-camera-action="close-feed">Close Feeds</button>
+      </div>
+    </section>
+  {{else}}
+    <section class="security-camera-monitor-preview">
+      <div class="security-camera-empty">No camera selected.</div>
+    </section>
+  {{/if}}
+
+  <form class="security-camera-editor" data-security-camera-form>
+    <header>
+      <span class="security-camera-kicker">Manager</span>
+      <h2>{{#if isNewCamera}}Create Camera{{else}}Edit Camera{{/if}}</h2>
+    </header>
+
+    <input type="hidden" name="originalId" value="{{editorCamera.id}}">
+
+    <label>
+      ID
+      <input type="text" name="id" value="{{editorCamera.id}}" placeholder="auto-generated">
+    </label>
+
+    <label>
+      Name
+      <input type="text" name="name" value="{{editorCamera.name}}" required>
+    </label>
+
+    <label>
+      Scene
+      <select name="sceneId">
+        {{#each sceneChoices}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      Scene Region
+      <select name="regionId">
+        {{#each regionChoices}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      Location
+      <input type="text" name="location" value="{{editorCamera.location}}">
+    </label>
+
+    <label>
+      Feed Source
+      <select name="feedSource" data-security-camera-feed-source>
+        {{#each feedSourceChoices}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label data-security-camera-static-image-field {{#unless showStaticImageField}}hidden{{/unless}}>
+      Static Image
+      <span class="security-camera-path-row">
+        <input type="text" name="image" value="{{editorCamera.image}}">
+        <button type="button" data-security-camera-action="browse-image">Browse</button>
+      </span>
+    </label>
+
+    <label>
+      Status
+      <select name="status">
+        {{#each statusChoices}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      Display Mode
+      <select name="displayMode">
+        {{#each displayModeChoices}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <input type="hidden" name="regionX" value="{{editorCamera.regionX}}">
+    <input type="hidden" name="regionY" value="{{editorCamera.regionY}}">
+    <input type="hidden" name="regionWidth" value="{{editorCamera.regionWidth}}">
+    <input type="hidden" name="regionHeight" value="{{editorCamera.regionHeight}}">
+
+    <label>
+      Notes
+      <textarea name="notes" rows="4">{{editorCamera.notes}}</textarea>
+    </label>
+
+    <div class="security-camera-editor-actions">
+      <button type="submit">Save Camera</button>
+      <button type="button" data-security-camera-action="pan-region">Pan to Region</button>
+      <button type="button" data-security-camera-action="show">Show to Players</button>
+      <button type="button" data-security-camera-action="close-feed">Close Feeds</button>
+    </div>
+  </form>
+</section>

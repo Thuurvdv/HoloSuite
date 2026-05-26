@@ -1,0 +1,28 @@
+{
+  "id": "pulse-scanner",
+  "title": "Pulse Scanner",
+  "description": "A system-agnostic cinematic scanner pulse module for GM-placed scan targets in Foundry VTT.",
+  "version": "0.2.0-beta",
+  "socket": true,
+  "authors": [
+    {
+      "name": "Pulse Scanner Contributors"
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "esmodules": [
+    "dist/main.js"
+  ],
+  "styles": [
+    "styles/pulse-scanner.css"
+  ],
+  "languages": [],
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "license": "MIT",
+  "readme": "README.md"
+}

@@ -1,0 +1,83 @@
+<form class="pulse-scanner-target-form" autocomplete="off">
+  <input type="hidden" name="id" value="{{selectedTarget.id}}">
+  <input type="hidden" name="x" value="{{selectedTarget.x}}">
+  <input type="hidden" name="y" value="{{selectedTarget.y}}">
+  <input type="hidden" name="radius" value="{{selectedTarget.radius}}">
+  <input type="hidden" name="width" value="{{selectedTarget.width}}">
+  <input type="hidden" name="height" value="{{selectedTarget.height}}">
+
+  <div class="pulse-scanner-form-grid">
+    <label class="span-2">
+      <span>Label</span>
+      <input type="text" name="label" value="{{selectedTarget.label}}" placeholder="Hidden passage">
+    </label>
+
+    <label>
+      <span>Scanner Mode</span>
+      <select name="mode">
+        {{#each modeOptions}}
+          <option value="{{value}}" {{psOption value ../selectedTarget.mode}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      <span>Type</span>
+      <select name="type">
+        {{#each typeOptions}}
+          <option value="{{value}}" {{psOption value ../selectedTarget.type}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      <span>Visibility</span>
+      <select name="visibility">
+        {{#each visibilityOptions}}
+          <option value="{{value}}" {{psOption value ../selectedTarget.visibility}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      <span>Status</span>
+      <select name="status">
+        {{#each statusOptions}}
+          <option value="{{value}}" {{psOption value ../selectedTarget.status}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      <span>Difficulty</span>
+      <input type="number" name="difficulty" value="{{selectedTarget.difficulty}}" step="1">
+    </label>
+
+    {{#if selectedTarget.isBreakable}}
+      <label class="span-2">
+        <span>Integrity <output class="ps-integrity-value">{{selectedTarget.integrity}}</output>%</span>
+        <input class="ps-integrity-slider" type="range" name="integrity" value="{{selectedTarget.integrity}}" min="0" max="100" step="1">
+      </label>
+    {{else}}
+      <input type="hidden" name="integrity" value="{{selectedTarget.integrity}}">
+    {{/if}}
+
+    <label>
+      <span>Color</span>
+      <select name="color" class="pulse-scanner-color-select">
+        {{#each colorOptions}}
+          <option value="{{value}}" {{psOption value ../selectedTarget.color}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label class="span-2">
+      <span>Description</span>
+      <textarea name="description" rows="3">{{selectedTarget.description}}</textarea>
+    </label>
+
+  </div>
+  <footer class="pulse-scanner-form-actions">
+    <button type="submit" data-action="save-target"><i class="fa-solid fa-floppy-disk"></i> Save Target</button>
+  </footer>
+</form>

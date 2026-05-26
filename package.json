@@ -1,0 +1,25 @@
+{
+  "name": "holosuite",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Monorepo for the HoloSuite Foundry VTT sci-fi module suite.",
+  "type": "module",
+  "workspaces": [
+    "holosuite-core",
+    "holocall",
+    "security-cameras",
+    "csi-toolkit",
+    "galaxy-map",
+    "pulse-scanner",
+    "holosuite-hacking",
+    "shared"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0"
+  }
+}

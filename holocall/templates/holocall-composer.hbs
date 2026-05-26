@@ -1,0 +1,74 @@
+<form class="holocall-composer" data-holocall-composer>
+  <header class="holocall-composer-header">
+    <div>
+      <div class="holocall-composer-kicker">Transmission Console</div>
+      <h2>HoloCall Composer</h2>
+    </div>
+    <output data-holocall-signal-output>{{call.signal}}%</output>
+  </header>
+
+  <section class="holocall-composer-grid">
+    <label>
+      <span>Actor Portrait</span>
+      <select name="actorId">
+        <option value="">Manual / no actor</option>
+        {{#each actors}}
+          <option value="{{id}}">{{name}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      <span>Variant</span>
+      <select name="variant">
+        <option value="standard" {{#if call.isStandard}}selected{{/if}}>Standard Blue</option>
+        <option value="emergency" {{#if call.isEmergency}}selected{{/if}}>Emergency Red</option>
+        <option value="corrupted" {{#if call.isCorrupted}}selected{{/if}}>Corrupted Green</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Caller Name</span>
+      <input type="text" name="callerName" value="{{call.callerName}}" placeholder="UNKNOWN CALLER">
+    </label>
+
+    <label>
+      <span>Subtitle / Faction</span>
+      <input type="text" name="subtitle" value="{{call.subtitle}}" placeholder="ATLAS Corporation">
+    </label>
+
+    <label class="holocall-composer-wide">
+      <span>Portrait Image Path</span>
+      <input type="text" name="image" value="{{call.image}}" placeholder="path/to/image.webp">
+    </label>
+
+    <label class="holocall-composer-wide">
+      <span>Message</span>
+      <textarea name="message" rows="5" placeholder="Officer, we have a situation.">{{call.message}}</textarea>
+    </label>
+
+    <label class="holocall-composer-wide holocall-composer-range">
+      <span>Signal Strength</span>
+      <input type="range" name="signal" min="0" max="100" step="1" value="{{call.signal}}">
+    </label>
+  </section>
+
+  <section class="holocall-composer-toggles">
+    <label>
+      <input type="checkbox" name="fullscreen" {{#if call.fullscreen}}checked{{/if}}>
+      <span>Fullscreen broadcast mode</span>
+    </label>
+
+    <label>
+      <input type="checkbox" name="ringing" {{#if call.ringing}}checked{{/if}}>
+      <span>Incoming ringing animation and sound</span>
+    </label>
+  </section>
+
+  <footer class="holocall-composer-actions">
+    <button type="button" data-holocall-compose-action="preview">Preview Locally</button>
+    <button type="button" data-holocall-compose-action="broadcast">Broadcast to Players</button>
+    <button type="button" data-holocall-compose-action="close-active">Close Active Call</button>
+    <button type="button" data-holocall-compose-action="reset">Reset Form</button>
+  </footer>
+</form>

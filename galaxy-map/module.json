@@ -1,0 +1,27 @@
+{
+  "id": "galaxy-map",
+  "title": "Galaxy Map",
+  "description": "A system-agnostic cinematic galaxy map framework for Foundry VTT campaigns.",
+  "version": "0.2.7",
+  "authors": [
+    {
+      "name": "Galaxy Map Contributors"
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "esmodules": [
+    "dist/main.js"
+  ],
+  "styles": [
+    "styles/galaxy-map-framework.css"
+  ],
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "license": "MIT",
+  "readme": "README.md"
+}
+

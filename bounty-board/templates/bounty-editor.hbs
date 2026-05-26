@@ -1,0 +1,88 @@
+<section class="bb-editor">
+  {{#unless canEdit}}
+    <p class="bb-empty">Only a GM can edit bounty contracts.</p>
+  {{else}}
+    <input type="hidden" name="id" value="{{bounty.id}}" />
+
+    <div class="bb-editor-grid">
+      <label>
+        <span>Title</span>
+        <input type="text" name="title" value="{{bounty.title}}" required />
+      </label>
+      <label>
+        <span>Target Name</span>
+        <input type="text" name="targetName" value="{{bounty.targetName}}" required />
+      </label>
+      <label>
+        <span>Reward Amount</span>
+        <input type="number" min="0" step="1" name="rewardAmount" value="{{bounty.rewardAmount}}" required />
+      </label>
+      <label>
+        <span>Reward Currency</span>
+        <input type="text" name="rewardCurrency" value="{{bounty.rewardCurrency}}" required />
+      </label>
+      <label>
+        <span>Threat Level</span>
+        <select name="threatLevel" required>
+          {{#each threatLevels as |threat|}}
+            <option value="{{threat}}" {{#if (bbEq ../bounty.threatLevel threat)}}selected{{/if}}>{{threat}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>
+        <span>Status</span>
+        <select name="status">
+          {{#each statuses as |status|}}
+            <option value="{{status}}" {{#if (bbEq ../bounty.status status)}}selected{{/if}}>{{status}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>
+        <span>Faction / Source</span>
+        <input type="text" name="faction" value="{{bounty.faction}}" />
+      </label>
+      <label>
+        <span>Location</span>
+        <input type="text" name="location" value="{{bounty.location}}" />
+      </label>
+      <label class="bb-editor-wide">
+        <span>Short Description</span>
+        <textarea name="description" rows="2">{{bounty.description}}</textarea>
+      </label>
+      <label class="bb-editor-wide">
+        <span>Long Description</span>
+        <textarea name="longDescription" rows="5">{{bounty.longDescription}}</textarea>
+      </label>
+      <label class="bb-editor-wide">
+        <span>Tags</span>
+        <input type="text" name="tags" value="{{bounty.tagsText}}" placeholder="Smuggling, Rescue, Investigation" />
+      </label>
+      <label class="bb-editor-image">
+        <span>Image</span>
+        <input type="text" name="image" value="{{bounty.image}}" />
+        <button type="button" data-action="browseImage" title="Browse image"><i class="fa-solid fa-folder-open"></i></button>
+      </label>
+      <label>
+        <span>Linked Journal</span>
+        <select name="linkedJournalId">
+          <option value="">None</option>
+          {{#each journals as |journal|}}
+            <option value="{{journal.id}}" {{#if (bbEq ../bounty.linkedJournalId journal.id)}}selected{{/if}}>{{journal.name}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>
+        <span>Claimed By</span>
+        <input type="text" name="claimedBy" value="{{bounty.claimedBy}}" />
+      </label>
+      <label class="bb-checkbox bb-checkbox-compact">
+        <input type="checkbox" name="published" {{#if bounty.published}}checked{{/if}} />
+        <span>Published to players</span>
+      </label>
+    </div>
+
+    <footer class="bb-editor-actions">
+      <button type="submit" class="bb-primary"><i class="fa-solid fa-floppy-disk"></i>Save Contract</button>
+    </footer>
+  {{/unless}}
+</section>

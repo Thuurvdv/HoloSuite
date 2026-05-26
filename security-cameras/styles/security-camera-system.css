@@ -1,0 +1,559 @@
+:root {
+  --security-camera-bg: #04100f;
+  --security-camera-panel: #071918;
+  --security-camera-blue: #48c7ff;
+  --security-camera-green: #6dffb0;
+  --security-camera-red: #ff4e6a;
+  --security-camera-yellow: #ffd15c;
+  --security-camera-text: #c8fff1;
+  --security-camera-muted: #7fb5ad;
+  --security-camera-line: rgba(109, 255, 176, 0.24);
+  --security-camera-field: rgba(1, 10, 10, 0.88);
+}
+
+.security-camera-window,
+.security-camera-feed-window {
+  color: var(--security-camera-text);
+}
+
+.security-camera-window .window-content,
+.security-camera-feed-window .window-content {
+  padding: 0;
+  overflow: hidden;
+  background: #020707;
+  border: 1px solid var(--security-camera-line);
+}
+
+.security-camera-manager {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.75fr) minmax(330px, 1.1fr) minmax(280px, 0.95fr);
+  gap: 14px;
+  padding: 14px;
+  background:
+    linear-gradient(rgba(109, 255, 176, 0.055) 50%, transparent 50%) 0 0 / 100% 4px,
+    radial-gradient(circle at 12% 4%, rgba(72, 199, 255, 0.15), transparent 31%),
+    radial-gradient(circle at 92% 16%, rgba(255, 78, 106, 0.08), transparent 30%),
+    var(--security-camera-bg);
+  font-family: "Roboto Mono", "Consolas", monospace;
+}
+
+.security-camera-monitor-list,
+.security-camera-monitor-preview,
+.security-camera-editor {
+  min-width: 0;
+  border: 1px solid var(--security-camera-line);
+  background: rgba(2, 12, 12, 0.88);
+  box-shadow: inset 0 0 22px rgba(109, 255, 176, 0.08), 0 0 18px rgba(72, 199, 255, 0.08);
+}
+
+.security-camera-monitor-list,
+.security-camera-editor {
+  display: flex;
+  flex-direction: column;
+}
+
+.security-camera-monitor-list header,
+.security-camera-monitor-preview header,
+.security-camera-editor header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--security-camera-line);
+}
+
+.security-camera-editor header {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.security-camera-kicker,
+.security-camera-rec {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--security-camera-green);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.security-camera-manager h2,
+.security-camera-manager h3,
+.security-camera-feed h2 {
+  margin: 2px 0 0;
+  color: #e9fffa;
+  font-size: 20px;
+  line-height: 1.15;
+  text-shadow: 0 0 10px rgba(109, 255, 176, 0.42);
+}
+
+.security-camera-list {
+  display: grid;
+  gap: 8px;
+  max-height: 520px;
+  padding: 10px;
+  overflow: auto;
+}
+
+.security-camera-list-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
+  width: 100%;
+  min-height: 58px;
+  padding: 9px 10px;
+  color: var(--security-camera-text);
+  text-align: left;
+  background: rgba(5, 28, 28, 0.92);
+  border: 1px solid rgba(72, 199, 255, 0.16);
+}
+
+.security-camera-list-item:hover,
+.security-camera-list-item.active {
+  border-color: var(--security-camera-green);
+  box-shadow: inset 0 0 18px rgba(109, 255, 176, 0.12), 0 0 12px rgba(109, 255, 176, 0.12);
+}
+
+.security-camera-list-item span,
+.security-camera-list-item small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.security-camera-list-item span {
+  font-weight: 700;
+}
+
+.security-camera-list-item small {
+  grid-column: 1;
+  color: var(--security-camera-muted);
+}
+
+.security-camera-list-item i,
+.security-camera-monitor-preview strong {
+  color: var(--security-camera-blue);
+  font-size: 10px;
+  font-style: normal;
+  text-transform: uppercase;
+}
+
+.security-camera-list-actions,
+.security-camera-preview-actions,
+.security-camera-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--security-camera-line);
+}
+
+.security-camera-preview-frame,
+.security-camera-feed-frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(72, 199, 255, 0.08), transparent 24%, transparent 76%, rgba(109, 255, 176, 0.08)),
+    #010505;
+}
+
+.security-camera-preview-frame {
+  aspect-ratio: 16 / 9;
+  margin: 12px;
+}
+
+.security-camera-preview-frame img,
+.security-camera-feed-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.78) contrast(1.12) brightness(0.82);
+}
+
+.security-camera-source-live .security-camera-feed-frame img {
+  object-fit: contain;
+  background: #010505;
+}
+
+.security-camera-placeholder,
+.security-camera-feed-warning,
+.security-camera-empty {
+  color: var(--security-camera-yellow);
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(255, 209, 92, 0.42);
+}
+
+.security-camera-empty {
+  padding: 24px;
+  color: var(--security-camera-muted);
+}
+
+.security-camera-monitor-preview dl {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 6px 12px;
+  margin: 0;
+  padding: 0 12px 12px;
+}
+
+.security-camera-monitor-preview dt {
+  color: var(--security-camera-muted);
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.security-camera-monitor-preview dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.security-camera-editor {
+  gap: 10px;
+}
+
+.security-camera-editor label {
+  display: grid;
+  gap: 5px;
+  padding: 0 12px;
+  color: var(--security-camera-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.security-camera-editor input,
+.security-camera-editor select,
+.security-camera-editor textarea {
+  width: 100%;
+  min-height: 30px;
+  color: var(--security-camera-text);
+  background: var(--security-camera-field);
+  border: 1px solid rgba(72, 199, 255, 0.26);
+  font-family: "Roboto Mono", "Consolas", monospace;
+  font-size: 12px;
+}
+
+.security-camera-editor textarea {
+  resize: vertical;
+  min-height: 76px;
+}
+
+.security-camera-path-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.security-camera-list-actions button,
+.security-camera-preview-actions button,
+.security-camera-editor-actions button {
+  min-height: 32px;
+  padding: 0 10px;
+  color: var(--security-camera-text);
+  background: rgba(72, 199, 255, 0.12);
+  border: 1px solid rgba(72, 199, 255, 0.44);
+  text-transform: uppercase;
+}
+
+.security-camera-list-actions button:hover,
+.security-camera-preview-actions button:hover,
+.security-camera-editor-actions button:hover {
+  color: #04100f;
+  background: var(--security-camera-green);
+  border-color: var(--security-camera-green);
+}
+
+.security-camera-feed {
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+  min-height: 100%;
+  background:
+    linear-gradient(rgba(109, 255, 176, 0.07) 50%, transparent 50%) 0 0 / 100% 4px,
+    radial-gradient(circle at 80% 0%, rgba(72, 199, 255, 0.18), transparent 30%),
+    #010707;
+  border: 1px solid var(--security-camera-line);
+  font-family: "Roboto Mono", "Consolas", monospace;
+}
+
+.security-camera-feed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid rgba(109, 255, 176, 0.18);
+  box-shadow: inset 0 0 38px rgba(109, 255, 176, 0.14);
+  z-index: 3;
+}
+
+.security-camera-feed-static,
+.security-camera-feed-scanline {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.security-camera-feed-static {
+  opacity: 0.18;
+  background:
+    repeating-radial-gradient(circle at 17% 32%, rgba(255, 255, 255, 0.7) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(109, 255, 176, 0.18) 3px 4px);
+  animation: security-camera-static 0.7s steps(3) infinite;
+}
+
+.security-camera-feed-scanline {
+  opacity: 0.35;
+  background: linear-gradient(180deg, transparent 0%, rgba(72, 199, 255, 0.28) 49%, transparent 50%);
+  transform: translateY(-100%);
+  animation: security-camera-scanline 4s linear infinite;
+}
+
+.security-camera-feed-header,
+.security-camera-feed-footer {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.security-camera-feed-header {
+  padding-bottom: 12px;
+}
+
+.security-camera-feed-header p,
+.security-camera-feed-footer {
+  margin: 4px 0 0;
+  color: var(--security-camera-muted);
+  font-size: 12px;
+}
+
+.security-camera-rec i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--security-camera-red);
+  box-shadow: 0 0 10px var(--security-camera-red);
+  animation: security-camera-rec 1.2s ease-in-out infinite;
+}
+
+.security-camera-signal {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  color: var(--security-camera-blue);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.security-camera-signal span {
+  display: inline-flex;
+  align-items: end;
+  gap: 3px;
+  height: 18px;
+}
+
+.security-camera-signal i {
+  display: block;
+  width: 5px;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.security-camera-signal i:nth-child(1) { height: 5px; }
+.security-camera-signal i:nth-child(2) { height: 9px; }
+.security-camera-signal i:nth-child(3) { height: 13px; }
+.security-camera-signal i:nth-child(4) { height: 17px; }
+
+.security-camera-feed-frame {
+  z-index: 1;
+  aspect-ratio: var(--security-camera-region-aspect, 16 / 9);
+  border: 1px solid rgba(72, 199, 255, 0.22);
+}
+
+.security-camera-feed-frame::after,
+.security-camera-preview-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(72, 199, 255, 0.2), transparent 18%, transparent 82%, rgba(109, 255, 176, 0.18));
+  pointer-events: none;
+}
+
+.security-camera-feed-footer {
+  padding-top: 10px;
+}
+
+.security-camera-feed-display-pip {
+  z-index: 99999 !important;
+}
+
+.security-camera-feed-display-pip .window-content {
+  border-color: rgba(72, 199, 255, 0.5);
+}
+
+.security-camera-feed-display-pip .security-camera-feed {
+  padding: 8px;
+}
+
+.security-camera-feed-display-pip .security-camera-feed h2 {
+  font-size: 15px;
+}
+
+.security-camera-feed-display-pip .security-camera-feed-header {
+  padding-bottom: 8px;
+}
+
+.security-camera-feed-display-pip .security-camera-feed-header p,
+.security-camera-feed-display-pip .security-camera-feed-footer {
+  font-size: 10px;
+}
+
+.security-camera-feed-display-pip .security-camera-feed-footer {
+  padding-top: 6px;
+}
+
+.security-camera-status-offline .security-camera-signal,
+.security-camera-monitor-preview.security-camera-status-offline strong {
+  color: var(--security-camera-yellow);
+}
+
+.security-camera-status-offline .security-camera-feed-frame,
+.security-camera-status-offline .security-camera-preview-frame {
+  animation: security-camera-signal-loss 1.6s ease-in-out infinite;
+}
+
+.security-camera-status-offline img {
+  filter: grayscale(1) brightness(0.38);
+}
+
+.security-camera-status-restricted .security-camera-signal,
+.security-camera-monitor-preview.security-camera-status-restricted strong {
+  color: var(--security-camera-red);
+}
+
+.security-camera-status-restricted .security-camera-feed-frame,
+.security-camera-status-restricted .security-camera-preview-frame {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 78, 106, 0.18) 0 8px, transparent 8px 16px),
+    radial-gradient(circle, rgba(255, 78, 106, 0.12), transparent 48%),
+    #090303;
+}
+
+.security-camera-status-restricted .security-camera-feed-warning {
+  color: var(--security-camera-red);
+  font-size: clamp(20px, 5vw, 54px);
+  text-shadow: 0 0 18px rgba(255, 78, 106, 0.8);
+}
+
+.security-camera-status-corrupted .security-camera-feed-static {
+  opacity: 0.38;
+  animation-duration: 0.22s;
+}
+
+.security-camera-status-corrupted img {
+  filter: hue-rotate(110deg) saturate(1.35) contrast(1.45);
+  animation: security-camera-glitch 1.1s steps(2) infinite;
+}
+
+.security-camera-status-corrupted .security-camera-feed-frame::before,
+.security-camera-status-corrupted .security-camera-preview-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(90deg, rgba(255, 78, 106, 0.18), transparent 18%),
+    linear-gradient(270deg, rgba(72, 199, 255, 0.18), transparent 16%);
+  mix-blend-mode: screen;
+  animation: security-camera-glitch-bar 0.9s steps(3) infinite;
+  pointer-events: none;
+}
+
+.security-camera-source-live .security-camera-feed-frame {
+  border-color: rgba(109, 255, 176, 0.42);
+  box-shadow: inset 0 0 28px rgba(109, 255, 176, 0.08);
+}
+
+.security-camera-source-live .security-camera-feed-warning {
+  color: var(--security-camera-green);
+  animation: security-camera-live-pulse 1.5s ease-in-out infinite;
+}
+
+.security-camera-source-live.security-camera-status-offline .security-camera-feed-warning,
+.security-camera-source-live.security-camera-status-restricted .security-camera-feed-warning {
+  animation: none;
+}
+
+@keyframes security-camera-static {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(-2%, 1%); }
+  66% { transform: translate(1%, -1%); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes security-camera-scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes security-camera-rec {
+  0%, 48%, 100% { opacity: 1; }
+  50%, 82% { opacity: 0.28; }
+}
+
+@keyframes security-camera-glitch {
+  0%, 100% { transform: translate(0, 0) skewX(0deg); }
+  20% { transform: translate(2px, -1px) skewX(1deg); }
+  40% { transform: translate(-3px, 1px) skewX(-1deg); }
+  60% { transform: translate(1px, 2px) skewX(0.5deg); }
+}
+
+@keyframes security-camera-glitch-bar {
+  0% { clip-path: inset(10% 0 78% 0); transform: translateX(-2%); }
+  35% { clip-path: inset(42% 0 45% 0); transform: translateX(2%); }
+  70% { clip-path: inset(72% 0 12% 0); transform: translateX(-1%); }
+  100% { clip-path: inset(10% 0 78% 0); transform: translateX(0); }
+}
+
+@keyframes security-camera-signal-loss {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  45% { opacity: 0.62; filter: brightness(0.65); }
+  50% { opacity: 0.22; filter: brightness(0.25); }
+  54% { opacity: 0.88; filter: brightness(1.15); }
+}
+
+@keyframes security-camera-live-pulse {
+  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(109, 255, 176, 0.55); }
+  50% { opacity: 0.62; text-shadow: 0 0 22px rgba(109, 255, 176, 0.9); }
+}
+
+@media (max-width: 980px) {
+  .security-camera-manager {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .security-camera-preview-actions,
+  .security-camera-editor-actions,
+  .security-camera-feed-header,
+  .security-camera-feed-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .security-camera-signal {
+    justify-items: start;
+  }
+}

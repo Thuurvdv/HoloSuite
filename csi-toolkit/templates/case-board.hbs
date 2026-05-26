@@ -1,0 +1,114 @@
+<section class="csi-shell csi-board-shell {{themeClass}} {{#if playerMode}}is-player-mode{{else}}is-gm-mode{{/if}}">
+  {{#if isMissing}}
+    <div class="csi-empty-workspace">
+      <h1>Case File Missing</h1>
+      <p>The requested case record could not be found.</p>
+    </div>
+  {{else}}
+      <header class="csi-board-header">
+        <div class="csi-case-identity">
+          {{#if case.image}}<img src="{{case.image}}" alt="" />{{/if}}
+          <div>
+            <p class="csi-kicker">Case File / {{csiLabel case.status}}</p>
+            <h1>{{case.title}}</h1>
+            <p>{{case.subtitle}}</p>
+          </div>
+        </div>
+
+        <div class="csi-board-actions csi-board-actions-compact">
+          <span class="csi-pill csi-pill--{{case.status}}">{{csiLabel case.status}}</span>
+          <span class="csi-pill" data-csi-zoom>{{zoomPercent}}%</span>
+          <details class="csi-board-dim-menu" data-csi-dim-menu>
+            <summary title="Dim entity types"><i class="fas fa-adjust"></i></summary>
+            <div class="csi-board-dim-options">
+              <label><input type="checkbox" data-csi-dim-kind value="evidence" /> Evidence</label>
+              <label><input type="checkbox" data-csi-dim-kind value="suspects" /> Suspects</label>
+              <label><input type="checkbox" data-csi-dim-kind value="locations" /> Locations</label>
+              <label><input type="checkbox" data-csi-dim-kind value="timeline" /> Timeline</label>
+            </div>
+          </details>
+          <button type="button" data-action="zoom-out" title="Zoom out"><i class="fas fa-search-minus"></i></button>
+          <button type="button" data-action="zoom-in" title="Zoom in"><i class="fas fa-search-plus"></i></button>
+          <button type="button" data-action="refresh-board" title="Refresh board"><i class="fas fa-sync-alt"></i></button>
+          {{#if isGM}}
+            <button type="button" data-action="open-manager" title="Open case manager"><i class="fas fa-folder-open"></i></button>
+          {{/if}}
+        </div>
+      </header>
+
+      <main class="csi-board-layout">
+        <aside class="csi-board-dossier">
+          <section class="csi-report">
+            <div class="csi-stamp">Classified</div>
+            <h2>Briefing</h2>
+            <p>{{case.description}}</p>
+          </section>
+
+          <section class="csi-board-section">
+            <header><h2>Timeline</h2><span>{{counts.timeline}}</span></header>
+            <ol class="csi-timeline">
+              {{#each case.timeline}}
+                <li class="{{#if hidden}}is-hidden-entity{{/if}}" data-csi-timeline-row data-collection="timeline" data-item-id="{{id}}">
+                  <div class="csi-timeline-time-cell">
+                    <time>{{time}}</time>
+                    {{#if ../canEditBoard}}
+                      <span class="csi-timeline-order-actions">
+                        <button type="button" data-action="move-timeline-item" data-item-id="{{id}}" data-direction="up" title="Move earlier"><i class="fas fa-chevron-up"></i></button>
+                        <button type="button" data-action="move-timeline-item" data-item-id="{{id}}" data-direction="down" title="Move later"><i class="fas fa-chevron-down"></i></button>
+                      </span>
+                    {{/if}}
+                  </div>
+                  <div class="csi-timeline-content">
+                    <div class="csi-timeline-title-row">
+                      <h3>{{title}}</h3>
+                      {{#if ../canEditBoard}}
+                        <button type="button" data-action="edit-card" data-collection="timeline" data-item-id="{{id}}" title="Edit timeline item"><i class="fas fa-edit"></i></button>
+                      {{/if}}
+                    </div>
+                    <p>{{description}}</p>
+                    {{#if linkedLabels.length}}
+                      <p class="csi-linked">Linked: {{#each linkedLabels}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+                    {{/if}}
+                  </div>
+                </li>
+              {{else}}
+                <li class="csi-empty-state">No timeline entries visible.</li>
+              {{/each}}
+            </ol>
+          </section>
+        </aside>
+
+        <section class="csi-board-viewport" data-csi-board-viewport>
+          <div class="csi-board-canvas" data-csi-board-canvas style="width: {{boardSize.width}}px; height: {{boardSize.height}}px; {{viewStyle}}">
+            <svg class="csi-connection-svg" width="{{boardSize.width}}" height="{{boardSize.height}}" viewBox="0 0 {{boardSize.width}} {{boardSize.height}}">
+              {{#each connections}}
+                <g class="csi-connection-group {{typeClass}} {{styleClass}} {{colorClass}}" data-csi-connection-group data-from-id="{{fromId}}" data-to-id="{{toId}}">
+                  <title>{{csiFallback label "Connection"}}</title>
+                  <line class="csi-connection-hit" data-csi-connection-hit data-connection-id="{{id}}" x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}" />
+                  <line class="csi-connection-visible" data-csi-connection-line x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}" />
+                  <text class="csi-connection-label" data-csi-connection-label x="{{labelX}}" y="{{labelY}}">
+                    {{csiFallback label "Connection"}}
+                  </text>
+                </g>
+              {{/each}}
+            </svg>
+
+            {{#each cards}}
+              {{> "modules/csi-toolkit/templates/item-card.hbs" item=this kind=kind collection=collection playerMode=../playerMode isGM=../isGM canEditBoard=../canEditBoard}}
+            {{else}}
+              <p class="csi-empty-state csi-board-empty">No cards on this board yet.</p>
+            {{/each}}
+          </div>
+          {{#if canEditBoard}}
+            <nav class="csi-board-context-menu" data-csi-context-menu hidden>
+              {{#each addCollections}}
+                <button type="button" data-action="context-add-board-item" data-collection="{{id}}">
+                  <i class="fas fa-plus"></i>{{label}}
+                </button>
+              {{/each}}
+            </nav>
+          {{/if}}
+        </section>
+      </main>
+  {{/if}}
+</section>

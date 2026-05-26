@@ -1,0 +1,129 @@
+.holosuite-hacking-window .window-content,
+.holosuite-hacking-launcher-window .window-content {
+  background: #05070d;
+  color: #d9fbff;
+  padding: 0;
+}
+
+.holosuite-hacking-launcher {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  background:
+    linear-gradient(rgba(83, 235, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(83, 235, 255, 0.04) 1px, transparent 1px),
+    #05070d;
+  background-size: 24px 24px;
+  font-family: "Rajdhani", "Orbitron", "Segoe UI", sans-serif;
+}
+
+.holosuite-hacking-launcher-header p {
+  margin: 0 0 4px;
+  color: #64f7ff;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.holosuite-hacking-launcher-header h2 {
+  margin: 0;
+  color: #f5feff;
+  font-size: 28px;
+  text-shadow: 0 0 16px rgba(74, 230, 255, 0.75);
+}
+
+.holosuite-hacking-launcher .form-group {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.holosuite-hacking-launcher label {
+  color: #9ffcff;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.holosuite-hacking-launcher input,
+.holosuite-hacking-launcher select {
+  width: 100%;
+  border: 1px solid rgba(100, 247, 255, 0.35);
+  background: rgba(3, 12, 20, 0.9);
+  color: #f5feff;
+}
+
+.holosuite-hacking-launcher select option {
+  background: #07101a;
+  color: #f5feff;
+}
+
+.holosuite-hacking-launcher-actions {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(93, 245, 255, 0.2);
+  padding-top: 12px;
+}
+
+.holosuite-hacking-launcher-actions button {
+  border: 1px solid rgba(77, 255, 155, 0.55);
+  background: rgba(8, 35, 27, 0.9);
+  color: #d9fbff;
+  padding: 8px 12px;
+  box-shadow: 0 0 14px rgba(77, 255, 155, 0.18);
+}
+
+.holosuite-hacking-start-dialog .dialog-content {
+  background: #05070d;
+  color: #d9fbff;
+  padding: 0;
+}
+
+.holosuite-hacking-start-dialog .dialog-buttons {
+  margin: 0;
+  padding: 12px;
+  background: #05070d;
+  border-top: 1px solid rgba(93, 245, 255, 0.22);
+}
+
+.holosuite-hacking-start-dialog .dialog-button {
+  border: 1px solid rgba(77, 255, 155, 0.55);
+  background: rgba(8, 35, 27, 0.95);
+  color: #d9fbff;
+  box-shadow: 0 0 14px rgba(77, 255, 155, 0.2);
+}
+
+.holosuite-hacking-start-prompt {
+  min-height: 180px;
+  color: #d9fbff;
+  padding: 22px;
+  background:
+    linear-gradient(rgba(83, 235, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(83, 235, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(circle at 72% 32%, rgba(255, 71, 126, 0.18), transparent 34%),
+    radial-gradient(circle at 18% 78%, rgba(77, 255, 155, 0.16), transparent 32%),
+    #05070d;
+  background-size: 24px 24px, 24px 24px, auto, auto, auto;
+}
+
+.holosuite-hacking-start-prompt p {
+  margin: 0 0 6px;
+  color: #64f7ff;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.holosuite-hacking-start-prompt h2 {
+  margin: 0 0 14px;
+  color: #f5feff;
+  font-size: 30px;
+  text-shadow: 0 0 16px rgba(100, 247, 255, 0.75);
+}
+
+.holosuite-hacking-start-prompt div {
+  display: inline-flex;
+  border: 1px solid rgba(255, 230, 111, 0.38);
+  background: rgba(255, 230, 111, 0.08);
+  color: #ffe66f;
+  padding: 7px 9px;
+  font-size: 13px;
+}

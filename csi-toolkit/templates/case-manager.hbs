@@ -1,0 +1,133 @@
+<section class="csi-shell csi-manager-shell">
+  <aside class="csi-case-list">
+    <header class="csi-panel-header">
+      <div>
+        <h2>Case Files</h2>
+        <p>{{csiCount cases}} records</p>
+      </div>
+      <button type="button" class="csi-icon-button" data-action="new-case" title="Create case">
+        <i class="fas fa-plus"></i>
+      </button>
+    </header>
+
+    <div class="csi-case-list-scroll">
+      {{#each cases}}
+        <button type="button" class="csi-case-row {{#if (csiEq ../selected.id id)}}is-active{{/if}}" data-action="select-case" data-case-id="{{id}}">
+          <span class="csi-case-row-title">{{title}}</span>
+          <span class="csi-case-row-meta">
+            <span class="csi-pill csi-pill--{{status}}">{{csiLabel status}}</span>
+          </span>
+        </button>
+      {{else}}
+        <div class="csi-empty-state">No case files yet.</div>
+      {{/each}}
+    </div>
+
+    <footer class="csi-case-list-footer">
+      <button type="button" data-action="import-case">
+        <i class="fas fa-file-import"></i>
+        Import JSON
+      </button>
+      <button type="button" data-action="import-sample">
+        <i class="fas fa-vial"></i>
+        Sample Case
+      </button>
+      <input type="file" accept="application/json,.json" data-csi-import-file hidden />
+    </footer>
+  </aside>
+
+  <main class="csi-editor">
+    {{#if selected}}
+      <form data-csi-case-form>
+        <header class="csi-editor-header">
+          <div>
+            <p class="csi-kicker">Case Configuration</p>
+            <h1>{{selected.title}}</h1>
+            <p>{{csiFallback selected.subtitle "No subtitle"}}</p>
+          </div>
+          <div class="csi-editor-actions">
+            <button type="button" data-action="open-board">
+              <i class="fas fa-project-diagram"></i>
+              Board
+            </button>
+            <button type="button" data-action="export-case">
+              <i class="fas fa-file-export"></i>
+              Export
+            </button>
+            <button type="button" class="csi-danger" data-action="delete-case">
+              <i class="fas fa-trash"></i>
+              Delete
+            </button>
+            <button type="submit" class="csi-primary" data-action="save-case">
+              <i class="fas fa-save"></i>
+              Save
+            </button>
+          </div>
+        </header>
+
+        <section class="csi-form-grid csi-case-basics">
+          <label>
+            <span>Title</span>
+            <input type="text" name="title" value="{{selected.title}}" />
+          </label>
+          <label>
+            <span>Subtitle</span>
+            <input type="text" name="subtitle" value="{{selected.subtitle}}" />
+          </label>
+          <label>
+            <span>Status</span>
+            <select name="status">
+              {{#each options.caseStatuses}}
+                <option value="{{this}}" {{csiOption this ../selected.status}}>{{csiLabel this}}</option>
+              {{/each}}
+            </select>
+          </label>
+          <label>
+            <span>Board Theme</span>
+            <select name="theme">
+              {{#each options.themes}}
+                <option value="{{this}}" {{csiOption this ../selected.boardLayout.theme}}>{{csiLabel this}}</option>
+              {{/each}}
+            </select>
+          </label>
+          <label class="csi-image-field">
+            <span>Case Image</span>
+            <div class="csi-field-with-button">
+              <input type="text" name="image" value="{{selected.image}}" />
+              <button type="button" data-action="pick-image" title="Choose image"><i class="fas fa-image"></i></button>
+            </div>
+          </label>
+          <label class="csi-span-2">
+            <span>Description</span>
+            <textarea name="description" rows="5">{{selected.description}}</textarea>
+          </label>
+        </section>
+
+        <section class="csi-manager-section">
+          <header>
+            <h2>Board Contents</h2>
+            <button type="button" data-action="open-board">
+              <i class="fas fa-edit"></i>
+              Edit On Board
+            </button>
+          </header>
+          <div class="csi-board-summary">
+            <span><strong>{{csiCount selected.evidence}}</strong> Evidence</span>
+            <span><strong>{{csiCount selected.suspects}}</strong> Suspects</span>
+            <span><strong>{{csiCount selected.locations}}</strong> Locations</span>
+            <span><strong>{{csiCount selected.timeline}}</strong> Timeline</span>
+            <span><strong>{{csiCount selected.connections}}</strong> Connections</span>
+          </div>
+        </section>
+      </form>
+    {{else}}
+      <div class="csi-empty-workspace">
+        <h1>No Active Case</h1>
+        <button type="button" class="csi-primary" data-action="new-case">
+          <i class="fas fa-plus"></i>
+          Create Case
+        </button>
+      </div>
+    {{/if}}
+  </main>
+</section>

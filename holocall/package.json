@@ -1,0 +1,13 @@
+{
+  "name": "@holosuite/holocall",
+  "private": true,
+  "version": "0.9.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0",
+    "typescript": "^5.4.0"
+  }
+}

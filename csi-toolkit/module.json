@@ -1,0 +1,28 @@
+{
+  "id": "csi-toolkit",
+  "title": "Crime Scene Investigation Toolkit",
+  "description": "A system-agnostic case board, evidence, suspect, location, timeline, and connection toolkit for investigation-heavy Foundry VTT games.",
+  "version": "0.4.7",
+  "socket": true,
+  "authors": [
+    {
+      "name": "CSI Toolkit Contributors"
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "esmodules": [
+    "dist/main.js"
+  ],
+  "styles": [
+    "styles/csi-toolkit.css"
+  ],
+  "languages": [],
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "license": "MIT",
+  "readme": "README.md"
+}

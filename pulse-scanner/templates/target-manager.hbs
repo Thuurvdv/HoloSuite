@@ -1,0 +1,56 @@
+<section class="pulse-scanner-shell">
+  <header class="pulse-scanner-header">
+    <div>
+      <h2>Pulse Scanner</h2>
+      <p>{{#if scene}}{{scene.name}}{{else}}No active scene{{/if}}</p>
+    </div>
+    <div class="pulse-scanner-header-actions">
+      <div class="pulse-scanner-mode-row" aria-label="Scanner modes">
+      {{#each modeOptions}}
+        <button type="button" data-action="scan-selected" data-mode="{{value}}" title="{{label}} scan"><i class="fa-solid fa-satellite-dish"></i> {{label}}</button>
+      {{/each}}
+      </div>
+      <div class="pulse-scanner-tool-row">
+      <button type="button" data-action="toggle-placement" class="{{#if placementActive}}is-active{{/if}}"><i class="fa-solid fa-map-pin"></i> Place</button>
+      <button type="button" data-action="set-placement-shape" data-shape="circle" class="{{#if placementCircle}}is-active{{/if}}" title="Place circular targets"><i class="fa-regular fa-circle"></i> Circle</button>
+      <button type="button" data-action="set-placement-shape" data-shape="rectangle" class="{{#if placementRectangle}}is-active{{/if}}" title="Place square or rectangular targets"><i class="fa-regular fa-square"></i> Square</button>
+      <button type="button" data-action="new-manual"><i class="fa-solid fa-plus"></i> Manual</button>
+      <button type="button" data-action="reveal-latest" {{#unless latestScanCount}}disabled{{/unless}}><i class="fa-solid fa-eye"></i> Reveal Latest {{#if latestScanCount}}({{latestScanCount}}){{/if}}</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="pulse-scanner-layout">
+    <aside class="pulse-scanner-list">
+      {{#if hasTargets}}
+        {{#each targets}}
+          <article class="pulse-scanner-target-card {{#if (psEq ../selectedTarget.id id)}}is-active{{/if}} {{#if isResolved}}is-resolved{{/if}}" data-target-id="{{id}}">
+            <div class="pulse-scanner-target-card-main">
+              <span class="pulse-scanner-dot" style="--target-color: {{color}};"></span>
+              <div>
+                <strong>{{label}}</strong>
+                <small>{{psModeLabel mode}} - {{psTypeLabel type}} - {{visibility}} - {{status}} - {{x}}, {{y}}</small>
+              </div>
+            </div>
+            <div class="pulse-scanner-target-card-actions">
+              <button type="button" data-action="reveal-target" data-target-id="{{id}}" title="Reveal to players"><i class="fa-solid fa-eye"></i><span>Reveal</span></button>
+              <button type="button" data-action="hide-target" data-target-id="{{id}}" title="Hide from players"><i class="fa-solid fa-eye-slash"></i><span>Hide</span></button>
+              <button type="button" data-action="toggle-resolved" data-target-id="{{id}}" title="{{#if isResolved}}Mark active{{else}}Mark resolved or destroyed{{/if}}"><i class="fa-solid {{#if isResolved}}fa-rotate-left{{else}}fa-check{{/if}}"></i><span>{{#if isResolved}}Unresolve{{else}}Resolve{{/if}}</span></button>
+              <button type="button" data-action="delete-target" data-target-id="{{id}}" title="Delete target"><i class="fa-solid fa-trash"></i><span>Delete</span></button>
+            </div>
+          </article>
+        {{/each}}
+      {{else}}
+        <div class="pulse-scanner-empty-state">
+          <i class="fa-solid fa-satellite-dish"></i>
+          <strong>No scan targets on this scene</strong>
+          <span>Use Place, then click the canvas to create one.</span>
+        </div>
+      {{/if}}
+    </aside>
+
+    <main class="pulse-scanner-editor">
+      {{> "modules/pulse-scanner/templates/target-form.hbs"}}
+    </main>
+  </div>
+</section>

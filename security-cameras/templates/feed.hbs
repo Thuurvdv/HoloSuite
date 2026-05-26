@@ -1,0 +1,42 @@
+<section class="security-camera-feed {{camera.statusClass}} {{camera.sourceClass}} {{camera.displayClass}}">
+  <div class="security-camera-feed-static" aria-hidden="true"></div>
+  <div class="security-camera-feed-scanline" aria-hidden="true"></div>
+
+  <header class="security-camera-feed-header">
+    <div>
+      <span class="security-camera-rec"><i></i> REC</span>
+      <h2>{{camera.name}}</h2>
+      <p>{{camera.location}}</p>
+    </div>
+    <div class="security-camera-signal">
+      <strong>{{camera.signalLabel}}</strong>
+      <span aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    </div>
+  </header>
+
+  <main class="security-camera-feed-frame" style="--security-camera-region-aspect: {{camera.regionAspect}};">
+    {{#if camera.isLive}}
+      {{#if camera.isOffline}}
+        <div class="security-camera-feed-warning">{{camera.signalLabel}}</div>
+      {{else}}
+        {{#if camera.isRestricted}}
+          <div class="security-camera-feed-warning">{{camera.signalLabel}}</div>
+        {{else}}
+          <img src="{{#if camera.liveFrame}}{{camera.liveFrame}}{{else}}{{camera.image}}{{/if}}" alt="{{camera.name}}" data-security-camera-live-frame {{#unless camera.liveFrame}}{{#unless camera.image}}hidden{{/unless}}{{/unless}}>
+          <div class="security-camera-feed-warning" data-security-camera-live-waiting {{#if camera.liveFrame}}hidden{{else}}{{#if camera.image}}hidden{{/if}}{{/if}}>AWAITING LIVE SIGNAL</div>
+        {{/if}}
+      {{/if}}
+    {{else}}
+      {{#if camera.canDisplayImage}}
+        <img src="{{camera.image}}" alt="{{camera.name}}">
+      {{else}}
+        <div class="security-camera-feed-warning">{{camera.signalLabel}}</div>
+      {{/if}}
+    {{/if}}
+  </main>
+
+  <footer class="security-camera-feed-footer">
+    <span>{{camera.timestamp}}</span>
+    <span>ID {{camera.id}}</span>
+  </footer>
+</section>

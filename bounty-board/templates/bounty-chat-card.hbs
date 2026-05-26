@@ -1,0 +1,11 @@
+<div class="bb-chat-card {{#if isResult}}bb-chat-card--result{{else}}bb-chat-card--published{{/if}}">
+  <p class="bb-kicker">{{#if isResult}}Contract Update{{else}}New Contract Published{{/if}}</p>
+  <h3>{{bounty.title}}</h3>
+  <dl>
+    <div><dt>Target</dt><dd>{{bounty.targetName}}</dd></div>
+    <div><dt>Reward</dt><dd>{{bounty.rewardLabel}}</dd></div>
+    <div><dt>Threat</dt><dd>{{bounty.threatLevel}}</dd></div>
+    <div><dt>Faction</dt><dd>{{bounty.faction}}</dd></div>
+    <div><dt>Status</dt><dd>{{bounty.statusLabel}}</dd></div>
+  </dl>
+</div>

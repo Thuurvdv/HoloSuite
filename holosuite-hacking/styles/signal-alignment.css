@@ -1,0 +1,307 @@
+.signal-alignment-window .window-content {
+  background: #05070d;
+  color: #d9fbff;
+  padding: 0;
+}
+
+.signal-alignment-shell {
+  position: relative;
+  min-height: 600px;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(83, 235, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(83, 235, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(circle at 18% 80%, rgba(77, 255, 155, 0.14), transparent 30%),
+    radial-gradient(circle at 84% 24%, rgba(255, 71, 126, 0.16), transparent 32%),
+    #05070d;
+  background-size: 28px 28px, 28px 28px, auto, auto, auto;
+  font-family: "Rajdhani", "Orbitron", "Segoe UI", sans-serif;
+}
+
+.signal-alignment-header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  padding: 22px 26px 16px;
+  border-bottom: 1px solid rgba(93, 245, 255, 0.22);
+}
+
+.signal-alignment-kicker {
+  margin: 0 0 4px;
+  color: #64f7ff;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.signal-alignment-header h2 {
+  margin: 0;
+  color: #f5feff;
+  font-size: 30px;
+  font-weight: 700;
+  text-shadow: 0 0 16px rgba(74, 230, 255, 0.75);
+}
+
+.signal-alignment-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  color: #9ffcff;
+  font-size: 13px;
+}
+
+.signal-alignment-status span {
+  border: 1px solid rgba(100, 247, 255, 0.28);
+  background: rgba(5, 20, 29, 0.72);
+  padding: 6px 9px;
+}
+
+.signal-alignment-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+.signal-alignment-panel {
+  border-right: 1px solid rgba(93, 245, 255, 0.2);
+  padding: 8px 16px 8px 8px;
+}
+
+.signal-alignment-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 8px;
+  color: #a8f7ff;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.signal-alignment-readout strong {
+  color: #ffffff;
+  font-size: 21px;
+  text-shadow: 0 0 12px rgba(255, 64, 128, 0.72);
+}
+
+.signal-alignment-meter {
+  height: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(100, 247, 255, 0.35);
+  background: rgba(100, 247, 255, 0.08);
+}
+
+.signal-alignment-meter div {
+  height: 100%;
+  width: 0;
+  transition: width 120ms linear;
+}
+
+.signal-alignment-meter.trace {
+  border-color: rgba(255, 70, 132, 0.55);
+}
+
+.signal-alignment-meter.trace div {
+  background: linear-gradient(90deg, #28f7ff, #ff3f7f);
+}
+
+.signal-alignment-meter.lock div {
+  background: linear-gradient(90deg, #4dff9b, #ffe66f);
+}
+
+.signal-alignment-specs {
+  display: grid;
+  gap: 8px;
+  margin: 22px 0;
+}
+
+.signal-alignment-specs div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(93, 245, 255, 0.16);
+  padding-bottom: 6px;
+}
+
+.signal-alignment-specs dt {
+  color: #72c8d6;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.signal-alignment-specs dd {
+  margin: 0;
+  color: #f2feff;
+  font-weight: 700;
+}
+
+.signal-alignment-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.signal-alignment-actions button {
+  width: 100%;
+  border: 1px solid rgba(100, 247, 255, 0.35);
+  background: rgba(10, 34, 45, 0.85);
+  color: #d9fbff;
+  padding: 8px 10px;
+}
+
+.signal-alignment-board {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-height: 500px;
+  border: 1px solid rgba(93, 245, 255, 0.18);
+  background: rgba(1, 10, 17, 0.62);
+  padding: 16px;
+  box-shadow: inset 0 0 44px rgba(26, 234, 255, 0.08);
+}
+
+.signal-channel {
+  position: relative;
+  border: 1px solid rgba(100, 247, 255, 0.24);
+  background: rgba(5, 20, 29, 0.68);
+  padding: 12px;
+}
+
+.signal-channel.is-aligned {
+  border-color: rgba(77, 255, 155, 0.72);
+  box-shadow: 0 0 18px rgba(77, 255, 155, 0.12);
+}
+
+.signal-channel header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #bdeff6;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.signal-channel header strong {
+  color: #fff;
+  font-size: 15px;
+}
+
+.signal-waveform {
+  position: relative;
+  height: 34px;
+  margin: 12px 0;
+  overflow: hidden;
+  border: 1px solid rgba(100, 247, 255, 0.22);
+  background:
+    repeating-linear-gradient(90deg, rgba(100, 247, 255, 0.1), rgba(100, 247, 255, 0.1) 1px, transparent 1px, transparent 18px),
+    rgba(2, 9, 16, 0.9);
+}
+
+.signal-wave-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, rgba(40, 247, 255, 0.22), rgba(255, 230, 111, 0.55));
+  clip-path: polygon(0 50%, 5% 25%, 10% 50%, 15% 75%, 20% 50%, 25% 25%, 30% 50%, 35% 75%, 40% 50%, 45% 25%, 50% 50%, 55% 75%, 60% 50%, 65% 25%, 70% 50%, 75% 75%, 80% 50%, 85% 25%, 90% 50%, 95% 75%, 100% 50%, 100% 100%, 0 100%);
+}
+
+.signal-tolerance {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(77, 255, 155, 0.16);
+  border-inline: 1px solid rgba(77, 255, 155, 0.72);
+}
+
+.signal-target {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ffe66f;
+  box-shadow: 0 0 10px #ffe66f;
+}
+
+.signal-channel input[type="range"] {
+  width: 100%;
+  accent-color: #64f7ff;
+}
+
+.signal-channel-hint {
+  margin: 6px 0 0;
+  color: #8edbe6;
+  font-size: 12px;
+}
+
+.signal-decoys {
+  position: absolute;
+  inset: auto 12px 48px 12px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.signal-decoys span {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 10px;
+  background: rgba(255, 71, 126, 0.72);
+  box-shadow: 0 0 8px rgba(255, 71, 126, 0.75);
+}
+
+.signal-alignment-result {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  min-width: 300px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(3, 9, 16, 0.94);
+  padding: 22px;
+  text-align: center;
+  box-shadow: 0 0 44px rgba(100, 247, 255, 0.24);
+}
+
+.signal-alignment-result strong {
+  display: block;
+  color: #fff;
+  font-size: 28px;
+}
+
+.signal-alignment-result span {
+  display: block;
+  margin-top: 8px;
+  color: #bdeff6;
+}
+
+.signal-alignment-result.is-success {
+  border-color: rgba(77, 255, 155, 0.8);
+}
+
+.signal-alignment-result.is-failure {
+  border-color: rgba(255, 71, 126, 0.8);
+}
+
+.glitch-medium .signal-alignment-board,
+.glitch-high .signal-alignment-board {
+  animation: signal-alignment-glitch 3.8s infinite steps(2, end);
+}
+
+@keyframes signal-alignment-glitch {
+  0%, 92%, 100% { filter: none; }
+  94% { filter: hue-rotate(22deg) saturate(1.45); }
+  96% { filter: hue-rotate(-18deg) contrast(1.18); }
+}
+
+@media (max-width: 760px) {
+  .signal-alignment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .signal-alignment-panel {
+    border-right: 0;
+    border-bottom: 1px solid rgba(93, 245, 255, 0.2);
+    padding: 0 0 14px;
+  }
+}
