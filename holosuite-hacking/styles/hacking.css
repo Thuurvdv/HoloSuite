@@ -13,7 +13,7 @@
 
 .holosuite-hacking-window .window-content,
 .holosuite-hacking-launcher-window .window-content {
-  background: var(--hs-bg);
+  background: var(--hs-surface-bg);
   color: var(--hs-text);
   padding: 0;
 }
@@ -23,25 +23,25 @@
   gap: 14px;
   padding: 18px;
   background:
-    linear-gradient(rgba(83, 235, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(83, 235, 255, 0.04) 1px, transparent 1px),
-    #05070d;
+    var(--hs-grid-bg),
+    radial-gradient(circle at 72% 32%, rgba(255, 77, 125, 0.13), transparent 34%),
+    var(--hs-bg-deep);
   background-size: 24px 24px;
   font-family: var(--hs-font-ui);
 }
 
 .holosuite-hacking-launcher-header p {
   margin: 0 0 4px;
-  color: #64f7ff;
+  color: var(--hs-cyan);
   font-size: 11px;
   text-transform: uppercase;
 }
 
 .holosuite-hacking-launcher-header h2 {
   margin: 0;
-  color: #f5feff;
+  color: var(--hs-text);
   font-size: 28px;
-  text-shadow: 0 0 16px rgba(74, 230, 255, 0.75);
+  text-shadow: var(--hs-glow-cyan);
 }
 
 .holosuite-hacking-launcher .form-group {
@@ -52,7 +52,7 @@
 }
 
 .holosuite-hacking-launcher label {
-  color: #9ffcff;
+  color: var(--hs-muted);
   font-size: 12px;
   text-transform: uppercase;
 }
@@ -60,83 +60,82 @@
 .holosuite-hacking-launcher input,
 .holosuite-hacking-launcher select {
   width: 100%;
-  border: 1px solid rgba(100, 247, 255, 0.35);
-  background: rgba(3, 12, 20, 0.9);
-  color: #f5feff;
+  border: 1px solid rgba(105, 232, 255, 0.24);
+  background: var(--hs-field);
+  color: var(--hs-text);
 }
 
 .holosuite-hacking-launcher select option {
-  background: #07101a;
-  color: #f5feff;
+  background: var(--hs-bg-deep);
+  color: var(--hs-text);
 }
 
 .holosuite-hacking-launcher-actions {
   display: flex;
   justify-content: flex-end;
-  border-top: 1px solid rgba(93, 245, 255, 0.2);
+  border-top: 1px solid var(--hs-line);
   padding-top: 12px;
 }
 
 .holosuite-hacking-launcher-actions button {
-  border: 1px solid rgba(77, 255, 155, 0.55);
-  background: rgba(8, 35, 27, 0.9);
-  color: #d9fbff;
+  border: 1px solid rgba(98, 255, 182, 0.5);
+  background: var(--hs-active-bg);
+  color: var(--hs-text);
   padding: 8px 12px;
-  box-shadow: 0 0 14px rgba(77, 255, 155, 0.18);
+  box-shadow: var(--hs-glow-green);
 }
 
 .holosuite-hacking-start-dialog .dialog-content {
-  background: #05070d;
-  color: #d9fbff;
+  background: var(--hs-surface-bg);
+  color: var(--hs-text);
   padding: 0;
 }
 
 .holosuite-hacking-start-dialog .dialog-buttons {
   margin: 0;
   padding: 12px;
-  background: #05070d;
-  border-top: 1px solid rgba(93, 245, 255, 0.22);
+  background: var(--hs-bg-deep);
+  border-top: 1px solid var(--hs-line);
 }
 
 .holosuite-hacking-start-dialog .dialog-button {
-  border: 1px solid rgba(77, 255, 155, 0.55);
-  background: rgba(8, 35, 27, 0.95);
-  color: #d9fbff;
-  box-shadow: 0 0 14px rgba(77, 255, 155, 0.2);
+  border: 1px solid rgba(98, 255, 182, 0.5);
+  background: var(--hs-active-bg);
+  color: var(--hs-text);
+  box-shadow: var(--hs-glow-green);
 }
 
 .holosuite-hacking-start-prompt {
   min-height: 180px;
-  color: #d9fbff;
+  color: var(--hs-text);
   padding: 22px;
   background:
-    linear-gradient(rgba(83, 235, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(83, 235, 255, 0.05) 1px, transparent 1px),
-    radial-gradient(circle at 72% 32%, rgba(255, 71, 126, 0.18), transparent 34%),
-    radial-gradient(circle at 18% 78%, rgba(77, 255, 155, 0.16), transparent 32%),
-    #05070d;
+    var(--hs-grid-bg),
+    radial-gradient(circle at 72% 32%, rgba(255, 77, 125, 0.16), transparent 34%),
+    radial-gradient(circle at 18% 78%, rgba(98, 255, 182, 0.14), transparent 32%),
+    var(--hs-bg-deep);
   background-size: 24px 24px, 24px 24px, auto, auto, auto;
 }
 
 .holosuite-hacking-start-prompt p {
   margin: 0 0 6px;
-  color: #64f7ff;
+  color: var(--hs-cyan);
   font-size: 11px;
   text-transform: uppercase;
 }
 
 .holosuite-hacking-start-prompt h2 {
   margin: 0 0 14px;
-  color: #f5feff;
+  color: var(--hs-text);
   font-size: 30px;
-  text-shadow: 0 0 16px rgba(100, 247, 255, 0.75);
+  text-shadow: var(--hs-glow-cyan);
 }
 
 .holosuite-hacking-start-prompt div {
   display: inline-flex;
-  border: 1px solid rgba(255, 230, 111, 0.38);
-  background: rgba(255, 230, 111, 0.08);
-  color: #ffe66f;
+  border: 1px solid rgba(255, 209, 102, 0.38);
+  background: rgba(255, 209, 102, 0.08);
+  color: var(--hs-amber);
   padding: 7px 9px;
   font-size: 13px;
 }

@@ -32,7 +32,7 @@
 
 .bounty-board-window .window-content,
 .bounty-editor-window .window-content {
-  background: radial-gradient(circle at 20% 0%, rgba(105, 232, 255, 0.12), transparent 28%), var(--bb-bg);
+  background: var(--hs-surface-bg);
   color: var(--bb-text);
 }
 
@@ -74,14 +74,14 @@
 .bb-terminal button,
 .bb-editor button {
   border: 1px solid var(--bb-line);
-  background: rgba(105, 232, 255, 0.08);
+  background: var(--hs-control-bg);
   color: var(--bb-text);
   border-radius: 6px;
   min-height: 32px;
 }
 
 .bb-primary {
-  background: linear-gradient(135deg, rgba(105, 232, 255, 0.28), rgba(98, 255, 182, 0.16));
+  background: var(--hs-active-bg);
 }
 
 .bb-terminal button:hover,
@@ -114,8 +114,8 @@
 .bb-editor textarea,
 .bb-claim-field input {
   width: 100%;
-  border: 1px solid rgba(143, 181, 191, 0.35);
-  background: rgba(3, 10, 13, 0.65);
+  border: 1px solid rgba(105, 232, 255, 0.24);
+  background: var(--hs-field);
   color: var(--bb-text);
   border-radius: 5px;
 }
@@ -134,7 +134,7 @@
 .bb-card {
   min-width: 0;
   border: 1px solid var(--bb-line);
-  background: linear-gradient(180deg, rgba(16, 39, 48, 0.96), rgba(7, 16, 20, 0.98));
+  background: var(--hs-card-bg);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -401,16 +401,16 @@
 }
 
 .bb-chat-card {
-  border: 1px solid rgba(105, 232, 255, 0.35);
-  background: #071014;
-  color: #e7faff;
+  border: 1px solid var(--bb-line);
+  background: var(--hs-card-bg);
+  color: var(--bb-text);
   border-radius: 8px;
   padding: 12px;
 }
 
 .bb-chat-card h3 {
   margin: 0 0 8px;
-  color: #e7faff;
+  color: var(--bb-text);
 }
 
 .bb-chat-card dl {
@@ -426,7 +426,7 @@
 }
 
 .bb-chat-card dt {
-  color: #8fb5bf;
+  color: var(--bb-muted);
 }
 
 .bb-chat-card dd {
