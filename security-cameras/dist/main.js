@@ -1,18 +1,44 @@
-var xe = Object.defineProperty;
-var Le = (e, t, n) => t in e ? xe(e, t, { enumerable: !0, configurable: !0, writable: !0, value: n }) : e[t] = n;
-var T = (e, t, n) => Le(e, typeof t != "symbol" ? t + "" : t, n);
-const f = "security-cameras", ee = `module.${f}`, te = `modules/${f}/templates/monitor.hbs`, ne = `modules/${f}/templates/feed.hbs`, ie = /* @__PURE__ */ new Set(["online", "offline", "corrupted", "restricted"]), re = /* @__PURE__ */ new Set(["live", "image"]), B = /* @__PURE__ */ new Set(["window", "picture-in-picture"]), Ee = 1250, ae = 960, E = 1200, A = 675, Ae = [
+var Le = Object.defineProperty;
+var Ee = (e, t, n) => t in e ? Le(e, t, { enumerable: !0, configurable: !0, writable: !0, value: n }) : e[t] = n;
+var T = (e, t, n) => Ee(e, typeof t != "symbol" ? t + "" : t, n);
+function Ne(e, t = e) {
+  const n = `${t} |`;
+  return {
+    log: (i, ...r) => console.log(n, i, ...r),
+    warn: (i, ...r) => console.warn(n, i, ...r),
+    error: (i, ...r) => console.error(n, i, ...r)
+  };
+}
+function Ae(e, t = {}) {
+  const n = t.socketName ?? `module.${e}`, i = Ne(e, t.title ?? e);
+  return {
+    socketName: n,
+    emit(r) {
+      var a;
+      const s = (a = globalThis.game) == null ? void 0 : a.socket;
+      return s != null && s.emit ? (s.emit(n, r), !0) : (i.warn("Foundry socket is unavailable.", r), !1);
+    },
+    isGMSender(r) {
+      var s, a, o;
+      return r ? !!((o = (a = (s = globalThis.game) == null ? void 0 : s.users) == null ? void 0 : a.get(String(r))) != null && o.isGM) : !1;
+    }
+  };
+}
+const f = "security-cameras", ee = `module.${f}`, te = Ae(f, {
+  socketName: ee,
+  title: "Security Cameras"
+}), ne = `modules/${f}/templates/monitor.hbs`, ie = `modules/${f}/templates/feed.hbs`, re = /* @__PURE__ */ new Set(["online", "offline", "corrupted", "restricted"]), ae = /* @__PURE__ */ new Set(["live", "image"]), B = /* @__PURE__ */ new Set(["window", "picture-in-picture"]), Te = 1250, se = 960, E = 1200, N = 675, He = [
   { value: "online", label: "Online" },
   { value: "offline", label: "Offline" },
   { value: "corrupted", label: "Corrupted" },
   { value: "restricted", label: "Restricted" }
-], Ne = [
+], Re = [
   { value: "window", label: "Window" },
   { value: "picture-in-picture", label: "Picture-in-Picture" }
-], Te = [
+], Oe = [
   { value: "live", label: "Live Canvas" },
   { value: "image", label: "Static Image" }
-], b = {
+], S = {
   id: "",
   name: "Unnamed Camera",
   sceneId: "",
@@ -25,12 +51,12 @@ const f = "security-cameras", ee = `module.${f}`, te = `modules/${f}/templates/m
   regionX: null,
   regionY: null,
   regionWidth: E,
-  regionHeight: A,
+  regionHeight: N,
   notes: ""
 };
-let y = null, S = null, h = "", M = "";
+let y = null, b = null, h = "", M = "";
 const Y = /* @__PURE__ */ new Map();
-function X() {
+function P() {
   var e;
   return (e = foundry == null ? void 0 : foundry.utils) != null && e.randomID ? foundry.utils.randomID() : crypto != null && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
@@ -58,13 +84,13 @@ function w(e, t) {
   return Number.isFinite(n) && n > 0 ? n : t;
 }
 function v(e = {}, t = {}) {
-  const n = t.preserveId === !0, i = String(e.id ?? "").trim(), r = n ? i : i || X(), s = D(e.feedSource, re, b.feedSource), a = D(e.status, ie, b.status), o = D(e.displayMode, B, b.displayMode);
+  const n = t.preserveId === !0, i = String(e.id ?? "").trim(), r = n ? i : i || P(), s = D(e.feedSource, ae, S.feedSource), a = D(e.status, re, S.status), o = D(e.displayMode, B, S.displayMode);
   return {
-    ...b,
+    ...S,
     id: r,
-    name: String(e.name ?? b.name).trim() || b.name,
+    name: String(e.name ?? S.name).trim() || S.name,
     sceneId: String(e.sceneId ?? "").trim(),
-    location: String(e.location ?? b.location).trim() || b.location,
+    location: String(e.location ?? S.location).trim() || S.location,
     image: String(e.image ?? "").trim(),
     feedSource: s,
     status: a,
@@ -73,28 +99,28 @@ function v(e = {}, t = {}) {
     regionX: p(e.regionX),
     regionY: p(e.regionY),
     regionWidth: w(e.regionWidth, E),
-    regionHeight: w(e.regionHeight, A),
+    regionHeight: w(e.regionHeight, N),
     notes: String(e.notes ?? "").trim()
   };
 }
 function q(e = {}, t = {}) {
-  const n = v(e, { preserveId: t.requireId === !0 }), i = [], r = String(e.feedSource ?? b.feedSource).trim(), s = String(e.status ?? b.status).trim(), a = String(e.displayMode ?? b.displayMode).trim();
-  return t.requireId && !n.id && i.push("Camera id is required."), typeof e.name == "string" && !e.name.trim() && i.push("Camera name is required."), re.has(r) || i.push(`Invalid feed source: ${r}`), ie.has(s) || i.push(`Invalid status: ${s}`), B.has(a) || i.push(`Invalid display mode: ${a}`), {
+  const n = v(e, { preserveId: t.requireId === !0 }), i = [], r = String(e.feedSource ?? S.feedSource).trim(), s = String(e.status ?? S.status).trim(), a = String(e.displayMode ?? S.displayMode).trim();
+  return t.requireId && !n.id && i.push("Camera id is required."), typeof e.name == "string" && !e.name.trim() && i.push("Camera name is required."), ae.has(r) || i.push(`Invalid feed source: ${r}`), re.has(s) || i.push(`Invalid status: ${s}`), B.has(a) || i.push(`Invalid display mode: ${a}`), {
     ok: i.length === 0,
     camera: v(n),
     errors: i
   };
 }
-function He(e) {
+function _e(e) {
   var t, n;
   return e ? ((n = (t = game.scenes) == null ? void 0 : t.get(e)) == null ? void 0 : n.name) ?? "Unknown Scene" : "Unassigned Scene";
 }
-function se(e = "") {
+function oe(e = "") {
   var n;
-  const t = k(e);
+  const t = X(e);
   return String(((n = t == null ? void 0 : t.background) == null ? void 0 : n.src) ?? (t == null ? void 0 : t.img) ?? (t == null ? void 0 : t.thumb) ?? "").trim();
 }
-function Re(e = "") {
+function De(e = "") {
   var n;
   const t = (((n = game.scenes) == null ? void 0 : n.contents) ?? []).map((i) => ({
     id: i.id,
@@ -106,36 +132,36 @@ function Re(e = "") {
     ...t
   ];
 }
-function k(e = "") {
+function X(e = "") {
   var t;
   return e ? ((t = game.scenes) == null ? void 0 : t.get(e)) ?? null : (canvas == null ? void 0 : canvas.scene) ?? null;
 }
-function Oe(e = "") {
+function We(e = "") {
   var i;
-  const t = k(e);
+  const t = X(e);
   return (((i = t == null ? void 0 : t.regions) == null ? void 0 : i.contents) ?? []).map((r) => ({
     id: r.id,
     name: r.name || `Region ${r.id}`,
     region: r
   })).sort((r, s) => r.name.localeCompare(s.name));
 }
-function _e(e = "", t = "") {
+function ke(e = "", t = "") {
   return [
     { id: "", name: "No Linked Region", selected: !t },
-    ...Oe(e).map((n) => ({
+    ...We(e).map((n) => ({
       id: n.id,
       name: n.name,
       selected: n.id === t
     }))
   ];
 }
-function De(e = "", t = "") {
+function Pe(e = "", t = "") {
   var i, r;
   if (!e) return null;
-  const n = k(t);
+  const n = X(t);
   return ((r = (i = n == null ? void 0 : n.regions) == null ? void 0 : i.get) == null ? void 0 : r.call(i, e)) ?? null;
 }
-function We(e = {}) {
+function Xe(e = {}) {
   const t = Array.isArray(e.points) ? e.points : [];
   if (t.length >= 4) {
     const a = [], o = [];
@@ -153,7 +179,7 @@ function We(e = {}) {
   const n = p(e.x) ?? 0, i = p(e.y) ?? 0, r = w(e.width ?? e.radiusX ?? e.radius, 0), s = w(e.height ?? e.radiusY ?? e.radius, 0);
   return !r || !s ? null : { x: n, y: i, width: r, height: s };
 }
-function Pe(e) {
+function Ye(e) {
   const t = e.filter(Boolean);
   if (!t.length) return null;
   const n = Math.min(...t.map((a) => a.x)), i = Math.min(...t.map((a) => a.y)), r = Math.max(...t.map((a) => a.x + a.width)), s = Math.max(...t.map((a) => a.y + a.height));
@@ -164,7 +190,7 @@ function Pe(e) {
     height: s - i
   };
 }
-function Xe(e) {
+function Ue(e) {
   var d, m, l, g;
   const t = (e == null ? void 0 : e.object) ?? ((l = (m = (d = canvas == null ? void 0 : canvas.regions) == null ? void 0 : d.placeables) == null ? void 0 : m.find) == null ? void 0 : l.call(m, (C) => {
     var _;
@@ -175,7 +201,7 @@ function Xe(e) {
       regionX: p(n.x) ?? 0,
       regionY: p(n.y) ?? 0,
       regionWidth: w(n.width, E),
-      regionHeight: w(n.height, A)
+      regionHeight: w(n.height, N)
     };
   const i = e == null ? void 0 : e.bounds;
   if (i != null && i.width && (i != null && i.height))
@@ -183,11 +209,11 @@ function Xe(e) {
       regionX: p(i.x) ?? 0,
       regionY: p(i.y) ?? 0,
       regionWidth: w(i.width, E),
-      regionHeight: w(i.height, A)
+      regionHeight: w(i.height, N)
     };
-  const r = ((g = e == null ? void 0 : e.toObject) == null ? void 0 : g.call(e)) ?? e, s = Array.isArray(e == null ? void 0 : e.shapes) ? e.shapes : Array.isArray(r == null ? void 0 : r.shapes) ? r.shapes : [], a = Pe(s.map(We));
+  const r = ((g = e == null ? void 0 : e.toObject) == null ? void 0 : g.call(e)) ?? e, s = Array.isArray(e == null ? void 0 : e.shapes) ? e.shapes : Array.isArray(r == null ? void 0 : r.shapes) ? r.shapes : [], a = Ye(s.map(Xe));
   if (!a) return null;
-  const o = w(a.width, E), c = w(a.height, A);
+  const o = w(a.width, E), c = w(a.height, N);
   return {
     regionX: p(a.x) ?? 0,
     regionY: p(a.y) ?? 0,
@@ -195,8 +221,8 @@ function Xe(e) {
     regionHeight: c
   };
 }
-function N(e) {
-  const t = De(e.regionId, e.sceneId), n = Xe(t);
+function A(e) {
+  const t = Pe(e.regionId, e.sceneId), n = Ue(t);
   return n ? {
     ...e,
     ...n
@@ -222,12 +248,12 @@ function U(e, t) {
     selected: n.value === t
   }));
 }
-function F(e = {}) {
+function I(e = {}) {
   const t = v(e), n = (/* @__PURE__ */ new Date()).toLocaleString(), i = t.status === "online", r = t.status === "offline", s = t.status === "corrupted", a = t.status === "restricted", o = t.feedSource === "live";
   return {
     ...t,
-    sceneName: He(t.sceneId),
-    sceneBackground: se(t.sceneId),
+    sceneName: _e(t.sceneId),
+    sceneBackground: oe(t.sceneId),
     regionAspect: t.regionWidth && t.regionHeight ? `${t.regionWidth} / ${t.regionHeight}` : "16 / 9",
     timestamp: n,
     signalLabel: i ? "SIGNAL LOCK" : s ? "SIGNAL CORRUPTED" : a ? "ACCESS DENIED" : "NO SIGNAL",
@@ -249,7 +275,7 @@ function L() {
   const e = game.settings.get(f, "cameras");
   return !e || typeof e != "object" || Array.isArray(e) ? {} : e;
 }
-function oe() {
+function ce() {
   return Object.values(L()).map(v).sort((e, t) => e.name.localeCompare(t.name));
 }
 function x(e) {
@@ -259,28 +285,27 @@ function x(e) {
   return n ? v(n) : null;
 }
 async function R(e) {
-  await game.settings.set(f, "cameras", e), await gt();
+  await game.settings.set(f, "cameras", e), await yt();
 }
-function I(e = "manage security cameras") {
+function F(e = "manage security cameras") {
   var t, n, i;
   return (t = game.user) != null && t.isGM ? !0 : ((i = (n = ui.notifications) == null ? void 0 : n.warn) == null || i.call(n, `Only the GM can ${e}.`), !1);
 }
-function ce(e) {
-  var t;
-  return (t = game.socket) != null && t.emit ? (game.socket.emit(ee, e), !0) : (console.warn(`${f} | Foundry socket is unavailable.`, e), !1);
+function ue(e) {
+  return te.emit(e);
 }
-async function ke(e = {}) {
+async function Ge(e = {}) {
   var r, s;
-  if (!I("register security cameras")) return null;
+  if (!F("register security cameras")) return null;
   const t = q(e);
   if (!t.ok)
     return (s = (r = ui.notifications) == null ? void 0 : r.error) == null || s.call(r, t.errors.join(" ")), null;
-  const n = N(t.camera), i = H(L());
+  const n = A(t.camera), i = H(L());
   return i[n.id] = n, h = n.id, M = n.id, await R(i), n;
 }
-async function ue(e) {
+async function le(e) {
   var a, o;
-  if (!I("delete security cameras")) return !1;
+  if (!F("delete security cameras")) return !1;
   const t = String(e ?? h ?? "");
   if (!t || !x(t))
     return (o = (a = ui.notifications) == null ? void 0 : a.warn) == null || o.call(a, "Select a camera to delete."), !1;
@@ -295,32 +320,32 @@ async function ue(e) {
   const r = H(L());
   return delete r[t], h = Object.keys(r)[0] ?? "", M = h, await R(r), !0;
 }
-async function le(e) {
+async function de(e) {
   var r, s;
-  if (!I("duplicate security cameras")) return null;
+  if (!F("duplicate security cameras")) return null;
   const t = x(e || h);
   if (!t)
     return (s = (r = ui.notifications) == null ? void 0 : r.warn) == null || s.call(r, "Select a camera to duplicate."), null;
   const n = v({
     ...t,
-    id: X(),
+    id: P(),
     name: `${t.name} Copy`
   }), i = H(L());
   return i[n.id] = n, h = n.id, M = n.id, await R(i), n;
 }
-async function de() {
+async function me() {
   var n, i;
-  if (!I("create security cameras")) return null;
+  if (!F("create security cameras")) return null;
   const e = v({
     ...G(),
-    id: X(),
+    id: P(),
     name: "New Camera",
     location: "Unlabeled Location"
   }), t = H(L());
-  return t[e.id] = N(e), h = e.id, M = e.id, await R(t), (i = (n = ui.notifications) == null ? void 0 : n.info) == null || i.call(n, "New security camera created."), e;
+  return t[e.id] = A(e), h = e.id, M = e.id, await R(t), (i = (n = ui.notifications) == null ? void 0 : n.info) == null || i.call(n, "New security camera created."), e;
 }
-function Ye(e) {
-  const t = new FormData(e), n = String(t.get("originalId") ?? "").trim(), i = String(t.get("id") ?? "").trim() || n || X();
+function Be(e) {
+  const t = new FormData(e), n = String(t.get("originalId") ?? "").trim(), i = String(t.get("id") ?? "").trim() || n || P();
   return {
     originalId: n,
     camera: v({
@@ -341,16 +366,16 @@ function Ye(e) {
     })
   };
 }
-async function Ue(e) {
+async function qe(e) {
   var a, o, c, d;
-  if (!I("save security cameras")) return null;
-  const { originalId: t, camera: n } = Ye(e), i = q(n);
+  if (!F("save security cameras")) return null;
+  const { originalId: t, camera: n } = Be(e), i = q(n);
   if (!i.ok)
     return (o = (a = ui.notifications) == null ? void 0 : a.error) == null || o.call(a, i.errors.join(" ")), null;
-  const r = N(i.camera), s = H(L());
+  const r = A(i.camera), s = H(L());
   return t && t !== r.id && delete s[t], s[r.id] = r, h = r.id, M = r.id, await R(s), (d = (c = ui.notifications) == null ? void 0 : c.info) == null || d.call(c, "Security camera saved."), r;
 }
-function Ge(e = h) {
+function Ve(e = h) {
   var n, i, r, s, a, o, c, d;
   const t = x(e);
   if (!Number.isFinite(t == null ? void 0 : t.regionX) || !Number.isFinite(t == null ? void 0 : t.regionY)) {
@@ -372,28 +397,28 @@ function O(e, t) {
   var n;
   return t != null && t[0] ? t[0] : t instanceof HTMLElement ? t : (n = e.element) != null && n[0] ? e.element[0] : e.element ?? null;
 }
-function me() {
-  const e = oe();
+function ge() {
+  const e = ce();
   !h && e.length && (h = e[0].id), M === null && (M = h);
-  const t = x(h), n = M === "" ? G() : x(M) ?? G(), i = F(n);
+  const t = x(h), n = M === "" ? G() : x(M) ?? G(), i = I(n);
   return {
     cameras: e.map((r) => ({
-      ...F(r),
+      ...I(r),
       isSelected: r.id === h
     })),
-    selectedCamera: t ? F(t) : null,
+    selectedCamera: t ? I(t) : null,
     editorCamera: i,
-    sceneChoices: Re(n.sceneId),
-    regionChoices: _e(n.sceneId, n.regionId),
-    feedSourceChoices: U(Te, n.feedSource),
-    statusChoices: U(Ae, n.status),
-    displayModeChoices: U(Ne, n.displayMode),
+    sceneChoices: De(n.sceneId),
+    regionChoices: ke(n.sceneId, n.regionId),
+    feedSourceChoices: U(Oe, n.feedSource),
+    statusChoices: U(He, n.status),
+    displayModeChoices: U(Re, n.displayMode),
     showStaticImageField: n.feedSource === "image",
     hasCameras: e.length > 0,
     isNewCamera: !n.id
   };
 }
-function ge(e) {
+function he(e) {
   const t = e.cameras.map((l) => `
     <button type="button" class="security-camera-list-item ${l.isSelected ? "active" : ""}" data-security-camera-id="${u(l.id)}">
       <span>${u(l.name)}</span>
@@ -461,7 +486,7 @@ function ge(e) {
     </section>
   `;
 }
-function he(e) {
+function fe(e) {
   const n = e.isLive && !e.isOffline && !e.isRestricted ? `<img src="${u(e.liveFrame || e.image || "")}" alt="${u(e.name)}" data-security-camera-live-frame ${e.liveFrame || e.image ? "" : "hidden"}><div class="security-camera-feed-warning" data-security-camera-live-waiting ${e.liveFrame || e.image ? "hidden" : ""}>AWAITING LIVE SIGNAL</div>` : e.canDisplayImage ? `<img src="${u(e.image)}" alt="${u(e.name)}">` : `<div class="security-camera-feed-warning">${u(e.signalLabel)}</div>`;
   return `
     <section class="security-camera-feed ${u(e.statusClass)} ${u(e.sourceClass)} ${u(e.displayClass)}">
@@ -488,7 +513,7 @@ function he(e) {
     </section>
   `;
 }
-function Be(e) {
+function je(e) {
   var i, r, s;
   if (typeof FilePicker > "u") {
     (r = (i = ui.notifications) == null ? void 0 : i.warn) == null || r.call(i, "Foundry FilePicker is not available.");
@@ -503,13 +528,13 @@ function Be(e) {
     }
   }).browse();
 }
-function fe(e, t) {
+function ye(e, t) {
   var r, s;
   const n = O(e, t);
   if (!n) return;
   const i = n.querySelector("[data-security-camera-form]");
   i == null || i.addEventListener("submit", async (a) => {
-    a.preventDefault(), await Ue(i);
+    a.preventDefault(), await qe(i);
   }), (s = (r = i == null ? void 0 : i.elements) == null ? void 0 : r.feedSource) == null || s.addEventListener("change", () => {
     const a = i.querySelector("[data-security-camera-static-image-field]");
     a && (a.hidden = i.elements.feedSource.value !== "image");
@@ -521,27 +546,27 @@ function fe(e, t) {
     a.addEventListener("click", async (o) => {
       const c = o.currentTarget.dataset.securityCameraAction;
       if (c === "new") {
-        await de();
+        await me();
         return;
       }
       if (c === "duplicate") {
-        await le(h);
+        await de(h);
         return;
       }
       if (c === "delete") {
-        await ue(h);
+        await le(h);
         return;
       }
       if (c === "browse-image") {
-        Be(i);
+        je(i);
         return;
       }
       if (c === "pan-region") {
-        Ge(h);
+        Ve(h);
         return;
       }
       if (c === "show") {
-        await Ce(h);
+        await Fe(h);
         return;
       }
       if (c === "close-feed") {
@@ -551,9 +576,9 @@ function fe(e, t) {
     });
   });
 }
-function ye(e) {
+function pe(e) {
   var r, s;
-  const t = (e == null ? void 0 : e.camera) ?? {}, n = D(t.displayMode, B, b.displayMode), i = O(e);
+  const t = (e == null ? void 0 : e.camera) ?? {}, n = D(t.displayMode, B, S.displayMode), i = O(e);
   if (i == null || i.classList.toggle("security-camera-feed-display-window", n === "window"), i == null || i.classList.toggle("security-camera-feed-display-pip", n === "picture-in-picture"), n === "picture-in-picture") {
     const a = Number(t.regionWidth) && Number(t.regionHeight) ? Number(t.regionWidth) / Number(t.regionHeight) : 1.7777777777777777, o = Math.min(620, Math.max(360, window.innerWidth * 0.42)), c = Math.min(460, Math.max(260, window.innerHeight * 0.38));
     let d = o, m = d / a;
@@ -572,18 +597,18 @@ function ye(e) {
     height: "auto"
   });
 }
-function pe(e, t) {
-  O(e, t) && (ye(e), at(e));
+function we(e, t) {
+  O(e, t) && (pe(e), ct(e));
 }
-function we(e) {
+function ve(e) {
   const t = v(e);
   return t.feedSource === "live" && t.status !== "offline" && t.status !== "restricted";
 }
-function qe(e) {
+function ze(e) {
   var t, n;
   return !(!(canvas != null && canvas.ready) || !((t = canvas == null ? void 0 : canvas.app) != null && t.renderer) || e.sceneId && ((n = canvas.scene) == null ? void 0 : n.id) !== e.sceneId);
 }
-function Ve() {
+function Je() {
   var n, i, r, s, a;
   const e = (n = canvas == null ? void 0 : canvas.app) == null ? void 0 : n.renderer, t = [
     (i = canvas == null ? void 0 : canvas.app) == null ? void 0 : i.stage,
@@ -599,9 +624,9 @@ function Ve() {
   }
   return (e == null ? void 0 : e.view) ?? ((a = canvas == null ? void 0 : canvas.app) == null ? void 0 : a.view) ?? null;
 }
-function je(e, t) {
+function Ke(e, t) {
   var a, o, c, d, m, l;
-  const n = N(v(t));
+  const n = A(v(t));
   if (!(Number.isFinite(n.regionX) && Number.isFinite(n.regionY)))
     return {
       sx: 0,
@@ -635,22 +660,22 @@ function je(e, t) {
     sh: e.height
   };
 }
-function ve(e, t) {
+function Se(e, t) {
   const n = Math.max(0, Math.min(t.width - 1, Math.round(e.sx))), i = Math.max(0, Math.min(t.height - 1, Math.round(e.sy))), r = Math.max(1, Math.min(t.width - n, Math.round(e.sw))), s = Math.max(1, Math.min(t.height - i, Math.round(e.sh)));
   return { sx: n, sy: i, sw: r, sh: s };
 }
-function ze(e = "") {
+function Qe(e = "") {
   var r, s, a, o, c;
-  const t = k(e), i = (t == null ? void 0 : t.id) && ((r = canvas == null ? void 0 : canvas.scene) == null ? void 0 : r.id) === t.id ? canvas.dimensions : null;
+  const t = X(e), i = (t == null ? void 0 : t.id) && ((r = canvas == null ? void 0 : canvas.scene) == null ? void 0 : r.id) === t.id ? canvas.dimensions : null;
   return {
     x: p((i == null ? void 0 : i.sceneX) ?? ((s = i == null ? void 0 : i.sceneRect) == null ? void 0 : s.x)) ?? 0,
     y: p((i == null ? void 0 : i.sceneY) ?? ((a = i == null ? void 0 : i.sceneRect) == null ? void 0 : a.y)) ?? 0,
     width: w((i == null ? void 0 : i.sceneWidth) ?? ((o = i == null ? void 0 : i.sceneRect) == null ? void 0 : o.width) ?? (t == null ? void 0 : t.width), E),
-    height: w((i == null ? void 0 : i.sceneHeight) ?? ((c = i == null ? void 0 : i.sceneRect) == null ? void 0 : c.height) ?? (t == null ? void 0 : t.height), A)
+    height: w((i == null ? void 0 : i.sceneHeight) ?? ((c = i == null ? void 0 : i.sceneRect) == null ? void 0 : c.height) ?? (t == null ? void 0 : t.height), N)
   };
 }
-function Je(e, t) {
-  const n = N(v(t));
+function Ze(e, t) {
+  const n = A(v(t));
   if (!(Number.isFinite(n.regionX) && Number.isFinite(n.regionY)))
     return {
       sx: 0,
@@ -658,7 +683,7 @@ function Je(e, t) {
       sw: e.naturalWidth,
       sh: e.naturalHeight
     };
-  const r = ze(n.sceneId), s = e.naturalWidth / r.width, a = e.naturalHeight / r.height;
+  const r = Qe(n.sceneId), s = e.naturalWidth / r.width, a = e.naturalHeight / r.height;
   return {
     sx: (n.regionX - r.x) * s,
     sy: (n.regionY - r.y) * a,
@@ -678,23 +703,23 @@ function be(e) {
   });
   return Y.set(e, t), t;
 }
-async function Ke(e = {}) {
-  const n = se(e.sceneId) || e.image, i = await be(n);
+async function et(e = {}) {
+  const n = oe(e.sceneId) || e.image, i = await be(n);
   if (!(i != null && i.naturalWidth) || !(i != null && i.naturalHeight)) return "";
-  const r = ve(Je(i, e), {
+  const r = Se(Ze(i, e), {
     width: i.naturalWidth,
     height: i.naturalHeight
-  }), s = Math.min(1, ae / r.sw), a = Math.max(1, Math.round(r.sw * s)), o = Math.max(1, Math.round(r.sh * s)), c = document.createElement("canvas");
+  }), s = Math.min(1, se / r.sw), a = Math.max(1, Math.round(r.sw * s)), o = Math.max(1, Math.round(r.sh * s)), c = document.createElement("canvas");
   c.width = a, c.height = o;
   const d = c.getContext("2d");
-  d.drawImage(i, r.sx, r.sy, r.sw, r.sh, 0, 0, a, o), await nt(d, e, r, a, o);
+  d.drawImage(i, r.sx, r.sy, r.sw, r.sh, 0, 0, a, o), await at(d, e, r, a, o);
   try {
     return c.toDataURL("image/webp", 0.72);
   } catch (m) {
     return console.warn(`${f} | Scene background crop failed.`, m), "";
   }
 }
-function Qe(e) {
+function tt(e) {
   var s, a;
   const t = e == null ? void 0 : e.document;
   if (!t) return null;
@@ -706,21 +731,21 @@ function Qe(e) {
     height: w(t.height, 1) * n
   };
 }
-function Ze(e, t) {
+function nt(e, t) {
   return e.x < t.x + t.width && e.x + e.width > t.x && e.y < t.y + t.height && e.y + e.height > t.y;
 }
-function et(e) {
+function it(e) {
   var t;
   return !(!(e != null && e.document) || e.document.hidden && !((t = game.user) != null && t.isGM) || e.visible === !1 || e.renderable === !1 || e.isVisible === !1);
 }
-function tt(e) {
+function rt(e) {
   var t, n, i, r, s;
   return String(((n = (t = e == null ? void 0 : e.document) == null ? void 0 : t.texture) == null ? void 0 : n.src) ?? ((r = (i = e == null ? void 0 : e.document) == null ? void 0 : i.actor) == null ? void 0 : r.img) ?? ((s = e == null ? void 0 : e.actor) == null ? void 0 : s.img) ?? "").trim();
 }
-async function nt(e, t, n, i, r) {
+async function at(e, t, n, i, r) {
   var o, c;
   if (!(canvas != null && canvas.ready) || ((o = canvas.scene) == null ? void 0 : o.id) !== t.sceneId) return;
-  const s = N(v(t)), a = {
+  const s = A(v(t)), a = {
     x: s.regionX,
     y: s.regionY,
     width: s.regionWidth,
@@ -728,16 +753,16 @@ async function nt(e, t, n, i, r) {
   };
   if ([a.x, a.y, a.width, a.height].every(Number.isFinite))
     for (const d of ((c = canvas.tokens) == null ? void 0 : c.placeables) ?? []) {
-      if (!et(d)) continue;
-      const m = Qe(d);
-      if (!m || !Ze(m, a)) continue;
-      const l = tt(d), g = await be(l);
+      if (!it(d)) continue;
+      const m = tt(d);
+      if (!m || !nt(m, a)) continue;
+      const l = rt(d), g = await be(l);
       if (!(g != null && g.naturalWidth) || !(g != null && g.naturalHeight)) continue;
-      const C = (m.x - a.x) / a.width * i, _ = (m.y - a.y) / a.height * r, Fe = m.width / a.width * i, $e = m.height / a.height * r;
-      e.save(), e.globalAlpha = d.document.alpha ?? 1, e.drawImage(g, C, _, Fe, $e), e.restore();
+      const C = (m.x - a.x) / a.width * i, _ = (m.y - a.y) / a.height * r, $e = m.width / a.width * i, xe = m.height / a.height * r;
+      e.save(), e.globalAlpha = d.document.alpha ?? 1, e.drawImage(g, C, _, $e, xe), e.restore();
     }
 }
-function it(e) {
+function st(e) {
   const t = e.getContext("2d", { willReadFrequently: !0 });
   if (!t) return !1;
   const n = Math.min(48, e.width), i = Math.min(48, e.height), r = t.getImageData(0, 0, n, i).data;
@@ -747,11 +772,11 @@ function it(e) {
     s += r[o] + r[o + 1] + r[o + 2];
   return s / (a * 3) < 3;
 }
-function rt(e = {}) {
-  const t = Ve();
+function ot(e = {}) {
+  const t = Je();
   if (!(t != null && t.width) || !(t != null && t.height)) return "";
-  const n = ve(je(t, e), t), i = Math.min(1, ae / n.sw), r = Math.max(1, Math.round(n.sw * i)), s = Math.max(1, Math.round(n.sh * i)), a = document.createElement("canvas");
-  if (a.width = r, a.height = s, a.getContext("2d").drawImage(t, n.sx, n.sy, n.sw, n.sh, 0, 0, r, s), it(a)) return "";
+  const n = Se(Ke(t, e), t), i = Math.min(1, se / n.sw), r = Math.max(1, Math.round(n.sw * i)), s = Math.max(1, Math.round(n.sh * i)), a = document.createElement("canvas");
+  if (a.width = r, a.height = s, a.getContext("2d").drawImage(t, n.sx, n.sy, n.sw, n.sh, 0, 0, r, s), st(a)) return "";
   try {
     return a.toDataURL("image/webp", 0.62);
   } catch (c) {
@@ -760,28 +785,28 @@ function rt(e = {}) {
 }
 async function z(e) {
   var n;
-  if (!we(e == null ? void 0 : e.camera)) return;
+  if (!ve(e == null ? void 0 : e.camera)) return;
   let t = "";
-  qe(e.camera) && (t = rt(e.camera)), t || (t = await Ke(e.camera)), t && await ((n = e.updateLiveFrame) == null ? void 0 : n.call(e, t));
+  ze(e.camera) && (t = ot(e.camera)), t || (t = await et(e.camera)), t && await ((n = e.updateLiveFrame) == null ? void 0 : n.call(e, t));
 }
 function V(e) {
   e != null && e.liveFrameTimer && (window.clearInterval(e.liveFrameTimer), e.liveFrameTimer = null);
 }
-function at(e) {
-  V(e), we(e == null ? void 0 : e.camera) && (z(e), e.liveFrameTimer = window.setInterval(() => {
+function ct(e) {
+  V(e), ve(e == null ? void 0 : e.camera) && (z(e), e.liveFrameTimer = window.setInterval(() => {
     z(e);
-  }, Ee));
+  }, Te));
 }
 var J, K;
 const W = (K = (J = foundry == null ? void 0 : foundry.applications) == null ? void 0 : J.api) == null ? void 0 : K.ApplicationV2;
 var Q, Z;
-const P = (Z = (Q = foundry == null ? void 0 : foundry.applications) == null ? void 0 : Q.api) == null ? void 0 : Z.HandlebarsApplicationMixin;
-class st extends Application {
+const k = (Z = (Q = foundry == null ? void 0 : foundry.applications) == null ? void 0 : Q.api) == null ? void 0 : Z.HandlebarsApplicationMixin;
+class ut extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "security-camera-monitor",
       title: "Security Camera Manager",
-      template: te,
+      template: ne,
       classes: ["security-camera-window"],
       popOut: !0,
       resizable: !0,
@@ -790,31 +815,31 @@ class st extends Application {
     });
   }
   getData() {
-    return me();
+    return ge();
   }
   async _renderInner(t) {
     try {
       return await super._renderInner(t);
     } catch (n) {
-      return console.warn(`${f} | Monitor template render failed, using inline fallback.`, n), $(ge(t));
+      return console.warn(`${f} | Monitor template render failed, using inline fallback.`, n), $(he(t));
     }
   }
   activateListeners(t) {
-    super.activateListeners(t), fe(this, t);
+    super.activateListeners(t), ye(this, t);
   }
   async close(t) {
     return y === this && (y = null), super.close(t);
   }
 }
-class ot extends Application {
+class lt extends Application {
   constructor(t, n = {}) {
-    super(n), this.camera = F(t), this.liveFrame = n.liveFrame ?? "", this.liveFrameTimer = null;
+    super(n), this.camera = I(t), this.liveFrame = n.liveFrame ?? "", this.liveFrameTimer = null;
   }
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "security-camera-feed",
       title: "Camera Feed",
-      template: ne,
+      template: ie,
       classes: ["security-camera-feed-window"],
       popOut: !0,
       resizable: !0,
@@ -823,7 +848,7 @@ class ot extends Application {
     });
   }
   getData() {
-    return this.camera = F(this.camera), {
+    return this.camera = I(this.camera), {
       camera: {
         ...this.camera,
         liveFrame: this.liveFrame,
@@ -835,14 +860,14 @@ class ot extends Application {
     try {
       return await super._renderInner(t);
     } catch (n) {
-      return console.warn(`${f} | Feed template render failed, using inline fallback.`, n), $(he({
+      return console.warn(`${f} | Feed template render failed, using inline fallback.`, n), $(fe({
         ...this.camera,
         liveFrame: this.liveFrame
       }));
     }
   }
   activateListeners(t) {
-    super.activateListeners(t), pe(this, t);
+    super.activateListeners(t), we(this, t);
   }
   async updateLiveFrame(t) {
     var s, a;
@@ -855,16 +880,16 @@ class ot extends Application {
     await this.render(!0);
   }
   async close(t) {
-    return V(this), S === this && (S = null), super.close(t);
+    return V(this), b === this && (b = null), super.close(t);
   }
 }
-function ct() {
+function dt() {
   var e;
-  return !W || !P ? null : (e = class extends P(W) {
+  return !W || !k ? null : (e = class extends k(W) {
     async _prepareContext(n) {
       return {
         ...await super._prepareContext(n),
-        ...me()
+        ...ge()
       };
     }
     async _renderHTML(n, i) {
@@ -873,12 +898,12 @@ function ct() {
       } catch (r) {
         console.warn(`${f} | Monitor template render failed, using inline fallback.`, r);
         const s = document.createElement("template");
-        return s.innerHTML = ge(n).trim(), s.content;
+        return s.innerHTML = he(n).trim(), s.content;
       }
     }
     _onRender(n, i) {
       var r;
-      (r = super._onRender) == null || r.call(this, n, i), fe(this);
+      (r = super._onRender) == null || r.call(this, n, i), ye(this);
     }
     async close(n) {
       return y === this && (y = null), super.close(n);
@@ -897,18 +922,18 @@ function ct() {
     }
   }), T(e, "PARTS", {
     main: {
-      template: te
+      template: ne
     }
   }), e);
 }
-function ut() {
+function mt() {
   var e;
-  return !W || !P ? null : (e = class extends P(W) {
+  return !W || !k ? null : (e = class extends k(W) {
     constructor(n, i = {}) {
-      super(i), this.camera = F(n), this.liveFrame = i.liveFrame ?? "", this.liveFrameTimer = null;
+      super(i), this.camera = I(n), this.liveFrame = i.liveFrame ?? "", this.liveFrameTimer = null;
     }
     async _prepareContext(n) {
-      return this.camera = F(this.camera), {
+      return this.camera = I(this.camera), {
         ...await super._prepareContext(n),
         camera: {
           ...this.camera,
@@ -923,7 +948,7 @@ function ut() {
       } catch (r) {
         console.warn(`${f} | Feed template render failed, using inline fallback.`, r);
         const s = document.createElement("template");
-        return s.innerHTML = he({
+        return s.innerHTML = fe({
           ...this.camera,
           liveFrame: this.liveFrame
         }).trim(), s.content;
@@ -931,7 +956,7 @@ function ut() {
     }
     _onRender(n, i) {
       var r;
-      (r = super._onRender) == null || r.call(this, n, i), pe(this);
+      (r = super._onRender) == null || r.call(this, n, i), we(this);
     }
     async updateLiveFrame(n) {
       var a, o;
@@ -944,7 +969,7 @@ function ut() {
       await this.render(!0);
     }
     async close(n) {
-      return V(this), S === this && (S = null), super.close(n);
+      return V(this), b === this && (b = null), super.close(n);
     }
   }, T(e, "DEFAULT_OPTIONS", {
     id: "security-camera-feed",
@@ -960,74 +985,74 @@ function ut() {
     }
   }), T(e, "PARTS", {
     main: {
-      template: ne
+      template: ie
     }
   }), e);
 }
-const lt = ct() ?? st, dt = ut() ?? ot;
-async function Se() {
+const gt = dt() ?? ut, ht = mt() ?? lt;
+async function Me() {
   var e;
-  return I("open the Security Camera Manager") ? y ? ((e = y.bringToFront) == null || e.call(y), y) : (y = new lt(), await y.render(!0), y) : null;
+  return F("open the Security Camera Manager") ? y ? ((e = y.bringToFront) == null || e.call(y), y) : (y = new gt(), await y.render(!0), y) : null;
 }
-async function mt() {
+async function ft() {
   if (!y) return;
   const e = y;
   y = null, await e.close();
 }
-async function Me(e, t = {}) {
+async function Ce(e, t = {}) {
   const n = v(e);
-  return await j(), S = new dt(n, {
+  return await j(), b = new ht(n, {
     liveFrame: t.liveFrame ?? ""
-  }), await S.render(!0), ye(S), S;
+  }), await b.render(!0), pe(b), b;
 }
 async function j() {
-  if (!S) return;
-  const e = S;
-  S = null, await e.close();
+  if (!b) return;
+  const e = b;
+  b = null, await e.close();
 }
-async function Ce(e) {
+async function Fe(e) {
   var n, i;
-  if (!I("broadcast camera feeds")) return null;
+  if (!F("broadcast camera feeds")) return null;
   const t = x(e);
-  return t ? (ce({
+  return t ? (ue({
     action: "showFeed",
     gmUserId: game.user.id,
     camera: t
-  }), Me(t)) : ((i = (n = ui.notifications) == null ? void 0 : n.warn) == null || i.call(n, "Security camera not found."), null);
+  }), Ce(t)) : ((i = (n = ui.notifications) == null ? void 0 : n.warn) == null || i.call(n, "Security camera not found."), null);
 }
 function Ie() {
-  I("close player camera feeds") && (ce({
+  F("close player camera feeds") && (ue({
     action: "closeFeed",
     gmUserId: game.user.id
   }), j());
 }
-async function gt() {
+async function yt() {
   y && await y.render(!0);
 }
-async function ht(e) {
-  var i, r, s;
+async function pt(e) {
+  var n, i;
   if (!e || typeof e != "object") return;
-  const t = (i = game.users) == null ? void 0 : i.get(e.gmUserId), n = !!(t != null && t.isGM);
+  const t = te.isGMSender(e.gmUserId);
   if (e.action === "showFeed") {
-    if ((r = game.user) != null && r.isGM) return;
-    if (!n) {
+    if ((n = game.user) != null && n.isGM) return;
+    if (!t) {
       console.warn(`${f} | Ignoring camera feed socket message without a GM sender.`);
       return;
     }
-    const a = q(e.camera);
-    if (!a.ok) {
-      console.warn(`${f} | Ignoring invalid socket camera payload.`, a.errors);
+    const r = q(e.camera);
+    if (!r.ok) {
+      console.warn(`${f} | Ignoring invalid socket camera payload.`, r.errors);
       return;
     }
-    await Me(a.camera);
+    await Ce(r.camera);
     return;
   }
   if (e.action === "closeFeed") {
-    if ((s = game.user) != null && s.isGM || !n) return;
+    if ((i = game.user) != null && i.isGM || !t) return;
     await j();
   }
 }
-function ft() {
+function wt() {
   game.settings.register(f, "cameras", {
     name: "Security Cameras",
     hint: "World-level camera feed definitions for the Security Cameras module.",
@@ -1037,29 +1062,29 @@ function ft() {
     default: {}
   });
 }
-function yt() {
+function vt() {
   const e = {
-    openMonitor: Se,
-    closeMonitor: mt,
-    showFeed: Ce,
-    registerCamera: ke,
-    createNewCamera: de,
-    deleteCamera: ue,
-    duplicateCamera: le,
-    getCameras: oe,
+    openMonitor: Me,
+    closeMonitor: ft,
+    showFeed: Fe,
+    registerCamera: Ge,
+    createNewCamera: me,
+    deleteCamera: le,
+    duplicateCamera: de,
+    getCameras: ce,
     closeFeed: Ie,
     get activeMonitor() {
       return y;
     },
     get activeFeed() {
-      return S;
+      return b;
     }
   };
   game.securityCameras = e;
   const t = game.modules.get(f);
   t && (t.api = e);
 }
-function pt() {
+function St() {
   const e = game.modules.get("holosuite-core"), t = e != null && e.active ? e.api : null;
   return t != null && t.registerApp ? (t.registerApp({
     id: f,
@@ -1068,13 +1093,13 @@ function pt() {
     premium: !1,
     featureId: f,
     description: "Manage camera feeds and broadcast surveillance views.",
-    open: () => Se()
+    open: () => Me()
   }), !0) : !1;
 }
 Hooks.once("init", () => {
-  ft();
+  wt();
 });
 Hooks.once("ready", () => {
   var e, t;
-  yt(), pt(), (t = (e = game.socket) == null ? void 0 : e.on) == null || t.call(e, ee, ht), console.log(`${f} | Ready. Use game.securityCameras.openMonitor()`);
+  vt(), St(), (t = (e = game.socket) == null ? void 0 : e.on) == null || t.call(e, ee, pt), console.log(`${f} | Ready. Use game.securityCameras.openMonitor()`);
 });

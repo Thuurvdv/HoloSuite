@@ -16,6 +16,7 @@
     "dist/main.js"
   ],
   "styles": [
+    "styles/holosuite-tokens.css",
     "styles/holosuite-core.css"
   ],
   "languages": [],

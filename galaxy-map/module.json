@@ -16,6 +16,7 @@
     "dist/main.js"
   ],
   "styles": [
+    "styles/holosuite-tokens.css",
     "styles/galaxy-map-framework.css"
   ],
   "url": "",

@@ -17,8 +17,12 @@
     "shared"
   ],
   "scripts": {
+    "audit": "node scripts/audit-workspace.mjs",
+    "sync:styles": "node scripts/sync-shared-styles.mjs",
+    "prebuild": "npm run sync:styles",
     "build": "npm run build --workspaces --if-present",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "verify": "npm run audit && npm run check && npm run build"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

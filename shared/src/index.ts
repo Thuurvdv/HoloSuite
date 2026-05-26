@@ -23,3 +23,45 @@ export interface HoloSuiteApi {
   checkLicense(force?: boolean): Promise<HoloSuiteLicenseResult>;
   isFeatureAllowed(featureId: string): boolean;
 }
+
+export interface HoloSuiteLogger {
+  log(message: string, ...details: unknown[]): void;
+  warn(message: string, ...details: unknown[]): void;
+  error(message: string, ...details: unknown[]): void;
+}
+
+export interface HoloSuiteSocketOptions {
+  socketName?: string;
+  title?: string;
+}
+
+export function createHoloSuiteLogger(moduleId: string, title = moduleId): HoloSuiteLogger {
+  const prefix = `${title} |`;
+  return {
+    log: (message, ...details) => console.log(prefix, message, ...details),
+    warn: (message, ...details) => console.warn(prefix, message, ...details),
+    error: (message, ...details) => console.error(prefix, message, ...details)
+  };
+}
+
+export function createHoloSuiteSocket(moduleId: string, options: HoloSuiteSocketOptions = {}) {
+  const socketName = options.socketName ?? `module.${moduleId}`;
+  const logger = createHoloSuiteLogger(moduleId, options.title ?? moduleId);
+
+  return {
+    socketName,
+    emit(message: Record<string, unknown>) {
+      const socket = (globalThis as any).game?.socket;
+      if (!socket?.emit) {
+        logger.warn("Foundry socket is unavailable.", message);
+        return false;
+      }
+      socket.emit(socketName, message);
+      return true;
+    },
+    isGMSender(userId: unknown) {
+      if (!userId) return false;
+      return Boolean((globalThis as any).game?.users?.get(String(userId))?.isGM);
+    }
+  };
+}

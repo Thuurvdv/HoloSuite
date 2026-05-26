@@ -17,6 +17,7 @@
     "dist/main.js"
   ],
   "styles": [
+    "styles/holosuite-tokens.css",
     "styles/pulse-scanner.css"
   ],
   "languages": [],

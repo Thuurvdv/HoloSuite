@@ -1,6 +1,12 @@
 // @ts-nocheck
+import { createHoloSuiteSocket } from "../../shared/src/index";
+
 const MODULE_ID = "security-cameras";
 const SOCKET_NAME = `module.${MODULE_ID}`;
+const moduleSocket = createHoloSuiteSocket(MODULE_ID, {
+  socketName: SOCKET_NAME,
+  title: "Security Cameras"
+});
 const MONITOR_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/monitor.hbs`;
 const FEED_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/feed.hbs`;
 
@@ -375,12 +381,7 @@ function requireGM(action = "manage security cameras") {
 }
 
 function emitSocketMessage(message) {
-  if (!game.socket?.emit) {
-    console.warn(`${MODULE_ID} | Foundry socket is unavailable.`, message);
-    return false;
-  }
-  game.socket.emit(SOCKET_NAME, message);
-  return true;
+  return moduleSocket.emit(message);
 }
 
 async function registerCamera(cameraData = {}) {
@@ -1480,8 +1481,7 @@ async function refreshMonitor() {
 
 async function handleSocketMessage(message) {
   if (!message || typeof message !== "object") return;
-  const sender = game.users?.get(message.gmUserId);
-  const isGMSent = Boolean(sender?.isGM);
+  const isGMSent = moduleSocket.isGMSender(message.gmUserId);
 
   if (message.action === "showFeed") {
     if (game.user?.isGM) return;
