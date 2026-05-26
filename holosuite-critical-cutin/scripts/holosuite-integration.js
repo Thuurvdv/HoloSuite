@@ -17,6 +17,7 @@ export function registerHoloSuiteIntegration() {
     title: "Critical Cut-In",
     icon: "fa-solid fa-bolt-lightning",
     premium: false,
+    playerVisible: false,
     description: "JRPG-style critical hit cut-in animation for natural d20 results.",
     enabled: setting(SETTINGS.enabled),
     open: () => openPlayerConfig()

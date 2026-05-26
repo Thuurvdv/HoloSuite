@@ -326,6 +326,7 @@ function ht(s, d) {
       icon: "fa-solid fa-wave-square",
       premium: !1,
       featureId: s,
+      playerVisible: !1,
       description: "Scan scenes, reveal targets, and manage sensor signatures.",
       open: () => {
         var t;

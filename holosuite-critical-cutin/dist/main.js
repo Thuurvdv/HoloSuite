@@ -358,11 +358,11 @@ function H(e) {
 }
 var D, R, q;
 const ve = globalThis.FormApplication ?? ((q = (R = (D = globalThis.foundry) == null ? void 0 : D.appv1) == null ? void 0 : R.api) == null ? void 0 : q.FormApplication);
-function K(e, t) {
+function V(e, t) {
   return `${e}:${t}`;
 }
 function pe() {
-  return K("gm", "default");
+  return V("gm", "default");
 }
 function be(e, t) {
   var n, a, r, o;
@@ -399,7 +399,7 @@ function Ce() {
   for (const r of game.actors ?? []) {
     const o = ((a = game.users) == null ? void 0 : a.filter((l) => !l.isGM && be(l, r)).map((l) => l.name)) ?? [];
     o.length && t.push({
-      key: K("actor", r.id),
+      key: V("actor", r.id),
       type: "actor",
       typeLabel: "Actor",
       id: r.id,
@@ -409,7 +409,7 @@ function Ce() {
   }
   return t.sort((r, o) => r.type === "gm" ? -1 : o.type === "gm" ? 1 : r.name.localeCompare(o.name));
 }
-class V extends ve {
+class K extends ve {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "hcci-player-config",
@@ -487,7 +487,7 @@ class V extends ve {
 }
 function W() {
   var e, t;
-  return (e = game.user) != null && e.isGM ? new V().render(!0) : ((t = ui.notifications) == null || t.warn("Only the GM can configure Critical Cut-In."), null);
+  return (e = game.user) != null && e.isGM ? new K().render(!0) : ((t = ui.notifications) == null || t.warn("Only the GM can configure Critical Cut-In."), null);
 }
 function Se() {
   var i, n, a, r;
@@ -501,6 +501,7 @@ function Q() {
     title: "Critical Cut-In",
     icon: "fa-solid fa-bolt-lightning",
     premium: !1,
+    playerVisible: !1,
     description: "JRPG-style critical hit cut-in animation for natural d20 results.",
     enabled: u(c.enabled),
     open: () => W()
@@ -523,7 +524,7 @@ function J() {
   return t && (t.api = e), game.holosuiteCriticalCutin = e, e;
 }
 Hooks.once("init", async () => {
-  Z(V), J(), await loadTemplates([`modules/${s}/templates/player-config.hbs`]);
+  Z(K), J(), await loadTemplates([`modules/${s}/templates/player-config.hbs`]);
 });
 Hooks.once("ready", () => {
   J(), me(), Q(), console.log(`${s} | Ready. API available at game.modules.get("${s}").api`);

@@ -235,6 +235,7 @@ import {
       icon: "fa-solid fa-wave-square",
       premium: false,
       featureId: MODULE_ID,
+      playerVisible: false,
       description: "Scan scenes, reveal targets, and manage sensor signatures.",
       open: () => game.user?.isGM ? openTargetManager() : scan()
     });
