@@ -22,9 +22,11 @@
 .pulse-scanner-shell {
   min-height: 560px;
   background:
-    linear-gradient(135deg, rgba(69, 214, 255, 0.12), transparent 28%),
-    linear-gradient(315deg, rgba(255, 179, 71, 0.11), transparent 34%),
-    #101214;
+    var(--hs-grid-bg),
+    radial-gradient(circle at 18% 8%, rgba(69, 214, 255, 0.16), transparent 30rem),
+    radial-gradient(circle at 86% 18%, rgba(255, 179, 71, 0.09), transparent 28rem),
+    var(--hs-bg-deep);
+  background-size: 28px 28px, 28px 28px, auto, auto, auto;
 }
 
 .pulse-scanner-header {
@@ -33,19 +35,21 @@
   justify-content: space-between;
   gap: 16px;
   padding: 16px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid var(--hs-line);
+  background: rgba(2, 10, 18, 0.72);
 }
 
 .pulse-scanner-header h2 {
   margin: 0;
   font-size: 22px;
   letter-spacing: 0;
-  color: #ffffff;
+  color: var(--hs-text);
+  text-shadow: var(--hs-glow-cyan);
 }
 
 .pulse-scanner-header p {
   margin: 3px 0 0;
-  color: #aeb8bf;
+  color: var(--hs-muted);
 }
 
 .pulse-scanner-header-actions,
@@ -88,8 +92,8 @@
   min-height: 30px;
   border: 1px solid rgba(125, 249, 255, 0.32);
   border-radius: 6px;
-  background: rgba(19, 32, 36, 0.9);
-  color: #f8fbfc;
+  background: var(--hs-control-bg);
+  color: var(--hs-text);
   cursor: pointer;
 }
 
@@ -99,8 +103,9 @@
 }
 
 .pulse-scanner button.is-active {
-  border-color: rgba(255, 179, 71, 0.9);
-  background: rgba(255, 179, 71, 0.18);
+  border-color: rgba(255, 209, 102, 0.76);
+  background: var(--hs-warning-bg);
+  color: var(--hs-amber);
 }
 
 .pulse-scanner button:disabled {
@@ -116,7 +121,8 @@
 
 .pulse-scanner-list {
   padding: 12px;
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  border-right: 1px solid var(--hs-line);
+  background: rgba(2, 10, 18, 0.52);
   overflow: auto;
 }
 
@@ -127,9 +133,9 @@
   align-items: stretch;
   padding: 10px;
   margin-bottom: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--hs-line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--hs-card-bg);
   cursor: pointer;
 }
 
@@ -164,7 +170,7 @@
 }
 
 .pulse-scanner-target-card small {
-  color: #aeb8bf;
+  color: var(--hs-muted);
 }
 
 .pulse-scanner-target-card.is-resolved small,
@@ -213,7 +219,7 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  color: #d8e1e6;
+  color: var(--hs-muted);
   font-weight: 600;
 }
 
@@ -225,10 +231,10 @@
 .pulse-scanner select,
 .pulse-scanner textarea {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(105, 232, 255, 0.24);
   border-radius: 6px;
-  background: #151d21;
-  color: #ffffff;
+  background: var(--hs-field);
+  color: var(--hs-text);
 }
 
 .pulse-scanner select {
@@ -236,14 +242,14 @@
   background:
     linear-gradient(45deg, transparent 50%, #7df9ff 50%) calc(100% - 15px) 50% / 6px 6px no-repeat,
     linear-gradient(135deg, #7df9ff 50%, transparent 50%) calc(100% - 10px) 50% / 6px 6px no-repeat,
-    #151d21;
-  color: #f8fbfc;
+    var(--hs-field);
+  color: var(--hs-text);
   padding-right: 30px;
 }
 
 .pulse-scanner select option {
-  background: #151d21;
-  color: #f8fbfc;
+  background: var(--hs-bg-deep);
+  color: var(--hs-text);
 }
 
 .pulse-scanner textarea {
@@ -255,7 +261,7 @@
   justify-content: flex-end;
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid var(--hs-line);
 }
 
 .pulse-scanner-empty-state {
@@ -263,12 +269,12 @@
   place-items: center;
   gap: 8px;
   padding: 40px 18px;
-  color: #aeb8bf;
+  color: var(--hs-muted);
   text-align: center;
 }
 
 .pulse-scanner-empty-state i {
-  color: #45d6ff;
+  color: var(--hs-cyan);
   font-size: 28px;
 }
 

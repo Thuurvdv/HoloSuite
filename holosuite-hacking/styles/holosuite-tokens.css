@@ -13,12 +13,227 @@
   --hs-violet: #b48cff;
   --hs-text: #e7faff;
   --hs-muted: #8fb5bf;
+  --hs-dim: #5f7f89;
   --hs-radius: 6px;
   --hs-font-ui: "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif;
   --hs-font-mono: "Cascadia Mono", "Roboto Mono", "Consolas", monospace;
   --hs-glow-cyan: 0 0 16px rgba(105, 232, 255, 0.26);
   --hs-glow-green: 0 0 16px rgba(98, 255, 182, 0.22);
+  --hs-shadow-panel: 0 16px 42px rgba(0, 0, 0, 0.38), inset 0 0 28px rgba(105, 232, 255, 0.08);
+  --hs-shadow-control: inset 0 0 12px rgba(105, 232, 255, 0.08);
+  --hs-surface-bg:
+    linear-gradient(rgba(231, 250, 255, 0.026) 50%, rgba(0, 0, 0, 0.035) 50%) 0 0 / 100% 4px,
+    radial-gradient(circle at 18% 8%, rgba(105, 232, 255, 0.14), transparent 30rem),
+    radial-gradient(circle at 86% 18%, rgba(255, 77, 125, 0.08), transparent 28rem),
+    var(--hs-bg-deep);
+  --hs-panel-bg: linear-gradient(180deg, rgba(12, 30, 42, 0.96), rgba(5, 14, 22, 0.94));
+  --hs-card-bg: linear-gradient(180deg, rgba(14, 35, 46, 0.92), rgba(5, 14, 22, 0.96));
+  --hs-control-bg: linear-gradient(180deg, rgba(20, 46, 58, 0.82), rgba(5, 17, 26, 0.9));
+  --hs-control-bg-hover: linear-gradient(180deg, rgba(29, 68, 82, 0.9), rgba(8, 26, 38, 0.95));
+  --hs-active-bg: linear-gradient(135deg, rgba(105, 232, 255, 0.24), rgba(98, 255, 182, 0.15));
+  --hs-danger-bg: linear-gradient(180deg, rgba(94, 22, 35, 0.84), rgba(42, 7, 17, 0.92));
+  --hs-warning-bg: linear-gradient(180deg, rgba(96, 70, 28, 0.74), rgba(38, 28, 11, 0.9));
   --hs-grid-bg:
     linear-gradient(rgba(105, 232, 255, 0.055) 1px, transparent 1px),
     linear-gradient(90deg, rgba(105, 232, 255, 0.045) 1px, transparent 1px);
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-app,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .holosuite-hacking-start-dialog,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) {
+  color: var(--hs-text);
+  color-scheme: dark;
+  font-family: var(--hs-font-ui);
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-app,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) .window-content {
+  background: var(--hs-surface-bg);
+  color: var(--hs-text);
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-app,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .holosuite-phone,
+  .hcci-config-window,
+  .holosuite-hacking-launcher,
+  .node-intrusion-shell,
+  .signal-alignment-shell,
+  .pulse-scanner,
+  .security-camera-manager,
+  .security-camera-feed
+) :where(button, .dialog-button) {
+  min-height: 30px;
+  border: 1px solid var(--hs-line);
+  border-radius: var(--hs-radius);
+  background: var(--hs-control-bg);
+  color: var(--hs-text);
+  box-shadow: var(--hs-shadow-control);
+  cursor: pointer;
+  font-family: var(--hs-font-ui);
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-app,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .holosuite-phone,
+  .hcci-config-window,
+  .holosuite-hacking-launcher,
+  .node-intrusion-shell,
+  .signal-alignment-shell,
+  .pulse-scanner,
+  .security-camera-manager,
+  .security-camera-feed
+) :where(button, .dialog-button):where(:hover, :focus-visible) {
+  border-color: var(--hs-line-strong);
+  background: var(--hs-control-bg-hover);
+  box-shadow: var(--hs-glow-cyan), var(--hs-shadow-control);
+  outline: none;
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .hcci-config-window,
+  .holosuite-hacking-launcher,
+  .pulse-scanner,
+  .security-camera-manager
+) :where(input, select, textarea) {
+  border: 1px solid rgba(105, 232, 255, 0.24);
+  border-radius: var(--hs-radius);
+  background: var(--hs-field);
+  color: var(--hs-text);
+  box-shadow: inset 0 0 12px rgba(105, 232, 255, 0.06);
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .hcci-config-window,
+  .holosuite-hacking-launcher,
+  .pulse-scanner,
+  .security-camera-manager
+) :where(input, select, textarea):focus {
+  border-color: var(--hs-line-strong);
+  box-shadow: 0 0 0 2px rgba(105, 232, 255, 0.18), inset 0 0 12px rgba(105, 232, 255, 0.08);
+  outline: none;
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map-framework,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .holosuite-phone,
+  .hcci-config-window,
+  .holosuite-hacking-launcher,
+  .node-intrusion-shell,
+  .signal-alignment-shell,
+  .pulse-scanner,
+  .security-camera-manager
+) :where(.bb-kicker, .csi-kicker, .gmf-kicker, .holocall-kicker, .holocall-composer-kicker, .holocall-contacts-kicker, .holosuite-kicker, .hcci-kicker, .node-intrusion-kicker, .signal-alignment-kicker, .pulse-scanner-kicker, .security-camera-kicker) {
+  color: var(--hs-cyan);
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+:where(
+  .bb-card,
+  .bb-chat-card,
+  .csi-manager-section,
+  .csi-editor-card,
+  .csi-card,
+  .csi-report,
+  .csi-board-section,
+  .gmf-map-card,
+  .gmf-manager-preview__panel,
+  .gmf-crud-section,
+  .gmf-dialog-row,
+  .holocall-composer,
+  .holocall-contacts,
+  .holosuite-app-tile,
+  .hcci-config-row,
+  .node-intrusion-map,
+  .signal-alignment-board,
+  .signal-channel,
+  .pulse-scanner-target-card,
+  .security-camera-monitor-list,
+  .security-camera-monitor-preview,
+  .security-camera-editor
+) {
+  border-color: var(--hs-line);
+  background: var(--hs-card-bg);
+  box-shadow: var(--hs-shadow-panel);
+}
+
+:where(
+  .bb-empty,
+  .csi-empty-state,
+  .csi-empty-workspace,
+  .gmf-empty,
+  .hcci-empty,
+  .pulse-scanner-empty-state,
+  .security-camera-empty
+) {
+  border-color: var(--hs-line);
+  color: var(--hs-muted);
 }

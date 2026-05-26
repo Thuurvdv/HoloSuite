@@ -10,7 +10,7 @@
   --hs-text: #e7faff;
   --hs-muted: #8fb5bf;
   --hs-font-mono: "Cascadia Mono", "Roboto Mono", "Consolas", monospace;
-  --security-camera-bg: #04100f;
+  --security-camera-bg: var(--hs-bg-deep);
   --security-camera-panel: var(--hs-panel);
   --security-camera-blue: var(--hs-cyan);
   --security-camera-green: var(--hs-green);
@@ -19,7 +19,7 @@
   --security-camera-text: var(--hs-text);
   --security-camera-muted: var(--hs-muted);
   --security-camera-line: var(--hs-line);
-  --security-camera-field: rgba(1, 10, 10, 0.88);
+  --security-camera-field: var(--hs-field);
 }
 
 .security-camera-window,
@@ -31,7 +31,7 @@
 .security-camera-feed-window .window-content {
   padding: 0;
   overflow: hidden;
-  background: #020707;
+  background: var(--hs-surface-bg);
   border: 1px solid var(--security-camera-line);
 }
 
@@ -41,8 +41,8 @@
   gap: 14px;
   padding: 14px;
   background:
-    linear-gradient(rgba(109, 255, 176, 0.055) 50%, transparent 50%) 0 0 / 100% 4px,
-    radial-gradient(circle at 12% 4%, rgba(72, 199, 255, 0.15), transparent 31%),
+    linear-gradient(rgba(231, 250, 255, 0.026) 50%, rgba(0, 0, 0, 0.035) 50%) 0 0 / 100% 4px,
+    radial-gradient(circle at 12% 4%, rgba(72, 199, 255, 0.16), transparent 31%),
     radial-gradient(circle at 92% 16%, rgba(255, 78, 106, 0.08), transparent 30%),
     var(--security-camera-bg);
   font-family: var(--hs-font-mono);
@@ -53,8 +53,8 @@
 .security-camera-editor {
   min-width: 0;
   border: 1px solid var(--security-camera-line);
-  background: rgba(2, 12, 12, 0.88);
-  box-shadow: inset 0 0 22px rgba(109, 255, 176, 0.08), 0 0 18px rgba(72, 199, 255, 0.08);
+  background: var(--hs-card-bg);
+  box-shadow: var(--hs-shadow-panel);
 }
 
 .security-camera-monitor-list,
@@ -95,10 +95,10 @@
 .security-camera-manager h3,
 .security-camera-feed h2 {
   margin: 2px 0 0;
-  color: #e9fffa;
+  color: var(--hs-text);
   font-size: 20px;
   line-height: 1.15;
-  text-shadow: 0 0 10px rgba(109, 255, 176, 0.42);
+  text-shadow: var(--hs-glow-cyan);
 }
 
 .security-camera-list {
@@ -118,14 +118,14 @@
   padding: 9px 10px;
   color: var(--security-camera-text);
   text-align: left;
-  background: rgba(5, 28, 28, 0.92);
-  border: 1px solid rgba(72, 199, 255, 0.16);
+  background: var(--hs-card-bg);
+  border: 1px solid rgba(105, 232, 255, 0.18);
 }
 
 .security-camera-list-item:hover,
 .security-camera-list-item.active {
-  border-color: var(--security-camera-green);
-  box-shadow: inset 0 0 18px rgba(109, 255, 176, 0.12), 0 0 12px rgba(109, 255, 176, 0.12);
+  border-color: var(--hs-line-strong);
+  box-shadow: var(--hs-glow-cyan);
 }
 
 .security-camera-list-item span,
@@ -246,7 +246,7 @@
   min-height: 30px;
   color: var(--security-camera-text);
   background: var(--security-camera-field);
-  border: 1px solid rgba(72, 199, 255, 0.26);
+  border: 1px solid rgba(105, 232, 255, 0.24);
   font-family: "Roboto Mono", "Consolas", monospace;
   font-size: 12px;
 }
@@ -268,17 +268,17 @@
   min-height: 32px;
   padding: 0 10px;
   color: var(--security-camera-text);
-  background: rgba(72, 199, 255, 0.12);
-  border: 1px solid rgba(72, 199, 255, 0.44);
+  background: var(--hs-control-bg);
+  border: 1px solid rgba(105, 232, 255, 0.36);
   text-transform: uppercase;
 }
 
 .security-camera-list-actions button:hover,
 .security-camera-preview-actions button:hover,
 .security-camera-editor-actions button:hover {
-  color: #04100f;
-  background: var(--security-camera-green);
-  border-color: var(--security-camera-green);
+  color: var(--hs-text);
+  background: var(--hs-control-bg-hover);
+  border-color: var(--hs-line-strong);
 }
 
 .security-camera-feed {
@@ -287,9 +287,9 @@
   padding: 16px;
   min-height: 100%;
   background:
-    linear-gradient(rgba(109, 255, 176, 0.07) 50%, transparent 50%) 0 0 / 100% 4px,
+    linear-gradient(rgba(231, 250, 255, 0.035) 50%, transparent 50%) 0 0 / 100% 4px,
     radial-gradient(circle at 80% 0%, rgba(72, 199, 255, 0.18), transparent 30%),
-    #010707;
+    var(--hs-bg-deep);
   border: 1px solid var(--security-camera-line);
   font-family: "Roboto Mono", "Consolas", monospace;
 }

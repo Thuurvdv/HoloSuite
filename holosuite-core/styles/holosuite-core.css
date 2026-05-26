@@ -15,7 +15,7 @@
 }
 
 .holosuite-launcher-window .window-content {
-  background: var(--hs-bg-deep);
+  background: var(--hs-surface-bg);
   padding: 0;
   overflow: hidden;
 }
@@ -28,10 +28,10 @@
 
 .holosuite-phone-shell {
   background:
-    linear-gradient(145deg, rgba(33, 244, 255, 0.14), transparent 32%),
-    linear-gradient(180deg, #0b1b24 0%, #03070b 100%);
-  border: 1px solid rgba(105, 236, 255, 0.5);
-  box-shadow: inset 0 0 36px rgba(38, 216, 255, 0.16), 0 18px 60px rgba(0, 0, 0, 0.55);
+    radial-gradient(circle at 18% 8%, rgba(105, 232, 255, 0.16), transparent 28rem),
+    var(--hs-panel-bg);
+  border: 1px solid var(--hs-line-strong);
+  box-shadow: var(--hs-shadow-panel);
   min-height: 640px;
   padding: 18px;
 }
@@ -44,7 +44,7 @@
 }
 
 .holosuite-status-bar {
-  color: #7defff;
+  color: var(--hs-cyan);
   font-size: 12px;
   letter-spacing: 0;
   margin-bottom: 14px;
@@ -53,11 +53,10 @@
 
 .holosuite-screen {
   background:
-    linear-gradient(rgba(120, 238, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 238, 255, 0.05) 1px, transparent 1px),
+    var(--hs-grid-bg),
     rgba(2, 12, 18, 0.86);
   background-size: 24px 24px;
-  border: 1px solid rgba(125, 239, 255, 0.32);
+  border: 1px solid var(--hs-line);
   min-height: 540px;
   padding: 18px;
 }
@@ -70,14 +69,14 @@
 }
 
 .holosuite-kicker {
-  color: #ffcf6a;
+  color: var(--hs-amber);
   display: block;
   font-size: 11px;
   text-transform: uppercase;
 }
 
 .holosuite-screen h2 {
-  color: #f4feff;
+  color: var(--hs-text);
   font-size: 28px;
   font-weight: 600;
   line-height: 1.1;
@@ -87,9 +86,9 @@
 .holosuite-refresh,
 .holosuite-dock button {
   align-items: center;
-  background: rgba(18, 48, 60, 0.88);
-  border: 1px solid rgba(125, 239, 255, 0.45);
-  color: #d9fbff;
+  background: var(--hs-control-bg);
+  border: 1px solid var(--hs-line);
+  color: var(--hs-text);
   display: inline-flex;
   height: 34px;
   justify-content: center;
@@ -103,9 +102,9 @@
 }
 
 .holosuite-app-tile {
-  background: rgba(9, 31, 42, 0.9);
-  border: 1px solid rgba(93, 227, 255, 0.38);
-  color: #e5fbff;
+  background: var(--hs-card-bg);
+  border: 1px solid var(--hs-line);
+  color: var(--hs-text);
   cursor: pointer;
   min-height: 132px;
   padding: 14px;
@@ -114,7 +113,7 @@
 }
 
 .holosuite-app-tile:hover {
-  border-color: #ffcf6a;
+  border-color: var(--hs-amber);
   box-shadow: inset 0 0 24px rgba(255, 207, 106, 0.13);
 }
 
@@ -126,8 +125,8 @@
 
 .holosuite-app-icon {
   align-items: center;
-  border: 1px solid rgba(125, 239, 255, 0.35);
-  color: #7defff;
+  border: 1px solid var(--hs-line);
+  color: var(--hs-cyan);
   display: inline-flex;
   font-size: 20px;
   height: 42px;
@@ -144,7 +143,7 @@
 }
 
 .holosuite-app-tile p {
-  color: #a7cfd8;
+  color: var(--hs-muted);
   font-family: system-ui, sans-serif;
   font-size: 12px;
   line-height: 1.35;
@@ -152,7 +151,7 @@
 }
 
 .holosuite-app-badge {
-  color: #ffcf6a;
+  color: var(--hs-amber);
   font-size: 10px;
   position: absolute;
   right: 10px;
@@ -161,8 +160,8 @@
 }
 
 .holosuite-empty {
-  border: 1px dashed rgba(125, 239, 255, 0.3);
-  color: #a7cfd8;
+  border: 1px dashed var(--hs-line);
+  color: var(--hs-muted);
   font-family: system-ui, sans-serif;
   grid-column: 1 / -1;
   margin: 0;
