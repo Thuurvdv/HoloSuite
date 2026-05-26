@@ -320,7 +320,7 @@
     const selectedTypes = normalizeTypeFilter(options.types);
     const selectedModes = normalizeModeFilter(options.modes ?? options.mode);
     const origin = getTokenCenter(token);
-    const targets = getTargets(canvas.scene.id);
+    const targets = getSceneTargets(canvas.scene.id);
     const detected = targets.filter((target) => targetMatchesScan(target, origin, radius, selectedTypes, selectedModes));
     const duration = Number(options.duration ?? game.settings.get(MODULE_ID, "defaultHighlightDuration"));
 
@@ -380,9 +380,11 @@
   }
 
   function getTargets(sceneId = canvas?.scene?.id) {
-    return getSceneTargets(sceneId).map((target) => game.user?.isGM
-      ? foundry.utils.deepClone(target)
-      : sanitizeTargetForPulse(target, true));
+    return getSceneTargets(sceneId)
+      .filter((target) => game.user?.isGM || target.visibility === "revealed" || target.visibility === "always")
+      .map((target) => game.user?.isGM
+        ? foundry.utils.deepClone(target)
+        : sanitizeTargetForPulse(target, true));
   }
 
   function getSceneTargets(sceneId = canvas?.scene?.id) {
@@ -633,6 +635,8 @@
   }
 
   function sanitizeTargetForPulse(target, playerView) {
+    const hiddenFromPlayer = playerView && target.visibility === "gm";
+    const safeTypeLabel = TYPE_META[target.type]?.label || labelize(target.type);
     const clean = {
       id: target.id,
       sceneId: target.sceneId,
@@ -644,10 +648,10 @@
       height: target.height,
       mode: target.mode,
       type: target.type,
-      label: target.label,
-      description: target.description,
-      integrity: target.integrity,
-      difficulty: target.difficulty,
+      label: hiddenFromPlayer ? `${safeTypeLabel} Signature` : target.label,
+      description: hiddenFromPlayer ? "" : target.description,
+      integrity: hiddenFromPlayer && target.type !== "breakable" ? null : target.integrity,
+      difficulty: hiddenFromPlayer ? null : target.difficulty,
       visibility: target.visibility,
       status: target.status,
       color: target.color,

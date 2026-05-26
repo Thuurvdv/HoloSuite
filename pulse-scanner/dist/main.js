@@ -1,6 +1,6 @@
 (() => {
   var $e, Ee;
-  const u = "pulse-scanner", g = "Pulse Scanner", V = `module.${u}`, F = `modules/${u}/templates`, v = "targets", J = "structural", G = "breakable", E = "circle", R = [
+  const u = "pulse-scanner", g = "Pulse Scanner", J = `module.${u}`, F = `modules/${u}/templates`, v = "targets", K = "structural", G = "breakable", E = "circle", z = [
     "breakable",
     "hidden",
     "trap",
@@ -11,7 +11,7 @@
     "evidence",
     "loot",
     "custom"
-  ], K = ["gm", "revealed", "always"], Q = ["active", "revealed", "resolved"], H = ["circle", "rectangle"], A = ["structural", "arcane", "thermal", "forensic", "tech", "biological"], _ = {
+  ], V = ["gm", "revealed", "always"], Q = ["active", "revealed", "resolved"], H = ["circle", "rectangle"], A = ["structural", "arcane", "thermal", "forensic", "tech", "biological"], R = {
     structural: { label: "Structural", color: "#ffb347", icon: "fa-solid fa-building-shield", types: ["breakable", "hidden"] },
     arcane: { label: "Arcane", color: "#c77dff", icon: "fa-solid fa-wand-sparkles", types: ["magic", "hidden", "custom"] },
     thermal: { label: "Thermal", color: "#ff4d6d", icon: "fa-solid fa-temperature-high", types: ["trap", "biological", "radiation"] },
@@ -54,9 +54,9 @@
     liveMarker: null,
     liveUpdates: null,
     latestScan: null
-  }, ze = globalThis.Application ?? ((Ee = ($e = foundry.appv1) == null ? void 0 : $e.api) == null ? void 0 : Ee.Application);
+  }, Le = globalThis.Application ?? ((Ee = ($e = foundry.appv1) == null ? void 0 : $e.api) == null ? void 0 : Ee.Application);
   Hooks.once("init", async () => {
-    Le(), Re(), await loadTemplates([
+    ze(), Re(), await loadTemplates([
       `${F}/target-manager.hbs`,
       `${F}/target-form.hbs`
     ]), console.log(`${g} | Initialized`);
@@ -64,12 +64,12 @@
     var n;
     game.pulseScanner = _e();
     const e = game.modules.get(u);
-    e && (e.api = game.pulseScanner), De(), (n = game.socket) == null || n.on(V, Ye), console.log(`${g} | API available at game.pulseScanner`);
+    e && (e.api = game.pulseScanner), De(), (n = game.socket) == null || n.on(J, Ye), console.log(`${g} | API available at game.pulseScanner`);
   }), Hooks.on("canvasReady", nn), Hooks.on("canvasReady", O), Hooks.on("updateScene", (e, n = {}) => {
     var t, r, a;
     s.draggingMarker || s.resizingMarker || e.id === ((t = canvas == null ? void 0 : canvas.scene) == null ? void 0 : t.id) && ((a = (r = n.flags) == null ? void 0 : r[u]) != null && a[v]) && O();
   });
-  function Le() {
+  function ze() {
     game.settings.register(u, "defaultScanRadius", {
       name: "Default Scan Radius",
       hint: "The default pulse radius in scene pixels.",
@@ -117,10 +117,10 @@
   function Re() {
     Handlebars.registerHelper("psOption", (e, n) => e === n ? "selected" : ""), Handlebars.registerHelper("psFallback", (e, n) => e || n), Handlebars.registerHelper("psEq", (e, n) => e === n), Handlebars.registerHelper("psTypeLabel", (e) => {
       var n;
-      return ((n = m[e]) == null ? void 0 : n.label) ?? I(e);
+      return ((n = m[e]) == null ? void 0 : n.label) ?? T(e);
     }), Handlebars.registerHelper("psModeLabel", (e) => {
       var n;
-      return ((n = _[e]) == null ? void 0 : n.label) ?? I(e);
+      return ((n = R[e]) == null ? void 0 : n.label) ?? T(e);
     });
   }
   function _e() {
@@ -128,7 +128,7 @@
       openTargetManager: ee,
       scan: X,
       createTarget: B,
-      getTargets: z,
+      getTargets: _,
       deleteTarget: ne,
       revealTarget: j,
       revealLatestScan: te,
@@ -156,10 +156,10 @@
     }), !0) : !1;
   }
   function Z(e) {
-    return x("place scan targets") ? (s.placementActive = typeof e == "boolean" ? e : !s.placementActive, O(), s.placementActive) : !1;
+    return I("place scan targets") ? (s.placementActive = typeof e == "boolean" ? e : !s.placementActive, O(), s.placementActive) : !1;
   }
   function Oe(e) {
-    return x("place scan targets") ? (s.placementShape = H.includes(e) ? e : E, s.placementActive = !0, k(), s.placementShape) : E;
+    return I("place scan targets") ? (s.placementShape = H.includes(e) ? e : E, s.placementActive = !0, x(), s.placementShape) : E;
   }
   function ee() {
     var e;
@@ -174,7 +174,7 @@
     const n = sn(e.tokenId);
     if (!n)
       return console.warn(`${g}: select a token or pass tokenId.`), [];
-    const t = Number(e.radius ?? game.settings.get(u, "defaultScanRadius")), r = Xe(e.types), a = Be(e.modes ?? e.mode), i = Se(n), o = z(canvas.scene.id).filter((C) => Ue(C, i, t, r, a)), c = Number(e.duration ?? game.settings.get(u, "defaultHighlightDuration"));
+    const t = Number(e.radius ?? game.settings.get(u, "defaultScanRadius")), r = Xe(e.types), a = Be(e.modes ?? e.mode), i = Se(n), o = M(canvas.scene.id).filter((C) => Ue(C, i, t, r, a)), c = Number(e.duration ?? game.settings.get(u, "defaultHighlightDuration"));
     s.latestScan = {
       sceneId: canvas.scene.id,
       targetIds: o.map((C) => C.id),
@@ -201,30 +201,33 @@
         playerView: !0,
         mode: (a == null ? void 0 : a.values().next().value) ?? null
       });
-      (w = game.socket) == null || w.emit(V, { action: "scan-results", payload: C });
+      (w = game.socket) == null || w.emit(J, { action: "scan-results", payload: C });
     }
-    return (Ae = game.user) != null && Ae.isGM ? foundry.utils.deepClone(o) : o.map((C) => Y(C));
+    return (Ae = game.user) != null && Ae.isGM ? foundry.utils.deepClone(o) : o.map((C) => Y(C, !0));
   }
   async function B(e = {}) {
-    if (!x("create scan targets")) return null;
+    if (!I("create scan targets")) return null;
     const n = $(e.sceneId) ?? canvas.scene;
     if (!n)
       return console.warn(`${g}: no scene was found for the new target.`), null;
-    const t = N(n), r = S({ ...e, sceneId: n.id });
-    return t[r.id] = r, await n.setFlag(u, v, t), k(), foundry.utils.deepClone(r);
+    const t = N(n), r = k({ ...e, sceneId: n.id });
+    return t[r.id] = r, await n.setFlag(u, v, t), x(), foundry.utils.deepClone(r);
   }
-  function z(e = ((n) => (n = canvas == null ? void 0 : canvas.scene) == null ? void 0 : n.id)()) {
-    return M(e).map((t) => {
+  function _(e = ((n) => (n = canvas == null ? void 0 : canvas.scene) == null ? void 0 : n.id)()) {
+    return M(e).filter((t) => {
       var r;
-      return (r = game.user) != null && r.isGM ? foundry.utils.deepClone(t) : Y(t);
+      return ((r = game.user) == null ? void 0 : r.isGM) || t.visibility === "revealed" || t.visibility === "always";
+    }).map((t) => {
+      var r;
+      return (r = game.user) != null && r.isGM ? foundry.utils.deepClone(t) : Y(t, !0);
     });
   }
   function M(e = ((n) => (n = canvas == null ? void 0 : canvas.scene) == null ? void 0 : n.id)()) {
     const t = $(e);
-    return t ? Object.values(N(t)).map((r) => S(r)).sort((r, a) => r.label.localeCompare(a.label)) : [];
+    return t ? Object.values(N(t)).map((r) => k(r)).sort((r, a) => r.label.localeCompare(a.label)) : [];
   }
   async function ne(e, n = ((t) => (t = canvas == null ? void 0 : canvas.scene) == null ? void 0 : t.id)()) {
-    if (!x("delete scan targets")) return !1;
+    if (!I("delete scan targets")) return !1;
     s.draggingMarker = null, s.resizingMarker = null, s.liveMarker = null, s.liveUpdates = null;
     const r = $(n) ?? ke(e);
     if (!r)
@@ -236,7 +239,7 @@
     const l = r.getFlag(u, v) ?? {};
     (l[i] || Object.values(l).some((c) => (c == null ? void 0 : c.id) === e)) && (await r.unsetFlag(u, v), Object.keys(a).length && await r.setFlag(u, v, a));
     const o = r.getFlag(u, v) ?? {};
-    return o[i] || Object.values(o).some((c) => (c == null ? void 0 : c.id) === e) ? (console.error(`${g} | Delete failed`, { targetId: e, storeKey: i, scene: r, store: a, afterFallback: o }), !1) : (k(), !0);
+    return o[i] || Object.values(o).some((c) => (c == null ? void 0 : c.id) === e) ? (console.error(`${g} | Delete failed`, { targetId: e, storeKey: i, scene: r, store: a, afterFallback: o }), !1) : (x(), !0);
   }
   function Fe(e, n) {
     var t;
@@ -245,11 +248,11 @@
   async function j(e) {
     var t;
     const n = M((t = canvas.scene) == null ? void 0 : t.id).find((r) => r.id === e);
-    return n ? T(e, { visibility: "revealed", status: n.status === "resolved" ? "resolved" : "revealed" }) : null;
+    return n ? S(e, { visibility: "revealed", status: n.status === "resolved" ? "resolved" : "revealed" }) : null;
   }
   async function te() {
     var n;
-    if (!x("reveal scan targets")) return [];
+    if (!I("reveal scan targets")) return [];
     if (!s.latestScan || s.latestScan.sceneId !== ((n = canvas.scene) == null ? void 0 : n.id))
       return console.warn(`${g}: no latest scan is available for this scene.`), [];
     const e = [];
@@ -260,13 +263,13 @@
     return e;
   }
   async function re(e) {
-    return T(e, { visibility: "gm", status: "active" });
+    return S(e, { visibility: "gm", status: "active" });
   }
   async function ae(e) {
-    return T(e, { status: "resolved", visibility: "revealed" });
+    return S(e, { status: "resolved", visibility: "revealed" });
   }
   async function se(e) {
-    return T(e, { status: "active", visibility: "gm" });
+    return S(e, { status: "active", visibility: "gm" });
   }
   function Ge(e = ((n) => (n = canvas == null ? void 0 : canvas.scene) == null ? void 0 : n.id)()) {
     var a, i;
@@ -283,7 +286,7 @@
     return un(`pulse-scanner-${dn(t.name)}.json`, r), r;
   }
   async function ie(e, { merge: n = !0, sceneId: t = ((r) => (r = canvas == null ? void 0 : canvas.scene) == null ? void 0 : r.id)() } = {}) {
-    if (!x("import scan targets")) return [];
+    if (!I("import scan targets")) return [];
     const a = $(t);
     if (!a) return [];
     let i;
@@ -295,27 +298,27 @@
     const l = Array.isArray(i) ? i : i == null ? void 0 : i.targets;
     if (!Array.isArray(l))
       return console.warn(`${g}: import JSON must contain a targets array.`), [];
-    const o = n ? N(a) : {}, c = l.map((d) => S({
+    const o = n ? N(a) : {}, c = l.map((d) => k({
       ...d,
       id: d.id && !o[d.id] ? d.id : xe(),
       sceneId: a.id
     }));
     for (const d of c) o[d.id] = d;
-    return await a.setFlag(u, v, o), k(), c;
+    return await a.setFlag(u, v, o), x(), c;
   }
-  async function T(e, n = {}, t = {}) {
-    if (!x("edit scan targets")) return null;
+  async function S(e, n = {}, t = {}) {
+    if (!I("edit scan targets")) return null;
     const r = ke(e) ?? $(n.sceneId) ?? canvas.scene;
     if (!r) return null;
-    const a = N(r), i = a[e] ?? {}, l = S({ ...i, ...n, id: e, sceneId: r.id });
-    return a[l.id] = l, await r.setFlag(u, v, a), t.refresh !== !1 && k(), foundry.utils.deepClone(l);
+    const a = N(r), i = a[e] ?? {}, l = k({ ...i, ...n, id: e, sceneId: r.id });
+    return a[l.id] = l, await r.setFlag(u, v, a), t.refresh !== !1 && x(), foundry.utils.deepClone(l);
   }
   function N(e) {
     return foundry.utils.deepClone((e == null ? void 0 : e.getFlag(u, v)) ?? {});
   }
-  function S(e = {}) {
+  function k(e = {}) {
     var l;
-    const n = R.includes(e.type) ? e.type : G, t = m[n] ?? m.custom, r = A.includes(e.mode) ? e.mode : le(n), a = H.includes(e.shape) ? e.shape : E, i = Q.includes(e.status) ? e.status : e.resolved ? "resolved" : "active";
+    const n = z.includes(e.type) ? e.type : G, t = m[n] ?? m.custom, r = A.includes(e.mode) ? e.mode : le(n), a = H.includes(e.shape) ? e.shape : E, i = Q.includes(e.status) ? e.status : e.resolved ? "resolved" : "active";
     return {
       id: String(e.id || xe()),
       sceneId: String(e.sceneId || ((l = canvas == null ? void 0 : canvas.scene) == null ? void 0 : l.id) || ""),
@@ -331,7 +334,7 @@
       description: String(e.description || ""),
       integrity: Ie(P(e.integrity, 100), 0, 100),
       difficulty: P(e.difficulty, 10),
-      visibility: K.includes(e.visibility) ? e.visibility : "gm",
+      visibility: V.includes(e.visibility) ? e.visibility : "gm",
       status: i,
       color: oe(e.color, t.color),
       icon: t.icon
@@ -340,8 +343,8 @@
   function le(e) {
     return A.find((n) => {
       var t, r;
-      return (r = (t = _[n]) == null ? void 0 : t.types) == null ? void 0 : r.includes(e);
-    }) ?? J;
+      return (r = (t = R[n]) == null ? void 0 : t.types) == null ? void 0 : r.includes(e);
+    }) ?? K;
   }
   function oe(e, n) {
     const t = String(e || n || "").trim();
@@ -356,7 +359,7 @@
   }
   function Xe(e) {
     if (!Array.isArray(e) || e.length === 0) return null;
-    const n = e.map((t) => String(t).trim()).filter((t) => R.includes(t));
+    const n = e.map((t) => String(t).trim()).filter((t) => z.includes(t));
     return n.length ? new Set(n) : null;
   }
   function Be(e) {
@@ -377,10 +380,12 @@
       mode: o,
       showLabels: l ? !!game.settings.get(u, "showLabelsToPlayers") : !0,
       showIntegrity: l ? !!game.settings.get(u, "showIntegrityToPlayers") : !0,
-      detected: a.map((c) => Y(c))
+      detected: a.map((c) => Y(c, l))
     };
   }
   function Y(e, n) {
+    var i;
+    const t = n && e.visibility === "gm", r = ((i = m[e.type]) == null ? void 0 : i.label) || T(e.type);
     return {
       id: e.id,
       sceneId: e.sceneId,
@@ -392,10 +397,10 @@
       height: e.height,
       mode: e.mode,
       type: e.type,
-      label: e.label,
-      description: e.description,
-      integrity: e.integrity,
-      difficulty: e.difficulty,
+      label: t ? `${r} Signature` : e.label,
+      description: t ? "" : e.description,
+      integrity: t && e.type !== "breakable" ? null : e.integrity,
+      difficulty: t ? null : e.difficulty,
       visibility: e.visibility,
       status: e.status,
       color: e.color,
@@ -408,7 +413,7 @@
     const n = document.createElement("div");
     n.className = "pulse-scanner-overlay", n.style.setProperty("--pulse-duration", `${Math.max(900, Number(e.duration || 4200))}ms`), document.body.appendChild(n);
     const t = Me(((l = e.origin) == null ? void 0 : l.x) ?? 0, ((o = e.origin) == null ? void 0 : o.y) ?? 0), r = Math.max(16, Te(Number(e.radius || 0))), a = document.createElement("div");
-    if (a.className = "pulse-scanner-ring", a.style.left = `${t.x}px`, a.style.top = `${t.y}px`, a.style.setProperty("--pulse-radius", `${r}px`), a.style.setProperty("--pulse-color", ((c = _[e.mode]) == null ? void 0 : c.color) ?? "#7df9ff"), n.appendChild(a), !((d = e.detected) != null && d.length)) {
+    if (a.className = "pulse-scanner-ring", a.style.left = `${t.x}px`, a.style.top = `${t.y}px`, a.style.setProperty("--pulse-radius", `${r}px`), a.style.setProperty("--pulse-color", ((c = R[e.mode]) == null ? void 0 : c.color) ?? "#7df9ff"), n.appendChild(a), !((d = e.detected) != null && d.length)) {
       const f = document.createElement("div");
       f.className = "pulse-scanner-empty", f.textContent = "NO SIGNATURES DETECTED", f.style.left = `${t.x}px`, f.style.top = `${t.y}px`, n.appendChild(f);
     }
@@ -423,7 +428,7 @@
   }
   function je(e, n) {
     var d, p, h;
-    const t = e.icon || ((d = m[e.type]) == null ? void 0 : d.icon) || m.custom.icon, r = q(e.label || ((p = m[e.type]) == null ? void 0 : p.label) || "Signature"), a = q(((h = m[e.type]) == null ? void 0 : h.label) || I(e.type)), i = Ie(Number(e.integrity ?? 0), 0, 100), l = e.type === "breakable", o = n && l ? `<span class="pulse-scanner-integrity">${i}%</span>` : "", c = n && l ? `<div class="pulse-scanner-integrity-bar"><span style="width: ${i}%;"></span></div><small>STRUCTURAL WEAKNESS: ${i}%</small>` : `<small>${a}</small>`;
+    const t = e.icon || ((d = m[e.type]) == null ? void 0 : d.icon) || m.custom.icon, r = q(e.label || ((p = m[e.type]) == null ? void 0 : p.label) || "Signature"), a = q(((h = m[e.type]) == null ? void 0 : h.label) || T(e.type)), i = Ie(Number(e.integrity ?? 0), 0, 100), l = e.type === "breakable", o = n && l ? `<span class="pulse-scanner-integrity">${i}%</span>` : "", c = n && l ? `<div class="pulse-scanner-integrity-bar"><span style="width: ${i}%;"></span></div><small>STRUCTURAL WEAKNESS: ${i}%</small>` : `<small>${a}</small>`;
     return `<span class="pulse-scanner-label-row"><i class="${q(t)}"></i><strong>${r}</strong>${o}</span>${c}`;
   }
   function Ye(e = {}) {
@@ -471,7 +476,7 @@
   }
   function fe(e, n) {
     const t = new PIXI.Graphics();
-    return t.name = `pulse-scanner-move-${e.id}`, t.eventMode = "static", t.interactive = !0, t.cursor = "move", t.hitArea = new PIXI.Circle(0, 0, 13), t.lineStyle(2, 16777215, 0.78), t.beginFill(n, 0.82), t.drawCircle(0, 0, 9), t.endFill(), t.lineStyle(1, 1053204, 0.9), t.moveTo(-5, 0), t.lineTo(5, 0), t.moveTo(0, -5), t.lineTo(0, 5), t.on("pointerdown", (r) => Ke(r, e, t.parent)).on("pointermove", (r) => Qe(r, e)).on("pointerup", () => W()).on("pointerupoutside", () => W()).on("rightclick", () => {
+    return t.name = `pulse-scanner-move-${e.id}`, t.eventMode = "static", t.interactive = !0, t.cursor = "move", t.hitArea = new PIXI.Circle(0, 0, 13), t.lineStyle(2, 16777215, 0.78), t.beginFill(n, 0.82), t.drawCircle(0, 0, 9), t.endFill(), t.lineStyle(1, 1053204, 0.9), t.moveTo(-5, 0), t.lineTo(5, 0), t.moveTo(0, -5), t.lineTo(0, 5), t.on("pointerdown", (r) => Ve(r, e, t.parent)).on("pointermove", (r) => Qe(r, e)).on("pointerup", () => W()).on("pointerupoutside", () => W()).on("rightclick", () => {
       s.manager = s.manager ?? new Ce({ targetId: e.id }), s.manager.selectedTargetId = e.id, s.manager.render(!0);
     }), t;
   }
@@ -500,9 +505,9 @@
   }
   function me(e, n, t, r, a) {
     const i = new PIXI.Graphics();
-    return i.name = `pulse-scanner-resize-${e.id}-${n}`, i.position.set(t, r), i.eventMode = "static", i.interactive = !0, i.cursor = Je(n), i.hitArea = new PIXI.Circle(0, 0, 12), i.beginFill(1053204, 0.92), i.lineStyle(2, a, 1), i.drawCircle(0, 0, 7), i.endFill(), i.on("pointerdown", (l) => Ve(l, e, n)), i;
+    return i.name = `pulse-scanner-resize-${e.id}-${n}`, i.position.set(t, r), i.eventMode = "static", i.interactive = !0, i.cursor = Ke(n), i.hitArea = new PIXI.Circle(0, 0, 12), i.beginFill(1053204, 0.92), i.lineStyle(2, a, 1), i.drawCircle(0, 0, 7), i.endFill(), i.on("pointerdown", (l) => Je(l, e, n)), i;
   }
-  function Ve(e, n, t) {
+  function Je(e, n, t) {
     var r, a, i;
     (r = game.user) != null && r.isGM && ((a = e.stopPropagation) == null || a.call(e), s.resizingMarker = {
       id: n.id,
@@ -510,10 +515,10 @@
       center: { x: Number(n.x), y: Number(n.y) }
     }, s.liveMarker = ((i = e.currentTarget) == null ? void 0 : i.parent) ?? null, s.liveUpdates = null);
   }
-  function Je(e) {
+  function Ke(e) {
     return e.startsWith("radius") ? "move" : e === "n" || e === "s" ? "ns-resize" : e === "e" || e === "w" ? "ew-resize" : e === "nw" || e === "se" ? "nwse-resize" : e === "ne" || e === "sw" ? "nesw-resize" : "move";
   }
-  function Ke(e, n, t) {
+  function Ve(e, n, t) {
     var r, a;
     (r = game.user) != null && r.isGM && ((a = e.stopPropagation) == null || a.call(e), s.draggingMarker = {
       id: n.id,
@@ -540,7 +545,7 @@
   async function W() {
     if (!s.draggingMarker) return !1;
     const e = s.draggingMarker.id, n = s.liveUpdates;
-    return s.draggingMarker = null, s.liveMarker = null, s.liveUpdates = null, n && await T(e, n, { refresh: !1 }), k(), !0;
+    return s.draggingMarker = null, s.liveMarker = null, s.liveUpdates = null, n && await S(e, n, { refresh: !1 }), x(), !0;
   }
   function he(e) {
     if (!s.draggingMarker || !(canvas != null && canvas.scene)) return !1;
@@ -562,7 +567,7 @@
       l.radius = Math.max(12, Math.round(Math.hypot(a, i)));
     if (s.liveUpdates = l, s.liveMarker) {
       s.liveMarker.removeChildren();
-      const o = S({ ...r, ...l }), c = Pe(o), d = new PIXI.Graphics();
+      const o = k({ ...r, ...l }), c = Pe(o), d = new PIXI.Graphics();
       de(d, o, c), s.liveMarker.addChild(d), ge(s.liveMarker, o, c), s.liveMarker.addChild(fe(o, c));
     }
     return !0;
@@ -570,7 +575,7 @@
   async function en() {
     if (!s.resizingMarker) return !1;
     const e = s.resizingMarker.id, n = s.liveUpdates;
-    return s.resizingMarker = null, s.liveMarker = null, s.liveUpdates = null, n && await T(e, n, { refresh: !1 }), k(), !0;
+    return s.resizingMarker = null, s.liveMarker = null, s.liveUpdates = null, n && await S(e, n, { refresh: !1 }), x(), !0;
   }
   function nn() {
     var n;
@@ -614,7 +619,7 @@
     var a, i, l, o, c, d, p, h, f, y;
     const e = (o = (l = (i = (a = s.manager) == null ? void 0 : a.element) == null ? void 0 : i.find) == null ? void 0 : l.call(i, "form.pulse-scanner-target-form")) == null ? void 0 : o[0], n = (d = (c = e == null ? void 0 : e.elements) == null ? void 0 : c.type) == null ? void 0 : d.value, t = (h = (p = e == null ? void 0 : e.elements) == null ? void 0 : p.mode) == null ? void 0 : h.value, r = (y = (f = e == null ? void 0 : e.elements) == null ? void 0 : f.label) == null ? void 0 : y.value;
     return {
-      type: R.includes(n) ? n : G,
+      type: z.includes(n) ? n : G,
       mode: A.includes(t) ? t : le(n || G),
       label: r || "Placed Scan Target"
     };
@@ -674,11 +679,11 @@
       if (N(n)[e]) return n;
     return null;
   }
-  function k() {
+  function x() {
     var e;
     (e = s.manager) != null && e.rendered && s.manager.render(!1), !s.draggingMarker && !s.resizingMarker && O();
   }
-  function x(e) {
+  function I(e) {
     var n;
     return (n = game.user) != null && n.isGM ? !0 : (console.warn(`${g}: only GMs can ${e}.`), !1);
   }
@@ -686,7 +691,7 @@
     var e, n;
     return ((n = (e = foundry.utils).randomID) == null ? void 0 : n.call(e, 16)) ?? crypto.randomUUID();
   }
-  function I(e) {
+  function T(e) {
     return String(e || "").replace(/[-_]/g, " ").replace(/\b\w/g, (n) => n.toUpperCase());
   }
   function P(e, n) {
@@ -727,7 +732,7 @@
       "'": "&#039;"
     })[n]);
   }
-  class Ce extends ze {
+  class Ce extends Le {
     constructor(n = {}) {
       super(n), this.selectedTargetId = n.targetId ?? null, this.draftTarget = null;
     }
@@ -744,11 +749,11 @@
     }
     getData() {
       var l, o;
-      const n = (canvas == null ? void 0 : canvas.scene) ?? ((l = game.scenes) == null ? void 0 : l.current) ?? null, t = z(n == null ? void 0 : n.id), r = t.map((c) => ({
+      const n = (canvas == null ? void 0 : canvas.scene) ?? ((l = game.scenes) == null ? void 0 : l.current) ?? null, t = _(n == null ? void 0 : n.id), r = t.map((c) => ({
         ...c,
         isResolved: c.status === "resolved",
         isBreakable: c.type === "breakable"
-      })), a = this.draftTarget ?? t.find((c) => c.id === this.selectedTargetId) ?? t[0] ?? S({ sceneId: n == null ? void 0 : n.id, ...Ne() }), i = {
+      })), a = this.draftTarget ?? t.find((c) => c.id === this.selectedTargetId) ?? t[0] ?? k({ sceneId: n == null ? void 0 : n.id, ...Ne() }), i = {
         ...a,
         isBreakable: a.type === "breakable"
       };
@@ -756,17 +761,17 @@
         scene: n,
         targets: r,
         selectedTarget: i,
-        typeOptions: R.map((c) => {
+        typeOptions: z.map((c) => {
           var d;
-          return { value: c, label: ((d = m[c]) == null ? void 0 : d.label) ?? I(c) };
+          return { value: c, label: ((d = m[c]) == null ? void 0 : d.label) ?? T(c) };
         }),
         modeOptions: A.map((c) => {
           var d;
-          return { value: c, label: ((d = _[c]) == null ? void 0 : d.label) ?? I(c) };
+          return { value: c, label: ((d = R[c]) == null ? void 0 : d.label) ?? T(c) };
         }),
         colorOptions: He(a.color),
-        visibilityOptions: K.map((c) => ({ value: c, label: I(c) })),
-        statusOptions: Q.map((c) => ({ value: c, label: I(c) })),
+        visibilityOptions: V.map((c) => ({ value: c, label: T(c) })),
+        statusOptions: Q.map((c) => ({ value: c, label: T(c) })),
         defaultRadius: game.settings.get(u, "defaultScanRadius"),
         hasTargets: t.length > 0,
         canUseMouse: !!s.lastMouseScenePosition,
@@ -805,7 +810,7 @@
     _startManualTarget() {
       var t;
       const n = Ne();
-      this.draftTarget = S({ sceneId: (t = canvas.scene) == null ? void 0 : t.id, ...n, label: "New Scan Target" }), this.selectedTargetId = null, this.render(!1), window.setTimeout(() => {
+      this.draftTarget = k({ sceneId: (t = canvas.scene) == null ? void 0 : t.id, ...n, label: "New Scan Target" }), this.selectedTargetId = null, this.render(!1), window.setTimeout(() => {
         var a, i, l;
         const r = (l = (i = (a = this.element) == null ? void 0 : a.find) == null ? void 0 : i.call(a, "form.pulse-scanner-target-form")) == null ? void 0 : l[0];
         r && (r.elements.x.value = n.x, r.elements.y.value = n.y, r.elements.label.focus(), r.elements.label.select());
@@ -823,8 +828,8 @@
         integrity: r.integrity,
         difficulty: r.difficulty
       };
-      if (r.id && z((l = canvas.scene) == null ? void 0 : l.id).some((o) => o.id === r.id))
-        await T(r.id, a), this.selectedTargetId = r.id;
+      if (r.id && _((l = canvas.scene) == null ? void 0 : l.id).some((o) => o.id === r.id))
+        await S(r.id, a), this.selectedTargetId = r.id;
       else {
         const o = await B(a);
         this.selectedTargetId = (o == null ? void 0 : o.id) ?? this.selectedTargetId;
@@ -834,7 +839,7 @@
     _getCurrentMode() {
       var t, r, a, i, l;
       const n = (a = (r = (t = this.element) == null ? void 0 : t.find) == null ? void 0 : r.call(t, "form.pulse-scanner-target-form")) == null ? void 0 : a[0];
-      return ((l = (i = n == null ? void 0 : n.elements) == null ? void 0 : i.mode) == null ? void 0 : l.value) || J;
+      return ((l = (i = n == null ? void 0 : n.elements) == null ? void 0 : i.mode) == null ? void 0 : l.value) || K;
     }
     _togglePlacement() {
       Z(), this.render(!1);
@@ -879,7 +884,7 @@
     }
     async _deleteTarget(n) {
       var t, r, a;
-      n && (await ne(n, (t = canvas.scene) == null ? void 0 : t.id), this.selectedTargetId = ((a = z((r = canvas.scene) == null ? void 0 : r.id)[0]) == null ? void 0 : a.id) ?? null, this.draftTarget = null, this.render(!1));
+      n && (await ne(n, (t = canvas.scene) == null ? void 0 : t.id), this.selectedTargetId = ((a = _((r = canvas.scene) == null ? void 0 : r.id)[0]) == null ? void 0 : a.id) ?? null, this.draftTarget = null, this.render(!1));
     }
   }
   function Ne() {

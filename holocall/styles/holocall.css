@@ -1,19 +1,33 @@
+:root {
+  --hs-bg: #05070d;
+  --hs-bg-deep: #03070b;
+  --hs-panel: rgba(8, 18, 28, 0.9);
+  --hs-line: rgba(105, 232, 255, 0.28);
+  --hs-cyan: #69e8ff;
+  --hs-green: #62ffb6;
+  --hs-magenta: #ff4d7d;
+  --hs-text: #e7faff;
+  --hs-font-ui: "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif;
+}
+
 .holocall-app {
-  --holocall-cyan: #5ee7ff;
+  --holocall-cyan: var(--hs-cyan);
   --holocall-blue: #00a7ff;
   --holocall-deep: rgba(4, 16, 28, 0.82);
-  --holocall-line: rgba(94, 231, 255, 0.42);
-  --holocall-text: #d9fbff;
-  --holocall-danger: #ff415d;
+  --holocall-line: var(--hs-line);
+  --holocall-text: var(--hs-text);
+  --holocall-danger: var(--hs-magenta);
   color: var(--holocall-text);
+  font-family: var(--hs-font-ui);
 }
 
 .holocall-composer-app,
 .holocall-contacts-app {
-  --holocall-cyan: #5ee7ff;
+  --holocall-cyan: var(--hs-cyan);
   --holocall-blue: #00a7ff;
-  --holocall-text: #d9fbff;
+  --holocall-text: var(--hs-text);
   color: var(--holocall-text);
+  font-family: var(--hs-font-ui);
 }
 
 .holocall-app.holocall-fullscreen {

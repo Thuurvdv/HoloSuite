@@ -30,6 +30,7 @@ export function startMinigame(type, options = {}) {
     return null;
   }
 
+  activeApps.get(definition.id)?.close?.();
   const app = definition.create(options);
   console.log("holosuite-hacking | Creating minigame app", {
     type: definition.id,

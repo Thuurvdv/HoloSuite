@@ -13,7 +13,7 @@
     "verified": "13"
   },
   "esmodules": [
-    "scripts/bounty-board/main.js"
+    "dist/main.js"
   ],
   "styles": [
     "styles/bounty-board.css"

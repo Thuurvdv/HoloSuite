@@ -29,7 +29,7 @@ function parseForm(form) {
     published: formData.get("published") === "on",
     claimedBy: String(formData.get("claimedBy") ?? ""),
     linkedJournalId: String(formData.get("linkedJournalId") ?? ""),
-    linkedSceneId: ""
+    linkedSceneId: String(formData.get("linkedSceneId") ?? "")
   };
 }
 
@@ -82,6 +82,7 @@ export class BountyEditorApp extends BaseApplication {
       statuses: Object.values(BOUNTY_STATUSES),
       threatLevels: THREAT_LEVELS,
       journals: getDocuments(game.journal),
+      scenes: getDocuments(game.scenes),
       canEdit: game.user?.isGM === true
     };
   }

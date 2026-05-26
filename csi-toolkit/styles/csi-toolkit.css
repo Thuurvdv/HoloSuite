@@ -1,17 +1,34 @@
+:root {
+  --hs-bg: #05070d;
+  --hs-bg-deep: #03070b;
+  --hs-panel: rgba(8, 18, 28, 0.9);
+  --hs-panel-strong: rgba(12, 30, 42, 0.96);
+  --hs-line: rgba(105, 232, 255, 0.28);
+  --hs-cyan: #69e8ff;
+  --hs-green: #62ffb6;
+  --hs-magenta: #ff4d7d;
+  --hs-amber: #ffd166;
+  --hs-text: #e7faff;
+  --hs-muted: #8fb5bf;
+  --hs-radius: 6px;
+  --hs-font-ui: "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif;
+}
+
 .csi-toolkit {
   --csi-bg: #071014;
-  --csi-panel: #0d1b22;
-  --csi-panel-2: #122832;
-  --csi-line: rgba(95, 220, 255, 0.22);
-  --csi-text: #d9f7ff;
-  --csi-muted: #7ea8b3;
-  --csi-cyan: #5fdcff;
-  --csi-red: #ff4c5f;
-  --csi-amber: #f7c66a;
-  --csi-green: #73e6a1;
+  --csi-panel: var(--hs-panel);
+  --csi-panel-2: var(--hs-panel-strong);
+  --csi-line: var(--hs-line);
+  --csi-text: var(--hs-text);
+  --csi-muted: var(--hs-muted);
+  --csi-cyan: var(--hs-cyan);
+  --csi-red: var(--hs-magenta);
+  --csi-amber: var(--hs-amber);
+  --csi-green: var(--hs-green);
   --csi-paper: #d2c5a2;
   --csi-shadow: 0 0 28px rgba(95, 220, 255, 0.12);
   color: var(--csi-text);
+  font-family: var(--hs-font-ui);
 }
 
 .csi-toolkit .window-content {

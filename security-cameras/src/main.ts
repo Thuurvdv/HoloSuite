@@ -159,7 +159,8 @@ function getSceneChoices(selectedSceneId = "") {
 }
 
 function getSceneById(sceneId = "") {
-  return game.scenes?.get(sceneId) ?? canvas?.scene ?? null;
+  if (!sceneId) return canvas?.scene ?? null;
+  return game.scenes?.get(sceneId) ?? null;
 }
 
 function getSceneRegions(sceneId = "") {

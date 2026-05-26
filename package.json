@@ -5,12 +5,14 @@
   "description": "Monorepo for the HoloSuite Foundry VTT sci-fi module suite.",
   "type": "module",
   "workspaces": [
+    "bounty-board",
     "holosuite-core",
     "holocall",
     "security-cameras",
     "csi-toolkit",
     "galaxy-map",
     "pulse-scanner",
+    "holosuite-critical-cutin",
     "holosuite-hacking",
     "shared"
   ],

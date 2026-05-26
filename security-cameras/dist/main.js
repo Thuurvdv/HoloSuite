@@ -108,7 +108,7 @@ function Re(e = "") {
 }
 function k(e = "") {
   var t;
-  return ((t = game.scenes) == null ? void 0 : t.get(e)) ?? (canvas == null ? void 0 : canvas.scene) ?? null;
+  return e ? ((t = game.scenes) == null ? void 0 : t.get(e)) ?? null : (canvas == null ? void 0 : canvas.scene) ?? null;
 }
 function Oe(e = "") {
   var i;

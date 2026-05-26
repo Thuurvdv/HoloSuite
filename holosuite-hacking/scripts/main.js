@@ -19,6 +19,7 @@ import { SignalAlignmentApp } from "./minigames/signal-alignment/signal-alignmen
 
 const MODULE_ID = "holosuite-hacking";
 const SOCKET_NAME = `module.${MODULE_ID}`;
+const PENDING_CALLBACK_TTL_MS = 10 * 60 * 1000;
 
 let api = null;
 let launcherApp = null;
@@ -164,9 +165,11 @@ function sendHackToPlayer(options = {}) {
     : getSkillModifier(skillData);
 
   if (typeof options.onSuccess === "function" || typeof options.onFailure === "function") {
+    const timeoutId = window.setTimeout(() => pendingCallbacks.delete(payload.requestId), PENDING_CALLBACK_TTL_MS);
     pendingCallbacks.set(payload.requestId, {
       onSuccess: typeof options.onSuccess === "function" ? options.onSuccess : null,
-      onFailure: typeof options.onFailure === "function" ? options.onFailure : null
+      onFailure: typeof options.onFailure === "function" ? options.onFailure : null,
+      timeoutId
     });
   }
 
@@ -286,6 +289,7 @@ function receiveResultReport(payload = {}) {
   if (!game.user?.isGM || payload.gmUserId !== game.user.id) return;
   const callbacks = pendingCallbacks.get(payload.requestId);
   pendingCallbacks.delete(payload.requestId);
+  if (callbacks?.timeoutId) window.clearTimeout(callbacks.timeoutId);
 
   const result = payload.result ?? {};
   if (result.result === "success") callbacks?.onSuccess?.(result);

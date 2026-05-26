@@ -140,6 +140,7 @@ export function registerRollDetection() {
     if (!shouldAuthoritativelyDetect()) return;
     if (processedMessages.has(message.id)) return;
     processedMessages.add(message.id);
+    if (processedMessages.size > 200) processedMessages.delete(processedMessages.values().next().value);
 
     const actor = resolveActor(message);
     const user = resolveTriggerUser(message, actor);

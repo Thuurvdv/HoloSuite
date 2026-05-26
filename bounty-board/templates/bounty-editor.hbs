@@ -72,6 +72,15 @@
         </select>
       </label>
       <label>
+        <span>Linked Scene</span>
+        <select name="linkedSceneId">
+          <option value="">None</option>
+          {{#each scenes as |scene|}}
+            <option value="{{scene.id}}" {{#if (bbEq ../bounty.linkedSceneId scene.id)}}selected{{/if}}>{{scene.name}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>
         <span>Claimed By</span>
         <input type="text" name="claimedBy" value="{{bounty.claimedBy}}" />
       </label>

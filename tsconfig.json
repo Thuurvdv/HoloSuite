@@ -11,12 +11,15 @@
     "moduleDetection": "force"
   },
   "include": [
+    "bounty-board/src",
     "holosuite-core/src",
     "holocall/src",
     "security-cameras/src",
     "csi-toolkit/src",
     "galaxy-map/src",
     "pulse-scanner/src",
+    "holosuite-critical-cutin/src",
+    "holosuite-hacking/src",
     "shared/src"
   ]
 }

@@ -15,6 +15,7 @@
   const MIN_ZOOM = 0.55;
   const MAX_ZOOM = 2.6;
   const TRAVEL_ANIMATION_MS = 2400;
+  const TRAVEL_REQUEST_TIMEOUT_MS = 60_000;
 
   const SAMPLE_MAP = {
     id: "sample-aster-veil",
@@ -1291,10 +1292,15 @@
 
   function trackTravelRequest(payload) {
     if (!isPrimaryGM() || !payload?.requestId) return;
+    const timeoutId = globalThis.setTimeout(() => {
+      const pending = pendingTravelRequests.get(payload.requestId);
+      if (pending) rejectTravelRequest(pending, "Request timeout");
+    }, TRAVEL_REQUEST_TIMEOUT_MS);
     pendingTravelRequests.set(payload.requestId, {
       ...payload,
       accepted: new Set(),
-      voterIds: [...new Set(payload.voterIds ?? [])]
+      voterIds: [...new Set(payload.voterIds ?? [])],
+      timeoutId
     });
   }
 
@@ -1314,6 +1320,7 @@
 
   async function approveTravelRequest(pending) {
     pendingTravelRequests.delete(pending.requestId);
+    if (pending.timeoutId) globalThis.clearTimeout(pending.timeoutId);
     const payload = {
       action: "travel-approved",
       requestId: pending.requestId,
@@ -1332,6 +1339,7 @@
 
   function rejectTravelRequest(pending, voterName = "A player") {
     pendingTravelRequests.delete(pending.requestId);
+    if (pending.timeoutId) globalThis.clearTimeout(pending.timeoutId);
     const payload = {
       action: "travel-declined",
       requestId: pending.requestId,
@@ -1363,12 +1371,14 @@
 
   function handleTravelApproved(payload) {
     if (payload.coordinatorId === game.user?.id) return;
+    if (payload.requestId) promptedTravelRequests.delete(payload.requestId);
     animateTravelOnOpenMaps(payload);
     ui.notifications?.info(`Travel approved: ${payload.fromName} to ${payload.toName}.`);
   }
 
   function handleTravelDeclined(payload) {
     if (payload.coordinatorId === game.user?.id) return;
+    if (payload.requestId) promptedTravelRequests.delete(payload.requestId);
     ui.notifications?.warn(`Travel declined by ${payload.voterName}: ${payload.fromName} to ${payload.toName}.`);
   }
 

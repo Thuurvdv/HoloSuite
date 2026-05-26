@@ -1,16 +1,32 @@
+:root {
+  --hs-bg: #05070d;
+  --hs-bg-deep: #03070b;
+  --hs-panel: rgba(8, 18, 28, 0.9);
+  --hs-panel-strong: rgba(12, 30, 42, 0.96);
+  --hs-line: rgba(105, 232, 255, 0.28);
+  --hs-cyan: #69e8ff;
+  --hs-green: #62ffb6;
+  --hs-magenta: #ff4d7d;
+  --hs-amber: #ffd166;
+  --hs-text: #e7faff;
+  --hs-muted: #8fb5bf;
+  --hs-radius: 6px;
+  --hs-font-ui: "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif;
+}
+
 .galaxy-map-framework {
-  --gmf-bg: #05070d;
-  --gmf-panel: rgba(8, 14, 24, 0.86);
-  --gmf-panel-strong: rgba(11, 22, 36, 0.95);
-  --gmf-line: rgba(116, 222, 255, 0.24);
-  --gmf-text: #d9f7ff;
-  --gmf-muted: #83a8b8;
-  --gmf-cyan: #58d8ff;
-  --gmf-gold: #ffd166;
-  --gmf-red: #ff5c7a;
-  --gmf-green: #7dffbd;
+  --gmf-bg: var(--hs-bg);
+  --gmf-panel: var(--hs-panel);
+  --gmf-panel-strong: var(--hs-panel-strong);
+  --gmf-line: var(--hs-line);
+  --gmf-text: var(--hs-text);
+  --gmf-muted: var(--hs-muted);
+  --gmf-cyan: var(--hs-cyan);
+  --gmf-gold: var(--hs-amber);
+  --gmf-red: var(--hs-magenta);
+  --gmf-green: var(--hs-green);
   color: var(--gmf-text);
-  font-family: "Signika", "Inter", system-ui, sans-serif;
+  font-family: var(--hs-font-ui);
 }
 
 .galaxy-map-framework button {

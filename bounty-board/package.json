@@ -1,7 +1,7 @@
 {
-  "name": "@holosuite/hacking",
-  "version": "0.1.0",
+  "name": "@holosuite/bounty-board",
   "private": true,
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "build": "vite build"

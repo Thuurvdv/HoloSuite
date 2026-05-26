@@ -1,23 +1,8 @@
+import type { HoloSuiteAppRegistration, HoloSuiteLicenseResult } from "../../shared/src/index";
+
 const MODULE_ID = "holosuite-core";
 const SETTING_LICENSE_KEY = "licenseKey";
 const SETTING_ALLOWED_FEATURES = "mockAllowedFeatures";
-
-type HoloSuiteAppRegistration = {
-  id: string;
-  title: string;
-  icon: string;
-  premium?: boolean;
-  description?: string;
-  featureId?: string;
-  open: () => unknown | Promise<unknown>;
-};
-
-type HoloSuiteLicenseResult = {
-  valid: boolean;
-  allowedFeatureIds: string[];
-  checkedAt: string;
-  message?: string;
-};
 
 const registeredApps = new Map<string, HoloSuiteAppRegistration>();
 let launcherApp: HoloSuiteLauncher | null = null;

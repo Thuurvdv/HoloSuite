@@ -1,6 +1,6 @@
 .signal-alignment-window .window-content {
-  background: #05070d;
-  color: #d9fbff;
+  background: var(--hs-bg, #05070d);
+  color: var(--hs-text, #d9fbff);
   padding: 0;
 }
 
@@ -15,7 +15,7 @@
     radial-gradient(circle at 84% 24%, rgba(255, 71, 126, 0.16), transparent 32%),
     #05070d;
   background-size: 28px 28px, 28px 28px, auto, auto, auto;
-  font-family: "Rajdhani", "Orbitron", "Segoe UI", sans-serif;
+  font-family: var(--hs-font-ui, "Rajdhani", "Orbitron", "Segoe UI", sans-serif);
 }
 
 .signal-alignment-header {

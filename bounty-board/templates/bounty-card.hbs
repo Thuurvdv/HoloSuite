@@ -57,6 +57,12 @@
             Open Linked Journal
           </button>
         {{/if}}
+        {{#if bounty.canSeeScene}}
+          <button type="button" data-action="openScene" data-open-scene="{{bounty.linkedSceneId}}">
+            <i class="fa-solid fa-map"></i>
+            Open Linked Scene
+          </button>
+        {{/if}}
       </div>
     </section>
   {{/if}}

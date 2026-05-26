@@ -13,7 +13,7 @@
     "verified": "13"
   },
   "esmodules": [
-    "scripts/main.js"
+    "dist/main.js"
   ],
   "styles": [
     "styles/critical-cutin.css"

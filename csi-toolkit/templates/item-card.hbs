@@ -58,11 +58,13 @@
       {{/if}}
     {{/if}}
 
-    {{#if item.notes}}
-      <div class="csi-gm-notes">
-        <strong>Notes</strong>
-        <p>{{item.notes}}</p>
-      </div>
+    {{#if isGM}}
+      {{#if item.notes}}
+        <div class="csi-gm-notes">
+          <strong>GM Notes</strong>
+          <p>{{item.notes}}</p>
+        </div>
+      {{/if}}
     {{/if}}
 
     {{#if canEditBoard}}
