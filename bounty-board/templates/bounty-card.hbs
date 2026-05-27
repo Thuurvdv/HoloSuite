@@ -1,11 +1,20 @@
-<article class="bb-card {{bbStatusClass bounty.status}}" data-bounty-id="{{bounty.id}}">
-  <button type="button" class="bb-card-header" data-bounty-toggle="{{bounty.id}}">
+<article class="bb-card {{bbStatusClass bounty.status}} {{#if bounty.expanded}}is-expanded{{else}}is-collapsed{{/if}}" data-bounty-id="{{bounty.id}}">
+  <button type="button" class="bb-card-header" data-bounty-toggle="{{bounty.id}}" aria-expanded="{{#if bounty.expanded}}true{{else}}false{{/if}}">
     <span class="bb-card-title-wrap">
       <span class="bb-card-title">{{bounty.title}}</span>
     </span>
     <span class="bb-card-topline">
       <span class="bb-status-badge">{{bounty.statusLabel}}</span>
       <span class="bb-threat">{{bounty.threatLevel}}</span>
+      <span class="bb-expand-state">
+        {{#if bounty.expanded}}
+          <i class="fa-solid fa-chevron-up"></i>
+          Expanded
+        {{else}}
+          <i class="fa-solid fa-chevron-down"></i>
+          Collapsed
+        {{/if}}
+      </span>
     </span>
   </button>
 
@@ -61,8 +70,8 @@
     </section>
   {{/if}}
 
-  <footer class="bb-card-actions">
-    {{#if isGM}}
+  {{#if isGM}}
+    <footer class="bb-card-actions">
       <button type="button" title="Edit" data-action="editBounty"><i class="fa-solid fa-pen"></i></button>
       {{#if bounty.published}}
         <button type="button" title="Unpublish" data-action="unpublishBounty"><i class="fa-solid fa-eye-slash"></i></button>
@@ -75,11 +84,6 @@
       <button type="button" title="Hide" data-action="hideBounty"><i class="fa-solid fa-user-lock"></i></button>
       <button type="button" title="Archive" data-action="archiveBounty"><i class="fa-solid fa-box-archive"></i></button>
       <button type="button" title="Delete" data-action="deleteBounty"><i class="fa-solid fa-trash"></i></button>
-    {{else}}
-      <button type="button" class="bb-primary" data-action="requestContract">
-        <i class="fa-solid fa-paper-plane"></i>
-        Request Contract
-      </button>
-    {{/if}}
-  </footer>
+    </footer>
+  {{/if}}
 </article>

@@ -68,6 +68,41 @@
   margin-bottom: 16px;
 }
 
+.holosuite-player-home {
+  align-items: stretch;
+  background: rgba(6, 24, 32, 0.72);
+  border: 1px solid rgba(98, 255, 182, 0.24);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.holosuite-player-home strong {
+  color: var(--hs-text);
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.holosuite-player-status {
+  align-items: flex-end;
+  color: var(--hs-green);
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  gap: 4px;
+  justify-content: center;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
 .holosuite-kicker {
   color: var(--hs-amber);
   display: block;
@@ -110,6 +145,11 @@
   padding: 14px;
   position: relative;
   text-align: left;
+}
+
+.holosuite-app-tile:has(.holosuite-app-count) {
+  min-height: 116px;
+  padding-bottom: 38px;
 }
 
 .holosuite-app-tile:hover {
@@ -157,6 +197,23 @@
   right: 10px;
   text-transform: uppercase;
   top: 10px;
+}
+
+.holosuite-app-count {
+  border-top: 1px solid rgba(105, 232, 255, 0.2);
+  bottom: 10px;
+  color: var(--hs-green);
+  font-size: 11px;
+  font-weight: 700;
+  left: 14px;
+  line-height: 1;
+  overflow: hidden;
+  padding-top: 9px;
+  position: absolute;
+  right: 14px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .holosuite-empty {

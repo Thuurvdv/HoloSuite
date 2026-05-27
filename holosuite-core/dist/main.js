@@ -1,16 +1,68 @@
-const m = "holosuite-core", b = "licenseKey", w = "mockAllowedFeatures", p = /* @__PURE__ */ new Map();
-let r = null, c = null;
-var k, v;
-const M = globalThis.Application ?? ((v = (k = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : k.api) == null ? void 0 : v.Application);
-function f(e) {
+const m = "holosuite-core", M = "licenseKey", T = "mockAllowedFeatures", p = /* @__PURE__ */ new Map();
+let c = null, g = null;
+var A, L;
+const D = globalThis.Application ?? ((L = (A = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : A.api) == null ? void 0 : L.Application), F = {
+  holocall: "Comms",
+  "bounty-board": "Contracts",
+  "csi-toolkit": "Case Files",
+  "galaxy-map": "NavMap"
+};
+function d(e) {
   const t = document.createElement("div");
   return t.textContent = String(e ?? ""), t.innerHTML;
 }
-function I(e) {
-  const t = String((e == null ? void 0 : e.id) ?? "").trim(), s = String((e == null ? void 0 : e.title) ?? "").trim(), o = String((e == null ? void 0 : e.icon) ?? "").trim();
-  return !t || !s || !o || typeof (e == null ? void 0 : e.open) != "function" ? (console.warn(`${m} | Ignoring invalid app registration.`, e), null) : {
+function y(e, t, n = `${t}s`) {
+  return `${e} ${e === 1 ? t : n}`;
+}
+function w(e, t) {
+  try {
+    return game.settings.get(e, t);
+  } catch {
+    return null;
+  }
+}
+function k(e) {
+  var t;
+  return ((t = game.modules.get(e)) == null ? void 0 : t.api) ?? null;
+}
+function G() {
+  var e, t, n;
+  return String(((t = (e = game.user) == null ? void 0 : e.character) == null ? void 0 : t.name) ?? ((n = game.user) == null ? void 0 : n.name) ?? "Player");
+}
+function N() {
+  return (/* @__PURE__ */ new Date()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+function _(e) {
+  return F[e.id] ?? e.title;
+}
+function x(e) {
+  var t, n, o, s, i, u;
+  if (e === "holocall") {
+    const l = b(w("holocall", "contacts")), a = b(w("holocall", "groupContacts"));
+    return y(l.length + a.length, "link");
+  }
+  if (e === "bounty-board") {
+    const l = b((n = (t = k("bounty-board")) == null ? void 0 : t.getAllBounties) == null ? void 0 : n.call(t, { includeHidden: !1 }));
+    return y(l.length, "contract");
+  }
+  if (e === "csi-toolkit") {
+    const l = Object.values(((s = (o = k("csi-toolkit")) == null ? void 0 : o.getCases) == null ? void 0 : s.call(o)) ?? {}).filter((a) => (a == null ? void 0 : a.visibility) !== "gm");
+    return y(l.length, "case");
+  }
+  if (e === "galaxy-map") {
+    const l = b((u = (i = k("galaxy-map")) == null ? void 0 : i.getMaps) == null ? void 0 : u.call(i)).filter((a) => (a == null ? void 0 : a.visibility) === "players");
+    return y(l.length, "chart");
+  }
+  return "";
+}
+function b(e) {
+  return Array.isArray(e) ? e : [];
+}
+function z(e) {
+  const t = String((e == null ? void 0 : e.id) ?? "").trim(), n = String((e == null ? void 0 : e.title) ?? "").trim(), o = String((e == null ? void 0 : e.icon) ?? "").trim();
+  return !t || !n || !o || typeof (e == null ? void 0 : e.open) != "function" ? (console.warn(`${m} | Ignoring invalid app registration.`, e), null) : {
     id: t,
-    title: s,
+    title: n,
     icon: o,
     premium: e.premium === !0,
     playerVisible: e.playerVisible !== !1,
@@ -19,9 +71,9 @@ function I(e) {
     open: e.open
   };
 }
-function O(e) {
-  var u, d, l;
-  const t = () => y.openLauncher(), o = {
+function B(e) {
+  var u, l, a;
+  const t = () => v.openLauncher(), o = {
     name: "holosuite-core-launcher",
     title: ((u = game.user) == null ? void 0 : u.isGM) === !0 ? "HoloSuite Command Deck" : "HoloSuite Player View",
     icon: "fa-solid fa-mobile-screen-button",
@@ -31,22 +83,22 @@ function O(e) {
     onChange: t
   };
   if (Array.isArray(e)) {
-    const a = e.find((g) => g.name === "token") ?? e[0];
-    a != null && a.tools && !((l = (d = a.tools).some) != null && l.call(d, (g) => g.name === o.name)) && a.tools.push(o);
+    const r = e.find((f) => f.name === "token") ?? e[0];
+    r != null && r.tools && !((a = (l = r.tools).some) != null && a.call(l, (f) => f.name === o.name)) && r.tools.push(o);
     return;
   }
-  const i = e, n = (i == null ? void 0 : i.tokens) ?? (i == null ? void 0 : i.token) ?? Object.values(i ?? {})[0];
-  !(n != null && n.tools) || n.tools[o.name] || (n.tools[o.name] = { ...o, order: Object.keys(n.tools).length });
+  const s = e, i = (s == null ? void 0 : s.tokens) ?? (s == null ? void 0 : s.token) ?? Object.values(s ?? {})[0];
+  !(i != null && i.tools) || i.tools[o.name] || (i.tools[o.name] = { ...o, order: Object.keys(i.tools).length });
 }
-function T() {
-  game.settings.register(m, b, {
+function K() {
+  game.settings.register(m, M, {
     name: "HoloSuite License Key",
     hint: "Optional supporter validation key. This is not DRM; use it for supporter status, downloads, and update access.",
     scope: "world",
     config: !0,
     type: String,
     default: ""
-  }), game.settings.register(m, w, {
+  }), game.settings.register(m, T, {
     name: "Mock Allowed Premium Features",
     hint: "Development-only comma-separated feature ids returned by the local mock license checker.",
     scope: "world",
@@ -56,65 +108,78 @@ function T() {
   });
 }
 async function h(e = !1) {
-  if (c && !e) return c;
-  const t = String(game.settings.get(m, b) ?? "").trim(), s = String(game.settings.get(m, w) ?? "").split(",").map((n) => n.trim()).filter(Boolean), o = new Set(s), i = t.toLowerCase();
-  if (i.includes("supporter") || i.includes("valid"))
-    for (const n of p.values())
-      n.premium && o.add(n.featureId ?? n.id);
-  return c = {
-    valid: !!t && (o.size > 0 || i.includes("valid")),
+  if (g && !e) return g;
+  const t = String(game.settings.get(m, M) ?? "").trim(), n = String(game.settings.get(m, T) ?? "").split(",").map((i) => i.trim()).filter(Boolean), o = new Set(n), s = t.toLowerCase();
+  if (s.includes("supporter") || s.includes("valid"))
+    for (const i of p.values())
+      i.premium && o.add(i.featureId ?? i.id);
+  return g = {
+    valid: !!t && (o.size > 0 || s.includes("valid")),
     allowedFeatureIds: [...o].sort(),
     checkedAt: (/* @__PURE__ */ new Date()).toISOString(),
     message: t ? "Mock license check complete." : "No license key configured."
-  }, await (r == null ? void 0 : r.render(!1)), c;
+  }, await (c == null ? void 0 : c.render(!1)), g;
 }
-function S(e) {
-  return e ? (c == null ? void 0 : c.allowedFeatureIds.includes(e)) ?? !1 : !1;
+function H(e) {
+  return e ? (g == null ? void 0 : g.allowedFeatureIds.includes(e)) ?? !1 : !1;
 }
-function L(e) {
-  return !e.premium || S(e.featureId ?? e.id);
+function C(e) {
+  return !e.premium || H(e.featureId ?? e.id);
 }
-function A(e) {
+function E(e) {
   var t;
   return ((t = game.user) == null ? void 0 : t.isGM) === !0 || e.playerVisible !== !1;
 }
-async function C(e) {
-  var s, o, i, n, u, d;
+async function j(e) {
+  var n, o, s, i, u, l;
   const t = p.get(e);
-  return t ? A(t) ? (await h(), L(t) ? t.open() : ((d = (u = ui.notifications) == null ? void 0 : u.warn) == null || d.call(u, `${t.title} is locked for this world.`), null)) : ((n = (i = ui.notifications) == null ? void 0 : i.warn) == null || n.call(i, `${t.title} is not available from the player view.`), null) : ((o = (s = ui.notifications) == null ? void 0 : s.warn) == null || o.call(s, `HoloSuite app "${e}" is not registered.`), null);
+  return t ? E(t) ? (await h(), C(t) ? t.open() : ((l = (u = ui.notifications) == null ? void 0 : u.warn) == null || l.call(u, `${t.title} is locked for this world.`), null)) : ((i = (s = ui.notifications) == null ? void 0 : s.warn) == null || i.call(s, `${t.title} is not available from the player view.`), null) : ((o = (n = ui.notifications) == null ? void 0 : n.warn) == null || o.call(n, `HoloSuite app "${e}" is not registered.`), null);
 }
-function E() {
-  var d;
-  const e = ((d = game.user) == null ? void 0 : d.isGM) === !0, t = [...p.values()].filter(A).sort((l, a) => l.title.localeCompare(a.title)), s = c != null && c.valid ? "Supporter link active" : "Free core mode", o = e ? "GM Command Deck" : "Player Link", i = e ? "Apps" : "Commlink", n = e ? "No HoloSuite apps have registered yet." : "No player apps are available yet.", u = t.length ? t.map((l) => {
-    const a = !L(l), g = l.description ? `<p>${f(l.description)}</p>` : "";
+function R() {
+  var a;
+  const e = ((a = game.user) == null ? void 0 : a.isGM) === !0, t = [...p.values()].filter(E).sort((r, f) => r.title.localeCompare(f.title)), n = g != null && g.valid ? "Supporter link active" : "Free core mode", o = e ? "GM Command Deck" : "Player Link", s = e ? "Apps" : "Commlink", i = e ? "No HoloSuite apps have registered yet." : "No player apps are available yet.", u = e ? "" : `
+    <section class="holosuite-player-home">
+      <div>
+        <span class="holosuite-kicker">Active User</span>
+        <strong>${d(G())}</strong>
+      </div>
+      <div class="holosuite-player-status">
+        <span>LINK STABLE</span>
+        <span>${d(N())}</span>
+      </div>
+    </section>
+  `, l = t.length ? t.map((r) => {
+    const f = !C(r), I = e ? r.title : _(r), P = e && r.description ? `<p>${d(r.description)}</p>` : "", S = e ? "" : x(r.id);
     return `
-        <button type="button" class="holosuite-app-tile ${a ? "is-locked" : ""}" data-holosuite-app="${f(l.id)}" ${a ? "disabled" : ""}>
-          <span class="holosuite-app-icon"><i class="${f(l.icon)}"></i></span>
-          <span class="holosuite-app-title">${f(l.title)}</span>
-          ${g}
-          ${l.premium ? `<span class="holosuite-app-badge">${a ? "Locked" : "Premium"}</span>` : ""}
+        <button type="button" class="holosuite-app-tile ${f ? "is-locked" : ""}" data-holosuite-app="${d(r.id)}" ${f ? "disabled" : ""}>
+          <span class="holosuite-app-icon"><i class="${d(r.icon)}"></i></span>
+          <span class="holosuite-app-title">${d(I)}</span>
+          ${P}
+          ${S ? `<span class="holosuite-app-count">${d(S)}</span>` : ""}
+          ${r.premium ? `<span class="holosuite-app-badge">${f ? "Locked" : "Premium"}</span>` : ""}
         </button>
       `;
-  }).join("") : `<p class="holosuite-empty">${f(n)}</p>`;
+  }).join("") : `<p class="holosuite-empty">${d(i)}</p>`;
   return `
     <section class="holosuite-phone">
       <div class="holosuite-phone-shell">
         <header class="holosuite-status-bar">
           <span>HoloSuite</span>
-          <span>${f(s)}</span>
+          <span>${d(n)}</span>
         </header>
         <main class="holosuite-screen">
           <div class="holosuite-screen-heading">
             <div>
-              <span class="holosuite-kicker">${f(o)}</span>
-              <h2>${f(i)}</h2>
+              <span class="holosuite-kicker">${d(o)}</span>
+              <h2>${d(s)}</h2>
             </div>
             <button type="button" class="holosuite-refresh" data-holosuite-action="check-license" title="Check license">
               <i class="fa-solid fa-arrows-rotate"></i>
             </button>
           </div>
+          ${u}
           <div class="holosuite-app-grid">
-            ${u}
+            ${l}
           </div>
         </main>
         <footer class="holosuite-dock">
@@ -124,7 +189,7 @@ function E() {
     </section>
   `;
 }
-class F extends M {
+class V extends D {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "holosuite-launcher",
@@ -137,43 +202,43 @@ class F extends M {
     });
   }
   async _renderInner() {
-    return $(E());
+    return $(R());
   }
   activateListeners(t) {
-    super.activateListeners(t), t.find("[data-holosuite-app]").on("click", (s) => {
-      C(s.currentTarget.dataset.holosuiteApp);
+    super.activateListeners(t), t.find("[data-holosuite-app]").on("click", (n) => {
+      j(n.currentTarget.dataset.holosuiteApp);
     }), t.find("[data-holosuite-action='check-license']").on("click", () => h(!0)), t.find("[data-holosuite-action='close']").on("click", () => this.close());
   }
   async close(t = {}) {
-    return r = null, super.close(t);
+    return c = null, super.close(t);
   }
 }
-const y = {
+const v = {
   registerApp(e) {
-    const t = I(e);
-    return t ? (p.set(t.id, t), c = null, r == null || r.render(!1), t) : null;
+    const t = z(e);
+    return t ? (p.set(t.id, t), g = null, c == null || c.render(!1), t) : null;
   },
   unregisterApp(e) {
     const t = p.delete(String(e ?? ""));
-    return t && (r == null || r.render(!1)), t;
+    return t && (c == null || c.render(!1)), t;
   },
   getApps() {
     return [...p.values()];
   },
   async openLauncher() {
-    return await h(), r || (r = new F()), await r.render(!0), r;
+    return await h(), c || (c = new V()), await c.render(!0), c;
   },
   checkLicense: h,
-  isFeatureAllowed: S
+  isFeatureAllowed: H
 };
-function H() {
+function O() {
   const e = game.modules.get(m);
-  e && (e.api = y), game.holosuite = y;
+  e && (e.api = v), game.holosuite = v;
 }
 Hooks.once("init", () => {
-  T(), H();
+  K(), O();
 });
-Hooks.on("getSceneControlButtons", O);
+Hooks.on("getSceneControlButtons", B);
 Hooks.once("ready", async () => {
-  H(), await h(!0), console.log(`${m} | Ready. API available at game.modules.get("${m}").api`);
+  O(), await h(!0), console.log(`${m} | Ready. API available at game.modules.get("${m}").api`);
 });

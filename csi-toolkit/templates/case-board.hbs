@@ -29,6 +29,9 @@
           </details>
           <button type="button" data-action="zoom-out" title="Zoom out"><i class="fas fa-search-minus"></i></button>
           <button type="button" data-action="zoom-in" title="Zoom in"><i class="fas fa-search-plus"></i></button>
+          {{#if canEditBoard}}
+            <button type="button" data-action="publish-layout" title="Publish layout"><i class="fas fa-upload"></i></button>
+          {{/if}}
           <button type="button" data-action="refresh-board" title="Refresh board"><i class="fas fa-sync-alt"></i></button>
           {{#if isGM}}
             <button type="button" data-action="open-manager" title="Open case manager"><i class="fas fa-folder-open"></i></button>

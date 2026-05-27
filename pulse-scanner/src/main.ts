@@ -258,15 +258,16 @@ import {
     const token = app.object?.document ? app.object : canvas.tokens?.get(app.object?.id);
     if (!token?.actor) return;
 
-    const hasItem = Boolean(getPulseScannerItemForToken(token));
-    if (!hasItem) return;
+    const scannerItems = getPulseScannerItemsForToken(token);
+    if (!scannerItems.length) return;
 
-    const icon = $(`<div class="control-icon pulse-scanner-token-control" title="Use Pulse Scanner" data-action="pulse-scanner-scan"><i class="fa-solid fa-wave-square"></i></div>`);
+    const title = scannerItems.length > 1 ? "Choose Pulse Scanner" : "Use Pulse Scanner";
+    const icon = $(`<div class="control-icon pulse-scanner-token-control" title="${title}" data-action="pulse-scanner-scan"><i class="fa-solid fa-wave-square"></i></div>`);
 
     icon.on("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      usePulseScannerItem({ tokenId: token.id ?? token.document?.id }).catch((error) => console.error(`${MODULE_TITLE} | Item scan failed`, error));
+      choosePulseScannerItemForToken(token).catch((error) => console.error(`${MODULE_TITLE} | Item scan failed`, error));
     });
 
     const root = html instanceof jQuery ? html : $(html);
@@ -532,7 +533,7 @@ import {
       return [];
     }
 
-    const item = options.item ?? getPulseScannerItemForToken(token);
+    const item = options.item ?? getPulseScannerItemById(token, options.scannerItemId) ?? getPulseScannerItemForToken(token);
     if (!game.user?.isGM && !item && playerRequiresScannerItem(options)) {
       notifyScannerWarning("This token needs a Pulse Scanner item before it can scan.");
       return [];
@@ -1343,8 +1344,84 @@ import {
   }
 
   function getPulseScannerItemForActor(actor) {
+    return getPulseScannerItemsForActor(actor)[0] ?? null;
+  }
+
+  function getPulseScannerItemsForToken(token) {
+    return token?.actor ? getPulseScannerItemsForActor(token.actor) : [];
+  }
+
+  function getPulseScannerItemsForActor(actor) {
     const items = Array.from(actor?.items ?? []);
-    return items.find((item) => isPulseScannerItem(item)) ?? null;
+    return items.filter((item) => isPulseScannerItem(item));
+  }
+
+  function getPulseScannerItemById(token, itemId) {
+    if (!itemId) return null;
+    return getPulseScannerItemsForToken(token).find((item) => item.id === itemId) ?? null;
+  }
+
+  async function choosePulseScannerItemForToken(token) {
+    const items = getPulseScannerItemsForToken(token);
+    const tokenId = token.id ?? token.document?.id;
+    if (!items.length) {
+      notifyScannerWarning("This token needs a Pulse Scanner item before it can scan.");
+      return [];
+    }
+    if (items.length === 1) return usePulseScannerItem({ tokenId, item: items[0] });
+
+    const DialogClass = globalThis.Dialog ?? globalThis.foundry?.appv1?.api?.Dialog;
+    if (!DialogClass) return usePulseScannerItem({ tokenId, item: items[0] });
+
+    const rows = items.map((item, index) => {
+      const config = getPulseScannerItemConfig(item);
+      const checked = index === 0 ? "checked" : "";
+      return `
+        <label class="pulse-scanner-choice">
+          <input type="radio" name="pulseScannerItemId" value="${escapeHtml(item.id)}" ${checked}>
+          <span>
+            <strong>${escapeHtml(item.name)}</strong>
+            <small>${escapeHtml(labelize(config.mode))} / ${Number(config.radiusFeet)} ft</small>
+          </span>
+        </label>
+      `;
+    }).join("");
+
+    return new Promise((resolve) => {
+      new DialogClass({
+        title: "Choose Pulse Scanner",
+        content: `<form class="pulse-scanner-choice-dialog">${rows}</form>`,
+        buttons: {
+          scan: {
+            icon: '<i class="fa-solid fa-wave-square"></i>',
+            label: "Scan",
+            callback: async (html) => {
+              const root = html?.[0] ?? html;
+              const selectedId = root?.querySelector?.("[name='pulseScannerItemId']:checked")?.value;
+              const item = getPulseScannerItemById(token, selectedId) ?? items[0];
+              resolve(await usePulseScannerItem({ tokenId, item }));
+            }
+          },
+          cancel: {
+            label: "Cancel",
+            callback: () => resolve([])
+          }
+        },
+        default: "scan",
+        close: () => resolve([])
+      }, {
+        classes: ["pulse-scanner", "pulse-scanner-choice-window"],
+        width: 360
+      }).render(true);
+    });
+  }
+
+  function getPulseScannerItemConfig(item) {
+    const scan = item?.getFlag?.(MODULE_ID, "scan") ?? {};
+    return {
+      mode: SCANNER_MODES.includes(scan.mode) ? scan.mode : getScannerItemMode(),
+      radiusFeet: toNumber(scan.radiusFeet, game.settings.get(MODULE_ID, "scannerItemRadiusFeet"))
+    };
   }
 
   function isPulseScannerItem(item) {

@@ -137,18 +137,46 @@
     return game.settings.set(MODULE_ID, "cases", cases ?? {});
   }
 
+  function hasActiveGM() {
+    const users = game.users?.contents ?? Array.from(game.users ?? []);
+    return users.some(user => user?.isGM && user?.active);
+  }
+
   function getCase(caseId) {
     const cases = getCases();
     return cases[caseId] ? normalizeCase(cases[caseId]) : null;
   }
 
-  async function saveCase(caseData, { notify = true, render = true } = {}) {
+  async function saveCase(caseData, { notify = true, render = true, updateReason = null, userName = null } = {}) {
     const csiCase = normalizeCase(caseData);
+    if (!game.user?.isGM) return requestCaseSave(csiCase, { notify, render });
+
     const cases = getCases();
     cases[csiCase.id] = csiCase;
     await setCases(cases);
-    if (notify) broadcastCaseUpdated(csiCase.id);
+    if (notify) broadcastCaseUpdated(csiCase.id, { reason: updateReason, userName });
     if (render) renderOpenSurfaces(csiCase.id);
+    return csiCase;
+  }
+
+  async function requestCaseSave(csiCase, { render = true } = {}) {
+    if (!game.socket?.emit) {
+      ui.notifications?.warn(`${MODULE_TITLE}: A GM must be connected to save board changes.`);
+      return csiCase;
+    }
+
+    if (!hasActiveGM()) {
+      ui.notifications?.warn(`${MODULE_TITLE}: No active GM is connected to save board changes.`);
+      return csiCase;
+    }
+
+    game.socket.emit(SOCKET_NAME, {
+      type: "save-case-request",
+      caseData: csiCase,
+      userId: game.user?.id,
+      userName: game.user?.name
+    });
+    ui.notifications?.info(`${MODULE_TITLE}: Board update sent to the GM.`);
     return csiCase;
   }
 
@@ -302,16 +330,91 @@
     return board;
   }
 
-  function broadcastCaseUpdated(caseId) {
-    game.socket?.emit(SOCKET_NAME, { type: "case-updated", caseId, userId: game.user?.id });
+  async function requestLayoutPublish(caseId, layout) {
+    const normalized = normalizeBoardLayout(layout);
+    if (!game.socket?.emit) {
+      ui.notifications?.warn(`${MODULE_TITLE}: A GM must be connected to publish the board layout.`);
+      return false;
+    }
+
+    if (!hasActiveGM()) {
+      ui.notifications?.warn(`${MODULE_TITLE}: No active GM is connected to publish the board layout.`);
+      return false;
+    }
+
+    game.socket.emit(SOCKET_NAME, {
+      type: "publish-layout-request",
+      caseId,
+      boardLayout: normalized,
+      userId: game.user?.id,
+      userName: game.user?.name
+    });
+    ui.notifications?.info(`${MODULE_TITLE}: Layout publish request sent to the GM.`);
+    return true;
+  }
+
+  async function publishSharedLayout(caseId, layout, { userId = game.user?.id, userName = game.user?.name } = {}) {
+    const csiCase = getCase(caseId);
+    if (!csiCase) return false;
+
+    const currentLayout = normalizeBoardLayout(csiCase.boardLayout);
+    const publishedLayout = normalizeBoardLayout(layout);
+    csiCase.boardLayout = normalizeBoardLayout({
+      ...currentLayout,
+      cards: publishedLayout.cards
+    });
+
+    await saveCase(csiCase, {
+      render: false,
+      updateReason: "layout-published",
+      userName
+    });
+    renderOpenSurfaces(caseId, { resetLayout: true });
+    ui.notifications?.info(`${MODULE_TITLE}: Published shared board layout${userName ? ` from ${userName}` : ""}.`);
+    return true;
+  }
+
+  function broadcastCaseUpdated(caseId, { reason = null, userName = null } = {}) {
+    game.socket?.emit(SOCKET_NAME, { type: "case-updated", caseId, reason, userName, userId: game.user?.id });
   }
 
   function handleSocketMessage(message) {
     if (!message) return;
 
+    if (message.type === "save-case-request") {
+      if (!game.user?.isGM || !message.caseData) return;
+      saveCase(message.caseData, { render: false })
+        .then(csiCase => {
+          if (csiCase) {
+            renderOpenSurfaces(csiCase.id);
+            ui.notifications?.info(`${MODULE_TITLE}: Saved player board update from ${message.userName ?? "a player"}.`);
+          }
+        })
+        .catch(error => {
+          console.error(`${MODULE_TITLE} | Could not save player board update`, error);
+          ui.notifications?.error(`${MODULE_TITLE}: Player board update could not be saved.`);
+        });
+      return;
+    }
+
+    if (message.type === "publish-layout-request") {
+      if (!game.user?.isGM || !message.caseId || !message.boardLayout) return;
+      publishSharedLayout(message.caseId, message.boardLayout, {
+        userId: message.userId,
+        userName: message.userName
+      }).catch(error => {
+        console.error(`${MODULE_TITLE} | Could not publish player layout`, error);
+        ui.notifications?.error(`${MODULE_TITLE}: Player layout could not be published.`);
+      });
+      return;
+    }
+
     if (message.type === "case-updated" && message.caseId) {
       if (message.userId && message.userId === game.user?.id) return;
-      renderOpenSurfaces(message.caseId);
+      renderOpenSurfaces(message.caseId, { resetLayout: message.reason === "layout-published" });
+      if (message.reason === "layout-published") {
+        ui.notifications?.info(`${MODULE_TITLE}: ${message.userName ?? "Someone"} published a shared board layout.`);
+      }
       return;
     }
 
@@ -580,7 +683,8 @@
     activateListeners(html) {
       super.activateListeners(html);
       html.find("[data-action='open-manager']").on("click", () => openCaseManager());
-      html.find("[data-action='refresh-board']").on("click", () => this.render(false));
+      html.find("[data-action='refresh-board']").on("click", () => this._reloadSharedBoard());
+      html.find("[data-action='publish-layout']").on("click", () => this._publishLayout());
       html.find("[data-action='zoom-in']").on("click", () => this._zoomBy(0.1));
       html.find("[data-action='zoom-out']").on("click", () => this._zoomBy(-0.1));
       html.find("[data-action='context-add-board-item']").on("click", event => this._addBoardItemFromContext(event));
@@ -720,14 +824,22 @@
 
     async _saveLayout(layout) {
       this._localLayout = normalizeBoardLayout(layout);
-      if (!game.user?.isGM) return;
-      clearTimeout(this._saveTimer);
-      this._saveTimer = setTimeout(async () => {
-        const csiCase = getCase(this.caseId);
-        if (!csiCase) return;
-        csiCase.boardLayout = normalizeBoardLayout(layout);
-        await saveCase(csiCase, { render: false });
-      }, 180);
+    }
+
+    async _publishLayout() {
+      if (!canUserEditBoard(this.caseId)) return;
+      const layout = this._getLayout();
+      if (game.user?.isGM) {
+        await publishSharedLayout(this.caseId, layout);
+        return;
+      }
+      await requestLayoutPublish(this.caseId, layout);
+    }
+
+    _reloadSharedBoard() {
+      this._localLayout = null;
+      this._layoutDraft = null;
+      this.render(true);
     }
 
     _updateConnectionLines() {
@@ -1378,10 +1490,11 @@
     return allowed.includes(value) ? value : fallback;
   }
 
-  function renderOpenSurfaces(caseId) {
-    if (state.manager?.rendered) state.manager.render(false);
+  function renderOpenSurfaces(caseId, { resetLayout = false } = {}) {
+    if (state.manager?.rendered) state.manager.render(true);
     for (const [key, board] of state.boards.entries()) {
-      if (key.startsWith(`${caseId}:`) && board.rendered) board.render(false);
+      if (resetLayout && key.startsWith(`${caseId}:`)) board._localLayout = null;
+      if (key.startsWith(`${caseId}:`) && board.rendered) board.render(true);
     }
   }
 

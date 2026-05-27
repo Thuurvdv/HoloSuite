@@ -9,11 +9,76 @@ let launcherApp: HoloSuiteLauncher | null = null;
 let licenseCache: HoloSuiteLicenseResult | null = null;
 
 const LegacyApplication = (globalThis as any).Application ?? foundry?.appv1?.api?.Application;
+const PLAYER_APP_TITLES: Record<string, string> = {
+  "holocall": "Comms",
+  "bounty-board": "Contracts",
+  "csi-toolkit": "Case Files",
+  "galaxy-map": "NavMap"
+};
 
 function escapeHtml(value: unknown): string {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
   return div.innerHTML;
+}
+
+function pluralize(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function safeGetSetting(moduleId: string, key: string): unknown {
+  try {
+    return game.settings.get(moduleId, key);
+  } catch (error) {
+    return null;
+  }
+}
+
+function getPublicApi(moduleId: string): any {
+  return game.modules.get(moduleId)?.api ?? null;
+}
+
+function getPlayerDisplayName(): string {
+  return String(game.user?.character?.name ?? game.user?.name ?? "Player");
+}
+
+function getClockLabel(): string {
+  return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function getPlayerAppTitle(app: HoloSuiteAppRegistration): string {
+  return PLAYER_APP_TITLES[app.id] ?? app.title;
+}
+
+function getAppBadgeLabel(appId: string): string {
+  if (appId === "holocall") {
+    const contacts = safeArray(safeGetSetting("holocall", "contacts"));
+    const groupContacts = safeArray(safeGetSetting("holocall", "groupContacts"));
+    return pluralize(contacts.length + groupContacts.length, "link");
+  }
+
+  if (appId === "bounty-board") {
+    const bounties = safeArray(getPublicApi("bounty-board")?.getAllBounties?.({ includeHidden: false }));
+    return pluralize(bounties.length, "contract");
+  }
+
+  if (appId === "csi-toolkit") {
+    const cases = Object.values(getPublicApi("csi-toolkit")?.getCases?.() ?? {})
+      .filter((csiCase: any) => csiCase?.visibility !== "gm");
+    return pluralize(cases.length, "case");
+  }
+
+  if (appId === "galaxy-map") {
+    const maps = safeArray(getPublicApi("galaxy-map")?.getMaps?.())
+      .filter((map: any) => map?.visibility === "players");
+    return pluralize(maps.length, "chart");
+  }
+
+  return "";
+}
+
+function safeArray(value: unknown): any[] {
+  return Array.isArray(value) ? value : [];
 }
 
 function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration | null {
@@ -158,16 +223,31 @@ function renderLauncherHtml(): string {
   const emptyLabel = isGM
     ? "No HoloSuite apps have registered yet."
     : "No player apps are available yet.";
+  const playerSummary = isGM ? "" : `
+    <section class="holosuite-player-home">
+      <div>
+        <span class="holosuite-kicker">Active User</span>
+        <strong>${escapeHtml(getPlayerDisplayName())}</strong>
+      </div>
+      <div class="holosuite-player-status">
+        <span>LINK STABLE</span>
+        <span>${escapeHtml(getClockLabel())}</span>
+      </div>
+    </section>
+  `;
 
   const appCards = apps.length
     ? apps.map((app) => {
       const locked = !canOpenApp(app);
-      const description = app.description ? `<p>${escapeHtml(app.description)}</p>` : "";
+      const title = isGM ? app.title : getPlayerAppTitle(app);
+      const description = isGM && app.description ? `<p>${escapeHtml(app.description)}</p>` : "";
+      const badgeLabel = !isGM ? getAppBadgeLabel(app.id) : "";
       return `
         <button type="button" class="holosuite-app-tile ${locked ? "is-locked" : ""}" data-holosuite-app="${escapeHtml(app.id)}" ${locked ? "disabled" : ""}>
           <span class="holosuite-app-icon"><i class="${escapeHtml(app.icon)}"></i></span>
-          <span class="holosuite-app-title">${escapeHtml(app.title)}</span>
+          <span class="holosuite-app-title">${escapeHtml(title)}</span>
           ${description}
+          ${badgeLabel ? `<span class="holosuite-app-count">${escapeHtml(badgeLabel)}</span>` : ""}
           ${app.premium ? `<span class="holosuite-app-badge">${locked ? "Locked" : "Premium"}</span>` : ""}
         </button>
       `;
@@ -191,6 +271,7 @@ function renderLauncherHtml(): string {
               <i class="fa-solid fa-arrows-rotate"></i>
             </button>
           </div>
+          ${playerSummary}
           <div class="holosuite-app-grid">
             ${appCards}
           </div>

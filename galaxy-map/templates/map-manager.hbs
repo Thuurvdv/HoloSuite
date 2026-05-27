@@ -30,10 +30,14 @@
               <span class="gmf-map-card__title">{{map.title}}</span>
               <span class="gmf-map-card__meta">{{gmfFallback map.subtitle "No subtitle"}} - {{map.systems.length}} systems - {{map.routes.length}} routes</span>
             </button>
-            <div class="gmf-map-card__buttons gmf-map-card__buttons--single">
+            <div class="gmf-map-card__buttons">
               <button type="button" data-open-map="{{map.id}}" title="Open map">
                 <i class="fa-solid fa-up-right-from-square"></i>
                 Open
+              </button>
+              <button type="button" data-delete-map="{{map.id}}" title="Delete map">
+                <i class="fa-solid fa-trash"></i>
+                Delete
               </button>
             </div>
           </article>
@@ -58,6 +62,10 @@
             <button type="button" data-open-map="{{selectedMap.id}}">
               <i class="fa-solid fa-map-location-dot"></i>
               Open Map
+            </button>
+            <button type="button" data-delete-map="{{selectedMap.id}}">
+              <i class="fa-solid fa-trash"></i>
+              Delete Map
             </button>
           </div>
           <p class="gmf-manager-preview__note">
