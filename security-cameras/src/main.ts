@@ -847,7 +847,7 @@ function getTokenSceneBounds(token) {
 
 function shouldDrawToken(token) {
   if (!token?.document) return false;
-  if (token.document.hidden && !game.user?.isGM) return false;
+  if (token.document.hidden) return false;
   if (token.visible === false || token.renderable === false) return false;
   if (token.isVisible === false) return false;
   return true;
@@ -929,8 +929,8 @@ function captureCanvasFrame(camera = {}) {
 async function updateLocalLiveFrame(app) {
   if (!isCameraLive(app?.camera)) return;
   let frame = "";
-  if (canCaptureLiveCamera(app.camera)) frame = captureCanvasFrame(app.camera);
-  if (!frame) frame = await captureSceneBackgroundFrame(app.camera);
+  frame = await captureSceneBackgroundFrame(app.camera);
+  if (!frame && canCaptureLiveCamera(app.camera)) frame = captureCanvasFrame(app.camera);
   if (!frame) return;
   await app.updateLiveFrame?.(frame);
 }

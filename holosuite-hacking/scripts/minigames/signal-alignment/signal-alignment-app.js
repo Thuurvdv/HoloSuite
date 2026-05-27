@@ -81,7 +81,7 @@ export class SignalAlignmentApp extends LegacyApplication {
   activateListeners(html) {
     super.activateListeners(html);
     html.find("[data-channel-slider]").on("input", (event) => this.handleSlider(event.currentTarget));
-    html.find("[data-action='abort']").on("click", () => this.finish("failure", "Manual disconnect"));
+    html.find("[data-action='abort']").on("click", () => this.abort());
     html.find("[data-action='restart']").on("click", () => this.restart());
     this.syncDom();
   }
@@ -186,7 +186,11 @@ export class SignalAlignmentApp extends LegacyApplication {
     this.timer = null;
   }
 
-  async finish(result, message) {
+  async abort() {
+    await this.finish("failure", "Manual disconnect", { close: true });
+  }
+
+  async finish(result, message, { close = false } = {}) {
     if (!this.state.isRunning && this.state.result) return;
     this.state.isRunning = false;
     this.state.result = result;
@@ -221,6 +225,7 @@ export class SignalAlignmentApp extends LegacyApplication {
 
     if (result === "success") this.onSuccess?.(payload);
     else this.onFailure?.(payload);
+    if (close) await this.close();
   }
 
   syncDom() {

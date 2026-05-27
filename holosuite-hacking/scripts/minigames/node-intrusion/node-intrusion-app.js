@@ -10,6 +10,14 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function nodeTypeLabel(type) {
+  if (type === "start") return "entry";
+  if (type === "target") return "target";
+  if (type === "firewall") return "firewall";
+  if (type === "decoy") return "decoy";
+  return "relay";
+}
+
 export class NodeIntrusionApp extends LegacyApplication {
   constructor(options = {}) {
     super(options);
@@ -51,12 +59,21 @@ export class NodeIntrusionApp extends LegacyApplication {
   }
 
   getData() {
+    const currentNode = this.getCurrentNode();
+    const currentConnections = currentNode.connected;
     const nodes = this.graph.nodes.map((node) => ({
       ...node,
       isCurrent: node.id === this.state.currentNodeId,
       isVisited: this.state.visitedNodeIds.has(node.id),
-      isNeighbor: this.getCurrentNode().connected.includes(node.id),
-      isDangerVisible: this.profile.hintsEnabled || node.revealed || this.state.visitedNodeIds.has(node.id)
+      isNeighbor: currentConnections.includes(node.id),
+      canMove: currentConnections.includes(node.id)
+        && !this.state.blockedEdgeIds.has(edgeKey(currentNode.id, node.id))
+        && !this.state.deadNodeIds.has(node.id),
+      isDangerVisible: this.profile.hintsEnabled || node.revealed || this.state.visitedNodeIds.has(node.id),
+      displayType: this.profile.hintsEnabled || node.revealed || this.state.visitedNodeIds.has(node.id) || node.type === "start" || node.type === "target"
+        ? nodeTypeLabel(node.type)
+        : "unknown",
+      title: `${node.id} - ${nodeTypeLabel(node.type)}`
     }));
 
     return {
@@ -67,7 +84,6 @@ export class NodeIntrusionApp extends LegacyApplication {
       edges: this.graph.edges.map((edge) => {
         const from = nodes.find((node) => node.id === edge.from);
         const to = nodes.find((node) => node.id === edge.to);
-        const currentConnections = this.getCurrentNode().connected;
         const blockedType = this.state.blockedEdgeIds.get(edgeKey(edge.from, edge.to));
         return {
           ...edge,
@@ -80,6 +96,11 @@ export class NodeIntrusionApp extends LegacyApplication {
           isDecoyPath: blockedType === "decoy"
         };
       }),
+      currentNode: {
+        id: currentNode.id,
+        label: nodeTypeLabel(currentNode.type),
+        availableRoutes: nodes.filter((node) => node.canMove).length
+      },
       state: {
         ...this.state,
         visitedNodeIds: [...this.state.visitedNodeIds],
@@ -96,7 +117,7 @@ export class NodeIntrusionApp extends LegacyApplication {
   activateListeners(html) {
     super.activateListeners(html);
     html.find("[data-node-id]").on("click", (event) => this.handleNodeClick(event.currentTarget.dataset.nodeId));
-    html.find("[data-action='abort']").on("click", () => this.finish("failure", "Manual disconnect"));
+    html.find("[data-action='abort']").on("click", () => this.abort());
     html.find("[data-action='restart']").on("click", () => this.restart());
     this.syncDom();
   }
@@ -219,7 +240,11 @@ export class NodeIntrusionApp extends LegacyApplication {
     this.timer = null;
   }
 
-  async finish(result, message) {
+  async abort() {
+    await this.finish("failure", "Manual disconnect", { close: true });
+  }
+
+  async finish(result, message, { close = false } = {}) {
     if (!this.state.isRunning && this.state.result) return;
     this.state.isRunning = false;
     this.state.result = result;
@@ -253,6 +278,7 @@ export class NodeIntrusionApp extends LegacyApplication {
 
     if (result === "success") this.onSuccess?.(payload);
     else this.onFailure?.(payload);
+    if (close) await this.close();
   }
 
   syncDom() {

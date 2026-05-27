@@ -67,7 +67,7 @@ function C(e, t) {
 function ae(e) {
   return e && typeof e == "object" ? e : {};
 }
-function G(e = {}, t = {}) {
+function B(e = {}, t = {}) {
   var d;
   const n = ae(e), i = t.preserveId === !0, a = String(n.id ?? "").trim(), r = i ? a : a || ((d = t.createId) == null ? void 0 : d.call(t)) || "", s = R(n.feedSource, ie, p.feedSource), o = R(n.status, ne, p.status), u = R(n.displayMode, V, p.displayMode);
   return {
@@ -89,13 +89,13 @@ function G(e = {}, t = {}) {
   };
 }
 function Ue(e = {}, t = {}) {
-  const n = ae(e), i = G(n, {
+  const n = ae(e), i = B(n, {
     preserveId: t.requireId === !0,
     createId: t.createId
   }), a = [], r = String(n.feedSource ?? p.feedSource).trim(), s = String(n.status ?? p.status).trim(), o = String(n.displayMode ?? p.displayMode).trim();
   return t.requireId && !i.id && a.push("Camera id is required."), typeof n.name == "string" && !n.name.trim() && a.push("Camera name is required."), ie.has(r) || a.push(`Invalid feed source: ${r}`), ne.has(s) || a.push(`Invalid status: ${s}`), V.has(o) || a.push(`Invalid display mode: ${o}`), {
     ok: a.length === 0,
-    camera: G(i, { createId: t.createId }),
+    camera: B(i, { createId: t.createId }),
     errors: a
   };
 }
@@ -120,7 +120,7 @@ function Ye(e = {}) {
   const i = b(t.x) ?? 0, a = b(t.y) ?? 0, r = C(t.width ?? t.radiusX ?? t.radius, 0), s = C(t.height ?? t.radiusY ?? t.radius, 0);
   return !r || !s ? null : { x: i, y: a, width: r, height: s };
 }
-function Ge(e) {
+function Be(e) {
   const t = e.filter((s) => !!s);
   if (!t.length) return null;
   const n = Math.min(...t.map((s) => s.x)), i = Math.min(...t.map((s) => s.y)), a = Math.max(...t.map((s) => s.x + s.width)), r = Math.max(...t.map((s) => s.y + s.height));
@@ -131,7 +131,7 @@ function Ge(e) {
     height: r - i
   };
 }
-function B(e) {
+function G(e) {
   const t = re(e), n = C(t.width, P), i = C(t.height, k);
   return !n || !i ? null : {
     regionX: b(t.x) ?? 0,
@@ -140,9 +140,9 @@ function B(e) {
     regionHeight: i
   };
 }
-function Be(e) {
-  const t = Ge(e.map(Ye));
-  return t ? B(t) : null;
+function Ge(e) {
+  const t = Be(e.map(Ye));
+  return t ? G(t) : null;
 }
 function se(e) {
   return Number.isFinite(e.regionX) && Number.isFinite(e.regionY);
@@ -231,7 +231,7 @@ function c(e) {
   return t.innerText = String(e), t.innerHTML;
 }
 function v(e = {}, t = {}) {
-  return G(e, { ...t, createId: E });
+  return B(e, { ...t, createId: E });
 }
 function q(e = {}, t = {}) {
   return Ue(e, { ...t, createId: E });
@@ -293,12 +293,12 @@ function it(e) {
     return ((l = g.document) == null ? void 0 : l.id) === (e == null ? void 0 : e.id);
   })), n = t == null ? void 0 : t.bounds;
   if (n != null && n.width && (n != null && n.height))
-    return B(n);
+    return G(n);
   const i = e == null ? void 0 : e.bounds;
   if (i != null && i.width && (i != null && i.height))
-    return B(i);
+    return G(i);
   const a = ((d = e == null ? void 0 : e.toObject) == null ? void 0 : d.call(e)) ?? e, r = Array.isArray(e == null ? void 0 : e.shapes) ? e.shapes : Array.isArray(a == null ? void 0 : a.shapes) ? a.shapes : [];
-  return Be(r);
+  return Ge(r);
 }
 function N(e) {
   const t = nt(e.regionId, e.sceneId), n = it(t);
@@ -771,8 +771,7 @@ function ft(e) {
   return qe(e == null ? void 0 : e.document, t);
 }
 function yt(e) {
-  var t;
-  return !(!(e != null && e.document) || e.document.hidden && !((t = game.user) != null && t.isGM) || e.visible === !1 || e.renderable === !1 || e.isVisible === !1);
+  return !(!(e != null && e.document) || e.document.hidden || e.visible === !1 || e.renderable === !1 || e.isVisible === !1);
 }
 function pt(e) {
   var t, n, i, a, r;
@@ -823,7 +822,7 @@ async function K(e) {
   var n;
   if (!Fe(e == null ? void 0 : e.camera)) return;
   let t = "";
-  ut(e.camera) && (t = St(e.camera)), t || (t = await gt(e.camera)), t && await ((n = e.updateLiveFrame) == null ? void 0 : n.call(e, t));
+  t = await gt(e.camera), !t && ut(e.camera) && (t = St(e.camera)), t && await ((n = e.updateLiveFrame) == null ? void 0 : n.call(e, t));
 }
 function z(e) {
   e != null && e.liveFrameTimer && (window.clearInterval(e.liveFrameTimer), e.liveFrameTimer = null);

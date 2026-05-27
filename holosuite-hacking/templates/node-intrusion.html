@@ -32,12 +32,25 @@
           <strong data-mistake-text>{{state.mistakes}}/{{profile.maxMistakes}}</strong>
         </div>
 
+        <div class="node-intrusion-objective">
+          <span>Objective</span>
+          <strong>Reach target before trace lock</strong>
+          <small>Current: {{currentNode.label}} / {{currentNode.availableRoutes}} open route(s)</small>
+        </div>
+
         <dl class="node-intrusion-specs">
           <div><dt>Nodes</dt><dd>{{profile.nodeCount}}</dd></div>
           <div><dt>Firewalls</dt><dd>{{profile.firewallCount}}</dd></div>
           <div><dt>Decoys</dt><dd>{{profile.decoyCount}}</dd></div>
           <div><dt>Hints</dt><dd>{{#if profile.hintsEnabled}}online{{else}}masked{{/if}}</dd></div>
         </dl>
+
+        <div class="node-intrusion-legend" aria-label="Node legend">
+          <span><i class="legend-node is-current"></i> active</span>
+          <span><i class="legend-line is-open"></i> open route</span>
+          <span><i class="legend-node is-target"></i> target</span>
+          <span><i class="legend-node is-danger"></i> revealed threat</span>
+        </div>
 
         <div class="node-intrusion-actions">
           <button type="button" data-action="abort"><i class="fa-solid fa-power-off"></i> Abort</button>
@@ -55,10 +68,12 @@
         {{#each nodes}}
           <button
             type="button"
-            class="node-intrusion-node type-{{type}}{{#if isCurrent}} is-current{{/if}}{{#if isVisited}} is-visited{{/if}}{{#if isNeighbor}} is-neighbor{{/if}}{{#if isDangerVisible}} is-revealed{{/if}}"
+            class="node-intrusion-node type-{{type}}{{#if isCurrent}} is-current{{/if}}{{#if isVisited}} is-visited{{/if}}{{#if isNeighbor}} is-neighbor{{/if}}{{#if canMove}} can-move{{/if}}{{#if isDangerVisible}} is-revealed{{/if}}"
             data-node-id="{{id}}"
             style="left: {{x}}%; top: {{y}}%;"
-            title="{{id}}"
+            title="{{title}}"
+            aria-label="{{id}} {{displayType}}"
+            {{#unless canMove}}{{#unless isCurrent}}disabled{{/unless}}{{/unless}}
           >
             {{#if isCurrent}}<i class="fa-solid fa-location-crosshairs node-intrusion-current-icon"></i>{{/if}}
             {{#if isNeighbor}}<i class="fa-solid fa-chevron-right node-intrusion-neighbor-icon"></i>{{/if}}

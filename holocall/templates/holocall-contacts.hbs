@@ -16,6 +16,13 @@
       {{#if hasContacts}}
         {{#each contacts}}
           <li>
+            <div class="holocall-contact-avatar">
+              {{#if image}}
+                <img src="{{image}}" alt="">
+              {{else}}
+                <span>{{initials}}</span>
+              {{/if}}
+            </div>
             <div class="holocall-contact-id">
               <strong>{{name}}</strong>
               <span>{{number}}</span>
@@ -39,6 +46,13 @@
       {{#if hasGroupContacts}}
         {{#each groupContacts}}
           <li>
+            <div class="holocall-contact-avatar">
+              {{#if image}}
+                <img src="{{image}}" alt="">
+              {{else}}
+                <span>{{initials}}</span>
+              {{/if}}
+            </div>
             <div class="holocall-contact-id">
               <strong>{{name}}</strong>
               <span>{{number}}</span>
@@ -68,6 +82,11 @@
     <label>
       <span>Number</span>
       <input type="text" name="number" autocomplete="off" required>
+    </label>
+
+    <label>
+      <span>Picture</span>
+      <input type="text" name="image" autocomplete="off" placeholder="icons/...">
     </label>
 
     <button type="submit">Add Contact</button>

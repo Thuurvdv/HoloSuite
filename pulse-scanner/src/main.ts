@@ -893,6 +893,7 @@ import {
 
     const overlay = document.createElement("div");
     overlay.className = "pulse-scanner-overlay";
+    overlay.dataset.cameraLocked = "true";
     overlay.style.setProperty("--pulse-duration", `${Math.max(900, Number(payload.duration || 4200))}ms`);
     document.body.appendChild(overlay);
 

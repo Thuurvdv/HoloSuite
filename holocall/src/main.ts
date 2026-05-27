@@ -122,7 +122,9 @@ function normalizeContact(contact = {}) {
   return {
     id: String(contact.id ?? createCallId()),
     name: String(contact.name ?? "").trim(),
-    number: String(contact.number ?? "").trim()
+    number: String(contact.number ?? "").trim(),
+    image: String(contact.image ?? contact.img ?? "").trim(),
+    initials: getInitials(contact.name)
   };
 }
 
@@ -166,8 +168,8 @@ async function saveGroupContacts(contacts) {
   });
 }
 
-async function addContact(name, number, scope = "personal") {
-  const contact = normalizeContact({ name, number });
+async function addContact(name, number, scope = "personal", image = "") {
+  const contact = normalizeContact({ name, number, image });
   if (!contact.name || !contact.number) {
     ui.notifications?.warn?.("Contact name and number are required.");
     return;
@@ -380,7 +382,7 @@ function bindContactsControls(app, html) {
     event.preventDefault();
     const formData = new FormData(form);
     const scope = String(formData.get("scope") ?? activeContactsTab);
-    await addContact(formData.get("name"), formData.get("number"), scope);
+    await addContact(formData.get("name"), formData.get("number"), scope, formData.get("image"));
     form.reset();
     form.elements.scope.value = scope;
     form.elements.name?.focus();
@@ -516,6 +518,9 @@ function renderContactsFallbackTemplate(data) {
   const renderContactList = (contacts, scope) => contacts.length
     ? contacts.map((contact) => `
         <li>
+          <div class="holocall-contact-avatar">
+            ${contact.image ? `<img src="${escapeHTML(contact.image)}" alt="">` : `<span>${escapeHTML(contact.initials)}</span>`}
+          </div>
           <div class="holocall-contact-id">
             <strong>${escapeHTML(contact.name)}</strong>
             <span>${escapeHTML(contact.number)}</span>
@@ -552,6 +557,7 @@ function renderContactsFallbackTemplate(data) {
         <input type="hidden" name="scope" value="${escapeHTML(data.activeTab)}">
         <label>Name <input type="text" name="name" required></label>
         <label>Number <input type="text" name="number" required></label>
+        <label>Picture <input type="text" name="image" placeholder="icons/..."></label>
         <button type="submit">Add Contact</button>
       </form>
     </section>
@@ -946,6 +952,7 @@ async function requestCallToGM(contact) {
     return openCall({
       callerName: contact.name,
       subtitle: `Comms ${contact.number}`,
+      image: contact.image,
       message: `Opening channel ${contact.number}...`,
       signal: game.settings.get(MODULE_ID, "defaultSignal"),
       variant: "standard",
@@ -959,11 +966,9 @@ async function requestCallToGM(contact) {
   }
 
   const callId = createCallId();
+  const callerImage = String(game.user?.avatar ?? game.user?.character?.img ?? "").trim();
   const baseCall = {
     id: callId,
-    callerName: contact.name,
-    subtitle: `Comms ${contact.number}`,
-    image: "",
     signal: game.settings.get(MODULE_ID, "defaultSignal"),
     variant: "standard",
     fullscreen: false,
@@ -974,6 +979,9 @@ async function requestCallToGM(contact) {
   };
   const callerCall = normalizeCallData({
     ...baseCall,
+    callerName: contact.name,
+    subtitle: `Comms ${contact.number}`,
+    image: contact.image,
     message: `Awaiting connection to ${contact.name} on ${contact.number}...`,
     canAccept: false,
     canDecline: false,
@@ -982,7 +990,9 @@ async function requestCallToGM(contact) {
   });
   const gmCall = normalizeCallData({
     ...baseCall,
+    callerName: game.user.name,
     subtitle: `Call request from ${game.user.name}`,
+    image: callerImage,
     message: `${game.user.name} is calling ${contact.name} on ${contact.number}.`,
     canAccept: true,
     ringing: true

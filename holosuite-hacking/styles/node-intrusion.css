@@ -115,10 +115,32 @@
   transition: width 120ms linear;
 }
 
+.node-intrusion-objective {
+  display: grid;
+  gap: 4px;
+  margin: 18px 0 0;
+  border: 1px solid rgba(255, 230, 111, 0.25);
+  background: rgba(255, 230, 111, 0.07);
+  padding: 10px;
+}
+
+.node-intrusion-objective span,
+.node-intrusion-objective small {
+  color: var(--hs-muted, #a8f7ff);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.node-intrusion-objective strong {
+  color: #ffe66f;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
 .node-intrusion-specs {
   display: grid;
   gap: 8px;
-  margin: 22px 0;
+  margin: 18px 0;
 }
 
 .node-intrusion-specs div {
@@ -139,6 +161,60 @@
   margin: 0;
   color: var(--hs-text, #f2feff);
   font-weight: 700;
+}
+
+.node-intrusion-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 10px;
+  margin: 0 0 18px;
+  color: var(--hs-muted, #a8f7ff);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.node-intrusion-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.legend-node,
+.legend-line {
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.legend-node {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(117, 244, 255, 0.75);
+  border-radius: 50%;
+  background: #7df9ff;
+  box-shadow: 0 0 10px rgba(125, 249, 255, 0.8);
+}
+
+.legend-node.is-current {
+  border-color: #ffffff;
+  background: #4dff9b;
+}
+
+.legend-node.is-target {
+  border-radius: 2px;
+  border-color: #ffe66f;
+  background: #ffe66f;
+}
+
+.legend-node.is-danger {
+  border-color: #ff477e;
+  background: #ff477e;
+}
+
+.legend-line {
+  width: 18px;
+  border-top: 2px dashed #ffe66f;
+  filter: drop-shadow(0 0 4px rgba(255, 230, 111, 0.8));
 }
 
 .node-intrusion-actions {
@@ -224,10 +300,19 @@
   box-shadow: 0 0 14px #7df9ff;
 }
 
-.node-intrusion-node:hover,
-.node-intrusion-node.is-neighbor {
+.node-intrusion-node:not(:disabled):hover,
+.node-intrusion-node.can-move {
   transform: scale(1.18);
   border-color: #ffffff;
+}
+
+.node-intrusion-node:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
+.node-intrusion-node:disabled .node-intrusion-neighbor-icon {
+  display: none;
 }
 
 .node-intrusion-node.is-current {

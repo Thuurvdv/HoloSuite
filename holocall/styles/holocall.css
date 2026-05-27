@@ -639,13 +639,33 @@
 
 .holocall-contacts-list li {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   padding: 10px;
   border: 1px solid rgba(94, 231, 255, 0.24);
   border-radius: 4px;
   background: rgba(0, 124, 190, 0.1);
+}
+
+.holocall-contact-avatar {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid rgba(94, 231, 255, 0.38);
+  border-radius: 50%;
+  background: rgba(0, 124, 190, 0.14);
+  color: var(--holocall-cyan);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.holocall-contact-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .holocall-contact-id {
@@ -688,7 +708,7 @@
 
 .holocall-contacts-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
   gap: 10px;
   align-items: end;
   margin-top: 12px;
@@ -791,9 +811,16 @@
 @media (max-width: 520px) {
   .holocall-composer-grid,
   .holocall-composer-toggles,
-  .holocall-contacts-form,
-  .holocall-contacts-list li {
+  .holocall-contacts-form {
     grid-template-columns: 1fr;
+  }
+
+  .holocall-contacts-list li {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .holocall-contact-actions {
+    grid-column: 1 / -1;
   }
 
   .holocall-broadcast {

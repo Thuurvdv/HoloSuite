@@ -360,6 +360,8 @@
   z-index: 70;
   pointer-events: none;
   overflow: hidden;
+  transform: none;
+  contain: layout paint;
 }
 
 .pulse-scanner-ring {
@@ -553,7 +555,7 @@
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, calc(-100% - 26px));
+    transform: translate(-50%, calc(-100% - 22px));
   }
 }
 

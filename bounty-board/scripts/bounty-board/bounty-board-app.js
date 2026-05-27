@@ -72,6 +72,9 @@ export class BountyBoardApp extends BaseApplication {
       search: ""
     };
     this.expanded = new Set();
+    this.pendingFilterRender = null;
+    this.searchSelection = null;
+    this.restoreSearchFocus = false;
   }
 
   async _prepareContext(options) {
@@ -93,10 +96,15 @@ export class BountyBoardApp extends BaseApplication {
   _onRender(context, options) {
     super._onRender?.(context, options);
     const html = this.element;
+    html.querySelector(".bb-filters")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
     html.querySelectorAll("[data-filter]").forEach((input) => {
-      input.addEventListener("change", () => this.#updateFilter(input));
+      input.addEventListener("change", () => this.#updateFilter(input, { immediate: true }));
       input.addEventListener("input", () => this.#updateFilter(input));
     });
+    this.#restoreSearchFocus();
     html.querySelectorAll("[data-bounty-toggle]").forEach((button) => {
       button.addEventListener("click", () => {
         const id = button.dataset.bountyToggle;
@@ -107,13 +115,39 @@ export class BountyBoardApp extends BaseApplication {
     });
   }
 
-  #updateFilter(input) {
+  #updateFilter(input, { immediate = false } = {}) {
     this.filters[input.dataset.filter] = input.value;
+    if (input.dataset.filter === "search") {
+      this.searchSelection = {
+        start: input.selectionStart ?? input.value.length,
+        end: input.selectionEnd ?? input.value.length
+      };
+      this.restoreSearchFocus = true;
+    }
+    if (this.pendingFilterRender) window.clearTimeout(this.pendingFilterRender);
+    if (!immediate && input.dataset.filter === "search") {
+      this.pendingFilterRender = window.setTimeout(() => {
+        this.pendingFilterRender = null;
+        this.render({ force: true });
+      }, 120);
+      return;
+    }
     this.render({ force: true });
+  }
+
+  #restoreSearchFocus() {
+    const search = this.element?.querySelector?.("[data-filter='search']");
+    if (!search || !this.restoreSearchFocus || document.activeElement === search || this.searchSelection === null) return;
+    this.restoreSearchFocus = false;
+    search.focus({ preventScroll: true });
+    const start = Math.min(this.searchSelection.start, search.value.length);
+    const end = Math.min(this.searchSelection.end, search.value.length);
+    search.setSelectionRange?.(start, end);
   }
 
   async close(options = {}) {
     if (boardApp === this) boardApp = null;
+    if (this.pendingFilterRender) window.clearTimeout(this.pendingFilterRender);
     return super.close(options);
   }
 

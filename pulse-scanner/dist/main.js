@@ -25,7 +25,7 @@ const j = "structural", ge = "breakable", q = "circle", Q = [
   "evidence",
   "loot",
   "custom"
-], rn = ["gm", "revealed", "always"], an = ["active", "revealed", "resolved"], he = ["circle", "rectangle"], P = ["structural", "arcane", "thermal", "forensic", "tech", "biological"], K = {
+], rn = ["gm", "revealed", "always"], an = ["active", "revealed", "resolved"], he = ["circle", "rectangle"], k = ["structural", "arcane", "thermal", "forensic", "tech", "biological"], K = {
   structural: { label: "Structural", color: "#ffb347", icon: "fa-solid fa-building-shield", types: ["breakable", "hidden"] },
   arcane: { label: "Arcane", color: "#c77dff", icon: "fa-solid fa-wand-sparkles", types: ["magic", "hidden", "custom"] },
   thermal: { label: "Thermal", color: "#ff4d6d", icon: "fa-solid fa-temperature-high", types: ["trap", "biological", "radiation"] },
@@ -70,7 +70,7 @@ function ct(s) {
   return String(s || "").replace(/[-_]/g, " ").replace(/\b\w/g, (d) => d.toUpperCase());
 }
 function sn(s) {
-  return P.find((d) => {
+  return k.find((d) => {
     var l, m;
     return (m = (l = K[d]) == null ? void 0 : l.types) == null ? void 0 : m.includes(s);
   }) ?? j;
@@ -81,7 +81,7 @@ function on(s, d) {
 }
 function lt(s = {}, d = {}) {
   var o;
-  const l = it(s), m = Q.includes(l.type) ? l.type : ge, h = v[m] ?? v.custom, w = P.includes(l.mode) ? l.mode : sn(m), I = he.includes(l.shape) ? l.shape : q, _ = an.includes(l.status) ? l.status : l.resolved ? "resolved" : "active";
+  const l = it(s), m = Q.includes(l.type) ? l.type : ge, h = v[m] ?? v.custom, w = k.includes(l.mode) ? l.mode : sn(m), I = he.includes(l.shape) ? l.shape : q, _ = an.includes(l.status) ? l.status : l.resolved ? "resolved" : "active";
   return {
     id: String(l.id || ((o = d.createId) == null ? void 0 : o.call(d)) || ""),
     sceneId: String(l.sceneId || d.sceneId || ""),
@@ -109,7 +109,7 @@ function ut(s) {
   return d.length ? new Set(d) : null;
 }
 function dt(s) {
-  const l = (Array.isArray(s) ? s : s ? [s] : []).map((m) => String(m).trim()).filter((m) => P.includes(m));
+  const l = (Array.isArray(s) ? s : s ? [s] : []).map((m) => String(m).trim()).filter((m) => k.includes(m));
   return l.length ? new Set(l) : null;
 }
 function ft(s, d, l, m, h) {
@@ -304,8 +304,8 @@ function St(s, d) {
       deleteTarget: Me,
       revealTarget: ie,
       revealLatestScan: Ie,
-      hideTarget: Pe,
-      resolveTarget: ke,
+      hideTarget: ke,
+      resolveTarget: Pe,
       unresolveTarget: xe,
       exportTargets: In,
       importTargets: Ne,
@@ -429,7 +429,7 @@ function St(s, d) {
     if (!n)
       return D("Select a token before using the Pulse Scanner."), [];
     if (!Tn(n, e)) return [];
-    const t = Number(e.radius ?? game.settings.get(s, "defaultScanRadius")), r = Nn(e.types), a = Cn(e.modes ?? e.mode), i = We(n), c = k(canvas.scene.id).filter((F) => xn(F, i, t, r, a)), f = Number(e.duration ?? game.settings.get(s, "defaultHighlightDuration"));
+    const t = Number(e.radius ?? game.settings.get(s, "defaultScanRadius")), r = Nn(e.types), a = Cn(e.modes ?? e.mode), i = We(n), c = P(canvas.scene.id).filter((F) => xn(F, i, t, r, a)), f = Number(e.duration ?? game.settings.get(s, "defaultHighlightDuration"));
     o.latestScan = {
       sceneId: canvas.scene.id,
       targetIds: c.map((F) => F.id),
@@ -514,7 +514,7 @@ function St(s, d) {
     }
   }
   function G(e = {}) {
-    const n = J(e.radiusFeet ?? game.settings.get(s, "scannerItemRadiusFeet"), 30), t = P.includes(e.mode) ? e.mode : ae();
+    const n = J(e.radiusFeet ?? game.settings.get(s, "scannerItemRadiusFeet"), 30), t = k.includes(e.mode) ? e.mode : ae();
     return {
       name: e.name || fe(),
       type: e.type || Vn(),
@@ -533,7 +533,7 @@ function St(s, d) {
   }
   function ae() {
     const e = game.settings.get(s, "scannerItemMode");
-    return P.includes(e) ? e : j;
+    return k.includes(e) ? e : j;
   }
   function Sn(e) {
     var r, a, i, u, c, f, g;
@@ -559,7 +559,7 @@ function St(s, d) {
     return t[r.id] = r, await n.setFlag(s, h, t), E(), foundry.utils.deepClone(r);
   }
   function W(e = ((n) => (n = canvas == null ? void 0 : canvas.scene) == null ? void 0 : n.id)()) {
-    return k(e).filter((t) => {
+    return P(e).filter((t) => {
       var r;
       return ((r = game.user) == null ? void 0 : r.isGM) || mt(t);
     }).map((t) => {
@@ -567,7 +567,7 @@ function St(s, d) {
       return (r = game.user) != null && r.isGM ? foundry.utils.deepClone(t) : oe(t, !0);
     });
   }
-  function k(e = ((n) => (n = canvas == null ? void 0 : canvas.scene) == null ? void 0 : n.id)()) {
+  function P(e = ((n) => (n = canvas == null ? void 0 : canvas.scene) == null ? void 0 : n.id)()) {
     const t = O(e);
     return t ? Object.values(L(t)).map((r) => C(r)).sort((r, a) => r.label.localeCompare(a.label)) : [];
   }
@@ -592,7 +592,7 @@ function St(s, d) {
   }
   async function ie(e) {
     var t;
-    const n = k((t = canvas.scene) == null ? void 0 : t.id).find((r) => r.id === e);
+    const n = P((t = canvas.scene) == null ? void 0 : t.id).find((r) => r.id === e);
     return n ? N(e, { visibility: "revealed", status: n.status === "resolved" ? "resolved" : "revealed" }) : null;
   }
   async function Ie() {
@@ -607,10 +607,10 @@ function St(s, d) {
     }
     return e;
   }
-  async function Pe(e) {
+  async function ke(e) {
     return N(e, { visibility: "gm", status: "active" });
   }
-  async function ke(e) {
+  async function Pe(e) {
     return N(e, { status: "resolved", visibility: "revealed" });
   }
   async function xe(e) {
@@ -626,7 +626,7 @@ function St(s, d) {
       sceneId: t.id,
       sceneName: t.name,
       exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
-      targets: k(t.id)
+      targets: P(t.id)
     };
     return et(`pulse-scanner-${nt(t.name)}.json`, r), r;
   }
@@ -668,10 +668,10 @@ function St(s, d) {
       sceneId: ((n = canvas == null ? void 0 : canvas.scene) == null ? void 0 : n.id) || ""
     });
   }
-  function Pn(e) {
+  function kn(e) {
     return sn(e);
   }
-  function kn(e) {
+  function Pn(e) {
     return ht(e);
   }
   function xn(e, n, t, r, a) {
@@ -707,7 +707,7 @@ function St(s, d) {
     var i, u, c, f, g, b, y;
     if (!(canvas != null && canvas.ready) || e.sceneId !== ((i = canvas.scene) == null ? void 0 : i.id)) return;
     const n = document.createElement("div");
-    n.className = "pulse-scanner-overlay", n.style.setProperty("--pulse-duration", `${Math.max(900, Number(e.duration || 4200))}ms`), document.body.appendChild(n);
+    n.className = "pulse-scanner-overlay", n.dataset.cameraLocked = "true", n.style.setProperty("--pulse-duration", `${Math.max(900, Number(e.duration || 4200))}ms`), document.body.appendChild(n);
     const t = Ge(((u = e.origin) == null ? void 0 : u.x) ?? 0, ((c = e.origin) == null ? void 0 : c.y) ?? 0), r = Math.max(16, Ue(Number(e.radius || 0))), a = document.createElement("div");
     if (a.className = "pulse-scanner-ring", a.style.left = `${t.x}px`, a.style.top = `${t.y}px`, a.style.setProperty("--pulse-radius", `${r}px`), a.style.setProperty("--pulse-color", ((f = K[e.mode]) == null ? void 0 : f.color) ?? "#7df9ff"), n.appendChild(a), !((g = e.detected) != null && g.length)) {
       const p = document.createElement("div");
@@ -742,7 +742,7 @@ function St(s, d) {
     if (!(e != null && e.addChild)) return;
     const n = new PIXI.Container();
     n.name = "pulse-scanner-target-markers", n.sortableChildren = !0, n.zIndex = 250, e.addChild(n), o.markerLayer = n, o.markerSceneId = canvas.scene.id;
-    const t = k(canvas.scene.id).filter((u) => An(u));
+    const t = P(canvas.scene.id).filter((u) => An(u));
     for (const u of t) n.addChild(Fn(u));
   }
   function An(e) {
@@ -833,7 +833,7 @@ function St(s, d) {
     if (!o.resizingMarker || !(canvas != null && canvas.scene)) return !1;
     const t = U(e, n);
     if (!t) return !0;
-    const r = k(canvas.scene.id).find((i) => i.id === o.resizingMarker.id);
+    const r = P(canvas.scene.id).find((i) => i.id === o.resizingMarker.id);
     if (!r) return !0;
     const a = bt(r, o.resizingMarker.handle, t);
     if (o.liveUpdates = a, o.liveMarker) {
@@ -891,13 +891,13 @@ function St(s, d) {
     const e = (c = (u = (i = (a = o.manager) == null ? void 0 : a.element) == null ? void 0 : i.find) == null ? void 0 : u.call(i, "form.pulse-scanner-target-form")) == null ? void 0 : c[0], n = (g = (f = e == null ? void 0 : e.elements) == null ? void 0 : f.type) == null ? void 0 : g.value, t = (y = (b = e == null ? void 0 : e.elements) == null ? void 0 : b.mode) == null ? void 0 : y.value, r = (S = (p = e == null ? void 0 : e.elements) == null ? void 0 : p.label) == null ? void 0 : S.value;
     return {
       type: Q.includes(n) ? n : ge,
-      mode: P.includes(t) ? t : Pn(n || ge),
+      mode: k.includes(t) ? t : kn(n || ge),
       label: r || "Placed Scan Target"
     };
   }
   function jn(e) {
     var n;
-    return k((n = canvas.scene) == null ? void 0 : n.id).some((t) => St(e, t));
+    return P((n = canvas.scene) == null ? void 0 : n.id).some((t) => St(e, t));
   }
   function Ge(e, n) {
     try {
@@ -1022,7 +1022,7 @@ function St(s, d) {
     var t;
     const n = ((t = e == null ? void 0 : e.getFlag) == null ? void 0 : t.call(e, s, "scan")) ?? {};
     return {
-      mode: P.includes(n.mode) ? n.mode : ae(),
+      mode: k.includes(n.mode) ? n.mode : ae(),
       radiusFeet: J(n.radiusFeet, game.settings.get(s, "scannerItemRadiusFeet"))
     };
   }
@@ -1151,11 +1151,11 @@ function St(s, d) {
           var f;
           return { value: c, label: ((f = v[c]) == null ? void 0 : f.label) ?? x(c) };
         }),
-        modeOptions: P.map((c) => {
+        modeOptions: k.map((c) => {
           var f;
           return { value: c, label: ((f = K[c]) == null ? void 0 : f.label) ?? x(c) };
         }),
-        colorOptions: kn(a.color),
+        colorOptions: Pn(a.color),
         visibilityOptions: rn.map((c) => ({ value: c, label: x(c) })),
         statusOptions: an.map((c) => ({ value: c, label: x(c) })),
         hasTargets: t.length > 0,
@@ -1225,7 +1225,7 @@ function St(s, d) {
     }
     async _createScannerItemConfig(n) {
       if (!n) return;
-      const t = new FormData(n), r = String(t.get("scannerItemName") || I).trim() || I, a = P.includes(t.get("scannerItemMode")) ? t.get("scannerItemMode") : j, i = Math.max(0, J(t.get("scannerItemRadiusFeet"), 30));
+      const t = new FormData(n), r = String(t.get("scannerItemName") || I).trim() || I, a = k.includes(t.get("scannerItemMode")) ? t.get("scannerItemMode") : j, i = Math.max(0, J(t.get("scannerItemRadiusFeet"), 30));
       await game.settings.set(s, "scannerItemName", r), await game.settings.set(s, "scannerItemMode", a), await game.settings.set(s, "scannerItemRadiusFeet", i), await we({ name: r, mode: a, radiusFeet: i }), this.render(!1);
     }
     _getCurrentMode() {
@@ -1246,13 +1246,13 @@ function St(s, d) {
       await Ie(), this.render(!1);
     }
     async _hideTarget(n) {
-      n && (await Pe(n), this.render(!1));
+      n && (await ke(n), this.render(!1));
     }
     async _toggleResolved(n) {
       var r;
       if (!n) return;
-      const t = k((r = canvas.scene) == null ? void 0 : r.id).find((a) => a.id === n);
-      (t == null ? void 0 : t.status) === "resolved" ? await xe(n) : await ke(n), this.render(!1);
+      const t = P((r = canvas.scene) == null ? void 0 : r.id).find((a) => a.id === n);
+      (t == null ? void 0 : t.status) === "resolved" ? await xe(n) : await Pe(n), this.render(!1);
     }
     _openImportDialog() {
       new Dialog({
