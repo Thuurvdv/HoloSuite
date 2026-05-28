@@ -19,9 +19,9 @@ const m = {
   outgoing: !1
 }, Ae = /* @__PURE__ */ new Set(["standard", "emergency", "corrupted"]), Te = {
   "": "Silent",
-  [`modules/${c}/Ringtone1.ogg`]: "Ringtone 1",
-  [`modules/${c}/Ringtone2.ogg`]: "Ringtone 2",
-  [`modules/${c}/Ringtone3.ogg`]: "Ringtone 3"
+  [`modules/${c}/audio/Ringtone1.ogg`]: "Ringtone 1",
+  [`modules/${c}/audio/Ringtone2.ogg`]: "Ringtone 2",
+  [`modules/${c}/audio/Ringtone3.ogg`]: "Ringtone 3"
 };
 function ne(e) {
   const t = Number(e);

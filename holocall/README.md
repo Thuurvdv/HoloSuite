@@ -26,11 +26,12 @@ HoloCall is a minimal Foundry VTT v12/v13 module that adds a sci-fi hologram com
 holocall/
   module.json
   README.md
-  Ringtone1.ogg
-  Ringtone2.ogg
-  Ringtone3.ogg
-  scripts/
-    holocall.js
+  audio/
+    Ringtone1.ogg
+    Ringtone2.ogg
+    Ringtone3.ogg
+  src/
+    main.ts
   styles/
     holocall.css
   templates/

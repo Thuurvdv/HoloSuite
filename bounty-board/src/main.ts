@@ -1,1 +1,1 @@
-import "../scripts/bounty-board/main.js";
+import "./init.js";

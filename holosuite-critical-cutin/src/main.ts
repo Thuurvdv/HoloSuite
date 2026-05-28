@@ -1,1 +1,1 @@
-import "../scripts/main.js";
+import "./init.js";

@@ -13,7 +13,7 @@ Copy or symlink the `holosuite-hacking` folder into Foundry's `Data/modules` dir
 
 The module metadata lives in `module.json` and loads:
 
-- `scripts/main.js`
+- `dist/main.js` (built from `src/`)
 - `styles/hacking.css`
 - `styles/node-intrusion.css`
 - `styles/signal-alignment.css`
@@ -110,13 +110,13 @@ Profiles return shared values such as trace duration, mistake limit, hints, and 
 
 ## Adding Another Minigame
 
-1. Create a folder under `scripts/minigames/<your-minigame>`.
+1. Create a folder under `src/minigames/<your-minigame>`.
 2. Keep puzzle generation/state helpers separate from the Application class.
 3. Add a template in `templates/`.
 4. Add styles in `styles/`.
-5. Import the Application in `scripts/main.js`.
+5. Import the Application in `src/init.js`.
 6. Register it with `registerMinigame({ id, title, icon, create })`.
-7. Add any profile-specific difficulty fields to `scripts/core/difficulty.js`.
+7. Add any profile-specific difficulty fields to `src/core/difficulty.js`.
 
 Minigames should stop intervals/timeouts in `close()` and should be launchable through `api.startHack({ type })`.
 

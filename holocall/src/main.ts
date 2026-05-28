@@ -31,9 +31,9 @@ const DEFAULT_CALL = {
 const VARIANTS = new Set(["standard", "emergency", "corrupted"]);
 const RINGTONE_CHOICES = {
   "": "Silent",
-  [`modules/${MODULE_ID}/Ringtone1.ogg`]: "Ringtone 1",
-  [`modules/${MODULE_ID}/Ringtone2.ogg`]: "Ringtone 2",
-  [`modules/${MODULE_ID}/Ringtone3.ogg`]: "Ringtone 3"
+  [`modules/${MODULE_ID}/audio/Ringtone1.ogg`]: "Ringtone 1",
+  [`modules/${MODULE_ID}/audio/Ringtone2.ogg`]: "Ringtone 2",
+  [`modules/${MODULE_ID}/audio/Ringtone3.ogg`]: "Ringtone 3"
 };
 
 function clampSignal(value) {
