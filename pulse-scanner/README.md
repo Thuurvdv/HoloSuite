@@ -1,6 +1,6 @@
 # Pulse Scanner
 
-Pulse Scanner is a system-agnostic Foundry VTT v12/v13 public beta module for cinematic scanner pulses and GM-placed scan regions.
+Pulse Scanner is a system-agnostic Foundry VTT v12/v13 public beta module for cinematic scanner pulses and GM-placed scan targets linked to Foundry Scene Regions.
 
 No AI. No external services. No backend. No database. Targets are stored on the Scene with Foundry flags:
 
@@ -14,9 +14,7 @@ scene.getFlag("pulse-scanner", "targets");
 1. Copy `pulse-scanner` into your Foundry user data `Data/modules` folder.
 2. Restart Foundry or refresh the Setup screen.
 3. Enable **Pulse Scanner** in **Manage Modules**.
-4. Open a scene and use the Token controls side-menu buttons:
-   - **Pulse Scanner Targets** opens the GM manager.
-   - **Place Scan Target** toggles click-to-place canvas placement for GMs.
+4. Open a scene, draw Scene Regions where scan targets should be, then open the Pulse Scanner Target Manager to create targets linked to those regions.
 5. Drag the included **Pulse Scanner** world item onto a player actor so they can trigger scans from that item or from the token HUD shortcut.
 
 For local development, symlink or copy this folder to `Data/modules/pulse-scanner`, edit files, then refresh Foundry with cache disabled.
@@ -24,10 +22,10 @@ For local development, symlink or copy this folder to `Data/modules/pulse-scanne
 ## Files
 
 - `module.json` registers the beta module, script, stylesheet, and socket support.
-- `scripts/pulse-scanner.js` contains the public API, settings, canvas markers, placement tool, target manager, scan modes, reveal tools, JSON import/export API, and pulse effects.
-- `styles/pulse-scanner.css` contains the manager UI, stronger pulse animation, target ping, labels, and integrity bars.
-- `templates/target-manager.hbs` renders the GM target list, scanner modes, reveal tools, and placement controls.
-- `templates/target-form.hbs` renders create/edit fields for circular regions, mode, type, status, visibility, and notes.
+- `scripts/pulse-scanner.js` contains the public API, settings, target manager, scan modes, reveal tools, JSON import/export API, and pulse effects.
+- `styles/pulse-scanner.css` contains the manager UI, pulse animation, target ping, labels, and integrity bars.
+- `templates/target-manager.hbs` renders the GM target list, scanner modes, reveal tools, and new target button.
+- `templates/target-form.hbs` renders create/edit fields with a Scene Region dropdown, mode, type, status, visibility, and notes.
 
 ## Public API
 
@@ -49,7 +47,6 @@ game.pulseScanner.hideTarget(targetId);
 game.pulseScanner.resolveTarget(targetId);
 game.pulseScanner.exportTargets(sceneId);
 game.pulseScanner.importTargets(jsonOrObject);
-game.pulseScanner.togglePlacementTool();
 ```
 
 ## Scanner Modes
@@ -75,18 +72,13 @@ await game.pulseScanner.scan({
 
 ## Target Data
 
-Circular regions are supported now. Rectangle fields exist for later expansion.
+Targets link to Foundry Scene Regions via `regionId`. The region's bounds provide the target's position and scan radius at runtime.
 
 ```js
 {
   id: "optional-id",
   sceneId: canvas.scene.id,
-  x: 2400,
-  y: 1800,
-  shape: "circle",
-  radius: 90,
-  width: 160,
-  height: 160,
+  regionId: "region-document-id",
   mode: "structural",
   type: "breakable",
   label: "Cracked Maintenance Wall",
@@ -109,13 +101,12 @@ Status: `active`, `revealed`, `resolved`.
 
 ## GM Workflow
 
-1. Open **Pulse Scanner Targets** from Token controls.
-2. Use **Place** or the **Place Scan Target** side-menu tool.
-3. Click on the canvas to create circular scan regions.
-4. Drag GM-visible markers to reposition them. Positions save automatically.
-5. Run scans by mode from a selected token.
-6. Reveal one target, reveal all latest detections, hide a revealed target, or mark it resolved/destroyed.
-7. Use the JSON API macros below when moving target data between worlds.
+1. Draw one or more **Scene Regions** on the canvas using Foundry's built-in region tools.
+2. Open the **Pulse Scanner Target Manager** (via HoloSuite or `game.pulseScanner.openTargetManager()`).
+3. Click **New Target**, select a Scene Region from the dropdown, set the mode/type/label, and save.
+4. Run scans by mode from a selected token.
+5. Reveal one target, reveal all latest detections, hide a revealed target, or mark it resolved/destroyed.
+6. Use the JSON API macros below when moving target data between worlds.
 
 ## Player Workflow
 
@@ -136,24 +127,12 @@ When a GM loads the world, the module creates a flagged **Pulse Scanner** item i
 game.pulseScanner.openTargetManager();
 ```
 
-### Toggle Canvas Placement
-
-```js
-game.pulseScanner.togglePlacementTool();
-```
-
 ### Create Sample Breakable Wall
 
 ```js
-const token = canvas.tokens.controlled[0];
-const center = token?.center ?? { x: canvas.dimensions.width / 2, y: canvas.dimensions.height / 2 };
-
 await game.pulseScanner.createTarget({
   sceneId: canvas.scene.id,
-  x: center.x + 200,
-  y: center.y,
-  shape: "circle",
-  radius: 90,
+  regionId: "your-region-id-here",
   mode: "structural",
   type: "breakable",
   label: "Cracked Stone Wall",
@@ -224,10 +203,7 @@ game.pulseScanner.exportTargets(canvas.scene.id);
 await game.pulseScanner.importTargets({
   targets: [
     {
-      x: 1800,
-      y: 1400,
-      shape: "circle",
-      radius: 100,
+      regionId: "region-id-1",
       mode: "forensic",
       type: "evidence",
       label: "Blood Trace",
@@ -239,10 +215,7 @@ await game.pulseScanner.importTargets({
       color: "#ff4d6d"
     },
     {
-      x: 2200,
-      y: 1760,
-      shape: "circle",
-      radius: 120,
+      regionId: "region-id-2",
       mode: "tech",
       type: "tech",
       label: "Encrypted Transponder",
@@ -270,16 +243,14 @@ The sound plays when a scan pulse fires.
 ## Testing Checklist
 
 - Enable the module in a Foundry v12 or v13 world.
-- Confirm the Token controls side-menu shows Pulse Scanner buttons.
-- As GM, toggle placement and click the canvas to create targets.
-- Confirm markers appear for the GM and can be dragged.
-- Confirm dragged positions persist after scene reload.
+- Draw Scene Regions on the canvas.
+- Open the Pulse Scanner Target Manager and create targets linked to regions.
 - Run structural, arcane, thermal, forensic, tech, and biological scans.
 - Confirm resolved targets no longer scan.
 - Confirm detected targets show pings, labels, and integrity bars.
 - Confirm `SIGNATURE DETECTED` and `NO SIGNATURES DETECTED` notifications.
-- Reveal one target and confirm players see its marker.
-- Hide the target and confirm players no longer see its marker.
+- Reveal one target and confirm players see it in pulse results.
+- Hide the target and confirm players no longer see it.
 - Reveal latest scan results and confirm all latest detections become revealed.
 - Export targets by macro, clear or change targets, then import the JSON by macro.
 - Confirm GM notes never appear in player pulse labels.
@@ -289,13 +260,12 @@ The sound plays when a scan pulse fires.
 - Foundry walls are not parsed or modified.
 - Wall HP, destruction, lighting, movement, and combat automation are not implemented.
 - No system-specific skill rolls are included.
-- Circular regions are the intended beta path; rectangle fields are present but still considered experimental.
 - Scan distance uses scene-pixel distance, not pathfinding or line of sight.
 - Player clients can receive scene flag data because this is a client-only module; the UI and API hide GM notes from player-facing displays.
+- Targets without a linked region use fallback x/y/radius values (defaults to 0,0 with radius 80).
 
 ## Roadmap
 
-- Better rectangle editing controls.
 - Optional persistent revealed marker styling for players.
 - Import/export target packs with thumbnails.
 - Line-of-sight and wall-blocked scanning modes.

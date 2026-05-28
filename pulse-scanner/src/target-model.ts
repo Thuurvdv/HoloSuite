@@ -5,7 +5,6 @@ import {
 
 export const DEFAULT_MODE = "structural";
 export const DEFAULT_TYPE = "breakable";
-export const DEFAULT_SHAPE = "circle";
 
 export const TARGET_TYPES = [
   "breakable",
@@ -22,24 +21,20 @@ export const TARGET_TYPES = [
 
 export const VISIBILITY_MODES = ["gm", "revealed", "always"] as const;
 export const TARGET_STATUSES = ["active", "revealed", "resolved"] as const;
-export const REGION_SHAPES = ["circle", "rectangle"] as const;
 export const SCANNER_MODES = ["structural", "arcane", "thermal", "forensic", "tech", "biological"] as const;
 
 export type PulseTargetType = typeof TARGET_TYPES[number];
 export type PulseVisibility = typeof VISIBILITY_MODES[number];
 export type PulseTargetStatus = typeof TARGET_STATUSES[number];
-export type PulseRegionShape = typeof REGION_SHAPES[number];
 export type PulseScannerMode = typeof SCANNER_MODES[number];
 
 export interface PulseTarget {
   id: string;
   sceneId: string;
+  regionId: string;
   x: number;
   y: number;
   radius: number;
-  shape: PulseRegionShape;
-  width: number;
-  height: number;
   mode: PulseScannerMode;
   type: PulseTargetType;
   label: string;
@@ -131,7 +126,6 @@ export function normalizeTarget(dataInput: unknown = {}, options: PulseTargetNor
   const type = TARGET_TYPES.includes(data.type as PulseTargetType) ? data.type as PulseTargetType : DEFAULT_TYPE;
   const meta = TYPE_META[type] ?? TYPE_META.custom;
   const mode = SCANNER_MODES.includes(data.mode as PulseScannerMode) ? data.mode as PulseScannerMode : inferModeForType(type);
-  const shape = REGION_SHAPES.includes(data.shape as PulseRegionShape) ? data.shape as PulseRegionShape : DEFAULT_SHAPE;
   const status = TARGET_STATUSES.includes(data.status as PulseTargetStatus)
     ? data.status as PulseTargetStatus
     : data.resolved ? "resolved" : "active";
@@ -139,12 +133,10 @@ export function normalizeTarget(dataInput: unknown = {}, options: PulseTargetNor
   return {
     id: String(data.id || options.createId?.() || ""),
     sceneId: String(data.sceneId || options.sceneId || ""),
+    regionId: String(data.regionId || ""),
     x: toNumber(data.x, 0),
     y: toNumber(data.y, 0),
     radius: Math.max(0, toNumber(data.radius, 80)),
-    shape,
-    width: Math.max(0, toNumber(data.width, 160)),
-    height: Math.max(0, toNumber(data.height, 160)),
     mode,
     type,
     label: String(data.label || meta.label),

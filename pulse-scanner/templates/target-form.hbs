@@ -1,15 +1,19 @@
 <form class="pulse-scanner-target-form" autocomplete="off">
   <input type="hidden" name="id" value="{{selectedTarget.id}}">
-  <input type="hidden" name="x" value="{{selectedTarget.x}}">
-  <input type="hidden" name="y" value="{{selectedTarget.y}}">
-  <input type="hidden" name="radius" value="{{selectedTarget.radius}}">
-  <input type="hidden" name="width" value="{{selectedTarget.width}}">
-  <input type="hidden" name="height" value="{{selectedTarget.height}}">
 
   <div class="pulse-scanner-form-grid">
     <label class="span-2">
       <span>Label</span>
       <input type="text" name="label" value="{{selectedTarget.label}}" placeholder="Hidden passage">
+    </label>
+
+    <label class="span-2">
+      <span>Scene Region</span>
+      <select name="regionId">
+        {{#each regionChoices}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
     </label>
 
     <label>

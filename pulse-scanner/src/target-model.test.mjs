@@ -27,6 +27,15 @@ test("normalizeTarget applies defaults, ids, metadata, and numeric coercion", ()
   assert.equal(target.integrity, 100);
   assert.equal(target.difficulty, 12);
   assert.equal(target.color, "#abcdef");
+  assert.equal(target.regionId, "");
+});
+
+test("normalizeTarget preserves regionId when provided", () => {
+  const target = model.normalizeTarget({
+    regionId: "region-abc",
+    type: "hidden"
+  });
+  assert.equal(target.regionId, "region-abc");
 });
 
 test("normalize filters ignore unsupported values", () => {
@@ -51,13 +60,9 @@ test("targetMatchesScan respects status, filters, distance, and target radius", 
   assert.equal(model.targetMatchesScan({ ...target, status: "resolved" }, { x: 0, y: 0 }, 200), false);
 });
 
-test("getTargetScanRadius uses rectangle diagonal radius", () => {
-  assert.equal(model.getTargetScanRadius({
-    shape: "rectangle",
-    width: 300,
-    height: 400,
-    radius: 10
-  }), 250);
+test("getTargetScanRadius returns radius directly", () => {
+  assert.equal(model.getTargetScanRadius({ radius: 42 }), 42);
+  assert.equal(model.getTargetScanRadius({ radius: 0 }), 0);
 });
 
 test("sanitizeTargetForPulse masks GM-only non-breakable details for players", () => {

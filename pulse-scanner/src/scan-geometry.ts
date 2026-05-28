@@ -7,18 +7,12 @@ export interface ScanTargetLike {
   x: number;
   y: number;
   radius: number;
-  shape: "circle" | "rectangle";
-  width: number;
-  height: number;
   status?: string;
   type?: string;
   mode?: string;
 }
 
-export function getTargetScanRadius(target: Pick<ScanTargetLike, "shape" | "width" | "height" | "radius">): number {
-  if (target.shape === "rectangle") {
-    return Math.hypot(Number(target.width || 0), Number(target.height || 0)) / 2;
-  }
+export function getTargetScanRadius(target: Pick<ScanTargetLike, "radius">): number {
   return Number(target.radius || 0);
 }
 
@@ -27,20 +21,7 @@ export function circleIntersectsCircle(left: ScanPoint, leftRadius: number, righ
   return distance <= Number(leftRadius) + Number(rightRadius);
 }
 
-export function circleIntersectsRectangle(center: ScanPoint, radius: number, rectangle: ScanTargetLike): boolean {
-  const halfWidth = Math.max(0, Number(rectangle.width || 0) / 2);
-  const halfHeight = Math.max(0, Number(rectangle.height || 0) / 2);
-  const left = Number(rectangle.x) - halfWidth;
-  const right = Number(rectangle.x) + halfWidth;
-  const top = Number(rectangle.y) - halfHeight;
-  const bottom = Number(rectangle.y) + halfHeight;
-  const closestX = Math.max(left, Math.min(center.x, right));
-  const closestY = Math.max(top, Math.min(center.y, bottom));
-  return Math.hypot(center.x - closestX, center.y - closestY) <= Number(radius);
-}
-
 export function pulseIntersectsTarget(origin: ScanPoint, radius: number, target: ScanTargetLike): boolean {
-  if (target.shape === "rectangle") return circleIntersectsRectangle(origin, radius, target);
   return circleIntersectsCircle(origin, radius, target, Number(target.radius || 0));
 }
 

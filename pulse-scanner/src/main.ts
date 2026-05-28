@@ -2,10 +2,8 @@
 import {
   COLOR_OPTIONS,
   DEFAULT_MODE,
-  DEFAULT_SHAPE,
   DEFAULT_TYPE,
   MODE_META,
-  REGION_SHAPES,
   SCANNER_MODES,
   TARGET_STATUSES,
   TARGET_TYPES,
@@ -25,12 +23,6 @@ import {
   targetVisibleToPlayer,
   toNumber
 } from "./target-model";
-import {
-  getResizeCursor as getMarkerResizeCursor,
-  getResizeHandlePositions,
-  getResizeUpdates,
-  isPointNearTarget
-} from "./marker-geometry";
 
 (() => {
   "use strict";
@@ -45,16 +37,6 @@ import {
   const SCANNER_ITEM_IMAGE = "icons/tools/scribal/magnifying-glass.webp";
   const state = {
     manager: null,
-    lastMouseScenePosition: null,
-    mouseTrackingCanvas: null,
-    placementActive: false,
-    placementShape: DEFAULT_SHAPE,
-    markerLayer: null,
-    markerSceneId: null,
-    draggingMarker: null,
-    resizingMarker: null,
-    liveMarker: null,
-    liveUpdates: null,
     latestScan: null,
     sheetObserver: null,
     sheetEnhanceTimeout: null
@@ -83,12 +65,8 @@ import {
     console.log(`${MODULE_TITLE} | API available at game.pulseScanner`);
   });
 
-  // HoloSuite Core is the suite launcher; keep this module out of the scene-control toolbar.
-  Hooks.on("canvasReady", setupMouseTracking);
-  Hooks.on("canvasReady", renderTargetMarkers);
   Hooks.on("updateScene", (scene, changes = {}) => {
-    if (state.draggingMarker || state.resizingMarker) return;
-    if (scene.id === canvas?.scene?.id && changes.flags?.[MODULE_ID]?.[TARGET_FLAG]) renderTargetMarkers();
+    if (scene.id === canvas?.scene?.id && changes.flags?.[MODULE_ID]?.[TARGET_FLAG]) refreshManager();
   });
 
   function registerSettings() {
@@ -214,7 +192,6 @@ import {
       unresolveTarget,
       exportTargets,
       importTargets,
-      togglePlacementTool,
       usePulseScannerItem,
       createPulseScannerItem,
       hasPulseScannerItem,
@@ -370,20 +347,103 @@ import {
       ?? null;
   }
 
-  function togglePlacementTool(force) {
-    if (!requireGM("place scan targets")) return false;
-    state.placementActive = typeof force === "boolean" ? force : !state.placementActive;
-    renderTargetMarkers();
-    return state.placementActive;
+  // --- Region helpers ---
+
+  function getSceneRegions(sceneId = "") {
+    const scene = getSceneById(sceneId);
+    const regions = scene?.regions?.contents ?? [];
+    return regions
+      .map((region) => ({
+        id: region.id,
+        name: region.name || `Region ${region.id}`,
+        region
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  function setPlacementShape(shape) {
-    if (!requireGM("place scan targets")) return DEFAULT_SHAPE;
-    state.placementShape = REGION_SHAPES.includes(shape) ? shape : DEFAULT_SHAPE;
-    state.placementActive = true;
-    refreshManager();
-    return state.placementShape;
+  function getRegionChoices(sceneId = "", selectedRegionId = "") {
+    return [
+      { id: "", name: "No Linked Region", selected: !selectedRegionId },
+      ...getSceneRegions(sceneId).map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+        selected: entry.id === selectedRegionId
+      }))
+    ];
   }
+
+  function getRegionDocument(regionId = "", sceneId = "") {
+    if (!regionId) return null;
+    const scene = getSceneById(sceneId);
+    return scene?.regions?.get?.(regionId) ?? null;
+  }
+
+  function getRegionBounds(region) {
+    const regionObject = region?.object ?? canvas?.regions?.placeables?.find?.((placeable) => placeable.document?.id === region?.id);
+    const objectBounds = regionObject?.bounds;
+    if (objectBounds?.width && objectBounds?.height) return normalizeBounds(objectBounds);
+
+    const directBounds = region?.bounds;
+    if (directBounds?.width && directBounds?.height) return normalizeBounds(directBounds);
+
+    const source = region?.toObject?.() ?? region;
+    const shapes = Array.isArray(region?.shapes) ? region.shapes : Array.isArray(source?.shapes) ? source.shapes : [];
+    return getShapesRegionBounds(shapes);
+  }
+
+  function normalizeBounds(bounds) {
+    const x = Number(bounds.x ?? 0);
+    const y = Number(bounds.y ?? 0);
+    const width = Number(bounds.width ?? 0);
+    const height = Number(bounds.height ?? 0);
+    return {
+      x: Math.round(x + width / 2),
+      y: Math.round(y + height / 2),
+      radius: Math.round(Math.hypot(width, height) / 2)
+    };
+  }
+
+  function getShapesRegionBounds(shapes) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const shape of shapes) {
+      if (shape.type === "rectangle") {
+        minX = Math.min(minX, shape.x ?? 0);
+        minY = Math.min(minY, shape.y ?? 0);
+        maxX = Math.max(maxX, (shape.x ?? 0) + (shape.width ?? 0));
+        maxY = Math.max(maxY, (shape.y ?? 0) + (shape.height ?? 0));
+      } else if (shape.type === "ellipse") {
+        minX = Math.min(minX, (shape.x ?? 0) - (shape.radiusX ?? 0));
+        minY = Math.min(minY, (shape.y ?? 0) - (shape.radiusY ?? 0));
+        maxX = Math.max(maxX, (shape.x ?? 0) + (shape.radiusX ?? 0));
+        maxY = Math.max(maxY, (shape.y ?? 0) + (shape.radiusY ?? 0));
+      } else if (shape.type === "polygon" && Array.isArray(shape.points)) {
+        for (let i = 0; i < shape.points.length; i += 2) {
+          minX = Math.min(minX, shape.points[i]);
+          minY = Math.min(minY, shape.points[i + 1]);
+          maxX = Math.max(maxX, shape.points[i]);
+          maxY = Math.max(maxY, shape.points[i + 1]);
+        }
+      }
+    }
+    if (!Number.isFinite(minX)) return null;
+    const width = maxX - minX;
+    const height = maxY - minY;
+    return {
+      x: Math.round(minX + width / 2),
+      y: Math.round(minY + height / 2),
+      radius: Math.round(Math.hypot(width, height) / 2)
+    };
+  }
+
+  function applyRegionBounds(target) {
+    if (!target.regionId) return target;
+    const region = getRegionDocument(target.regionId, target.sceneId);
+    const bounds = getRegionBounds(region);
+    if (!bounds) return target;
+    return { ...target, ...bounds };
+  }
+
+  // --- Core API ---
 
   function openTargetManager() {
     if (!game.user?.isGM) {
@@ -419,7 +479,7 @@ import {
     const selectedTypes = normalizeTypeFilter(options.types);
     const selectedModes = normalizeModeFilter(options.modes ?? options.mode);
     const origin = getTokenCenter(token);
-    const targets = getSceneTargets(canvas.scene.id);
+    const targets = getSceneTargets(canvas.scene.id).map(applyRegionBounds);
     const detected = targets.filter((target) => targetMatchesScan(target, origin, radius, selectedTypes, selectedModes));
     const duration = Number(options.duration ?? game.settings.get(MODULE_ID, "defaultHighlightDuration"));
 
@@ -622,10 +682,6 @@ import {
 
   async function deleteTarget(targetId, sceneId = canvas?.scene?.id) {
     if (!requireGM("delete scan targets")) return false;
-    state.draggingMarker = null;
-    state.resizingMarker = null;
-    state.liveMarker = null;
-    state.liveUpdates = null;
     const scene = getSceneById(sceneId) ?? findSceneForTarget(targetId);
     if (!scene) {
       console.warn(`${MODULE_TITLE}: target "${targetId}" was not found.`);
@@ -752,18 +808,6 @@ import {
     await scene.setFlag(MODULE_ID, TARGET_FLAG, store);
     if (options.refresh !== false) refreshManager();
     return foundry.utils.deepClone(target);
-  }
-
-  async function duplicateTarget(targetId) {
-    const source = getTargets(canvas.scene?.id).find((target) => target.id === targetId);
-    if (!source) return null;
-    return createTarget({
-      ...source,
-      id: randomId(),
-      label: `${source.label} Copy`,
-      x: Number(source.x) + 40,
-      y: Number(source.y) + 40
-    });
   }
 
   function getTargetStore(scene) {
@@ -899,328 +943,7 @@ import {
     }
   }
 
-  function renderTargetMarkers() {
-    if (!canvas?.ready || !canvas.scene || !globalThis.PIXI) return;
-
-    if (state.markerLayer?.parent) state.markerLayer.parent.removeChild(state.markerLayer);
-    state.markerLayer?.destroy?.({ children: true });
-
-    const parent = canvas.interface ?? canvas.foreground ?? canvas.stage;
-    if (!parent?.addChild) return;
-
-    const layer = new PIXI.Container();
-    layer.name = "pulse-scanner-target-markers";
-    layer.sortableChildren = true;
-    layer.zIndex = 250;
-    parent.addChild(layer);
-    state.markerLayer = layer;
-    state.markerSceneId = canvas.scene.id;
-
-    const targets = getSceneTargets(canvas.scene.id).filter((target) => targetShouldShowMarker(target));
-    for (const target of targets) layer.addChild(createTargetMarker(target));
-  }
-
-  function targetShouldShowMarker(target) {
-    if (game.user?.isGM) return true;
-    return target.visibility === "revealed" || target.visibility === "always";
-  }
-
-  function createTargetMarker(target) {
-    const marker = new PIXI.Container();
-    marker.name = `pulse-scanner-target-${target.id}`;
-    marker.position.set(Number(target.x), Number(target.y));
-    marker.eventMode = "none";
-    marker.interactive = false;
-    marker.zIndex = target.status === "resolved" ? 1 : 5;
-
-    const color = getTargetDisplayColor(target);
-    const region = new PIXI.Graphics();
-    drawMarkerRegion(region, target, color);
-    marker.addChild(region);
-    if (game.user?.isGM) addResizeHandles(marker, target, color);
-
-    const moveHandle = createMoveHandle(target, color);
-    if (game.user?.isGM) marker.addChild(moveHandle);
-
-    const label = new PIXI.Text(target.status === "resolved" ? `${target.label} [resolved]` : target.label, {
-      fontFamily: "Arial",
-      fontSize: 13,
-      fill: 0xffffff,
-      stroke: 0x000000,
-      strokeThickness: 3
-    });
-    label.anchor.set(0.5, 1);
-    label.position.set(0, -Math.max(28, getTargetScanRadius(target) + 8));
-    label.alpha = game.user?.isGM ? 0.95 : 0.78;
-    marker.addChild(label);
-
-    return marker;
-  }
-
-  function drawMarkerRegion(graphics, target, color) {
-    const alpha = target.status === "resolved" ? 0.14 : target.visibility === "revealed" ? 0.2 : 0.1;
-    graphics.clear();
-    graphics.lineStyle(2, color, target.status === "resolved" ? 0.42 : 0.82);
-    graphics.beginFill(color, alpha);
-    if (target.shape === "rectangle") {
-      graphics.drawRoundedRect(-target.width / 2, -target.height / 2, target.width, target.height, 8);
-    } else {
-      graphics.drawCircle(0, 0, Math.max(8, Number(target.radius || 80)));
-    }
-    graphics.endFill();
-    graphics.lineStyle(1, color, 0.52);
-    graphics.drawCircle(0, 0, 14);
-  }
-
-  function createMoveHandle(target, color) {
-    const grip = new PIXI.Graphics();
-    grip.name = `pulse-scanner-move-${target.id}`;
-    grip.eventMode = "static";
-    grip.interactive = true;
-    grip.cursor = "move";
-    grip.hitArea = new PIXI.Circle(0, 0, 13);
-    grip.lineStyle(2, 0xffffff, 0.78);
-    grip.beginFill(color, 0.82);
-    grip.drawCircle(0, 0, 9);
-    grip.endFill();
-    grip.lineStyle(1, 0x101214, 0.9);
-    grip.moveTo(-5, 0);
-    grip.lineTo(5, 0);
-    grip.moveTo(0, -5);
-    grip.lineTo(0, 5);
-    grip
-      .on("pointerdown", (event) => beginMarkerDrag(event, target, grip.parent))
-      .on("pointermove", (event) => dragMarker(event, target))
-      .on("pointerup", () => finishMarkerDrag())
-      .on("pointerupoutside", () => finishMarkerDrag())
-      .on("rightclick", () => {
-        state.manager = state.manager ?? new PulseTargetManager({ targetId: target.id });
-        state.manager.selectedTargetId = target.id;
-        state.manager.render(true);
-      });
-    return grip;
-  }
-
-  function addResizeHandles(marker, target, color) {
-    getResizeHandlePositions(target)
-      .forEach(({ handle, x, y }) => marker.addChild(createResizeHandle(target, handle, x, y, color)));
-  }
-
-  function createResizeHandle(target, handle, x, y, color) {
-    const grip = new PIXI.Graphics();
-    grip.name = `pulse-scanner-resize-${target.id}-${handle}`;
-    grip.position.set(x, y);
-    grip.eventMode = "static";
-    grip.interactive = true;
-    grip.cursor = getResizeCursor(handle);
-    grip.hitArea = new PIXI.Circle(0, 0, 12);
-    grip.beginFill(0x101214, 0.92);
-    grip.lineStyle(2, color, 1);
-    grip.drawCircle(0, 0, 7);
-    grip.endFill();
-    grip.on("pointerdown", (event) => beginMarkerResize(event, target, handle));
-    return grip;
-  }
-
-  function beginMarkerResize(event, target, handle) {
-    if (!game.user?.isGM) return;
-    event.stopPropagation?.();
-    state.resizingMarker = {
-      id: target.id,
-      handle,
-      center: { x: Number(target.x), y: Number(target.y) }
-    };
-    state.liveMarker = event.currentTarget?.parent ?? null;
-    state.liveUpdates = null;
-  }
-
-  function getResizeCursor(handle) {
-    return getMarkerResizeCursor(handle);
-  }
-
-  function beginMarkerDrag(event, target, marker) {
-    if (!game.user?.isGM) return;
-    event.stopPropagation?.();
-    state.draggingMarker = {
-      id: target.id,
-      start: getScenePointFromPixiEvent(event),
-      origin: { x: Number(target.x), y: Number(target.y) }
-    };
-    state.liveMarker = marker ?? null;
-    state.liveUpdates = null;
-  }
-
-  function dragMarker(event, target) {
-    if (!state.draggingMarker || state.draggingMarker.id !== target.id) return;
-    moveMarkerToScenePoint(getScenePointFromPixiEvent(event));
-  }
-
-  function getPixiLocalPosition(event, target) {
-    return event.data?.getLocalPosition?.(target)
-      ?? event.getLocalPosition?.(target)
-      ?? new PIXI.Point(0, 0);
-  }
-
-  function getScenePointFromPixiEvent(event) {
-    const original = event.data?.originalEvent;
-    if (original?.clientX != null && original?.clientY != null) return clientToScene(original.clientX, original.clientY);
-    const global = event.global ?? event.data?.global;
-    if (!global) return null;
-    try {
-      const point = canvas.stage.worldTransform.applyInverse(new PIXI.Point(global.x, global.y));
-      return { x: Math.round(point.x), y: Math.round(point.y) };
-    } catch (error) {
-      return null;
-    }
-  }
-
-  async function finishMarkerDrag() {
-    if (!state.draggingMarker) return false;
-    const targetId = state.draggingMarker.id;
-    const updates = state.liveUpdates;
-    state.draggingMarker = null;
-    state.liveMarker = null;
-    state.liveUpdates = null;
-    if (updates) await updateTarget(targetId, updates, { refresh: false });
-    refreshManager();
-    return true;
-  }
-
-  function moveMarkerToScenePoint(point) {
-    if (!state.draggingMarker || !canvas?.scene) return false;
-    if (!point || !state.draggingMarker.start) return true;
-    const dx = point.x - state.draggingMarker.start.x;
-    const dy = point.y - state.draggingMarker.start.y;
-    const x = Math.round(state.draggingMarker.origin.x + dx);
-    const y = Math.round(state.draggingMarker.origin.y + dy);
-    if (state.liveMarker) state.liveMarker.position.set(x, y);
-    state.liveUpdates = { x, y };
-    return true;
-  }
-
-  function resizeMarkerFromClientPoint(clientX, clientY) {
-    if (!state.resizingMarker || !canvas?.scene) return false;
-    const point = clientToScene(clientX, clientY);
-    if (!point) return true;
-
-    const target = getSceneTargets(canvas.scene.id).find((candidate) => candidate.id === state.resizingMarker.id);
-    if (!target) return true;
-
-    const updates = getResizeUpdates(target, state.resizingMarker.handle, point);
-
-    state.liveUpdates = updates;
-    if (state.liveMarker) {
-      state.liveMarker.removeChildren();
-      const preview = normalizeTarget({ ...target, ...updates });
-      const color = getTargetDisplayColor(preview);
-      const region = new PIXI.Graphics();
-      drawMarkerRegion(region, preview, color);
-      state.liveMarker.addChild(region);
-      addResizeHandles(state.liveMarker, preview, color);
-      state.liveMarker.addChild(createMoveHandle(preview, color));
-    }
-    return true;
-  }
-
-  async function finishMarkerResize() {
-    if (!state.resizingMarker) return false;
-    const targetId = state.resizingMarker.id;
-    const updates = state.liveUpdates;
-    state.resizingMarker = null;
-    state.liveMarker = null;
-    state.liveUpdates = null;
-    if (updates) await updateTarget(targetId, updates, { refresh: false });
-    refreshManager();
-    return true;
-  }
-
-  function setupMouseTracking() {
-    const view = canvas?.app?.view;
-    if (!view || state.mouseTrackingCanvas === view) return;
-
-    if (state.mouseTrackingCanvas) {
-      state.mouseTrackingCanvas.removeEventListener("mousemove", trackMousePosition);
-      state.mouseTrackingCanvas.removeEventListener("pointerdown", handleCanvasPlacement);
-      state.mouseTrackingCanvas.removeEventListener("pointermove", handleCanvasPointerMove);
-      state.mouseTrackingCanvas.removeEventListener("pointerup", handleCanvasPointerUp);
-    }
-
-    view.addEventListener("mousemove", trackMousePosition);
-    view.addEventListener("pointerdown", handleCanvasPlacement);
-    view.addEventListener("pointermove", handleCanvasPointerMove);
-    view.addEventListener("pointerup", handleCanvasPointerUp);
-    state.mouseTrackingCanvas = view;
-  }
-
-  function trackMousePosition(event) {
-    state.lastMouseScenePosition = clientToScene(event.clientX, event.clientY);
-  }
-
-  async function handleCanvasPlacement(event) {
-    if (!state.placementActive || !game.user?.isGM || !canvas?.scene) return;
-    if (state.resizingMarker || state.draggingMarker) return;
-    if (event.button !== 0) return;
-
-    const position = clientToScene(event.clientX, event.clientY);
-    if (!position) return;
-    if (isNearExistingTarget(position)) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    const defaults = getCurrentManagerFormDefaults();
-    const target = await createTarget({
-      sceneId: canvas.scene.id,
-      x: position.x,
-      y: position.y,
-      mode: defaults.mode,
-      type: defaults.type,
-      label: defaults.label,
-      visibility: "gm",
-      shape: getPlacementShape(),
-      radius: 80,
-      width: 160,
-      height: 160
-    });
-    if (state.manager) {
-      state.manager.selectedTargetId = target?.id ?? state.manager.selectedTargetId;
-      state.manager.draftTarget = null;
-      state.manager.render(true);
-    }
-  }
-
-  function handleCanvasPointerMove(event) {
-    if (!state.resizingMarker && !state.draggingMarker) return;
-    event.preventDefault();
-    if (state.draggingMarker) moveMarkerToScenePoint(clientToScene(event.clientX, event.clientY));
-    if (state.resizingMarker) resizeMarkerFromClientPoint(event.clientX, event.clientY);
-  }
-
-  function handleCanvasPointerUp(event) {
-    if (!state.resizingMarker && !state.draggingMarker) return;
-    event.preventDefault();
-    if (state.draggingMarker) finishMarkerDrag().catch((error) => console.error(`${MODULE_TITLE} | Move failed`, error));
-    if (state.resizingMarker) finishMarkerResize().catch((error) => console.error(`${MODULE_TITLE} | Resize failed`, error));
-  }
-
-  function getPlacementShape() {
-    return REGION_SHAPES.includes(state.placementShape) ? state.placementShape : DEFAULT_SHAPE;
-  }
-
-  function getCurrentManagerFormDefaults() {
-    const form = state.manager?.element?.find?.("form.pulse-scanner-target-form")?.[0];
-    const type = form?.elements?.type?.value;
-    const mode = form?.elements?.mode?.value;
-    const label = form?.elements?.label?.value;
-    return {
-      type: TARGET_TYPES.includes(type) ? type : DEFAULT_TYPE,
-      mode: SCANNER_MODES.includes(mode) ? mode : inferModeForType(type || DEFAULT_TYPE),
-      label: label || "Placed Scan Target"
-    };
-  }
-
-  function isNearExistingTarget(position) {
-    return getSceneTargets(canvas.scene?.id).some((target) => isPointNearTarget(position, target));
-  }
+  // --- Coordinate helpers ---
 
   function sceneToClient(x, y) {
     try {
@@ -1232,20 +955,12 @@ import {
     }
   }
 
-  function clientToScene(clientX, clientY) {
-    try {
-      const rect = canvas.app.view.getBoundingClientRect();
-      const point = canvas.stage.worldTransform.applyInverse(new PIXI.Point(clientX - rect.left, clientY - rect.top));
-      return { x: Math.round(point.x), y: Math.round(point.y) };
-    } catch (error) {
-      return null;
-    }
-  }
-
   function sceneDistanceToScreen(distance) {
     const scale = canvas?.stage?.scale?.x ?? 1;
     return Number(distance) * scale;
   }
+
+  // --- Token / actor helpers ---
 
   function resolveToken(tokenId) {
     if (tokenId) return canvas.tokens?.get(tokenId) ?? canvas.tokens?.placeables?.find((token) => token.id === tokenId || token.document?.id === tokenId);
@@ -1391,22 +1106,12 @@ import {
     return documentTypes[0] ?? "item";
   }
 
-  function notifyScannerWarning(message) {
-    ui.notifications?.warn?.(message);
-    console.warn(`${MODULE_TITLE}: ${message}`);
-  }
-
   function getTokenCenter(token) {
     if (token.center) return { x: token.center.x, y: token.center.y };
     const document = token.document ?? token;
     const width = Number(document.width ?? 1) * Number(canvas.grid?.size ?? 100);
     const height = Number(document.height ?? 1) * Number(canvas.grid?.size ?? 100);
     return { x: Number(document.x ?? token.x ?? 0) + width / 2, y: Number(document.y ?? token.y ?? 0) + height / 2 };
-  }
-
-  function getSelectedTokenPosition() {
-    const token = canvas?.tokens?.controlled?.[0];
-    return token ? getTokenCenter(token) : null;
   }
 
   function getSceneById(sceneId) {
@@ -1422,9 +1127,14 @@ import {
     return null;
   }
 
+  function getRegionName(regionId, sceneId) {
+    if (!regionId) return "";
+    const region = getRegionDocument(regionId, sceneId);
+    return region?.name || `Region ${regionId}`;
+  }
+
   function refreshManager() {
     if (state.manager?.rendered) state.manager.render(false);
-    if (!state.draggingMarker && !state.resizingMarker) renderTargetMarkers();
   }
 
   function requireGM(action) {
@@ -1435,6 +1145,11 @@ import {
 
   function randomId() {
     return foundry.utils.randomID?.(16) ?? crypto.randomUUID();
+  }
+
+  function notifyScannerWarning(message) {
+    ui.notifications?.warn?.(message);
+    console.warn(`${MODULE_TITLE}: ${message}`);
   }
 
   function labelize(value) {
@@ -1450,19 +1165,6 @@ import {
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
-  }
-
-  function colorToHex(value) {
-    const normalized = String(value || "").trim().replace("#", "");
-    const parsed = Number.parseInt(normalized.length === 3
-      ? normalized.split("").map((part) => `${part}${part}`).join("")
-      : normalized, 16);
-    return Number.isFinite(parsed) ? parsed : 0x7df9ff;
-  }
-
-  function getTargetDisplayColor(target) {
-    if (target.status === "resolved") return 0x7b858c;
-    return colorToHex(target.color || TYPE_META[target.type]?.color || TYPE_META.custom.color);
   }
 
   function playScanSound() {
@@ -1524,12 +1226,13 @@ import {
       const viewTargets = targets.map((target) => ({
         ...target,
         isResolved: target.status === "resolved",
-        isBreakable: target.type === "breakable"
+        isBreakable: target.type === "breakable",
+        regionName: target.regionId ? getRegionName(target.regionId, scene?.id) : ""
       }));
       const selectedTarget = this.draftTarget
         ?? targets.find((target) => target.id === this.selectedTargetId)
         ?? targets[0]
-        ?? normalizeTarget({ sceneId: scene?.id, ...getDefaultPositionData() });
+        ?? normalizeTarget({ sceneId: scene?.id });
       const selectedViewTarget = {
         ...selectedTarget,
         isBreakable: selectedTarget.type === "breakable"
@@ -1546,12 +1249,8 @@ import {
         colorOptions: getColorOptions(selectedTarget.color),
         visibilityOptions: VISIBILITY_MODES.map((mode) => ({ value: mode, label: labelize(mode) })),
         statusOptions: TARGET_STATUSES.map((status) => ({ value: status, label: labelize(status) })),
+        regionChoices: getRegionChoices(scene?.id, selectedTarget.regionId),
         hasTargets: targets.length > 0,
-        canUseMouse: Boolean(state.lastMouseScenePosition),
-        placementActive: state.placementActive,
-        placementShape: state.placementShape,
-        placementCircle: state.placementShape === "circle",
-        placementRectangle: state.placementShape === "rectangle",
         scannerItem: {
           name: getScannerItemName(),
           mode: getScannerItemMode(),
@@ -1587,27 +1286,22 @@ import {
       const action = button.dataset.action;
       const targetId = button.dataset.targetId ?? button.closest("[data-target-id]")?.dataset.targetId ?? this.selectedTargetId;
 
-      if (action === "new-manual") return this._startManualTarget();
+      if (action === "new-target") return this._startNewTarget();
       if (action === "save-target") return this._saveForm(button.closest("form"));
       if (action === "create-scanner-item-config") return this._createScannerItemConfig(button.closest("form"));
       if (action === "delete-target") return this._deleteTarget(targetId);
-      if (action === "toggle-placement") return this._togglePlacement();
-      if (action === "set-placement-shape") return this._setPlacementShape(button.dataset.shape);
       if (action === "reveal-target") return this._revealTarget(targetId);
       if (action === "hide-target") return this._hideTarget(targetId);
       if (action === "toggle-resolved") return this._toggleResolved(targetId);
     }
 
-    _startManualTarget() {
-      const position = getDefaultPositionData();
-      this.draftTarget = normalizeTarget({ sceneId: canvas.scene?.id, ...position, label: "New Scan Target" });
+    _startNewTarget() {
+      this.draftTarget = normalizeTarget({ sceneId: canvas.scene?.id, label: "New Scan Target" });
       this.selectedTargetId = null;
       this.render(false);
       window.setTimeout(() => {
         const form = this.element?.find?.("form.pulse-scanner-target-form")?.[0];
         if (!form) return;
-        form.elements.x.value = position.x;
-        form.elements.y.value = position.y;
         form.elements.label.focus();
         form.elements.label.select();
       }, 20);
@@ -1620,9 +1314,7 @@ import {
       const targetData = {
         ...data,
         sceneId: canvas.scene?.id,
-        x: data.x,
-        y: data.y,
-        radius: data.radius,
+        regionId: data.regionId || "",
         integrity: data.integrity
       };
 
@@ -1648,21 +1340,6 @@ import {
       await game.settings.set(MODULE_ID, "scannerItemMode", mode);
       await game.settings.set(MODULE_ID, "scannerItemRadiusFeet", radiusFeet);
       await createWorldPulseScannerItem({ name, mode, radiusFeet });
-      this.render(false);
-    }
-
-    _getCurrentMode() {
-      const form = this.element?.find?.("form.pulse-scanner-target-form")?.[0];
-      return form?.elements?.mode?.value || DEFAULT_MODE;
-    }
-
-    _togglePlacement() {
-      togglePlacementTool();
-      this.render(false);
-    }
-
-    _setPlacementShape(shape) {
-      setPlacementShape(shape);
       this.render(false);
     }
 
@@ -1720,11 +1397,5 @@ import {
       this.draftTarget = null;
       this.render(false);
     }
-  }
-
-  function getDefaultPositionData() {
-    return getSelectedTokenPosition()
-      ?? state.lastMouseScenePosition
-      ?? { x: Math.round(canvas?.dimensions?.width / 2 || 0), y: Math.round(canvas?.dimensions?.height / 2 || 0) };
   }
 })();

@@ -6,10 +6,7 @@
     </div>
     <div class="pulse-scanner-header-actions">
       <div class="pulse-scanner-tool-row">
-        <button type="button" data-action="toggle-placement" class="{{#if placementActive}}is-active{{/if}}"><i class="fa-solid fa-map-pin"></i> Place</button>
-        <button type="button" data-action="set-placement-shape" data-shape="circle" class="{{#if placementCircle}}is-active{{/if}}" title="Place circular targets"><i class="fa-regular fa-circle"></i> Circle</button>
-        <button type="button" data-action="set-placement-shape" data-shape="rectangle" class="{{#if placementRectangle}}is-active{{/if}}" title="Place square or rectangular targets"><i class="fa-regular fa-square"></i> Square</button>
-        <button type="button" data-action="new-manual"><i class="fa-solid fa-plus"></i> Manual</button>
+        <button type="button" data-action="new-target"><i class="fa-solid fa-plus"></i> New Target</button>
       </div>
     </div>
   </header>
@@ -44,7 +41,7 @@
               <span class="pulse-scanner-dot" style="--target-color: {{color}};"></span>
               <div>
                 <strong>{{label}}</strong>
-                <small>{{psModeLabel mode}} - {{psTypeLabel type}} - {{visibility}} - {{status}}</small>
+                <small>{{psModeLabel mode}} - {{psTypeLabel type}} - {{visibility}} - {{status}}{{#if regionName}} - {{regionName}}{{/if}}</small>
               </div>
             </div>
             <div class="pulse-scanner-target-card-actions">
@@ -59,7 +56,7 @@
         <div class="pulse-scanner-empty-state">
           <i class="fa-solid fa-satellite-dish"></i>
           <strong>No scan targets on this scene</strong>
-          <span>Use Place, then click the canvas to create one.</span>
+          <span>Draw a Scene Region first, then click New Target to link it.</span>
         </div>
       {{/if}}
     </aside>
