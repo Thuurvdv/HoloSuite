@@ -14,11 +14,18 @@
     <main class="node-intrusion-result-screen is-{{state.result}}">
       <strong>{{resultTitle}}</strong>
       <span>{{resultDetail}}</span>
-      <button type="button" data-action="restart"><i class="fa-solid fa-rotate-right"></i> Restart</button>
     </main>
   {{else}}
     <div class="node-intrusion-grid">
       <aside class="node-intrusion-panel">
+        {{#unless state.hasStarted}}
+          <div class="node-intrusion-standby">
+            <span>Ready</span>
+            <strong>Review the network, then start the trace.</strong>
+            <button type="button" data-action="start"><i class="fa-solid fa-play"></i> Start</button>
+          </div>
+        {{/unless}}
+
         <div class="node-intrusion-readout">
           <span>Trace</span>
           <strong data-trace-text>{{state.traceProgress}}%</strong>
@@ -49,20 +56,23 @@
           <span><i class="legend-node is-current"></i> active</span>
           <span><i class="legend-line is-open"></i> open route</span>
           <span><i class="legend-node is-target"></i> target</span>
-          <span><i class="legend-node is-danger"></i> revealed threat</span>
+          <span><i class="legend-node is-firewall"></i> firewall</span>
+          <span><i class="legend-node is-decoy"></i> decoy</span>
         </div>
 
         <div class="node-intrusion-actions">
           <button type="button" data-action="abort"><i class="fa-solid fa-power-off"></i> Abort</button>
-          <button type="button" data-action="restart"><i class="fa-solid fa-rotate-right"></i> Restart</button>
         </div>
       </aside>
 
-      <main class="node-intrusion-map" aria-label="Network graph">
+      <main class="node-intrusion-map {{#unless state.hasStarted}}is-standby{{/unless}}" aria-label="Network graph">
         <svg class="node-intrusion-links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {{#each edges}}
             <line class="{{#if isAvailable}}is-available{{/if}}{{#if isVisitedPath}} is-visited-path{{/if}}{{#if isFirewallPath}} is-firewall-path{{/if}}{{#if isDecoyPath}} is-decoy-path{{/if}}" x1="{{from.x}}" y1="{{from.y}}" x2="{{to.x}}" y2="{{to.y}}" />
           {{/each}}
+          {{#if movement}}
+            <path class="node-intrusion-move-track" pathLength="100" d="{{movement.path}}" />
+          {{/if}}
         </svg>
 
         {{#each nodes}}
@@ -73,7 +83,7 @@
             style="left: {{x}}%; top: {{y}}%;"
             title="{{title}}"
             aria-label="{{id}} {{displayType}}"
-            {{#unless canMove}}{{#unless isCurrent}}disabled{{/unless}}{{/unless}}
+            {{#unless ../state.hasStarted}}disabled{{else}}{{#unless canMove}}{{#unless isCurrent}}disabled{{/unless}}{{/unless}}{{/unless}}
           >
             {{#if isCurrent}}<i class="fa-solid fa-location-crosshairs node-intrusion-current-icon"></i>{{/if}}
             {{#if isNeighbor}}<i class="fa-solid fa-chevron-right node-intrusion-neighbor-icon"></i>{{/if}}

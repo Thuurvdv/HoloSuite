@@ -62,9 +62,13 @@ function stopAudio(handle) {
 function createOverlay(payload) {
   const accent = payload.accentColor || "#69e8ff";
   const animationStyle = ["strike", "breach", "signal"].includes(payload.animationStyle) ? payload.animationStyle : "strike";
+  const triggerKind = payload.triggerKind === "failure" ? "failure" : "success";
   const image = payload.imagePath
     ? `<img class="hcci-portrait" src="${escapeHtml(payload.imagePath)}" alt="">`
     : `<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>`;
+  const fracture = payload.imagePath
+    ? [0, 1, 2, 3].map((index) => `<div class="hcci-fracture hcci-fracture-${index + 1}" style="background-image: url('${escapeHtml(payload.imagePath)}')"></div>`).join("")
+    : "";
   const titleLength = Math.max(1, String(payload.overlayText ?? "").length);
   const text = payload.textEnabled && payload.overlayText
     ? `<div class="hcci-title" style="--hcci-title-chars: ${titleLength}">${escapeHtml(payload.overlayText)}</div>`
@@ -72,7 +76,7 @@ function createOverlay(payload) {
   const actorName = payload.actorName || payload.userName || "";
 
   const overlay = document.createElement("div");
-  overlay.className = `hcci-overlay hcci-style-${animationStyle}`;
+  overlay.className = `hcci-overlay hcci-style-${animationStyle} hcci-kind-${triggerKind}`;
   overlay.style.setProperty("--hcci-accent", accent);
   overlay.innerHTML = `
     <div class="hcci-flash"></div>
@@ -97,6 +101,7 @@ function createOverlay(payload) {
     <section class="hcci-stage">
       <div class="hcci-portrait-frame">
         ${image}
+        ${fracture}
         <div class="hcci-frame-lightning hcci-frame-lightning-a"></div>
         <div class="hcci-frame-lightning hcci-frame-lightning-b"></div>
       </div>

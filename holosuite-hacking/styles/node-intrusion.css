@@ -6,7 +6,7 @@
 
 .node-intrusion-shell {
   position: relative;
-  min-height: 620px;
+  min-height: 700px;
   overflow: hidden;
   background:
     var(--hs-grid-bg, linear-gradient(rgba(83, 235, 255, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(83, 235, 255, 0.05) 1px, transparent 1px)),
@@ -70,7 +70,7 @@
 .node-intrusion-grid {
   position: relative;
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
   gap: 18px;
   padding: 18px;
 }
@@ -97,6 +97,34 @@
   color: var(--hs-text, #ffffff);
   font-size: 21px;
   text-shadow: 0 0 12px rgba(255, 64, 128, 0.72);
+}
+
+.node-intrusion-standby {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 16px;
+  border: 1px solid rgba(77, 255, 155, 0.28);
+  background: rgba(77, 255, 155, 0.08);
+  padding: 10px;
+}
+
+.node-intrusion-standby span {
+  color: var(--hs-muted, #a8f7ff);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.node-intrusion-standby strong {
+  color: #f5feff;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.node-intrusion-standby button {
+  border: 1px solid rgba(77, 255, 155, 0.55);
+  background: rgba(13, 59, 42, 0.86);
+  color: #d9fbff;
+  padding: 8px 10px;
 }
 
 .node-intrusion-trace {
@@ -206,9 +234,14 @@
   background: #ffe66f;
 }
 
-.legend-node.is-danger {
+.legend-node.is-firewall {
   border-color: #ff477e;
   background: #ff477e;
+}
+
+.legend-node.is-decoy {
+  border-color: #a987ff;
+  background: #a987ff;
 }
 
 .legend-line {
@@ -232,10 +265,15 @@
 
 .node-intrusion-map {
   position: relative;
-  min-height: 500px;
+  min-height: 590px;
   border: 1px solid var(--hs-line, rgba(93, 245, 255, 0.18));
   background: var(--hs-card-bg, rgba(1, 10, 17, 0.62));
   box-shadow: var(--hs-shadow-panel, inset 0 0 44px rgba(26, 234, 255, 0.08));
+}
+
+.node-intrusion-map.is-standby .node-intrusion-node:not(.is-current),
+.node-intrusion-map.is-standby .node-intrusion-links line {
+  opacity: 0.76;
 }
 
 .node-intrusion-links {
@@ -276,6 +314,19 @@
   stroke-width: 4.6;
   stroke-dasharray: 5 3;
   filter: drop-shadow(0 0 9px rgba(169, 135, 255, 0.9));
+}
+
+.node-intrusion-move-track {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 18 82;
+  stroke-dashoffset: 100;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.95));
+  pointer-events: none;
+  animation: node-intrusion-move-track 720ms ease-out forwards;
 }
 
 .node-intrusion-node {
@@ -457,6 +508,24 @@
 @keyframes node-intrusion-neighbor-nudge {
   0%, 100% { transform: translateX(0); }
   50% { transform: translateX(3px); }
+}
+
+@keyframes node-intrusion-move-track {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  86% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
 }
 
 @media (max-width: 760px) {

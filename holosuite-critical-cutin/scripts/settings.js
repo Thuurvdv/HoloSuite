@@ -6,11 +6,13 @@ export const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/player-config.hbs`;
 export const SETTINGS = {
   enabled: "enabled",
   threshold: "threshold",
+  failureThreshold: "failureThreshold",
   duration: "duration",
   volume: "volume",
   audience: "audience",
   textEnabled: "textEnabled",
   defaultText: "defaultText",
+  defaultFailureText: "defaultFailureText",
   debug: "debug",
   playerConfigs: "playerConfigs"
 };
@@ -39,6 +41,16 @@ export function registerSettings(configAppClass) {
     type: Number,
     range: { min: 1, max: 20, step: 1 },
     default: 20
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.failureThreshold, {
+    name: "Default Failure Trigger",
+    hint: "Natural d20 results equal to or below this number trigger the failure cut-in. Example: 1 triggers only on a natural 1.",
+    scope: "world",
+    config: true,
+    type: Number,
+    range: { min: 1, max: 20, step: 1 },
+    default: 1
   });
 
   game.settings.register(MODULE_ID, SETTINGS.duration, {
@@ -93,6 +105,15 @@ export function registerSettings(configAppClass) {
     default: "CRITICAL"
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.defaultFailureText, {
+    name: "Default Failure Overlay Text",
+    hint: "Fallback label used when no failure-specific label is configured.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "CRITICAL FAILURE"
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.debug, {
     name: "Debug Logging",
     hint: "Log roll detection and playback decisions to the console.",
@@ -130,6 +151,10 @@ export async function setSetting(key, value) {
 
 export function getThreshold() {
   return Math.min(20, Math.max(1, Number(setting(SETTINGS.threshold) || 20)));
+}
+
+export function getFailureThreshold() {
+  return Math.min(20, Math.max(1, Number(setting(SETTINGS.failureThreshold) || 1)));
 }
 
 export function getPlayerConfigs() {

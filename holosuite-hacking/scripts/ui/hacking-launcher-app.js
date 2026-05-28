@@ -31,6 +31,7 @@ export class HackingLauncherApp extends LegacyApplication {
     const firstActor = actorOptions.length ? getActorById(actorOptions[0].id) : null;
     return {
       defaultDc,
+      defaultTestRoll: defaultDc,
       minigames: this.api.getMinigames(),
       actors: actorOptions.map((actor) => ({
         id: actor.id,
@@ -122,12 +123,20 @@ export class HackingLauncherApp extends LegacyApplication {
     }
 
     const minigameType = String(form.querySelector("[name='minigameType']")?.value || "node-intrusion");
+    const actorId = String(form.querySelector("[name='actorId']")?.value || "");
     const dc = Number(form.querySelector("[name='dc']")?.value ?? game.settings.get(MODULE_ID, "defaultDc") ?? 15);
+    const rollTotal = Number(form.querySelector("[name='testRollTotal']")?.value ?? dc);
+    if (!Number.isFinite(rollTotal)) {
+      ui.notifications?.warn?.("Enter a fake roll result before testing the minigame.");
+      return;
+    }
+    const actor = getActorById(actorId);
+
     this.api.startHack({
       type: minigameType,
       dc,
-      rollTotal: dc + 2,
-      actorName: game.user?.name ?? "GM",
+      rollTotal,
+      actorName: actor?.name ?? game.user?.name ?? "GM",
       userId: game.user?.id ?? "",
       onSuccess: (result) => console.log(`${MODULE_ID} | GM test success`, result),
       onFailure: (result) => console.log(`${MODULE_ID} | GM test failure`, result)

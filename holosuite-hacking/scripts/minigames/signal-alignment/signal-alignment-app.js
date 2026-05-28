@@ -27,11 +27,12 @@ export class SignalAlignmentApp extends LegacyApplication {
       mistakes: 0,
       lockProgress: 0,
       destabilizations: 0,
-      isRunning: true,
+      hasStarted: false,
+      isRunning: false,
       result: null
     };
-    this.startedAt = performance.now();
-    this.lastTickAt = this.startedAt;
+    this.startedAt = null;
+    this.lastTickAt = null;
     this.timer = null;
     this.wasAligned = false;
   }
@@ -81,14 +82,14 @@ export class SignalAlignmentApp extends LegacyApplication {
   activateListeners(html) {
     super.activateListeners(html);
     html.find("[data-channel-slider]").on("input", (event) => this.handleSlider(event.currentTarget));
+    html.find("[data-action='start']").on("click", () => this.startRun());
     html.find("[data-action='abort']").on("click", () => this.abort());
-    html.find("[data-action='restart']").on("click", () => this.restart());
     this.syncDom();
   }
 
   async render(force, options) {
     const rendered = await super.render(force, options);
-    if (this.state.isRunning) this.startTimer();
+    if (this.state.hasStarted && this.state.isRunning) this.startTimer();
     return rendered;
   }
 
@@ -97,8 +98,18 @@ export class SignalAlignmentApp extends LegacyApplication {
     return super.close(options);
   }
 
+  startRun() {
+    if (this.state.hasStarted || this.state.result) return;
+    this.state.hasStarted = true;
+    this.state.isRunning = true;
+    this.startedAt = performance.now();
+    this.lastTickAt = this.startedAt;
+    this.startTimer();
+    this.render(false);
+  }
+
   handleSlider(slider) {
-    if (!this.state.isRunning) return;
+    if (!this.state.hasStarted || !this.state.isRunning) return;
     const channel = this.channels.find((candidate) => candidate.id === slider.dataset.channelSlider);
     if (!channel) return;
     channel.value = clampFrequency(slider.value);
@@ -121,30 +132,13 @@ export class SignalAlignmentApp extends LegacyApplication {
     this.wasAligned = aligned;
   }
 
-  restart() {
-    this.stopTimer();
-    this.channels = generateSignalChannels(this.profile, `${this.seed}:${Date.now()}`);
-    this.state = {
-      traceProgress: 0,
-      mistakes: 0,
-      lockProgress: 0,
-      destabilizations: 0,
-      isRunning: true,
-      result: null
-    };
-    this.resultMessage = null;
-    this.startedAt = performance.now();
-    this.lastTickAt = this.startedAt;
-    this.wasAligned = false;
-    this.render(false);
-  }
-
   startTimer() {
     if (this.timer) return;
+    if (!this.state.hasStarted || !this.startedAt || !this.lastTickAt) return;
     const multiplier = Number(game.settings.get(MODULE_ID, "traceDurationMultiplier") ?? 1) || 1;
     const duration = Math.max(5, this.profile.traceDurationSeconds * multiplier);
     this.timer = window.setInterval(() => {
-      if (!this.state.isRunning) return;
+      if (!this.state.hasStarted || !this.state.isRunning) return;
       const now = performance.now();
       const deltaSeconds = Math.min(0.5, (now - this.lastTickAt) / 1000);
       this.lastTickAt = now;
@@ -191,7 +185,7 @@ export class SignalAlignmentApp extends LegacyApplication {
   }
 
   async finish(result, message, { close = false } = {}) {
-    if (!this.state.isRunning && this.state.result) return;
+    if (this.state.result) return;
     this.state.isRunning = false;
     this.state.result = result;
     this.stopTimer();

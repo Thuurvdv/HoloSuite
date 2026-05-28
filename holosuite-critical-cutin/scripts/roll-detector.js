@@ -1,4 +1,4 @@
-import { MODULE_ID, SOCKET_NAME, SETTINGS, debugLog, getPlayerConfigs, getThreshold, setting } from "./settings.js";
+import { MODULE_ID, SOCKET_NAME, SETTINGS, debugLog, getFailureThreshold, getPlayerConfigs, getThreshold, setting } from "./settings.js";
 import { playCutin } from "./cutin-animation.js";
 
 const processedMessages = new Set();
@@ -67,25 +67,33 @@ function resolveTriggerUser(message, actor) {
   return author ?? game.users?.get(authorId) ?? null;
 }
 
-function resolveConfig(user, actor) {
-  const configs = getPlayerConfigs();
-  const actorConfig = actor ? configs[targetKey("actor", actor.id)] : null;
-  const gmConfig = user?.isGM ? configs[gmTargetKey()] : null;
-  if (!actor && !user?.isGM && !actorConfig) return { enabled: false, threshold: getThreshold() };
-
-  const config = actorConfig ?? gmConfig ?? {};
+function normalizeTriggerConfig(rawConfig = {}, kind, actor) {
+  const fallbackThreshold = kind === "failure" ? getFailureThreshold() : getThreshold();
+  const defaultText = kind === "failure" ? setting(SETTINGS.defaultFailureText) : setting(SETTINGS.defaultText);
+  const defaultAccent = kind === "failure" ? "#ff4d7d" : "#69e8ff";
+  const config = kind === "failure" ? rawConfig.failure ?? {} : rawConfig;
   const configuredThreshold = Number(config.threshold);
   return {
+    kind,
     enabled: config.enabled !== false,
     threshold: Number.isInteger(configuredThreshold) && configuredThreshold >= 1 && configuredThreshold <= 20
       ? configuredThreshold
-      : getThreshold(),
+      : fallbackThreshold,
     animationStyle: sanitizeAnimationStyle(config.animationStyle),
     imagePath: config.imagePath || actor?.img || "",
     audioPath: config.audioPath || "",
-    overlayText: config.overlayText || setting(SETTINGS.defaultText),
-    accentColor: config.accentColor || "#69e8ff"
+    overlayText: config.overlayText || defaultText,
+    accentColor: config.accentColor || defaultAccent
   };
+}
+
+function resolveConfig(user, actor, kind = "success") {
+  const configs = getPlayerConfigs();
+  const actorConfig = actor ? configs[targetKey("actor", actor.id)] : null;
+  const gmConfig = user?.isGM ? configs[gmTargetKey()] : null;
+  if (!actor && !user?.isGM && !actorConfig) return { enabled: false, threshold: kind === "failure" ? getFailureThreshold() : getThreshold() };
+
+  return normalizeTriggerConfig(actorConfig ?? gmConfig ?? {}, kind, actor);
 }
 
 function buildPayload(message, qualifyingResult, actor, user, config) {
@@ -101,6 +109,7 @@ function buildPayload(message, qualifyingResult, actor, user, config) {
     actorId: actor?.id ?? null,
     userName: user?.name ?? "",
     actorName: actor?.name ?? user?.name ?? "",
+    triggerKind: config.kind ?? "success",
     naturalResult: qualifyingResult,
     threshold: config.threshold,
     animationStyle: config.animationStyle,
@@ -117,12 +126,14 @@ function buildPayload(message, qualifyingResult, actor, user, config) {
   };
 }
 
-function messageHasQualifyingD20(message, threshold) {
+function messageHasQualifyingD20(message, threshold, kind = "success") {
   if (!message?.isRoll && !message?.rolls?.length) return null;
   for (const roll of message.rolls ?? []) {
     if (isDamageRoll(message, roll)) continue;
     const d20Results = getActiveD20Results(roll);
-    const qualifying = d20Results.find((value) => value >= threshold);
+    const qualifying = kind === "failure"
+      ? d20Results.find((value) => value <= threshold)
+      : d20Results.find((value) => value >= threshold);
     if (qualifying) return qualifying;
   }
   return null;
@@ -144,9 +155,13 @@ export function registerRollDetection() {
 
     const actor = resolveActor(message);
     const user = resolveTriggerUser(message, actor);
-    const config = resolveConfig(user, actor);
-    const natural = messageHasQualifyingD20(message, config.threshold);
+    const successConfig = resolveConfig(user, actor, "success");
+    const failureConfig = resolveConfig(user, actor, "failure");
+    const failureNatural = messageHasQualifyingD20(message, failureConfig.threshold, "failure");
+    const successNatural = failureNatural ? null : messageHasQualifyingD20(message, successConfig.threshold, "success");
+    const natural = failureNatural ?? successNatural;
     if (!natural) return;
+    const config = failureNatural ? failureConfig : successConfig;
 
     const payload = buildPayload(message, natural, actor, user, config);
     if (!payload) return;
@@ -166,7 +181,8 @@ export function registerRollDetection() {
 export function createManualPayloadForUser(userId, options = {}) {
   const user = game.users?.get(userId);
   const actor = options.actorId ? game.actors?.get(options.actorId) : user?.character ?? null;
-  const config = resolveConfig(user, actor);
+  const triggerKind = options.triggerKind === "failure" ? "failure" : "success";
+  const config = resolveConfig(user, actor, triggerKind);
   return {
     id: foundry.utils.randomID(),
     userId,
@@ -174,6 +190,7 @@ export function createManualPayloadForUser(userId, options = {}) {
     userName: user?.name ?? "",
     actorName: actor?.name ?? user?.name ?? "",
     naturalResult: options.naturalResult ?? 20,
+    triggerKind,
     threshold: options.threshold ?? config.threshold ?? getThreshold(),
     animationStyle: options.animationStyle ?? config.animationStyle ?? "strike",
     imagePath: options.imagePath ?? config.imagePath ?? "",

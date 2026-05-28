@@ -1128,8 +1128,8 @@ function St(s, d) {
         title: "Pulse Scanner Target Manager",
         template: `${m}/target-manager.hbs`,
         classes: ["pulse-scanner", "pulse-scanner-manager"],
-        width: 900,
-        height: "auto",
+        width: 1080,
+        height: 720,
         resizable: !0
       });
     }

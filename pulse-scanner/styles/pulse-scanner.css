@@ -13,14 +13,23 @@
 }
 
 .pulse-scanner .window-content {
+  height: 100%;
+  overflow: hidden;
   padding: 0;
   background: var(--hs-bg);
   color: var(--hs-text);
   font-family: var(--hs-font-ui);
 }
 
+.pulse-scanner-manager {
+  min-width: 980px;
+}
+
 .pulse-scanner-shell {
-  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
   background:
     var(--hs-grid-bg),
     radial-gradient(circle at 18% 8%, rgba(69, 214, 255, 0.16), transparent 30rem),
@@ -191,11 +200,15 @@
 
 .pulse-scanner-layout {
   display: grid;
-  grid-template-columns: minmax(260px, 330px) 1fr;
-  min-height: 500px;
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .pulse-scanner-list {
+  overflow-x: hidden;
+  min-height: 0;
   padding: 12px;
   border-right: 1px solid var(--hs-line);
   background: rgba(2, 10, 18, 0.52);
@@ -281,8 +294,10 @@
 }
 
 .pulse-scanner-editor {
+  min-height: 0;
   padding: 16px;
   overflow: auto;
+  overflow-x: hidden;
 }
 
 .pulse-scanner-form-grid {

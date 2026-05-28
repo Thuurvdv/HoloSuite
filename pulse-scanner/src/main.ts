@@ -1576,8 +1576,8 @@ import {
         title: "Pulse Scanner Target Manager",
         template: `${TEMPLATE_ROOT}/target-manager.hbs`,
         classes: ["pulse-scanner", "pulse-scanner-manager"],
-        width: 900,
-        height: "auto",
+        width: 1080,
+        height: 720,
         resizable: true
       });
     }

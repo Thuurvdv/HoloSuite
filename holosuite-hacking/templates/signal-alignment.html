@@ -12,6 +12,14 @@
 
   <div class="signal-alignment-grid">
     <aside class="signal-alignment-panel">
+      {{#unless state.hasStarted}}
+        <div class="signal-alignment-standby">
+          <span>Ready</span>
+          <strong>Review the channels, then start the trace.</strong>
+          <button type="button" data-action="start"><i class="fa-solid fa-play"></i> Start</button>
+        </div>
+      {{/unless}}
+
       <div class="signal-alignment-readout">
         <span>Trace</span>
         <strong data-trace-text>{{state.traceProgress}}%</strong>
@@ -44,7 +52,7 @@
       </div>
     </aside>
 
-    <main class="signal-alignment-board" aria-label="Signal channels">
+    <main class="signal-alignment-board {{#unless state.hasStarted}}is-standby{{/unless}}" aria-label="Signal channels">
       {{#each channels}}
         <section class="signal-channel {{#if aligned}}is-aligned{{/if}}" data-channel-row="{{id}}">
           <header>
@@ -56,7 +64,7 @@
             <div class="signal-target" style="left: {{targetLeft}}%;"></div>
             <div class="signal-wave-fill" data-wave-fill style="width: {{value}}%"></div>
           </div>
-          <input type="range" min="0" max="100" step="0.1" value="{{value}}" data-channel-slider="{{id}}" />
+          <input type="range" min="0" max="100" step="0.1" value="{{value}}" data-channel-slider="{{id}}" {{#unless ../state.hasStarted}}disabled{{/unless}} />
           {{#if ../profile.hintsEnabled}}
             <p class="signal-channel-hint">Tune inside the highlighted lock band.</p>
           {{/if}}

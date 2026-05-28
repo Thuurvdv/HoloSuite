@@ -1,4 +1,4 @@
-import { MODULE_ID, MODULE_TITLE, SETTINGS, TEMPLATE_PATH, getPlayerConfigs, getThreshold, savePlayerConfigs, setSetting, setting } from "./settings.js";
+import { MODULE_ID, MODULE_TITLE, SETTINGS, TEMPLATE_PATH, getFailureThreshold, getPlayerConfigs, getThreshold, savePlayerConfigs, setSetting, setting } from "./settings.js";
 
 const BaseFormApplication = globalThis.FormApplication ?? globalThis.foundry?.appv1?.api?.FormApplication;
 
@@ -15,7 +15,7 @@ function userOwnsActor(user, actor) {
   return Number(actor?.ownership?.[user.id] ?? actor?.ownership?.default ?? 0) >= ownerLevel;
 }
 
-function normalizeConfig(config = {}) {
+function normalizeTriggerConfig(config = {}, { defaultAccent = "#69e8ff" } = {}) {
   const threshold = Number(config.threshold);
   const animationStyle = ["strike", "breach", "signal"].includes(config.animationStyle) ? config.animationStyle : "strike";
   return {
@@ -30,7 +30,14 @@ function normalizeConfig(config = {}) {
     imagePath: String(config.imagePath ?? ""),
     audioPath: String(config.audioPath ?? ""),
     overlayText: String(config.overlayText ?? ""),
-    accentColor: String(config.accentColor ?? "#69e8ff")
+    accentColor: String(config.accentColor ?? defaultAccent)
+  };
+}
+
+function normalizeConfig(config = {}) {
+  return {
+    success: normalizeTriggerConfig(config, { defaultAccent: "#69e8ff" }),
+    failure: normalizeTriggerConfig(config.failure, { defaultAccent: "#ff4d7d" })
   };
 }
 
@@ -66,13 +73,18 @@ function buildTargets() {
 }
 
 export class PlayerConfigApp extends BaseFormApplication {
+  constructor(options = {}) {
+    super(options);
+    this.activeTabs = new Map();
+  }
+
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "hcci-player-config",
       title: `${MODULE_TITLE} Configuration`,
       template: TEMPLATE_PATH,
       classes: ["hcci-config-window"],
-      width: 1120,
+      width: 1320,
       height: "auto",
       resizable: true,
       closeOnSubmit: false,
@@ -84,34 +96,60 @@ export class PlayerConfigApp extends BaseFormApplication {
     const configs = getPlayerConfigs();
     const rows = buildTargets().map((target) => {
       const config = normalizeConfig(configs[target.key]);
-      const preview = config.imagePath || target.portrait;
+      const successPreview = config.success.imagePath || target.portrait;
+      const failurePreview = config.failure.imagePath || target.portrait;
+      const activeTab = this.activeTabs.get(target.key) === "failure" ? "failure" : "success";
       return {
         ...target,
-        ...config,
-        preview,
-        imageStatus: config.imagePath ? "Custom image configured." : "No custom image configured.",
-        audioStatus: config.audioPath ? "Audio sample configured." : "No audio sample configured."
+        successActive: activeTab === "success",
+        failureActive: activeTab === "failure",
+        success: {
+          ...config.success,
+          preview: successPreview,
+          imageStatus: config.success.imagePath ? "Custom image configured." : "No custom image configured.",
+          audioStatus: config.success.audioPath ? "Audio sample configured." : "No audio sample configured."
+        },
+        failure: {
+          ...config.failure,
+          preview: failurePreview,
+          imageStatus: config.failure.imagePath ? "Custom image configured." : "No custom image configured.",
+          audioStatus: config.failure.audioPath ? "Audio sample configured." : "No audio sample configured."
+        }
       };
     });
 
     return {
       moduleId: MODULE_ID,
       threshold: getThreshold(),
+      failureThreshold: getFailureThreshold(),
       duration: setting(SETTINGS.duration),
       defaultText: setting(SETTINGS.defaultText),
+      defaultFailureText: setting(SETTINGS.defaultFailureText),
       rows
     };
   }
 
   activateListeners(html) {
     super.activateListeners(html);
+    const markDirty = () => {
+      html.closest(".app")?.addClass("hcci-config-dirty");
+      html.find("[data-hcci-dirty]").prop("hidden", false);
+    };
+
+    html.find("input, select").on("input change", (event) => {
+      markDirty();
+      if (event.currentTarget.dataset.hcciField !== "imagePath") return;
+      const panel = event.currentTarget.closest("[data-hcci-panel]");
+      const preview = panel?.querySelector("[data-hcci-preview]");
+      if (preview) preview.src = event.currentTarget.value || preview.dataset.fallbackSrc || "icons/svg/mystery-man.svg";
+    });
 
     html.find("[data-hcci-browse]").on("click", (event) => {
       event.preventDefault();
       const button = event.currentTarget;
-      const target = button.closest("[data-hcci-row]");
+      const panel = button.closest("[data-hcci-panel]");
       const field = button.dataset.hcciBrowse;
-      const input = target?.querySelector(`[data-hcci-field="${field}"]`);
+      const input = panel?.querySelector(`[data-hcci-field="${field}"]`);
       if (!input) return;
 
       const picker = new FilePicker({
@@ -121,12 +159,21 @@ export class PlayerConfigApp extends BaseFormApplication {
           input.value = path;
           input.dispatchEvent(new Event("change", { bubbles: true }));
           if (field === "imagePath") {
-            const img = target.querySelector("[data-hcci-preview]");
+            const img = panel.querySelector("[data-hcci-preview]");
             if (img) img.src = path || img.dataset.fallbackSrc || "icons/svg/mystery-man.svg";
           }
         }
       });
       picker.browse();
+    });
+
+    html.find("[data-hcci-tab]").on("click", (event) => {
+      event.preventDefault();
+      const tab = event.currentTarget.dataset.hcciTab;
+      const row = event.currentTarget.closest("[data-hcci-row]");
+      if (row?.dataset.hcciRow) this.activeTabs.set(row.dataset.hcciRow, tab);
+      row?.querySelectorAll("[data-hcci-tab]").forEach((button) => button.classList.toggle("is-active", button.dataset.hcciTab === tab));
+      row?.querySelectorAll("[data-hcci-panel]").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.hcciPanel === tab));
     });
 
     html.find("[data-hcci-action='reset']").on("click", async (event) => {
@@ -141,28 +188,39 @@ export class PlayerConfigApp extends BaseFormApplication {
     const form = event.currentTarget;
     const configs = {};
 
-    for (const row of form.querySelectorAll("[data-hcci-row]")) {
-      const key = row.dataset.hcciRow;
-      configs[key] = {
-        enabled: row.querySelector('[data-hcci-field="enabled"]')?.checked === true,
+    const readPanel = (row, scope) => {
+      const panel = row.querySelector(`[data-hcci-panel="${scope}"]`);
+      return {
+        enabled: panel?.querySelector('[data-hcci-field="enabled"]')?.checked === true,
         threshold: (() => {
-          const value = Number(row.querySelector('[data-hcci-field="threshold"]')?.value);
+          const value = Number(panel?.querySelector('[data-hcci-field="threshold"]')?.value);
           return Number.isInteger(value) && value >= 1 && value <= 20 ? value : "";
         })(),
-        animationStyle: row.querySelector('[data-hcci-field="animationStyle"]')?.value || "strike",
-        imagePath: row.querySelector('[data-hcci-field="imagePath"]')?.value?.trim() ?? "",
-        audioPath: row.querySelector('[data-hcci-field="audioPath"]')?.value?.trim() ?? "",
-        overlayText: row.querySelector('[data-hcci-field="overlayText"]')?.value?.trim() ?? "",
-        accentColor: row.querySelector('[data-hcci-field="accentColor"]')?.value || "#69e8ff"
+        animationStyle: panel?.querySelector('[data-hcci-field="animationStyle"]')?.value || "strike",
+        imagePath: panel?.querySelector('[data-hcci-field="imagePath"]')?.value?.trim() ?? "",
+        audioPath: panel?.querySelector('[data-hcci-field="audioPath"]')?.value?.trim() ?? "",
+        overlayText: panel?.querySelector('[data-hcci-field="overlayText"]')?.value?.trim() ?? "",
+        accentColor: panel?.querySelector('[data-hcci-field="accentColor"]')?.value || (scope === "failure" ? "#ff4d7d" : "#69e8ff")
       };
+    };
+
+    for (const row of form.querySelectorAll("[data-hcci-row]")) {
+      const key = row.dataset.hcciRow;
+      const activePanel = row.querySelector("[data-hcci-panel].is-active")?.dataset.hcciPanel;
+      if (activePanel) this.activeTabs.set(key, activePanel);
+      configs[key] = readPanel(row, "success");
+      configs[key].failure = readPanel(row, "failure");
     }
 
     const threshold = Number(form.querySelector('[name="threshold"]')?.value ?? getThreshold());
+    const failureThreshold = Number(form.querySelector('[name="failureThreshold"]')?.value ?? getFailureThreshold());
     const duration = Number(form.querySelector('[name="duration"]')?.value ?? setting(SETTINGS.duration));
     await setSetting(SETTINGS.threshold, Math.min(20, Math.max(1, threshold)));
+    await setSetting(SETTINGS.failureThreshold, Math.min(20, Math.max(1, failureThreshold)));
     await setSetting(SETTINGS.duration, Math.min(8000, Math.max(800, duration)));
     await savePlayerConfigs(configs);
     ui.notifications?.info("Critical Cut-In configuration saved.");
+    this.element?.removeClass("hcci-config-dirty");
     this.render(false);
   }
 }

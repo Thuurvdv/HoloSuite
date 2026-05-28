@@ -47,6 +47,69 @@
   animation: hcci-out 240ms ease-in both;
 }
 
+.hcci-kind-failure .hcci-flash {
+  background: color-mix(in srgb, var(--hcci-accent), #ffffff 28%);
+}
+
+.hcci-kind-failure .hcci-title {
+  text-shadow:
+    0 0 14px color-mix(in srgb, var(--hcci-accent), transparent 4%),
+    4px 4px 0 rgba(0, 0, 0, 0.78),
+    -4px 0 0 rgba(255, 255, 255, 0.16);
+}
+
+.hcci-kind-failure .hcci-portrait-frame {
+  border-style: dashed;
+  filter: saturate(0.92) contrast(1.18);
+}
+
+.hcci-kind-failure .hcci-portrait-frame .hcci-portrait {
+  animation: hcci-failure-image-flash var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
+.hcci-fracture {
+  display: none;
+  position: absolute;
+  z-index: 3;
+  width: 50%;
+  height: 50%;
+  background-size: 200% 200%;
+  opacity: 0;
+  filter: brightness(1.18) contrast(1.18) drop-shadow(0 0 14px var(--hcci-accent));
+}
+
+.hcci-kind-failure .hcci-fracture {
+  display: block;
+}
+
+.hcci-fracture-1 {
+  left: 0;
+  top: 0;
+  background-position: 0 0;
+  animation: hcci-fracture-1 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
+.hcci-fracture-2 {
+  right: 0;
+  top: 0;
+  background-position: 100% 0;
+  animation: hcci-fracture-2 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
+.hcci-fracture-3 {
+  left: 0;
+  bottom: 0;
+  background-position: 0 100%;
+  animation: hcci-fracture-3 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
+.hcci-fracture-4 {
+  right: 0;
+  bottom: 0;
+  background-position: 100% 100%;
+  animation: hcci-fracture-4 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
 .hcci-flash {
   position: absolute;
   inset: 0;
@@ -505,12 +568,13 @@
 .hcci-config-window .window-content {
   background: linear-gradient(180deg, #081116, #030709);
   color: var(--hcci-text);
+  padding-bottom: 12px;
 }
 
 .hcci-config {
   display: grid;
-  gap: 14px;
-  padding: 16px;
+  gap: 18px;
+  padding: 20px;
 }
 
 .hcci-config-header {
@@ -533,6 +597,33 @@
   margin: 0;
   color: var(--hcci-text);
   font-size: 28px;
+}
+
+.hcci-unsaved {
+  display: inline-flex;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 209, 102, 0.48);
+  border-radius: 6px;
+  background: rgba(255, 209, 102, 0.1);
+  color: #ffd166;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hcci-unsaved[hidden] {
+  display: none;
+}
+
+.hcci-config-dirty .window-title::after {
+  content: " *";
+  color: #ffd166;
+}
+
+.hcci-config-dirty .hcci-config-actions {
+  border-color: rgba(255, 209, 102, 0.36);
+  box-shadow: 0 -10px 24px rgba(255, 209, 102, 0.06);
 }
 
 .hcci-threshold,
@@ -579,20 +670,20 @@
 
 .hcci-config-grid {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   max-height: 62vh;
   overflow: auto;
-  padding-right: 4px;
+  padding: 2px 6px 2px 0;
 }
 
 .hcci-config-row {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 18px;
   border: 1px solid var(--hcci-line);
   border-radius: 8px;
   background: rgba(12, 26, 32, 0.78);
-  padding: 12px;
+  padding: 16px;
 }
 
 .hcci-preview-wrap {
@@ -605,8 +696,8 @@
 }
 
 .hcci-preview-wrap img {
-  width: 78px;
-  height: 78px;
+  width: 88px;
+  height: 88px;
   object-fit: cover;
   border-radius: 6px;
   border: 1px solid var(--hcci-line);
@@ -616,14 +707,14 @@
 .hcci-row-main,
 .hcci-row-fields {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 
 .hcci-row-title {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
 }
 
@@ -634,8 +725,88 @@
   overflow-wrap: anywhere;
 }
 
+.hcci-row-tabs {
+  display: inline-flex;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 4px;
+  border: 1px solid rgba(143, 181, 191, 0.34);
+  border-radius: 8px;
+  background: rgba(3, 7, 9, 0.55);
+}
+
+.hcci-row-tabs button {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--hcci-muted);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hcci-row-tabs button.is-active {
+  border-color: color-mix(in srgb, var(--hcci-accent), white 18%);
+  background: linear-gradient(180deg, rgba(105, 232, 255, 0.22), rgba(105, 232, 255, 0.08));
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(105, 232, 255, 0.22), inset 0 0 12px rgba(255, 255, 255, 0.05);
+}
+
+.hcci-row-tabs button[data-hcci-tab="failure"].is-active {
+  border-color: rgba(255, 77, 125, 0.72);
+  background: linear-gradient(180deg, rgba(255, 77, 125, 0.24), rgba(255, 77, 125, 0.08));
+  box-shadow: 0 0 14px rgba(255, 77, 125, 0.24), inset 0 0 12px rgba(255, 255, 255, 0.05);
+}
+
+.hcci-row-panel {
+  display: none;
+  gap: 12px;
+  border: 1px solid rgba(143, 181, 191, 0.18);
+  border-radius: 8px;
+  background: rgba(3, 7, 9, 0.22);
+  padding: 14px;
+}
+
+.hcci-row-panel.is-active {
+  display: grid;
+}
+
+.hcci-row-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(143, 181, 191, 0.18);
+}
+
+.hcci-row-panel-heading strong {
+  color: var(--hcci-text);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.hcci-panel-preview {
+  width: 76px;
+  padding: 4px;
+  border: 1px solid rgba(143, 181, 191, 0.2);
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.hcci-panel-preview img {
+  display: block;
+  width: 66px;
+  height: 66px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid rgba(105, 232, 255, 0.2);
+}
+
 .hcci-row-fields {
-  grid-template-columns: minmax(220px, 1.35fr) minmax(220px, 1.35fr) 76px 132px minmax(150px, 0.9fr) 82px;
+  grid-template-columns: minmax(230px, 1.25fr) minmax(230px, 1.25fr) 88px 140px minmax(170px, 0.9fr) 90px;
+  gap: 14px;
 }
 
 .hcci-path-field div {
@@ -656,10 +827,6 @@
 .hcci-config-actions button:hover {
   border-color: var(--hcci-accent);
   box-shadow: 0 0 12px rgba(105, 232, 255, 0.24);
-}
-
-.hcci-path-field small {
-  color: var(--hcci-muted);
 }
 
 .hcci-toggle,
@@ -687,6 +854,8 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  border-top: 1px solid rgba(143, 181, 191, 0.18);
+  padding: 12px 22px 6px 0;
 }
 
 .hcci-empty {
@@ -741,6 +910,41 @@
 @keyframes hcci-title {
   0% { opacity: 0; transform: translateX(24vw); }
   100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes hcci-failure-image-flash {
+  0% { opacity: 0; transform: scale(0.88); filter: brightness(2.2) blur(6px); }
+  18% { opacity: 1; transform: scale(1.06); filter: brightness(1.55) blur(0); }
+  34% { opacity: 1; transform: scale(1); filter: brightness(1.1) blur(0); }
+  48%, 100% { opacity: 0; transform: scale(0.96); filter: brightness(0.7) blur(4px); }
+}
+
+@keyframes hcci-fracture-1 {
+  0%, 30% { opacity: 0; transform: translate(0, 0) rotate(0) scale(1); }
+  36% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); }
+  78% { opacity: 0.9; transform: translate(-10vw, -8vh) rotate(-18deg) scale(0.88); }
+  100% { opacity: 0; transform: translate(-14vw, -12vh) rotate(-28deg) scale(0.72); }
+}
+
+@keyframes hcci-fracture-2 {
+  0%, 30% { opacity: 0; transform: translate(0, 0) rotate(0) scale(1); }
+  36% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); }
+  78% { opacity: 0.9; transform: translate(11vw, -7vh) rotate(16deg) scale(0.88); }
+  100% { opacity: 0; transform: translate(15vw, -11vh) rotate(26deg) scale(0.72); }
+}
+
+@keyframes hcci-fracture-3 {
+  0%, 30% { opacity: 0; transform: translate(0, 0) rotate(0) scale(1); }
+  36% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); }
+  78% { opacity: 0.9; transform: translate(-9vw, 9vh) rotate(14deg) scale(0.88); }
+  100% { opacity: 0; transform: translate(-13vw, 13vh) rotate(24deg) scale(0.72); }
+}
+
+@keyframes hcci-fracture-4 {
+  0%, 30% { opacity: 0; transform: translate(0, 0) rotate(0) scale(1); }
+  36% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); }
+  78% { opacity: 0.9; transform: translate(10vw, 8vh) rotate(-14deg) scale(0.88); }
+  100% { opacity: 0; transform: translate(14vw, 12vh) rotate(-24deg) scale(0.72); }
 }
 
 @keyframes hcci-breach-flash {

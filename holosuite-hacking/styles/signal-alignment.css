@@ -87,6 +87,34 @@
   text-shadow: 0 0 12px rgba(255, 64, 128, 0.72);
 }
 
+.signal-alignment-standby {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 16px;
+  border: 1px solid rgba(77, 255, 155, 0.28);
+  background: rgba(77, 255, 155, 0.08);
+  padding: 10px;
+}
+
+.signal-alignment-standby span {
+  color: var(--hs-muted, #a8f7ff);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.signal-alignment-standby strong {
+  color: #f5feff;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.signal-alignment-standby button {
+  border: 1px solid rgba(77, 255, 155, 0.55);
+  background: rgba(13, 59, 42, 0.86);
+  color: #d9fbff;
+  padding: 8px 10px;
+}
+
 .signal-alignment-meter {
   height: 14px;
   overflow: hidden;
@@ -163,6 +191,10 @@
   box-shadow: inset 0 0 44px rgba(26, 234, 255, 0.08);
 }
 
+.signal-alignment-board.is-standby .signal-channel {
+  opacity: 0.78;
+}
+
 .signal-channel {
   position: relative;
   border: 1px solid var(--hs-line, rgba(100, 247, 255, 0.24));
@@ -226,6 +258,11 @@
 .signal-channel input[type="range"] {
   width: 100%;
   accent-color: #64f7ff;
+}
+
+.signal-channel input[type="range"]:disabled {
+  cursor: default;
+  opacity: 0.58;
 }
 
 .signal-channel-hint {

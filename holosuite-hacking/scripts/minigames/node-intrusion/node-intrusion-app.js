@@ -36,12 +36,14 @@ export class NodeIntrusionApp extends LegacyApplication {
       traversedEdgeIds: new Set(),
       blockedEdgeIds: new Map(),
       deadNodeIds: new Set(),
+      movement: null,
       mistakes: 0,
       traceProgress: 0,
-      isRunning: true,
+      hasStarted: false,
+      isRunning: false,
       result: null
     };
-    this.startedAt = performance.now();
+    this.startedAt = null;
     this.timer = null;
   }
 
@@ -52,8 +54,8 @@ export class NodeIntrusionApp extends LegacyApplication {
       classes: ["node-intrusion-window", "holosuite-hacking-window"],
       popOut: true,
       resizable: true,
-      width: 920,
-      height: 660,
+      width: 980,
+      height: 760,
       template: TEMPLATE_PATH
     });
   }
@@ -96,6 +98,7 @@ export class NodeIntrusionApp extends LegacyApplication {
           isDecoyPath: blockedType === "decoy"
         };
       }),
+      movement: this.state.movement,
       currentNode: {
         id: currentNode.id,
         label: nodeTypeLabel(currentNode.type),
@@ -117,14 +120,14 @@ export class NodeIntrusionApp extends LegacyApplication {
   activateListeners(html) {
     super.activateListeners(html);
     html.find("[data-node-id]").on("click", (event) => this.handleNodeClick(event.currentTarget.dataset.nodeId));
+    html.find("[data-action='start']").on("click", () => this.startRun());
     html.find("[data-action='abort']").on("click", () => this.abort());
-    html.find("[data-action='restart']").on("click", () => this.restart());
     this.syncDom();
   }
 
   async render(force, options) {
     const rendered = await super.render(force, options);
-    if (this.state.isRunning) this.startTimer();
+    if (this.state.hasStarted && this.state.isRunning) this.startTimer();
     return rendered;
   }
 
@@ -137,8 +140,17 @@ export class NodeIntrusionApp extends LegacyApplication {
     return this.graph.nodes.find((node) => node.id === this.state.currentNodeId) ?? this.graph.nodes[0];
   }
 
+  startRun() {
+    if (this.state.hasStarted || this.state.result) return;
+    this.state.hasStarted = true;
+    this.state.isRunning = true;
+    this.startedAt = performance.now();
+    this.startTimer();
+    this.render(false);
+  }
+
   handleNodeClick(nodeId) {
-    if (!this.state.isRunning) return;
+    if (!this.state.hasStarted || !this.state.isRunning) return;
     const current = this.getCurrentNode();
     const node = this.graph.nodes.find((candidate) => candidate.id === nodeId);
     if (!node) return;
@@ -158,6 +170,13 @@ export class NodeIntrusionApp extends LegacyApplication {
 
     this.state.visitedNodeIds.add(nodeId);
     this.state.traversedEdgeIds.add(routeKey);
+    this.state.movement = {
+      fromX: current.x,
+      fromY: current.y,
+      toX: node.x,
+      toY: node.y,
+      path: `M ${current.x} ${current.y} L ${node.x} ${node.y}`
+    };
     node.visited = true;
     node.revealed = true;
 
@@ -202,31 +221,13 @@ export class NodeIntrusionApp extends LegacyApplication {
     this.render(false);
   }
 
-  restart() {
-    this.stopTimer();
-    this.graph = generateIntrusionGraph(this.profile, `${this.seed}:${Date.now()}`);
-    this.state = {
-      currentNodeId: this.graph.startNodeId,
-      visitedNodeIds: new Set([this.graph.startNodeId]),
-      traversedEdgeIds: new Set(),
-      blockedEdgeIds: new Map(),
-      deadNodeIds: new Set(),
-      mistakes: 0,
-      traceProgress: 0,
-      isRunning: true,
-      result: null
-    };
-    this.resultMessage = null;
-    this.startedAt = performance.now();
-    this.render(false);
-  }
-
   startTimer() {
     if (this.timer) return;
+    if (!this.state.hasStarted || !this.startedAt) return;
     const multiplier = Number(game.settings.get(MODULE_ID, "traceDurationMultiplier") ?? 1) || 1;
     const duration = Math.max(5, this.profile.traceDurationSeconds * multiplier);
     this.timer = window.setInterval(() => {
-      if (!this.state.isRunning) return;
+      if (!this.state.hasStarted || !this.state.isRunning) return;
       const elapsedSeconds = (performance.now() - this.startedAt) / 1000;
       this.state.traceProgress = clamp((elapsedSeconds / duration) * 100, 0, 100);
       this.syncDom();
@@ -245,7 +246,7 @@ export class NodeIntrusionApp extends LegacyApplication {
   }
 
   async finish(result, message, { close = false } = {}) {
-    if (!this.state.isRunning && this.state.result) return;
+    if (this.state.result) return;
     this.state.isRunning = false;
     this.state.result = result;
     this.stopTimer();

@@ -264,6 +264,121 @@
   .bounty-board-window,
   .bounty-editor-window,
   .csi-toolkit,
+  .galaxy-map,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-app,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) .window-resizable-handle {
+  right: 8px;
+  bottom: 8px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--hs-line);
+  border-radius: 5px;
+  background: rgba(2, 13, 24, 0.9);
+  color: var(--hs-cyan);
+  box-shadow: var(--hs-glow-cyan);
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-app,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) .window-resizable-handle > * {
+  display: none;
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-app,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) .window-resizable-handle::before {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .holocall-app,
+  .holocall-composer-app,
+  .holocall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) .window-resizable-handle::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 8px;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.72;
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
   .galaxy-map-framework,
   .gmf-crud-dialog,
   .holocall-app,
