@@ -848,8 +848,6 @@ function getTokenSceneBounds(token) {
 function shouldDrawToken(token) {
   if (!token?.document) return false;
   if (token.document.hidden) return false;
-  if (token.visible === false || token.renderable === false) return false;
-  if (token.isVisible === false) return false;
   return true;
 }
 

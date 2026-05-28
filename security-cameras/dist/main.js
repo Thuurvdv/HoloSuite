@@ -24,12 +24,12 @@ function We(e, t = {}) {
     }
   };
 }
-const ne = /* @__PURE__ */ new Set(["online", "offline", "corrupted", "restricted"]), ie = /* @__PURE__ */ new Set(["live", "image"]), V = /* @__PURE__ */ new Set(["window", "picture-in-picture"]), P = 1200, k = 675, Pe = [
+const ne = /* @__PURE__ */ new Set(["online", "offline", "corrupted", "restricted"]), ie = /* @__PURE__ */ new Set(["live", "image"]), q = /* @__PURE__ */ new Set(["window", "picture-in-picture"]), k = 1200, P = 675, ke = [
   { value: "online", label: "Online" },
   { value: "offline", label: "Offline" },
   { value: "corrupted", label: "Corrupted" },
   { value: "restricted", label: "Restricted" }
-], ke = [
+], Pe = [
   { value: "window", label: "Window" },
   { value: "picture-in-picture", label: "Picture-in-Picture" }
 ], Xe = [
@@ -47,8 +47,8 @@ const ne = /* @__PURE__ */ new Set(["online", "offline", "corrupted", "restricte
   regionId: "",
   regionX: null,
   regionY: null,
-  regionWidth: P,
-  regionHeight: k,
+  regionWidth: k,
+  regionHeight: P,
   notes: ""
 };
 function R(e, t, n) {
@@ -68,8 +68,8 @@ function ae(e) {
   return e && typeof e == "object" ? e : {};
 }
 function B(e = {}, t = {}) {
-  var d;
-  const n = ae(e), i = t.preserveId === !0, a = String(n.id ?? "").trim(), r = i ? a : a || ((d = t.createId) == null ? void 0 : d.call(t)) || "", s = R(n.feedSource, ie, p.feedSource), o = R(n.status, ne, p.status), u = R(n.displayMode, V, p.displayMode);
+  var l;
+  const n = ae(e), i = t.preserveId === !0, a = String(n.id ?? "").trim(), r = i ? a : a || ((l = t.createId) == null ? void 0 : l.call(t)) || "", s = R(n.feedSource, ie, p.feedSource), o = R(n.status, ne, p.status), u = R(n.displayMode, q, p.displayMode);
   return {
     ...p,
     id: r,
@@ -83,8 +83,8 @@ function B(e = {}, t = {}) {
     regionId: String(n.regionId ?? "").trim(),
     regionX: b(n.regionX),
     regionY: b(n.regionY),
-    regionWidth: C(n.regionWidth, P),
-    regionHeight: C(n.regionHeight, k),
+    regionWidth: C(n.regionWidth, k),
+    regionHeight: C(n.regionHeight, P),
     notes: String(n.notes ?? "").trim()
   };
 }
@@ -93,7 +93,7 @@ function Ue(e = {}, t = {}) {
     preserveId: t.requireId === !0,
     createId: t.createId
   }), a = [], r = String(n.feedSource ?? p.feedSource).trim(), s = String(n.status ?? p.status).trim(), o = String(n.displayMode ?? p.displayMode).trim();
-  return t.requireId && !i.id && a.push("Camera id is required."), typeof n.name == "string" && !n.name.trim() && a.push("Camera name is required."), ie.has(r) || a.push(`Invalid feed source: ${r}`), ne.has(s) || a.push(`Invalid status: ${s}`), V.has(o) || a.push(`Invalid display mode: ${o}`), {
+  return t.requireId && !i.id && a.push("Camera id is required."), typeof n.name == "string" && !n.name.trim() && a.push("Camera name is required."), ie.has(r) || a.push(`Invalid feed source: ${r}`), ne.has(s) || a.push(`Invalid status: ${s}`), q.has(o) || a.push(`Invalid display mode: ${o}`), {
     ok: a.length === 0,
     camera: B(i, { createId: t.createId }),
     errors: a
@@ -108,12 +108,12 @@ function Ye(e = {}) {
     const o = [], u = [];
     for (let M = 0; M < n.length; M += 2)
       o.push(Number(n[M])), u.push(Number(n[M + 1]));
-    const d = Math.min(...o), g = Math.min(...u), l = Math.max(...o), y = Math.max(...u);
-    if ([d, g, l, y].every(Number.isFinite))
+    const l = Math.min(...o), g = Math.min(...u), d = Math.max(...o), y = Math.max(...u);
+    if ([l, g, d, y].every(Number.isFinite))
       return {
-        x: d,
+        x: l,
         y: g,
-        width: l - d,
+        width: d - l,
         height: y - g
       };
   }
@@ -132,7 +132,7 @@ function Be(e) {
   };
 }
 function G(e) {
-  const t = re(e), n = C(t.width, P), i = C(t.height, k);
+  const t = re(e), n = C(t.width, k), i = C(t.height, P);
   return !n || !i ? null : {
     regionX: b(t.x) ?? 0,
     regionY: b(t.y) ?? 0,
@@ -172,7 +172,7 @@ function oe(e, t) {
   const n = Math.max(0, Math.min(t.width - 1, Math.round(e.sx))), i = Math.max(0, Math.min(t.height - 1, Math.round(e.sy))), a = Math.max(1, Math.min(t.width - n, Math.round(e.sw))), r = Math.max(1, Math.min(t.height - i, Math.round(e.sh)));
   return { sx: n, sy: i, sw: a, sh: r };
 }
-function Ve(e, t, n) {
+function qe(e, t, n) {
   if (!se(t)) return O(e);
   const i = e.width / n.width, a = e.height / n.height;
   return {
@@ -189,7 +189,7 @@ function ce(e, t) {
     height: Math.max(1, Math.round(e.sh * n))
   };
 }
-function qe(e, t = 100) {
+function Ve(e, t = 100) {
   if (!e) return null;
   const n = b(e.x), i = b(e.y);
   return !Number.isFinite(n) || !Number.isFinite(i) ? null : {
@@ -210,10 +210,10 @@ function Je(e, t, n) {
     dh: e.height / t.height * n.height
   };
 }
-const h = "security-cameras", ue = `module.${h}`, le = We(h, {
+const h = "security-cameras", ue = `module.${h}`, de = We(h, {
   socketName: ue,
   title: "Security Cameras"
-}), de = `modules/${h}/templates/monitor.hbs`, me = `modules/${h}/templates/feed.hbs`, Ke = 1250, he = 960;
+}), le = `modules/${h}/templates/monitor.hbs`, me = `modules/${h}/templates/feed.hbs`, Ke = 1250, he = 960;
 let f = null, w = null, m = "", S = "";
 const U = /* @__PURE__ */ new Map();
 function E() {
@@ -233,7 +233,7 @@ function c(e) {
 function v(e = {}, t = {}) {
   return B(e, { ...t, createId: E });
 }
-function q(e = {}, t = {}) {
+function V(e = {}, t = {}) {
   return Ue(e, { ...t, createId: E });
 }
 function Qe(e) {
@@ -287,17 +287,17 @@ function nt(e = "", t = "") {
   return ((a = (i = n == null ? void 0 : n.regions) == null ? void 0 : i.get) == null ? void 0 : a.call(i, e)) ?? null;
 }
 function it(e) {
-  var s, o, u, d;
+  var s, o, u, l;
   const t = (e == null ? void 0 : e.object) ?? ((u = (o = (s = canvas == null ? void 0 : canvas.regions) == null ? void 0 : s.placeables) == null ? void 0 : o.find) == null ? void 0 : u.call(o, (g) => {
-    var l;
-    return ((l = g.document) == null ? void 0 : l.id) === (e == null ? void 0 : e.id);
+    var d;
+    return ((d = g.document) == null ? void 0 : d.id) === (e == null ? void 0 : e.id);
   })), n = t == null ? void 0 : t.bounds;
   if (n != null && n.width && (n != null && n.height))
     return G(n);
   const i = e == null ? void 0 : e.bounds;
   if (i != null && i.width && (i != null && i.height))
     return G(i);
-  const a = ((d = e == null ? void 0 : e.toObject) == null ? void 0 : d.call(e)) ?? e, r = Array.isArray(e == null ? void 0 : e.shapes) ? e.shapes : Array.isArray(a == null ? void 0 : a.shapes) ? a.shapes : [];
+  const a = ((l = e == null ? void 0 : e.toObject) == null ? void 0 : l.call(e)) ?? e, r = Array.isArray(e == null ? void 0 : e.shapes) ? e.shapes : Array.isArray(a == null ? void 0 : a.shapes) ? a.shapes : [];
   return Ge(r);
 }
 function N(e) {
@@ -371,12 +371,12 @@ function I(e = "manage security cameras") {
   return (t = game.user) != null && t.isGM ? !0 : ((i = (n = ui.notifications) == null ? void 0 : n.warn) == null || i.call(n, `Only the GM can ${e}.`), !1);
 }
 function ye(e) {
-  return le.emit(e);
+  return de.emit(e);
 }
 async function at(e = {}) {
   var a, r;
   if (!I("register security cameras")) return null;
-  const t = q(e);
+  const t = V(e);
   if (!t.ok)
     return (r = (a = ui.notifications) == null ? void 0 : a.error) == null || r.call(a, t.errors.join(" ")), null;
   const n = N(t.camera), i = T(L());
@@ -446,16 +446,16 @@ function rt(e) {
   };
 }
 async function st(e) {
-  var s, o, u, d;
+  var s, o, u, l;
   if (!I("save security cameras")) return null;
-  const { originalId: t, camera: n } = rt(e), i = q(n);
+  const { originalId: t, camera: n } = rt(e), i = V(n);
   if (!i.ok)
     return (o = (s = ui.notifications) == null ? void 0 : s.error) == null || o.call(s, i.errors.join(" ")), null;
   const a = N(i.camera), r = T(L());
-  return t && t !== a.id && delete r[t], r[a.id] = a, m = a.id, S = a.id, await D(r), (d = (u = ui.notifications) == null ? void 0 : u.info) == null || d.call(u, "Security camera saved."), a;
+  return t && t !== a.id && delete r[t], r[a.id] = a, m = a.id, S = a.id, await D(r), (l = (u = ui.notifications) == null ? void 0 : u.info) == null || l.call(u, "Security camera saved."), a;
 }
 function ot(e = m) {
-  var n, i, a, r, s, o, u, d;
+  var n, i, a, r, s, o, u, l;
   const t = x(e);
   if (!Number.isFinite(t == null ? void 0 : t.regionX) || !Number.isFinite(t == null ? void 0 : t.regionY)) {
     (i = (n = ui.notifications) == null ? void 0 : n.warn) == null || i.call(n, "This camera does not have a region yet.");
@@ -465,7 +465,7 @@ function ot(e = m) {
     (s = (r = ui.notifications) == null ? void 0 : r.warn) == null || s.call(r, "Activate the camera's scene before panning to its region.");
     return;
   }
-  (d = canvas.animatePan) == null || d.call(canvas, {
+  (l = canvas.animatePan) == null || l.call(canvas, {
     x: t.regionX + t.regionWidth / 2,
     y: t.regionY + t.regionHeight / 2,
     scale: ((u = (o = canvas.stage) == null ? void 0 : o.scale) == null ? void 0 : u.x) ?? 1,
@@ -490,19 +490,19 @@ function Se() {
     sceneChoices: Ze(n.sceneId),
     regionChoices: tt(n.sceneId, n.regionId),
     feedSourceChoices: Y(Xe, n.feedSource),
-    statusChoices: Y(Pe, n.status),
-    displayModeChoices: Y(ke, n.displayMode),
+    statusChoices: Y(ke, n.status),
+    displayModeChoices: Y(Pe, n.displayMode),
     showStaticImageField: n.feedSource === "image",
     hasCameras: e.length > 0,
     isNewCamera: !n.id
   };
 }
 function be(e) {
-  const t = e.cameras.map((l) => `
-    <button type="button" class="security-camera-list-item ${l.isSelected ? "active" : ""}" data-security-camera-id="${c(l.id)}">
-      <span>${c(l.name)}</span>
-      <small>${c(l.location)}</small>
-      <i>${c(l.status)}</i>
+  const t = e.cameras.map((d) => `
+    <button type="button" class="security-camera-list-item ${d.isSelected ? "active" : ""}" data-security-camera-id="${c(d.id)}">
+      <span>${c(d.name)}</span>
+      <small>${c(d.location)}</small>
+      <i>${c(d.status)}</i>
     </button>
   `).join(""), n = e.selectedCamera, i = n ? `
     <section class="security-camera-monitor-preview ${c(n.statusClass)}">
@@ -525,7 +525,7 @@ function be(e) {
         <dt>Notes</dt><dd>${c(n.notes || "No notes recorded.")}</dd>
       </dl>
     </section>
-  ` : '<section class="security-camera-monitor-preview"><div class="security-camera-empty">No camera selected.</div></section>', a = e.editorCamera, r = e.sceneChoices.map((l) => `<option value="${c(l.id)}" ${l.selected ? "selected" : ""}>${c(l.name)}</option>`).join(""), s = e.regionChoices.map((l) => `<option value="${c(l.id)}" ${l.selected ? "selected" : ""}>${c(l.name)}</option>`).join(""), o = e.feedSourceChoices.map((l) => `<option value="${c(l.value)}" ${l.selected ? "selected" : ""}>${c(l.label)}</option>`).join(""), u = e.statusChoices.map((l) => `<option value="${c(l.value)}" ${l.selected ? "selected" : ""}>${c(l.label)}</option>`).join(""), d = e.displayModeChoices.map((l) => `<option value="${c(l.value)}" ${l.selected ? "selected" : ""}>${c(l.label)}</option>`).join(""), g = `<label data-security-camera-static-image-field ${e.showStaticImageField ? "" : "hidden"}>Static Image <span class="security-camera-path-row"><input type="text" name="image" value="${c(a.image)}"><button type="button" data-security-camera-action="browse-image">Browse</button></span></label>`;
+  ` : '<section class="security-camera-monitor-preview"><div class="security-camera-empty">No camera selected.</div></section>', a = e.editorCamera, r = e.sceneChoices.map((d) => `<option value="${c(d.id)}" ${d.selected ? "selected" : ""}>${c(d.name)}</option>`).join(""), s = e.regionChoices.map((d) => `<option value="${c(d.id)}" ${d.selected ? "selected" : ""}>${c(d.name)}</option>`).join(""), o = e.feedSourceChoices.map((d) => `<option value="${c(d.value)}" ${d.selected ? "selected" : ""}>${c(d.label)}</option>`).join(""), u = e.statusChoices.map((d) => `<option value="${c(d.value)}" ${d.selected ? "selected" : ""}>${c(d.label)}</option>`).join(""), l = e.displayModeChoices.map((d) => `<option value="${c(d.value)}" ${d.selected ? "selected" : ""}>${c(d.label)}</option>`).join(""), g = `<label data-security-camera-static-image-field ${e.showStaticImageField ? "" : "hidden"}>Static Image <span class="security-camera-path-row"><input type="text" name="image" value="${c(a.image)}"><button type="button" data-security-camera-action="browse-image">Browse</button></span></label>`;
   return `
     <section class="security-camera-manager">
       <aside class="security-camera-monitor-list">
@@ -549,7 +549,7 @@ function be(e) {
         <label>Feed Source <select name="feedSource">${o}</select></label>
         ${g}
         <label>Status <select name="status">${u}</select></label>
-        <label>Display Mode <select name="displayMode">${d}</select></label>
+        <label>Display Mode <select name="displayMode">${l}</select></label>
         <input type="hidden" name="regionX" value="${c(a.regionX ?? "")}">
         <input type="hidden" name="regionY" value="${c(a.regionY ?? "")}">
         <input type="hidden" name="regionWidth" value="${c(a.regionWidth ?? "")}">
@@ -657,17 +657,17 @@ function Me(e, t) {
 }
 function Ie(e) {
   var a, r;
-  const t = (e == null ? void 0 : e.camera) ?? {}, n = R(t.displayMode, V, p.displayMode), i = H(e);
+  const t = (e == null ? void 0 : e.camera) ?? {}, n = R(t.displayMode, q, p.displayMode), i = H(e);
   if (i == null || i.classList.toggle("security-camera-feed-display-window", n === "window"), i == null || i.classList.toggle("security-camera-feed-display-pip", n === "picture-in-picture"), n === "picture-in-picture") {
     const s = Number(t.regionWidth) && Number(t.regionHeight) ? Number(t.regionWidth) / Number(t.regionHeight) : 1.7777777777777777, o = Math.min(620, Math.max(360, window.innerWidth * 0.42)), u = Math.min(460, Math.max(260, window.innerHeight * 0.38));
-    let d = o, g = d / s;
-    g > u && (g = u, d = g * s);
-    const l = Math.round(g + 112);
+    let l = o, g = l / s;
+    g > u && (g = u, l = g * s);
+    const d = Math.round(g + 112);
     (a = e.setPosition) == null || a.call(e, {
-      left: Math.max(12, window.innerWidth - d - 24),
-      top: Math.max(12, window.innerHeight - l - 84),
-      width: Math.round(d),
-      height: l
+      left: Math.max(12, window.innerWidth - l - 24),
+      top: Math.max(12, window.innerHeight - d - 84),
+      width: Math.round(l),
+      height: d
     });
     return;
   }
@@ -687,7 +687,7 @@ function ut(e) {
   var t, n;
   return !(!(canvas != null && canvas.ready) || !((t = canvas == null ? void 0 : canvas.app) != null && t.renderer) || e.sceneId && ((n = canvas.scene) == null ? void 0 : n.id) !== e.sceneId);
 }
-function lt() {
+function dt() {
   var n, i, a, r, s;
   const e = (n = canvas == null ? void 0 : canvas.app) == null ? void 0 : n.renderer, t = [
     (i = canvas == null ? void 0 : canvas.app) == null ? void 0 : i.stage,
@@ -703,12 +703,12 @@ function lt() {
   }
   return (e == null ? void 0 : e.view) ?? ((s = canvas == null ? void 0 : canvas.app) == null ? void 0 : s.view) ?? null;
 }
-function dt(e, t) {
-  var s, o, u, d;
-  const n = N(v(t)), i = ((s = canvas.dimensions) == null ? void 0 : s.width) ?? ((o = canvas.scene) == null ? void 0 : o.width) ?? 0, a = ((u = canvas.dimensions) == null ? void 0 : u.height) ?? ((d = canvas.scene) == null ? void 0 : d.height) ?? 0;
+function lt(e, t) {
+  var s, o, u, l;
+  const n = N(v(t)), i = ((s = canvas.dimensions) == null ? void 0 : s.width) ?? ((o = canvas.scene) == null ? void 0 : o.width) ?? 0, a = ((u = canvas.dimensions) == null ? void 0 : u.height) ?? ((l = canvas.scene) == null ? void 0 : l.height) ?? 0;
   return je(e, n, i && a ? { width: i, height: a } : null, () => {
-    var g, l;
-    if ((l = (g = canvas.stage) == null ? void 0 : g.worldTransform) != null && l.apply && typeof PIXI < "u") {
+    var g, d;
+    if ((d = (g = canvas.stage) == null ? void 0 : g.worldTransform) != null && d.apply && typeof PIXI < "u") {
       const y = canvas.stage.worldTransform.apply(new PIXI.Point(n.regionX, n.regionY)), M = canvas.stage.worldTransform.apply(new PIXI.Point(n.regionX + n.regionWidth, n.regionY + n.regionHeight));
       return {
         sx: y.x,
@@ -726,8 +726,8 @@ function mt(e = "") {
   return {
     x: b((i == null ? void 0 : i.sceneX) ?? ((r = i == null ? void 0 : i.sceneRect) == null ? void 0 : r.x)) ?? 0,
     y: b((i == null ? void 0 : i.sceneY) ?? ((s = i == null ? void 0 : i.sceneRect) == null ? void 0 : s.y)) ?? 0,
-    width: C((i == null ? void 0 : i.sceneWidth) ?? ((o = i == null ? void 0 : i.sceneRect) == null ? void 0 : o.width) ?? (t == null ? void 0 : t.width), P),
-    height: C((i == null ? void 0 : i.sceneHeight) ?? ((u = i == null ? void 0 : i.sceneRect) == null ? void 0 : u.height) ?? (t == null ? void 0 : t.height), k)
+    width: C((i == null ? void 0 : i.sceneWidth) ?? ((o = i == null ? void 0 : i.sceneRect) == null ? void 0 : o.width) ?? (t == null ? void 0 : t.width), k),
+    height: C((i == null ? void 0 : i.sceneHeight) ?? ((u = i == null ? void 0 : i.sceneRect) == null ? void 0 : u.height) ?? (t == null ? void 0 : t.height), P)
   };
 }
 function ht(e, t) {
@@ -735,7 +735,7 @@ function ht(e, t) {
   if (!Number.isFinite(n.regionX) || !Number.isFinite(n.regionY))
     return O({ width: e.naturalWidth, height: e.naturalHeight });
   const i = mt(n.sceneId);
-  return Ve({ width: e.naturalWidth, height: e.naturalHeight }, n, i);
+  return qe({ width: e.naturalWidth, height: e.naturalHeight }, n, i);
 }
 function xe(e) {
   if (!e) return Promise.resolve(null);
@@ -761,17 +761,17 @@ async function gt(e = {}) {
   u.drawImage(i, a.sx, a.sy, a.sw, a.sh, 0, 0, r, s), await wt(u, e, a, r, s);
   try {
     return o.toDataURL("image/webp", 0.72);
-  } catch (d) {
-    return console.warn(`${h} | Scene background crop failed.`, d), "";
+  } catch (l) {
+    return console.warn(`${h} | Scene background crop failed.`, l), "";
   }
 }
 function ft(e) {
   var n, i;
   const t = ((n = canvas == null ? void 0 : canvas.dimensions) == null ? void 0 : n.size) ?? ((i = canvas == null ? void 0 : canvas.grid) == null ? void 0 : i.size) ?? 100;
-  return qe(e == null ? void 0 : e.document, t);
+  return Ve(e == null ? void 0 : e.document, t);
 }
 function yt(e) {
-  return !(!(e != null && e.document) || e.document.hidden || e.visible === !1 || e.renderable === !1 || e.isVisible === !1);
+  return !(!(e != null && e.document) || e.document.hidden);
 }
 function pt(e) {
   var t, n, i, a, r;
@@ -787,14 +787,14 @@ async function wt(e, t, n, i, a) {
     height: r.regionHeight
   };
   if ([s.x, s.y, s.width, s.height].every(Number.isFinite))
-    for (const d of ((u = canvas.tokens) == null ? void 0 : u.placeables) ?? []) {
-      if (!yt(d)) continue;
-      const g = ft(d);
+    for (const l of ((u = canvas.tokens) == null ? void 0 : u.placeables) ?? []) {
+      if (!yt(l)) continue;
+      const g = ft(l);
       if (!g || !ze(g, s)) continue;
-      const l = pt(d), y = await xe(l);
+      const d = pt(l), y = await xe(d);
       if (!(y != null && y.naturalWidth) || !(y != null && y.naturalHeight)) continue;
       const { dx: M, dy: Te, dw: De, dh: He } = Je(g, s, { width: i, height: a });
-      e.save(), e.globalAlpha = d.document.alpha ?? 1, e.drawImage(y, M, Te, De, He), e.restore();
+      e.save(), e.globalAlpha = l.document.alpha ?? 1, e.drawImage(y, M, Te, De, He), e.restore();
     }
 }
 function vt(e) {
@@ -808,9 +808,9 @@ function vt(e) {
   return r / (s * 3) < 3;
 }
 function St(e = {}) {
-  const t = lt();
+  const t = dt();
   if (!(t != null && t.width) || !(t != null && t.height)) return "";
-  const n = oe(dt(t, e), t), { width: i, height: a } = ce(n, he), r = document.createElement("canvas");
+  const n = oe(lt(t, e), t), { width: i, height: a } = ce(n, he), r = document.createElement("canvas");
   if (r.width = i, r.height = a, r.getContext("2d").drawImage(t, n.sx, n.sy, n.sw, n.sh, 0, 0, i, a), vt(r)) return "";
   try {
     return r.toDataURL("image/webp", 0.62);
@@ -841,7 +841,7 @@ class Ct extends Application {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "security-camera-monitor",
       title: "Security Camera Manager",
-      template: de,
+      template: le,
       classes: ["security-camera-window"],
       popOut: !0,
       resizable: !0,
@@ -957,7 +957,7 @@ function It() {
     }
   }), A(e, "PARTS", {
     main: {
-      template: de
+      template: le
     }
   }), e);
 }
@@ -1067,14 +1067,14 @@ async function Nt() {
 async function At(e) {
   var n, i;
   if (!e || typeof e != "object") return;
-  const t = le.isGMSender(e.gmUserId);
+  const t = de.isGMSender(e.gmUserId);
   if (e.action === "showFeed") {
     if ((n = game.user) != null && n.isGM) return;
     if (!t) {
       console.warn(`${h} | Ignoring camera feed socket message without a GM sender.`);
       return;
     }
-    const a = q(e.camera);
+    const a = V(e.camera);
     if (!a.ok) {
       console.warn(`${h} | Ignoring invalid socket camera payload.`, a.errors);
       return;
