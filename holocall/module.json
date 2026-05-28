@@ -16,7 +16,6 @@
     "dist/main.js"
   ],
   "styles": [
-    "styles/holosuite-tokens.css",
     "styles/holocall.css"
   ],
   "packs": [],
@@ -24,5 +23,13 @@
   "socket": true,
   "manifest": "",
   "download": "",
-  "readme": "README.md"
+  "readme": "README.md",
+  "relationships": {
+    "requires": [
+      {
+        "id": "holosuite-core",
+        "type": "module"
+      }
+    ]
+  }
 }

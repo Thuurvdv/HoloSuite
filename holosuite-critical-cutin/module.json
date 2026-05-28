@@ -16,7 +16,6 @@
     "dist/main.js"
   ],
   "styles": [
-    "styles/holosuite-tokens.css",
     "styles/critical-cutin.css"
   ],
   "packs": [],
@@ -26,5 +25,13 @@
   "manifest": "",
   "download": "",
   "license": "MIT",
-  "readme": "README.md"
+  "readme": "README.md",
+  "relationships": {
+    "requires": [
+      {
+        "id": "holosuite-core",
+        "type": "module"
+      }
+    ]
+  }
 }

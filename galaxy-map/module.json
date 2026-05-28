@@ -17,13 +17,20 @@
     "dist/main.js"
   ],
   "styles": [
-    "styles/holosuite-tokens.css",
     "styles/galaxy-map-framework.css"
   ],
   "url": "",
   "manifest": "",
   "download": "",
   "license": "MIT",
-  "readme": "README.md"
+  "readme": "README.md",
+  "relationships": {
+    "requires": [
+      {
+        "id": "holosuite-core",
+        "type": "module"
+      }
+    ]
+  }
 }
 

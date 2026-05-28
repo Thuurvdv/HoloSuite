@@ -17,7 +17,6 @@
     "dist/main.js"
   ],
   "styles": [
-    "styles/holosuite-tokens.css",
     "styles/hacking.css",
     "styles/node-intrusion.css",
     "styles/signal-alignment.css"
@@ -26,5 +25,13 @@
   "manifest": "",
   "download": "",
   "license": "MIT",
-  "readme": "README.md"
+  "readme": "README.md",
+  "relationships": {
+    "requires": [
+      {
+        "id": "holosuite-core",
+        "type": "module"
+      }
+    ]
+  }
 }
