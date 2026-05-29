@@ -1,16 +1,27 @@
 # HoloSuite
 
-HoloSuite is a Foundry VTT sci-fi module suite built around a free core module:
+HoloSuite is a collection of Foundry VTT modules built for sci-fi, cyberpunk, and space-opera tabletop games. Each module adds a specific tool to your sessions, and they all connect through a shared launcher called HoloSuite Core.
 
-- `holosuite-core` - GM-only in-world phone/tablet launcher and public registration API.
-- `holocall` - holographic calls and broadcasts.
-- `security-cameras` - camera feed manager and surveillance broadcast tools.
-- `csi-toolkit` - case files, evidence boards, and investigation tooling.
-- `galaxy-map` - cinematic star map and travel framework.
-- `pulse-scanner` - scan pulses, hidden targets, and scene signatures.
-- `shared` - TypeScript interfaces shared by suite packages.
+## The Modules
 
-## Local Development
+- **[HoloSuite Core](holosuite-core/README.md)** - A free in-world phone launcher that gives the GM one-click access to every installed HoloSuite app.
+- **[HoloCall](holocall/README.md)** - Holographic communication overlays with caller portraits, signal effects, ringtones, and player-to-GM calling.
+- **[Security Cameras](security-cameras/README.md)** - A surveillance camera system with live and static feeds, cyberpunk overlays, and GM-to-player broadcasting.
+- **[CSI Toolkit](csi-toolkit/README.md)** - Interactive case boards for investigations, with draggable evidence cards, connection lines, timelines, and collaborative player editing.
+- **[Galaxy Map](galaxy-map/README.md)** - Cinematic star maps with clickable systems, travel routes, ship animations, and discovery notifications.
+- **[Pulse Scanner](pulse-scanner/README.md)** - Scene-scanning gameplay with hidden targets, scan modes, pulse animations, and player scanner items.
+- **[Bounty Board](bounty-board/README.md)** - A bounty contract board for posting and browsing sci-fi jobs and contracts.
+- **[Critical Cut-In](holosuite-critical-cutin/README.md)** - Anime-style critical hit animations triggered by natural d20 rolls, with per-character images, sounds, and overlay text.
+- **[HoloSuite Hacking](holosuite-hacking/README.md)** - Interactive hacking minigames where skill checks determine puzzle difficulty. Includes Node Intrusion and Signal Alignment.
+
+## Getting Started
+
+1. Install Foundry VTT (v12 or v13).
+2. Copy the module folders you want into your Foundry `Data/modules` directory.
+3. Enable **HoloSuite Core** first, then enable whichever feature modules you want to use.
+4. Each feature module also works on its own if you prefer not to use the shared launcher.
+
+## For Developers
 
 Install dependencies from the repository root:
 
@@ -18,89 +29,19 @@ Install dependencies from the repository root:
 npm install
 ```
 
-Each Foundry module keeps authoring code in `src/` and Foundry-loaded output in `dist/`.
-The current refactor preserves the existing single-file module implementations while making `src/main.ts` the source of truth for future modularization.
-
-## Build
-
-Build every workspace:
+Build every module:
 
 ```bash
 npm run build
 ```
 
-Or build one module:
+Or build a single module:
 
 ```bash
 npm run build -w @holosuite/core
 npm run build -w @holosuite/holocall
 ```
 
-Each module's `module.json` points Foundry at `dist/main.js`.
+Each module keeps its source code in `src/` and the Foundry-loaded output in `dist/`. The `module.json` in each module points Foundry at `dist/main.js`.
 
-## Foundry Installation
-
-During development, symlink or copy these module folders into Foundry's `Data/modules` directory:
-
-```text
-holosuite-core
-holocall
-security-cameras
-csi-toolkit
-galaxy-map
-pulse-scanner
-```
-
-Enable `HoloSuite Core` first, then enable any feature modules you want. Feature modules still expose their legacy scene controls and APIs when the core module is not active.
-
-## Registering Apps With HoloSuite Core
-
-Feature modules register during `ready` by calling:
-
-```js
-game.modules.get("holosuite-core")?.api?.registerApp({
-  id: "example-module",
-  title: "Example App",
-  icon: "fa-solid fa-rocket",
-  premium: false,
-  description: "Short launcher description.",
-  open: () => game.modules.get("example-module").api.open()
-});
-```
-
-Registered app fields:
-
-- `id`: stable app id.
-- `title`: launcher label.
-- `icon`: Font Awesome class string.
-- `premium`: whether the app should be gated by the license service.
-- `featureId`: optional premium feature id; defaults to `id`.
-- `description`: optional launcher text.
-- `open`: callback invoked when the GM launches the app.
-
-The core API is available at:
-
-```js
-game.modules.get("holosuite-core").api
-game.holosuite
-```
-
-## License Model
-
-`holosuite-core` stores a license key in a world setting and exposes:
-
-```js
-await game.holosuite.checkLicense();
-game.holosuite.isFeatureAllowed("security-cameras");
-```
-
-The current checker is a local mock. It returns allowed premium feature ids from the `Mock Allowed Premium Features` setting, and treats license keys containing `supporter` or `valid` as allowing registered premium apps.
-
-Foundry modules run client-side, so this is not secure DRM. Treat licensing as supporter validation plus download/update access control. Future premium enforcement should happen outside the client, for example:
-
-- account-backed manifest/download endpoints,
-- signed release downloads,
-- private package access,
-- optional supporter status checks that only affect convenience UI.
-
-Do not put real secrets, private API keys, or irreversible entitlement logic in frontend module code.
+For local development, symlink or copy module folders into Foundry's `Data/modules` directory.

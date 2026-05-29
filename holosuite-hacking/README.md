@@ -1,138 +1,84 @@
 # HoloSuite Hacking
 
-HoloSuite Hacking is a standalone Foundry VTT module that hosts reusable hacking minigames. It currently includes:
+HoloSuite Hacking brings interactive hacking minigames to your Foundry VTT sessions. Instead of resolving a hack with a single dice roll, this module puts the player in a timed puzzle where their roll determines the difficulty. It currently includes two minigames, with more planned.
 
-- **Node Intrusion**: move through a connected node graph, avoid firewalls and dead ends, and reach the target before trace completes.
-- **Signal Alignment**: tune unstable signal channels into their target tolerance and hold lock until the transmission decrypts.
+## What Does It Do?
 
-The module is designed to work on its own now and register with **HoloSuite Core** later when available.
+- Adds playable hacking minigames that the GM can launch for any player during a session.
+- **Node Intrusion**: The player navigates through a connected network of nodes, avoiding firewalls and dead ends, trying to reach the target node before a trace timer runs out.
+- **Signal Alignment**: The player tunes unstable signal channels into their target range and holds them steady until a transmission decrypts.
+- Difficulty scales with the player's skill check. A good roll makes the puzzle easier (more time, more hints, fewer traps). A bad roll makes it harder.
+- The GM picks the minigame, selects a player and their character's hacking skill, sets a DC, and sends the challenge. The player's client rolls the skill check and launches the minigame based on the result.
+- Works on its own, and also shows up in the HoloSuite launcher if HoloSuite Core is installed.
 
-## Installation
+## How Difficulty Works
 
-Copy or symlink the `holosuite-hacking` folder into Foundry's `Data/modules` directory, then enable **HoloSuite Hacking** in your world.
+When the GM sends a hacking challenge, the player's skill check is compared to the DC. The margin of success or failure determines one of five difficulty profiles:
 
-The module metadata lives in `module.json` and loads:
+- **Critical Success** (beat the DC by 10 or more): Long trace timer, extra hints, fewer obstacles. The player is in total control.
+- **Strong Success** (beat the DC by 5 or more): Comfortable difficulty with a reasonable margin for error.
+- **Success** (met or beat the DC): Standard difficulty. The puzzle is fair but requires focus.
+- **Failure** (missed the DC): The puzzle is harder. Less time, fewer hints, more obstacles. Still playable, but tense.
+- **Critical Failure** (missed the DC by 10 or more): Maximum difficulty. Very little time, almost no hints, dense obstacles. It is meant to feel desperate.
 
-- `dist/main.js` (built from `src/`)
-- `styles/hacking.css`
-- `styles/node-intrusion.css`
-- `styles/signal-alignment.css`
+## Tutorial: Using HoloSuite Hacking as a DM
 
-## GM Launcher
+### Launching a Hack
 
-As a GM, use the scene-control terminal button to open the HoloSuite Hacking launcher. Choose:
+1. Enable **HoloSuite Hacking** in your Foundry world.
+2. Open the hacking launcher from the terminal button in the scene controls, or through the HoloSuite launcher.
+3. In the launcher, choose:
+   - The **minigame** (Node Intrusion or Signal Alignment).
+   - The **actor** who is doing the hacking.
+   - The **player** who owns that actor.
+   - The **skill** to roll (this comes from the actor's sheet).
+   - The **DC** for the check.
+4. Click **Send Challenge**. The selected player receives a prompt asking them to accept.
+5. When the player accepts, their client rolls the skill check and the minigame opens at the appropriate difficulty.
 
-- the minigame
-- the hacker actor
-- the player who owns that actor
-- the exact actor skill to roll
-- the DC
+### Watching the Result
 
-The selected player receives an accept prompt. When they accept, their client rolls the chosen skill against the DC and the roll total determines the minigame difficulty.
+- The minigame runs on the player's screen. You can watch over their shoulder or wait for the result.
+- When the player succeeds or fails, the result is reported so you can narrate the outcome.
 
-## Local Testing
+### Adjusting Settings
 
-Console smoke tests:
+- **Default Hacking DC**: Sets the default DC in the launcher so you do not have to type it every time.
+- **Default Trace Duration Multiplier**: Scales all trace timers up or down. Increase this to give players more breathing room, or decrease it for a faster pace.
+- **Visual Glitch Intensity**: A client-side setting (low, medium, or high) that controls how much visual noise the minigame displays. Players can set this to their own preference.
 
-```js
-game.modules.get("holosuite-hacking").api.testNodeIntrusion();
-game.modules.get("holosuite-hacking").api.testSignalAlignment();
-```
+### Tips
 
-## API Examples
+- Match the minigame to the fiction. Use Node Intrusion for breaking into a corporate server or bypassing a security grid. Use Signal Alignment for intercepting encrypted transmissions or tuning into a hidden frequency.
+- Set the DC based on the narrative stakes, not just the character's skill bonus. An important corporate mainframe should be harder than a vending machine terminal.
+- Use the difficulty scaling to your advantage. Even a failed check still lets the player attempt the puzzle, just at a much higher difficulty. That moment of tension can be more memorable than an automatic failure.
 
-Start a minigame by type:
+## Tutorial: Using HoloSuite Hacking as a Player
 
-```js
-game.modules.get("holosuite-hacking").api.startHack({
-  type: "node-intrusion",
-  rollTotal: 17,
-  dc: 15,
-  onSuccess: (result) => console.log("Hack succeeded", result),
-  onFailure: (result) => console.log("Hack failed", result)
-});
-```
+### Accepting a Challenge
 
-```js
-game.modules.get("holosuite-hacking").api.startHack({
-  type: "signal-alignment",
-  rollTotal: 17,
-  dc: 15,
-  onSuccess: (result) => console.log("Signal locked", result),
-  onFailure: (result) => console.log("Signal lost", result)
-});
-```
+1. When the GM sends you a hacking challenge, a prompt appears on your screen asking you to accept.
+2. Click **Accept**. Your client rolls the selected skill against the DC.
+3. The minigame opens, and the difficulty depends on how well you rolled.
 
-Convenience methods:
+### Playing Node Intrusion
 
-```js
-game.modules.get("holosuite-hacking").api.startNodeIntrusion({
-  rollTotal: 22,
-  dc: 15
-});
+1. You see a network of connected nodes. Your goal is to reach the target node before the trace timer fills up.
+2. Click on adjacent nodes to move through the network.
+3. Avoid firewall nodes (they cost you time or block your path) and dead ends.
+4. Reach the target node before the trace catches you to succeed.
+5. If the trace completes before you reach the target, the hack fails.
 
-game.modules.get("holosuite-hacking").api.startSignalAlignment({
-  rollTotal: 12,
-  dc: 15
-});
-```
+### Playing Signal Alignment
 
-The API is also exposed at:
+1. You see one or more signal channels with fluctuating values.
+2. Use the controls to tune each channel into its target range (shown as a highlighted zone).
+3. Hold all channels within their targets at the same time until the transmission decrypts.
+4. If you cannot hold lock long enough, the signal is lost and the hack fails.
 
-```js
-game.holosuiteHacking
-```
+### Things to Know
 
-## Settings
-
-The module registers these settings during `init`:
-
-- **Default Hacking DC**: used by the launcher and API calls that omit `dc`.
-- **Default Trace Duration Multiplier**: scales trace timers across minigames.
-- **Allow Players To Interact Directly**: reserved for future player-targeted play, default `false`.
-- **Visual Glitch Intensity**: client-side visual preference, `low`, `medium`, or `high`.
-
-## Difficulty
-
-Use `getDifficultyProfile(rollTotal, dc)` to map a roll into one of five profiles:
-
-- `critical_success`: roll is at least DC + 10
-- `strong_success`: roll is at least DC + 5
-- `success`: roll meets or beats DC
-- `failure_but_playable`: roll misses DC
-- `critical_failure`: roll is DC - 10 or worse
-
-Profiles return shared values such as trace duration, mistake limit, hints, and visual glitch intensity, plus minigame-specific values for Node Intrusion and Signal Alignment.
-
-## What Is Roll Total?
-
-`rollTotal` is the final number from the actor skill check after modifiers. Direct API calls can still provide it for automation and testing, but the GM launcher now asks for an actor skill instead and rolls that skill on the player's client after they accept.
-
-## Adding Another Minigame
-
-1. Create a folder under `src/minigames/<your-minigame>`.
-2. Keep puzzle generation/state helpers separate from the Application class.
-3. Add a template in `templates/`.
-4. Add styles in `styles/`.
-5. Import the Application in `src/init.js`.
-6. Register it with `registerMinigame({ id, title, icon, create })`.
-7. Add any profile-specific difficulty fields to `src/core/difficulty.js`.
-
-Minigames should stop intervals/timeouts in `close()` and should be launchable through `api.startHack({ type })`.
-
-## HoloSuite Core Notes
-
-This module does not require HoloSuite Core. If `holosuite-core` is active and exposes `registerApp`, HoloSuite Hacking registers a free app entry named **HoloSuite Hacking**. You can also force registration from the console:
-
-```js
-game.modules.get("holosuite-hacking").api.registerWithHoloSuite();
-```
-
-HoloSuite Core's current launcher is GM-only, so this app appears in the GM HoloSuite launcher. Players receive hacking prompts through the socket challenge flow, not through the HoloSuite app grid yet.
-
-TODO:
-
-- Replace the current standalone socket flow with a Core routing layer.
-- Add richer app manifests once HoloSuite Core defines them.
-- Add result reporting back to a GM control surface.
-- Keep supporter/licensing logic in HoloSuite Core metadata only. Do not add DRM here.
+- A better skill check gives you an easier puzzle. A worse check makes it harder, but you still get to play.
+- Even on a critical failure, you can attempt the puzzle. It will be very difficult, but not impossible.
+- The trace timer is always running. Work quickly but carefully.
+- You can adjust the **Visual Glitch Intensity** in module settings if the visual effects are too distracting or not intense enough for your taste.

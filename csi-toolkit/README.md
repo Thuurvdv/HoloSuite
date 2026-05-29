@@ -1,182 +1,76 @@
 # Crime Scene Investigation Toolkit
 
-Crime Scene Investigation Toolkit, or CSI Toolkit, is a system-agnostic Foundry VTT module for running mystery, detective, sci-fi police, noir, cyberpunk, horror, and investigation-heavy campaigns.
+The Crime Scene Investigation Toolkit (CSI Toolkit) is a system-agnostic Foundry VTT module for running investigation-driven games. Whether your campaign is a cyberpunk noir, a sci-fi police procedural, a horror mystery, or a classic detective story, this module gives you a visual case board where the GM and players can organize evidence, suspects, locations, and timelines together.
 
-It is intentionally local-only:
+## What Does It Do?
 
-- no AI generation
-- no external services
-- no backend
-- no database
-- cases are stored in Foundry world settings
+- Provides a full case management system where the GM creates and organizes investigation cases.
+- Each case gets its own interactive board where evidence, suspects, locations, and timeline entries appear as draggable cards.
+- Cards can be connected with visual lines to show relationships, and those lines can be colored and styled (solid, dashed, or dotted) to represent different types of links.
+- Players can open shared case boards, drag cards around, add their own connections, and contribute to the investigation in real time.
+- Two built-in visual themes are available: a sci-fi police database look and a classic noir corkboard look.
+- Cases can be imported and exported as JSON files, making it easy to share investigations between worlds or back them up.
+- A sample case called "The Glass Orchid" is included so you can see how everything works right away.
 
-## Public Beta Features
+## Tutorial: Using the CSI Toolkit as a DM
 
-- Left scene-controls button for GMs and players.
-- Case manager for case-level setup, imports, exports, and board theme.
-- Foundry FilePicker image selection.
-- Shared player-facing case boards.
-- Drag-and-drop board cards with saved layout per case.
-- Zoom and pan on the case board.
-- Visual SVG connection lines between cards.
-- Connection colors plus solid, dashed, or dotted line styles.
-- Board card editing from inside the board view.
-- Board card and connection deletion from inside the board view.
-- Type-based board dimming for temporarily de-emphasizing entities without deleting them.
-- Compact board toolbar and right-click board add menu.
-- Player case browser from the left scene controls.
-- Player board contributions for any case board they can open.
-- Click-to-connect cards from inside the board view.
-- Connection labels appear when hovering over board connection lines.
-- Timeline entries can be reordered from the timeline panel.
-- Live player board refresh through `game.socket`.
-- JSON import/export.
-- Bundled sample case: `samples/glass-orchid.json`.
-- Sci-fi police database and noir corkboard themes.
+### Creating Your First Case
 
-## Install
+1. Enable **Crime Scene Investigation Toolkit** in your Foundry world.
+2. Click the fingerprint button in the left scene controls to open the **Case Manager**.
+3. Click **New Case** to create a blank case. Give it a title, subtitle (like a case number), and a short description.
+4. Set the case visibility to **Players** if you want them to see it, or keep it GM-only until you are ready to reveal it.
+5. Choose a board theme: **Database** for a clean sci-fi look, or **Corkboard** for a noir feel.
 
-1. Copy this folder into your Foundry user data modules directory.
-2. The final folder name should be `csi-toolkit` so it matches the module id in `module.json`.
-3. Restart Foundry or return to Setup and refresh the module list.
-4. Enable **Crime Scene Investigation Toolkit** in your world.
+### Building the Case Board
 
-For local development, copy or symlink this folder to:
+1. Open your case and switch to the board view.
+2. Right-click on the board (or use the toolbar) to add new cards. Cards can be evidence, suspects, locations, or timeline entries.
+3. Each card has a title, type, description, image, status, and optional notes. Fill in what you need and leave the rest blank.
+4. Drag cards around the board to arrange them however makes sense for your investigation.
+5. To connect two cards, use the click-to-connect feature: click the connect action on one card, then click the card you want to link it to. A line appears between them.
+6. Edit connections to add labels (like "found at" or "last seen with"), choose a color, and pick a line style.
+7. Use board dimming to temporarily fade out card types you do not want to focus on, without deleting anything.
 
-```text
-FoundryVTT/Data/modules/csi-toolkit
-```
+### Running the Investigation During a Session
 
-## Files
+1. Share the case with players by setting its visibility to **Players**.
+2. Players can open the case from the fingerprint button in the scene controls. They see the same board and can drag cards, add connections, and edit cards.
+3. As new evidence comes in during the session, add cards to the board on the fly.
+4. Reorder timeline entries from the timeline panel to keep the chronology straight.
+5. Board changes sync to all connected players in real time.
 
-```text
-module.json
-scripts/csi-toolkit.js
-styles/csi-toolkit.css
-templates/case-manager.hbs
-templates/case-board.hbs
-templates/item-card.hbs
-samples/glass-orchid.json
-README.md
-```
+### Importing and Exporting
 
-## Public API
+- Click **Export** in the Case Manager to download a case as a JSON file.
+- Click **Import** to load a previously exported case.
+- Click **Sample Case** to install the included "Glass Orchid" demo and see a fully built-out investigation board.
 
-```js
-game.csiToolkit.openCaseBoard(caseId);
-game.csiToolkit.openCaseManager();
-game.csiToolkit.createCase(caseData);
-game.csiToolkit.getCases();
-game.csiToolkit.exportCase(caseId);
-game.csiToolkit.importCase(caseData);
-game.csiToolkit.importSampleCase();
-```
+### Tips
 
-## Testing In Foundry
+- Start a case with just a few cards and build it up as the players investigate. An empty board at the start of a session is more exciting than a pre-filled one.
+- Use connection line styles to encode meaning. For example, solid lines for confirmed links and dashed lines for theories.
+- Let players arrange the board their way. Sometimes their layout reveals connections you had not considered.
 
-1. Enable the module in a world.
-2. As GM, click the fingerprint button in the left scene controls or run:
+## Tutorial: Using the CSI Toolkit as a Player
 
-```js
-game.csiToolkit.openCaseManager();
-```
+### Opening a Case
 
-3. Click **Sample Case** to import the bundled case.
-4. Open the board.
-5. Drag cards around, zoom, and pan the board.
-6. Reload the board and confirm card positions persist.
-7. Connect as a non-GM player.
-8. Use the fingerprint button to open the case browser.
-9. Open the board and confirm cards, connections, and edits are shared.
+1. Click the fingerprint button in the left scene controls.
+2. A case browser opens showing all cases the GM has made visible to players.
+3. Click on a case to open its board.
 
-## Example Macros
+### Working the Board
 
-### Open Case Manager
+1. Drag cards around to organize the investigation the way you see it. Your layout changes are shared with everyone.
+2. Click on a card to read its details: description, image, notes, and status.
+3. Create connections between cards by using the connect action on a card and then clicking another card. Use this to map out your theories.
+4. Edit connections to add labels describing the relationship.
+5. Hover over connection lines to see their labels.
 
-```js
-game.csiToolkit.openCaseManager();
-```
+### Things to Know
 
-### Import Bundled Sample Case
-
-```js
-const c = await game.csiToolkit.importSampleCase();
-game.csiToolkit.openCaseBoard(c.id);
-```
-
-### Create A Minimal Case
-
-```js
-const c = await game.csiToolkit.createCase({
-  title: "The Locked Observatory",
-  subtitle: "Case 04-B",
-  status: "open",
-  description: "A professor is found dead under a sealed dome.",
-  visibility: "players",
-  evidence: [
-    {
-      id: "lens",
-      title: "Cracked Telescope Lens",
-      type: "physical",
-      description: "A hairline fracture crosses the inside face of the lens.",
-      image: "",
-      status: "relevant",
-      visibility: "players",
-      notes: "The fracture was caused from inside the mechanism."
-    }
-  ],
-  suspects: [],
-  locations: [],
-  timeline: [],
-  connections: []
-});
-
-game.csiToolkit.openCaseBoard(c.id);
-```
-
-### Open A Specific Case Board
-
-```js
-game.csiToolkit.openCaseBoard("case-id-here");
-```
-
-## Data Notes
-
-Cases still live in:
-
-```js
-game.settings.register("csi-toolkit", "cases", {
-  scope: "world",
-  config: false,
-  type: Object,
-  default: {}
-});
-```
-
-The beta adds a `boardLayout` object to each case:
-
-```json
-{
-  "theme": "database",
-  "view": { "x": 0, "y": 0, "scale": 1 },
-  "cards": {
-    "item-id": { "x": 120, "y": 180 }
-  }
-}
-```
-
-## Known Limitations
-
-- Connection lines are straight SVG lines, not a full graph editor.
-- Board layout is per case, not per user.
-- Import/export uses browser file download/upload.
-- Legacy `visibility` fields may exist in older case JSON, but they are no longer used to hide case files or cards.
-- There is no live scene scanning, OCR, AI, or external API integration.
-
-## Roadmap
-
-- Card grouping and board search.
-- Better connection labels drawn directly on the board.
-- Optional journal entry linking.
-- Import/export all cases as a campaign archive.
-- Permission presets for collaborative editing.
+- You can contribute to any case board the GM has opened for players.
+- Your board changes (card positions, new connections) are visible to the GM and other players right away.
+- Cards and connections can be edited or deleted from the board view.
+- The GM controls which cases are visible. If a case disappears from your browser, the GM has changed its visibility.

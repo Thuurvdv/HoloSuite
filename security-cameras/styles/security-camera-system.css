@@ -1,15 +1,5 @@
-:root {
-  --hs-bg: #05070d;
-  --hs-bg-deep: #03070b;
-  --hs-panel: rgba(8, 18, 28, 0.9);
-  --hs-line: rgba(105, 232, 255, 0.28);
-  --hs-cyan: #69e8ff;
-  --hs-green: #62ffb6;
-  --hs-magenta: #ff4d7d;
-  --hs-amber: #ffd166;
-  --hs-text: #e7faff;
-  --hs-muted: #8fb5bf;
-  --hs-font-mono: "Cascadia Mono", "Roboto Mono", "Consolas", monospace;
+.security-camera-window,
+.security-camera-feed-window {
   --security-camera-bg: var(--hs-bg-deep);
   --security-camera-panel: var(--hs-panel);
   --security-camera-blue: var(--hs-cyan);
@@ -20,10 +10,6 @@
   --security-camera-muted: var(--hs-muted);
   --security-camera-line: var(--hs-line);
   --security-camera-field: var(--hs-field);
-}
-
-.security-camera-window,
-.security-camera-feed-window {
   color: var(--security-camera-text);
 }
 
@@ -405,8 +391,9 @@
   padding-top: 10px;
 }
 
+/* PiP overlay — must stack above all other windows; high z-index is intentional */
 .security-camera-feed-display-pip {
-  z-index: 99999 !important;
+  z-index: 99999;
 }
 
 .security-camera-feed-display-pip .window-content {

@@ -1,19 +1,3 @@
-:root {
-  --hs-bg: #05070d;
-  --hs-bg-deep: #03070b;
-  --hs-panel: rgba(8, 18, 28, 0.9);
-  --hs-panel-strong: rgba(12, 30, 42, 0.96);
-  --hs-line: rgba(105, 232, 255, 0.28);
-  --hs-cyan: #69e8ff;
-  --hs-green: #62ffb6;
-  --hs-magenta: #ff4d7d;
-  --hs-amber: #ffd166;
-  --hs-text: #e7faff;
-  --hs-muted: #8fb5bf;
-  --hs-radius: 6px;
-  --hs-font-ui: "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif;
-}
-
 .csi-toolkit {
   --csi-bg: #071014;
   --csi-panel: var(--hs-panel);
@@ -132,7 +116,7 @@
   margin: 0 0 8px;
   padding: 12px;
   border: 1px solid rgba(95, 220, 255, 0.14);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: rgba(18, 40, 50, 0.56);
   color: var(--csi-text);
   text-align: left;
@@ -181,7 +165,7 @@
   margin-bottom: 18px;
   padding: 16px;
   border: 1px solid var(--csi-line);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: rgba(13, 27, 34, 0.96);
   backdrop-filter: blur(6px);
 }
@@ -195,7 +179,7 @@
 }
 
 .csi-kicker {
-  color: var(--csi-cyan) !important;
+  color: var(--csi-cyan);
   font-size: 11px;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -213,7 +197,7 @@
 .csi-toolkit button {
   min-height: 30px;
   border: 1px solid rgba(95, 220, 255, 0.28);
-  border-radius: 5px;
+  border-radius: var(--hs-radius);
   background: rgba(11, 24, 31, 0.92);
   color: var(--csi-text);
   cursor: pointer;
@@ -248,15 +232,15 @@
   padding: 0;
 }
 
-.csi-primary {
-  border-color: rgba(115, 230, 161, 0.48) !important;
-  background: rgba(34, 92, 65, 0.74) !important;
+.csi-toolkit button.csi-primary {
+  border-color: rgba(115, 230, 161, 0.48);
+  background: rgba(34, 92, 65, 0.74);
 }
 
-.csi-danger,
+.csi-toolkit button.csi-danger,
 .csi-editor-card header button[data-action="delete-item"] {
-  border-color: rgba(255, 76, 95, 0.48) !important;
-  background: rgba(90, 24, 32, 0.78) !important;
+  border-color: rgba(255, 76, 95, 0.48);
+  background: rgba(90, 24, 32, 0.78);
 }
 
 .csi-form-grid {
@@ -273,7 +257,7 @@
 .csi-manager-section {
   padding: 14px;
   border: 1px solid var(--csi-line);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: rgba(13, 27, 34, 0.78);
 }
 
@@ -291,7 +275,7 @@
 .csi-editor-card {
   padding: 12px;
   border: 1px solid rgba(95, 220, 255, 0.16);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: rgba(3, 9, 12, 0.46);
 }
 
@@ -332,15 +316,15 @@
   min-height: 58px;
   padding: 0 10px;
   border: 1px solid rgba(95, 220, 255, 0.14);
-  border-radius: 5px;
+  border-radius: var(--hs-radius);
 }
 
-.csi-toggle-field span {
-  margin-bottom: 0 !important;
+.csi-toolkit .csi-toggle-field label span {
+  margin-bottom: 0;
 }
 
-.csi-toggle-field input {
-  width: 18px !important;
+.csi-toolkit .csi-toggle-field input {
+  width: 18px;
   height: 18px;
 }
 
@@ -349,7 +333,7 @@
 .csi-toolkit textarea {
   width: 100%;
   border: 1px solid rgba(95, 220, 255, 0.18);
-  border-radius: 5px;
+  border-radius: var(--hs-radius);
   background: #061117;
   color: var(--csi-text);
 }
@@ -408,7 +392,7 @@
   width: 42px;
   height: 42px;
   border: 1px solid var(--csi-line);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   object-fit: cover;
 }
 
@@ -450,7 +434,7 @@
   width: 26px;
   height: 26px;
   border: 1px solid rgba(95, 220, 255, 0.28);
-  border-radius: 5px;
+  border-radius: var(--hs-radius);
   background: rgba(11, 24, 31, 0.92);
   color: var(--csi-text);
   cursor: pointer;
@@ -471,7 +455,7 @@
   min-width: 150px;
   padding: 8px;
   border: 1px solid var(--csi-line);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: rgba(5, 11, 15, 0.97);
   box-shadow: var(--csi-shadow);
 }
@@ -497,7 +481,7 @@
   min-height: 22px;
   padding: 3px 8px;
   border: 1px solid rgba(95, 220, 255, 0.24);
-  border-radius: 4px;
+  border-radius: var(--hs-radius);
   background: rgba(95, 220, 255, 0.08);
   color: var(--csi-text);
   font-size: 12px;
@@ -545,7 +529,7 @@
   margin-bottom: 14px;
   padding: 14px;
   border: 1px solid var(--csi-line);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: rgba(13, 27, 34, 0.78);
 }
 
@@ -599,7 +583,7 @@
   min-width: 156px;
   padding: 6px;
   border: 1px solid var(--csi-line);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: rgba(5, 11, 15, 0.97);
   box-shadow: var(--csi-shadow);
 }
@@ -649,11 +633,11 @@
   pointer-events: none;
 }
 
-.csi-connection-hit {
+.csi-connection-group .csi-connection-hit {
   cursor: pointer;
   opacity: 0;
   pointer-events: stroke;
-  stroke: transparent !important;
+  stroke: transparent;
   stroke-linecap: round;
   stroke-width: 18;
 }
@@ -677,98 +661,98 @@
 }
 
 .csi-connection-svg .csi-connection--link,
-.csi-connection--link {
+.csi-toolkit .csi-connection--link {
   stroke: rgba(95, 220, 255, 0.72);
-  border-color: rgba(95, 220, 255, 0.34) !important;
+  border-color: rgba(95, 220, 255, 0.34);
 }
 
 .csi-connection-svg .csi-connection--supports,
-.csi-connection--supports {
+.csi-toolkit .csi-connection--supports {
   stroke: rgba(115, 230, 161, 0.78);
-  border-color: rgba(115, 230, 161, 0.38) !important;
+  border-color: rgba(115, 230, 161, 0.38);
 }
 
 .csi-connection-svg .csi-connection--contradicts,
-.csi-connection--contradicts {
+.csi-toolkit .csi-connection--contradicts {
   stroke: rgba(255, 76, 95, 0.82);
-  border-color: rgba(255, 76, 95, 0.42) !important;
+  border-color: rgba(255, 76, 95, 0.42);
 }
 
 .csi-connection-svg .csi-connection--location,
-.csi-connection--location {
+.csi-toolkit .csi-connection--location {
   stroke: rgba(247, 198, 106, 0.78);
-  border-color: rgba(247, 198, 106, 0.42) !important;
+  border-color: rgba(247, 198, 106, 0.42);
 }
 
 .csi-connection-svg .csi-connection--timeline,
-.csi-connection--timeline {
+.csi-toolkit .csi-connection--timeline {
   stroke: rgba(209, 177, 255, 0.8);
-  border-color: rgba(209, 177, 255, 0.42) !important;
+  border-color: rgba(209, 177, 255, 0.42);
 }
 
 .csi-connection-svg .csi-connection--identity,
-.csi-connection--identity {
+.csi-toolkit .csi-connection--identity {
   stroke: rgba(255, 180, 112, 0.82);
-  border-color: rgba(255, 180, 112, 0.42) !important;
+  border-color: rgba(255, 180, 112, 0.42);
 }
 
 .csi-connection-svg .csi-connection-color--cyan,
-.csi-connection-color--cyan {
+.csi-toolkit .csi-connection-color--cyan {
   stroke: rgba(95, 220, 255, 0.82);
-  border-color: rgba(95, 220, 255, 0.44) !important;
+  border-color: rgba(95, 220, 255, 0.44);
   background: rgba(95, 220, 255, 0.12);
 }
 
 .csi-connection-svg .csi-connection-color--green,
-.csi-connection-color--green {
+.csi-toolkit .csi-connection-color--green {
   stroke: rgba(115, 230, 161, 0.86);
-  border-color: rgba(115, 230, 161, 0.48) !important;
+  border-color: rgba(115, 230, 161, 0.48);
   background: rgba(115, 230, 161, 0.12);
 }
 
 .csi-connection-svg .csi-connection-color--red,
-.csi-connection-color--red {
+.csi-toolkit .csi-connection-color--red {
   stroke: rgba(255, 76, 95, 0.9);
-  border-color: rgba(255, 76, 95, 0.52) !important;
+  border-color: rgba(255, 76, 95, 0.52);
   background: rgba(255, 76, 95, 0.12);
 }
 
 .csi-connection-svg .csi-connection-color--amber,
-.csi-connection-color--amber {
+.csi-toolkit .csi-connection-color--amber {
   stroke: rgba(247, 198, 106, 0.9);
-  border-color: rgba(247, 198, 106, 0.52) !important;
+  border-color: rgba(247, 198, 106, 0.52);
   background: rgba(247, 198, 106, 0.12);
 }
 
 .csi-connection-svg .csi-connection-color--violet,
-.csi-connection-color--violet {
+.csi-toolkit .csi-connection-color--violet {
   stroke: rgba(209, 177, 255, 0.9);
-  border-color: rgba(209, 177, 255, 0.52) !important;
+  border-color: rgba(209, 177, 255, 0.52);
   background: rgba(209, 177, 255, 0.12);
 }
 
 .csi-connection-svg .csi-connection-color--orange,
-.csi-connection-color--orange {
+.csi-toolkit .csi-connection-color--orange {
   stroke: rgba(255, 160, 80, 0.92);
-  border-color: rgba(255, 160, 80, 0.54) !important;
+  border-color: rgba(255, 160, 80, 0.54);
   background: rgba(255, 160, 80, 0.12);
 }
 
 .csi-connection-svg .csi-connection-color--white,
-.csi-connection-color--white {
+.csi-toolkit .csi-connection-color--white {
   stroke: rgba(244, 250, 255, 0.94);
-  border-color: rgba(244, 250, 255, 0.58) !important;
+  border-color: rgba(244, 250, 255, 0.58);
   background: rgba(244, 250, 255, 0.1);
 }
 
-.csi-connection-line--dashed {
+.csi-toolkit .csi-connection-line--dashed {
   stroke-dasharray: 18 12;
-  border-style: dashed !important;
+  border-style: dashed;
 }
 
-.csi-connection-line--dotted {
+.csi-toolkit .csi-connection-line--dotted {
   stroke-dasharray: 3 10;
-  border-style: dotted !important;
+  border-style: dotted;
 }
 
 .csi-board-card {
@@ -781,7 +765,7 @@
 .csi-card {
   min-width: 0;
   border: 1px solid rgba(95, 220, 255, 0.24);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: linear-gradient(180deg, rgba(18, 40, 50, 0.94), rgba(7, 16, 20, 0.96));
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
   overflow: hidden;
@@ -930,8 +914,8 @@
   white-space: pre-wrap;
 }
 
-.csi-card-subtitle {
-  color: var(--csi-muted) !important;
+.csi-card .csi-card-subtitle {
+  color: var(--csi-muted);
 }
 
 .csi-gm-notes {
@@ -1015,9 +999,9 @@
   color: var(--csi-text);
 }
 
-.csi-linked {
-  margin-top: 8px !important;
-  color: var(--csi-muted) !important;
+.csi-toolkit .csi-linked {
+  margin-top: 8px;
+  color: var(--csi-muted);
 }
 
 .csi-board-summary {
@@ -1029,7 +1013,7 @@
 .csi-board-summary span {
   padding: 10px;
   border: 1px solid rgba(95, 220, 255, 0.18);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: rgba(3, 9, 12, 0.5);
   color: var(--csi-muted);
 }
@@ -1080,7 +1064,7 @@
   width: 100%;
   padding: 10px;
   border: 1px solid var(--csi-line);
-  border-radius: 6px;
+  border-radius: var(--hs-radius);
   background: rgba(13, 27, 34, 0.78);
   color: var(--csi-text);
   text-align: left;
@@ -1097,7 +1081,7 @@
 .csi-browser-case-placeholder {
   width: 56px;
   height: 56px;
-  border-radius: 5px;
+  border-radius: var(--hs-radius);
 }
 
 .csi-browser-case img {
@@ -1155,8 +1139,8 @@
 }
 
 .csi-theme-noir .csi-card-topline,
-.csi-theme-noir .csi-card-subtitle {
-  color: #6f4e32 !important;
+.csi-theme-noir .csi-card .csi-card-subtitle {
+  color: #6f4e32;
 }
 
 .csi-theme-noir .csi-connection-svg line {

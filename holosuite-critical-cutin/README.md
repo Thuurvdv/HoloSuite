@@ -1,46 +1,60 @@
 # HoloSuite Critical Cut-In
 
-A HoloSuite-compatible Foundry VTT module that plays a legally distinct sci-fi anime critical cut-in when a qualifying natural d20 result is rolled.
+HoloSuite Critical Cut-In adds dramatic anime-style critical hit animations to your Foundry VTT game. When a player rolls a qualifying natural result on a d20, a full-screen cut-in flashes across every connected screen with the character's portrait, a custom sound effect, and an overlay label. It turns a lucky roll into a memorable cinematic moment.
 
-## Setup
+## What Does It Do?
 
-1. Install and enable `HoloSuite Critical Cut-In`.
-2. Open **Configure Settings > Module Settings > HoloSuite Critical Cut-In**.
-3. Set the default trigger threshold. The default is `20`; setting it to `19` triggers on natural `19` and `20`.
-4. Open **Configure Player Cut-Ins** to assign each player-owned actor a minimum roll, animation style, image, audio sample, overlay label, accent color, and enable state. Leave a row's minimum roll blank to use the default threshold. If no custom image is set, the actor portrait is used automatically.
-5. Use the **GM Cut-In** row for GM-authored rolls that do not map to a configured player actor.
+- Watches for d20 rolls and triggers a visual cut-in animation when the natural result meets or exceeds a configurable threshold.
+- Each player character can have their own custom cut-in setup: unique image, sound effect, animation style, overlay text, and accent color.
+- The GM can set a global threshold (for example, natural 20 only, or natural 19 and above) and also override the threshold per character.
+- A GM cut-in configuration covers rolls that do not belong to a specific player character.
+- The cut-in duration is adjustable so you can control how long the animation stays on screen.
+- Works on its own, and also registers in the HoloSuite launcher if HoloSuite Core is installed.
 
-The configuration panel also includes a global duration field in milliseconds. This controls how long the animation remains visible and how long the cut-in moment is paced around the audio sample.
+## Tutorial: Using Critical Cut-In as a DM
 
-Images and audio can live anywhere Foundry can serve them. The included folders are ready for your own assets:
+### Initial Setup
 
-```text
-modules/holosuite-critical-cutin/assets/images/
-modules/holosuite-critical-cutin/assets/sounds/
-```
+1. Enable **HoloSuite Critical Cut-In** in your Foundry world.
+2. Open **Configure Settings**, then go to **Module Settings** and find **HoloSuite Critical Cut-In**.
+3. Set the **default trigger threshold**. The default is 20, meaning only natural 20s trigger the animation. Setting it to 19 triggers on both natural 19 and 20.
+4. Click **Configure Player Cut-Ins** to open the per-character configuration panel.
 
-## HoloSuite
+### Configuring Player Cut-Ins
 
-If HoloSuite Core is active, this module registers a **Critical Cut-In** entry in the HoloSuite GM command panel. If HoloSuite is missing or disabled, the module still works through standard Foundry settings.
+1. Each player-owned actor in the world gets a row in the configuration panel.
+2. For each actor, you can set:
+   - **Enable/Disable**: Turn the cut-in on or off for that character.
+   - **Minimum Roll**: Set a custom threshold for this character. Leave it blank to use the global default.
+   - **Animation Style**: Choose how the cut-in animates onto the screen.
+   - **Image**: Pick a custom image for the cut-in. If you leave this blank, the actor's portrait is used automatically.
+   - **Audio**: Select a sound effect that plays during the cut-in.
+   - **Overlay Label**: Set the text that flashes on screen (like "CRITICAL HIT" or a character catchphrase).
+   - **Accent Color**: Choose a color that tints the cut-in border and effects.
+3. The **GM Cut-In** row at the top covers any rolls the GM makes that do not match a configured player actor.
+4. Adjust the **global duration** field to control how many milliseconds the animation stays visible.
 
-## Manual API
+### Using It in Play
 
-```js
-game.modules.get("holosuite-critical-cutin").api.playCutinForUser(game.user.id);
-game.modules.get("holosuite-critical-cutin").api.playCutinForActor("ACTOR_ID");
-game.modules.get("holosuite-critical-cutin").api.openConfig();
-```
+Once configured, the module runs automatically. Qualifying rolls trigger the cut-in with no extra input needed. You can also trigger a cut-in manually for testing or dramatic effect by running a macro.
 
-## Testing
+### Tips
 
-As GM, configure a player or actor, set the threshold to `20`, then roll:
+- Put character art into the `modules/holosuite-critical-cutin/assets/images/` folder and sound effects into `modules/holosuite-critical-cutin/assets/sounds/` for easy access from the file picker.
+- Keep cut-in durations short (1500 to 2500 milliseconds) so they feel punchy and do not interrupt the flow.
+- Use custom overlay labels to give each character a signature phrase.
 
-```js
-new Roll("1d20").toMessage({ speaker: ChatMessage.getSpeaker({ actor: canvas.tokens.controlled[0]?.actor }) });
-```
+## Tutorial: Using Critical Cut-In as a Player
 
-For a guaranteed manual visual test:
+### What You See
 
-```js
-game.modules.get("holosuite-critical-cutin").api.playCutinForUser(game.user.id, { overlayText: "HOLO STRIKE" });
-```
+1. Roll a d20 as part of normal gameplay (attacks, skill checks, saves, etc.).
+2. If your natural roll meets or exceeds the threshold your GM has set, a cut-in animation fires across the screen.
+3. Your character's portrait (or custom image), sound effect, and overlay text flash on screen for a moment before fading away.
+4. That is it. There is nothing you need to do. The module handles everything automatically based on your rolls.
+
+### Things to Know
+
+- The GM controls the trigger threshold and all visual settings. If you want a custom image or catchphrase for your character's cut-in, talk to your GM about setting it up.
+- The cut-in is purely visual and does not affect game mechanics. It is a celebration of a great roll, nothing more.
+- If your GM has not configured a cut-in for your character, the module will use your actor portrait as a fallback image.
