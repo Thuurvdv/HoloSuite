@@ -1,0 +1,138 @@
+name: Release Module
+
+on:
+  push:
+    tags:
+      - "*-v[0-9]*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      # Space-separated list of modules behind a Patreon paywall.
+      # These are packaged as workflow artifacts instead of public releases.
+      PROTECTED_MODULES: pulse-scanner
+
+    steps:
+      - name: Parse tag
+        id: meta
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          MODULE_ID="${TAG%-v*}"
+          VERSION="${TAG#*-v}"
+          echo "module_id=$MODULE_ID"  >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION"      >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"              >> "$GITHUB_OUTPUT"
+
+          if echo " $PROTECTED_MODULES " | grep -q " $MODULE_ID "; then
+            echo "is_protected=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "is_protected=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync shared styles
+        run: npm run sync:styles
+
+      - name: Build module
+        run: npm run build -w ${{ steps.meta.outputs.module_id }}
+
+      - name: Verify version match
+        run: |
+          MODULE_ID="${{ steps.meta.outputs.module_id }}"
+          TAG_VERSION="${{ steps.meta.outputs.version }}"
+          JSON_VERSION=$(jq -r '.version' "$MODULE_ID/module.json")
+          if [ "$TAG_VERSION" != "$JSON_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match module.json version ($JSON_VERSION)"
+            exit 1
+          fi
+
+      - name: Package module
+        run: |
+          MODULE_ID="${{ steps.meta.outputs.module_id }}"
+          TAG="${{ steps.meta.outputs.tag }}"
+          REPO="${{ github.repository }}"
+
+          mkdir -p "staging/$MODULE_ID"
+
+          # Foundry manifest URL: always points to the latest module.json for this module.
+          # Foundry download URL: points to this specific version's zip.
+          MANIFEST_URL="https://github.com/$REPO/releases/download/${MODULE_ID}-latest/module.json"
+          DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$MODULE_ID.zip"
+
+          jq \
+            --arg manifest "$MANIFEST_URL" \
+            --arg download "$DOWNLOAD_URL" \
+            '.manifest = $manifest | .download = $download' \
+            "$MODULE_ID/module.json" > "staging/$MODULE_ID/module.json"
+
+          cp -r "$MODULE_ID/dist" "staging/$MODULE_ID/dist"
+
+          for dir in styles templates audio samples; do
+            [ -d "$MODULE_ID/$dir" ] && cp -r "$MODULE_ID/$dir" "staging/$MODULE_ID/$dir"
+          done
+
+          for file in README.md LICENSE; do
+            [ -f "$MODULE_ID/$file" ] && cp "$MODULE_ID/$file" "staging/$MODULE_ID/$file"
+          done
+
+          cd staging
+          zip -r "../$MODULE_ID.zip" "$MODULE_ID"
+
+      # ── Public modules: GitHub Release ──────────────────────────────
+
+      - name: Create GitHub release
+        if: steps.meta.outputs.is_protected == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MODULE_ID="${{ steps.meta.outputs.module_id }}"
+          TAG="${{ steps.meta.outputs.tag }}"
+          VERSION="${{ steps.meta.outputs.version }}"
+
+          gh release create "$TAG" "$MODULE_ID.zip" \
+            --title "$MODULE_ID v$VERSION" \
+            --generate-notes
+
+      - name: Update latest manifest
+        if: steps.meta.outputs.is_protected == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MODULE_ID="${{ steps.meta.outputs.module_id }}"
+          LATEST_TAG="${MODULE_ID}-latest"
+          REPO="${{ github.repository }}"
+          NOTES="Auto-updated manifest for **$MODULE_ID**.
+          Install URL: \`https://github.com/$REPO/releases/download/$LATEST_TAG/module.json\`"
+
+          if gh release view "$LATEST_TAG" &>/dev/null; then
+            gh release upload "$LATEST_TAG" "staging/$MODULE_ID/module.json" --clobber
+          else
+            gh release create "$LATEST_TAG" "staging/$MODULE_ID/module.json" \
+              --title "$MODULE_ID – latest manifest" \
+              --notes "$NOTES" \
+              --latest=false
+          fi
+
+      # ── Protected (Patreon) modules: artifact only ──────────────────
+
+      - name: Upload protected module artifact
+        if: steps.meta.outputs.is_protected == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.module_id }}-v${{ steps.meta.outputs.version }}
+          path: |
+            ${{ steps.meta.outputs.module_id }}.zip
+            staging/${{ steps.meta.outputs.module_id }}/module.json
