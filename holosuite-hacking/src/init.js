@@ -184,13 +184,6 @@ function sendHackToPlayer(options = {}) {
       gmUserId: game.user.id
     }
   });
-  console.log(`${MODULE_ID} | Sent hacking challenge`, {
-    minigameType: payload.minigameType,
-    userId: payload.userId,
-    actorId: actor?.id ?? "",
-    skillLabel,
-    skillModifier
-  });
   ui.notifications?.info?.(`${getMinigameTitle(payload.minigameType)} sent${targetUser ? ` to ${targetUser.name}` : " to players"}.`);
   return true;
 }
@@ -246,11 +239,7 @@ async function startPlayerHack(payload) {
     onFailure: (result) => reportPlayerResult(payload, result)
   };
 
-  console.log(`${MODULE_ID} | Starting player minigame`, {
-    minigameType: payload.minigameType,
-    rollTotal: rollResult.total,
-    dc: payload.dc
-  });
+
 
   if (payload.minigameType === "signal-alignment") return api.startSignalAlignment(options);
   return api.startNodeIntrusion(options);
@@ -274,7 +263,6 @@ async function rollFallbackSkill(payload) {
 }
 
 function reportPlayerResult(payload, result) {
-  console.log(`${MODULE_ID} | ${getMinigameTitle(payload.minigameType)} ${result.result}`, result);
   game.socket?.emit?.(SOCKET_NAME, {
     type: "result-report",
     payload: {
@@ -294,7 +282,6 @@ function receiveResultReport(payload = {}) {
   const result = payload.result ?? {};
   if (result.result === "success") callbacks?.onSuccess?.(result);
   else callbacks?.onFailure?.(result);
-  console.log(`${MODULE_ID} | Player hacking result`, result);
 }
 
 function renderStartPrompt(payload, actorName, skillLabel) {
@@ -378,5 +365,4 @@ Hooks.once("ready", () => {
   tryRegisterWithHoloSuite();
   window.setTimeout(() => tryRegisterWithHoloSuite(), 500);
   console.log(`${MODULE_ID} | Ready. API available at game.modules.get("${MODULE_ID}").api`);
-  console.log(`${MODULE_ID} | Test with game.modules.get("${MODULE_ID}").api.testNodeIntrusion() or .testSignalAlignment()`);
 });

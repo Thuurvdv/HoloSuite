@@ -32,11 +32,6 @@ export function startMinigame(type, options = {}) {
 
   activeApps.get(definition.id)?.close?.();
   const app = definition.create(options);
-  console.log("holosuite-hacking | Creating minigame app", {
-    type: definition.id,
-    title: definition.title,
-    appClass: app.constructor?.name
-  });
   const originalClose = app.close.bind(app);
   app.close = async (...args) => {
     activeApps.delete(definition.id);

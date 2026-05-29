@@ -106,8 +106,8 @@ export class HackingLauncherApp extends LegacyApplication {
       skillLabel,
       skillModifier,
       dc,
-      onSuccess: (result) => console.log(`${MODULE_ID} | Test success callback`, result),
-      onFailure: (result) => console.log(`${MODULE_ID} | Test failure callback`, result)
+      onSuccess: () => {},
+      onFailure: () => {}
     });
     if (sent) this.close();
   }
@@ -138,8 +138,8 @@ export class HackingLauncherApp extends LegacyApplication {
       rollTotal,
       actorName: actor?.name ?? game.user?.name ?? "GM",
       userId: game.user?.id ?? "",
-      onSuccess: (result) => console.log(`${MODULE_ID} | GM test success`, result),
-      onFailure: (result) => console.log(`${MODULE_ID} | GM test failure`, result)
+      onSuccess: () => {},
+      onFailure: () => {}
     });
     this.close();
   }

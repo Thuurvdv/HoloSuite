@@ -2,7 +2,7 @@
   "id": "pulse-scanner",
   "title": "Pulse Scanner",
   "description": "A system-agnostic cinematic scanner pulse module for GM-placed scan targets in Foundry VTT.",
-  "version": "0.2.0-beta",
+  "version": "0.2.0",
   "socket": true,
   "authors": [
     {

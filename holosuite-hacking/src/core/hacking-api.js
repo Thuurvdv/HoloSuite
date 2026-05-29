@@ -39,14 +39,14 @@ export function createHackingApi({ moduleId, openLauncher }) {
     testNodeIntrusion: () => api.startNodeIntrusion({
       rollTotal: 17,
       dc: 15,
-      onSuccess: (result) => console.log(`${moduleId} | Node Intrusion success`, result),
-      onFailure: (result) => console.log(`${moduleId} | Node Intrusion failure`, result)
+      onSuccess: () => {},
+      onFailure: () => {}
     }),
     testSignalAlignment: () => api.startSignalAlignment({
       rollTotal: 17,
       dc: 15,
-      onSuccess: (result) => console.log(`${moduleId} | Signal Alignment success`, result),
-      onFailure: (result) => console.log(`${moduleId} | Signal Alignment failure`, result)
+      onSuccess: () => {},
+      onFailure: () => {}
     })
   };
 
