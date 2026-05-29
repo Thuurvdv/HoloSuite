@@ -24,7 +24,7 @@
   "url": "",
   "manifest": "",
   "download": "",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "readme": "README.md",
   "relationships": {
     "requires": [

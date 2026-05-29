@@ -23,6 +23,7 @@
   "socket": true,
   "manifest": "",
   "download": "",
+  "license": "GPL-3.0-or-later",
   "readme": "README.md",
   "relationships": {
     "requires": [
