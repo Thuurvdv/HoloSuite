@@ -66,17 +66,17 @@ export const MODE_META: Record<PulseScannerMode, { label: string; color: string;
   biological: { label: "Biological", color: "#8fd14f", icon: "fa-solid fa-dna", types: ["biological", "evidence"] }
 };
 
-export const TYPE_META: Record<PulseTargetType, { label: string; color: string; icon: string }> = {
-  breakable: { label: "Breakable Wall", color: "#ffb347", icon: "fa-solid fa-hammer" },
-  hidden: { label: "Hidden Passage", color: "#45d6ff", icon: "fa-solid fa-door-open" },
-  trap: { label: "Trap", color: "#ff4d6d", icon: "fa-solid fa-triangle-exclamation" },
-  magic: { label: "Magic Residue", color: "#c77dff", icon: "fa-solid fa-wand-sparkles" },
-  tech: { label: "Tech Signature", color: "#39ffb6", icon: "fa-solid fa-microchip" },
-  biological: { label: "Biological Trace", color: "#8fd14f", icon: "fa-solid fa-dna" },
-  radiation: { label: "Radiation Leak", color: "#f8f32b", icon: "fa-solid fa-radiation" },
-  evidence: { label: "Evidence", color: "#f7f7f2", icon: "fa-solid fa-magnifying-glass" },
-  loot: { label: "Loot Cache", color: "#ffd166", icon: "fa-solid fa-gem" },
-  custom: { label: "Custom", color: "#7df9ff", icon: "fa-solid fa-location-dot" }
+export const TYPE_META: Record<PulseTargetType, { label: string; color: string; icon: string; stat: string }> = {
+  breakable: { label: "Breakable Wall", color: "#ffb347", icon: "fa-solid fa-hammer", stat: "Integrity" },
+  hidden: { label: "Hidden Passage", color: "#45d6ff", icon: "fa-solid fa-door-open", stat: "Concealment" },
+  trap: { label: "Trap", color: "#ff4d6d", icon: "fa-solid fa-triangle-exclamation", stat: "Lethality" },
+  magic: { label: "Magic Residue", color: "#c77dff", icon: "fa-solid fa-wand-sparkles", stat: "Potency" },
+  tech: { label: "Tech Signature", color: "#39ffb6", icon: "fa-solid fa-microchip", stat: "Signal" },
+  biological: { label: "Biological Trace", color: "#8fd14f", icon: "fa-solid fa-dna", stat: "Vitality" },
+  loot: { label: "Loot Cache", color: "#ffd166", icon: "fa-solid fa-gem", stat: "Value" },
+  radiation: { label: "Radiation Leak", color: "#f8f32b", icon: "fa-solid fa-radiation", stat: "Exposure" },
+  evidence: { label: "Evidence", color: "#f7f7f2", icon: "fa-solid fa-magnifying-glass", stat: "Freshness" },
+  custom: { label: "Custom", color: "#7df9ff", icon: "fa-solid fa-location-dot", stat: "Intensity" }
 };
 
 export const COLOR_OPTIONS = [

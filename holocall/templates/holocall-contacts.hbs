@@ -91,4 +91,15 @@
 
     <button type="submit">Add Contact</button>
   </form>
+
+  <footer class="holocall-contacts-footer">
+    <label class="holocall-ringtone-select">
+      <span>Ringtone</span>
+      <select data-holocall-ringtone>
+        {{#each ringtoneChoices}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+  </footer>
 </section>

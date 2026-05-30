@@ -27,7 +27,7 @@
 
     <label>
       <span>Type</span>
-      <select name="type">
+      <select name="type" class="ps-type-select">
         {{#each typeOptions}}
           <option value="{{value}}" {{psOption value ../selectedTarget.type}}>{{label}}</option>
         {{/each}}
@@ -52,14 +52,10 @@
       </select>
     </label>
 
-    {{#if selectedTarget.isBreakable}}
-      <label class="span-2">
-        <span>Integrity <output class="ps-integrity-value">{{selectedTarget.integrity}}</output>%</span>
-        <input class="ps-integrity-slider" type="range" name="integrity" value="{{selectedTarget.integrity}}" min="0" max="100" step="1">
-      </label>
-    {{else}}
-      <input type="hidden" name="integrity" value="{{selectedTarget.integrity}}">
-    {{/if}}
+    <label class="span-2 ps-integrity-group" {{#unless (psEq selectedTarget.type "breakable")}}style="display:none"{{/unless}}>
+      <span>Integrity <output class="ps-integrity-value">{{selectedTarget.integrity}}</output>%</span>
+      <input class="ps-integrity-slider" type="range" name="integrity" value="{{selectedTarget.integrity}}" min="0" max="100" step="1">
+    </label>
 
     <label>
       <span>Color</span>

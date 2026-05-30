@@ -401,6 +401,13 @@ function bindContactsControls(app, html) {
     });
   });
 
+  const ringtoneSelect = element.querySelector("[data-holocall-ringtone]");
+  if (ringtoneSelect) {
+    ringtoneSelect.addEventListener("change", async (event) => {
+      await game.settings.set(MODULE_ID, "ringSound", event.currentTarget.value);
+    });
+  }
+
   element.querySelectorAll("[data-holocall-contact-action]").forEach((button) => {
     button.addEventListener("click", async (event) => {
       const action = event.currentTarget.dataset.holocallContactAction;
@@ -560,6 +567,16 @@ function renderContactsFallbackTemplate(data) {
         <label>Picture <input type="text" name="image" placeholder="icons/..."></label>
         <button type="submit">Add Contact</button>
       </form>
+      <footer class="holocall-contacts-footer">
+        <label class="holocall-ringtone-select">
+          <span>Ringtone</span>
+          <select data-holocall-ringtone>
+            ${(data.ringtoneChoices ?? []).map((choice) =>
+              `<option value="${escapeHTML(choice.value)}" ${choice.selected ? "selected" : ""}>${escapeHTML(choice.label)}</option>`
+            ).join("")}
+          </select>
+        </label>
+      </footer>
     </section>
   `;
 }
@@ -678,7 +695,9 @@ class HoloCallContactsV1 extends Application {
       hasGroupContacts: groupContacts.length > 0,
       activeTab: activeContactsTab,
       isPersonalTab: activeContactsTab !== "group",
-      isGroupTab: activeContactsTab === "group"
+      isGroupTab: activeContactsTab === "group",
+      ringtoneChoices: getRingtoneChoices(),
+      currentRingtone: getSoundPath()
     };
   }
 
@@ -856,7 +875,9 @@ function createContactsV2Class() {
         hasGroupContacts: groupContacts.length > 0,
         activeTab: activeContactsTab,
         isPersonalTab: activeContactsTab !== "group",
-        isGroupTab: activeContactsTab === "group"
+        isGroupTab: activeContactsTab === "group",
+        ringtoneChoices: getRingtoneChoices(),
+        currentRingtone: getSoundPath()
       };
     }
 
@@ -1131,6 +1152,15 @@ function getSoundPath() {
   return String(game.settings.get(MODULE_ID, "ringSound") ?? "").trim();
 }
 
+function getRingtoneChoices() {
+  const current = getSoundPath();
+  return Object.entries(RINGTONE_CHOICES).map(([value, label]) => ({
+    value,
+    label,
+    selected: value === current
+  }));
+}
+
 function stopRinging() {
   if (!ringingAudio) return;
   ringingAudio.pause();
@@ -1223,7 +1253,7 @@ function registerSettings() {
     name: "Incoming Call Ringtone",
     hint: "Ringtone played locally while a HoloCall is ringing. This is a client setting, so each user can choose their own ringtone.",
     scope: "client",
-    config: true,
+    config: false,
     type: String,
     default: "",
     choices: RINGTONE_CHOICES

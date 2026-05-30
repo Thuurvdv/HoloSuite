@@ -217,7 +217,7 @@ function renderLauncherHtml(): string {
   const apps = [...registeredApps.values()]
     .filter(isAppVisibleToCurrentUser)
     .sort((left, right) => left.title.localeCompare(right.title));
-  const status = licenseCache?.valid ? "Supporter link active" : "Free core mode";
+  const status = licenseCache?.valid ? "Supporter link active" : "";
   const deckLabel = isGM ? "GM Command Deck" : "Player Link";
   const screenTitle = isGM ? "Apps" : "Commlink";
   const emptyLabel = isGM
@@ -259,7 +259,7 @@ function renderLauncherHtml(): string {
       <div class="holosuite-phone-shell">
         <header class="holosuite-status-bar">
           <span>HoloSuite</span>
-          <span>${escapeHtml(status)}</span>
+          ${status ? `<span>${escapeHtml(status)}</span>` : ""}
         </header>
         <main class="holosuite-screen">
           <div class="holosuite-screen-heading">

@@ -168,6 +168,15 @@ import {
       type: String,
       default: ""
     });
+
+    game.settings.register(MODULE_ID, "scannerCharges", {
+      name: "Scanner Charges",
+      hint: "Maximum number of charges per Pulse Scanner item. Set to 0 for unlimited.",
+      scope: "world",
+      config: true,
+      type: Number,
+      default: 0
+    });
   }
 
   function registerHandlebarsHelpers() {
@@ -193,6 +202,8 @@ import {
       exportTargets,
       importTargets,
       usePulseScannerItem,
+      refreshScannerItem,
+      getScannerCharges,
       createPulseScannerItem,
       hasPulseScannerItem,
       ensureWorldPulseScannerItem,
@@ -277,19 +288,40 @@ import {
   function insertPulseScannerItemButton(root, item) {
     if (!root || root.querySelector(".pulse-scanner-item-use")) return;
 
+    const charges = getScannerCharges(item);
+    const chargesLabel = charges ? ` (${charges.current}/${charges.max})` : "";
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "pulse-scanner-item-actions";
+
     const button = document.createElement("button");
     button.type = "button";
     button.className = "pulse-scanner-item-use";
-    button.innerHTML = `<i class="fa-solid fa-wave-square"></i> Use Pulse Scanner`;
+    button.innerHTML = `<i class="fa-solid fa-wave-square"></i> Use Pulse Scanner${escapeHtml(chargesLabel)}`;
+    if (charges && charges.current <= 0) button.disabled = true;
     button.addEventListener("click", (event) => {
       event.preventDefault();
       usePulseScannerItem({ item }).catch((error) => console.error(`${MODULE_TITLE} | Item scan failed`, error));
     });
+    wrapper.appendChild(button);
+
+    if (charges) {
+      const refreshBtn = document.createElement("button");
+      refreshBtn.type = "button";
+      refreshBtn.className = "pulse-scanner-item-refresh";
+      refreshBtn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i>`;
+      refreshBtn.title = "Refresh scanner charges";
+      refreshBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        refreshScannerItem({ item }).catch((error) => console.error(`${MODULE_TITLE} | Refresh failed`, error));
+      });
+      wrapper.appendChild(refreshBtn);
+    }
 
     const content = root.querySelector(".window-content") ?? root;
     const sheetHeader = content.querySelector(".sheet-header, header.sheet-header, .item-header");
-    if (sheetHeader?.parentElement) sheetHeader.parentElement.insertBefore(button, sheetHeader.nextSibling);
-    else content.prepend(button);
+    if (sheetHeader?.parentElement) sheetHeader.parentElement.insertBefore(wrapper, sheetHeader.nextSibling);
+    else content.prepend(wrapper);
   }
 
   function getItemFromSheet(app) {
@@ -535,6 +567,16 @@ import {
       return [];
     }
 
+    const maxCharges = toNumber(game.settings.get(MODULE_ID, "scannerCharges"), 0);
+    if (maxCharges > 0 && item) {
+      const charges = toNumber(item.getFlag?.(MODULE_ID, "charges"), maxCharges);
+      if (charges <= 0) {
+        notifyScannerWarning("This scanner has no charges remaining. Refresh it to scan again.");
+        return [];
+      }
+      await item.setFlag?.(MODULE_ID, "charges", charges - 1);
+    }
+
     const itemFlags = item?.getFlag?.(MODULE_ID, "scan") ?? {};
     const itemRadius = itemFlags.radiusFeet != null
       ? feetToScenePixels(itemFlags.radiusFeet)
@@ -546,6 +588,34 @@ import {
       tokenId: token.id ?? token.document?.id,
       scannerItemId: item?.id ?? options.scannerItemId
     });
+  }
+
+  async function refreshScannerItem(options = {}) {
+    const token = resolveToken(options.tokenId) ?? resolveTokenForItem(options.item);
+    if (!token) {
+      notifyScannerWarning("Select a token with a Pulse Scanner item.");
+      return null;
+    }
+
+    const item = options.item ?? getPulseScannerItemById(token, options.scannerItemId) ?? getPulseScannerItemForToken(token);
+    if (!item) {
+      notifyScannerWarning("No Pulse Scanner item found on this token.");
+      return null;
+    }
+
+    const maxCharges = toNumber(game.settings.get(MODULE_ID, "scannerCharges"), 0);
+    if (maxCharges <= 0) return item;
+
+    await item.setFlag?.(MODULE_ID, "charges", maxCharges);
+    ui.notifications?.info?.(`${MODULE_TITLE}: scanner recharged to ${maxCharges} charge${maxCharges === 1 ? "" : "s"}.`);
+    return item;
+  }
+
+  function getScannerCharges(item) {
+    const maxCharges = toNumber(game.settings.get(MODULE_ID, "scannerCharges"), 0);
+    if (maxCharges <= 0) return null;
+    const current = toNumber(item?.getFlag?.(MODULE_ID, "charges"), maxCharges);
+    return { current, max: maxCharges };
   }
 
   async function createPulseScannerItem(target, options = {}) {
@@ -871,11 +941,15 @@ import {
   function renderScanEffect(payload = {}) {
     if (!canvas?.ready || payload.sceneId !== canvas.scene?.id) return;
 
+    const duration = Math.max(900, Number(payload.duration || 4200));
+
     const overlay = document.createElement("div");
     overlay.className = "pulse-scanner-overlay";
     overlay.dataset.cameraLocked = "true";
-    overlay.style.setProperty("--pulse-duration", `${Math.max(900, Number(payload.duration || 4200))}ms`);
+    overlay.style.setProperty("--pulse-duration", `${duration}ms`);
     document.body.appendChild(overlay);
+
+    lockCanvasControls(duration + 650);
 
     const originPoint = sceneToClient(payload.origin?.x ?? 0, payload.origin?.y ?? 0);
     const screenRadius = Math.max(16, sceneDistanceToScreen(Number(payload.radius || 0)));
@@ -918,22 +992,58 @@ import {
       }
     }
 
-    window.setTimeout(() => overlay.remove(), Math.max(900, Number(payload.duration || 4200)) + 650);
+    window.setTimeout(() => overlay.remove(), duration + 650);
+  }
+
+  function lockCanvasControls(durationMs) {
+    if (!canvas?.mouseInteractionManager) return;
+
+    const mim = canvas.mouseInteractionManager;
+    const savedCallbacks = {
+      dragLeftMove: mim.callbacks?.dragLeftMove,
+      dragRightMove: mim.callbacks?.dragRightMove,
+      longPress: mim.callbacks?.longPress
+    };
+    const noop = () => {};
+    if (mim.callbacks) {
+      mim.callbacks.dragLeftMove = noop;
+      mim.callbacks.dragRightMove = noop;
+      mim.callbacks.longPress = noop;
+    }
+
+    const view = canvas.app?.view ?? canvas.element?.[0] ?? document.querySelector("#board");
+    const blockWheel = (event) => { event.preventDefault(); event.stopPropagation(); };
+    if (view) view.addEventListener("wheel", blockWheel, { capture: true, passive: false });
+
+    window.setTimeout(() => {
+      if (mim.callbacks) {
+        mim.callbacks.dragLeftMove = savedCallbacks.dragLeftMove;
+        mim.callbacks.dragRightMove = savedCallbacks.dragRightMove;
+        mim.callbacks.longPress = savedCallbacks.longPress;
+      }
+      if (view) view.removeEventListener("wheel", blockWheel, { capture: true });
+    }, durationMs);
   }
 
   function buildTargetLabelHtml(target, showIntegrity) {
-    const icon = target.icon || TYPE_META[target.type]?.icon || TYPE_META.custom.icon;
     const safeLabel = escapeHtml(target.label || TYPE_META[target.type]?.label || "Signature");
-    const safeType = escapeHtml(TYPE_META[target.type]?.label || labelize(target.type));
+    const safeDescription = escapeHtml(target.description || "");
     const integrityValue = clamp(Number(target.integrity ?? 0), 0, 100);
-    const isStructural = target.type === "breakable";
-    const integrity = showIntegrity && isStructural
-      ? `<span class="pulse-scanner-integrity">${integrityValue}%</span>`
+    const isBreakable = target.type === "breakable";
+    const showType = target.type !== "custom";
+
+    const typeLabel = showType ? `<small>${escapeHtml(TYPE_META[target.type]?.label || "")}</small>` : "";
+
+    let integrityLine = "";
+    if (showIntegrity && isBreakable) {
+      integrityLine = `<small>Integrity</small><div class="pulse-scanner-integrity-bar"><span style="width: ${integrityValue}%;"></span></div>`;
+    }
+
+    const descriptionLine = safeDescription
+      ? `<small class="pulse-scanner-description">${safeDescription}</small>`
       : "";
-    const integrityBar = showIntegrity && isStructural
-      ? `<div class="pulse-scanner-integrity-bar"><span style="width: ${integrityValue}%;"></span></div><small>STRUCTURAL WEAKNESS: ${integrityValue}%</small>`
-      : `<small>${safeType}</small>`;
-    return `<span class="pulse-scanner-label-row"><i class="${escapeHtml(icon)}"></i><strong>${safeLabel}</strong>${integrity}</span>${integrityBar}`;
+
+    return `<span class="pulse-scanner-label-row"><strong>${safeLabel}</strong></span>${integrityLine}${descriptionLine}`;
   }
 
   function handleSocketMessage(message = {}) {
@@ -1027,13 +1137,15 @@ import {
 
     const rows = items.map((item, index) => {
       const config = getPulseScannerItemConfig(item);
+      const charges = getScannerCharges(item);
+      const chargesLabel = charges ? ` - ${charges.current}/${charges.max} charges` : "";
       const checked = index === 0 ? "checked" : "";
       return `
         <label class="pulse-scanner-choice">
           <input type="radio" name="pulseScannerItemId" value="${escapeHtml(item.id)}" ${checked}>
           <span>
             <strong>${escapeHtml(item.name)}</strong>
-            <small>${escapeHtml(labelize(config.mode))} / ${Number(config.radiusFeet)} ft</small>
+            <small>${escapeHtml(labelize(config.mode))} / ${Number(config.radiusFeet)} ft${escapeHtml(chargesLabel)}</small>
           </span>
         </label>
       `;
@@ -1226,7 +1338,6 @@ import {
       const viewTargets = targets.map((target) => ({
         ...target,
         isResolved: target.status === "resolved",
-        isBreakable: target.type === "breakable",
         regionName: target.regionId ? getRegionName(target.regionId, scene?.id) : ""
       }));
       const selectedTarget = this.draftTarget
@@ -1235,7 +1346,7 @@ import {
         ?? normalizeTarget({ sceneId: scene?.id });
       const selectedViewTarget = {
         ...selectedTarget,
-        isBreakable: selectedTarget.type === "breakable"
+        statLabel: TYPE_META[selectedTarget.type]?.stat ?? "Intensity"
       };
 
       if (!this.draftTarget && !this.selectedTargetId && targets[0]) this.selectedTargetId = targets[0].id;
@@ -1275,6 +1386,12 @@ import {
       });
       html.find(".ps-integrity-slider").on("input", (event) => {
         html.find(".ps-integrity-value").text(event.currentTarget.value);
+      });
+      html.find(".ps-type-select").on("change", (event) => {
+        const type = event.currentTarget.value;
+        const integrityGroup = html.find(".ps-integrity-group");
+        if (type === "breakable") integrityGroup.show();
+        else integrityGroup.hide();
       });
     }
 

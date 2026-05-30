@@ -1,8 +1,8 @@
-var Se = Object.defineProperty;
-var $e = (e, t, a) => t in e ? Se(e, t, { enumerable: !0, configurable: !0, writable: !0, value: a }) : e[t] = a;
-var A = (e, t, a) => $e(e, typeof t != "symbol" ? t + "" : t, a);
-const c = "holocall", S = `module.${c}`, ee = `modules/${c}/templates/holocall.hbs`, te = `modules/${c}/templates/holocall-composer.hbs`, ae = `modules/${c}/templates/holocall-contacts.hbs`;
-let o = null, f = null, d = null, h = "personal", y = null, M = null;
+var Te = Object.defineProperty;
+var De = (e, t, a) => t in e ? Te(e, t, { enumerable: !0, configurable: !0, writable: !0, value: a }) : e[t] = a;
+var A = (e, t, a) => De(e, typeof t != "symbol" ? t + "" : t, a);
+const c = "holocall", S = `module.${c}`, te = `modules/${c}/templates/holocall.hbs`, ae = `modules/${c}/templates/holocall-composer.hbs`, ne = `modules/${c}/templates/holocall-contacts.hbs`;
+let o = null, p = null, d = null, b = "personal", y = null, E = null;
 const m = {
   callerName: "UNKNOWN CALLER",
   subtitle: "Unidentified Signal",
@@ -17,17 +17,17 @@ const m = {
   canDecline: !0,
   allowBroadcast: !0,
   outgoing: !1
-}, Ae = /* @__PURE__ */ new Set(["standard", "emergency", "corrupted"]), Te = {
+}, Ee = /* @__PURE__ */ new Set(["standard", "emergency", "corrupted"]), oe = {
   "": "Silent",
   [`modules/${c}/audio/Ringtone1.ogg`]: "Ringtone 1",
   [`modules/${c}/audio/Ringtone2.ogg`]: "Ringtone 2",
   [`modules/${c}/audio/Ringtone3.ogg`]: "Ringtone 3"
 };
-function ne(e) {
+function le(e) {
   const t = Number(e);
   return Number.isNaN(t) ? m.signal : Math.min(100, Math.max(0, Math.round(t)));
 }
-function oe(e) {
+function re(e) {
   return String(e).split(/\s+/).filter(Boolean).slice(0, 2).map((t) => {
     var a;
     return (a = t[0]) == null ? void 0 : a.toUpperCase();
@@ -39,7 +39,7 @@ function u(e) {
   const t = document.createElement("div");
   return t.innerText = String(e), t.innerHTML;
 }
-function G() {
+function F() {
   var e;
   return (e = foundry == null ? void 0 : foundry.utils) != null && e.randomID ? foundry.utils.randomID() : crypto != null && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
@@ -48,13 +48,13 @@ function T(e = {}) {
   const t = {
     ...m,
     ...e,
-    id: String(e.id ?? G()),
+    id: String(e.id ?? F()),
     callerName: String(e.callerName ?? m.callerName),
     subtitle: String(e.subtitle ?? m.subtitle),
     image: String(e.image ?? m.image),
     message: String(e.message ?? m.message),
-    signal: ne(e.signal ?? m.signal),
-    variant: Ae.has(e.variant) ? e.variant : m.variant,
+    signal: le(e.signal ?? m.signal),
+    variant: Ee.has(e.variant) ? e.variant : m.variant,
     fullscreen: !!(e.fullscreen ?? m.fullscreen),
     ringing: e.ringing !== !1 && e.accepted !== !0,
     accepted: e.accepted === !0,
@@ -65,22 +65,22 @@ function T(e = {}) {
     callerUserId: String(e.callerUserId ?? ""),
     contactNumber: String(e.contactNumber ?? "")
   };
-  return t.initials = oe(t.callerName), t.showBroadcast = !!((a = game == null ? void 0 : game.user) != null && a.isGM && t.allowBroadcast), t.isStandard = t.variant === "standard", t.isEmergency = t.variant === "emergency", t.isCorrupted = t.variant === "corrupted", t.isIncoming = !t.accepted, t.kicker = t.outgoing ? "Outgoing HoloCall" : t.fullscreen ? "System-wide Broadcast" : "Incoming HoloCall", t;
+  return t.initials = re(t.callerName), t.showBroadcast = !!((a = game == null ? void 0 : game.user) != null && a.isGM && t.allowBroadcast), t.isStandard = t.variant === "standard", t.isEmergency = t.variant === "emergency", t.isCorrupted = t.variant === "corrupted", t.isIncoming = !t.accepted, t.kicker = t.outgoing ? "Outgoing HoloCall" : t.fullscreen ? "System-wide Broadcast" : "Incoming HoloCall", t;
 }
-function le() {
-  var e, t, a, n, l, r, i, s;
+function ie() {
+  var e, t, a, n, l, i, r, s;
   return T({
     callerName: ((e = o == null ? void 0 : o.callData) == null ? void 0 : e.callerName) ?? m.callerName,
     subtitle: ((t = o == null ? void 0 : o.callData) == null ? void 0 : t.subtitle) ?? m.subtitle,
     image: ((a = o == null ? void 0 : o.callData) == null ? void 0 : a.image) ?? "",
     message: ((n = o == null ? void 0 : o.callData) == null ? void 0 : n.message) ?? m.message,
     signal: ((l = o == null ? void 0 : o.callData) == null ? void 0 : l.signal) ?? game.settings.get(c, "defaultSignal"),
-    variant: ((r = o == null ? void 0 : o.callData) == null ? void 0 : r.variant) ?? "standard",
-    fullscreen: ((i = o == null ? void 0 : o.callData) == null ? void 0 : i.fullscreen) ?? !1,
+    variant: ((i = o == null ? void 0 : o.callData) == null ? void 0 : i.variant) ?? "standard",
+    fullscreen: ((r = o == null ? void 0 : o.callData) == null ? void 0 : r.fullscreen) ?? !1,
     ringing: ((s = o == null ? void 0 : o.callData) == null ? void 0 : s.ringing) ?? !0
   });
 }
-function re() {
+function ce() {
   var e;
   return (((e = game.actors) == null ? void 0 : e.contents) ?? []).map((t) => ({
     id: t.id,
@@ -90,77 +90,77 @@ function re() {
 }
 function v(e = {}) {
   return {
-    id: String(e.id ?? G()),
+    id: String(e.id ?? F()),
     name: String(e.name ?? "").trim(),
     number: String(e.number ?? "").trim(),
     image: String(e.image ?? e.img ?? "").trim(),
-    initials: oe(e.name)
+    initials: re(e.name)
   };
 }
-function k() {
+function R() {
   const e = game.settings.get(c, "contacts");
   return Array.isArray(e) ? e.map(v).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name)) : [];
 }
 function D() {
-  if (Array.isArray(M))
-    return M.map(v).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name));
+  if (Array.isArray(E))
+    return E.map(v).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name));
   const e = game.settings.get(c, "groupContacts");
   return Array.isArray(e) ? e.map(v).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name)) : [];
 }
-async function ie(e) {
+async function se(e) {
   await game.settings.set(c, "contacts", e.map(v));
 }
-async function P(e) {
-  M = e.map(v), await game.settings.set(c, "groupContacts", M), game.socket.emit(S, {
+async function _(e) {
+  E = e.map(v), await game.settings.set(c, "groupContacts", E), game.socket.emit(S, {
     action: "groupContactsChanged",
-    contacts: M
+    contacts: E
   });
 }
-async function De(e, t, a = "personal", n = "") {
-  var i, s, g, b, p, C;
+async function Me(e, t, a = "personal", n = "") {
+  var r, s, g, f, h, C;
   const l = v({ name: e, number: t, image: n });
   if (!l.name || !l.number) {
-    (s = (i = ui.notifications) == null ? void 0 : i.warn) == null || s.call(i, "Contact name and number are required.");
+    (s = (r = ui.notifications) == null ? void 0 : r.warn) == null || s.call(r, "Contact name and number are required.");
     return;
   }
   if (a === "group" && !game.user.isGM) {
-    if (!x()) {
-      (b = (g = ui.notifications) == null ? void 0 : g.warn) == null || b.call(g, "A GM must be connected to update group contacts.");
+    if (!U()) {
+      (f = (g = ui.notifications) == null ? void 0 : g.warn) == null || f.call(g, "A GM must be connected to update group contacts.");
       return;
     }
     game.socket.emit(S, {
       action: "groupContactAdd",
       contact: l
-    }), (C = (p = ui.notifications) == null ? void 0 : p.info) == null || C.call(p, "Group contact update sent to the GM.");
+    }), (C = (h = ui.notifications) == null ? void 0 : h.info) == null || C.call(h, "Group contact update sent to the GM.");
     return;
   }
-  const r = a === "group" ? D() : k();
-  r.push(l), a === "group" ? await P(r) : await ie(r), await H();
+  const i = a === "group" ? D() : R();
+  i.push(l), a === "group" ? await _(i) : await se(i), await k();
 }
-async function Me(e, t = "personal") {
-  var a, n, l, r;
+async function Le(e, t = "personal") {
+  var a, n, l, i;
   if (t === "group") {
     if (!game.user.isGM) {
-      if (!x()) {
+      if (!U()) {
         (n = (a = ui.notifications) == null ? void 0 : a.warn) == null || n.call(a, "A GM must be connected to update group contacts.");
         return;
       }
       game.socket.emit(S, {
         action: "groupContactRemove",
         contactId: e
-      }), (r = (l = ui.notifications) == null ? void 0 : l.info) == null || r.call(l, "Group contact removal sent to the GM.");
+      }), (i = (l = ui.notifications) == null ? void 0 : l.info) == null || i.call(l, "Group contact removal sent to the GM.");
       return;
     }
-    await P(D().filter((i) => i.id !== e));
+    await _(D().filter((r) => r.id !== e));
   } else
-    await ie(k().filter((i) => i.id !== e));
-  await H();
+    await se(R().filter((r) => r.id !== e));
+  await k();
 }
-function x() {
+function U() {
   var e;
   return ((e = game.users) == null ? void 0 : e.some((t) => t.isGM && t.active)) ?? !1;
 }
-function F(e = game.user) {
+function q(e = game.user) {
   if (e != null && e.isGM) return !0;
   let t = CONST.USER_ROLES.PLAYER;
   try {
@@ -170,38 +170,38 @@ function F(e = game.user) {
   }
   return Number((e == null ? void 0 : e.role) ?? 0) >= Number(t);
 }
-function U(e, t) {
+function B(e, t) {
   var a;
   return t != null && t[0] ? t[0] : t instanceof HTMLElement ? t : (a = e.element) != null && a[0] ? e.element[0] : e.element ?? null;
 }
-function ce(e, t) {
-  const a = U(e, t);
+function ue(e, t) {
+  const a = B(e, t);
   a && (a.classList.toggle("holocall-fullscreen", e.callData.fullscreen), a.classList.toggle("holocall-ringing", e.callData.ringing && !e.callData.accepted), a.classList.toggle("holocall-connected", e.callData.accepted), a.querySelectorAll("[data-holocall-action]").forEach((n) => {
     n.addEventListener("click", (l) => {
-      const r = l.currentTarget.dataset.holocallAction;
-      if (r === "accept") {
-        qe(e.callData.id);
+      const i = l.currentTarget.dataset.holocallAction;
+      if (i === "accept") {
+        Ve(e.callData.id);
         return;
       }
-      if (r === "broadcast") {
-        B({
+      if (i === "broadcast") {
+        j({
           ...e.callData,
           fullscreen: !0,
           ringing: !0
         });
         return;
       }
-      (r === "decline" || r === "end") && he(e.callData.id);
+      (i === "decline" || i === "end") && Ce(e.callData.id);
     });
   }));
 }
-function Ee(e) {
+function Ne(e) {
   var t;
   return (t = e == null ? void 0 : e.querySelector) == null ? void 0 : t.call(e, "form[data-holocall-composer]");
 }
-function K(e) {
-  var r;
-  const t = new FormData(e), a = (r = game.actors) == null ? void 0 : r.get(t.get("actorId")), n = String(t.get("image") ?? "").trim() || (a == null ? void 0 : a.img) || "", l = String(t.get("callerName") ?? "").trim() || (a == null ? void 0 : a.name) || "UNKNOWN CALLER";
+function J(e) {
+  var i;
+  const t = new FormData(e), a = (i = game.actors) == null ? void 0 : i.get(t.get("actorId")), n = String(t.get("image") ?? "").trim() || (a == null ? void 0 : a.img) || "", l = String(t.get("callerName") ?? "").trim() || (a == null ? void 0 : a.name) || "UNKNOWN CALLER";
   return T({
     callerName: l,
     subtitle: String(t.get("subtitle") ?? "").trim(),
@@ -213,91 +213,96 @@ function K(e) {
     ringing: t.get("ringing") === "on"
   });
 }
-function I(e) {
+function x(e) {
   var n, l;
   const t = (n = e == null ? void 0 : e.elements) == null ? void 0 : n.signal, a = (l = e == null ? void 0 : e.querySelector) == null ? void 0 : l.call(e, "[data-holocall-signal-output]");
-  !t || !a || (a.textContent = `${ne(t.value)}%`);
+  !t || !a || (a.textContent = `${le(t.value)}%`);
 }
-function se(e, t) {
-  var l, r;
-  const a = U(e, t), n = Ee(a);
-  !a || !n || (I(n), (l = n.elements.signal) == null || l.addEventListener("input", () => I(n)), (r = n.elements.actorId) == null || r.addEventListener("change", () => {
+function ge(e, t) {
+  var l, i;
+  const a = B(e, t), n = Ne(a);
+  !a || !n || (x(n), (l = n.elements.signal) == null || l.addEventListener("input", () => x(n)), (i = n.elements.actorId) == null || i.addEventListener("change", () => {
     var s;
-    const i = (s = game.actors) == null ? void 0 : s.get(n.elements.actorId.value);
-    i && (n.elements.callerName.value = i.name, n.elements.image.value = i.img ?? "");
-  }), n.addEventListener("submit", (i) => {
-    i.preventDefault(), w(K(n));
-  }), a.querySelectorAll("[data-holocall-compose-action]").forEach((i) => {
-    i.addEventListener("click", async (s) => {
-      var p, C, V, j, R, z, Y;
-      const g = s.currentTarget.dataset.holocallComposeAction, b = K(n);
+    const r = (s = game.actors) == null ? void 0 : s.get(n.elements.actorId.value);
+    r && (n.elements.callerName.value = r.name, n.elements.image.value = r.img ?? "");
+  }), n.addEventListener("submit", (r) => {
+    r.preventDefault(), w(J(n));
+  }), a.querySelectorAll("[data-holocall-compose-action]").forEach((r) => {
+    r.addEventListener("click", async (s) => {
+      var h, C, N, z, O, Y, W;
+      const g = s.currentTarget.dataset.holocallComposeAction, f = J(n);
       if (g === "preview") {
-        await w(b);
+        await w(f);
         return;
       }
       if (g === "broadcast") {
-        await B(b);
+        await j(f);
         return;
       }
       if (g === "close-active") {
-        he((p = o == null ? void 0 : o.callData) == null ? void 0 : p.id);
+        Ce((h = o == null ? void 0 : o.callData) == null ? void 0 : h.id);
         return;
       }
       if (g === "browse-image") {
-        const O = n.elements.image, W = globalThis.FilePicker ?? ((j = (V = (C = globalThis.foundry) == null ? void 0 : C.applications) == null ? void 0 : V.apps) == null ? void 0 : j.FilePicker);
-        if (!O || !W) {
-          (z = (R = ui.notifications) == null ? void 0 : R.warn) == null || z.call(R, "Foundry FilePicker is unavailable.");
+        const P = n.elements.image, K = globalThis.FilePicker ?? ((z = (N = (C = globalThis.foundry) == null ? void 0 : C.applications) == null ? void 0 : N.apps) == null ? void 0 : z.FilePicker);
+        if (!P || !K) {
+          (Y = (O = ui.notifications) == null ? void 0 : O.warn) == null || Y.call(O, "Foundry FilePicker is unavailable.");
           return;
         }
-        const N = new W({
+        const H = new K({
           type: "image",
-          current: O.value,
-          callback: (we) => {
-            O.value = we, O.dispatchEvent(new Event("change", { bubbles: !0 }));
+          current: P.value,
+          callback: (Ae) => {
+            P.value = Ae, P.dispatchEvent(new Event("change", { bubbles: !0 }));
           }
         });
-        typeof N.browse == "function" ? N.browse() : (Y = N.render) == null || Y.call(N, !0);
+        typeof H.browse == "function" ? H.browse() : (W = H.render) == null || W.call(H, !0);
         return;
       }
-      g === "reset" && (n.reset(), I(n));
+      g === "reset" && (n.reset(), x(n));
     });
   }));
 }
-function Le(e) {
+function He(e) {
   var t;
   return (t = e == null ? void 0 : e.querySelector) == null ? void 0 : t.call(e, "form[data-holocall-contacts-form]");
 }
-function ue(e, t) {
-  const a = U(e, t), n = Le(a);
-  !a || !n || (n.addEventListener("submit", async (l) => {
-    var s;
-    l.preventDefault();
-    const r = new FormData(n), i = String(r.get("scope") ?? h);
-    await De(r.get("name"), r.get("number"), i, r.get("image")), n.reset(), n.elements.scope.value = i, (s = n.elements.name) == null || s.focus();
-  }), a.querySelectorAll("[data-holocall-contact-tab]").forEach((l) => {
-    l.addEventListener("click", (r) => {
-      h = r.currentTarget.dataset.holocallContactTab, a.querySelectorAll("[data-holocall-contact-tab]").forEach((i) => {
-        i.classList.toggle("active", i.dataset.holocallContactTab === h);
-      }), a.querySelectorAll("[data-holocall-contact-panel]").forEach((i) => {
-        i.hidden = i.dataset.holocallContactPanel !== h;
-      }), n.elements.scope && (n.elements.scope.value = h);
+function de(e, t) {
+  const a = B(e, t), n = He(a);
+  if (!a || !n) return;
+  n.addEventListener("submit", async (i) => {
+    var g;
+    i.preventDefault();
+    const r = new FormData(n), s = String(r.get("scope") ?? b);
+    await Me(r.get("name"), r.get("number"), s, r.get("image")), n.reset(), n.elements.scope.value = s, (g = n.elements.name) == null || g.focus();
+  }), a.querySelectorAll("[data-holocall-contact-tab]").forEach((i) => {
+    i.addEventListener("click", (r) => {
+      b = r.currentTarget.dataset.holocallContactTab, a.querySelectorAll("[data-holocall-contact-tab]").forEach((s) => {
+        s.classList.toggle("active", s.dataset.holocallContactTab === b);
+      }), a.querySelectorAll("[data-holocall-contact-panel]").forEach((s) => {
+        s.hidden = s.dataset.holocallContactPanel !== b;
+      }), n.elements.scope && (n.elements.scope.value = b);
     });
-  }), a.querySelectorAll("[data-holocall-contact-action]").forEach((l) => {
-    l.addEventListener("click", async (r) => {
-      const i = r.currentTarget.dataset.holocallContactAction, s = r.currentTarget.dataset.contactId, g = r.currentTarget.dataset.contactScope ?? "personal", p = (g === "group" ? D() : k()).find((C) => C.id === s);
-      if (i === "remove") {
-        await Me(s, g);
+  });
+  const l = a.querySelector("[data-holocall-ringtone]");
+  l && l.addEventListener("change", async (i) => {
+    await game.settings.set(c, "ringSound", i.currentTarget.value);
+  }), a.querySelectorAll("[data-holocall-contact-action]").forEach((i) => {
+    i.addEventListener("click", async (r) => {
+      const s = r.currentTarget.dataset.holocallContactAction, g = r.currentTarget.dataset.contactId, f = r.currentTarget.dataset.contactScope ?? "personal", C = (f === "group" ? D() : R()).find((N) => N.id === g);
+      if (s === "remove") {
+        await Le(g, f);
         return;
       }
-      i === "call" && p && await Be(p) && d === e && await e.close();
+      s === "call" && C && await je(C) && d === e && await e.close();
     });
-  }));
+  });
 }
-function Ne(e) {
+function ke(e) {
   return e.image ? `<img src="${u(e.image)}" alt="${u(e.callerName)}">` : `<div class="holocall-initials" aria-hidden="true">${u(e.initials)}</div>`;
 }
-function ge(e) {
-  const t = `--holocall-signal: ${e.signal}%;`, a = e.fullscreen ? "holocall-broadcast" : "", n = e.ringing ? "holocall-ringing-panel" : "", l = e.accepted ? "holocall-connected-panel" : "", r = e.showBroadcast ? '<button type="button" data-holocall-action="broadcast">Broadcast</button>' : "", i = e.accepted ? "" : `
+function me(e) {
+  const t = `--holocall-signal: ${e.signal}%;`, a = e.fullscreen ? "holocall-broadcast" : "", n = e.ringing ? "holocall-ringing-panel" : "", l = e.accepted ? "holocall-connected-panel" : "", i = e.showBroadcast ? '<button type="button" data-holocall-action="broadcast">Broadcast</button>' : "", r = e.accepted ? "" : `
       <header class="holocall-header">
         <div>
           <div class="holocall-kicker">${u(e.kicker)}</div>
@@ -312,16 +317,16 @@ function ge(e) {
     `, s = e.accepted ? "" : `<blockquote>${u(e.message)}</blockquote>`, g = e.accepted ? '<button type="button" data-holocall-action="end">End Call</button>' : `
         ${e.canAccept ? '<button type="button" data-holocall-action="accept">Accept</button>' : ""}
         ${e.canDecline ? '<button type="button" data-holocall-action="decline">Decline</button>' : ""}
-        ${r}
+        ${i}
         <button type="button" data-holocall-action="end">End Call</button>
       `;
   return `
     <div class="holocall-panel holocall-${e.variant} ${a} ${n} ${l}" style="${t}">
       <div class="holocall-static" aria-hidden="true"></div>
       <div class="holocall-reticle" aria-hidden="true"></div>
-      ${i}
+      ${r}
       <main class="holocall-body">
-        <div class="holocall-portrait">${Ne(e)}</div>
+        <div class="holocall-portrait">${ke(e)}</div>
         ${s}
       </main>
       <footer class="holocall-actions">
@@ -330,7 +335,7 @@ function ge(e) {
     </div>
   `;
 }
-function de(e) {
+function pe(e) {
   const t = e.call;
   return `
     <form class="holocall-composer" data-holocall-composer>
@@ -362,19 +367,19 @@ function de(e) {
     </form>
   `;
 }
-function me(e) {
-  const t = (l, r) => l.length ? l.map((i) => `
+function fe(e) {
+  const t = (l, i) => l.length ? l.map((r) => `
         <li>
           <div class="holocall-contact-avatar">
-            ${i.image ? `<img src="${u(i.image)}" alt="">` : `<span>${u(i.initials)}</span>`}
+            ${r.image ? `<img src="${u(r.image)}" alt="">` : `<span>${u(r.initials)}</span>`}
           </div>
           <div class="holocall-contact-id">
-            <strong>${u(i.name)}</strong>
-            <span>${u(i.number)}</span>
+            <strong>${u(r.name)}</strong>
+            <span>${u(r.number)}</span>
           </div>
           <div class="holocall-contact-actions">
-            <button type="button" data-holocall-contact-action="call" data-contact-scope="${r}" data-contact-id="${u(i.id)}">Call</button>
-            <button type="button" data-holocall-contact-action="remove" data-contact-scope="${r}" data-contact-id="${u(i.id)}">Remove</button>
+            <button type="button" data-holocall-contact-action="call" data-contact-scope="${i}" data-contact-id="${u(r.id)}">Call</button>
+            <button type="button" data-holocall-contact-action="remove" data-contact-scope="${i}" data-contact-id="${u(r.id)}">Remove</button>
           </div>
         </li>
       `).join("") : '<li class="holocall-contacts-empty">No contacts stored.</li>', a = e.activeTab !== "group", n = e.activeTab === "group";
@@ -403,14 +408,24 @@ function me(e) {
         <label>Picture <input type="text" name="image" placeholder="icons/..."></label>
         <button type="submit">Add Contact</button>
       </form>
+      <footer class="holocall-contacts-footer">
+        <label class="holocall-ringtone-select">
+          <span>Ringtone</span>
+          <select data-holocall-ringtone>
+            ${(e.ringtoneChoices ?? []).map(
+    (l) => `<option value="${u(l.value)}" ${l.selected ? "selected" : ""}>${u(l.label)}</option>`
+  ).join("")}
+          </select>
+        </label>
+      </footer>
     </section>
   `;
 }
-var J, Q;
-const E = (Q = (J = foundry == null ? void 0 : foundry.applications) == null ? void 0 : J.api) == null ? void 0 : Q.ApplicationV2;
-var X, Z;
-const L = (Z = (X = foundry == null ? void 0 : foundry.applications) == null ? void 0 : X.api) == null ? void 0 : Z.HandlebarsApplicationMixin;
-class He extends Application {
+var Q, X;
+const M = (X = (Q = foundry == null ? void 0 : foundry.applications) == null ? void 0 : Q.api) == null ? void 0 : X.ApplicationV2;
+var Z, ee;
+const L = (ee = (Z = foundry == null ? void 0 : foundry.applications) == null ? void 0 : Z.api) == null ? void 0 : ee.HandlebarsApplicationMixin;
+class Re extends Application {
   constructor(t, a = {}) {
     super(a), this.callData = T(t);
   }
@@ -418,7 +433,7 @@ class He extends Application {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "holocall-overlay",
       title: "HoloCall",
-      template: ee,
+      template: te,
       classes: ["holocall-app"],
       popOut: !0,
       resizable: !0,
@@ -435,22 +450,22 @@ class He extends Application {
     try {
       return await super._renderInner(t);
     } catch (a) {
-      return console.warn(`${c} | Template render failed, using inline fallback.`, a), $(ge(this.callData));
+      return console.warn(`${c} | Template render failed, using inline fallback.`, a), $(me(this.callData));
     }
   }
   activateListeners(t) {
-    super.activateListeners(t), ce(this, t);
+    super.activateListeners(t), ue(this, t);
   }
   async close(t) {
-    return o === this && (o = null), _(), super.close(t);
+    return o === this && (o = null), G(), super.close(t);
   }
 }
-class ke extends Application {
+class Oe extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "holocall-composer",
       title: "HoloCall Composer",
-      template: te,
+      template: ae,
       classes: ["holocall-composer-app"],
       popOut: !0,
       resizable: !0,
@@ -460,30 +475,30 @@ class ke extends Application {
   }
   getData() {
     return {
-      call: le(),
-      actors: re()
+      call: ie(),
+      actors: ce()
     };
   }
   async _renderInner(t) {
     try {
       return await super._renderInner(t);
     } catch (a) {
-      return console.warn(`${c} | Composer template render failed, using inline fallback.`, a), $(de(t));
+      return console.warn(`${c} | Composer template render failed, using inline fallback.`, a), $(pe(t));
     }
   }
   activateListeners(t) {
-    super.activateListeners(t), se(this, t);
+    super.activateListeners(t), ge(this, t);
   }
   async close(t) {
-    return f === this && (f = null), super.close(t);
+    return p === this && (p = null), super.close(t);
   }
 }
-class Re extends Application {
+class Pe extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "holocall-contacts",
       title: "HoloCall Contacts",
-      template: ae,
+      template: ne,
       classes: ["holocall-contacts-app"],
       popOut: !0,
       resizable: !0,
@@ -492,34 +507,36 @@ class Re extends Application {
     });
   }
   getData() {
-    const t = k(), a = D();
+    const t = R(), a = D();
     return {
       contacts: t,
       groupContacts: a,
       hasContacts: t.length > 0,
       hasGroupContacts: a.length > 0,
-      activeTab: h,
-      isPersonalTab: h !== "group",
-      isGroupTab: h === "group"
+      activeTab: b,
+      isPersonalTab: b !== "group",
+      isGroupTab: b === "group",
+      ringtoneChoices: $e(),
+      currentRingtone: I()
     };
   }
   async _renderInner(t) {
     try {
       return await super._renderInner(t);
     } catch (a) {
-      return console.warn(`${c} | Contacts template render failed, using inline fallback.`, a), $(me(t));
+      return console.warn(`${c} | Contacts template render failed, using inline fallback.`, a), $(fe(t));
     }
   }
   activateListeners(t) {
-    super.activateListeners(t), ue(this, t);
+    super.activateListeners(t), de(this, t);
   }
   async close(t) {
     return d === this && (d = null), super.close(t);
   }
 }
-function Oe() {
+function _e() {
   var e;
-  return !E || !L ? null : (e = class extends L(E) {
+  return !M || !L ? null : (e = class extends L(M) {
     constructor(a, n = {}) {
       super(n), this.callData = T(a);
     }
@@ -534,16 +551,16 @@ function Oe() {
         return await super._renderHTML(a, n);
       } catch (l) {
         console.warn(`${c} | Template render failed, using inline fallback.`, l);
-        const r = document.createElement("template");
-        return r.innerHTML = ge(this.callData).trim(), r.content;
+        const i = document.createElement("template");
+        return i.innerHTML = me(this.callData).trim(), i.content;
       }
     }
     _onRender(a, n) {
       var l;
-      (l = super._onRender) == null || l.call(this, a, n), ce(this);
+      (l = super._onRender) == null || l.call(this, a, n), ue(this);
     }
     async close(a) {
-      return o === this && (o = null), _(), super.close(a);
+      return o === this && (o = null), G(), super.close(a);
     }
   }, A(e, "DEFAULT_OPTIONS", {
     id: "holocall-overlay",
@@ -559,19 +576,19 @@ function Oe() {
     }
   }), A(e, "PARTS", {
     main: {
-      template: ee
+      template: te
     }
   }), e);
 }
-const Pe = Oe() ?? He;
-function _e() {
+const Ie = _e() ?? Re;
+function Ge() {
   var e;
-  return !E || !L ? null : (e = class extends L(E) {
+  return !M || !L ? null : (e = class extends L(M) {
     async _prepareContext(a) {
       return {
         ...await super._prepareContext(a),
-        call: le(),
-        actors: re()
+        call: ie(),
+        actors: ce()
       };
     }
     async _renderHTML(a, n) {
@@ -579,16 +596,16 @@ function _e() {
         return await super._renderHTML(a, n);
       } catch (l) {
         console.warn(`${c} | Composer template render failed, using inline fallback.`, l);
-        const r = document.createElement("template");
-        return r.innerHTML = de(a).trim(), r.content;
+        const i = document.createElement("template");
+        return i.innerHTML = pe(a).trim(), i.content;
       }
     }
     _onRender(a, n) {
       var l;
-      (l = super._onRender) == null || l.call(this, a, n), se(this);
+      (l = super._onRender) == null || l.call(this, a, n), ge(this);
     }
     async close(a) {
-      return f === this && (f = null), super.close(a);
+      return p === this && (p = null), super.close(a);
     }
   }, A(e, "DEFAULT_OPTIONS", {
     id: "holocall-composer",
@@ -604,25 +621,27 @@ function _e() {
     }
   }), A(e, "PARTS", {
     main: {
-      template: te
+      template: ae
     }
   }), e);
 }
-const Ie = _e() ?? ke;
-function Ge() {
+const xe = Ge() ?? Oe;
+function Fe() {
   var e;
-  return !E || !L ? null : (e = class extends L(E) {
+  return !M || !L ? null : (e = class extends L(M) {
     async _prepareContext(a) {
-      const n = k(), l = D();
+      const n = R(), l = D();
       return {
         ...await super._prepareContext(a),
         contacts: n,
         groupContacts: l,
         hasContacts: n.length > 0,
         hasGroupContacts: l.length > 0,
-        activeTab: h,
-        isPersonalTab: h !== "group",
-        isGroupTab: h === "group"
+        activeTab: b,
+        isPersonalTab: b !== "group",
+        isGroupTab: b === "group",
+        ringtoneChoices: $e(),
+        currentRingtone: I()
       };
     }
     async _renderHTML(a, n) {
@@ -630,13 +649,13 @@ function Ge() {
         return await super._renderHTML(a, n);
       } catch (l) {
         console.warn(`${c} | Contacts template render failed, using inline fallback.`, l);
-        const r = document.createElement("template");
-        return r.innerHTML = me(a).trim(), r.content;
+        const i = document.createElement("template");
+        return i.innerHTML = fe(a).trim(), i.content;
       }
     }
     _onRender(a, n) {
       var l;
-      (l = super._onRender) == null || l.call(this, a, n), ue(this);
+      (l = super._onRender) == null || l.call(this, a, n), de(this);
     }
     async close(a) {
       return d === this && (d = null), super.close(a);
@@ -655,48 +674,48 @@ function Ge() {
     }
   }), A(e, "PARTS", {
     main: {
-      template: ae
+      template: ne
     }
   }), e);
 }
-const xe = Ge() ?? Re;
+const Ue = Fe() ?? Pe;
 async function w(e = {}) {
   var t, a;
-  return F() ? (d && await d.close(), await q(), o = new Pe(e), await o.render(!0), ye(o), ze(o.callData), o) : ((a = (t = ui.notifications) == null ? void 0 : t.warn) == null || a.call(t, "You do not have permission to open HoloCall transmissions."), null);
+  return q() ? (d && await d.close(), await V(), o = new Ie(e), await o.render(!0), we(o), Ye(o.callData), o) : ((a = (t = ui.notifications) == null ? void 0 : t.warn) == null || a.call(t, "You do not have permission to open HoloCall transmissions."), null);
 }
-async function q() {
+async function V() {
   if (!o) return;
   const e = o;
   o = null, await e.close();
 }
-function Fe(e) {
+function qe(e) {
   var t;
   return !!((t = o == null ? void 0 : o.callData) != null && t.id) && o.callData.id === e;
 }
-async function Ue() {
-  o && (await o.render(!0), ye(o));
+async function Be() {
+  o && (await o.render(!0), we(o));
 }
-async function pe(e) {
-  Fe(e) && (o.callData.accepted = !0, o.callData.ringing = !1, _(), await Ue());
+async function he(e) {
+  qe(e) && (o.callData.accepted = !0, o.callData.ringing = !1, G(), await Be());
 }
-function qe(e) {
+function Ve(e) {
   e && (game.socket.emit(S, {
     action: "acceptCall",
     callId: e
-  }), pe(e));
+  }), he(e));
 }
-async function fe(e) {
+async function be(e) {
   var t;
-  e && ((t = o == null ? void 0 : o.callData) != null && t.id) && o.callData.id !== e || await q();
+  e && ((t = o == null ? void 0 : o.callData) != null && t.id) && o.callData.id !== e || await V();
 }
-function he(e) {
+function Ce(e) {
   game.socket.emit(S, {
     action: "endCall",
     callId: e
-  }), fe(e);
+  }), be(e);
 }
-async function Be(e) {
-  var i, s, g, b, p;
+async function je(e) {
+  var r, s, g, f, h;
   if (game.user.isGM)
     return w({
       callerName: e.name,
@@ -707,9 +726,9 @@ async function Be(e) {
       variant: "standard",
       ringing: !1
     });
-  if (!x())
-    return (s = (i = ui.notifications) == null ? void 0 : i.warn) == null || s.call(i, "No GM is connected to receive the HoloCall."), null;
-  const t = G(), a = String(((g = game.user) == null ? void 0 : g.avatar) ?? ((p = (b = game.user) == null ? void 0 : b.character) == null ? void 0 : p.img) ?? "").trim(), n = {
+  if (!U())
+    return (s = (r = ui.notifications) == null ? void 0 : r.warn) == null || s.call(r, "No GM is connected to receive the HoloCall."), null;
+  const t = F(), a = String(((g = game.user) == null ? void 0 : g.avatar) ?? ((h = (f = game.user) == null ? void 0 : f.character) == null ? void 0 : h.img) ?? "").trim(), n = {
     id: t,
     signal: game.settings.get(c, "defaultSignal"),
     variant: "standard",
@@ -728,7 +747,7 @@ async function Be(e) {
     canDecline: !1,
     outgoing: !0,
     ringing: !0
-  }), r = T({
+  }), i = T({
     ...n,
     callerName: game.user.name,
     subtitle: `Call request from ${game.user.name}`,
@@ -739,21 +758,21 @@ async function Be(e) {
   });
   return game.socket.emit(S, {
     action: "playerCallRequest",
-    callData: r
+    callData: i
   }), w(l);
 }
-async function be() {
+async function ye() {
   var e, t, a;
-  return game.user.isGM ? f ? ((a = f.bringToFront) == null || a.call(f), f) : (f = new Ie(), await f.render(!0), f) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "Only the GM can open the HoloCall composer."), null);
+  return game.user.isGM ? p ? ((a = p.bringToFront) == null || a.call(p), p) : (p = new xe(), await p.render(!0), p) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "Only the GM can open the HoloCall composer."), null);
 }
-async function Ce() {
+async function ve() {
   var e, t, a, n;
-  return F() ? o ? ((a = o.bringToFront) == null || a.call(o), o) : d ? ((n = d.bringToFront) == null || n.call(d), d) : (d = new xe(), await d.render(!0), d) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "You do not have permission to use HoloCall contacts."), null);
+  return q() ? o ? ((a = o.bringToFront) == null || a.call(o), o) : d ? ((n = d.bringToFront) == null || n.call(d), d) : (d = new Ue(), await d.render(!0), d) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "You do not have permission to use HoloCall contacts."), null);
 }
-async function H() {
+async function k() {
   d && await d.render(!0);
 }
-async function B(e = {}) {
+async function j(e = {}) {
   var a, n;
   if (!game.user.isGM)
     return (n = (a = ui.notifications) == null ? void 0 : a.warn) == null || n.call(a, "Only the GM can broadcast HoloCalls to all players."), null;
@@ -767,10 +786,10 @@ async function B(e = {}) {
     callData: t
   }), w(t);
 }
-async function Ve(e) {
+async function ze(e) {
   if (e) {
     if (e.action === "openCall") {
-      if (!F()) return;
+      if (!q()) return;
       w(e.callData);
       return;
     }
@@ -780,11 +799,11 @@ async function Ve(e) {
       return;
     }
     if (e.action === "acceptCall") {
-      pe(e.callId);
+      he(e.callId);
       return;
     }
     if (e.action === "endCall") {
-      fe(e.callId);
+      be(e.callId);
       return;
     }
     if (e.action === "groupContactAdd") {
@@ -792,18 +811,18 @@ async function Ve(e) {
       const t = v(e.contact);
       if (!t.name || !t.number) return;
       const a = D();
-      a.push(t), await P(a), await H();
+      a.push(t), await _(a), await k();
       return;
     }
     if (e.action === "groupContactRemove") {
       if (!game.user.isGM) return;
-      await P(D().filter((t) => t.id !== e.contactId)), await H();
+      await _(D().filter((t) => t.id !== e.contactId)), await k();
       return;
     }
-    e.action === "groupContactsChanged" && (M = Array.isArray(e.contacts) ? e.contacts.map(v) : null, await H());
+    e.action === "groupContactsChanged" && (E = Array.isArray(e.contacts) ? e.contacts.map(v) : null, await k());
   }
 }
-function ye(e) {
+function we(e) {
   var t, a;
   (t = e == null ? void 0 : e.callData) != null && t.fullscreen && ((a = e.setPosition) == null || a.call(e, {
     left: 0,
@@ -812,39 +831,47 @@ function ye(e) {
     height: window.innerHeight
   }));
 }
-function je() {
+function I() {
   return String(game.settings.get(c, "ringSound") ?? "").trim();
 }
-function _() {
+function $e() {
+  const e = I();
+  return Object.entries(oe).map(([t, a]) => ({
+    value: t,
+    label: a,
+    selected: t === e
+  }));
+}
+function G() {
   y && (y.pause(), y.currentTime = 0, y = null);
 }
-function ze(e) {
-  if (_(), !e.ringing) return;
-  const t = je();
+function Ye(e) {
+  if (G(), !e.ringing) return;
+  const t = I();
   t && (y = new Audio(t), y.loop = !0, y.volume = 0.65, y.play().catch((a) => {
     console.warn(`${c} | Unable to play ringing sound.`, a);
   }));
 }
-function ve() {
+function Se() {
   const e = game.modules.get(c);
   e && (e.api = {
     openCall: w,
-    closeCall: q,
-    broadcastCall: B,
-    openComposer: be,
-    openContacts: Ce,
+    closeCall: V,
+    broadcastCall: j,
+    openComposer: ye,
+    openContacts: ve,
     get activeCall() {
       return o;
     },
     get activeComposer() {
-      return f;
+      return p;
     },
     get activeContacts() {
       return d;
     }
   });
 }
-function Ye() {
+function We() {
   const e = game.modules.get("holosuite-core"), t = e != null && e.active ? e.api : null;
   return t != null && t.registerApp ? (t.registerApp({
     id: c,
@@ -854,11 +881,11 @@ function Ye() {
     description: "Compose calls, contacts, and holographic broadcasts.",
     open: () => {
       var a;
-      return (a = game.user) != null && a.isGM ? be() : Ce();
+      return (a = game.user) != null && a.isGM ? ye() : ve();
     }
   }), !0) : !1;
 }
-function We() {
+function Ke() {
   const e = CONST.USER_ROLES, t = {};
   for (const [a, n] of [
     ["NONE", "None"],
@@ -885,10 +912,10 @@ function We() {
     name: "Incoming Call Ringtone",
     hint: "Ringtone played locally while a HoloCall is ringing. This is a client setting, so each user can choose their own ringtone.",
     scope: "client",
-    config: !0,
+    config: !1,
     type: String,
     default: "",
-    choices: Te
+    choices: oe
   }), game.settings.register(c, "minimumRole", {
     name: "Minimum Player Role",
     hint: "Minimum role allowed to open HoloCall overlays and receive GM broadcasts.",
@@ -914,8 +941,8 @@ function We() {
   });
 }
 Hooks.once("init", () => {
-  We(), ve();
+  Ke(), Se();
 });
 Hooks.once("ready", () => {
-  ve(), Ye(), game.socket.on(S, Ve), console.log(`${c} | Ready. Use game.modules.get("${c}").api.openCall({...})`);
+  Se(), We(), game.socket.on(S, ze), console.log(`${c} | Ready. Use game.modules.get("${c}").api.openCall({...})`);
 });

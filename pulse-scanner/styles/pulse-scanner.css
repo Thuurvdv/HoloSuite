@@ -148,14 +148,20 @@
   opacity: 0.58;
 }
 
+.pulse-scanner-item-actions {
+  display: flex;
+  gap: 6px;
+  width: calc(100% - 16px);
+  margin: 8px;
+}
+
 .pulse-scanner-item-use {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  width: calc(100% - 16px);
+  flex: 1 1 auto;
   min-height: 34px;
-  margin: 8px;
   border: 1px solid rgba(125, 249, 255, 0.42);
   border-radius: 6px;
   background: rgba(11, 22, 28, 0.82);
@@ -164,6 +170,30 @@
 }
 
 .pulse-scanner-item-use:hover {
+  border-color: rgba(125, 249, 255, 0.78);
+  box-shadow: 0 0 14px rgba(125, 249, 255, 0.24);
+}
+
+.pulse-scanner-item-use:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pulse-scanner-item-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 34px;
+  min-height: 34px;
+  border: 1px solid rgba(125, 249, 255, 0.42);
+  border-radius: 6px;
+  background: rgba(11, 22, 28, 0.82);
+  color: #dffcff;
+  cursor: pointer;
+}
+
+.pulse-scanner-item-refresh:hover {
   border-color: rgba(125, 249, 255, 0.78);
   box-shadow: 0 0 14px rgba(125, 249, 255, 0.24);
 }
@@ -373,10 +403,11 @@
   position: fixed;
   inset: 0;
   z-index: 70;
-  pointer-events: none;
+  pointer-events: auto;
   overflow: hidden;
   transform: none;
   contain: layout paint;
+  cursor: default;
 }
 
 .pulse-scanner-ring {
@@ -469,6 +500,12 @@
   display: block;
   margin-top: 2px;
   color: #b6c5cc;
+}
+
+.pulse-scanner-label .pulse-scanner-description {
+  color: #8fb5bf;
+  font-style: italic;
+  margin-top: 4px;
 }
 
 .pulse-scanner-integrity {

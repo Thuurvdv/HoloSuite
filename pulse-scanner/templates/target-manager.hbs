@@ -24,10 +24,9 @@
         {{/each}}
       </select>
     </label>
-    <label>
+    <label title="For performance, keep scanner radius at 100 ft or less.">
       <span>Radius (ft)</span>
       <input type="number" name="scannerItemRadiusFeet" value="{{scannerItem.radiusFeet}}" min="0" step="5">
-      <small>For performance, keep scanner radius at 100 ft or less.</small>
     </label>
     <button type="button" data-action="create-scanner-item-config"><i class="fa-solid fa-plus"></i> Create Item</button>
   </form>

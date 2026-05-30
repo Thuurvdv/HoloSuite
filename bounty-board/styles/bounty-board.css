@@ -391,15 +391,16 @@
   gap: 8px;
 }
 
-.bb-checkbox input {
+.bb-checkbox input[type="checkbox"] {
   width: auto;
+  border: none;
 }
 
 .bb-checkbox-compact {
   display: inline-flex;
   justify-self: start;
   align-self: end;
-  width: auto;
+  width: max-content;
   min-width: 0;
   max-width: max-content;
   padding: 0;

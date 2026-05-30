@@ -23,10 +23,15 @@
 }
 
 .holocall-app .window-content,
-.holocall-composer-app .window-content,
-.holocall-contacts-app .window-content {
+.holocall-composer-app .window-content {
   padding: 0;
   overflow: hidden;
+  background: transparent;
+}
+
+.holocall-contacts-app .window-content {
+  padding: 0;
+  overflow: visible;
   background: transparent;
 }
 
@@ -567,6 +572,7 @@
   box-shadow:
     0 0 22px rgba(0, 167, 255, 0.24),
     inset 0 0 28px rgba(94, 231, 255, 0.1);
+  overflow: visible;
 }
 
 .holocall-contacts-header {
@@ -854,4 +860,44 @@
     width: 100%;
     text-align: left;
   }
+}
+
+.holocall-contacts-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(94, 231, 255, 0.25);
+}
+
+.holocall-ringtone-select select {
+  overflow: visible;
+}
+
+.holocall-ringtone-select {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  color: rgba(217, 251, 255, 0.82);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.holocall-ringtone-select select {
+  width: 100%;
+  border: 1px solid rgba(94, 231, 255, 0.32);
+  border-radius: var(--hs-radius);
+  background: rgba(1, 8, 16, 0.72);
+  color: var(--holocall-text);
+  box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
+}
+
+.holocall-ringtone-select select:focus-visible {
+  border-color: var(--holocall-cyan);
+  box-shadow:
+    0 0 10px rgba(94, 231, 255, 0.22),
+    inset 0 0 12px rgba(94, 231, 255, 0.1);
+  outline: none;
 }

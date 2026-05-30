@@ -1,7 +1,7 @@
 const m = "holosuite-core", M = "licenseKey", T = "mockAllowedFeatures", p = /* @__PURE__ */ new Map();
 let c = null, g = null;
 var A, L;
-const D = globalThis.Application ?? ((L = (A = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : A.api) == null ? void 0 : L.Application), F = {
+const D = globalThis.Application ?? ((L = (A = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : A.api) == null ? void 0 : L.Application), G = {
   holocall: "Comms",
   "bounty-board": "Contracts",
   "csi-toolkit": "Case Files",
@@ -25,7 +25,7 @@ function k(e) {
   var t;
   return ((t = game.modules.get(e)) == null ? void 0 : t.api) ?? null;
 }
-function G() {
+function F() {
   var e, t, n;
   return String(((t = (e = game.user) == null ? void 0 : e.character) == null ? void 0 : t.name) ?? ((n = game.user) == null ? void 0 : n.name) ?? "Player");
 }
@@ -33,7 +33,7 @@ function N() {
   return (/* @__PURE__ */ new Date()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 function _(e) {
-  return F[e.id] ?? e.title;
+  return G[e.id] ?? e.title;
 }
 function x(e) {
   var t, n, o, s, i, u;
@@ -137,11 +137,11 @@ async function j(e) {
 }
 function R() {
   var a;
-  const e = ((a = game.user) == null ? void 0 : a.isGM) === !0, t = [...p.values()].filter(E).sort((r, f) => r.title.localeCompare(f.title)), n = g != null && g.valid ? "Supporter link active" : "Free core mode", o = e ? "GM Command Deck" : "Player Link", s = e ? "Apps" : "Commlink", i = e ? "No HoloSuite apps have registered yet." : "No player apps are available yet.", u = e ? "" : `
+  const e = ((a = game.user) == null ? void 0 : a.isGM) === !0, t = [...p.values()].filter(E).sort((r, f) => r.title.localeCompare(f.title)), n = g != null && g.valid ? "Supporter link active" : "", o = e ? "GM Command Deck" : "Player Link", s = e ? "Apps" : "Commlink", i = e ? "No HoloSuite apps have registered yet." : "No player apps are available yet.", u = e ? "" : `
     <section class="holosuite-player-home">
       <div>
         <span class="holosuite-kicker">Active User</span>
-        <strong>${d(G())}</strong>
+        <strong>${d(F())}</strong>
       </div>
       <div class="holosuite-player-status">
         <span>LINK STABLE</span>
@@ -165,7 +165,7 @@ function R() {
       <div class="holosuite-phone-shell">
         <header class="holosuite-status-bar">
           <span>HoloSuite</span>
-          <span>${d(n)}</span>
+          ${n ? `<span>${d(n)}</span>` : ""}
         </header>
         <main class="holosuite-screen">
           <div class="holosuite-screen-heading">
