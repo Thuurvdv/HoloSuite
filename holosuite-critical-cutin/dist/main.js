@@ -1,4 +1,4 @@
-const d = "holosuite-critical-cutin", X = "HoloSuite Critical Cut-In", $ = `module.${d}`, oe = `modules/${d}/templates/player-config.hbs`, o = {
+const d = "holosuite-critical-cutin", X = "HoloSuite Critical Cut-In", I = `module.${d}`, oe = `modules/${d}/templates/player-config.hbs`, o = {
   enabled: "enabled",
   threshold: "threshold",
   failureThreshold: "failureThreshold",
@@ -10,12 +10,12 @@ const d = "holosuite-critical-cutin", X = "HoloSuite Critical Cut-In", $ = `modu
   defaultFailureText: "defaultFailureText",
   debug: "debug",
   playerConfigs: "playerConfigs"
-}, v = {
+}, y = {
   everyone: "everyone",
   gm: "gm",
   triggeringPlayer: "triggeringPlayer"
 };
-function le(e) {
+function se(e) {
   game.settings.register(d, o.enabled, {
     name: "Enable Critical Cut-In",
     hint: "Play a configured cut-in when a qualifying natural d20 result is rolled.",
@@ -62,11 +62,11 @@ function le(e) {
     config: !0,
     type: String,
     choices: {
-      [v.everyone]: "Everyone",
-      [v.gm]: "GM only",
-      [v.triggeringPlayer]: "Triggering player only"
+      [y.everyone]: "Everyone",
+      [y.gm]: "GM only",
+      [y.triggeringPlayer]: "Triggering player only"
     },
-    default: v.everyone
+    default: y.everyone
   }), game.settings.register(d, o.textEnabled, {
     name: "Enable Text Overlay",
     hint: "Show the configured label during the cut-in.",
@@ -110,46 +110,46 @@ function le(e) {
     restricted: !0
   });
 }
-function s(e) {
+function l(e) {
   return game.settings.get(d, e);
 }
-async function N(e, t) {
+async function M(e, t) {
   return game.settings.set(d, e, t);
 }
 function S() {
-  return Math.min(20, Math.max(1, Number(s(o.threshold) || 20)));
+  return Math.min(20, Math.max(1, Number(l(o.threshold) || 20)));
 }
-function k() {
-  return Math.min(20, Math.max(1, Number(s(o.failureThreshold) || 1)));
+function N() {
+  return Math.min(20, Math.max(1, Number(l(o.failureThreshold) || 1)));
 }
 function Y() {
-  const e = s(o.playerConfigs);
+  const e = l(o.playerConfigs);
   return foundry.utils.deepClone(e && typeof e == "object" ? e : {});
 }
 async function z(e) {
-  return N(o.playerConfigs, e && typeof e == "object" ? e : {});
+  return M(o.playerConfigs, e && typeof e == "object" ? e : {});
 }
-function E(...e) {
-  s(o.debug) && console.log(`${d} |`, ...e);
+function k(...e) {
+  l(o.debug) && console.log(`${d} |`, ...e);
 }
-const b = [], w = /* @__PURE__ */ new Set();
-let I = !1;
-function M(e) {
+const T = [], w = /* @__PURE__ */ new Set();
+let E = !1;
+function A(e) {
   const t = document.createElement("div");
   return t.textContent = String(e ?? ""), t.innerHTML;
 }
-function se(e) {
+function le(e) {
   var r, i, a, n, c;
   if (e != null && e.blind && !((r = game.user) != null && r.isGM) || Array.isArray(e == null ? void 0 : e.whisper) && e.whisper.length && !e.whisper.includes((i = game.user) == null ? void 0 : i.id) && !((a = game.user) != null && a.isGM))
     return !1;
-  const t = (e == null ? void 0 : e.audience) ?? s(o.audience);
-  return t === v.everyone ? !0 : t === v.gm ? ((n = game.user) == null ? void 0 : n.isGM) === !0 : t === v.triggeringPlayer ? ((c = game.user) == null ? void 0 : c.id) === (e == null ? void 0 : e.userId) : !0;
+  const t = (e == null ? void 0 : e.audience) ?? l(o.audience);
+  return t === y.everyone ? !0 : t === y.gm ? ((n = game.user) == null ? void 0 : n.isGM) === !0 : t === y.triggeringPlayer ? ((c = game.user) == null ? void 0 : c.id) === (e == null ? void 0 : e.userId) : !0;
 }
 async function ue(e, t) {
   var r, i, a;
   if (e)
     try {
-      const n = Math.min(1, Math.max(0, Number(t ?? s(o.volume) ?? 0.8)));
+      const n = Math.min(1, Math.max(0, Number(t ?? l(o.volume) ?? 0.8)));
       if ((i = (r = foundry.audio) == null ? void 0 : r.AudioHelper) != null && i.play)
         return foundry.audio.AudioHelper.play({ src: e, volume: n, autoplay: !0, loop: !1 }, !1);
       if ((a = globalThis.AudioHelper) != null && a.play)
@@ -157,7 +157,7 @@ async function ue(e, t) {
       const c = new Audio(e);
       return c.volume = n, await c.play(), c;
     } catch (n) {
-      return E("Audio playback failed.", { src: e, error: n }), null;
+      return k("Audio playback failed.", { src: e, error: n }), null;
     }
 }
 function de(e) {
@@ -169,11 +169,11 @@ function de(e) {
     }
     typeof e.pause == "function" && (e.pause(), e.currentTime = 0);
   } catch (t) {
-    E("Audio stop failed.", t);
+    k("Audio stop failed.", t);
   }
 }
 function fe(e) {
-  const t = e.accentColor || "#69e8ff", r = ["strike", "breach", "signal"].includes(e.animationStyle) ? e.animationStyle : "strike", i = e.triggerKind === "failure" ? "failure" : "success", a = e.imagePath ? `<img class="hcci-portrait" src="${M(e.imagePath)}" alt="">` : '<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>', n = e.imagePath ? [0, 1, 2, 3].map((h) => `<div class="hcci-fracture hcci-fracture-${h + 1}" style="background-image: url('${M(e.imagePath)}')"></div>`).join("") : "", c = Math.max(1, String(e.overlayText ?? "").length), l = e.textEnabled && e.overlayText ? `<div class="hcci-title" style="--hcci-title-chars: ${c}">${M(e.overlayText)}</div>` : "", g = e.actorName || e.userName || "", f = document.createElement("div");
+  const t = e.accentColor || "#69e8ff", r = ["strike", "breach", "signal"].includes(e.animationStyle) ? e.animationStyle : "strike", i = e.triggerKind === "failure" ? "failure" : "success", a = e.imagePath ? `<img class="hcci-portrait" src="${A(e.imagePath)}" alt="">` : '<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>', n = e.imagePath ? [0, 1, 2, 3].map((g) => `<div class="hcci-fracture hcci-fracture-${g + 1}" style="background-image: url('${A(e.imagePath)}')"></div>`).join("") : "", c = Math.max(1, String(e.overlayText ?? "").length), s = e.textEnabled && e.overlayText ? `<div class="hcci-title" style="--hcci-title-chars: ${c}">${A(e.overlayText)}</div>` : "", h = e.actorName || e.userName || "", f = document.createElement("div");
   return f.className = `hcci-overlay hcci-style-${r} hcci-kind-${i}`, f.style.setProperty("--hcci-accent", t), f.innerHTML = `
     <div class="hcci-flash"></div>
     <div class="hcci-noise"></div>
@@ -202,26 +202,26 @@ function fe(e) {
         <div class="hcci-frame-lightning hcci-frame-lightning-b"></div>
       </div>
       <div class="hcci-copy">
-        ${l}
-        ${g ? `<div class="hcci-subtitle">${M(g)}</div>` : ""}
+        ${s}
+        ${h ? `<div class="hcci-subtitle">${A(h)}</div>` : ""}
       </div>
     </section>
   `, f;
 }
-async function he(e) {
-  if (!se(e)) return;
-  const t = Math.min(8e3, Math.max(800, Number(e.duration ?? s(o.duration) ?? 2500))), r = fe(e);
+async function ge(e) {
+  if (!le(e)) return;
+  const t = Math.min(8e3, Math.max(800, Number(e.duration ?? l(o.duration) ?? 2500))), r = fe(e);
   r.style.setProperty("--hcci-duration", `${t}ms`), document.body.appendChild(r), document.body.classList.add("hcci-screen-shake");
   const i = ue(e.audioPath, e.volume);
   await new Promise((a) => window.setTimeout(a, Math.max(250, t - 250))), de(await i), r.classList.add("hcci-exiting"), await new Promise((a) => window.setTimeout(a, 250)), r.remove(), document.body.classList.remove("hcci-screen-shake");
 }
-async function ge() {
-  if (!I) {
-    for (I = !0; b.length; ) {
-      const e = b.shift();
-      await he(e);
+async function he() {
+  if (!E) {
+    for (E = !0; T.length; ) {
+      const e = T.shift();
+      await ge(e);
     }
-    I = !1;
+    E = !1;
   }
 }
 function P(e) {
@@ -230,14 +230,15 @@ function P(e) {
       if (w.has(e.id)) return;
       w.add(e.id), w.size > 100 && w.delete(w.values().next().value);
     }
-    b.push(e), b.length > 3 && b.splice(1, b.length - 3), ge();
+    T.push(e), T.length > 3 && T.splice(1, T.length - 3), he();
   }
 }
 const C = /* @__PURE__ */ new Set();
 function me(e, t) {
-  var l, g, f, h, m, T;
-  const r = (e == null ? void 0 : e.flags) ?? {}, i = ((g = (l = r.dnd5e) == null ? void 0 : l.roll) == null ? void 0 : g.type) ?? ((h = (f = r.dnd5e) == null ? void 0 : f.roll) == null ? void 0 : h.rollType), a = (T = (m = r.pf2e) == null ? void 0 : m.context) == null ? void 0 : T.type, n = String((e == null ? void 0 : e.content) ?? "").toLowerCase(), c = String((t == null ? void 0 : t.formula) ?? "").toLowerCase();
-  return [i, a].some((x) => String(x ?? "").toLowerCase().includes("damage")) || n.includes("damage roll") || c.includes("damage");
+  var c, s, h, f, g, m;
+  if ([...(t == null ? void 0 : t.terms) ?? [], ...(t == null ? void 0 : t.dice) ?? []].some((v) => v && v.faces === 20)) return !1;
+  const i = (e == null ? void 0 : e.flags) ?? {}, a = ((s = (c = i.dnd5e) == null ? void 0 : c.roll) == null ? void 0 : s.type) ?? ((f = (h = i.dnd5e) == null ? void 0 : h.roll) == null ? void 0 : f.rollType), n = (m = (g = i.pf2e) == null ? void 0 : g.context) == null ? void 0 : m.type;
+  return [a, n].some((v) => String(v ?? "").toLowerCase().includes("damage"));
 }
 function ve(e) {
   const t = [], r = [...(e == null ? void 0 : e.terms) ?? [], ...(e == null ? void 0 : e.dice) ?? []], i = /* @__PURE__ */ new Set();
@@ -271,21 +272,21 @@ function be(e) {
   return t.actor ? ((r = game.actors) == null ? void 0 : r.get(t.actor)) ?? null : e != null && e.actor ? e.actor : null;
 }
 function Te(e, t) {
-  var a, n, c, l;
+  var a, n, c, s;
   const r = ((a = e == null ? void 0 : e.user) == null ? void 0 : a.id) ?? (e == null ? void 0 : e.user) ?? (e == null ? void 0 : e.userId), i = (n = game.users) == null ? void 0 : n.get(r);
   if (i && !i.isGM) return i;
   if (t) {
-    const g = (c = game.users) == null ? void 0 : c.find((f) => !f.isGM && ee(t, f.id));
-    if (g) return g;
+    const h = (c = game.users) == null ? void 0 : c.find((f) => !f.isGM && ee(t, f.id));
+    if (h) return h;
   }
-  return i ?? ((l = game.users) == null ? void 0 : l.get(r)) ?? null;
+  return i ?? ((s = game.users) == null ? void 0 : s.get(r)) ?? null;
 }
 function we(e = {}, t, r) {
-  const i = t === "failure" ? k() : S(), a = s(t === "failure" ? o.defaultFailureText : o.defaultText), n = t === "failure" ? "#ff4d7d" : "#69e8ff", c = t === "failure" ? e.failure ?? {} : e, l = Number(c.threshold);
+  const i = t === "failure" ? N() : S(), a = l(t === "failure" ? o.defaultFailureText : o.defaultText), n = t === "failure" ? "#ff4d7d" : "#69e8ff", c = t === "failure" ? e.failure ?? {} : e, s = Number(c.threshold);
   return {
     kind: t,
     enabled: c.enabled !== !1,
-    threshold: Number.isInteger(l) && l >= 1 && l <= 20 ? l : i,
+    threshold: Number.isInteger(s) && s >= 1 && s <= 20 ? s : i,
     animationStyle: pe(c.animationStyle),
     imagePath: c.imagePath || (r == null ? void 0 : r.img) || "",
     audioPath: c.audioPath || "",
@@ -293,9 +294,9 @@ function we(e = {}, t, r) {
     accentColor: c.accentColor || n
   };
 }
-function L(e, t, r = "success") {
+function $(e, t, r = "success") {
   const i = Y(), a = t ? i[Z("actor", t.id)] : null, n = e != null && e.isGM ? i[ye()] : null;
-  return !t && !(e != null && e.isGM) && !a ? { enabled: !1, threshold: r === "failure" ? k() : S() } : we(a ?? n ?? {}, r, t);
+  return !t && !(e != null && e.isGM) && !a ? { enabled: !1, threshold: r === "failure" ? N() : S() } : we(a ?? n ?? {}, r, t);
 }
 function Ce(e, t, r, i, a) {
   return a.enabled ? {
@@ -315,18 +316,18 @@ function Ce(e, t, r, i, a) {
     audioPath: a.audioPath || "",
     overlayText: a.overlayText || "",
     accentColor: a.accentColor || "#69e8ff",
-    textEnabled: s(o.textEnabled),
-    duration: s(o.duration),
-    volume: s(o.volume),
-    audience: s(o.audience)
-  } : (E("Cut-in disabled for target.", { userId: i == null ? void 0 : i.id, actorId: r == null ? void 0 : r.id }), null);
+    textEnabled: l(o.textEnabled),
+    duration: l(o.duration),
+    volume: l(o.volume),
+    audience: l(o.audience)
+  } : (k("Cut-in disabled for target.", { userId: i == null ? void 0 : i.id, actorId: r == null ? void 0 : r.id }), null);
 }
 function j(e, t, r = "success") {
   var i;
   if (!(e != null && e.isRoll) && !((i = e == null ? void 0 : e.rolls) != null && i.length)) return null;
   for (const a of e.rolls ?? []) {
     if (me(e, a)) continue;
-    const n = ve(a), c = r === "failure" ? n.find((l) => l <= t) : n.find((l) => l >= t);
+    const n = ve(a), c = r === "failure" ? n.find((s) => s <= t) : n.find((s) => s >= t);
     if (c) return c;
   }
   return null;
@@ -340,19 +341,19 @@ function Pe() {
   var e;
   Hooks.on("createChatMessage", (t) => {
     var m;
-    if (!s(o.enabled) || !Se() || C.has(t.id)) return;
+    if (!l(o.enabled) || !Se() || C.has(t.id)) return;
     C.add(t.id), C.size > 200 && C.delete(C.values().next().value);
-    const r = be(t), i = Te(t, r), a = L(i, r, "success"), n = L(i, r, "failure"), c = j(t, n.threshold, "failure"), l = c ? null : j(t, a.threshold, "success"), g = c ?? l;
-    if (!g) return;
-    const h = Ce(t, g, r, i, c ? n : a);
-    h && (E("Triggering cut-in.", h), (m = game.socket) == null || m.emit($, { type: "play", payload: h }), P(h));
-  }), (e = game.socket) == null || e.on($, (t) => {
-    (t == null ? void 0 : t.type) === "play" && s(o.enabled) && P(t.payload);
+    const r = be(t), i = Te(t, r), a = $(i, r, "success"), n = $(i, r, "failure"), c = j(t, n.threshold, "failure"), s = c ? null : j(t, a.threshold, "success"), h = c ?? s;
+    if (!h) return;
+    const g = Ce(t, h, r, i, c ? n : a);
+    g && (k("Triggering cut-in.", g), (m = game.socket) == null || m.emit(I, { type: "play", payload: g }), P(g));
+  }), (e = game.socket) == null || e.on(I, (t) => {
+    (t == null ? void 0 : t.type) === "play" && l(o.enabled) && P(t.payload);
   });
 }
 function te(e, t = {}) {
-  var c, l;
-  const r = (c = game.users) == null ? void 0 : c.get(e), i = t.actorId ? (l = game.actors) == null ? void 0 : l.get(t.actorId) : (r == null ? void 0 : r.character) ?? null, a = t.triggerKind === "failure" ? "failure" : "success", n = L(r, i, a);
+  var c, s;
+  const r = (c = game.users) == null ? void 0 : c.get(e), i = t.actorId ? (s = game.actors) == null ? void 0 : s.get(t.actorId) : (r == null ? void 0 : r.character) ?? null, a = t.triggerKind === "failure" ? "failure" : "success", n = $(r, i, a);
   return {
     id: foundry.utils.randomID(),
     userId: e,
@@ -365,12 +366,12 @@ function te(e, t = {}) {
     animationStyle: t.animationStyle ?? n.animationStyle ?? "strike",
     imagePath: t.imagePath ?? n.imagePath ?? "",
     audioPath: t.audioPath ?? n.audioPath ?? "",
-    overlayText: t.overlayText ?? n.overlayText ?? s(o.defaultText),
+    overlayText: t.overlayText ?? n.overlayText ?? l(o.defaultText),
     accentColor: t.accentColor ?? n.accentColor ?? "#69e8ff",
-    textEnabled: t.textEnabled ?? s(o.textEnabled),
-    duration: t.duration ?? s(o.duration),
-    volume: t.volume ?? s(o.volume),
-    audience: t.audience ?? s(o.audience)
+    textEnabled: t.textEnabled ?? l(o.textEnabled),
+    duration: t.duration ?? l(o.duration),
+    volume: t.volume ?? l(o.volume),
+    audience: t.audience ?? l(o.audience)
   };
 }
 function xe(e, t = {}) {
@@ -380,7 +381,7 @@ function xe(e, t = {}) {
 }
 function B(e) {
   var t;
-  (t = game.socket) == null || t.emit($, { type: "play", payload: e }), P(e);
+  (t = game.socket) == null || t.emit(I, { type: "play", payload: e }), P(e);
 }
 var W, Q, J;
 const Ae = globalThis.FormApplication ?? ((J = (Q = (W = globalThis.foundry) == null ? void 0 : W.appv1) == null ? void 0 : Q.api) == null ? void 0 : J.FormApplication);
@@ -429,7 +430,7 @@ function Ee() {
     portrait: (e == null ? void 0 : e.avatar) || "icons/svg/mystery-man.svg"
   }];
   for (const n of game.actors ?? []) {
-    const c = ((a = game.users) == null ? void 0 : a.filter((l) => !l.isGM && Ne(l, n)).map((l) => l.name)) ?? [];
+    const c = ((a = game.users) == null ? void 0 : a.filter((s) => !s.isGM && Ne(s, n)).map((s) => s.name)) ?? [];
     c.length && t.push({
       key: ie("actor", n.id),
       type: "actor",
@@ -460,11 +461,11 @@ class ae extends Ae {
   }
   async getData() {
     const t = Y(), r = Ee().map((i) => {
-      const a = ke(t[i.key]), n = a.success.imagePath || i.portrait, c = a.failure.imagePath || i.portrait, l = this.activeTabs.get(i.key) === "failure" ? "failure" : "success";
+      const a = ke(t[i.key]), n = a.success.imagePath || i.portrait, c = a.failure.imagePath || i.portrait, s = this.activeTabs.get(i.key) === "failure" ? "failure" : "success";
       return {
         ...i,
-        successActive: l === "success",
-        failureActive: l === "failure",
+        successActive: s === "success",
+        failureActive: s === "failure",
         success: {
           ...a.success,
           preview: n,
@@ -482,10 +483,10 @@ class ae extends Ae {
     return {
       moduleId: d,
       threshold: S(),
-      failureThreshold: k(),
-      duration: s(o.duration),
-      defaultText: s(o.defaultText),
-      defaultFailureText: s(o.defaultFailureText),
+      failureThreshold: N(),
+      duration: l(o.duration),
+      defaultText: l(o.defaultText),
+      defaultFailureText: l(o.defaultFailureText),
       rows: r
     };
   }
@@ -501,15 +502,15 @@ class ae extends Ae {
       n && (n.src = i.currentTarget.value || n.dataset.fallbackSrc || "icons/svg/mystery-man.svg");
     }), t.find("[data-hcci-browse]").on("click", (i) => {
       i.preventDefault();
-      const a = i.currentTarget, n = a.closest("[data-hcci-panel]"), c = a.dataset.hcciBrowse, l = n == null ? void 0 : n.querySelector(`[data-hcci-field="${c}"]`);
-      if (!l) return;
+      const a = i.currentTarget, n = a.closest("[data-hcci-panel]"), c = a.dataset.hcciBrowse, s = n == null ? void 0 : n.querySelector(`[data-hcci-field="${c}"]`);
+      if (!s) return;
       new FilePicker({
         type: c === "audioPath" ? "audio" : "image",
-        current: l.value,
+        current: s.value,
         callback: (f) => {
-          if (l.value = f, l.dispatchEvent(new Event("change", { bubbles: !0 })), c === "imagePath") {
-            const h = n.querySelector("[data-hcci-preview]");
-            h && (h.src = f || h.dataset.fallbackSrc || "icons/svg/mystery-man.svg");
+          if (s.value = f, s.dispatchEvent(new Event("change", { bubbles: !0 })), c === "imagePath") {
+            const g = n.querySelector("[data-hcci-preview]");
+            g && (g.src = f || g.dataset.fallbackSrc || "icons/svg/mystery-man.svg");
           }
         }
       }).browse();
@@ -523,30 +524,30 @@ class ae extends Ae {
     });
   }
   async _updateObject(t) {
-    var g, f, h, m, T, x;
-    const r = t.currentTarget, i = {}, a = (y, p) => {
+    var h, f, g, m, v, L;
+    const r = t.currentTarget, i = {}, a = (p, b) => {
       var O, G, D, q, R, F, H, K, U;
-      const u = y.querySelector(`[data-hcci-panel="${p}"]`);
+      const u = p.querySelector(`[data-hcci-panel="${b}"]`);
       return {
         enabled: ((O = u == null ? void 0 : u.querySelector('[data-hcci-field="enabled"]')) == null ? void 0 : O.checked) === !0,
         threshold: (() => {
           var _;
-          const A = Number((_ = u == null ? void 0 : u.querySelector('[data-hcci-field="threshold"]')) == null ? void 0 : _.value);
-          return Number.isInteger(A) && A >= 1 && A <= 20 ? A : "";
+          const x = Number((_ = u == null ? void 0 : u.querySelector('[data-hcci-field="threshold"]')) == null ? void 0 : _.value);
+          return Number.isInteger(x) && x >= 1 && x <= 20 ? x : "";
         })(),
         animationStyle: ((G = u == null ? void 0 : u.querySelector('[data-hcci-field="animationStyle"]')) == null ? void 0 : G.value) || "strike",
         imagePath: ((q = (D = u == null ? void 0 : u.querySelector('[data-hcci-field="imagePath"]')) == null ? void 0 : D.value) == null ? void 0 : q.trim()) ?? "",
         audioPath: ((F = (R = u == null ? void 0 : u.querySelector('[data-hcci-field="audioPath"]')) == null ? void 0 : R.value) == null ? void 0 : F.trim()) ?? "",
         overlayText: ((K = (H = u == null ? void 0 : u.querySelector('[data-hcci-field="overlayText"]')) == null ? void 0 : H.value) == null ? void 0 : K.trim()) ?? "",
-        accentColor: ((U = u == null ? void 0 : u.querySelector('[data-hcci-field="accentColor"]')) == null ? void 0 : U.value) || (p === "failure" ? "#ff4d7d" : "#69e8ff")
+        accentColor: ((U = u == null ? void 0 : u.querySelector('[data-hcci-field="accentColor"]')) == null ? void 0 : U.value) || (b === "failure" ? "#ff4d7d" : "#69e8ff")
       };
     };
-    for (const y of r.querySelectorAll("[data-hcci-row]")) {
-      const p = y.dataset.hcciRow, u = (g = y.querySelector("[data-hcci-panel].is-active")) == null ? void 0 : g.dataset.hcciPanel;
-      u && this.activeTabs.set(p, u), i[p] = a(y, "success"), i[p].failure = a(y, "failure");
+    for (const p of r.querySelectorAll("[data-hcci-row]")) {
+      const b = p.dataset.hcciRow, u = (h = p.querySelector("[data-hcci-panel].is-active")) == null ? void 0 : h.dataset.hcciPanel;
+      u && this.activeTabs.set(b, u), i[b] = a(p, "success"), i[b].failure = a(p, "failure");
     }
-    const n = Number(((f = r.querySelector('[name="threshold"]')) == null ? void 0 : f.value) ?? S()), c = Number(((h = r.querySelector('[name="failureThreshold"]')) == null ? void 0 : h.value) ?? k()), l = Number(((m = r.querySelector('[name="duration"]')) == null ? void 0 : m.value) ?? s(o.duration));
-    await N(o.threshold, Math.min(20, Math.max(1, n))), await N(o.failureThreshold, Math.min(20, Math.max(1, c))), await N(o.duration, Math.min(8e3, Math.max(800, l))), await z(i), (T = ui.notifications) == null || T.info("Critical Cut-In configuration saved."), (x = this.element) == null || x.removeClass("hcci-config-dirty"), this.render(!1);
+    const n = Number(((f = r.querySelector('[name="threshold"]')) == null ? void 0 : f.value) ?? S()), c = Number(((g = r.querySelector('[name="failureThreshold"]')) == null ? void 0 : g.value) ?? N()), s = Number(((m = r.querySelector('[name="duration"]')) == null ? void 0 : m.value) ?? l(o.duration));
+    await M(o.threshold, Math.min(20, Math.max(1, n))), await M(o.failureThreshold, Math.min(20, Math.max(1, c))), await M(o.duration, Math.min(8e3, Math.max(800, s))), await z(i), (v = ui.notifications) == null || v.info("Critical Cut-In configuration saved."), (L = this.element) == null || L.removeClass("hcci-config-dirty"), this.render(!1);
   }
 }
 function ne() {
@@ -567,7 +568,7 @@ function re() {
     premium: !1,
     playerVisible: !1,
     description: "JRPG-style critical hit cut-in animation for natural d20 results.",
-    enabled: s(o.enabled),
+    enabled: l(o.enabled),
     open: () => ne()
   }), console.log(`${d} | Registered with HoloSuite.`), !0) : !1;
 }
@@ -588,7 +589,7 @@ function ce() {
   return t && (t.api = e), game.holosuiteCriticalCutin = e, e;
 }
 Hooks.once("init", async () => {
-  le(ae), ce(), await loadTemplates([`modules/${d}/templates/player-config.hbs`]);
+  se(ae), ce(), await loadTemplates([`modules/${d}/templates/player-config.hbs`]);
 });
 Hooks.once("ready", () => {
   ce(), Pe(), re(), console.log(`${d} | Ready. API available at game.modules.get("${d}").api`);

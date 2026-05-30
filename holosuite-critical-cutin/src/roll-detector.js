@@ -4,14 +4,12 @@ import { playCutin } from "./cutin-animation.js";
 const processedMessages = new Set();
 
 function isDamageRoll(message, roll) {
+  const diceTerms = [...(roll?.terms ?? []), ...(roll?.dice ?? [])];
+  if (diceTerms.some((term) => term && term.faces === 20)) return false;
   const flags = message?.flags ?? {};
   const dnd5eRollType = flags.dnd5e?.roll?.type ?? flags.dnd5e?.roll?.rollType;
   const pf2eContextType = flags.pf2e?.context?.type;
-  const cardText = String(message?.content ?? "").toLowerCase();
-  const formula = String(roll?.formula ?? "").toLowerCase();
-  return [dnd5eRollType, pf2eContextType].some((type) => String(type ?? "").toLowerCase().includes("damage"))
-    || cardText.includes("damage roll")
-    || formula.includes("damage");
+  return [dnd5eRollType, pf2eContextType].some((type) => String(type ?? "").toLowerCase().includes("damage"));
 }
 
 function getActiveD20Results(roll) {
