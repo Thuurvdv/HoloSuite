@@ -25,7 +25,7 @@ The module works on its own from the scene controls, and it also integrates with
 
 - Use bounties to guide the party toward story hooks without railroading. A board full of contracts gives players the feeling of choice.
 - Update bounty statuses during the session to reflect the living world. If another hunter completes a contract first, remove it from the board.
-- Pair the Bounty Board with HoloCall to have an NPC call the party about a high-priority contract.
+- Pair the Bounty Board with CyberCall to have an NPC call the party about a high-priority contract.
 
 ## Tutorial: Using Bounty Board as a Player
 

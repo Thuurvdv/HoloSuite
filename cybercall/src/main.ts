@@ -1,9 +1,9 @@
 // @ts-nocheck
-const MODULE_ID = "holocall";
+const MODULE_ID = "cybercall";
 const SOCKET_NAME = `module.${MODULE_ID}`;
-const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/holocall.hbs`;
-const COMPOSER_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/holocall-composer.hbs`;
-const CONTACTS_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/holocall-contacts.hbs`;
+const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall.hbs`;
+const COMPOSER_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-composer.hbs`;
+const CONTACTS_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-contacts.hbs`;
 
 let activeCall = null;
 let activeComposer = null;
@@ -91,7 +91,7 @@ function normalizeCallData(data = {}) {
   call.isEmergency = call.variant === "emergency";
   call.isCorrupted = call.variant === "corrupted";
   call.isIncoming = !call.accepted;
-  call.kicker = call.outgoing ? "Outgoing HoloCall" : call.fullscreen ? "System-wide Broadcast" : "Incoming HoloCall";
+  call.kicker = call.outgoing ? "Outgoing CyberCall" : call.fullscreen ? "System-wide Broadcast" : "Incoming CyberCall";
   return call;
 }
 
@@ -223,7 +223,7 @@ function hasActiveGM() {
   return game.users?.some((user) => user.isGM && user.active) ?? false;
 }
 
-function canUseHoloCall(user = game.user) {
+function canUseCyberCall(user = game.user) {
   if (user?.isGM) return true;
   let requiredRole = CONST.USER_ROLES.PLAYER;
   try {
@@ -244,13 +244,13 @@ function getElement(app, html) {
 function bindCallControls(app, html) {
   const element = getElement(app, html);
   if (!element) return;
-  element.classList.toggle("holocall-fullscreen", app.callData.fullscreen);
-  element.classList.toggle("holocall-ringing", app.callData.ringing && !app.callData.accepted);
-  element.classList.toggle("holocall-connected", app.callData.accepted);
+  element.classList.toggle("cybercall-fullscreen", app.callData.fullscreen);
+  element.classList.toggle("cybercall-ringing", app.callData.ringing && !app.callData.accepted);
+  element.classList.toggle("cybercall-connected", app.callData.accepted);
 
-  element.querySelectorAll("[data-holocall-action]").forEach((button) => {
+  element.querySelectorAll("[data-cybercall-action]").forEach((button) => {
     button.addEventListener("click", (event) => {
-      const action = event.currentTarget.dataset.holocallAction;
+      const action = event.currentTarget.dataset.cybercallAction;
       if (action === "accept") {
         acceptCallForEveryone(app.callData.id);
         return;
@@ -273,7 +273,7 @@ function bindCallControls(app, html) {
 }
 
 function getComposerForm(element) {
-  return element?.querySelector?.("form[data-holocall-composer]");
+  return element?.querySelector?.("form[data-cybercall-composer]");
 }
 
 function readComposerForm(form) {
@@ -296,7 +296,7 @@ function readComposerForm(form) {
 
 function updateComposerSignal(form) {
   const signal = form?.elements?.signal;
-  const output = form?.querySelector?.("[data-holocall-signal-output]");
+  const output = form?.querySelector?.("[data-cybercall-signal-output]");
   if (!signal || !output) return;
   output.textContent = `${clampSignal(signal.value)}%`;
 }
@@ -321,9 +321,9 @@ function bindComposerControls(app, html) {
     openCall(readComposerForm(form));
   });
 
-  element.querySelectorAll("[data-holocall-compose-action]").forEach((button) => {
+  element.querySelectorAll("[data-cybercall-compose-action]").forEach((button) => {
     button.addEventListener("click", async (event) => {
-      const action = event.currentTarget.dataset.holocallComposeAction;
+      const action = event.currentTarget.dataset.cybercallComposeAction;
       const callData = readComposerForm(form);
 
       if (action === "preview") {
@@ -370,7 +370,7 @@ function bindComposerControls(app, html) {
 }
 
 function getContactsForm(element) {
-  return element?.querySelector?.("form[data-holocall-contacts-form]");
+  return element?.querySelector?.("form[data-cybercall-contacts-form]");
 }
 
 function bindContactsControls(app, html) {
@@ -388,29 +388,29 @@ function bindContactsControls(app, html) {
     form.elements.name?.focus();
   });
 
-  element.querySelectorAll("[data-holocall-contact-tab]").forEach((button) => {
+  element.querySelectorAll("[data-cybercall-contact-tab]").forEach((button) => {
     button.addEventListener("click", (event) => {
-      activeContactsTab = event.currentTarget.dataset.holocallContactTab;
-      element.querySelectorAll("[data-holocall-contact-tab]").forEach((tabButton) => {
-        tabButton.classList.toggle("active", tabButton.dataset.holocallContactTab === activeContactsTab);
+      activeContactsTab = event.currentTarget.dataset.cybercallContactTab;
+      element.querySelectorAll("[data-cybercall-contact-tab]").forEach((tabButton) => {
+        tabButton.classList.toggle("active", tabButton.dataset.cybercallContactTab === activeContactsTab);
       });
-      element.querySelectorAll("[data-holocall-contact-panel]").forEach((panel) => {
-        panel.hidden = panel.dataset.holocallContactPanel !== activeContactsTab;
+      element.querySelectorAll("[data-cybercall-contact-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.cybercallContactPanel !== activeContactsTab;
       });
       if (form.elements.scope) form.elements.scope.value = activeContactsTab;
     });
   });
 
-  const ringtoneSelect = element.querySelector("[data-holocall-ringtone]");
+  const ringtoneSelect = element.querySelector("[data-cybercall-ringtone]");
   if (ringtoneSelect) {
     ringtoneSelect.addEventListener("change", async (event) => {
       await game.settings.set(MODULE_ID, "ringSound", event.currentTarget.value);
     });
   }
 
-  element.querySelectorAll("[data-holocall-contact-action]").forEach((button) => {
+  element.querySelectorAll("[data-cybercall-contact-action]").forEach((button) => {
     button.addEventListener("click", async (event) => {
-      const action = event.currentTarget.dataset.holocallContactAction;
+      const action = event.currentTarget.dataset.cybercallContactAction;
       const contactId = event.currentTarget.dataset.contactId;
       const scope = event.currentTarget.dataset.contactScope ?? "personal";
       const contactList = scope === "group" ? getGroupContacts() : getContacts();
@@ -433,51 +433,51 @@ function makeFallbackImageMarkup(call) {
   if (call.image) {
     return `<img src="${escapeHTML(call.image)}" alt="${escapeHTML(call.callerName)}">`;
   }
-  return `<div class="holocall-initials" aria-hidden="true">${escapeHTML(call.initials)}</div>`;
+  return `<div class="cybercall-initials" aria-hidden="true">${escapeHTML(call.initials)}</div>`;
 }
 
 function renderFallbackTemplate(call) {
-  const signalStyle = `--holocall-signal: ${call.signal}%;`;
-  const fullscreenClass = call.fullscreen ? "holocall-broadcast" : "";
-  const ringingClass = call.ringing ? "holocall-ringing-panel" : "";
-  const connectedClass = call.accepted ? "holocall-connected-panel" : "";
+  const signalStyle = `--cybercall-signal: ${call.signal}%;`;
+  const fullscreenClass = call.fullscreen ? "cybercall-broadcast" : "";
+  const ringingClass = call.ringing ? "cybercall-ringing-panel" : "";
+  const connectedClass = call.accepted ? "cybercall-connected-panel" : "";
   const broadcastButton = call.showBroadcast
-    ? '<button type="button" data-holocall-action="broadcast">Broadcast</button>'
+    ? '<button type="button" data-cybercall-action="broadcast">Broadcast</button>'
     : "";
   const headerMarkup = call.accepted
     ? ""
     : `
-      <header class="holocall-header">
+      <header class="cybercall-header">
         <div>
-          <div class="holocall-kicker">${escapeHTML(call.kicker)}</div>
+          <div class="cybercall-kicker">${escapeHTML(call.kicker)}</div>
           <h2>${escapeHTML(call.callerName)}</h2>
           <p>${escapeHTML(call.subtitle)}</p>
         </div>
-        <div class="holocall-signal">
+        <div class="cybercall-signal">
           <span>${call.signal}%</span>
-          <div class="holocall-signal-bar" aria-hidden="true"><i></i></div>
+          <div class="cybercall-signal-bar" aria-hidden="true"><i></i></div>
         </div>
       </header>
     `;
   const messageMarkup = call.accepted ? "" : `<blockquote>${escapeHTML(call.message)}</blockquote>`;
   const actionsMarkup = call.accepted
-    ? '<button type="button" data-holocall-action="end">End Call</button>'
+    ? '<button type="button" data-cybercall-action="end">End Call</button>'
     : `
-        ${call.canAccept ? '<button type="button" data-holocall-action="accept">Accept</button>' : ""}
-        ${call.canDecline ? '<button type="button" data-holocall-action="decline">Decline</button>' : ""}
+        ${call.canAccept ? '<button type="button" data-cybercall-action="accept">Accept</button>' : ""}
+        ${call.canDecline ? '<button type="button" data-cybercall-action="decline">Decline</button>' : ""}
         ${broadcastButton}
-        <button type="button" data-holocall-action="end">End Call</button>
+        <button type="button" data-cybercall-action="end">End Call</button>
       `;
   return `
-    <div class="holocall-panel holocall-${call.variant} ${fullscreenClass} ${ringingClass} ${connectedClass}" style="${signalStyle}">
-      <div class="holocall-static" aria-hidden="true"></div>
-      <div class="holocall-reticle" aria-hidden="true"></div>
+    <div class="cybercall-panel cybercall-${call.variant} ${fullscreenClass} ${ringingClass} ${connectedClass}" style="${signalStyle}">
+      <div class="cybercall-static" aria-hidden="true"></div>
+      <div class="cybercall-reticle" aria-hidden="true"></div>
       ${headerMarkup}
-      <main class="holocall-body">
-        <div class="holocall-portrait">${makeFallbackImageMarkup(call)}</div>
+      <main class="cybercall-body">
+        <div class="cybercall-portrait">${makeFallbackImageMarkup(call)}</div>
         ${messageMarkup}
       </main>
-      <footer class="holocall-actions">
+      <footer class="cybercall-actions">
         ${actionsMarkup}
       </footer>
     </div>
@@ -491,7 +491,7 @@ function renderComposerFallbackTemplate(data) {
     .join("");
 
   return `
-    <form class="holocall-composer" data-holocall-composer>
+    <form class="cybercall-composer" data-cybercall-composer>
       <label>Actor Portrait
         <select name="actorId">
           <option value="">Manual / no actor</option>
@@ -500,7 +500,7 @@ function renderComposerFallbackTemplate(data) {
       </label>
       <label>Caller Name <input type="text" name="callerName" value="${escapeHTML(call.callerName)}"></label>
       <label>Subtitle / Faction <input type="text" name="subtitle" value="${escapeHTML(call.subtitle)}"></label>
-      <label>Portrait Image Path <span class="holocall-composer-path-row"><input type="text" name="image" value="${escapeHTML(call.image)}"><button type="button" data-holocall-compose-action="browse-image">Browse</button></span></label>
+      <label>Portrait Image Path <span class="cybercall-composer-path-row"><input type="text" name="image" value="${escapeHTML(call.image)}"><button type="button" data-cybercall-compose-action="browse-image">Browse</button></span></label>
       <label>Message <textarea name="message" rows="5">${escapeHTML(call.message)}</textarea></label>
       <label>Signal <input type="range" name="signal" min="0" max="100" value="${call.signal}"></label>
       <label>Variant
@@ -512,10 +512,10 @@ function renderComposerFallbackTemplate(data) {
       </label>
       <label><input type="checkbox" name="fullscreen" ${call.fullscreen ? "checked" : ""}> Fullscreen Broadcast</label>
       <label><input type="checkbox" name="ringing" ${call.ringing ? "checked" : ""}> Ringing Animation / Sound</label>
-      <div class="holocall-composer-actions">
-        <button type="button" data-holocall-compose-action="preview">Preview Locally</button>
-        <button type="button" data-holocall-compose-action="broadcast">Broadcast to Players</button>
-        <button type="button" data-holocall-compose-action="close-active">Close Active Call</button>
+      <div class="cybercall-composer-actions">
+        <button type="button" data-cybercall-compose-action="preview">Preview Locally</button>
+        <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>
+        <button type="button" data-cybercall-compose-action="close-active">Close Active Call</button>
       </div>
     </form>
   `;
@@ -525,52 +525,52 @@ function renderContactsFallbackTemplate(data) {
   const renderContactList = (contacts, scope) => contacts.length
     ? contacts.map((contact) => `
         <li>
-          <div class="holocall-contact-avatar">
+          <div class="cybercall-contact-avatar">
             ${contact.image ? `<img src="${escapeHTML(contact.image)}" alt="">` : `<span>${escapeHTML(contact.initials)}</span>`}
           </div>
-          <div class="holocall-contact-id">
+          <div class="cybercall-contact-id">
             <strong>${escapeHTML(contact.name)}</strong>
             <span>${escapeHTML(contact.number)}</span>
           </div>
-          <div class="holocall-contact-actions">
-            <button type="button" data-holocall-contact-action="call" data-contact-scope="${scope}" data-contact-id="${escapeHTML(contact.id)}">Call</button>
-            <button type="button" data-holocall-contact-action="remove" data-contact-scope="${scope}" data-contact-id="${escapeHTML(contact.id)}">Remove</button>
+          <div class="cybercall-contact-actions">
+            <button type="button" data-cybercall-contact-action="call" data-contact-scope="${scope}" data-contact-id="${escapeHTML(contact.id)}">Call</button>
+            <button type="button" data-cybercall-contact-action="remove" data-contact-scope="${scope}" data-contact-id="${escapeHTML(contact.id)}">Remove</button>
           </div>
         </li>
       `).join("")
-    : '<li class="holocall-contacts-empty">No contacts stored.</li>';
+    : '<li class="cybercall-contacts-empty">No contacts stored.</li>';
   const personalActive = data.activeTab !== "group";
   const groupActive = data.activeTab === "group";
 
   return `
-    <section class="holocall-contacts">
-      <header class="holocall-contacts-header">
+    <section class="cybercall-contacts">
+      <header class="cybercall-contacts-header">
         <div>
-          <div class="holocall-contacts-kicker">Personal Comms Directory</div>
-          <h2>HoloCall Contacts</h2>
+          <div class="cybercall-contacts-kicker">Personal Comms Directory</div>
+          <h2>CyberCall Contacts</h2>
         </div>
       </header>
-      <nav class="holocall-contact-tabs">
-        <button type="button" class="${personalActive ? "active" : ""}" data-holocall-contact-tab="personal">Personal</button>
-        <button type="button" class="${groupActive ? "active" : ""}" data-holocall-contact-tab="group">Group</button>
+      <nav class="cybercall-contact-tabs">
+        <button type="button" class="${personalActive ? "active" : ""}" data-cybercall-contact-tab="personal">Personal</button>
+        <button type="button" class="${groupActive ? "active" : ""}" data-cybercall-contact-tab="group">Group</button>
       </nav>
-      <section data-holocall-contact-panel="personal" ${personalActive ? "" : "hidden"}>
-        <ul class="holocall-contacts-list">${renderContactList(data.contacts, "personal")}</ul>
+      <section data-cybercall-contact-panel="personal" ${personalActive ? "" : "hidden"}>
+        <ul class="cybercall-contacts-list">${renderContactList(data.contacts, "personal")}</ul>
       </section>
-      <section data-holocall-contact-panel="group" ${groupActive ? "" : "hidden"}>
-        <ul class="holocall-contacts-list">${renderContactList(data.groupContacts, "group")}</ul>
+      <section data-cybercall-contact-panel="group" ${groupActive ? "" : "hidden"}>
+        <ul class="cybercall-contacts-list">${renderContactList(data.groupContacts, "group")}</ul>
       </section>
-      <form class="holocall-contacts-form" data-holocall-contacts-form>
+      <form class="cybercall-contacts-form" data-cybercall-contacts-form>
         <input type="hidden" name="scope" value="${escapeHTML(data.activeTab)}">
         <label>Name <input type="text" name="name" required></label>
         <label>Number <input type="text" name="number" required></label>
         <label>Picture <input type="text" name="image" placeholder="icons/..."></label>
         <button type="submit">Add Contact</button>
       </form>
-      <footer class="holocall-contacts-footer">
-        <label class="holocall-ringtone-select">
+      <footer class="cybercall-contacts-footer">
+        <label class="cybercall-ringtone-select">
           <span>Ringtone</span>
-          <select data-holocall-ringtone>
+          <select data-cybercall-ringtone>
             ${(data.ringtoneChoices ?? []).map((choice) =>
               `<option value="${escapeHTML(choice.value)}" ${choice.selected ? "selected" : ""}>${escapeHTML(choice.label)}</option>`
             ).join("")}
@@ -584,7 +584,7 @@ function renderContactsFallbackTemplate(data) {
 const ApplicationV2 = foundry?.applications?.api?.ApplicationV2;
 const HandlebarsApplicationMixin = foundry?.applications?.api?.HandlebarsApplicationMixin;
 
-class HoloCallApplicationV1 extends Application {
+class CyberCallApplicationV1 extends Application {
   constructor(callData, options = {}) {
     super(options);
     this.callData = normalizeCallData(callData);
@@ -592,10 +592,10 @@ class HoloCallApplicationV1 extends Application {
 
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "holocall-overlay",
-      title: "HoloCall",
+      id: "cybercall-overlay",
+      title: "CyberCall",
       template: TEMPLATE_PATH,
-      classes: ["holocall-app"],
+      classes: ["cybercall-app"],
       popOut: true,
       resizable: true,
       width: 440,
@@ -630,13 +630,13 @@ class HoloCallApplicationV1 extends Application {
   }
 }
 
-class HoloCallComposerV1 extends Application {
+class CyberCallComposerV1 extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "holocall-composer",
-      title: "HoloCall Composer",
+      id: "cybercall-composer",
+      title: "CyberCall Composer",
       template: COMPOSER_TEMPLATE_PATH,
-      classes: ["holocall-composer-app"],
+      classes: ["cybercall-composer-app"],
       popOut: true,
       resizable: true,
       width: 560,
@@ -671,13 +671,13 @@ class HoloCallComposerV1 extends Application {
   }
 }
 
-class HoloCallContactsV1 extends Application {
+class CyberCallContactsV1 extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "holocall-contacts",
-      title: "HoloCall Contacts",
+      id: "cybercall-contacts",
+      title: "CyberCall Contacts",
       template: CONTACTS_TEMPLATE_PATH,
-      classes: ["holocall-contacts-app"],
+      classes: ["cybercall-contacts-app"],
       popOut: true,
       resizable: true,
       width: 500,
@@ -724,13 +724,13 @@ class HoloCallContactsV1 extends Application {
 function createApplicationV2Class() {
   if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
 
-  return class HoloCallApplicationV2 extends HandlebarsApplicationMixin(ApplicationV2) {
+  return class CyberCallApplicationV2 extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
-      id: "holocall-overlay",
+      id: "cybercall-overlay",
       tag: "section",
-      classes: ["holocall-app"],
+      classes: ["cybercall-app"],
       window: {
-        title: "HoloCall",
+        title: "CyberCall",
         resizable: true
       },
       position: {
@@ -781,18 +781,18 @@ function createApplicationV2Class() {
   };
 }
 
-const HoloCallApplication = createApplicationV2Class() ?? HoloCallApplicationV1;
+const CyberCallApplication = createApplicationV2Class() ?? CyberCallApplicationV1;
 
 function createComposerV2Class() {
   if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
 
-  return class HoloCallComposerV2 extends HandlebarsApplicationMixin(ApplicationV2) {
+  return class CyberCallComposerV2 extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
-      id: "holocall-composer",
+      id: "cybercall-composer",
       tag: "section",
-      classes: ["holocall-composer-app"],
+      classes: ["cybercall-composer-app"],
       window: {
-        title: "HoloCall Composer",
+        title: "CyberCall Composer",
         resizable: true
       },
       position: {
@@ -838,18 +838,18 @@ function createComposerV2Class() {
   };
 }
 
-const HoloCallComposer = createComposerV2Class() ?? HoloCallComposerV1;
+const CyberCallComposer = createComposerV2Class() ?? CyberCallComposerV1;
 
 function createContactsV2Class() {
   if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
 
-  return class HoloCallContactsV2 extends HandlebarsApplicationMixin(ApplicationV2) {
+  return class CyberCallContactsV2 extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
-      id: "holocall-contacts",
+      id: "cybercall-contacts",
       tag: "section",
-      classes: ["holocall-contacts-app"],
+      classes: ["cybercall-contacts-app"],
       window: {
-        title: "HoloCall Contacts",
+        title: "CyberCall Contacts",
         resizable: true
       },
       position: {
@@ -904,17 +904,17 @@ function createContactsV2Class() {
   };
 }
 
-const HoloCallContacts = createContactsV2Class() ?? HoloCallContactsV1;
+const CyberCallContacts = createContactsV2Class() ?? CyberCallContactsV1;
 
 async function openCall(callData = {}) {
-  if (!canUseHoloCall()) {
-    ui.notifications?.warn?.("You do not have permission to open HoloCall transmissions.");
+  if (!canUseCyberCall()) {
+    ui.notifications?.warn?.("You do not have permission to open CyberCall transmissions.");
     return null;
   }
 
   if (activeContacts) await activeContacts.close();
   await closeCall();
-  activeCall = new HoloCallApplication(callData);
+  activeCall = new CyberCallApplication(callData);
   await activeCall.render(true);
   applyFullscreenPosition(activeCall);
   playRinging(activeCall.callData);
@@ -982,7 +982,7 @@ async function requestCallToGM(contact) {
   }
 
   if (!hasActiveGM()) {
-    ui.notifications?.warn?.("No GM is connected to receive the HoloCall.");
+    ui.notifications?.warn?.("No GM is connected to receive the CyberCall.");
     return null;
   }
 
@@ -1029,7 +1029,7 @@ async function requestCallToGM(contact) {
 
 async function openComposer() {
   if (!game.user.isGM) {
-    ui.notifications?.warn?.("Only the GM can open the HoloCall composer.");
+    ui.notifications?.warn?.("Only the GM can open the CyberCall composer.");
     return null;
   }
 
@@ -1038,14 +1038,14 @@ async function openComposer() {
     return activeComposer;
   }
 
-  activeComposer = new HoloCallComposer();
+  activeComposer = new CyberCallComposer();
   await activeComposer.render(true);
   return activeComposer;
 }
 
 async function openContacts() {
-  if (!canUseHoloCall()) {
-    ui.notifications?.warn?.("You do not have permission to use HoloCall contacts.");
+  if (!canUseCyberCall()) {
+    ui.notifications?.warn?.("You do not have permission to use CyberCall contacts.");
     return null;
   }
 
@@ -1059,7 +1059,7 @@ async function openContacts() {
     return activeContacts;
   }
 
-  activeContacts = new HoloCallContacts();
+  activeContacts = new CyberCallContacts();
   await activeContacts.render(true);
   return activeContacts;
 }
@@ -1071,7 +1071,7 @@ async function refreshContacts() {
 
 async function broadcastCall(callData = {}) {
   if (!game.user.isGM) {
-    ui.notifications?.warn?.("Only the GM can broadcast HoloCalls to all players.");
+    ui.notifications?.warn?.("Only the GM can broadcast CyberCalls to all players.");
     return null;
   }
 
@@ -1093,7 +1093,7 @@ async function handleSocketMessage(message) {
   if (!message) return;
 
   if (message.action === "openCall") {
-    if (!canUseHoloCall()) return;
+    if (!canUseCyberCall()) return;
     openCall(message.callData);
     return;
   }
@@ -1212,7 +1212,7 @@ function registerWithHoloSuite() {
 
   api.registerApp({
     id: MODULE_ID,
-    title: "HoloCall",
+    title: "CyberCall",
     icon: "fa-solid fa-satellite-dish",
     premium: false,
     description: "Compose calls, contacts, and holographic broadcasts.",
@@ -1251,7 +1251,7 @@ function registerSettings() {
 
   game.settings.register(MODULE_ID, "ringSound", {
     name: "Incoming Call Ringtone",
-    hint: "Ringtone played locally while a HoloCall is ringing. This is a client setting, so each user can choose their own ringtone.",
+    hint: "Ringtone played locally while a CyberCall is ringing. This is a client setting, so each user can choose their own ringtone.",
     scope: "client",
     config: false,
     type: String,
@@ -1261,7 +1261,7 @@ function registerSettings() {
 
   game.settings.register(MODULE_ID, "minimumRole", {
     name: "Minimum Player Role",
-    hint: "Minimum role allowed to open HoloCall overlays and receive GM broadcasts.",
+    hint: "Minimum role allowed to open CyberCall overlays and receive GM broadcasts.",
     scope: "world",
     config: true,
     type: Number,
@@ -1270,7 +1270,7 @@ function registerSettings() {
   });
 
   game.settings.register(MODULE_ID, "contacts", {
-    name: "HoloCall Contacts",
+    name: "CyberCall Contacts",
     hint: "Player contact directory stored locally for this client.",
     scope: "client",
     config: false,
@@ -1279,7 +1279,7 @@ function registerSettings() {
   });
 
   game.settings.register(MODULE_ID, "groupContacts", {
-    name: "HoloCall Group Contacts",
+    name: "CyberCall Group Contacts",
     hint: "Shared group contact directory for all players in this world.",
     scope: "world",
     config: false,
@@ -1289,13 +1289,13 @@ function registerSettings() {
 }
 
 function addSceneControl(controls) {
-  if (!canUseHoloCall()) return;
+  if (!canUseCyberCall()) return;
 
   const openDemoCall = () => game.user.isGM ? openComposer() : openContacts();
 
   const tool = {
-    name: "holocall",
-    title: game.user.isGM ? "Compose HoloCall" : "HoloCall Contacts",
+    name: "cybercall",
+    title: game.user.isGM ? "Compose CyberCall" : "CyberCall Contacts",
     icon: "fas fa-satellite-dish",
     button: true,
     visible: true,
@@ -1307,7 +1307,7 @@ function addSceneControl(controls) {
     const tokenControls = controls.tokens ?? controls.token;
     if (!tokenControls?.tools) return;
     const order = Object.keys(tokenControls.tools).length;
-    tokenControls.tools.holocall = { ...tool, order };
+    tokenControls.tools.cybercall = { ...tool, order };
     return;
   }
 

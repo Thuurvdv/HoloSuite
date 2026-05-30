@@ -1,7 +1,7 @@
 var Te = Object.defineProperty;
 var De = (e, t, a) => t in e ? Te(e, t, { enumerable: !0, configurable: !0, writable: !0, value: a }) : e[t] = a;
 var A = (e, t, a) => De(e, typeof t != "symbol" ? t + "" : t, a);
-const c = "holocall", S = `module.${c}`, te = `modules/${c}/templates/holocall.hbs`, ae = `modules/${c}/templates/holocall-composer.hbs`, ne = `modules/${c}/templates/holocall-contacts.hbs`;
+const c = "cybercall", S = `module.${c}`, te = `modules/${c}/templates/cybercall.hbs`, ae = `modules/${c}/templates/cybercall-composer.hbs`, ne = `modules/${c}/templates/cybercall-contacts.hbs`;
 let o = null, p = null, d = null, b = "personal", y = null, E = null;
 const m = {
   callerName: "UNKNOWN CALLER",
@@ -65,7 +65,7 @@ function T(e = {}) {
     callerUserId: String(e.callerUserId ?? ""),
     contactNumber: String(e.contactNumber ?? "")
   };
-  return t.initials = re(t.callerName), t.showBroadcast = !!((a = game == null ? void 0 : game.user) != null && a.isGM && t.allowBroadcast), t.isStandard = t.variant === "standard", t.isEmergency = t.variant === "emergency", t.isCorrupted = t.variant === "corrupted", t.isIncoming = !t.accepted, t.kicker = t.outgoing ? "Outgoing HoloCall" : t.fullscreen ? "System-wide Broadcast" : "Incoming HoloCall", t;
+  return t.initials = re(t.callerName), t.showBroadcast = !!((a = game == null ? void 0 : game.user) != null && a.isGM && t.allowBroadcast), t.isStandard = t.variant === "standard", t.isEmergency = t.variant === "emergency", t.isCorrupted = t.variant === "corrupted", t.isIncoming = !t.accepted, t.kicker = t.outgoing ? "Outgoing CyberCall" : t.fullscreen ? "System-wide Broadcast" : "Incoming CyberCall", t;
 }
 function ie() {
   var e, t, a, n, l, i, r, s;
@@ -176,9 +176,9 @@ function B(e, t) {
 }
 function ue(e, t) {
   const a = B(e, t);
-  a && (a.classList.toggle("holocall-fullscreen", e.callData.fullscreen), a.classList.toggle("holocall-ringing", e.callData.ringing && !e.callData.accepted), a.classList.toggle("holocall-connected", e.callData.accepted), a.querySelectorAll("[data-holocall-action]").forEach((n) => {
+  a && (a.classList.toggle("cybercall-fullscreen", e.callData.fullscreen), a.classList.toggle("cybercall-ringing", e.callData.ringing && !e.callData.accepted), a.classList.toggle("cybercall-connected", e.callData.accepted), a.querySelectorAll("[data-cybercall-action]").forEach((n) => {
     n.addEventListener("click", (l) => {
-      const i = l.currentTarget.dataset.holocallAction;
+      const i = l.currentTarget.dataset.cybercallAction;
       if (i === "accept") {
         Ve(e.callData.id);
         return;
@@ -197,7 +197,7 @@ function ue(e, t) {
 }
 function Ne(e) {
   var t;
-  return (t = e == null ? void 0 : e.querySelector) == null ? void 0 : t.call(e, "form[data-holocall-composer]");
+  return (t = e == null ? void 0 : e.querySelector) == null ? void 0 : t.call(e, "form[data-cybercall-composer]");
 }
 function J(e) {
   var i;
@@ -215,7 +215,7 @@ function J(e) {
 }
 function x(e) {
   var n, l;
-  const t = (n = e == null ? void 0 : e.elements) == null ? void 0 : n.signal, a = (l = e == null ? void 0 : e.querySelector) == null ? void 0 : l.call(e, "[data-holocall-signal-output]");
+  const t = (n = e == null ? void 0 : e.elements) == null ? void 0 : n.signal, a = (l = e == null ? void 0 : e.querySelector) == null ? void 0 : l.call(e, "[data-cybercall-signal-output]");
   !t || !a || (a.textContent = `${le(t.value)}%`);
 }
 function ge(e, t) {
@@ -227,10 +227,10 @@ function ge(e, t) {
     r && (n.elements.callerName.value = r.name, n.elements.image.value = r.img ?? "");
   }), n.addEventListener("submit", (r) => {
     r.preventDefault(), w(J(n));
-  }), a.querySelectorAll("[data-holocall-compose-action]").forEach((r) => {
+  }), a.querySelectorAll("[data-cybercall-compose-action]").forEach((r) => {
     r.addEventListener("click", async (s) => {
       var h, C, N, z, O, Y, W;
-      const g = s.currentTarget.dataset.holocallComposeAction, f = J(n);
+      const g = s.currentTarget.dataset.cybercallComposeAction, f = J(n);
       if (g === "preview") {
         await w(f);
         return;
@@ -265,7 +265,7 @@ function ge(e, t) {
 }
 function He(e) {
   var t;
-  return (t = e == null ? void 0 : e.querySelector) == null ? void 0 : t.call(e, "form[data-holocall-contacts-form]");
+  return (t = e == null ? void 0 : e.querySelector) == null ? void 0 : t.call(e, "form[data-cybercall-contacts-form]");
 }
 function de(e, t) {
   const a = B(e, t), n = He(a);
@@ -275,21 +275,21 @@ function de(e, t) {
     i.preventDefault();
     const r = new FormData(n), s = String(r.get("scope") ?? b);
     await Me(r.get("name"), r.get("number"), s, r.get("image")), n.reset(), n.elements.scope.value = s, (g = n.elements.name) == null || g.focus();
-  }), a.querySelectorAll("[data-holocall-contact-tab]").forEach((i) => {
+  }), a.querySelectorAll("[data-cybercall-contact-tab]").forEach((i) => {
     i.addEventListener("click", (r) => {
-      b = r.currentTarget.dataset.holocallContactTab, a.querySelectorAll("[data-holocall-contact-tab]").forEach((s) => {
-        s.classList.toggle("active", s.dataset.holocallContactTab === b);
-      }), a.querySelectorAll("[data-holocall-contact-panel]").forEach((s) => {
-        s.hidden = s.dataset.holocallContactPanel !== b;
+      b = r.currentTarget.dataset.cybercallContactTab, a.querySelectorAll("[data-cybercall-contact-tab]").forEach((s) => {
+        s.classList.toggle("active", s.dataset.cybercallContactTab === b);
+      }), a.querySelectorAll("[data-cybercall-contact-panel]").forEach((s) => {
+        s.hidden = s.dataset.cybercallContactPanel !== b;
       }), n.elements.scope && (n.elements.scope.value = b);
     });
   });
-  const l = a.querySelector("[data-holocall-ringtone]");
+  const l = a.querySelector("[data-cybercall-ringtone]");
   l && l.addEventListener("change", async (i) => {
     await game.settings.set(c, "ringSound", i.currentTarget.value);
-  }), a.querySelectorAll("[data-holocall-contact-action]").forEach((i) => {
+  }), a.querySelectorAll("[data-cybercall-contact-action]").forEach((i) => {
     i.addEventListener("click", async (r) => {
-      const s = r.currentTarget.dataset.holocallContactAction, g = r.currentTarget.dataset.contactId, f = r.currentTarget.dataset.contactScope ?? "personal", C = (f === "group" ? D() : R()).find((N) => N.id === g);
+      const s = r.currentTarget.dataset.cybercallContactAction, g = r.currentTarget.dataset.contactId, f = r.currentTarget.dataset.contactScope ?? "personal", C = (f === "group" ? D() : R()).find((N) => N.id === g);
       if (s === "remove") {
         await Le(g, f);
         return;
@@ -299,37 +299,37 @@ function de(e, t) {
   });
 }
 function ke(e) {
-  return e.image ? `<img src="${u(e.image)}" alt="${u(e.callerName)}">` : `<div class="holocall-initials" aria-hidden="true">${u(e.initials)}</div>`;
+  return e.image ? `<img src="${u(e.image)}" alt="${u(e.callerName)}">` : `<div class="cybercall-initials" aria-hidden="true">${u(e.initials)}</div>`;
 }
 function me(e) {
-  const t = `--holocall-signal: ${e.signal}%;`, a = e.fullscreen ? "holocall-broadcast" : "", n = e.ringing ? "holocall-ringing-panel" : "", l = e.accepted ? "holocall-connected-panel" : "", i = e.showBroadcast ? '<button type="button" data-holocall-action="broadcast">Broadcast</button>' : "", r = e.accepted ? "" : `
-      <header class="holocall-header">
+  const t = `--cybercall-signal: ${e.signal}%;`, a = e.fullscreen ? "cybercall-broadcast" : "", n = e.ringing ? "cybercall-ringing-panel" : "", l = e.accepted ? "cybercall-connected-panel" : "", i = e.showBroadcast ? '<button type="button" data-cybercall-action="broadcast">Broadcast</button>' : "", r = e.accepted ? "" : `
+      <header class="cybercall-header">
         <div>
-          <div class="holocall-kicker">${u(e.kicker)}</div>
+          <div class="cybercall-kicker">${u(e.kicker)}</div>
           <h2>${u(e.callerName)}</h2>
           <p>${u(e.subtitle)}</p>
         </div>
-        <div class="holocall-signal">
+        <div class="cybercall-signal">
           <span>${e.signal}%</span>
-          <div class="holocall-signal-bar" aria-hidden="true"><i></i></div>
+          <div class="cybercall-signal-bar" aria-hidden="true"><i></i></div>
         </div>
       </header>
-    `, s = e.accepted ? "" : `<blockquote>${u(e.message)}</blockquote>`, g = e.accepted ? '<button type="button" data-holocall-action="end">End Call</button>' : `
-        ${e.canAccept ? '<button type="button" data-holocall-action="accept">Accept</button>' : ""}
-        ${e.canDecline ? '<button type="button" data-holocall-action="decline">Decline</button>' : ""}
+    `, s = e.accepted ? "" : `<blockquote>${u(e.message)}</blockquote>`, g = e.accepted ? '<button type="button" data-cybercall-action="end">End Call</button>' : `
+        ${e.canAccept ? '<button type="button" data-cybercall-action="accept">Accept</button>' : ""}
+        ${e.canDecline ? '<button type="button" data-cybercall-action="decline">Decline</button>' : ""}
         ${i}
-        <button type="button" data-holocall-action="end">End Call</button>
+        <button type="button" data-cybercall-action="end">End Call</button>
       `;
   return `
-    <div class="holocall-panel holocall-${e.variant} ${a} ${n} ${l}" style="${t}">
-      <div class="holocall-static" aria-hidden="true"></div>
-      <div class="holocall-reticle" aria-hidden="true"></div>
+    <div class="cybercall-panel cybercall-${e.variant} ${a} ${n} ${l}" style="${t}">
+      <div class="cybercall-static" aria-hidden="true"></div>
+      <div class="cybercall-reticle" aria-hidden="true"></div>
       ${r}
-      <main class="holocall-body">
-        <div class="holocall-portrait">${ke(e)}</div>
+      <main class="cybercall-body">
+        <div class="cybercall-portrait">${ke(e)}</div>
         ${s}
       </main>
-      <footer class="holocall-actions">
+      <footer class="cybercall-actions">
         ${g}
       </footer>
     </div>
@@ -338,7 +338,7 @@ function me(e) {
 function pe(e) {
   const t = e.call;
   return `
-    <form class="holocall-composer" data-holocall-composer>
+    <form class="cybercall-composer" data-cybercall-composer>
       <label>Actor Portrait
         <select name="actorId">
           <option value="">Manual / no actor</option>
@@ -347,7 +347,7 @@ function pe(e) {
       </label>
       <label>Caller Name <input type="text" name="callerName" value="${u(t.callerName)}"></label>
       <label>Subtitle / Faction <input type="text" name="subtitle" value="${u(t.subtitle)}"></label>
-      <label>Portrait Image Path <span class="holocall-composer-path-row"><input type="text" name="image" value="${u(t.image)}"><button type="button" data-holocall-compose-action="browse-image">Browse</button></span></label>
+      <label>Portrait Image Path <span class="cybercall-composer-path-row"><input type="text" name="image" value="${u(t.image)}"><button type="button" data-cybercall-compose-action="browse-image">Browse</button></span></label>
       <label>Message <textarea name="message" rows="5">${u(t.message)}</textarea></label>
       <label>Signal <input type="range" name="signal" min="0" max="100" value="${t.signal}"></label>
       <label>Variant
@@ -359,10 +359,10 @@ function pe(e) {
       </label>
       <label><input type="checkbox" name="fullscreen" ${t.fullscreen ? "checked" : ""}> Fullscreen Broadcast</label>
       <label><input type="checkbox" name="ringing" ${t.ringing ? "checked" : ""}> Ringing Animation / Sound</label>
-      <div class="holocall-composer-actions">
-        <button type="button" data-holocall-compose-action="preview">Preview Locally</button>
-        <button type="button" data-holocall-compose-action="broadcast">Broadcast to Players</button>
-        <button type="button" data-holocall-compose-action="close-active">Close Active Call</button>
+      <div class="cybercall-composer-actions">
+        <button type="button" data-cybercall-compose-action="preview">Preview Locally</button>
+        <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>
+        <button type="button" data-cybercall-compose-action="close-active">Close Active Call</button>
       </div>
     </form>
   `;
@@ -370,48 +370,48 @@ function pe(e) {
 function fe(e) {
   const t = (l, i) => l.length ? l.map((r) => `
         <li>
-          <div class="holocall-contact-avatar">
+          <div class="cybercall-contact-avatar">
             ${r.image ? `<img src="${u(r.image)}" alt="">` : `<span>${u(r.initials)}</span>`}
           </div>
-          <div class="holocall-contact-id">
+          <div class="cybercall-contact-id">
             <strong>${u(r.name)}</strong>
             <span>${u(r.number)}</span>
           </div>
-          <div class="holocall-contact-actions">
-            <button type="button" data-holocall-contact-action="call" data-contact-scope="${i}" data-contact-id="${u(r.id)}">Call</button>
-            <button type="button" data-holocall-contact-action="remove" data-contact-scope="${i}" data-contact-id="${u(r.id)}">Remove</button>
+          <div class="cybercall-contact-actions">
+            <button type="button" data-cybercall-contact-action="call" data-contact-scope="${i}" data-contact-id="${u(r.id)}">Call</button>
+            <button type="button" data-cybercall-contact-action="remove" data-contact-scope="${i}" data-contact-id="${u(r.id)}">Remove</button>
           </div>
         </li>
-      `).join("") : '<li class="holocall-contacts-empty">No contacts stored.</li>', a = e.activeTab !== "group", n = e.activeTab === "group";
+      `).join("") : '<li class="cybercall-contacts-empty">No contacts stored.</li>', a = e.activeTab !== "group", n = e.activeTab === "group";
   return `
-    <section class="holocall-contacts">
-      <header class="holocall-contacts-header">
+    <section class="cybercall-contacts">
+      <header class="cybercall-contacts-header">
         <div>
-          <div class="holocall-contacts-kicker">Personal Comms Directory</div>
-          <h2>HoloCall Contacts</h2>
+          <div class="cybercall-contacts-kicker">Personal Comms Directory</div>
+          <h2>CyberCall Contacts</h2>
         </div>
       </header>
-      <nav class="holocall-contact-tabs">
-        <button type="button" class="${a ? "active" : ""}" data-holocall-contact-tab="personal">Personal</button>
-        <button type="button" class="${n ? "active" : ""}" data-holocall-contact-tab="group">Group</button>
+      <nav class="cybercall-contact-tabs">
+        <button type="button" class="${a ? "active" : ""}" data-cybercall-contact-tab="personal">Personal</button>
+        <button type="button" class="${n ? "active" : ""}" data-cybercall-contact-tab="group">Group</button>
       </nav>
-      <section data-holocall-contact-panel="personal" ${a ? "" : "hidden"}>
-        <ul class="holocall-contacts-list">${t(e.contacts, "personal")}</ul>
+      <section data-cybercall-contact-panel="personal" ${a ? "" : "hidden"}>
+        <ul class="cybercall-contacts-list">${t(e.contacts, "personal")}</ul>
       </section>
-      <section data-holocall-contact-panel="group" ${n ? "" : "hidden"}>
-        <ul class="holocall-contacts-list">${t(e.groupContacts, "group")}</ul>
+      <section data-cybercall-contact-panel="group" ${n ? "" : "hidden"}>
+        <ul class="cybercall-contacts-list">${t(e.groupContacts, "group")}</ul>
       </section>
-      <form class="holocall-contacts-form" data-holocall-contacts-form>
+      <form class="cybercall-contacts-form" data-cybercall-contacts-form>
         <input type="hidden" name="scope" value="${u(e.activeTab)}">
         <label>Name <input type="text" name="name" required></label>
         <label>Number <input type="text" name="number" required></label>
         <label>Picture <input type="text" name="image" placeholder="icons/..."></label>
         <button type="submit">Add Contact</button>
       </form>
-      <footer class="holocall-contacts-footer">
-        <label class="holocall-ringtone-select">
+      <footer class="cybercall-contacts-footer">
+        <label class="cybercall-ringtone-select">
           <span>Ringtone</span>
-          <select data-holocall-ringtone>
+          <select data-cybercall-ringtone>
             ${(e.ringtoneChoices ?? []).map(
     (l) => `<option value="${u(l.value)}" ${l.selected ? "selected" : ""}>${u(l.label)}</option>`
   ).join("")}
@@ -431,10 +431,10 @@ class Re extends Application {
   }
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "holocall-overlay",
-      title: "HoloCall",
+      id: "cybercall-overlay",
+      title: "CyberCall",
       template: te,
-      classes: ["holocall-app"],
+      classes: ["cybercall-app"],
       popOut: !0,
       resizable: !0,
       width: 440,
@@ -463,10 +463,10 @@ class Re extends Application {
 class Oe extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "holocall-composer",
-      title: "HoloCall Composer",
+      id: "cybercall-composer",
+      title: "CyberCall Composer",
       template: ae,
-      classes: ["holocall-composer-app"],
+      classes: ["cybercall-composer-app"],
       popOut: !0,
       resizable: !0,
       width: 560,
@@ -496,10 +496,10 @@ class Oe extends Application {
 class Pe extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "holocall-contacts",
-      title: "HoloCall Contacts",
+      id: "cybercall-contacts",
+      title: "CyberCall Contacts",
       template: ne,
-      classes: ["holocall-contacts-app"],
+      classes: ["cybercall-contacts-app"],
       popOut: !0,
       resizable: !0,
       width: 500,
@@ -563,11 +563,11 @@ function _e() {
       return o === this && (o = null), G(), super.close(a);
     }
   }, A(e, "DEFAULT_OPTIONS", {
-    id: "holocall-overlay",
+    id: "cybercall-overlay",
     tag: "section",
-    classes: ["holocall-app"],
+    classes: ["cybercall-app"],
     window: {
-      title: "HoloCall",
+      title: "CyberCall",
       resizable: !0
     },
     position: {
@@ -608,11 +608,11 @@ function Ge() {
       return p === this && (p = null), super.close(a);
     }
   }, A(e, "DEFAULT_OPTIONS", {
-    id: "holocall-composer",
+    id: "cybercall-composer",
     tag: "section",
-    classes: ["holocall-composer-app"],
+    classes: ["cybercall-composer-app"],
     window: {
-      title: "HoloCall Composer",
+      title: "CyberCall Composer",
       resizable: !0
     },
     position: {
@@ -661,11 +661,11 @@ function Fe() {
       return d === this && (d = null), super.close(a);
     }
   }, A(e, "DEFAULT_OPTIONS", {
-    id: "holocall-contacts",
+    id: "cybercall-contacts",
     tag: "section",
-    classes: ["holocall-contacts-app"],
+    classes: ["cybercall-contacts-app"],
     window: {
-      title: "HoloCall Contacts",
+      title: "CyberCall Contacts",
       resizable: !0
     },
     position: {
@@ -681,7 +681,7 @@ function Fe() {
 const Ue = Fe() ?? Pe;
 async function w(e = {}) {
   var t, a;
-  return q() ? (d && await d.close(), await V(), o = new Ie(e), await o.render(!0), we(o), Ye(o.callData), o) : ((a = (t = ui.notifications) == null ? void 0 : t.warn) == null || a.call(t, "You do not have permission to open HoloCall transmissions."), null);
+  return q() ? (d && await d.close(), await V(), o = new Ie(e), await o.render(!0), we(o), Ye(o.callData), o) : ((a = (t = ui.notifications) == null ? void 0 : t.warn) == null || a.call(t, "You do not have permission to open CyberCall transmissions."), null);
 }
 async function V() {
   if (!o) return;
@@ -727,7 +727,7 @@ async function je(e) {
       ringing: !1
     });
   if (!U())
-    return (s = (r = ui.notifications) == null ? void 0 : r.warn) == null || s.call(r, "No GM is connected to receive the HoloCall."), null;
+    return (s = (r = ui.notifications) == null ? void 0 : r.warn) == null || s.call(r, "No GM is connected to receive the CyberCall."), null;
   const t = F(), a = String(((g = game.user) == null ? void 0 : g.avatar) ?? ((h = (f = game.user) == null ? void 0 : f.character) == null ? void 0 : h.img) ?? "").trim(), n = {
     id: t,
     signal: game.settings.get(c, "defaultSignal"),
@@ -763,11 +763,11 @@ async function je(e) {
 }
 async function ye() {
   var e, t, a;
-  return game.user.isGM ? p ? ((a = p.bringToFront) == null || a.call(p), p) : (p = new xe(), await p.render(!0), p) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "Only the GM can open the HoloCall composer."), null);
+  return game.user.isGM ? p ? ((a = p.bringToFront) == null || a.call(p), p) : (p = new xe(), await p.render(!0), p) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "Only the GM can open the CyberCall composer."), null);
 }
 async function ve() {
   var e, t, a, n;
-  return q() ? o ? ((a = o.bringToFront) == null || a.call(o), o) : d ? ((n = d.bringToFront) == null || n.call(d), d) : (d = new Ue(), await d.render(!0), d) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "You do not have permission to use HoloCall contacts."), null);
+  return q() ? o ? ((a = o.bringToFront) == null || a.call(o), o) : d ? ((n = d.bringToFront) == null || n.call(d), d) : (d = new Ue(), await d.render(!0), d) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "You do not have permission to use CyberCall contacts."), null);
 }
 async function k() {
   d && await d.render(!0);
@@ -775,7 +775,7 @@ async function k() {
 async function j(e = {}) {
   var a, n;
   if (!game.user.isGM)
-    return (n = (a = ui.notifications) == null ? void 0 : a.warn) == null || n.call(a, "Only the GM can broadcast HoloCalls to all players."), null;
+    return (n = (a = ui.notifications) == null ? void 0 : a.warn) == null || n.call(a, "Only the GM can broadcast CyberCalls to all players."), null;
   const t = T({
     ...e,
     fullscreen: e.fullscreen ?? !0,
@@ -875,7 +875,7 @@ function We() {
   const e = game.modules.get("holosuite-core"), t = e != null && e.active ? e.api : null;
   return t != null && t.registerApp ? (t.registerApp({
     id: c,
-    title: "HoloCall",
+    title: "CyberCall",
     icon: "fa-solid fa-satellite-dish",
     premium: !1,
     description: "Compose calls, contacts, and holographic broadcasts.",
@@ -910,7 +910,7 @@ function Ke() {
     }
   }), game.settings.register(c, "ringSound", {
     name: "Incoming Call Ringtone",
-    hint: "Ringtone played locally while a HoloCall is ringing. This is a client setting, so each user can choose their own ringtone.",
+    hint: "Ringtone played locally while a CyberCall is ringing. This is a client setting, so each user can choose their own ringtone.",
     scope: "client",
     config: !1,
     type: String,
@@ -918,21 +918,21 @@ function Ke() {
     choices: oe
   }), game.settings.register(c, "minimumRole", {
     name: "Minimum Player Role",
-    hint: "Minimum role allowed to open HoloCall overlays and receive GM broadcasts.",
+    hint: "Minimum role allowed to open CyberCall overlays and receive GM broadcasts.",
     scope: "world",
     config: !0,
     type: Number,
     default: e.PLAYER,
     choices: t
   }), game.settings.register(c, "contacts", {
-    name: "HoloCall Contacts",
+    name: "CyberCall Contacts",
     hint: "Player contact directory stored locally for this client.",
     scope: "client",
     config: !1,
     type: Object,
     default: []
   }), game.settings.register(c, "groupContacts", {
-    name: "HoloCall Group Contacts",
+    name: "CyberCall Group Contacts",
     hint: "Shared group contact directory for all players in this world.",
     scope: "world",
     config: !1,

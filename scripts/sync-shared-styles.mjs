@@ -8,7 +8,7 @@ const modules = [
   "bounty-board",
   "csi-toolkit",
   "galaxy-map",
-  "holocall",
+  "cybercall",
   "holosuite-core",
   "holosuite-critical-cutin",
   "holosuite-hacking",

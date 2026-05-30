@@ -1,41 +1,41 @@
-.holocall-app {
-  --holocall-cyan: var(--hs-cyan);
-  --holocall-blue: #00a7ff;
-  --holocall-deep: rgba(4, 16, 28, 0.82);
-  --holocall-line: var(--hs-line);
-  --holocall-text: var(--hs-text);
-  --holocall-danger: var(--hs-magenta);
-  color: var(--holocall-text);
+.cybercall-app {
+  --cybercall-cyan: var(--hs-cyan);
+  --cybercall-blue: #00a7ff;
+  --cybercall-deep: rgba(4, 16, 28, 0.82);
+  --cybercall-line: var(--hs-line);
+  --cybercall-text: var(--hs-text);
+  --cybercall-danger: var(--hs-magenta);
+  color: var(--cybercall-text);
   font-family: var(--hs-font-ui);
 }
 
-.holocall-composer-app,
-.holocall-contacts-app {
-  --holocall-cyan: var(--hs-cyan);
-  --holocall-blue: #00a7ff;
-  --holocall-text: var(--hs-text);
-  color: var(--holocall-text);
+.cybercall-composer-app,
+.cybercall-contacts-app {
+  --cybercall-cyan: var(--hs-cyan);
+  --cybercall-blue: #00a7ff;
+  --cybercall-text: var(--hs-text);
+  color: var(--cybercall-text);
   font-family: var(--hs-font-ui);
 }
 
-.holocall-app.holocall-fullscreen {
+.cybercall-app.cybercall-fullscreen {
   max-width: none;
 }
 
-.holocall-app .window-content,
-.holocall-composer-app .window-content {
+.cybercall-app .window-content,
+.cybercall-composer-app .window-content {
   padding: 0;
   overflow: hidden;
   background: transparent;
 }
 
-.holocall-contacts-app .window-content {
+.cybercall-contacts-app .window-content {
   padding: 0;
   overflow: visible;
   background: transparent;
 }
 
-.holocall-app.holocall-fullscreen .window-content {
+.cybercall-app.cybercall-fullscreen .window-content {
   display: grid;
   min-height: calc(100vh - 30px);
   place-items: center;
@@ -48,35 +48,35 @@
     radial-gradient(circle at center, rgba(94, 231, 255, 0.12), rgba(0, 0, 0, 0.74) 62%);
 }
 
-.holocall-app .window-header,
-.holocall-composer-app .window-header,
-.holocall-contacts-app .window-header {
+.cybercall-app .window-header,
+.cybercall-composer-app .window-header,
+.cybercall-contacts-app .window-header {
   border-bottom-color: rgba(94, 231, 255, 0.35);
   background: rgba(2, 13, 24, 0.92);
-  color: var(--holocall-text);
+  color: var(--cybercall-text);
 }
 
-.holocall-panel {
+.cybercall-panel {
   position: relative;
   min-width: 320px;
   min-height: 280px;
   padding: 18px;
   overflow: hidden;
-  border: 1px solid var(--holocall-line);
+  border: 1px solid var(--cybercall-line);
   border-radius: var(--hs-radius);
   background:
     linear-gradient(135deg, rgba(94, 231, 255, 0.16), transparent 34%),
     linear-gradient(180deg, rgba(2, 28, 48, 0.72), rgba(3, 11, 22, 0.88)),
-    var(--holocall-deep);
+    var(--cybercall-deep);
   box-shadow:
     0 0 24px rgba(0, 167, 255, 0.34),
     inset 0 0 34px rgba(94, 231, 255, 0.12);
   backdrop-filter: blur(10px);
   text-shadow: 0 0 10px rgba(94, 231, 255, 0.55);
-  animation: holocall-flicker 5.5s infinite;
+  animation: cybercall-flicker 5.5s infinite;
 }
 
-.holocall-broadcast {
+.cybercall-broadcast {
   display: grid;
   width: min(1120px, calc(100vw - 72px));
   min-height: min(680px, calc(100vh - 96px));
@@ -85,7 +85,7 @@
   border-width: 2px;
 }
 
-.holocall-panel::before {
+.cybercall-panel::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -101,7 +101,7 @@
   opacity: 0.34;
 }
 
-.holocall-panel::after {
+.cybercall-panel::after {
   content: "";
   position: absolute;
   inset: -20%;
@@ -114,13 +114,13 @@
     transparent 100%
   );
   transform: translateY(-55%);
-  animation: holocall-scan 4.2s linear infinite;
+  animation: cybercall-scan 4.2s linear infinite;
 }
 
-.holocall-emergency {
-  --holocall-cyan: #ff6c7e;
-  --holocall-blue: #ff274b;
-  --holocall-line: rgba(255, 65, 93, 0.52);
+.cybercall-emergency {
+  --cybercall-cyan: #ff6c7e;
+  --cybercall-blue: #ff274b;
+  --cybercall-line: rgba(255, 65, 93, 0.52);
   background:
     linear-gradient(135deg, rgba(255, 65, 93, 0.20), transparent 34%),
     linear-gradient(180deg, rgba(42, 4, 13, 0.78), rgba(18, 3, 9, 0.9));
@@ -129,11 +129,11 @@
     inset 0 0 34px rgba(255, 65, 93, 0.14);
 }
 
-.holocall-corrupted {
-  --holocall-cyan: #7dff9a;
-  --holocall-blue: #12c96d;
-  --holocall-line: rgba(125, 255, 154, 0.48);
-  --holocall-text: #d8ffe2;
+.cybercall-corrupted {
+  --cybercall-cyan: #7dff9a;
+  --cybercall-blue: #12c96d;
+  --cybercall-line: rgba(125, 255, 154, 0.48);
+  --cybercall-text: #d8ffe2;
   background:
     linear-gradient(135deg, rgba(125, 255, 154, 0.18), transparent 36%),
     linear-gradient(180deg, rgba(5, 42, 20, 0.76), rgba(1, 16, 10, 0.92));
@@ -142,7 +142,7 @@
     inset 0 0 34px rgba(125, 255, 154, 0.13);
 }
 
-.holocall-static {
+.cybercall-static {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -151,40 +151,40 @@
     radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px),
     radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.24) 0 1px, transparent 1px);
   background-size: 12px 12px, 18px 18px;
-  animation: holocall-static 0.36s steps(2) infinite;
+  animation: cybercall-static 0.36s steps(2) infinite;
 }
 
-.holocall-reticle {
+.cybercall-reticle {
   position: absolute;
   inset: 12px;
   pointer-events: none;
   opacity: 0.38;
   background:
-    linear-gradient(var(--holocall-cyan), var(--holocall-cyan)) left top / 42px 1px no-repeat,
-    linear-gradient(var(--holocall-cyan), var(--holocall-cyan)) left top / 1px 42px no-repeat,
-    linear-gradient(var(--holocall-cyan), var(--holocall-cyan)) right top / 42px 1px no-repeat,
-    linear-gradient(var(--holocall-cyan), var(--holocall-cyan)) right top / 1px 42px no-repeat,
-    linear-gradient(var(--holocall-cyan), var(--holocall-cyan)) left bottom / 42px 1px no-repeat,
-    linear-gradient(var(--holocall-cyan), var(--holocall-cyan)) left bottom / 1px 42px no-repeat,
-    linear-gradient(var(--holocall-cyan), var(--holocall-cyan)) right bottom / 42px 1px no-repeat,
-    linear-gradient(var(--holocall-cyan), var(--holocall-cyan)) right bottom / 1px 42px no-repeat;
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) left top / 42px 1px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) left top / 1px 42px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right top / 42px 1px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right top / 1px 42px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) left bottom / 42px 1px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) left bottom / 1px 42px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right bottom / 42px 1px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right bottom / 1px 42px no-repeat;
 }
 
-.holocall-ringing .holocall-panel,
-.holocall-ringing-panel {
+.cybercall-ringing .cybercall-panel,
+.cybercall-ringing-panel {
   animation:
-    holocall-flicker 5.5s infinite,
-    holocall-ring-pulse 1.45s ease-in-out infinite;
+    cybercall-flicker 5.5s infinite,
+    cybercall-ring-pulse 1.45s ease-in-out infinite;
 }
 
-.holocall-header,
-.holocall-body,
-.holocall-actions {
+.cybercall-header,
+.cybercall-body,
+.cybercall-actions {
   position: relative;
   z-index: 1;
 }
 
-.holocall-header {
+.cybercall-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -193,16 +193,16 @@
   border-bottom: 1px solid rgba(94, 231, 255, 0.24);
 }
 
-.holocall-kicker {
+.cybercall-kicker {
   margin-bottom: 5px;
-  color: var(--holocall-cyan);
+  color: var(--cybercall-cyan);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0;
   text-transform: uppercase;
 }
 
-.holocall-header h2 {
+.cybercall-header h2 {
   margin: 0;
   color: #ffffff;
   font-size: 24px;
@@ -210,31 +210,31 @@
   text-transform: uppercase;
 }
 
-.holocall-broadcast .holocall-header h2 {
+.cybercall-broadcast .cybercall-header h2 {
   font-size: 42px;
 }
 
-.holocall-header p {
+.cybercall-header p {
   margin: 6px 0 0;
   color: rgba(217, 251, 255, 0.78);
   font-size: 13px;
 }
 
-.holocall-signal {
+.cybercall-signal {
   flex: 0 0 88px;
   text-align: right;
 }
 
-.holocall-signal span {
+.cybercall-signal span {
   display: block;
   margin-bottom: 7px;
-  color: var(--holocall-cyan);
+  color: var(--cybercall-cyan);
   font-family: var(--hs-font-mono);
   font-size: 16px;
   font-weight: 700;
 }
 
-.holocall-signal-bar {
+.cybercall-signal-bar {
   height: 8px;
   overflow: hidden;
   border: 1px solid rgba(94, 231, 255, 0.38);
@@ -242,15 +242,15 @@
   background: rgba(0, 0, 0, 0.34);
 }
 
-.holocall-signal-bar i {
+.cybercall-signal-bar i {
   display: block;
-  width: var(--holocall-signal);
+  width: var(--cybercall-signal);
   height: 100%;
-  background: linear-gradient(90deg, var(--holocall-blue), var(--holocall-cyan));
-  box-shadow: 0 0 12px var(--holocall-cyan);
+  background: linear-gradient(90deg, var(--cybercall-blue), var(--cybercall-cyan));
+  box-shadow: 0 0 12px var(--cybercall-cyan);
 }
 
-.holocall-body {
+.cybercall-body {
   display: grid;
   grid-template-columns: 132px minmax(0, 1fr);
   gap: 16px;
@@ -258,13 +258,13 @@
   margin-top: 16px;
 }
 
-.holocall-broadcast .holocall-body {
+.cybercall-broadcast .cybercall-body {
   grid-template-columns: minmax(220px, 34%) minmax(0, 1fr);
   gap: 28px;
   margin-top: 28px;
 }
 
-.holocall-portrait {
+.cybercall-portrait {
   display: grid;
   min-height: 154px;
   overflow: hidden;
@@ -277,11 +277,11 @@
   box-shadow: inset 0 0 18px rgba(94, 231, 255, 0.16);
 }
 
-.holocall-broadcast .holocall-portrait {
+.cybercall-broadcast .cybercall-portrait {
   min-height: 360px;
 }
 
-.holocall-portrait img {
+.cybercall-portrait img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -289,54 +289,54 @@
   opacity: 1;
 }
 
-.holocall-initials {
-  color: var(--holocall-cyan);
+.cybercall-initials {
+  color: var(--cybercall-cyan);
   font-size: 54px;
   font-weight: 800;
 }
 
-.holocall-body blockquote {
+.cybercall-body blockquote {
   display: flex;
   align-items: center;
   min-height: 154px;
   margin: 0;
   padding: 16px;
-  border-left: 3px solid var(--holocall-cyan);
+  border-left: 3px solid var(--cybercall-cyan);
   background: rgba(1, 12, 22, 0.42);
-  color: var(--holocall-text);
+  color: var(--cybercall-text);
   font-size: 17px;
   line-height: 1.45;
 }
 
-.holocall-broadcast .holocall-body blockquote {
+.cybercall-broadcast .cybercall-body blockquote {
   min-height: 360px;
   padding: 28px;
   font-size: 28px;
 }
 
-.holocall-connected-panel {
+.cybercall-connected-panel {
   align-content: center;
 }
 
-.holocall-connected-panel .holocall-body {
+.cybercall-connected-panel .cybercall-body {
   grid-template-columns: 1fr;
   margin-top: 0;
 }
 
-.holocall-connected-panel .holocall-portrait {
+.cybercall-connected-panel .cybercall-portrait {
   min-height: 320px;
   background: rgba(0, 0, 0, 0.2);
 }
 
-.holocall-connected-panel .holocall-portrait img {
+.cybercall-connected-panel .cybercall-portrait img {
   object-fit: contain;
 }
 
-.holocall-broadcast.holocall-connected-panel .holocall-portrait {
+.cybercall-broadcast.cybercall-connected-panel .cybercall-portrait {
   min-height: min(620px, calc(100vh - 190px));
 }
 
-.holocall-actions {
+.cybercall-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -344,35 +344,35 @@
   margin-top: 16px;
 }
 
-.holocall-actions button {
+.cybercall-actions button {
   min-width: 88px;
   border: 1px solid rgba(94, 231, 255, 0.5);
   border-radius: var(--hs-radius);
   background: rgba(0, 124, 190, 0.18);
-  color: var(--holocall-text);
+  color: var(--cybercall-text);
   font-weight: 700;
   text-transform: uppercase;
   box-shadow: inset 0 0 14px rgba(94, 231, 255, 0.12);
 }
 
-.holocall-actions button[data-holocall-action="broadcast"] {
+.cybercall-actions button[data-cybercall-action="broadcast"] {
   border-color: rgba(125, 255, 154, 0.58);
   background: rgba(18, 201, 109, 0.18);
 }
 
-.holocall-actions button:hover,
-.holocall-actions button:focus-visible {
-  border-color: var(--holocall-cyan);
+.cybercall-actions button:hover,
+.cybercall-actions button:focus-visible {
+  border-color: var(--cybercall-cyan);
   background: rgba(94, 231, 255, 0.22);
   box-shadow: 0 0 14px rgba(94, 231, 255, 0.28);
 }
 
-.holocall-actions button[data-holocall-action="decline"],
-.holocall-actions button[data-holocall-action="end"] {
+.cybercall-actions button[data-cybercall-action="decline"],
+.cybercall-actions button[data-cybercall-action="end"] {
   border-color: rgba(255, 65, 93, 0.54);
 }
 
-.holocall-composer {
+.cybercall-composer {
   padding: 16px;
   border: 1px solid rgba(94, 231, 255, 0.42);
   border-radius: var(--hs-radius);
@@ -391,7 +391,7 @@
     inset 0 0 28px rgba(94, 231, 255, 0.1);
 }
 
-.holocall-composer-header {
+.cybercall-composer-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -401,14 +401,14 @@
   border-bottom: 1px solid rgba(94, 231, 255, 0.25);
 }
 
-.holocall-composer-kicker {
-  color: var(--holocall-cyan);
+.cybercall-composer-kicker {
+  color: var(--cybercall-cyan);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.holocall-composer-header h2 {
+.cybercall-composer-header h2 {
   margin: 4px 0 0;
   color: #ffffff;
   font-size: 22px;
@@ -416,26 +416,26 @@
   text-transform: uppercase;
 }
 
-.holocall-composer-header output {
+.cybercall-composer-header output {
   min-width: 70px;
   padding: 7px 10px;
   border: 1px solid rgba(94, 231, 255, 0.36);
   border-radius: var(--hs-radius);
   background: rgba(0, 0, 0, 0.28);
-  color: var(--holocall-cyan);
+  color: var(--cybercall-cyan);
   font-family: var(--hs-font-mono);
   font-size: 18px;
   font-weight: 700;
   text-align: center;
 }
 
-.holocall-composer-grid {
+.cybercall-composer-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
 
-.holocall-composer label {
+.cybercall-composer label {
   display: grid;
   gap: 5px;
   margin: 0;
@@ -445,69 +445,69 @@
   text-transform: uppercase;
 }
 
-.holocall-composer input[type="text"],
-.holocall-composer input[type="range"],
-.holocall-composer select,
-.holocall-composer textarea {
+.cybercall-composer input[type="text"],
+.cybercall-composer input[type="range"],
+.cybercall-composer select,
+.cybercall-composer textarea {
   width: 100%;
 }
 
-.holocall-composer input[type="text"],
-.holocall-composer select,
-.holocall-composer textarea {
+.cybercall-composer input[type="text"],
+.cybercall-composer select,
+.cybercall-composer textarea {
   border: 1px solid rgba(94, 231, 255, 0.32);
   border-radius: var(--hs-radius);
   background: rgba(1, 8, 16, 0.72);
-  color: var(--holocall-text);
+  color: var(--cybercall-text);
   box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
 }
 
-.holocall-composer textarea {
+.cybercall-composer textarea {
   min-height: 104px;
   resize: vertical;
 }
 
-.holocall-composer input:focus-visible,
-.holocall-composer select:focus-visible,
-.holocall-composer textarea:focus-visible {
-  border-color: var(--holocall-cyan);
+.cybercall-composer input:focus-visible,
+.cybercall-composer select:focus-visible,
+.cybercall-composer textarea:focus-visible {
+  border-color: var(--cybercall-cyan);
   box-shadow:
     0 0 10px rgba(94, 231, 255, 0.22),
     inset 0 0 12px rgba(94, 231, 255, 0.1);
   outline: none;
 }
 
-.holocall-composer-wide {
+.cybercall-composer-wide {
   grid-column: 1 / -1;
 }
 
-.holocall-composer-path-row {
+.cybercall-composer-path-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 38px;
   gap: 6px;
 }
 
-.holocall-composer-path-row button {
+.cybercall-composer-path-row button {
   min-width: 38px;
   padding: 0;
   border: 1px solid rgba(94, 231, 255, 0.48);
   border-radius: var(--hs-radius);
   background: rgba(0, 124, 190, 0.18);
-  color: var(--holocall-text);
+  color: var(--cybercall-text);
 }
 
-.holocall-composer-range input {
-  accent-color: var(--holocall-cyan);
+.cybercall-composer-range input {
+  accent-color: var(--cybercall-cyan);
 }
 
-.holocall-composer-toggles {
+.cybercall-composer-toggles {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 12px;
 }
 
-.holocall-composer-toggles label {
+.cybercall-composer-toggles label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -517,11 +517,11 @@
   background: rgba(0, 124, 190, 0.1);
 }
 
-.holocall-composer-toggles input {
-  accent-color: var(--holocall-cyan);
+.cybercall-composer-toggles input {
+  accent-color: var(--cybercall-cyan);
 }
 
-.holocall-composer-actions {
+.cybercall-composer-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -529,33 +529,33 @@
   margin-top: 14px;
 }
 
-.holocall-composer-actions button {
+.cybercall-composer-actions button {
   min-width: 118px;
   border: 1px solid rgba(94, 231, 255, 0.48);
   border-radius: var(--hs-radius);
   background: rgba(0, 124, 190, 0.18);
-  color: var(--holocall-text);
+  color: var(--cybercall-text);
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.holocall-composer-actions button[data-holocall-compose-action="broadcast"] {
+.cybercall-composer-actions button[data-cybercall-compose-action="broadcast"] {
   border-color: rgba(125, 255, 154, 0.58);
   background: rgba(18, 201, 109, 0.18);
 }
 
-.holocall-composer-actions button[data-holocall-compose-action="close-active"] {
+.cybercall-composer-actions button[data-cybercall-compose-action="close-active"] {
   border-color: rgba(255, 65, 93, 0.54);
 }
 
-.holocall-composer-actions button:hover,
-.holocall-composer-actions button:focus-visible {
-  border-color: var(--holocall-cyan);
+.cybercall-composer-actions button:hover,
+.cybercall-composer-actions button:focus-visible {
+  border-color: var(--cybercall-cyan);
   background: rgba(94, 231, 255, 0.22);
   box-shadow: 0 0 14px rgba(94, 231, 255, 0.25);
 }
 
-.holocall-contacts {
+.cybercall-contacts {
   padding: 16px;
   border: 1px solid rgba(94, 231, 255, 0.42);
   border-radius: var(--hs-radius);
@@ -575,20 +575,20 @@
   overflow: visible;
 }
 
-.holocall-contacts-header {
+.cybercall-contacts-header {
   margin-bottom: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(94, 231, 255, 0.25);
 }
 
-.holocall-contacts-kicker {
-  color: var(--holocall-cyan);
+.cybercall-contacts-kicker {
+  color: var(--cybercall-cyan);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.holocall-contacts-header h2 {
+.cybercall-contacts-header h2 {
   margin: 4px 0 0;
   color: #ffffff;
   font-size: 22px;
@@ -596,14 +596,14 @@
   text-transform: uppercase;
 }
 
-.holocall-contact-tabs {
+.cybercall-contact-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-bottom: 10px;
 }
 
-.holocall-contact-tabs button {
+.cybercall-contact-tabs button {
   border: 1px solid rgba(94, 231, 255, 0.34);
   border-radius: var(--hs-radius);
   background: rgba(0, 124, 190, 0.12);
@@ -612,16 +612,16 @@
   text-transform: uppercase;
 }
 
-.holocall-contact-tabs button.active,
-.holocall-contact-tabs button:hover,
-.holocall-contact-tabs button:focus-visible {
-  border-color: var(--holocall-cyan);
+.cybercall-contact-tabs button.active,
+.cybercall-contact-tabs button:hover,
+.cybercall-contact-tabs button:focus-visible {
+  border-color: var(--cybercall-cyan);
   background: rgba(94, 231, 255, 0.22);
   color: #ffffff;
   box-shadow: 0 0 14px rgba(94, 231, 255, 0.22);
 }
 
-.holocall-contacts-list {
+.cybercall-contacts-list {
   display: grid;
   gap: 8px;
   max-height: 340px;
@@ -631,7 +631,7 @@
   list-style: none;
 }
 
-.holocall-contacts-list li {
+.cybercall-contacts-list li {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   gap: 10px;
@@ -642,7 +642,7 @@
   background: rgba(0, 124, 190, 0.1);
 }
 
-.holocall-contact-avatar {
+.cybercall-contact-avatar {
   display: grid;
   width: 40px;
   height: 40px;
@@ -651,24 +651,24 @@
   border: 1px solid rgba(94, 231, 255, 0.38);
   border-radius: 50%;
   background: rgba(0, 124, 190, 0.14);
-  color: var(--holocall-cyan);
+  color: var(--cybercall-cyan);
   font-size: 13px;
   font-weight: 800;
 }
 
-.holocall-contact-avatar img {
+.cybercall-contact-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.holocall-contact-id {
+.cybercall-contact-id {
   display: grid;
   gap: 3px;
   min-width: 0;
 }
 
-.holocall-contact-id strong {
+.cybercall-contact-id strong {
   overflow: hidden;
   color: #ffffff;
   font-size: 15px;
@@ -677,7 +677,7 @@
   white-space: nowrap;
 }
 
-.holocall-contact-id span {
+.cybercall-contact-id span {
   overflow: hidden;
   color: rgba(217, 251, 255, 0.72);
   font-family: var(--hs-font-mono);
@@ -686,21 +686,21 @@
   white-space: nowrap;
 }
 
-.holocall-contact-actions {
+.cybercall-contact-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   justify-content: flex-end;
 }
 
-.holocall-contacts-empty {
+.cybercall-contacts-empty {
   grid-template-columns: 1fr;
   color: rgba(217, 251, 255, 0.68);
   font-size: 13px;
   text-align: center;
 }
 
-.holocall-contacts-form {
+.cybercall-contacts-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
   gap: 10px;
@@ -710,7 +710,7 @@
   border-top: 1px solid rgba(94, 231, 255, 0.25);
 }
 
-.holocall-contacts-form label {
+.cybercall-contacts-form label {
   display: grid;
   gap: 5px;
   margin: 0;
@@ -720,54 +720,54 @@
   text-transform: uppercase;
 }
 
-.holocall-contacts-form input {
+.cybercall-contacts-form input {
   width: 100%;
   border: 1px solid rgba(94, 231, 255, 0.32);
   border-radius: var(--hs-radius);
   background: rgba(1, 8, 16, 0.72);
-  color: var(--holocall-text);
+  color: var(--cybercall-text);
   box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
 }
 
-.holocall-contacts-form input:focus-visible {
-  border-color: var(--holocall-cyan);
+.cybercall-contacts-form input:focus-visible {
+  border-color: var(--cybercall-cyan);
   box-shadow:
     0 0 10px rgba(94, 231, 255, 0.22),
     inset 0 0 12px rgba(94, 231, 255, 0.1);
   outline: none;
 }
 
-.holocall-contact-actions button,
-.holocall-contacts-form button {
+.cybercall-contact-actions button,
+.cybercall-contacts-form button {
   min-width: 76px;
   border: 1px solid rgba(94, 231, 255, 0.48);
   border-radius: var(--hs-radius);
   background: rgba(0, 124, 190, 0.18);
-  color: var(--holocall-text);
+  color: var(--cybercall-text);
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.holocall-contact-actions button[data-holocall-contact-action="remove"] {
+.cybercall-contact-actions button[data-cybercall-contact-action="remove"] {
   border-color: rgba(255, 65, 93, 0.54);
 }
 
-.holocall-contact-actions button:hover,
-.holocall-contact-actions button:focus-visible,
-.holocall-contacts-form button:hover,
-.holocall-contacts-form button:focus-visible {
-  border-color: var(--holocall-cyan);
+.cybercall-contact-actions button:hover,
+.cybercall-contact-actions button:focus-visible,
+.cybercall-contacts-form button:hover,
+.cybercall-contacts-form button:focus-visible {
+  border-color: var(--cybercall-cyan);
   background: rgba(94, 231, 255, 0.22);
   box-shadow: 0 0 14px rgba(94, 231, 255, 0.25);
 }
 
-.holocall-accepted .holocall-panel {
+.cybercall-accepted .cybercall-panel {
   box-shadow:
     0 0 30px rgba(94, 255, 187, 0.36),
     inset 0 0 34px rgba(94, 255, 187, 0.14);
 }
 
-@keyframes holocall-flicker {
+@keyframes cybercall-flicker {
   0%, 100% { opacity: 1; }
   31% { opacity: 0.96; }
   32% { opacity: 0.78; }
@@ -777,17 +777,17 @@
   76% { opacity: 1; }
 }
 
-@keyframes holocall-scan {
+@keyframes cybercall-scan {
   from { transform: translateY(-55%); }
   to { transform: translateY(55%); }
 }
 
-@keyframes holocall-static {
+@keyframes cybercall-static {
   from { transform: translate(0, 0); }
   to { transform: translate(3px, -2px); }
 }
 
-@keyframes holocall-ring-pulse {
+@keyframes cybercall-ring-pulse {
   0%, 100% {
     transform: scale(1);
     box-shadow:
@@ -797,72 +797,72 @@
   50% {
     transform: scale(1.012);
     box-shadow:
-      0 0 42px var(--holocall-blue),
+      0 0 42px var(--cybercall-blue),
       inset 0 0 44px rgba(94, 231, 255, 0.2);
   }
 }
 
 @media (max-width: 520px) {
-  .holocall-composer-grid,
-  .holocall-composer-toggles,
-  .holocall-contacts-form {
+  .cybercall-composer-grid,
+  .cybercall-composer-toggles,
+  .cybercall-contacts-form {
     grid-template-columns: 1fr;
   }
 
-  .holocall-contacts-list li {
+  .cybercall-contacts-list li {
     grid-template-columns: 40px minmax(0, 1fr);
   }
 
-  .holocall-contact-actions {
+  .cybercall-contact-actions {
     grid-column: 1 / -1;
   }
 
-  .holocall-broadcast {
+  .cybercall-broadcast {
     width: calc(100vw - 24px);
     min-height: calc(100vh - 72px);
     padding: 18px;
   }
 
-  .holocall-body {
+  .cybercall-body {
     grid-template-columns: 1fr;
   }
 
-  .holocall-broadcast .holocall-body {
+  .cybercall-broadcast .cybercall-body {
     grid-template-columns: 1fr;
   }
 
-  .holocall-portrait {
+  .cybercall-portrait {
     min-height: 190px;
   }
 
-  .holocall-broadcast .holocall-portrait,
-  .holocall-broadcast .holocall-body blockquote {
+  .cybercall-broadcast .cybercall-portrait,
+  .cybercall-broadcast .cybercall-body blockquote {
     min-height: 220px;
   }
 
-  .holocall-connected-panel .holocall-portrait {
+  .cybercall-connected-panel .cybercall-portrait {
     min-height: 260px;
   }
 
-  .holocall-broadcast .holocall-header h2 {
+  .cybercall-broadcast .cybercall-header h2 {
     font-size: 28px;
   }
 
-  .holocall-broadcast .holocall-body blockquote {
+  .cybercall-broadcast .cybercall-body blockquote {
     font-size: 19px;
   }
 
-  .holocall-header {
+  .cybercall-header {
     flex-direction: column;
   }
 
-  .holocall-signal {
+  .cybercall-signal {
     width: 100%;
     text-align: left;
   }
 }
 
-.holocall-contacts-footer {
+.cybercall-contacts-footer {
   position: relative;
   z-index: 1;
   margin-top: 12px;
@@ -870,11 +870,11 @@
   border-top: 1px solid rgba(94, 231, 255, 0.25);
 }
 
-.holocall-ringtone-select select {
+.cybercall-ringtone-select select {
   overflow: visible;
 }
 
-.holocall-ringtone-select {
+.cybercall-ringtone-select {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 10px;
@@ -885,17 +885,17 @@
   text-transform: uppercase;
 }
 
-.holocall-ringtone-select select {
+.cybercall-ringtone-select select {
   width: 100%;
   border: 1px solid rgba(94, 231, 255, 0.32);
   border-radius: var(--hs-radius);
   background: rgba(1, 8, 16, 0.72);
-  color: var(--holocall-text);
+  color: var(--cybercall-text);
   box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
 }
 
-.holocall-ringtone-select select:focus-visible {
-  border-color: var(--holocall-cyan);
+.cybercall-ringtone-select select:focus-visible {
+  border-color: var(--cybercall-cyan);
   box-shadow:
     0 0 10px rgba(94, 231, 255, 0.22),
     inset 0 0 12px rgba(94, 231, 255, 0.1);

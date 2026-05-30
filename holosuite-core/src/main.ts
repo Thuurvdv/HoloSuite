@@ -10,7 +10,7 @@ let licenseCache: HoloSuiteLicenseResult | null = null;
 
 const LegacyApplication = (globalThis as any).Application ?? foundry?.appv1?.api?.Application;
 const PLAYER_APP_TITLES: Record<string, string> = {
-  "holocall": "Comms",
+  "cybercall": "Comms",
   "bounty-board": "Contracts",
   "csi-toolkit": "Case Files",
   "galaxy-map": "NavMap"
@@ -51,9 +51,9 @@ function getPlayerAppTitle(app: HoloSuiteAppRegistration): string {
 }
 
 function getAppBadgeLabel(appId: string): string {
-  if (appId === "holocall") {
-    const contacts = safeArray(safeGetSetting("holocall", "contacts"));
-    const groupContacts = safeArray(safeGetSetting("holocall", "groupContacts"));
+  if (appId === "cybercall") {
+    const contacts = safeArray(safeGetSetting("cybercall", "contacts"));
+    const groupContacts = safeArray(safeGetSetting("cybercall", "groupContacts"));
     return pluralize(contacts.length + groupContacts.length, "link");
   }
 

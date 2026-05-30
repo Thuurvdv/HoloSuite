@@ -7,7 +7,7 @@
   "workspaces": [
     "bounty-board",
     "holosuite-core",
-    "holocall",
+    "cybercall",
     "security-cameras",
     "csi-toolkit",
     "galaxy-map",

@@ -1,6 +1,6 @@
 {
-  "id": "holocall",
-  "title": "HoloCall",
+  "id": "cybercall",
+  "title": "CyberCall",
   "description": "A sci-fi hologram communication overlay for Foundry VTT.",
   "version": "0.9.0",
   "compatibility": {
@@ -17,12 +17,12 @@
     "dist/main.js"
   ],
   "styles": [
-    "styles/holocall.css"
+    "styles/cybercall.css"
   ],
   "packs": [],
   "languages": [],
   "socket": true,
-  "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holocall",
+  "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall",
   "manifest": "",
   "download": "",
   "license": "GPL-3.0-or-later",

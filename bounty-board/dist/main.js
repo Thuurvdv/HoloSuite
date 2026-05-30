@@ -651,7 +651,7 @@ function Mt() {
     // Random bounty generator can call upsertBounty() with generated data.
     // Faction reputation systems can listen for completed/failed state changes.
     // Galaxy map integration can use location metadata.
-    // HoloCall contact integration can add claimant/contact actions.
+    // CyberCall contact integration can add claimant/contact actions.
     // Security camera and crime scene modules can attach evidence links via notes or future document ids.
   }, t = game.modules.get(h);
   t && (t.api = e), game.scifiSuite ?? (game.scifiSuite = {}), game.scifiSuite.bountyBoard = e;

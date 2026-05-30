@@ -1,6 +1,6 @@
-# HoloCall
+# CyberCall
 
-HoloCall adds sci-fi holographic communication overlays to your Foundry VTT sessions. Whether you are running a cyberpunk heist, a space opera, or a futuristic detective story, HoloCall lets the GM place incoming transmissions directly on every player's screen, complete with caller portraits, signal static, and ringing animations.
+CyberCall adds sci-fi holographic communication overlays to your Foundry VTT sessions. Whether you are running a cyberpunk heist, a space opera, or a futuristic detective story, CyberCall lets the GM place incoming transmissions directly on every player's screen, complete with caller portraits, signal static, and ringing animations.
 
 Players can also call the GM using a built-in contacts directory, making two-way in-character communication part of the game.
 
@@ -15,13 +15,13 @@ Players can also call the GM using a built-in contacts directory, making two-way
 - Players can keep a personal contacts list and a shared group contacts list, and place calls to the GM from those contacts.
 - Works with or without HoloSuite Core installed.
 
-## Tutorial: Using HoloCall as a DM
+## Tutorial: Using CyberCall as a DM
 
 ### Sending a Call
 
-1. Enable **HoloCall** in your Foundry world.
+1. Enable **CyberCall** in your Foundry world.
 2. Open a scene and look for the satellite dish button in the Token controls on the left sidebar.
-3. Click it to open the **HoloCall Composer**.
+3. Click it to open the **CyberCall Composer**.
 4. Fill in the caller's name, faction or subtitle, portrait image path, and message text.
 5. Set the signal strength (0 to 100). Lower values add more static to the display.
 6. Pick a variant: **Standard** (blue), **Emergency** (red), or **Corrupted** (green).
@@ -47,11 +47,11 @@ Players can also call the GM using a built-in contacts directory, making two-way
 - Use **Corrupted** variant with low signal strength when an unknown or hostile entity is reaching out.
 - You can use actor portrait paths as the caller image to make NPCs instantly recognizable.
 
-## Tutorial: Using HoloCall as a Player
+## Tutorial: Using CyberCall as a Player
 
 ### Receiving Calls
 
-1. When the GM broadcasts a HoloCall, it appears as an overlay on your screen.
+1. When the GM broadcasts a CyberCall, it appears as an overlay on your screen.
 2. If the call is ringing, you will hear a ringtone and see an incoming call animation. Click **Accept** to pick up.
 3. Read the caller's message once the call connects.
 4. Click **End Call** when you are finished. This closes the call for everyone.
@@ -59,8 +59,8 @@ Players can also call the GM using a built-in contacts directory, making two-way
 ### Making Calls
 
 1. Make sure no call is currently active.
-2. Click the HoloCall button in the Token controls on the left sidebar.
-3. This opens your **HoloCall Contacts** window.
+2. Click the CyberCall button in the Token controls on the left sidebar.
+3. This opens your **CyberCall Contacts** window.
 4. Add contacts to your personal list by entering a name and number, then clicking **Add**.
 5. Switch to the **Group** tab to see contacts shared across all players. You can add group contacts too (a GM must be connected for group edits to save).
 6. Click **Call** next to any contact to send a call request to the GM.
@@ -68,7 +68,7 @@ Players can also call the GM using a built-in contacts directory, making two-way
 
 ### Choosing a Ringtone
 
-- Open **Configure Settings** and find the **HoloCall** section.
+- Open **Configure Settings** and find the **CyberCall** section.
 - Pick a ringtone from the dropdown, or choose **Silent** if you prefer no sound.
 - Your ringtone choice is saved per browser, so it only affects your own client.
 

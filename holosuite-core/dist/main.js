@@ -2,7 +2,7 @@ const m = "holosuite-core", M = "licenseKey", T = "mockAllowedFeatures", p = /* 
 let c = null, g = null;
 var A, L;
 const D = globalThis.Application ?? ((L = (A = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : A.api) == null ? void 0 : L.Application), G = {
-  holocall: "Comms",
+  cybercall: "Comms",
   "bounty-board": "Contracts",
   "csi-toolkit": "Case Files",
   "galaxy-map": "NavMap"
@@ -37,8 +37,8 @@ function _(e) {
 }
 function x(e) {
   var t, n, o, s, i, u;
-  if (e === "holocall") {
-    const l = b(w("holocall", "contacts")), a = b(w("holocall", "groupContacts"));
+  if (e === "cybercall") {
+    const l = b(w("cybercall", "contacts")), a = b(w("cybercall", "groupContacts"));
     return y(l.length + a.length, "link");
   }
   if (e === "bounty-board") {

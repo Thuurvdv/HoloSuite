@@ -1,0 +1,54 @@
+<div class="cybercall-panel cybercall-{{call.variant}}{{#if call.fullscreen}} cybercall-broadcast{{/if}}{{#if call.ringing}} cybercall-ringing-panel{{/if}}{{#if call.accepted}} cybercall-connected-panel{{/if}}" style="--cybercall-signal: {{call.signal}}%;">
+  <div class="cybercall-static" aria-hidden="true"></div>
+  <div class="cybercall-reticle" aria-hidden="true"></div>
+
+  {{#unless call.accepted}}
+    <header class="cybercall-header">
+      <div>
+        <div class="cybercall-kicker">
+          {{call.kicker}}
+        </div>
+        <h2>{{call.callerName}}</h2>
+        <p>{{call.subtitle}}</p>
+      </div>
+
+      <div class="cybercall-signal" title="Signal strength">
+        <span>{{call.signal}}%</span>
+        <div class="cybercall-signal-bar" aria-hidden="true">
+          <i></i>
+        </div>
+      </div>
+    </header>
+  {{/unless}}
+
+  <main class="cybercall-body">
+    <div class="cybercall-portrait">
+      {{#if call.image}}
+        <img src="{{call.image}}" alt="{{call.callerName}}">
+      {{else}}
+        <div class="cybercall-initials" aria-hidden="true">
+          {{call.initials}}
+        </div>
+      {{/if}}
+    </div>
+
+    {{#unless call.accepted}}
+      <blockquote>{{call.message}}</blockquote>
+    {{/unless}}
+  </main>
+
+  <footer class="cybercall-actions">
+    {{#unless call.accepted}}
+      {{#if call.canAccept}}
+        <button type="button" data-cybercall-action="accept">Accept</button>
+      {{/if}}
+      {{#if call.canDecline}}
+        <button type="button" data-cybercall-action="decline">Decline</button>
+      {{/if}}
+      {{#if call.showBroadcast}}
+        <button type="button" data-cybercall-action="broadcast">Broadcast</button>
+      {{/if}}
+    {{/unless}}
+    <button type="button" data-cybercall-action="end">End Call</button>
+  </footer>
+</div>

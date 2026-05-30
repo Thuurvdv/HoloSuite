@@ -1,0 +1,105 @@
+<section class="cybercall-contacts">
+  <header class="cybercall-contacts-header">
+    <div>
+      <div class="cybercall-contacts-kicker">Personal Comms Directory</div>
+      <h2>CyberCall Contacts</h2>
+    </div>
+  </header>
+
+  <nav class="cybercall-contact-tabs">
+    <button type="button" class="{{#if isPersonalTab}}active{{/if}}" data-cybercall-contact-tab="personal">Personal</button>
+    <button type="button" class="{{#if isGroupTab}}active{{/if}}" data-cybercall-contact-tab="group">Group</button>
+  </nav>
+
+  <section data-cybercall-contact-panel="personal" {{#unless isPersonalTab}}hidden{{/unless}}>
+    <ul class="cybercall-contacts-list">
+      {{#if hasContacts}}
+        {{#each contacts}}
+          <li>
+            <div class="cybercall-contact-avatar">
+              {{#if image}}
+                <img src="{{image}}" alt="">
+              {{else}}
+                <span>{{initials}}</span>
+              {{/if}}
+            </div>
+            <div class="cybercall-contact-id">
+              <strong>{{name}}</strong>
+              <span>{{number}}</span>
+            </div>
+            <div class="cybercall-contact-actions">
+              <button type="button" data-cybercall-contact-action="call" data-contact-scope="personal" data-contact-id="{{id}}">Call</button>
+              <button type="button" data-cybercall-contact-action="remove" data-contact-scope="personal" data-contact-id="{{id}}">Remove</button>
+            </div>
+          </li>
+        {{/each}}
+      {{else}}
+        <li class="cybercall-contacts-empty">
+          <span>No personal contacts stored.</span>
+        </li>
+      {{/if}}
+    </ul>
+  </section>
+
+  <section data-cybercall-contact-panel="group" {{#unless isGroupTab}}hidden{{/unless}}>
+    <ul class="cybercall-contacts-list">
+      {{#if hasGroupContacts}}
+        {{#each groupContacts}}
+          <li>
+            <div class="cybercall-contact-avatar">
+              {{#if image}}
+                <img src="{{image}}" alt="">
+              {{else}}
+                <span>{{initials}}</span>
+              {{/if}}
+            </div>
+            <div class="cybercall-contact-id">
+              <strong>{{name}}</strong>
+              <span>{{number}}</span>
+            </div>
+            <div class="cybercall-contact-actions">
+              <button type="button" data-cybercall-contact-action="call" data-contact-scope="group" data-contact-id="{{id}}">Call</button>
+              <button type="button" data-cybercall-contact-action="remove" data-contact-scope="group" data-contact-id="{{id}}">Remove</button>
+            </div>
+          </li>
+        {{/each}}
+      {{else}}
+        <li class="cybercall-contacts-empty">
+          <span>No group contacts stored.</span>
+        </li>
+      {{/if}}
+    </ul>
+  </section>
+
+  <form class="cybercall-contacts-form" data-cybercall-contacts-form>
+    <input type="hidden" name="scope" value="{{activeTab}}">
+
+    <label>
+      <span>Name</span>
+      <input type="text" name="name" autocomplete="off" required>
+    </label>
+
+    <label>
+      <span>Number</span>
+      <input type="text" name="number" autocomplete="off" required>
+    </label>
+
+    <label>
+      <span>Picture</span>
+      <input type="text" name="image" autocomplete="off" placeholder="icons/...">
+    </label>
+
+    <button type="submit">Add Contact</button>
+  </form>
+
+  <footer class="cybercall-contacts-footer">
+    <label class="cybercall-ringtone-select">
+      <span>Ringtone</span>
+      <select data-cybercall-ringtone>
+        {{#each ringtoneChoices}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+  </footer>
+</section>

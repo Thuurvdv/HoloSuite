@@ -1,13 +1,13 @@
-<form class="holocall-composer" data-holocall-composer>
-  <header class="holocall-composer-header">
+<form class="cybercall-composer" data-cybercall-composer>
+  <header class="cybercall-composer-header">
     <div>
-      <div class="holocall-composer-kicker">Transmission Console</div>
-      <h2>HoloCall Composer</h2>
+      <div class="cybercall-composer-kicker">Transmission Console</div>
+      <h2>CyberCall Composer</h2>
     </div>
-    <output data-holocall-signal-output>{{call.signal}}%</output>
+    <output data-cybercall-signal-output>{{call.signal}}%</output>
   </header>
 
-  <section class="holocall-composer-grid">
+  <section class="cybercall-composer-grid">
     <label>
       <span>Actor Portrait</span>
       <select name="actorId">
@@ -37,26 +37,26 @@
       <input type="text" name="subtitle" value="{{call.subtitle}}" placeholder="ATLAS Corporation">
     </label>
 
-    <label class="holocall-composer-wide">
+    <label class="cybercall-composer-wide">
       <span>Portrait Image Path</span>
-      <div class="holocall-composer-path-row">
+      <div class="cybercall-composer-path-row">
         <input type="text" name="image" value="{{call.image}}" placeholder="path/to/image.webp">
-        <button type="button" data-holocall-compose-action="browse-image" title="Browse portrait image"><i class="fa-solid fa-folder-open"></i></button>
+        <button type="button" data-cybercall-compose-action="browse-image" title="Browse portrait image"><i class="fa-solid fa-folder-open"></i></button>
       </div>
     </label>
 
-    <label class="holocall-composer-wide">
+    <label class="cybercall-composer-wide">
       <span>Message</span>
       <textarea name="message" rows="5" placeholder="Officer, we have a situation.">{{call.message}}</textarea>
     </label>
 
-    <label class="holocall-composer-wide holocall-composer-range">
+    <label class="cybercall-composer-wide cybercall-composer-range">
       <span>Signal Strength</span>
       <input type="range" name="signal" min="0" max="100" step="1" value="{{call.signal}}">
     </label>
   </section>
 
-  <section class="holocall-composer-toggles">
+  <section class="cybercall-composer-toggles">
     <label>
       <input type="checkbox" name="fullscreen" {{#if call.fullscreen}}checked{{/if}}>
       <span>Fullscreen broadcast mode</span>
@@ -68,10 +68,10 @@
     </label>
   </section>
 
-  <footer class="holocall-composer-actions">
-    <button type="button" data-holocall-compose-action="preview">Preview Locally</button>
-    <button type="button" data-holocall-compose-action="broadcast">Broadcast to Players</button>
-    <button type="button" data-holocall-compose-action="close-active">Close Active Call</button>
-    <button type="button" data-holocall-compose-action="reset">Reset Form</button>
+  <footer class="cybercall-composer-actions">
+    <button type="button" data-cybercall-compose-action="preview">Preview Locally</button>
+    <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>
+    <button type="button" data-cybercall-compose-action="close-active">Close Active Call</button>
+    <button type="button" data-cybercall-compose-action="reset">Reset Form</button>
   </footer>
 </form>

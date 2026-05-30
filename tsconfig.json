@@ -13,7 +13,7 @@
   "include": [
     "bounty-board/src",
     "holosuite-core/src",
-    "holocall/src",
+    "cybercall/src",
     "security-cameras/src",
     "csi-toolkit/src",
     "galaxy-map/src",
