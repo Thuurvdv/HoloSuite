@@ -567,7 +567,7 @@ function re() {
     icon: "fa-solid fa-bolt-lightning",
     premium: !1,
     playerVisible: !1,
-    description: "JRPG-style critical hit cut-in animation for natural d20 results.",
+    description: "Critical hit cut-in animation for natural d20 results.",
     enabled: l(o.enabled),
     open: () => ne()
   }), console.log(`${d} | Registered with HoloSuite.`), !0) : !1;
