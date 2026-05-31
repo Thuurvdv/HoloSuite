@@ -10,14 +10,13 @@ The Crime Scene Investigation Toolkit (CSI Toolkit) is a system-agnostic Foundry
 - Players can open shared case boards, drag cards around, add their own connections, and contribute to the investigation in real time.
 - Two built-in visual themes are available: a sci-fi police database look and a classic noir corkboard look.
 - Cases can be imported and exported as JSON files, making it easy to share investigations between worlds or back them up.
-- A sample case called "The Glass Orchid" is included so you can see how everything works right away.
 
-## Tutorial: Using the CSI Toolkit as a DM
+## Tutorial: Using the CSI Toolkit as a GM
 
 ### Creating Your First Case
 
-1. Enable **Crime Scene Investigation Toolkit** in your Foundry world.
-2. Click the fingerprint button in the left scene controls to open the **Case Manager**.
+1. Enable **Crime Scene Investigation Toolkit** & **Holosuite-core** in your Foundry world.
+2. Open the **Case Manager** from the HoloSuite launcher.
 3. Click **New Case** to create a blank case. Give it a title, subtitle (like a case number), and a short description.
 4. Set the case visibility to **Players** if you want them to see it, or keep it GM-only until you are ready to reveal it.
 5. Choose a board theme: **Database** for a clean sci-fi look, or **Corkboard** for a noir feel.
@@ -38,25 +37,19 @@ The Crime Scene Investigation Toolkit (CSI Toolkit) is a system-agnostic Foundry
 2. Players can open the case from the fingerprint button in the scene controls. They see the same board and can drag cards, add connections, and edit cards.
 3. As new evidence comes in during the session, add cards to the board on the fly.
 4. Reorder timeline entries from the timeline panel to keep the chronology straight.
-5. Board changes sync to all connected players in real time.
+5. Board changes sync to all connected players in real time, coordinates for the cards have to be pushed seperatly.
 
 ### Importing and Exporting
 
 - Click **Export** in the Case Manager to download a case as a JSON file.
 - Click **Import** to load a previously exported case.
-- Click **Sample Case** to install the included "Glass Orchid" demo and see a fully built-out investigation board.
 
-### Tips
-
-- Start a case with just a few cards and build it up as the players investigate. An empty board at the start of a session is more exciting than a pre-filled one.
-- Use connection line styles to encode meaning. For example, solid lines for confirmed links and dashed lines for theories.
-- Let players arrange the board their way. Sometimes their layout reveals connections you had not considered.
 
 ## Tutorial: Using the CSI Toolkit as a Player
 
 ### Opening a Case
 
-1. Click the fingerprint button in the left scene controls.
+1. Open the **Case Manager** from the HoloSuite launcher.
 2. A case browser opens showing all cases the GM has made visible to players.
 3. Click on a case to open its board.
 
@@ -71,6 +64,5 @@ The Crime Scene Investigation Toolkit (CSI Toolkit) is a system-agnostic Foundry
 ### Things to Know
 
 - You can contribute to any case board the GM has opened for players.
-- Your board changes (card positions, new connections) are visible to the GM and other players right away.
 - Cards and connections can be edited or deleted from the board view.
 - The GM controls which cases are visible. If a case disappears from your browser, the GM has changed its visibility.
