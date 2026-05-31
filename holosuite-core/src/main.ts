@@ -1,21 +1,12 @@
-import type { HoloSuiteAppRegistration, HoloSuiteLicenseResult } from "../../shared/src/index";
+import type { HoloSuiteAppRegistration } from "../../shared/src/index";
 
 const MODULE_ID = "holosuite-core";
-const SETTING_LICENSE_KEY = "licenseKey";
-const SETTING_ALLOWED_FEATURES = "mockAllowedFeatures";
+const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
 
 const registeredApps = new Map<string, HoloSuiteAppRegistration>();
 let launcherApp: HoloSuiteLauncher | null = null;
-let licenseCache: HoloSuiteLicenseResult | null = null;
 
 const LegacyApplication = (globalThis as any).Application ?? foundry?.appv1?.api?.Application;
-const PLAYER_APP_TITLES: Record<string, string> = {
-  "cybercall": "Comms",
-  "bounty-board": "Contracts",
-  "csi-toolkit": "Case Files",
-  "galaxy-map": "NavMap"
-};
-
 function escapeHtml(value: unknown): string {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
@@ -40,14 +31,6 @@ function getPublicApi(moduleId: string): any {
 
 function getPlayerDisplayName(): string {
   return String(game.user?.character?.name ?? game.user?.name ?? "Player");
-}
-
-function getClockLabel(): string {
-  return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
-function getPlayerAppTitle(app: HoloSuiteAppRegistration): string {
-  return PLAYER_APP_TITLES[app.id] ?? app.title;
 }
 
 function getAppBadgeLabel(appId: string): string {
@@ -103,8 +86,9 @@ function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration |
 }
 
 function renderOpenLauncherControl(controls: unknown): void {
-  const openLauncher = () => api.openLauncher();
   const isGM = game.user?.isGM === true;
+  if (!isGM && isDisabledForPlayers()) return;
+  const openLauncher = () => api.openLauncher();
   const tool = {
     name: "holosuite-core-launcher",
     title: isGM ? "HoloSuite Command Deck" : "HoloSuite Player View",
@@ -130,65 +114,28 @@ function renderOpenLauncherControl(controls: unknown): void {
 }
 
 function registerSettings(): void {
-  game.settings.register(MODULE_ID, SETTING_LICENSE_KEY, {
-    name: "HoloSuite License Key",
-    hint: "Optional supporter validation key. This is not DRM; use it for supporter status, downloads, and update access.",
+  game.settings.register(MODULE_ID, SETTING_DISABLE_FOR_PLAYERS, {
+    name: "Disable HoloSuite for Players",
+    hint: "When enabled, the HoloSuite launcher and all apps are hidden from players.",
     scope: "world",
     config: true,
-    type: String,
-    default: ""
-  });
-
-  game.settings.register(MODULE_ID, SETTING_ALLOWED_FEATURES, {
-    name: "Mock Allowed Premium Features",
-    hint: "Development-only comma-separated feature ids returned by the local mock license checker.",
-    scope: "world",
-    config: true,
-    type: String,
-    default: ""
+    type: Boolean,
+    default: false
   });
 }
 
-async function checkLicense(force = false): Promise<HoloSuiteLicenseResult> {
-  if (licenseCache && !force) return licenseCache;
-
-  const licenseKey = String(game.settings.get(MODULE_ID, SETTING_LICENSE_KEY) ?? "").trim();
-  const configuredFeatures = String(game.settings.get(MODULE_ID, SETTING_ALLOWED_FEATURES) ?? "")
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
-
-  const allowedFeatureIds = new Set(configuredFeatures);
-  const normalizedKey = licenseKey.toLowerCase();
-
-  if (normalizedKey.includes("supporter") || normalizedKey.includes("valid")) {
-    for (const app of registeredApps.values()) {
-      if (app.premium) allowedFeatureIds.add(app.featureId ?? app.id);
-    }
+function isDisabledForPlayers(): boolean {
+  try {
+    return game.settings.get(MODULE_ID, SETTING_DISABLE_FOR_PLAYERS) === true;
+  } catch {
+    return false;
   }
-
-  licenseCache = {
-    valid: Boolean(licenseKey) && (allowedFeatureIds.size > 0 || normalizedKey.includes("valid")),
-    allowedFeatureIds: [...allowedFeatureIds].sort(),
-    checkedAt: new Date().toISOString(),
-    message: licenseKey ? "Mock license check complete." : "No license key configured."
-  };
-
-  await launcherApp?.render(false);
-  return licenseCache;
-}
-
-function isFeatureAllowed(featureId: string): boolean {
-  if (!featureId) return false;
-  return licenseCache?.allowedFeatureIds.includes(featureId) ?? false;
-}
-
-function canOpenApp(app: HoloSuiteAppRegistration): boolean {
-  return !app.premium || isFeatureAllowed(app.featureId ?? app.id);
 }
 
 function isAppVisibleToCurrentUser(app: HoloSuiteAppRegistration): boolean {
-  return game.user?.isGM === true || app.playerVisible !== false;
+  if (game.user?.isGM === true) return true;
+  if (isDisabledForPlayers()) return false;
+  return app.playerVisible !== false;
 }
 
 async function openRegisteredApp(appId: string): Promise<unknown> {
@@ -203,12 +150,6 @@ async function openRegisteredApp(appId: string): Promise<unknown> {
     return null;
   }
 
-  await checkLicense();
-  if (!canOpenApp(app)) {
-    ui.notifications?.warn?.(`${app.title} is locked for this world.`);
-    return null;
-  }
-
   return app.open();
 }
 
@@ -217,7 +158,6 @@ function renderLauncherHtml(): string {
   const apps = [...registeredApps.values()]
     .filter(isAppVisibleToCurrentUser)
     .sort((left, right) => left.title.localeCompare(right.title));
-  const status = licenseCache?.valid ? "Supporter link active" : "";
   const deckLabel = isGM ? "GM Command Deck" : "Player Link";
   const screenTitle = isGM ? "Apps" : "Commlink";
   const emptyLabel = isGM
@@ -231,24 +171,21 @@ function renderLauncherHtml(): string {
       </div>
       <div class="holosuite-player-status">
         <span>LINK STABLE</span>
-        <span>${escapeHtml(getClockLabel())}</span>
       </div>
     </section>
   `;
 
   const appCards = apps.length
     ? apps.map((app) => {
-      const locked = !canOpenApp(app);
-      const title = isGM ? app.title : getPlayerAppTitle(app);
+      const title = app.title;
       const description = isGM && app.description ? `<p>${escapeHtml(app.description)}</p>` : "";
       const badgeLabel = !isGM ? getAppBadgeLabel(app.id) : "";
       return `
-        <button type="button" class="holosuite-app-tile ${locked ? "is-locked" : ""}" data-holosuite-app="${escapeHtml(app.id)}" ${locked ? "disabled" : ""}>
+        <button type="button" class="holosuite-app-tile" data-holosuite-app="${escapeHtml(app.id)}">
           <span class="holosuite-app-icon"><i class="${escapeHtml(app.icon)}"></i></span>
           <span class="holosuite-app-title">${escapeHtml(title)}</span>
           ${description}
           ${badgeLabel ? `<span class="holosuite-app-count">${escapeHtml(badgeLabel)}</span>` : ""}
-          ${app.premium ? `<span class="holosuite-app-badge">${locked ? "Locked" : "Premium"}</span>` : ""}
         </button>
       `;
     }).join("")
@@ -259,7 +196,6 @@ function renderLauncherHtml(): string {
       <div class="holosuite-phone-shell">
         <header class="holosuite-status-bar">
           <span>HoloSuite</span>
-          ${status ? `<span>${escapeHtml(status)}</span>` : ""}
         </header>
         <main class="holosuite-screen">
           <div class="holosuite-screen-heading">
@@ -267,9 +203,6 @@ function renderLauncherHtml(): string {
               <span class="holosuite-kicker">${escapeHtml(deckLabel)}</span>
               <h2>${escapeHtml(screenTitle)}</h2>
             </div>
-            <button type="button" class="holosuite-refresh" data-holosuite-action="check-license" title="Check license">
-              <i class="fa-solid fa-arrows-rotate"></i>
-            </button>
           </div>
           ${playerSummary}
           <div class="holosuite-app-grid">
@@ -306,7 +239,6 @@ class HoloSuiteLauncher extends LegacyApplication {
     html.find("[data-holosuite-app]").on("click", (event) => {
       openRegisteredApp(event.currentTarget.dataset.holosuiteApp);
     });
-    html.find("[data-holosuite-action='check-license']").on("click", () => checkLicense(true));
     html.find("[data-holosuite-action='close']").on("click", () => this.close());
   }
 
@@ -321,7 +253,6 @@ const api = {
     const normalized = normalizeApp(app);
     if (!normalized) return null;
     registeredApps.set(normalized.id, normalized);
-    licenseCache = null;
     launcherApp?.render(false);
     return normalized;
   },
@@ -334,13 +265,10 @@ const api = {
     return [...registeredApps.values()];
   },
   async openLauncher(): Promise<HoloSuiteLauncher | null> {
-    await checkLicense();
     if (!launcherApp) launcherApp = new HoloSuiteLauncher();
     await launcherApp.render(true);
     return launcherApp;
-  },
-  checkLicense,
-  isFeatureAllowed
+  }
 };
 
 function exposeApi(): void {
@@ -356,8 +284,7 @@ Hooks.once("init", () => {
 
 Hooks.on("getSceneControlButtons", renderOpenLauncherControl);
 
-Hooks.once("ready", async () => {
+Hooks.once("ready", () => {
   exposeApi();
-  await checkLicense(true);
   console.log(`${MODULE_ID} | Ready. API available at game.modules.get("${MODULE_ID}").api`);
 });

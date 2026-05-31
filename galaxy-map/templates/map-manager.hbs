@@ -9,10 +9,6 @@
         <i class="fa-solid fa-plus"></i>
         Create Map
       </button>
-      <button type="button" data-action="install-sample">
-        <i class="fa-solid fa-star"></i>
-        {{#if sampleInstalled}}Reset Sample{{else}}Install Sample{{/if}}
-      </button>
       <button type="button" data-action="import-map">
         <i class="fa-solid fa-file-import"></i>
         Import JSON
@@ -59,6 +55,10 @@
             <p>{{gmfFallback selectedMap.subtitle "No subtitle"}}</p>
           </div>
           <div class="gmf-actions">
+            <button type="button" data-action="edit-map-metadata">
+              <i class="fa-solid fa-pen-to-square"></i>
+              Edit
+            </button>
             <button type="button" data-open-map="{{selectedMap.id}}">
               <i class="fa-solid fa-map-location-dot"></i>
               Open Map
@@ -68,9 +68,6 @@
               Delete Map
             </button>
           </div>
-          <p class="gmf-manager-preview__note">
-            Map editing now happens inside the galaxy map. Open it and right-click the map, a system, or a route to add and manage campaign content.
-          </p>
         </section>
       {{else}}
         <div class="gmf-empty gmf-empty--large">

@@ -166,7 +166,8 @@ import {
       scope: "world",
       config: true,
       type: String,
-      default: ""
+      default: "",
+      filePicker: "audio"
     });
 
     game.settings.register(MODULE_ID, "scannerCharges", {

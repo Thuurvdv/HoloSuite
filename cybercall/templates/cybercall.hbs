@@ -38,17 +38,20 @@
   </main>
 
   <footer class="cybercall-actions">
-    {{#unless call.accepted}}
-      {{#if call.canAccept}}
-        <button type="button" data-cybercall-action="accept">Accept</button>
-      {{/if}}
-      {{#if call.canDecline}}
+    {{#if call.accepted}}
+      <button type="button" data-cybercall-action="end">End Call</button>
+    {{else}}
+      {{#if call.outgoing}}
+        <button type="button" data-cybercall-action="end">End Call</button>
+      {{else}}
+        {{#if call.canAccept}}
+          <button type="button" data-cybercall-action="accept">Accept</button>
+        {{/if}}
         <button type="button" data-cybercall-action="decline">Decline</button>
+        {{#if call.showBroadcast}}
+          <button type="button" data-cybercall-action="broadcast">Broadcast</button>
+        {{/if}}
       {{/if}}
-      {{#if call.showBroadcast}}
-        <button type="button" data-cybercall-action="broadcast">Broadcast</button>
-      {{/if}}
-    {{/unless}}
-    <button type="button" data-cybercall-action="end">End Call</button>
+    {{/if}}
   </footer>
 </div>

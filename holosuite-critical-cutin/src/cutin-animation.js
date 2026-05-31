@@ -26,15 +26,16 @@ function shouldPlayForAudience(payload) {
 async function playAudio(src, volume) {
   if (!src) return;
   try {
-    const effectiveVolume = Math.min(1, Math.max(0, Number(volume ?? setting(SETTINGS.volume) ?? 0.8)));
+    const baseVolume = Math.min(1, Math.max(0, Number(volume ?? setting(SETTINGS.volume) ?? 0.8)));
     if (foundry.audio?.AudioHelper?.play) {
-      return foundry.audio.AudioHelper.play({ src, volume: effectiveVolume, autoplay: true, loop: false }, false);
+      return foundry.audio.AudioHelper.play({ src, volume: baseVolume, autoplay: true, loop: false }, false);
     }
     if (globalThis.AudioHelper?.play) {
-      return globalThis.AudioHelper.play({ src, volume: effectiveVolume, autoplay: true, loop: false }, false);
+      return globalThis.AudioHelper.play({ src, volume: baseVolume, autoplay: true, loop: false }, false);
     }
+    const interfaceVolume = Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5);
     const audio = new Audio(src);
-    audio.volume = effectiveVolume;
+    audio.volume = baseVolume * interfaceVolume;
     await audio.play();
     return audio;
   } catch (error) {

@@ -308,6 +308,13 @@ function bindComposerControls(app, html) {
 
   updateComposerSignal(form);
 
+  const ringtoneSelect = element.querySelector("[data-cybercall-ringtone]");
+  if (ringtoneSelect) {
+    ringtoneSelect.addEventListener("change", async (event) => {
+      await game.settings.set(MODULE_ID, "ringSound", event.currentTarget.value);
+    });
+  }
+
   form.elements.signal?.addEventListener("input", () => updateComposerSignal(form));
   form.elements.actorId?.addEventListener("change", () => {
     const actor = game.actors?.get(form.elements.actorId.value);
@@ -462,11 +469,12 @@ function renderFallbackTemplate(call) {
   const messageMarkup = call.accepted ? "" : `<blockquote>${escapeHTML(call.message)}</blockquote>`;
   const actionsMarkup = call.accepted
     ? '<button type="button" data-cybercall-action="end">End Call</button>'
-    : `
+    : call.outgoing
+      ? '<button type="button" data-cybercall-action="end">End Call</button>'
+      : `
         ${call.canAccept ? '<button type="button" data-cybercall-action="accept">Accept</button>' : ""}
-        ${call.canDecline ? '<button type="button" data-cybercall-action="decline">Decline</button>' : ""}
+        <button type="button" data-cybercall-action="decline">Decline</button>
         ${broadcastButton}
-        <button type="button" data-cybercall-action="end">End Call</button>
       `;
   return `
     <div class="cybercall-panel cybercall-${call.variant} ${fullscreenClass} ${ringingClass} ${connectedClass}" style="${signalStyle}">
@@ -512,6 +520,16 @@ function renderComposerFallbackTemplate(data) {
       </label>
       <label><input type="checkbox" name="fullscreen" ${call.fullscreen ? "checked" : ""}> Fullscreen Broadcast</label>
       <label><input type="checkbox" name="ringing" ${call.ringing ? "checked" : ""}> Ringing Animation / Sound</label>
+      <div class="cybercall-composer-ringtone">
+        <label class="cybercall-ringtone-select">
+          <span>Ringtone</span>
+          <select data-cybercall-ringtone>
+            ${(data.ringtoneChoices ?? []).map((choice) =>
+              `<option value="${escapeHTML(choice.value)}" ${choice.selected ? "selected" : ""}>${escapeHTML(choice.label)}</option>`
+            ).join("")}
+          </select>
+        </label>
+      </div>
       <div class="cybercall-composer-actions">
         <button type="button" data-cybercall-compose-action="preview">Preview Locally</button>
         <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>
@@ -647,7 +665,8 @@ class CyberCallComposerV1 extends Application {
   getData() {
     return {
       call: getDefaultComposerData(),
-      actors: getActorChoices()
+      actors: getActorChoices(),
+      ringtoneChoices: getRingtoneChoices()
     };
   }
 
@@ -811,7 +830,8 @@ function createComposerV2Class() {
       return {
         ...(await super._prepareContext(options)),
         call: getDefaultComposerData(),
-        actors: getActorChoices()
+        actors: getActorChoices(),
+        ringtoneChoices: getRingtoneChoices()
       };
     }
 
@@ -1086,7 +1106,7 @@ async function broadcastCall(callData = {}) {
     callData: call
   });
 
-  return openCall(call);
+  return openCall({ ...call, outgoing: true });
 }
 
 async function handleSocketMessage(message) {
@@ -1163,9 +1183,14 @@ function getRingtoneChoices() {
 
 function stopRinging() {
   if (!ringingAudio) return;
-  ringingAudio.pause();
-  ringingAudio.currentTime = 0;
+  const handle = ringingAudio;
   ringingAudio = null;
+  if (typeof handle.stop === "function") {
+    handle.stop();
+  } else {
+    handle.pause();
+    handle.currentTime = 0;
+  }
 }
 
 function playRinging(callData) {
@@ -1175,12 +1200,23 @@ function playRinging(callData) {
   const soundPath = getSoundPath();
   if (!soundPath) return;
 
-  ringingAudio = new Audio(soundPath);
-  ringingAudio.loop = true;
-  ringingAudio.volume = 0.65;
-  ringingAudio.play().catch((error) => {
-    console.warn(`${MODULE_ID} | Unable to play ringing sound.`, error);
-  });
+  const interfaceVolume = Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5);
+  const volume = 0.65 * interfaceVolume;
+  const AudioHelperClass = foundry?.audio?.AudioHelper ?? globalThis.AudioHelper;
+  if (AudioHelperClass?.play) {
+    AudioHelperClass.play({ src: soundPath, volume, autoplay: true, loop: true }, false)
+      .then((handle) => { ringingAudio = handle; })
+      .catch((error) => {
+        console.warn(`${MODULE_ID} | Unable to play ringing sound.`, error);
+      });
+  } else {
+    ringingAudio = new Audio(soundPath);
+    ringingAudio.loop = true;
+    ringingAudio.volume = volume;
+    ringingAudio.play().catch((error) => {
+      console.warn(`${MODULE_ID} | Unable to play ringing sound.`, error);
+    });
+  }
 }
 
 function registerApi() {

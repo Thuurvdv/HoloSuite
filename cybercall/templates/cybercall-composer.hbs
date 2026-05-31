@@ -68,6 +68,17 @@
     </label>
   </section>
 
+  <section class="cybercall-composer-ringtone">
+    <label class="cybercall-ringtone-select">
+      <span>Ringtone</span>
+      <select data-cybercall-ringtone>
+        {{#each ringtoneChoices}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+  </section>
+
   <footer class="cybercall-composer-actions">
     <button type="button" data-cybercall-compose-action="preview">Preview Locally</button>
     <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>

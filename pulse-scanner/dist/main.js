@@ -226,7 +226,8 @@ function Un(s) {
       scope: "world",
       config: !0,
       type: String,
-      default: ""
+      default: "",
+      filePicker: "audio"
     }), game.settings.register(s, "scannerCharges", {
       name: "Scanner Charges",
       hint: "Maximum number of charges per Pulse Scanner item. Set to 0 for unlimited.",
