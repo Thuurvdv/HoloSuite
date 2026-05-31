@@ -1,6 +1,6 @@
 # HoloSuite Critical Cut-In
 
-HoloSuite Critical Cut-In adds dramatic anime-style critical hit animations to your Foundry VTT game. When a player rolls a qualifying natural result on a d20, a full-screen cut-in flashes across every connected screen with the character's portrait, a custom sound effect, and an overlay label. It turns a lucky roll into a memorable cinematic moment.
+HoloSuite Critical Cut-In adds critical hit animations to your Foundry VTT game. When a player rolls a qualifying natural result on a d20, a full-screen cut-in flashes across every connected screen with the character's portrait, a custom sound effect, and an overlay label. It turns a lucky roll into a memorable cinematic moment.
 
 ![Critical Success](../images/CriticalSucces.jpg)
 
