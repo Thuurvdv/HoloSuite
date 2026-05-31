@@ -2,6 +2,8 @@
 
 The Crime Scene Investigation Toolkit (CSI Toolkit) is a system-agnostic Foundry VTT module for running investigation-driven games. Whether your campaign is a cyberpunk noir, a sci-fi police procedural, a horror mystery, or a classic detective story, this module gives you a visual case board where the GM and players can organize evidence, suspects, locations, and timelines together.
 
+![CSI Board](../images/CSI%20Board.jpg)
+
 ## What Does It Do?
 
 - Provides a full case management system where the GM creates and organizes investigation cases.

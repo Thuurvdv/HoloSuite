@@ -2,6 +2,10 @@
 
 HoloSuite Hacking brings interactive hacking minigames to your Foundry VTT sessions. Instead of resolving a hack with a single dice roll, this module puts the player in a timed puzzle where their roll determines the difficulty. It currently includes two minigames, with more planned.
 
+![Node Intrusion](../images/NodeIntrustion_hacking.jpg)
+
+![Signal Alignment](../images/SignalAlignment_hacking.jpg)
+
 ## What Does It Do?
 
 - Adds playable hacking minigames that the GM can launch for any player during a session.
@@ -9,7 +13,6 @@ HoloSuite Hacking brings interactive hacking minigames to your Foundry VTT sessi
 - **Signal Alignment**: The player tunes unstable signal channels into their target range and holds them steady until a transmission decrypts.
 - Difficulty scales with the player's skill check. A good roll makes the puzzle easier (more time, more hints, fewer traps). A bad roll makes it harder.
 - The GM picks the minigame, selects a player and their character's hacking skill, sets a DC, and sends the challenge. The player's client rolls the skill check and launches the minigame based on the result.
-- Works on its own, and also shows up in the HoloSuite launcher if HoloSuite Core is installed.
 
 ## How Difficulty Works
 
@@ -25,8 +28,8 @@ When the GM sends a hacking challenge, the player's skill check is compared to t
 
 ### Launching a Hack
 
-1. Enable **HoloSuite Hacking** in your Foundry world.
-2. Open the hacking launcher from the terminal button in the scene controls, or through the HoloSuite launcher.
+1. Enable **HoloSuite Hacking** & **Holosuite-core** in your Foundry world.
+2. Open the hacking launcher from the HoloSuite launcher.
 3. In the launcher, choose:
    - The **minigame** (Node Intrusion or Signal Alignment).
    - The **actor** who is doing the hacking.
@@ -46,12 +49,6 @@ When the GM sends a hacking challenge, the player's skill check is compared to t
 - **Default Hacking DC**: Sets the default DC in the launcher so you do not have to type it every time.
 - **Default Trace Duration Multiplier**: Scales all trace timers up or down. Increase this to give players more breathing room, or decrease it for a faster pace.
 - **Visual Glitch Intensity**: A client-side setting (low, medium, or high) that controls how much visual noise the minigame displays. Players can set this to their own preference.
-
-### Tips
-
-- Match the minigame to the fiction. Use Node Intrusion for breaking into a corporate server or bypassing a security grid. Use Signal Alignment for intercepting encrypted transmissions or tuning into a hidden frequency.
-- Set the DC based on the narrative stakes, not just the character's skill bonus. An important corporate mainframe should be harder than a vending machine terminal.
-- Use the difficulty scaling to your advantage. Even a failed check still lets the player attempt the puzzle, just at a much higher difficulty. That moment of tension can be more memorable than an automatic failure.
 
 ## Tutorial: Using HoloSuite Hacking as a Player
 

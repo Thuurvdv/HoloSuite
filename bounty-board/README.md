@@ -2,6 +2,8 @@
 
 Bounty Board is a Foundry VTT module for managing bounty contracts in your game. It gives the GM a place to post bounties and lets players browse available contracts, all presented in a sci-fi/modern setting.
 
+![Bounty Board](../images/BountyBoard.jpg)
+
 
 ## What Does It Do?
 

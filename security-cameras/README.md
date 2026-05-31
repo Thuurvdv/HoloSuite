@@ -2,6 +2,8 @@
 
 Security Cameras is a Foundry VTT module that gives the GM a full surveillance camera system for sci-fi and cyberpunk games. Set up cameras across your scenes, then broadcast live or static feeds to your players during gameplay. Every feed comes wrapped in a stylish cyberpunk UI with scanlines, recording indicators, and signal effects.
 
+![Camera Feed](../images/CameraFeed.jpg)
+
 ## What Does It Do?
 
 - Lets the GM create, organize, and manage security cameras across any scene in the world.
@@ -15,8 +17,8 @@ Security Cameras is a Foundry VTT module that gives the GM a full surveillance c
 
 ### Setting Up Cameras
 
-1. Enable **Security Cameras** in your Foundry world.
-2. Open a scene and find the video camera icon in the Token controls on the left sidebar. Click it to open the **Camera Manager**.
+1. Enable **Security Cameras** & **Holosuite-core** in your Foundry world.
+2. Open the **Camera Manager** from the HoloSuite launcher.
 3. Click **New** to create your first camera. The scene field defaults to whichever scene you have open.
 4. Give the camera a name and location label (for example, "Lobby Cam 01" in "Corporate Lobby").
 5. Choose a feed source:
@@ -35,12 +37,6 @@ Security Cameras is a Foundry VTT module that gives the GM a full surveillance c
 5. Change a camera's status mid-session to create tension. Switch a camera to **Corrupted** when something goes wrong, or to **Offline** when an enemy cuts the feed.
 6. Click **Close All Player Feeds** when you want to pull every feed off the players' screens at once.
 7. Use **Duplicate** to quickly create variants of an existing camera (useful for multi-camera hallways or repeating setups).
-
-### Tips
-
-- Set up cameras before the session and leave them offline. Reveal them one at a time as players gain access to the security system.
-- Use static images for cameras that are "recording playback" or showing archived footage.
-- Combine camera statuses with narrative beats. A corrupted feed right before an ambush tells the players something is very wrong without saying a word.
 
 ## Tutorial: Using Security Cameras as a Player
 

@@ -2,6 +2,8 @@
 
 Pulse Scanner is a system-agnostic Foundry VTT module for cinematic scanning gameplay. The GM places hidden scan targets around a scene, and players fire scanner pulses from their tokens to detect nearby signatures. It is designed for sci-fi, horror, and investigation games where discovering hidden objects, structural weaknesses, energy signatures, or biological traces is part of the action.
 
+![Pulse Scanner](../images/PulseScanner.jpg)
+
 ## What Does It Do?
 
 - The GM places hidden scan targets on a scene by linking them to Foundry Scene Regions. Each target has a type, scan mode, difficulty, and description.
@@ -18,10 +20,10 @@ Pulse Scanner is a system-agnostic Foundry VTT module for cinematic scanning gam
 
 ### Setting Up a Scene
 
-1. Enable **Pulse Scanner** in your Foundry world.
+1. Enable **Pulse Scanner** & **Holosuite-core** in your Foundry world.
 2. Open the scene you want to populate with scan targets.
 3. Use Foundry's built-in region tools to draw **Scene Regions** in the areas where you want hidden targets. For example, draw a region over a cracked wall, a hidden compartment, or a concealed device.
-4. Open the **Pulse Scanner Target Manager** from the scene controls (or the HoloSuite launcher if installed).
+4. Open the **Pulse Scanner Target Manager** from the HoloSuite launcher.
 5. Click **New Target**. Select a Scene Region from the dropdown, then set the target's mode, type, label, description, difficulty, and integrity.
 6. Leave the target visibility set to **GM** to keep it hidden from players until it is detected.
 7. Repeat for as many targets as you want on the scene.
@@ -54,13 +56,6 @@ Each target is assigned a scan mode, and scans can filter by mode. Use this to c
 - **Tech**: Electronic devices, encrypted signals, hidden transmitters.
 - **Biological**: Organic matter, toxins, parasites, living organisms.
 
-### Tips
-
-- Place targets with different scan modes to reward players who think about which scanner setting to use instead of just pulsing everything.
-- Use the difficulty value to gate what can be detected. Higher difficulty targets might require closer range or better equipment.
-- Pair Pulse Scanner with the CSI Toolkit. When players detect forensic evidence, have them add it to the case board.
-- Use integrity values to create destructible targets. A cracked wall with low integrity is almost ready to break.
-
 ## Tutorial: Using Pulse Scanner as a Player
 
 ### Getting Your Scanner
@@ -92,9 +87,3 @@ Each target is assigned a scan mode, and scans can filter by mode. Use this to c
 - The GM controls which targets exist, which ones are revealable, and when they become resolved.
 - Resolved targets no longer respond to scans. Once something is dealt with, it is done.
 - Your scan fires from your token's position, so move closer to areas you want to investigate for better results.
-
-## Settings
-
-- **Scan Pulse Sound**: Set an audio file path to play a sound effect with each pulse.
-- **Require Pulse Scanner Item**: When enabled, players need a Pulse Scanner item on their character to scan. When disabled, scanning works without the item.
-- **Create World Pulse Scanner Item**: When enabled, the module automatically creates a scanner item in the world Items directory on load.

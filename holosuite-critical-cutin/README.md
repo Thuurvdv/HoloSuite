@@ -2,6 +2,10 @@
 
 HoloSuite Critical Cut-In adds dramatic anime-style critical hit animations to your Foundry VTT game. When a player rolls a qualifying natural result on a d20, a full-screen cut-in flashes across every connected screen with the character's portrait, a custom sound effect, and an overlay label. It turns a lucky roll into a memorable cinematic moment.
 
+![Critical Success](../images/CriticalSucces.jpg)
+
+![Critical Failure](../images/CriticalFailure.jpg)
+
 ## What Does It Do?
 
 - Watches for d20 rolls and triggers a visual cut-in animation when the natural result meets or exceeds a configurable threshold.
@@ -9,13 +13,12 @@ HoloSuite Critical Cut-In adds dramatic anime-style critical hit animations to y
 - The GM can set a global threshold (for example, natural 20 only, or natural 19 and above) and also override the threshold per character.
 - A GM cut-in configuration covers rolls that do not belong to a specific player character.
 - The cut-in duration is adjustable so you can control how long the animation stays on screen.
-- Works on its own, and also registers in the HoloSuite launcher if HoloSuite Core is installed.
 
 ## Tutorial: Using Critical Cut-In as a DM
 
 ### Initial Setup
 
-1. Enable **HoloSuite Critical Cut-In** in your Foundry world.
+1. Enable **HoloSuite Critical Cut-In** & **Holosuite-core** in your Foundry world.
 2. Open **Configure Settings**, then go to **Module Settings** and find **HoloSuite Critical Cut-In**.
 3. Set the **default trigger threshold**. The default is 20, meaning only natural 20s trigger the animation. Setting it to 19 triggers on both natural 19 and 20.
 4. Click **Configure Player Cut-Ins** to open the per-character configuration panel.
@@ -37,12 +40,6 @@ HoloSuite Critical Cut-In adds dramatic anime-style critical hit animations to y
 ### Using It in Play
 
 Once configured, the module runs automatically. Qualifying rolls trigger the cut-in with no extra input needed. You can also trigger a cut-in manually for testing or dramatic effect by running a macro.
-
-### Tips
-
-- Put character art into the `modules/holosuite-critical-cutin/assets/images/` folder and sound effects into `modules/holosuite-critical-cutin/assets/sounds/` for easy access from the file picker.
-- Keep cut-in durations short (1500 to 2500 milliseconds) so they feel punchy and do not interrupt the flow.
-- Use custom overlay labels to give each character a signature phrase.
 
 ## Tutorial: Using Critical Cut-In as a Player
 

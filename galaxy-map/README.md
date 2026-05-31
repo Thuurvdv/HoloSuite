@@ -2,6 +2,8 @@
 
 Galaxy Map is a system-agnostic Foundry VTT module for campaign-scale star maps. It gives your sci-fi game a holographic, space-opera-inspired galaxy map where star systems are clickable, routes are traversable, and discoveries unfold over the course of a campaign. Everything runs inside Foundry with no external services.
 
+![Galaxy Map Manager](../images/Galaxy%20Map%20Manager.png)
+
 ## What Does It Do?
 
 - Provides an interactive star map that the GM builds and the players explore over time.
@@ -18,8 +20,8 @@ Galaxy Map is a system-agnostic Foundry VTT module for campaign-scale star maps.
 
 ### Getting Started
 
-1. Enable **Galaxy Map** in your Foundry world.
-2. Click the **Galaxy Map** button in the left scene controls toolbar to open the map experience, or open the **Map Manager** from the same menu.
+1. Enable **Galaxy Map** & **Holosuite-core** in your Foundry world.
+2. Open the **Map Manager** from the HoloSuite launcher.
 3. In the Map Manager, click **Install Sample** to load the included "Aster Veil" sample map. This is a great way to see everything in action before building your own.
 4. Click **Open** on any map to view it.
 
@@ -52,17 +54,11 @@ Galaxy Map is a system-agnostic Foundry VTT module for campaign-scale star maps.
 - Players see only systems, routes, and factions that you have made visible. GM-only content stays hidden.
 - Close all player map windows from the Map Manager when you are done.
 
-### Tips
-
-- Start with just the systems the players know about. Add and reveal systems as the campaign progresses.
-- Use faction assignments and route types to create political and logistical layers on the map.
-- Link systems to Foundry scenes and journal entries so players can jump directly from the map into a location or read lore.
-
 ## Tutorial: Using Galaxy Map as a Player
 
 ### Viewing the Map
 
-1. Click the **Galaxy Map** button in the left scene controls toolbar.
+1. Open **Galaxy Map** from the HoloSuite launcher.
 2. A map chooser opens showing all maps the GM has shared with players. Pick one to view.
 3. Click on any visible star system to see its details: name, description, faction, and links to scenes or journal entries.
 4. Click on route lines between systems to see travel details like travel time and fuel cost.
