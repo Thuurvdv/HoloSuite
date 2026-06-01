@@ -17,6 +17,7 @@
     "dist/main.js"
   ],
   "styles": [
+    "styles/holosuite-tokens.css",
     "styles/security-camera-system.css"
   ],
   "packs": [],
@@ -36,4 +37,3 @@
     ]
   }
 }
-

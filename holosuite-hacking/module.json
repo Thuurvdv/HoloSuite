@@ -18,6 +18,7 @@
     "dist/main.js"
   ],
   "styles": [
+    "styles/holosuite-tokens.css",
     "styles/hacking.css",
     "styles/node-intrusion.css",
     "styles/signal-alignment.css"

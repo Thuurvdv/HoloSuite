@@ -18,6 +18,7 @@
     "dist/main.js"
   ],
   "styles": [
+    "styles/holosuite-tokens.css",
     "styles/galaxy-map-framework.css"
   ],
   "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map",
@@ -34,4 +35,3 @@
     ]
   }
 }
-
