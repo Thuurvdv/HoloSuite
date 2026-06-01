@@ -63,20 +63,27 @@ export class NodeIntrusionApp extends LegacyApplication {
   getData() {
     const currentNode = this.getCurrentNode();
     const currentConnections = currentNode.connected;
-    const nodes = this.graph.nodes.map((node) => ({
-      ...node,
-      isCurrent: node.id === this.state.currentNodeId,
-      isVisited: this.state.visitedNodeIds.has(node.id),
-      isNeighbor: currentConnections.includes(node.id),
-      canMove: currentConnections.includes(node.id)
-        && !this.state.blockedEdgeIds.has(edgeKey(currentNode.id, node.id))
-        && !this.state.deadNodeIds.has(node.id),
-      isDangerVisible: this.profile.hintsEnabled || node.revealed || this.state.visitedNodeIds.has(node.id),
-      displayType: this.profile.hintsEnabled || node.revealed || this.state.visitedNodeIds.has(node.id) || node.type === "start" || node.type === "target"
-        ? nodeTypeLabel(node.type)
-        : "unknown",
-      title: `${node.id} - ${nodeTypeLabel(node.type)}`
-    }));
+    const nodes = this.graph.nodes.map((node) => {
+      const isCurrent = node.id === this.state.currentNodeId;
+      const isVisited = this.state.visitedNodeIds.has(node.id);
+      const isTargetVisible = node.type === "target" && isVisited;
+      const isTypeVisible = node.type !== "target" && (this.profile.hintsEnabled || node.revealed || isVisited || node.type === "start");
+      const displayType = isTargetVisible || isTypeVisible ? nodeTypeLabel(node.type) : "unknown";
+
+      return {
+        ...node,
+        visualType: isTargetVisible ? "target" : node.type === "target" ? "normal" : node.type,
+        isCurrent,
+        isVisited,
+        isNeighbor: currentConnections.includes(node.id),
+        canMove: currentConnections.includes(node.id)
+          && !this.state.blockedEdgeIds.has(edgeKey(currentNode.id, node.id))
+          && !this.state.deadNodeIds.has(node.id),
+        isDangerVisible: node.type !== "target" && (this.profile.hintsEnabled || node.revealed || isVisited),
+        displayType,
+        title: `${node.id} - ${displayType}`
+      };
+    });
 
     return {
       rollTotal: this.rollTotal,

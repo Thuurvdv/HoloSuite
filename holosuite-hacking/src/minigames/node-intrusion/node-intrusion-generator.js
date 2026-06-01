@@ -47,7 +47,7 @@ function createNode(id, type, x, y) {
     y: clamp(Math.round(y), 10, 90),
     type,
     connected: [],
-    revealed: type === "start" || type === "target",
+    revealed: type === "start",
     visited: false
   };
 }

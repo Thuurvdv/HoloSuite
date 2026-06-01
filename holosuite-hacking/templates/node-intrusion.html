@@ -78,7 +78,7 @@
         {{#each nodes}}
           <button
             type="button"
-            class="node-intrusion-node type-{{type}}{{#if isCurrent}} is-current{{/if}}{{#if isVisited}} is-visited{{/if}}{{#if isNeighbor}} is-neighbor{{/if}}{{#if canMove}} can-move{{/if}}{{#if isDangerVisible}} is-revealed{{/if}}"
+            class="node-intrusion-node type-{{visualType}}{{#if isCurrent}} is-current{{/if}}{{#if isVisited}} is-visited{{/if}}{{#if isNeighbor}} is-neighbor{{/if}}{{#if canMove}} can-move{{/if}}{{#if isDangerVisible}} is-revealed{{/if}}"
             data-node-id="{{id}}"
             style="left: {{x}}%; top: {{y}}%;"
             title="{{title}}"
