@@ -102,7 +102,7 @@ jobs:
           TAG="${{ steps.meta.outputs.tag }}"
           VERSION="${{ steps.meta.outputs.version }}"
 
-          gh release create "$TAG" "$MODULE_ID.zip" \
+          gh release create "$TAG" "$MODULE_ID.zip" "staging/$MODULE_ID/module.json" \
             --title "$MODULE_ID v$VERSION" \
             --generate-notes
 
