@@ -12,7 +12,6 @@ const modules = [
   "holosuite-core",
   "holosuite-critical-cutin",
   "holosuite-hacking",
-  "pulse-scanner",
   "security-cameras"
 ];
 

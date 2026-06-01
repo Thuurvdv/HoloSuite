@@ -11,10 +11,11 @@ HoloSuite is a collection of Foundry VTT modules built for sci-fi, cyberpunk, an
 - **[Security Cameras](security-cameras/README.md)** - A surveillance camera system with live and static feeds, cyberpunk overlays, and GM-to-player broadcasting.
 - **[CSI Toolkit](csi-toolkit/README.md)** - Interactive case boards for investigations, with draggable evidence cards, connection lines, timelines, and collaborative player editing.
 - **[Galaxy Map](galaxy-map/README.md)** - Cinematic star maps with clickable systems, travel routes, ship animations, and discovery notifications.
-- **[Pulse Scanner](pulse-scanner/README.md)** - Scene-scanning gameplay with hidden targets, scan modes, pulse animations, and player scanner items.
 - **[Bounty Board](bounty-board/README.md)** - A bounty contract board for posting and browsing sci-fi jobs and contracts.
 - **[Critical Cut-In](holosuite-critical-cutin/README.md)** - Anime-style critical hit animations triggered by natural d20 rolls, with per-character images, sounds, and overlay text.
 - **[HoloSuite Hacking](holosuite-hacking/README.md)** - Interactive hacking minigames where skill checks determine puzzle difficulty. Includes Node Intrusion and Signal Alignment.
+
+Pulse Scanner is distributed separately as a premium HoloSuite module.
 
 ## Getting Started
 

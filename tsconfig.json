@@ -17,7 +17,6 @@
     "security-cameras/src",
     "csi-toolkit/src",
     "galaxy-map/src",
-    "pulse-scanner/src",
     "holosuite-critical-cutin/src",
     "holosuite-hacking/src",
     "shared/src"

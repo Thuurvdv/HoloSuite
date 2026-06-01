@@ -566,8 +566,8 @@ function re() {
     title: "Critical Cut-In",
     icon: "fa-solid fa-bolt-lightning",
     premium: !1,
-    description: "Audio & Animations for specific d20 rolls",
     playerVisible: !1,
+    description: "JRPG-style critical hit cut-in animation for natural d20 results.",
     enabled: l(s.enabled),
     open: () => ne()
   }), console.log(`${d} | Registered with HoloSuite.`), !0) : !1;
