@@ -586,7 +586,6 @@ function Ce(e) {
         ${n}
       </main>
       <footer class="security-camera-feed-footer">
-        <span>${c(e.timestamp)}</span>
         <span>ID ${c(e.id)}</span>
       </footer>
     </section>

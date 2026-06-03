@@ -586,7 +586,6 @@ function renderFallbackFeed(camera) {
         ${frameMarkup}
       </main>
       <footer class="security-camera-feed-footer">
-        <span>${escapeHTML(camera.timestamp)}</span>
         <span>ID ${escapeHTML(camera.id)}</span>
       </footer>
     </section>
@@ -1398,4 +1397,3 @@ Hooks.once("ready", () => {
   game.socket?.on?.(SOCKET_NAME, handleSocketMessage);
   console.log(`${MODULE_ID} | Ready. Use game.securityCameras.openMonitor()`);
 });
-
