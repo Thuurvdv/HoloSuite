@@ -15,6 +15,8 @@ const modules = [
   "security-cameras"
 ];
 
+const allowedTsNocheckDebt = new Set();
+
 const failures = [];
 const warnings = [];
 
@@ -40,13 +42,15 @@ for (const moduleId of modules) {
   if (!existsSync(packagePath)) failures.push(`${moduleId}: missing package.json`);
 
   if (existsSync(srcPath) && readFileSync(srcPath, "utf8").startsWith("// @ts-nocheck")) {
-    warnings.push(`${moduleId}: src/main.ts still uses @ts-nocheck`);
+    const message = `${moduleId}: src/main.ts still uses @ts-nocheck`;
+    if (allowedTsNocheckDebt.has(moduleId)) warnings.push(`${message} (tracked debt)`);
+    else failures.push(message);
   }
 }
 
 if (warnings.length) {
-  console.warn("Workspace audit warnings:");
-  for (const warning of warnings) console.warn(`- ${warning}`);
+  console.log("Workspace audit tracked debt:");
+  for (const warning of warnings) console.log(`- ${warning}`);
 }
 
 if (failures.length) {

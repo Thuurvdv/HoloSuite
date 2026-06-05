@@ -1,0 +1,140 @@
+.cybercall-accepted .cybercall-panel {
+  box-shadow:
+    0 0 30px rgba(94, 255, 187, 0.36),
+    inset 0 0 34px rgba(94, 255, 187, 0.14);
+}
+
+@keyframes cybercall-flicker {
+  0%, 100% { opacity: 1; }
+  31% { opacity: 0.96; }
+  32% { opacity: 0.78; }
+  33% { opacity: 0.98; }
+  74% { opacity: 0.92; }
+  75% { opacity: 0.72; }
+  76% { opacity: 1; }
+}
+
+@keyframes cybercall-scan {
+  from { transform: translateY(-55%); }
+  to { transform: translateY(55%); }
+}
+
+@keyframes cybercall-static {
+  from { transform: translate(0, 0); }
+  to { transform: translate(3px, -2px); }
+}
+
+@keyframes cybercall-ring-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 24px rgba(94, 231, 255, 0.32),
+      inset 0 0 34px rgba(94, 231, 255, 0.14);
+  }
+  50% {
+    transform: scale(1.012);
+    box-shadow:
+      0 0 42px var(--cybercall-blue),
+      inset 0 0 44px rgba(94, 231, 255, 0.2);
+  }
+}
+
+@media (max-width: 520px) {
+  .cybercall-composer-grid,
+  .cybercall-composer-toggles,
+  .cybercall-contacts-form {
+    grid-template-columns: 1fr;
+  }
+
+  .cybercall-contacts-list li {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .cybercall-contact-actions {
+    grid-column: 1 / -1;
+  }
+
+  .cybercall-broadcast {
+    width: calc(100vw - 24px);
+    min-height: calc(100vh - 72px);
+    padding: 18px;
+  }
+
+  .cybercall-body {
+    grid-template-columns: 1fr;
+  }
+
+  .cybercall-broadcast .cybercall-body {
+    grid-template-columns: 1fr;
+  }
+
+  .cybercall-portrait {
+    min-height: 190px;
+  }
+
+  .cybercall-broadcast .cybercall-portrait,
+  .cybercall-broadcast .cybercall-body blockquote {
+    min-height: 220px;
+  }
+
+  .cybercall-connected-panel .cybercall-portrait {
+    min-height: 260px;
+  }
+
+  .cybercall-broadcast .cybercall-header h2 {
+    font-size: 28px;
+  }
+
+  .cybercall-broadcast .cybercall-body blockquote {
+    font-size: 19px;
+  }
+
+  .cybercall-header {
+    flex-direction: column;
+  }
+
+  .cybercall-signal {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+.cybercall-contacts-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(94, 231, 255, 0.25);
+}
+
+.cybercall-ringtone-select select {
+  overflow: visible;
+}
+
+.cybercall-ringtone-select {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  color: rgba(217, 251, 255, 0.82);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cybercall-ringtone-select select {
+  width: 100%;
+  border: 1px solid rgba(94, 231, 255, 0.32);
+  border-radius: var(--hs-radius);
+  background: rgba(1, 8, 16, 0.72);
+  color: var(--cybercall-text);
+  box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
+}
+
+.cybercall-ringtone-select select:focus-visible {
+  border-color: var(--cybercall-cyan);
+  box-shadow:
+    0 0 10px rgba(94, 231, 255, 0.22),
+    inset 0 0 12px rgba(94, 231, 255, 0.1);
+  outline: none;
+}

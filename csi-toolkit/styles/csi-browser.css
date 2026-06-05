@@ -1,0 +1,123 @@
+.csi-browser-shell {
+  height: 100%;
+  overflow: auto;
+  padding: 14px;
+}
+
+.csi-browser-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--csi-line);
+}
+
+.csi-browser-header h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 22px;
+}
+
+.csi-browser-header p {
+  margin: 4px 0 0;
+  color: var(--csi-muted);
+}
+
+.csi-browser-list {
+  display: grid;
+  gap: 10px;
+}
+
+.csi-browser-case {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--csi-line);
+  border-radius: var(--hs-radius);
+  background: rgba(13, 27, 34, 0.78);
+  color: var(--csi-text);
+  text-align: left;
+}
+
+.csi-browser-case:hover,
+.csi-browser-case:focus {
+  border-color: var(--csi-cyan);
+  box-shadow: var(--csi-shadow);
+  outline: none;
+}
+
+.csi-browser-case img,
+.csi-browser-case-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--hs-radius);
+}
+
+.csi-browser-case img {
+  object-fit: cover;
+}
+
+.csi-browser-case-placeholder {
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(95, 220, 255, 0.18);
+  background: rgba(3, 9, 12, 0.58);
+  color: var(--csi-cyan);
+}
+
+.csi-browser-case-placeholder i {
+  margin-right: 0;
+}
+
+.csi-browser-case-body {
+  display: block;
+  min-width: 0;
+}
+
+.csi-browser-case-title {
+  display: block;
+  margin: 0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.csi-browser-case-subtitle {
+  display: block;
+  margin: 3px 0 6px;
+  color: var(--csi-muted);
+}
+
+.csi-theme-noir .csi-board-viewport {
+  background:
+    radial-gradient(circle at 20px 20px, rgba(90, 56, 28, 0.7) 2px, transparent 2px) 0 0 / 38px 38px,
+    linear-gradient(90deg, rgba(89, 48, 18, 0.34), rgba(33, 21, 14, 0.42)),
+    #2a1c13;
+}
+
+.csi-theme-noir .csi-card {
+  background: #d8c9a6;
+  color: #24170f;
+  border-color: rgba(91, 50, 24, 0.45);
+  box-shadow: 0 9px 18px rgba(0, 0, 0, 0.32);
+}
+
+.csi-theme-noir .csi-card h3,
+.csi-theme-noir .csi-card p {
+  color: #24170f;
+}
+
+.csi-theme-noir .csi-card-topline,
+.csi-theme-noir .csi-card .csi-card-subtitle {
+  color: #6f4e32;
+}
+
+.csi-theme-noir .csi-connection-svg line {
+  filter: none;
+}
+

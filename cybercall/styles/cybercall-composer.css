@@ -1,0 +1,183 @@
+.cybercall-composer {
+  padding: 16px;
+  border: 1px solid rgba(94, 231, 255, 0.42);
+  border-radius: var(--hs-radius);
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    linear-gradient(135deg, rgba(94, 231, 255, 0.13), transparent 38%),
+    rgba(3, 13, 24, 0.94);
+  box-shadow:
+    0 0 22px rgba(0, 167, 255, 0.24),
+    inset 0 0 28px rgba(94, 231, 255, 0.1);
+}
+
+.cybercall-composer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(94, 231, 255, 0.25);
+}
+
+.cybercall-composer-kicker {
+  color: var(--cybercall-cyan);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cybercall-composer-header h2 {
+  margin: 4px 0 0;
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.cybercall-composer-header output {
+  min-width: 70px;
+  padding: 7px 10px;
+  border: 1px solid rgba(94, 231, 255, 0.36);
+  border-radius: var(--hs-radius);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--cybercall-cyan);
+  font-family: var(--hs-font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.cybercall-composer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.cybercall-composer label {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  color: rgba(217, 251, 255, 0.82);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cybercall-composer input[type="text"],
+.cybercall-composer input[type="range"],
+.cybercall-composer select,
+.cybercall-composer textarea {
+  width: 100%;
+}
+
+.cybercall-composer input[type="text"],
+.cybercall-composer select,
+.cybercall-composer textarea {
+  border: 1px solid rgba(94, 231, 255, 0.32);
+  border-radius: var(--hs-radius);
+  background: rgba(1, 8, 16, 0.72);
+  color: var(--cybercall-text);
+  box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
+}
+
+.cybercall-composer textarea {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.cybercall-composer input:focus-visible,
+.cybercall-composer select:focus-visible,
+.cybercall-composer textarea:focus-visible {
+  border-color: var(--cybercall-cyan);
+  box-shadow:
+    0 0 10px rgba(94, 231, 255, 0.22),
+    inset 0 0 12px rgba(94, 231, 255, 0.1);
+  outline: none;
+}
+
+.cybercall-composer-wide {
+  grid-column: 1 / -1;
+}
+
+.cybercall-composer-path-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 6px;
+}
+
+.cybercall-composer-path-row button {
+  min-width: 38px;
+  padding: 0;
+  border: 1px solid rgba(94, 231, 255, 0.48);
+  border-radius: var(--hs-radius);
+  background: rgba(0, 124, 190, 0.18);
+  color: var(--cybercall-text);
+}
+
+.cybercall-composer-range input {
+  accent-color: var(--cybercall-cyan);
+}
+
+.cybercall-composer-toggles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cybercall-composer-toggles label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid rgba(94, 231, 255, 0.24);
+  border-radius: var(--hs-radius);
+  background: rgba(0, 124, 190, 0.1);
+}
+
+.cybercall-composer-toggles input {
+  accent-color: var(--cybercall-cyan);
+}
+
+.cybercall-composer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.cybercall-composer-actions button {
+  min-width: 118px;
+  border: 1px solid rgba(94, 231, 255, 0.48);
+  border-radius: var(--hs-radius);
+  background: rgba(0, 124, 190, 0.18);
+  color: var(--cybercall-text);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cybercall-composer-actions button[data-cybercall-compose-action="broadcast"] {
+  border-color: rgba(125, 255, 154, 0.58);
+  background: rgba(18, 201, 109, 0.18);
+}
+
+.cybercall-composer-actions button[data-cybercall-compose-action="close-active"] {
+  border-color: rgba(255, 65, 93, 0.54);
+}
+
+.cybercall-composer-actions button:hover,
+.cybercall-composer-actions button:focus-visible {
+  border-color: var(--cybercall-cyan);
+  background: rgba(94, 231, 255, 0.22);
+  box-shadow: 0 0 14px rgba(94, 231, 255, 0.25);
+}
+

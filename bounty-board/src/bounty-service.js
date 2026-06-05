@@ -309,59 +309,6 @@ export async function requestContract(id) {
   ui.notifications?.info?.("Contract request sent to the GM.");
 }
 
-export async function seedTestData() {
-  if (!requireGM("seed bounty test data")) return [];
-  const timestamp = now();
-  const samples = [
-    {
-      title: "Red Wake Intercept",
-      targetName: "The Glass Jackal",
-      description: "Recover stolen drive cores before the convoy reaches restricted space.",
-      longDescription: "Blackline telemetry places the fugitive courier inside the Red Wake interdiction lane. Expect spoofed transponders and military-grade countermeasures.",
-      rewardAmount: 8500,
-      rewardCurrency: "credits",
-      threatLevel: "High",
-      faction: "Aster Accord",
-      location: "Kestral Gate",
-      tags: ["Recovery", "Smuggling"],
-      status: BOUNTY_STATUSES.AVAILABLE,
-      published: true,
-      notesPublic: "Bring the cores back intact.",
-      notesGM: "Premium gating hook: upgrade with Blackline classified details later.",
-      createdAt: timestamp,
-      updatedAt: timestamp
-    },
-    {
-      title: "Signal Under Saltglass",
-      targetName: "Unknown Echo Source",
-      description: "Investigate a repeating distress ping beneath reflective storm cover.",
-      longDescription: "The signal uses a pre-collapse cadence. Salvors claim the ruins answer back when approached after local midnight.",
-      rewardAmount: 4200,
-      rewardCurrency: "credits",
-      threatLevel: "Moderate",
-      faction: "Veil Freeholds",
-      location: "Saltglass Ruins",
-      tags: ["Investigation", "Rescue"],
-      status: BOUNTY_STATUSES.HIDDEN,
-      published: false,
-      notesGM: "Galaxy map integration hook: reveal route after this bounty is accepted.",
-      createdAt: timestamp,
-      updatedAt: timestamp
-    }
-  ];
-
-  const store = getBountyStore();
-  const installed = [];
-  for (const sample of samples) {
-    const bounty = normalizeBounty({ ...sample, id: `sample-${foundry.utils.randomID(8)}` });
-    store[bounty.id] = bounty;
-    installed.push(bounty);
-  }
-  await saveBountyStore(store);
-  ui.notifications?.info?.(`${MODULE_TITLE}: seeded ${installed.length} sample bounties.`);
-  return installed;
-}
-
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTING_BOUNTIES, {
     scope: "world",

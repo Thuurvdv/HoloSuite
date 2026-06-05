@@ -1,0 +1,70 @@
+.csi-board-edit-form {
+  padding: 14px;
+}
+
+.csi-board-edit-actions {
+  margin-top: 12px;
+}
+
+.csi-empty-state,
+.csi-empty-workspace {
+  color: var(--csi-muted);
+}
+
+.csi-empty-workspace {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-height: 360px;
+  text-align: center;
+}
+
+.csi-empty-workspace h1 {
+  margin: 0 0 12px;
+  color: #ffffff;
+}
+
+.csi-classified-panel h1 {
+  color: var(--csi-red);
+  text-transform: uppercase;
+}
+
+.csi-board-empty {
+  position: absolute;
+  left: 80px;
+  top: 80px;
+}
+
+@media (max-width: 980px) {
+  .csi-manager-shell,
+  .csi-form-grid,
+  .csi-board-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .csi-board-dossier {
+    max-height: 280px;
+    border-right: 0;
+    border-bottom: 1px solid var(--csi-line);
+  }
+
+  .csi-span-2 {
+    grid-column: span 1;
+  }
+
+  .csi-case-list {
+    max-height: 260px;
+    border-right: 0;
+    border-bottom: 1px solid var(--csi-line);
+  }
+
+  .csi-editor-header,
+  .csi-board-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .csi-timeline li {
+    grid-template-columns: 1fr;
+  }
+}

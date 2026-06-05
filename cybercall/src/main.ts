@@ -1,4 +1,12 @@
-// @ts-nocheck
+import { createCyberCallAppClasses } from "./apps";
+import {
+  DEFAULT_CALL,
+  clampSignal,
+  createCallId,
+  normalizeCallData,
+  normalizeContact
+} from "./call-model";
+
 const MODULE_ID = "cybercall";
 const SOCKET_NAME = `module.${MODULE_ID}`;
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall.hbs`;
@@ -12,23 +20,6 @@ let activeContactsTab = "personal";
 let ringingAudio = null;
 let groupContactsCache = null;
 
-const DEFAULT_CALL = {
-  callerName: "UNKNOWN CALLER",
-  subtitle: "Unidentified Signal",
-  image: "",
-  message: "Incoming transmission...",
-  signal: 100,
-  variant: "standard",
-  fullscreen: false,
-  ringing: true,
-  accepted: false,
-  canAccept: true,
-  canDecline: true,
-  allowBroadcast: true,
-  outgoing: false
-};
-
-const VARIANTS = new Set(["standard", "emergency", "corrupted"]);
 const RINGTONE_CHOICES = {
   "": "Silent",
   [`modules/${MODULE_ID}/audio/Ringtone1.ogg`]: "Ringtone 1",
@@ -36,63 +27,11 @@ const RINGTONE_CHOICES = {
   [`modules/${MODULE_ID}/audio/Ringtone3.ogg`]: "Ringtone 3"
 };
 
-function clampSignal(value) {
-  const number = Number(value);
-  if (Number.isNaN(number)) return DEFAULT_CALL.signal;
-  return Math.min(100, Math.max(0, Math.round(number)));
-}
-
-function getInitials(name) {
-  return String(name)
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "?";
-}
-
 function escapeHTML(value) {
   if (foundry?.utils?.escapeHTML) return foundry.utils.escapeHTML(String(value));
   const element = document.createElement("div");
   element.innerText = String(value);
   return element.innerHTML;
-}
-
-function createCallId() {
-  if (foundry?.utils?.randomID) return foundry.utils.randomID();
-  if (crypto?.randomUUID) return crypto.randomUUID();
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function normalizeCallData(data = {}) {
-  const call = {
-    ...DEFAULT_CALL,
-    ...data,
-    id: String(data.id ?? createCallId()),
-    callerName: String(data.callerName ?? DEFAULT_CALL.callerName),
-    subtitle: String(data.subtitle ?? DEFAULT_CALL.subtitle),
-    image: String(data.image ?? DEFAULT_CALL.image),
-    message: String(data.message ?? DEFAULT_CALL.message),
-    signal: clampSignal(data.signal ?? DEFAULT_CALL.signal),
-    variant: VARIANTS.has(data.variant) ? data.variant : DEFAULT_CALL.variant,
-    fullscreen: Boolean(data.fullscreen ?? DEFAULT_CALL.fullscreen),
-    ringing: data.ringing !== false && data.accepted !== true,
-    accepted: data.accepted === true,
-    canAccept: data.canAccept !== false,
-    canDecline: data.canDecline !== false,
-    allowBroadcast: data.allowBroadcast !== false,
-    outgoing: data.outgoing === true,
-    callerUserId: String(data.callerUserId ?? ""),
-    contactNumber: String(data.contactNumber ?? "")
-  };
-  call.initials = getInitials(call.callerName);
-  call.showBroadcast = Boolean(game?.user?.isGM && call.allowBroadcast);
-  call.isStandard = call.variant === "standard";
-  call.isEmergency = call.variant === "emergency";
-  call.isCorrupted = call.variant === "corrupted";
-  call.isIncoming = !call.accepted;
-  call.kicker = call.outgoing ? "Outgoing CyberCall" : call.fullscreen ? "System-wide Broadcast" : "Incoming CyberCall";
-  return call;
 }
 
 function getDefaultComposerData() {
@@ -116,16 +55,6 @@ function getActorChoices() {
       img: actor.img ?? ""
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function normalizeContact(contact = {}) {
-  return {
-    id: String(contact.id ?? createCallId()),
-    name: String(contact.name ?? "").trim(),
-    number: String(contact.number ?? "").trim(),
-    image: String(contact.image ?? contact.img ?? "").trim(),
-    initials: getInitials(contact.name)
-  };
 }
 
 function getContacts() {
@@ -168,7 +97,7 @@ async function saveGroupContacts(contacts) {
   });
 }
 
-async function addContact(name, number, scope = "personal", image = "") {
+async function addContact(name: any, number: any, scope = "personal", image: any = "") {
   const contact = normalizeContact({ name, number, image });
   if (!contact.name || !contact.number) {
     ui.notifications?.warn?.("Contact name and number are required.");
@@ -234,14 +163,14 @@ function canUseCyberCall(user = game.user) {
   return Number(user?.role ?? 0) >= Number(requiredRole);
 }
 
-function getElement(app, html) {
+function getElement(app: any, html: any = null) {
   if (html?.[0]) return html[0];
   if (html instanceof HTMLElement) return html;
   if (app.element?.[0]) return app.element[0];
   return app.element ?? null;
 }
 
-function bindCallControls(app, html) {
+function bindCallControls(app: any, html: any = null) {
   const element = getElement(app, html);
   if (!element) return;
   element.classList.toggle("cybercall-fullscreen", app.callData.fullscreen);
@@ -301,7 +230,7 @@ function updateComposerSignal(form) {
   output.textContent = `${clampSignal(signal.value)}%`;
 }
 
-function bindComposerControls(app, html) {
+function bindComposerControls(app: any, html: any = null) {
   const element = getElement(app, html);
   const form = getComposerForm(element);
   if (!element || !form) return;
@@ -350,7 +279,7 @@ function bindComposerControls(app, html) {
 
       if (action === "browse-image") {
         const input = form.elements.image;
-        const Picker = globalThis.FilePicker ?? globalThis.foundry?.applications?.apps?.FilePicker;
+        const Picker = (globalThis as any).FilePicker ?? (globalThis as any).foundry?.applications?.apps?.FilePicker;
         if (!input || !Picker) {
           ui.notifications?.warn?.("Foundry FilePicker is unavailable.");
           return;
@@ -380,7 +309,7 @@ function getContactsForm(element) {
   return element?.querySelector?.("form[data-cybercall-contacts-form]");
 }
 
-function bindContactsControls(app, html) {
+function bindContactsControls(app: any, html: any = null) {
   const element = getElement(app, html);
   const form = getContactsForm(element);
   if (!element || !form) return;
@@ -436,497 +365,35 @@ function bindContactsControls(app, html) {
   });
 }
 
-function makeFallbackImageMarkup(call) {
-  if (call.image) {
-    return `<img src="${escapeHTML(call.image)}" alt="${escapeHTML(call.callerName)}">`;
+const { CyberCallApplication, CyberCallComposer, CyberCallContacts } = createCyberCallAppClasses({
+  moduleId: MODULE_ID,
+  templatePath: TEMPLATE_PATH,
+  composerTemplatePath: COMPOSER_TEMPLATE_PATH,
+  contactsTemplatePath: CONTACTS_TEMPLATE_PATH,
+  escapeHTML,
+  getDefaultComposerData,
+  getActorChoices,
+  getContacts,
+  getGroupContacts,
+  getRingtoneChoices,
+  getSoundPath,
+  getActiveContactsTab: () => activeContactsTab,
+  bindCallControls,
+  bindComposerControls,
+  bindContactsControls,
+  stopRinging,
+  clearActiveCall: (app) => {
+    if (activeCall === app) activeCall = null;
+  },
+  clearActiveComposer: (app) => {
+    if (activeComposer === app) activeComposer = null;
+  },
+  clearActiveContacts: (app) => {
+    if (activeContacts === app) activeContacts = null;
   }
-  return `<div class="cybercall-initials" aria-hidden="true">${escapeHTML(call.initials)}</div>`;
-}
+});
 
-function renderFallbackTemplate(call) {
-  const signalStyle = `--cybercall-signal: ${call.signal}%;`;
-  const fullscreenClass = call.fullscreen ? "cybercall-broadcast" : "";
-  const ringingClass = call.ringing ? "cybercall-ringing-panel" : "";
-  const connectedClass = call.accepted ? "cybercall-connected-panel" : "";
-  const broadcastButton = call.showBroadcast
-    ? '<button type="button" data-cybercall-action="broadcast">Broadcast</button>'
-    : "";
-  const headerMarkup = call.accepted
-    ? ""
-    : `
-      <header class="cybercall-header">
-        <div>
-          <div class="cybercall-kicker">${escapeHTML(call.kicker)}</div>
-          <h2>${escapeHTML(call.callerName)}</h2>
-          <p>${escapeHTML(call.subtitle)}</p>
-        </div>
-        <div class="cybercall-signal">
-          <span>${call.signal}%</span>
-          <div class="cybercall-signal-bar" aria-hidden="true"><i></i></div>
-        </div>
-      </header>
-    `;
-  const messageMarkup = call.accepted ? "" : `<blockquote>${escapeHTML(call.message)}</blockquote>`;
-  const actionsMarkup = call.accepted
-    ? '<button type="button" data-cybercall-action="end">End Call</button>'
-    : call.outgoing
-      ? '<button type="button" data-cybercall-action="end">End Call</button>'
-      : `
-        ${call.canAccept ? '<button type="button" data-cybercall-action="accept">Accept</button>' : ""}
-        <button type="button" data-cybercall-action="decline">Decline</button>
-        ${broadcastButton}
-      `;
-  return `
-    <div class="cybercall-panel cybercall-${call.variant} ${fullscreenClass} ${ringingClass} ${connectedClass}" style="${signalStyle}">
-      <div class="cybercall-static" aria-hidden="true"></div>
-      <div class="cybercall-reticle" aria-hidden="true"></div>
-      ${headerMarkup}
-      <main class="cybercall-body">
-        <div class="cybercall-portrait">${makeFallbackImageMarkup(call)}</div>
-        ${messageMarkup}
-      </main>
-      <footer class="cybercall-actions">
-        ${actionsMarkup}
-      </footer>
-    </div>
-  `;
-}
-
-function renderComposerFallbackTemplate(data) {
-  const call = data.call;
-  const actorOptions = data.actors
-    .map((actor) => `<option value="${escapeHTML(actor.id)}">${escapeHTML(actor.name)}</option>`)
-    .join("");
-
-  return `
-    <form class="cybercall-composer" data-cybercall-composer>
-      <label>Actor Portrait
-        <select name="actorId">
-          <option value="">Manual / no actor</option>
-          ${actorOptions}
-        </select>
-      </label>
-      <label>Caller Name <input type="text" name="callerName" value="${escapeHTML(call.callerName)}"></label>
-      <label>Subtitle / Faction <input type="text" name="subtitle" value="${escapeHTML(call.subtitle)}"></label>
-      <label>Portrait Image Path <span class="cybercall-composer-path-row"><input type="text" name="image" value="${escapeHTML(call.image)}"><button type="button" data-cybercall-compose-action="browse-image">Browse</button></span></label>
-      <label>Message <textarea name="message" rows="5">${escapeHTML(call.message)}</textarea></label>
-      <label>Signal <input type="range" name="signal" min="0" max="100" value="${call.signal}"></label>
-      <label>Variant
-        <select name="variant">
-          <option value="standard" ${call.variant === "standard" ? "selected" : ""}>Standard Blue</option>
-          <option value="emergency" ${call.variant === "emergency" ? "selected" : ""}>Emergency Red</option>
-          <option value="corrupted" ${call.variant === "corrupted" ? "selected" : ""}>Corrupted Green</option>
-        </select>
-      </label>
-      <label><input type="checkbox" name="fullscreen" ${call.fullscreen ? "checked" : ""}> Fullscreen Broadcast</label>
-      <label><input type="checkbox" name="ringing" ${call.ringing ? "checked" : ""}> Ringing Animation / Sound</label>
-      <div class="cybercall-composer-ringtone">
-        <label class="cybercall-ringtone-select">
-          <span>Ringtone</span>
-          <select data-cybercall-ringtone>
-            ${(data.ringtoneChoices ?? []).map((choice) =>
-              `<option value="${escapeHTML(choice.value)}" ${choice.selected ? "selected" : ""}>${escapeHTML(choice.label)}</option>`
-            ).join("")}
-          </select>
-        </label>
-      </div>
-      <div class="cybercall-composer-actions">
-        <button type="button" data-cybercall-compose-action="preview">Preview Locally</button>
-        <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>
-        <button type="button" data-cybercall-compose-action="close-active">Close Active Call</button>
-      </div>
-    </form>
-  `;
-}
-
-function renderContactsFallbackTemplate(data) {
-  const renderContactList = (contacts, scope) => contacts.length
-    ? contacts.map((contact) => `
-        <li>
-          <div class="cybercall-contact-avatar">
-            ${contact.image ? `<img src="${escapeHTML(contact.image)}" alt="">` : `<span>${escapeHTML(contact.initials)}</span>`}
-          </div>
-          <div class="cybercall-contact-id">
-            <strong>${escapeHTML(contact.name)}</strong>
-            <span>${escapeHTML(contact.number)}</span>
-          </div>
-          <div class="cybercall-contact-actions">
-            <button type="button" data-cybercall-contact-action="call" data-contact-scope="${scope}" data-contact-id="${escapeHTML(contact.id)}">Call</button>
-            <button type="button" data-cybercall-contact-action="remove" data-contact-scope="${scope}" data-contact-id="${escapeHTML(contact.id)}">Remove</button>
-          </div>
-        </li>
-      `).join("")
-    : '<li class="cybercall-contacts-empty">No contacts stored.</li>';
-  const personalActive = data.activeTab !== "group";
-  const groupActive = data.activeTab === "group";
-
-  return `
-    <section class="cybercall-contacts">
-      <header class="cybercall-contacts-header">
-        <div>
-          <div class="cybercall-contacts-kicker">Personal Comms Directory</div>
-          <h2>CyberCall Contacts</h2>
-        </div>
-      </header>
-      <nav class="cybercall-contact-tabs">
-        <button type="button" class="${personalActive ? "active" : ""}" data-cybercall-contact-tab="personal">Personal</button>
-        <button type="button" class="${groupActive ? "active" : ""}" data-cybercall-contact-tab="group">Group</button>
-      </nav>
-      <section data-cybercall-contact-panel="personal" ${personalActive ? "" : "hidden"}>
-        <ul class="cybercall-contacts-list">${renderContactList(data.contacts, "personal")}</ul>
-      </section>
-      <section data-cybercall-contact-panel="group" ${groupActive ? "" : "hidden"}>
-        <ul class="cybercall-contacts-list">${renderContactList(data.groupContacts, "group")}</ul>
-      </section>
-      <form class="cybercall-contacts-form" data-cybercall-contacts-form>
-        <input type="hidden" name="scope" value="${escapeHTML(data.activeTab)}">
-        <label>Name <input type="text" name="name" required></label>
-        <label>Number <input type="text" name="number" required></label>
-        <label>Picture <input type="text" name="image" placeholder="icons/..."></label>
-        <button type="submit">Add Contact</button>
-      </form>
-      <footer class="cybercall-contacts-footer">
-        <label class="cybercall-ringtone-select">
-          <span>Ringtone</span>
-          <select data-cybercall-ringtone>
-            ${(data.ringtoneChoices ?? []).map((choice) =>
-              `<option value="${escapeHTML(choice.value)}" ${choice.selected ? "selected" : ""}>${escapeHTML(choice.label)}</option>`
-            ).join("")}
-          </select>
-        </label>
-      </footer>
-    </section>
-  `;
-}
-
-const ApplicationV2 = foundry?.applications?.api?.ApplicationV2;
-const HandlebarsApplicationMixin = foundry?.applications?.api?.HandlebarsApplicationMixin;
-
-class CyberCallApplicationV1 extends Application {
-  constructor(callData, options = {}) {
-    super(options);
-    this.callData = normalizeCallData(callData);
-  }
-
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "cybercall-overlay",
-      title: "CyberCall",
-      template: TEMPLATE_PATH,
-      classes: ["cybercall-app"],
-      popOut: true,
-      resizable: true,
-      width: 440,
-      height: "auto"
-    });
-  }
-
-  getData() {
-    return {
-      call: this.callData
-    };
-  }
-
-  async _renderInner(data) {
-    try {
-      return await super._renderInner(data);
-    } catch (error) {
-      console.warn(`${MODULE_ID} | Template render failed, using inline fallback.`, error);
-      return $(renderFallbackTemplate(this.callData));
-    }
-  }
-
-  activateListeners(html) {
-    super.activateListeners(html);
-    bindCallControls(this, html);
-  }
-
-  async close(options) {
-    if (activeCall === this) activeCall = null;
-    stopRinging();
-    return super.close(options);
-  }
-}
-
-class CyberCallComposerV1 extends Application {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "cybercall-composer",
-      title: "CyberCall Composer",
-      template: COMPOSER_TEMPLATE_PATH,
-      classes: ["cybercall-composer-app"],
-      popOut: true,
-      resizable: true,
-      width: 560,
-      height: "auto"
-    });
-  }
-
-  getData() {
-    return {
-      call: getDefaultComposerData(),
-      actors: getActorChoices(),
-      ringtoneChoices: getRingtoneChoices()
-    };
-  }
-
-  async _renderInner(data) {
-    try {
-      return await super._renderInner(data);
-    } catch (error) {
-      console.warn(`${MODULE_ID} | Composer template render failed, using inline fallback.`, error);
-      return $(renderComposerFallbackTemplate(data));
-    }
-  }
-
-  activateListeners(html) {
-    super.activateListeners(html);
-    bindComposerControls(this, html);
-  }
-
-  async close(options) {
-    if (activeComposer === this) activeComposer = null;
-    return super.close(options);
-  }
-}
-
-class CyberCallContactsV1 extends Application {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "cybercall-contacts",
-      title: "CyberCall Contacts",
-      template: CONTACTS_TEMPLATE_PATH,
-      classes: ["cybercall-contacts-app"],
-      popOut: true,
-      resizable: true,
-      width: 500,
-      height: "auto"
-    });
-  }
-
-  getData() {
-    const contacts = getContacts();
-    const groupContacts = getGroupContacts();
-    return {
-      contacts,
-      groupContacts,
-      hasContacts: contacts.length > 0,
-      hasGroupContacts: groupContacts.length > 0,
-      activeTab: activeContactsTab,
-      isPersonalTab: activeContactsTab !== "group",
-      isGroupTab: activeContactsTab === "group",
-      ringtoneChoices: getRingtoneChoices(),
-      currentRingtone: getSoundPath()
-    };
-  }
-
-  async _renderInner(data) {
-    try {
-      return await super._renderInner(data);
-    } catch (error) {
-      console.warn(`${MODULE_ID} | Contacts template render failed, using inline fallback.`, error);
-      return $(renderContactsFallbackTemplate(data));
-    }
-  }
-
-  activateListeners(html) {
-    super.activateListeners(html);
-    bindContactsControls(this, html);
-  }
-
-  async close(options) {
-    if (activeContacts === this) activeContacts = null;
-    return super.close(options);
-  }
-}
-
-function createApplicationV2Class() {
-  if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
-
-  return class CyberCallApplicationV2 extends HandlebarsApplicationMixin(ApplicationV2) {
-    static DEFAULT_OPTIONS = {
-      id: "cybercall-overlay",
-      tag: "section",
-      classes: ["cybercall-app"],
-      window: {
-        title: "CyberCall",
-        resizable: true
-      },
-      position: {
-        width: 440,
-        height: "auto"
-      }
-    };
-
-    static PARTS = {
-      main: {
-        template: TEMPLATE_PATH
-      }
-    };
-
-    constructor(callData, options = {}) {
-      super(options);
-      this.callData = normalizeCallData(callData);
-    }
-
-    async _prepareContext(options) {
-      return {
-        ...(await super._prepareContext(options)),
-        call: this.callData
-      };
-    }
-
-    async _renderHTML(context, options) {
-      try {
-        return await super._renderHTML(context, options);
-      } catch (error) {
-        console.warn(`${MODULE_ID} | Template render failed, using inline fallback.`, error);
-        const wrapper = document.createElement("template");
-        wrapper.innerHTML = renderFallbackTemplate(this.callData).trim();
-        return wrapper.content;
-      }
-    }
-
-    _onRender(context, options) {
-      super._onRender?.(context, options);
-      bindCallControls(this);
-    }
-
-    async close(options) {
-      if (activeCall === this) activeCall = null;
-      stopRinging();
-      return super.close(options);
-    }
-  };
-}
-
-const CyberCallApplication = createApplicationV2Class() ?? CyberCallApplicationV1;
-
-function createComposerV2Class() {
-  if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
-
-  return class CyberCallComposerV2 extends HandlebarsApplicationMixin(ApplicationV2) {
-    static DEFAULT_OPTIONS = {
-      id: "cybercall-composer",
-      tag: "section",
-      classes: ["cybercall-composer-app"],
-      window: {
-        title: "CyberCall Composer",
-        resizable: true
-      },
-      position: {
-        width: 560,
-        height: "auto"
-      }
-    };
-
-    static PARTS = {
-      main: {
-        template: COMPOSER_TEMPLATE_PATH
-      }
-    };
-
-    async _prepareContext(options) {
-      return {
-        ...(await super._prepareContext(options)),
-        call: getDefaultComposerData(),
-        actors: getActorChoices(),
-        ringtoneChoices: getRingtoneChoices()
-      };
-    }
-
-    async _renderHTML(context, options) {
-      try {
-        return await super._renderHTML(context, options);
-      } catch (error) {
-        console.warn(`${MODULE_ID} | Composer template render failed, using inline fallback.`, error);
-        const wrapper = document.createElement("template");
-        wrapper.innerHTML = renderComposerFallbackTemplate(context).trim();
-        return wrapper.content;
-      }
-    }
-
-    _onRender(context, options) {
-      super._onRender?.(context, options);
-      bindComposerControls(this);
-    }
-
-    async close(options) {
-      if (activeComposer === this) activeComposer = null;
-      return super.close(options);
-    }
-  };
-}
-
-const CyberCallComposer = createComposerV2Class() ?? CyberCallComposerV1;
-
-function createContactsV2Class() {
-  if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
-
-  return class CyberCallContactsV2 extends HandlebarsApplicationMixin(ApplicationV2) {
-    static DEFAULT_OPTIONS = {
-      id: "cybercall-contacts",
-      tag: "section",
-      classes: ["cybercall-contacts-app"],
-      window: {
-        title: "CyberCall Contacts",
-        resizable: true
-      },
-      position: {
-        width: 500,
-        height: "auto"
-      }
-    };
-
-    static PARTS = {
-      main: {
-        template: CONTACTS_TEMPLATE_PATH
-      }
-    };
-
-    async _prepareContext(options) {
-      const contacts = getContacts();
-      const groupContacts = getGroupContacts();
-      return {
-        ...(await super._prepareContext(options)),
-        contacts,
-        groupContacts,
-        hasContacts: contacts.length > 0,
-        hasGroupContacts: groupContacts.length > 0,
-        activeTab: activeContactsTab,
-        isPersonalTab: activeContactsTab !== "group",
-        isGroupTab: activeContactsTab === "group",
-        ringtoneChoices: getRingtoneChoices(),
-        currentRingtone: getSoundPath()
-      };
-    }
-
-    async _renderHTML(context, options) {
-      try {
-        return await super._renderHTML(context, options);
-      } catch (error) {
-        console.warn(`${MODULE_ID} | Contacts template render failed, using inline fallback.`, error);
-        const wrapper = document.createElement("template");
-        wrapper.innerHTML = renderContactsFallbackTemplate(context).trim();
-        return wrapper.content;
-      }
-    }
-
-    _onRender(context, options) {
-      super._onRender?.(context, options);
-      bindContactsControls(this);
-    }
-
-    async close(options) {
-      if (activeContacts === this) activeContacts = null;
-      return super.close(options);
-    }
-  };
-}
-
-const CyberCallContacts = createContactsV2Class() ?? CyberCallContactsV1;
-
-async function openCall(callData = {}) {
+async function openCall(callData: any = {}) {
   if (!canUseCyberCall()) {
     ui.notifications?.warn?.("You do not have permission to open CyberCall transmissions.");
     return null;
@@ -1089,7 +556,7 @@ async function refreshContacts() {
   await activeContacts.render(true);
 }
 
-async function broadcastCall(callData = {}) {
+async function broadcastCall(callData: any = {}) {
   if (!game.user.isGM) {
     ui.notifications?.warn?.("Only the GM can broadcast CyberCalls to all players.");
     return null;
@@ -1158,7 +625,7 @@ async function handleSocketMessage(message) {
   }
 }
 
-function applyFullscreenPosition(app) {
+function applyFullscreenPosition(app: any) {
   if (!app?.callData?.fullscreen) return;
   app.setPosition?.({
     left: 0,
@@ -1202,7 +669,7 @@ function playRinging(callData) {
 
   const interfaceVolume = Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5);
   const volume = 0.65 * interfaceVolume;
-  const AudioHelperClass = foundry?.audio?.AudioHelper ?? globalThis.AudioHelper;
+  const AudioHelperClass = foundry?.audio?.AudioHelper ?? (globalThis as any).AudioHelper;
   if (AudioHelperClass?.play) {
     AudioHelperClass.play({ src: soundPath, volume, autoplay: true, loop: true }, false)
       .then((handle) => { ringingAudio = handle; })

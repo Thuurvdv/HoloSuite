@@ -1,0 +1,127 @@
+.hcci-stage {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(220px, 38vw) minmax(240px, 1fr);
+  align-items: center;
+  gap: clamp(18px, 4vw, 56px);
+  width: min(1180px, 92vw);
+  height: 100%;
+  margin: 0 auto;
+}
+
+.hcci-portrait-frame {
+  justify-self: end;
+  position: relative;
+  width: min(38vw, 440px);
+  aspect-ratio: 1;
+  border: 2px solid color-mix(in srgb, var(--hcci-accent), white 20%);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 0 0 9px rgba(255, 255, 255, 0.04),
+    0 0 42px color-mix(in srgb, var(--hcci-accent), transparent 28%),
+    inset 0 0 34px rgba(255, 255, 255, 0.08);
+  clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+  overflow: hidden;
+  transform: translateX(-18vw) skewX(-5deg);
+  opacity: 0;
+  animation: hcci-portrait 620ms cubic-bezier(.12,.88,.18,1) 220ms both;
+}
+
+.hcci-frame-lightning {
+  display: none;
+  position: absolute;
+  inset: -2px;
+  z-index: 2;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    conic-gradient(from 0deg,
+      transparent 0 7%,
+      color-mix(in srgb, var(--hcci-accent), white 18%) 8% 10%,
+      transparent 11% 18%,
+      #ffffff 19% 20%,
+      transparent 21% 34%,
+      color-mix(in srgb, var(--hcci-accent), white 28%) 35% 38%,
+      transparent 39% 54%,
+      #ffffff 55% 56%,
+      transparent 57% 72%,
+      color-mix(in srgb, var(--hcci-accent), white 12%) 73% 76%,
+      transparent 77% 100%);
+  filter: drop-shadow(0 0 14px var(--hcci-accent)) drop-shadow(0 0 30px color-mix(in srgb, var(--hcci-accent), transparent 12%));
+  mask: radial-gradient(circle, transparent 0 45%, #000 46% 53%, transparent 54%);
+}
+
+.hcci-frame-lightning-b {
+  inset: -6px;
+  opacity: 0.72;
+  mask: radial-gradient(circle, transparent 0 44%, #000 45% 55%, transparent 56%);
+}
+
+.hcci-portrait {
+  width: 110%;
+  height: 100%;
+  object-fit: cover;
+  transform: skewX(5deg) translateX(-4%);
+  filter: contrast(1.1) saturate(1.12);
+}
+
+.hcci-portrait-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--hcci-accent);
+  font-size: clamp(76px, 12vw, 160px);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), transparent),
+    rgba(0,0,0,0.72);
+}
+
+.hcci-copy {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.hcci-title {
+  max-width: min(820px, 62vw);
+  color: #ffffff;
+  font-family: "Orbitron", "Eurostile", "Agency FB", Impact, sans-serif;
+  font-size: clamp(24px, min(8vw, calc(54vw / var(--hcci-title-chars, 8) * 1.2)), 118px);
+  line-height: 0.9;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: visible;
+  text-shadow:
+    0 0 12px color-mix(in srgb, var(--hcci-accent), transparent 8%),
+    5px 5px 0 rgba(0, 0, 0, 0.72);
+  transform: translateX(24vw);
+  opacity: 0;
+  animation: hcci-title 520ms cubic-bezier(.11,.9,.16,1) 330ms both;
+}
+
+.hcci-subtitle {
+  display: block;
+  color: var(--hcci-accent);
+  border-top: 2px solid var(--hcci-accent);
+  padding-top: 8px;
+  font-size: clamp(14px, 2vw, 24px);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  transform: translateY(20px);
+  opacity: 0;
+  animation: hcci-subtitle 420ms ease-out 460ms both;
+}
+
+.hcci-screen-shake #ui-left,
+.hcci-screen-shake #ui-right,
+.hcci-screen-shake #ui-top,
+.hcci-screen-shake #ui-bottom,
+.hcci-screen-shake #board {
+  animation: hcci-shake 340ms linear both;
+}
+

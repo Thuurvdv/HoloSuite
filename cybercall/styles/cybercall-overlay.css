@@ -1,0 +1,374 @@
+.cybercall-app {
+  --cybercall-cyan: var(--hs-cyan);
+  --cybercall-blue: #00a7ff;
+  --cybercall-deep: rgba(4, 16, 28, 0.82);
+  --cybercall-line: var(--hs-line);
+  --cybercall-text: var(--hs-text);
+  --cybercall-danger: var(--hs-magenta);
+  color: var(--cybercall-text);
+  font-family: var(--hs-font-ui);
+}
+
+.cybercall-composer-app,
+.cybercall-contacts-app {
+  --cybercall-cyan: var(--hs-cyan);
+  --cybercall-blue: #00a7ff;
+  --cybercall-text: var(--hs-text);
+  color: var(--cybercall-text);
+  font-family: var(--hs-font-ui);
+}
+
+.cybercall-app.cybercall-fullscreen {
+  max-width: none;
+}
+
+.cybercall-app .window-content,
+.cybercall-composer-app .window-content {
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+.cybercall-contacts-app .window-content {
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+}
+
+.cybercall-app.cybercall-fullscreen .window-content {
+  display: grid;
+  min-height: calc(100vh - 30px);
+  place-items: center;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(94, 231, 255, 0.04) 0 1px,
+      transparent 1px 64px
+    ),
+    radial-gradient(circle at center, rgba(94, 231, 255, 0.12), rgba(0, 0, 0, 0.74) 62%);
+}
+
+.cybercall-app .window-header,
+.cybercall-composer-app .window-header,
+.cybercall-contacts-app .window-header {
+  border-bottom-color: rgba(94, 231, 255, 0.35);
+  background: rgba(2, 13, 24, 0.92);
+  color: var(--cybercall-text);
+}
+
+.cybercall-panel {
+  position: relative;
+  min-width: 320px;
+  min-height: 280px;
+  padding: 18px;
+  overflow: hidden;
+  border: 1px solid var(--cybercall-line);
+  border-radius: var(--hs-radius);
+  background:
+    linear-gradient(135deg, rgba(94, 231, 255, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(2, 28, 48, 0.72), rgba(3, 11, 22, 0.88)),
+    var(--cybercall-deep);
+  box-shadow:
+    0 0 24px rgba(0, 167, 255, 0.34),
+    inset 0 0 34px rgba(94, 231, 255, 0.12);
+  backdrop-filter: blur(10px);
+  text-shadow: 0 0 10px rgba(94, 231, 255, 0.55);
+  animation: cybercall-flicker 5.5s infinite;
+}
+
+.cybercall-broadcast {
+  display: grid;
+  width: min(1120px, calc(100vw - 72px));
+  min-height: min(680px, calc(100vh - 96px));
+  align-content: center;
+  padding: 32px;
+  border-width: 2px;
+}
+
+.cybercall-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.08) 0,
+    rgba(255, 255, 255, 0.08) 1px,
+    transparent 1px,
+    transparent 5px
+  );
+  mix-blend-mode: screen;
+  opacity: 0.34;
+}
+
+.cybercall-panel::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(94, 231, 255, 0.18) 46%,
+    transparent 54%,
+    transparent 100%
+  );
+  transform: translateY(-55%);
+  animation: cybercall-scan 4.2s linear infinite;
+}
+
+.cybercall-emergency {
+  --cybercall-cyan: #ff6c7e;
+  --cybercall-blue: #ff274b;
+  --cybercall-line: rgba(255, 65, 93, 0.52);
+  background:
+    linear-gradient(135deg, rgba(255, 65, 93, 0.20), transparent 34%),
+    linear-gradient(180deg, rgba(42, 4, 13, 0.78), rgba(18, 3, 9, 0.9));
+  box-shadow:
+    0 0 26px rgba(255, 39, 75, 0.34),
+    inset 0 0 34px rgba(255, 65, 93, 0.14);
+}
+
+.cybercall-corrupted {
+  --cybercall-cyan: #7dff9a;
+  --cybercall-blue: #12c96d;
+  --cybercall-line: rgba(125, 255, 154, 0.48);
+  --cybercall-text: #d8ffe2;
+  background:
+    linear-gradient(135deg, rgba(125, 255, 154, 0.18), transparent 36%),
+    linear-gradient(180deg, rgba(5, 42, 20, 0.76), rgba(1, 16, 10, 0.92));
+  box-shadow:
+    0 0 26px rgba(18, 201, 109, 0.35),
+    inset 0 0 34px rgba(125, 255, 154, 0.13);
+}
+
+.cybercall-static {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.24) 0 1px, transparent 1px);
+  background-size: 12px 12px, 18px 18px;
+  animation: cybercall-static 0.36s steps(2) infinite;
+}
+
+.cybercall-reticle {
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+  opacity: 0.38;
+  background:
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) left top / 42px 1px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) left top / 1px 42px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right top / 42px 1px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right top / 1px 42px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) left bottom / 42px 1px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) left bottom / 1px 42px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right bottom / 42px 1px no-repeat,
+    linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right bottom / 1px 42px no-repeat;
+}
+
+.cybercall-ringing .cybercall-panel,
+.cybercall-ringing-panel {
+  animation:
+    cybercall-flicker 5.5s infinite,
+    cybercall-ring-pulse 1.45s ease-in-out infinite;
+}
+
+.cybercall-header,
+.cybercall-body,
+.cybercall-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.cybercall-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(94, 231, 255, 0.24);
+}
+
+.cybercall-kicker {
+  margin-bottom: 5px;
+  color: var(--cybercall-cyan);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.cybercall-header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 24px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.cybercall-broadcast .cybercall-header h2 {
+  font-size: 42px;
+}
+
+.cybercall-header p {
+  margin: 6px 0 0;
+  color: rgba(217, 251, 255, 0.78);
+  font-size: 13px;
+}
+
+.cybercall-signal {
+  flex: 0 0 88px;
+  text-align: right;
+}
+
+.cybercall-signal span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--cybercall-cyan);
+  font-family: var(--hs-font-mono);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cybercall-signal-bar {
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(94, 231, 255, 0.38);
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.34);
+}
+
+.cybercall-signal-bar i {
+  display: block;
+  width: var(--cybercall-signal);
+  height: 100%;
+  background: linear-gradient(90deg, var(--cybercall-blue), var(--cybercall-cyan));
+  box-shadow: 0 0 12px var(--cybercall-cyan);
+}
+
+.cybercall-body {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 16px;
+}
+
+.cybercall-broadcast .cybercall-body {
+  grid-template-columns: minmax(220px, 34%) minmax(0, 1fr);
+  gap: 28px;
+  margin-top: 28px;
+}
+
+.cybercall-portrait {
+  display: grid;
+  min-height: 154px;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid rgba(94, 231, 255, 0.34);
+  border-radius: var(--hs-radius);
+  background:
+    linear-gradient(180deg, rgba(94, 231, 255, 0.12), rgba(0, 0, 0, 0.22)),
+    rgba(0, 0, 0, 0.26);
+  box-shadow: inset 0 0 18px rgba(94, 231, 255, 0.16);
+}
+
+.cybercall-broadcast .cybercall-portrait {
+  min-height: 360px;
+}
+
+.cybercall-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+  opacity: 1;
+}
+
+.cybercall-initials {
+  color: var(--cybercall-cyan);
+  font-size: 54px;
+  font-weight: 800;
+}
+
+.cybercall-body blockquote {
+  display: flex;
+  align-items: center;
+  min-height: 154px;
+  margin: 0;
+  padding: 16px;
+  border-left: 3px solid var(--cybercall-cyan);
+  background: rgba(1, 12, 22, 0.42);
+  color: var(--cybercall-text);
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.cybercall-broadcast .cybercall-body blockquote {
+  min-height: 360px;
+  padding: 28px;
+  font-size: 28px;
+}
+
+.cybercall-connected-panel {
+  align-content: center;
+}
+
+.cybercall-connected-panel .cybercall-body {
+  grid-template-columns: 1fr;
+  margin-top: 0;
+}
+
+.cybercall-connected-panel .cybercall-portrait {
+  min-height: 320px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.cybercall-connected-panel .cybercall-portrait img {
+  object-fit: contain;
+}
+
+.cybercall-broadcast.cybercall-connected-panel .cybercall-portrait {
+  min-height: min(620px, calc(100vh - 190px));
+}
+
+.cybercall-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.cybercall-actions button {
+  min-width: 88px;
+  border: 1px solid rgba(94, 231, 255, 0.5);
+  border-radius: var(--hs-radius);
+  background: rgba(0, 124, 190, 0.18);
+  color: var(--cybercall-text);
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 14px rgba(94, 231, 255, 0.12);
+}
+
+.cybercall-actions button[data-cybercall-action="broadcast"] {
+  border-color: rgba(125, 255, 154, 0.58);
+  background: rgba(18, 201, 109, 0.18);
+}
+
+.cybercall-actions button:hover,
+.cybercall-actions button:focus-visible {
+  border-color: var(--cybercall-cyan);
+  background: rgba(94, 231, 255, 0.22);
+  box-shadow: 0 0 14px rgba(94, 231, 255, 0.28);
+}
+
+.cybercall-actions button[data-cybercall-action="decline"],
+.cybercall-actions button[data-cybercall-action="end"] {
+  border-color: rgba(255, 65, 93, 0.54);
+}
+

@@ -8,7 +8,6 @@ import {
   getBounty,
   publishBounty,
   registerSettings,
-  seedTestData,
   upsertBounty
 } from "./bounty-service.js";
 
@@ -48,7 +47,6 @@ function exposeApi() {
     publishBounty,
     archiveBounty,
     claimBounty,
-    seedTestData,
     // Future extension hooks:
     // Patreon/premium gating can wrap open() or selected GM actions here.
     // Random bounty generator can call upsertBounty() with generated data.
