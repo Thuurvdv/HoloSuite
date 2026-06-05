@@ -1,4 +1,38 @@
-// @ts-nocheck
+import {
+  BOARD_ADD_COLLECTIONS,
+  BOARD_HEIGHT,
+  BOARD_WIDTH,
+  CARD_WIDTH,
+  CASE_STATUSES,
+  COLLECTIONS,
+  CONNECTION_COLORS,
+  CONNECTION_STYLES,
+  CONNECTION_TYPES,
+  EVIDENCE_STATUSES,
+  EVIDENCE_TYPES,
+  SUSPECT_STATUSES,
+  THEMES,
+  VISIBILITIES,
+  defaultItem,
+  normalizeBoardLayout,
+  normalizeCase,
+  normalizeConnection,
+  normalizeEvidence,
+  normalizeLocation,
+  normalizeSuspect,
+  normalizeTimelineItem,
+  randomId
+} from "./case-model";
+import { createCSICaseBoardClass } from "./board-app";
+import { createCSIBoardItemEditorClass } from "./item-editor-app";
+
+declare const foundry: any;
+declare const game: any;
+declare const Hooks: any;
+declare const Handlebars: any;
+declare const loadTemplates: any;
+declare const ui: any;
+
 (() => {
   "use strict";
 
@@ -14,24 +48,9 @@
     `modules/${MODULE_ID}/templates/board-item-editor.hbs`
   ];
 
-  const CASE_STATUSES = ["open", "cold", "solved", "classified"];
-  const VISIBILITIES = ["gm", "players"];
-  const THEMES = ["database", "noir"];
-  const EVIDENCE_TYPES = ["physical", "digital", "biological", "weapon", "document", "testimony", "other"];
-  const EVIDENCE_STATUSES = ["unknown", "relevant", "red_herring", "confirmed"];
-  const SUSPECT_STATUSES = ["unknown", "cleared", "person_of_interest", "prime_suspect", "arrested", "dead"];
-  const CONNECTION_TYPES = ["link", "supports", "contradicts", "location", "timeline", "identity"];
-  const CONNECTION_STYLES = ["solid", "dashed", "dotted"];
-  const CONNECTION_COLORS = ["cyan", "green", "red", "amber", "violet", "orange", "white"];
-  const COLLECTIONS = ["evidence", "suspects", "locations", "timeline", "connections"];
-  const BOARD_ADD_COLLECTIONS = ["evidence", "suspects", "locations", "timeline", "connections"];
-  const CARD_WIDTH = 220;
-  const CARD_HEIGHT = 246;
-  const BOARD_WIDTH = 5200;
-  const BOARD_HEIGHT = 3600;
-  const LegacyApplication = globalThis.Application ?? foundry.appv1?.api?.Application;
+  const LegacyApplication = (globalThis as any).Application ?? foundry.appv1?.api?.Application;
 
-  const state = {
+  const state: any = {
     manager: null,
     browser: null,
     boards: new Map(),
@@ -147,7 +166,7 @@
     return cases[caseId] ? normalizeCase(cases[caseId]) : null;
   }
 
-  async function saveCase(caseData, { notify = true, render = true, updateReason = null, userName = null } = {}) {
+  async function saveCase(caseData: any, { notify = true, render = true, updateReason = null, userName = null } = {}) {
     const csiCase = normalizeCase(caseData);
     if (!game.user?.isGM) return requestCaseSave(csiCase, { notify, render });
 
@@ -159,7 +178,7 @@
     return csiCase;
   }
 
-  async function requestCaseSave(csiCase, { render = true } = {}) {
+  async function requestCaseSave(csiCase: any, { render = true, notify = true } = {}) {
     if (!game.socket?.emit) {
       ui.notifications?.warn(`${MODULE_TITLE}: A GM must be connected to save board changes.`);
       return csiCase;
@@ -176,11 +195,11 @@
       userId: game.user?.id,
       userName: game.user?.name
     });
-    ui.notifications?.info(`${MODULE_TITLE}: Board update sent to the GM.`);
+    if (notify) ui.notifications?.info(`${MODULE_TITLE}: Board update sent to the GM.`);
     return csiCase;
   }
 
-  async function createCase(caseData = {}) {
+  async function createCase(caseData: any = {}) {
     const csiCase = normalizeCase(caseData, { forceNewId: !caseData.id });
     const cases = getCases();
     cases[csiCase.id] = csiCase;
@@ -304,7 +323,7 @@
     return state.browser;
   }
 
-  function openCaseBoard(caseId, options = {}) {
+  function openCaseBoard(caseId, options: any = {}) {
     if (!caseId) {
       ui.notifications?.warn(`${MODULE_TITLE}: No case id provided.`);
       return null;
@@ -420,6 +439,42 @@
 
   }
 
+  const CSIBoardItemEditor = createCSIBoardItemEditorClass({
+    LegacyApplication,
+    moduleId: MODULE_ID,
+    moduleTitle: MODULE_TITLE,
+    singularLabel,
+    getItemTitle,
+    getCase,
+    buildItemChoices,
+    parseItemElement,
+    saveCase,
+    deleteBoardItem,
+    defaultBoardPosition
+  });
+
+  const CSICaseBoard = createCSICaseBoardClass({
+    LegacyApplication,
+    moduleId: MODULE_ID,
+    moduleTitle: MODULE_TITLE,
+    CSIBoardItemEditor,
+    getCase,
+    prepareBoardData,
+    openCaseManager,
+    canUserEditBoard,
+    publishSharedLayout,
+    requestLayoutPublish,
+    deleteBoardItem,
+    saveCase,
+    defaultBoardPosition,
+    getRectEdgeAnchor,
+    isFinitePoint,
+    clearBoardApp: (board: any) => {
+      state.boards.delete(`${board.caseId}:${board.playerMode ? "player" : "gm"}`);
+      if (state.playerBoard === board) state.playerBoard = null;
+    }
+  });
+
   class CSICaseBrowser extends LegacyApplication {
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
@@ -460,7 +515,7 @@
   }
 
   class CSICaseManager extends LegacyApplication {
-    constructor(options = {}) {
+    constructor(options: any = {}) {
       super(options);
       this.selectedCaseId = options.caseId ?? null;
     }
@@ -590,7 +645,7 @@
       const field = button.closest(".csi-image-field")?.querySelector("input");
       if (!field) return;
 
-      const Picker = globalThis.FilePicker ?? globalThis.foundry?.applications?.apps?.FilePicker;
+      const Picker = (globalThis as any).FilePicker ?? (globalThis as any).foundry?.applications?.apps?.FilePicker;
       if (!Picker) {
         ui.notifications?.warn(`${MODULE_TITLE}: Foundry FilePicker is unavailable.`);
         return;
@@ -636,538 +691,6 @@
     async close(options = {}) {
       state.manager = null;
       return super.close(options);
-    }
-  }
-
-  class CSICaseBoard extends LegacyApplication {
-    constructor(caseId, options = {}) {
-      super(options);
-      this.caseId = caseId;
-      this.playerMode = Boolean(options.playerMode);
-      this._drag = null;
-      this._pan = null;
-      this._localLayout = null;
-      this._layoutDraft = null;
-      this._pendingConnection = null;
-      this._contextBoardPosition = null;
-      this._boundContextClose = null;
-      this._dimmedKinds = new Set();
-      this._saveTimer = null;
-    }
-
-    static get defaultOptions() {
-      return foundry.utils.mergeObject(super.defaultOptions, {
-        title: "CSI Toolkit Case Board",
-        template: `modules/${MODULE_ID}/templates/case-board.hbs`,
-        classes: ["csi-toolkit", "csi-case-board-window"],
-        width: 1220,
-        height: 840,
-        resizable: true
-      });
-    }
-
-    get id() {
-      return `csi-case-board-${this.caseId}-${this.playerMode ? "player" : "gm"}`;
-    }
-
-    get title() {
-      const csiCase = getCase(this.caseId);
-      const suffix = this.playerMode ? "Player Board" : "GM Board";
-      return csiCase ? `${csiCase.title} - ${suffix}` : `CSI Toolkit - ${suffix}`;
-    }
-
-    async getData() {
-      return prepareBoardData(this.caseId, { playerMode: this.playerMode, layoutOverride: this._localLayout });
-    }
-
-    activateListeners(html) {
-      super.activateListeners(html);
-      html.find("[data-action='open-manager']").on("click", () => openCaseManager());
-      html.find("[data-action='refresh-board']").on("click", () => this._reloadSharedBoard());
-      html.find("[data-action='publish-layout']").on("click", () => this._publishLayout());
-      html.find("[data-action='zoom-in']").on("click", () => this._zoomBy(0.1));
-      html.find("[data-action='zoom-out']").on("click", () => this._zoomBy(-0.1));
-      html.find("[data-action='context-add-board-item']").on("click", event => this._addBoardItemFromContext(event));
-      html.find("[data-action='edit-card']").on("click", event => this._editCard(event.currentTarget.dataset.collection, event.currentTarget.dataset.itemId));
-      html.find("[data-action='delete-board-item']").on("click", event => this._deleteBoardItem(event.currentTarget.dataset.collection, event.currentTarget.dataset.itemId));
-      html.find("[data-action='move-timeline-item']").on("click", event => this._moveTimelineItem(event.currentTarget.dataset.itemId, event.currentTarget.dataset.direction));
-      html.find("[data-csi-connection-hit]").on("dblclick", event => this._editCard("connections", event.currentTarget.dataset.connectionId));
-      html.find("[data-action='start-connection']").on("click", event => this._startConnection(event));
-      html.find("[data-csi-dim-kind]").on("change", event => this._toggleDimKind(event.currentTarget));
-
-      const viewport = html[0].querySelector("[data-csi-board-viewport]");
-      if (viewport) {
-        viewport.addEventListener("wheel", event => this._onWheel(event), { passive: false });
-        viewport.addEventListener("mousedown", event => this._onViewportMouseDown(event));
-        viewport.addEventListener("contextmenu", event => this._openContextMenu(event));
-      }
-
-      html.find("[data-csi-board-card]").on("mousedown", event => this._onCardMouseDown(event));
-      html.find("[data-csi-board-card]").on("click", event => this._completeConnection(event));
-      html.find(".csi-card-image").on("load", () => this._queueConnectionLineUpdate());
-      this._syncDimControls();
-      this._applyDimmedKinds();
-      this._queueConnectionLineUpdate();
-    }
-
-    _onCardMouseDown(event) {
-      if (!canUserEditBoard(this.caseId) || event.button !== 0 || event.target.closest("button")) return;
-      const card = event.currentTarget;
-      const view = this._getView();
-      const layout = this._getLayout();
-      const itemId = card.dataset.itemId;
-      const current = layout.cards[itemId] ?? { x: Number(card.dataset.x) || 0, y: Number(card.dataset.y) || 0 };
-
-      event.preventDefault();
-      this._drag = {
-        itemId,
-        card,
-        startClientX: event.clientX,
-        startClientY: event.clientY,
-        startX: current.x,
-        startY: current.y,
-        scale: view.scale
-      };
-
-      document.addEventListener("mousemove", this._boundDragMove = moveEvent => this._onCardDrag(moveEvent));
-      document.addEventListener("mouseup", this._boundDragEnd = () => this._endDrag());
-    }
-
-    _onCardDrag(event) {
-      if (!this._drag) return;
-      const x = Math.round(this._drag.startX + (event.clientX - this._drag.startClientX) / this._drag.scale);
-      const y = Math.round(this._drag.startY + (event.clientY - this._drag.startClientY) / this._drag.scale);
-      this._drag.card.style.left = `${x}px`;
-      this._drag.card.style.top = `${y}px`;
-      this._drag.card.dataset.x = x;
-      this._drag.card.dataset.y = y;
-      this._updateConnectionLines();
-    }
-
-    _endDrag() {
-      if (!this._drag) return;
-      document.removeEventListener("mousemove", this._boundDragMove);
-      document.removeEventListener("mouseup", this._boundDragEnd);
-      const layout = this._getLayout();
-      layout.cards[this._drag.itemId] = {
-        ...(layout.cards[this._drag.itemId] ?? {}),
-        x: Number(this._drag.card.dataset.x),
-        y: Number(this._drag.card.dataset.y)
-      };
-      this._drag = null;
-      this._saveLayout(layout);
-    }
-
-    _onViewportMouseDown(event) {
-      if (event.button !== 0 || event.target.closest("[data-csi-board-card], [data-csi-context-menu], [data-csi-connection-hit], button")) return;
-      this._hideContextMenu();
-      const view = this._getView();
-      event.preventDefault();
-      this._pan = {
-        startClientX: event.clientX,
-        startClientY: event.clientY,
-        startX: view.x,
-        startY: view.y
-      };
-      document.addEventListener("mousemove", this._boundPanMove = moveEvent => this._onPan(moveEvent));
-      document.addEventListener("mouseup", this._boundPanEnd = () => this._endPan());
-    }
-
-    _onPan(event) {
-      if (!this._pan) return;
-      const layout = this._getLayout();
-      layout.view.x = Math.round(this._pan.startX + event.clientX - this._pan.startClientX);
-      layout.view.y = Math.round(this._pan.startY + event.clientY - this._pan.startClientY);
-      this._layoutDraft = layout;
-      this._applyView(layout.view);
-    }
-
-    _endPan() {
-      if (!this._pan) return;
-      document.removeEventListener("mousemove", this._boundPanMove);
-      document.removeEventListener("mouseup", this._boundPanEnd);
-      const layout = this._layoutDraft ?? this._getLayout();
-      this._pan = null;
-      this._saveLayout(layout);
-      this._layoutDraft = null;
-    }
-
-    _onWheel(event) {
-      event.preventDefault();
-      this._hideContextMenu();
-      this._zoomBy(event.deltaY > 0 ? -0.08 : 0.08);
-    }
-
-    _zoomBy(delta) {
-      const layout = this._getLayout();
-      layout.view.scale = clamp(Number(layout.view.scale) + delta, 0.45, 1.8);
-      this._applyView(layout.view);
-      this._saveLayout(layout);
-    }
-
-    _applyView(view) {
-      const canvas = this.element[0]?.querySelector("[data-csi-board-canvas]");
-      if (!canvas) return;
-      canvas.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
-      const zoom = this.element[0]?.querySelector("[data-csi-zoom]");
-      if (zoom) zoom.textContent = `${Math.round(view.scale * 100)}%`;
-    }
-
-    _getView() {
-      return this._getLayout().view;
-    }
-
-    _getLayout() {
-      const csiCase = getCase(this.caseId);
-      return normalizeBoardLayout(this._layoutDraft ?? this._localLayout ?? csiCase?.boardLayout);
-    }
-
-    async _saveLayout(layout) {
-      this._localLayout = normalizeBoardLayout(layout);
-    }
-
-    async _publishLayout() {
-      if (!canUserEditBoard(this.caseId)) return;
-      const layout = this._getLayout();
-      if (game.user?.isGM) {
-        await publishSharedLayout(this.caseId, layout);
-        return;
-      }
-      await requestLayoutPublish(this.caseId, layout);
-    }
-
-    _reloadSharedBoard() {
-      this._localLayout = null;
-      this._layoutDraft = null;
-      this.render(true);
-    }
-
-    _updateConnectionLines() {
-      const root = this.element[0];
-      if (!root) return;
-      const cards = new Map(Array.from(root.querySelectorAll("[data-csi-board-card]")).map(card => [card.dataset.itemId, card]));
-      for (const group of root.querySelectorAll("[data-csi-connection-group]")) {
-        const from = cards.get(group.dataset.fromId);
-        const to = cards.get(group.dataset.toId);
-        if (!from || !to) continue;
-        const fromRect = this._getCardBoardRect(from);
-        const toRect = this._getCardBoardRect(to);
-        const start = getRectEdgeAnchor(fromRect, toRect);
-        const end = getRectEdgeAnchor(toRect, fromRect);
-        if (!isFinitePoint(start) || !isFinitePoint(end)) continue;
-        for (const line of group.querySelectorAll("[data-csi-connection-line], [data-csi-connection-hit]")) {
-          line.setAttribute("x1", start.x);
-          line.setAttribute("y1", start.y);
-          line.setAttribute("x2", end.x);
-          line.setAttribute("y2", end.y);
-        }
-        const label = group.querySelector("[data-csi-connection-label]");
-        if (label) {
-          label.setAttribute("x", Math.round((start.x + end.x) / 2));
-          label.setAttribute("y", Math.round((start.y + end.y) / 2 - 10));
-        }
-      }
-    }
-
-    _queueConnectionLineUpdate() {
-      const update = () => this._updateConnectionLines();
-      if (globalThis.requestAnimationFrame) globalThis.requestAnimationFrame(update);
-      else globalThis.setTimeout(update, 0);
-    }
-
-    _getCardBoardRect(card) {
-      const x = Number(card.dataset.x) || Number.parseFloat(card.style.left) || 0;
-      const y = Number(card.dataset.y) || Number.parseFloat(card.style.top) || 0;
-      const width = card.offsetWidth || CARD_WIDTH;
-      const height = card.offsetHeight || CARD_HEIGHT;
-      return {
-        x,
-        y,
-        width,
-        height,
-        centerX: x + width / 2,
-        centerY: y + height / 2
-      };
-    }
-
-    _editCard(collection, itemId) {
-      if (!canUserEditBoard(this.caseId)) return;
-      new CSIBoardItemEditor(this.caseId, collection, itemId).render(true);
-    }
-
-    async _deleteBoardItem(collection, itemId) {
-      if (!canUserEditBoard(this.caseId) || !COLLECTIONS.includes(collection) || !itemId) return;
-      await deleteBoardItem(this.caseId, collection, itemId);
-    }
-
-    async _moveTimelineItem(itemId, direction) {
-      if (!canUserEditBoard(this.caseId) || !itemId) return;
-      const csiCase = getCase(this.caseId);
-      const index = csiCase?.timeline?.findIndex(item => item.id === itemId) ?? -1;
-      const offset = direction === "up" ? -1 : direction === "down" ? 1 : 0;
-      const nextIndex = index + offset;
-      if (!csiCase || index < 0 || nextIndex < 0 || nextIndex >= csiCase.timeline.length) return;
-      const [item] = csiCase.timeline.splice(index, 1);
-      csiCase.timeline.splice(nextIndex, 0, item);
-      await saveCase(csiCase);
-    }
-
-    _toggleDimKind(input) {
-      const kind = input?.value;
-      if (!["evidence", "suspects", "locations", "timeline"].includes(kind)) return;
-      if (input.checked) this._dimmedKinds.add(kind);
-      else this._dimmedKinds.delete(kind);
-      this._applyDimmedKinds();
-    }
-
-    _syncDimControls() {
-      for (const input of this.element[0]?.querySelectorAll("[data-csi-dim-kind]") ?? []) {
-        input.checked = this._dimmedKinds.has(input.value);
-      }
-    }
-
-    _applyDimmedKinds() {
-      const root = this.element[0];
-      if (!root) return;
-      for (const card of root.querySelectorAll("[data-csi-board-card]")) {
-        card.classList.toggle("is-type-dimmed", this._dimmedKinds.has(card.dataset.collection));
-      }
-      for (const row of root.querySelectorAll("[data-csi-timeline-row]")) {
-        row.classList.toggle("is-type-dimmed", this._dimmedKinds.has(row.dataset.collection));
-      }
-    }
-
-    _addBoardItemFromContext(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      const collection = event.currentTarget.dataset.collection;
-      this._addBoardItem(collection, this._contextBoardPosition);
-      this._hideContextMenu();
-    }
-
-    _addBoardItem(collection = "evidence", boardPosition = null) {
-      if (!canUserEditBoard(this.caseId)) return;
-      if (!BOARD_ADD_COLLECTIONS.includes(collection)) return;
-      new CSIBoardItemEditor(this.caseId, collection, null, { boardPosition }).render(true);
-    }
-
-    _openContextMenu(event) {
-      if (!canUserEditBoard(this.caseId)) return;
-      if (event.target.closest("[data-csi-board-card], button, input, select, textarea")) return;
-
-      const menu = this.element[0]?.querySelector("[data-csi-context-menu]");
-      const viewport = this.element[0]?.querySelector("[data-csi-board-viewport]");
-      if (!menu || !viewport) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      this._contextBoardPosition = this._clientToBoardPosition(event.clientX, event.clientY);
-      menu.hidden = false;
-      const menuWidth = menu.offsetWidth || 156;
-      const menuHeight = menu.offsetHeight || 180;
-      const maxLeft = Math.max(4, globalThis.innerWidth - menuWidth - 4);
-      const maxTop = Math.max(4, globalThis.innerHeight - menuHeight - 4);
-      menu.style.left = `${clamp(event.clientX, 4, maxLeft)}px`;
-      menu.style.top = `${clamp(event.clientY, 4, maxTop)}px`;
-
-      if (this._boundContextClose) document.removeEventListener("click", this._boundContextClose);
-      this._boundContextClose = () => this._hideContextMenu();
-      globalThis.setTimeout(() => document.addEventListener("click", this._boundContextClose, { once: true }), 0);
-    }
-
-    _hideContextMenu() {
-      const menu = this.element[0]?.querySelector("[data-csi-context-menu]");
-      if (menu) menu.hidden = true;
-      if (this._boundContextClose) document.removeEventListener("click", this._boundContextClose);
-      this._boundContextClose = null;
-    }
-
-    _clientToBoardPosition(clientX, clientY) {
-      const viewport = this.element[0]?.querySelector("[data-csi-board-viewport]");
-      const rect = viewport?.getBoundingClientRect();
-      const view = this._getView();
-      if (!rect) return null;
-      return {
-        x: Math.round((clientX - rect.left - view.x) / view.scale - CARD_WIDTH / 2),
-        y: Math.round((clientY - rect.top - view.y) / view.scale - 32)
-      };
-    }
-
-    _startConnection(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      if (!canUserEditBoard(this.caseId)) return;
-
-      const button = event.currentTarget;
-      const itemId = button.dataset.itemId;
-      if (!itemId) return;
-
-      this._pendingConnection = { fromId: itemId };
-      for (const card of this.element[0].querySelectorAll("[data-csi-board-card]")) card.classList.toggle("is-link-source", card.dataset.itemId === itemId);
-      ui.notifications?.info(`${MODULE_TITLE}: Select another card to create a connection.`);
-    }
-
-    async _completeConnection(event) {
-      if (!this._pendingConnection || event.target.closest("button, input, select, textarea")) return;
-      if (!canUserEditBoard(this.caseId)) return;
-
-      const toId = event.currentTarget.dataset.itemId;
-      const fromId = this._pendingConnection.fromId;
-      this._pendingConnection = null;
-      for (const card of this.element[0].querySelectorAll("[data-csi-board-card]")) card.classList.remove("is-link-source");
-      if (!toId || toId === fromId) return;
-
-      const csiCase = getCase(this.caseId);
-      if (!csiCase) return;
-
-      const connection = normalizeConnection({
-        id: randomId(),
-        fromId,
-        toId,
-        label: "linked to",
-        type: "link",
-        style: "solid",
-        color: "cyan",
-        visibility: "players"
-      });
-      csiCase.connections.push(connection);
-      await saveCase(csiCase);
-      new CSIBoardItemEditor(this.caseId, "connections", connection.id).render(true);
-    }
-
-    async close(options = {}) {
-      this._hideContextMenu();
-      state.boards.delete(`${this.caseId}:${this.playerMode ? "player" : "gm"}`);
-      if (state.playerBoard === this) state.playerBoard = null;
-      return super.close(options);
-    }
-  }
-
-  class CSIBoardItemEditor extends LegacyApplication {
-    constructor(caseId, collection, itemId, options = {}) {
-      super(options);
-      this.caseId = caseId;
-      this.collection = collection;
-      this.itemId = itemId || randomId();
-      this.isNew = !itemId;
-      this.boardPosition = options.boardPosition ? {
-        x: Number(options.boardPosition.x) || 0,
-        y: Number(options.boardPosition.y) || 0
-      } : null;
-    }
-
-    static get defaultOptions() {
-      return foundry.utils.mergeObject(super.defaultOptions, {
-        title: "Edit CSI Board Card",
-        template: `modules/${MODULE_ID}/templates/board-item-editor.hbs`,
-        classes: ["csi-toolkit", "csi-board-item-editor"],
-        width: 560,
-        height: 520,
-        resizable: true
-      });
-    }
-
-    get title() {
-      const item = this._getItem();
-      return this.isNew ? `Add ${singularLabel(this.collection)}` : item ? `Edit ${getItemTitle(item, this.collection)}` : "Edit CSI Board Card";
-    }
-
-    async getData() {
-      const csiCase = getCase(this.caseId);
-      const item = this._getItem();
-      return {
-        caseId: this.caseId,
-        collection: this.collection,
-        item,
-        isNew: this.isNew,
-        itemChoices: csiCase ? buildItemChoices(csiCase, !game.user?.isGM) : [],
-        isEvidence: this.collection === "evidence",
-        isSuspect: this.collection === "suspects",
-        isLocation: this.collection === "locations",
-        isTimeline: this.collection === "timeline",
-        isConnection: this.collection === "connections",
-        options: {
-          evidenceTypes: EVIDENCE_TYPES,
-          evidenceStatuses: EVIDENCE_STATUSES,
-          suspectStatuses: SUSPECT_STATUSES,
-          connectionTypes: CONNECTION_TYPES,
-          connectionStyles: CONNECTION_STYLES,
-          connectionColors: CONNECTION_COLORS
-        }
-      };
-    }
-
-    activateListeners(html) {
-      super.activateListeners(html);
-      const root = html[0];
-      const form = root?.matches?.("[data-csi-board-item-form]") ? root : root?.querySelector?.("[data-csi-board-item-form]");
-      if (form) form.addEventListener("submit", event => this._save(event));
-      html.find("[data-action='pick-image']").on("click", event => this._pickImage(event.currentTarget));
-      html.find("[data-action='delete-board-item']").on("click", event => this._delete(event));
-    }
-
-    _getItem() {
-      const csiCase = getCase(this.caseId);
-      const item = csiCase?.[this.collection]?.find(candidate => candidate.id === this.itemId);
-      if (item) return item;
-      if (!this.isNew) return null;
-      return defaultItem(this.collection, "players", this.itemId);
-    }
-
-    async _save(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation?.();
-
-      const form = event.currentTarget;
-      const csiCase = getCase(this.caseId);
-      if (!csiCase) {
-        ui.notifications?.warn(`${MODULE_TITLE}: The case could not be found.`);
-        return false;
-      }
-
-      const index = csiCase[this.collection].findIndex(item => item.id === this.itemId);
-      if (index < 0 && !this.isNew) {
-        ui.notifications?.warn(`${MODULE_TITLE}: The item could not be found.`);
-        return false;
-      }
-
-      const updated = parseItemElement(this.collection, form);
-      updated.id = this.itemId;
-      updated.visibility = "players";
-      updated.hidden = index >= 0 ? Boolean(csiCase[this.collection][index].hidden) : false;
-      if (index >= 0) csiCase[this.collection][index] = updated;
-      else csiCase[this.collection].push(updated);
-      if (this.isNew && this.collection !== "connections") {
-        csiCase.boardLayout.cards[this.itemId] = this.boardPosition ?? defaultBoardPosition(csiCase.evidence.length + csiCase.suspects.length + csiCase.locations.length + csiCase.timeline.length);
-      }
-      await saveCase(csiCase);
-      this.close();
-      return false;
-    }
-
-    async _delete(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation?.();
-      if (this.isNew) return false;
-      const deleted = await deleteBoardItem(this.caseId, this.collection, this.itemId, { confirm: true });
-      if (deleted) this.close();
-      return false;
-    }
-
-    _pickImage(button) {
-      const field = button.closest(".csi-image-field")?.querySelector("input");
-      const Picker = globalThis.FilePicker ?? globalThis.foundry?.applications?.apps?.FilePicker;
-      if (!field || !Picker) return;
-      new Picker({
-        type: "image",
-        current: field.value,
-        callback: path => {
-          field.value = path;
-          field.dispatchEvent(new Event("change", { bubbles: true }));
-        }
-      }).render(true);
     }
   }
 
@@ -1270,7 +793,7 @@
     boardCase.locations = visibleCollection(boardCase.locations);
     boardCase.timeline = visibleCollection(boardCase.timeline);
 
-    const cards = buildBoardCards(boardCase, playerMode);
+    const cards = buildBoardCards(boardCase);
     const index = new Map(cards.map(card => [card.id, card]));
 
     boardCase.timeline = boardCase.timeline.map(item => ({
@@ -1374,122 +897,6 @@
     return choices;
   }
 
-  function normalizeCase(data = {}, { forceNewId = false } = {}) {
-    return {
-      id: forceNewId ? randomId() : data.id || randomId(),
-      title: String(data.title || "Untitled Case"),
-      subtitle: String(data.subtitle || ""),
-      status: normalizeEnum(data.status, CASE_STATUSES, "open"),
-      description: String(data.description || ""),
-      image: String(data.image || ""),
-      visibility: normalizeEnum(data.visibility, VISIBILITIES, "players"),
-      evidence: normalizeCollection(data.evidence, normalizeEvidence),
-      suspects: normalizeCollection(data.suspects, normalizeSuspect),
-      locations: normalizeCollection(data.locations, normalizeLocation),
-      timeline: normalizeCollection(data.timeline, normalizeTimelineItem),
-      connections: normalizeCollection(data.connections, normalizeConnection),
-      boardLayout: normalizeBoardLayout(data.boardLayout)
-    };
-  }
-
-  function normalizeEvidence(data = {}) {
-    return {
-      id: data.id || randomId(),
-      title: String(data.title || "Untitled Evidence"),
-      type: normalizeEnum(data.type, EVIDENCE_TYPES, "other"),
-      description: String(data.description || ""),
-      image: String(data.image || ""),
-      status: normalizeEnum(data.status, EVIDENCE_STATUSES, "unknown"),
-      visibility: normalizeEnum(data.visibility, VISIBILITIES, "players"),
-      hidden: Boolean(data.hidden),
-      notes: String(data.notes || "")
-    };
-  }
-
-  function normalizeSuspect(data = {}) {
-    return {
-      id: data.id || randomId(),
-      name: String(data.name || "Unknown Suspect"),
-      alias: String(data.alias || ""),
-      image: String(data.image || ""),
-      motive: String(data.motive || ""),
-      alibi: String(data.alibi || ""),
-      status: normalizeEnum(data.status, SUSPECT_STATUSES, "unknown"),
-      visibility: normalizeEnum(data.visibility, VISIBILITIES, "players"),
-      hidden: Boolean(data.hidden),
-      notes: String(data.notes || "")
-    };
-  }
-
-  function normalizeLocation(data = {}) {
-    return {
-      id: data.id || randomId(),
-      name: String(data.name || "Unknown Location"),
-      sceneId: String(data.sceneId || ""),
-      image: String(data.image || ""),
-      description: String(data.description || ""),
-      visibility: normalizeEnum(data.visibility, VISIBILITIES, "players"),
-      hidden: Boolean(data.hidden),
-      notes: String(data.notes || "")
-    };
-  }
-
-  function normalizeTimelineItem(data = {}) {
-    return {
-      id: data.id || randomId(),
-      time: String(data.time || ""),
-      title: String(data.title || "Timeline Event"),
-      description: String(data.description || ""),
-      linkedItemIds: Array.isArray(data.linkedItemIds) ? data.linkedItemIds.map(String) : [],
-      visibility: normalizeEnum(data.visibility, VISIBILITIES, "players"),
-      hidden: Boolean(data.hidden)
-    };
-  }
-
-  function normalizeConnection(data = {}) {
-    return {
-      id: data.id || randomId(),
-      fromId: String(data.fromId || ""),
-      toId: String(data.toId || ""),
-      label: String(data.label || ""),
-      type: normalizeEnum(data.type, CONNECTION_TYPES, "link"),
-      style: normalizeEnum(data.style, CONNECTION_STYLES, "solid"),
-      color: normalizeEnum(data.color, CONNECTION_COLORS, connectionDefaultColor(data.type)),
-      visibility: normalizeEnum(data.visibility, VISIBILITIES, "players")
-    };
-  }
-
-  function normalizeBoardLayout(data = {}) {
-    return {
-      theme: normalizeEnum(data.theme, THEMES, "database"),
-      view: {
-        x: Number(data.view?.x) || 0,
-        y: Number(data.view?.y) || 0,
-        scale: clamp(Number(data.view?.scale) || 1, 0.45, 1.8)
-      },
-      cards: Object.fromEntries(Object.entries(data.cards ?? {}).map(([id, position]) => [id, {
-        x: Number(position?.x) || 0,
-        y: Number(position?.y) || 0
-      }]))
-    };
-  }
-
-  function defaultItem(collection, visibility = "players", id = randomId()) {
-    if (collection === "evidence") return normalizeEvidence({ id, visibility });
-    if (collection === "suspects") return normalizeSuspect({ id, visibility });
-    if (collection === "locations") return normalizeLocation({ id, visibility });
-    if (collection === "timeline") return normalizeTimelineItem({ id, visibility });
-    return normalizeConnection({ id, visibility });
-  }
-
-  function normalizeCollection(collection, normalizer) {
-    return Array.isArray(collection) ? collection.map(item => normalizer(item)) : [];
-  }
-
-  function normalizeEnum(value, allowed, fallback) {
-    return allowed.includes(value) ? value : fallback;
-  }
-
   function renderOpenSurfaces(caseId, { resetLayout = false } = {}) {
     if (state.manager?.rendered) state.manager.render(true);
     for (const [key, board] of state.boards.entries()) {
@@ -1519,11 +926,6 @@
     return JSON.parse(JSON.stringify(value));
   }
 
-  function randomId() {
-    if (foundry.utils.randomID) return foundry.utils.randomID();
-    return crypto.randomUUID?.() ?? Math.random().toString(36).slice(2, 12);
-  }
-
   function labelize(value) {
     return String(value ?? "").replace(/_/g, " ").replace(/\b\w/g, letter => letter.toUpperCase());
   }
@@ -1538,15 +940,6 @@
     if (collection === "timeline") return "timeline item";
     if (collection === "connections") return "connection";
     return "evidence";
-  }
-
-  function connectionDefaultColor(type) {
-    if (type === "supports") return "green";
-    if (type === "contradicts") return "red";
-    if (type === "location") return "amber";
-    if (type === "timeline") return "violet";
-    if (type === "identity") return "orange";
-    return "cyan";
   }
 
   function getItemTitle(item, collection) {
@@ -1575,12 +968,8 @@
     return Number.isFinite(point?.x) && Number.isFinite(point?.y);
   }
 
-  function clamp(value, min, max) {
-    return Math.min(max, Math.max(min, value));
-  }
-
   function confirmDialog(options) {
-    const DialogClass = globalThis.Dialog ?? globalThis.foundry?.appv1?.api?.Dialog;
+    const DialogClass = (globalThis as any).Dialog ?? (globalThis as any).foundry?.appv1?.api?.Dialog;
     if (DialogClass?.confirm) return DialogClass.confirm(options);
     return Promise.resolve(globalThis.confirm?.(options.content?.replace(/<[^>]+>/g, "") ?? options.title));
   }

@@ -1,0 +1,367 @@
+.csi-toolkit {
+  --csi-bg: #071014;
+  --csi-panel: var(--hs-panel);
+  --csi-panel-2: var(--hs-panel-strong);
+  --csi-line: var(--hs-line);
+  --csi-text: var(--hs-text);
+  --csi-muted: var(--hs-muted);
+  --csi-cyan: var(--hs-cyan);
+  --csi-red: var(--hs-magenta);
+  --csi-amber: var(--hs-amber);
+  --csi-green: var(--hs-green);
+  --csi-paper: #d2c5a2;
+  --csi-shadow: 0 0 28px rgba(95, 220, 255, 0.12);
+  color: var(--csi-text);
+  font-family: var(--hs-font-ui);
+}
+
+.csi-toolkit .window-content {
+  background: var(--csi-bg);
+  padding: 0;
+}
+
+.csi-shell {
+  position: relative;
+  min-height: 100%;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 50%, rgba(0, 0, 0, 0.04) 50%) 0 0 / 100% 4px,
+    radial-gradient(circle at 20% 0%, rgba(95, 220, 255, 0.12), transparent 34rem),
+    var(--csi-bg);
+  overflow: hidden;
+}
+
+.csi-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid rgba(95, 220, 255, 0.14);
+  box-shadow: inset 0 0 44px rgba(95, 220, 255, 0.08);
+}
+
+.csi-theme-noir {
+  --csi-bg: #18130f;
+  --csi-panel: #241b14;
+  --csi-panel-2: #37281c;
+  --csi-line: rgba(247, 198, 106, 0.3);
+  --csi-text: #f4ead4;
+  --csi-muted: #c2aa83;
+  --csi-cyan: #f7c66a;
+  --csi-red: #b63231;
+  --csi-shadow: 0 0 20px rgba(247, 198, 106, 0.12);
+}
+
+.csi-manager-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  height: 100%;
+}
+
+.csi-case-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--csi-line);
+  background: rgba(5, 11, 15, 0.72);
+}
+
+.csi-panel-header,
+.csi-editor-header,
+.csi-board-header,
+.csi-manager-section > header,
+.csi-editor-card > header,
+.csi-board-section > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.csi-panel-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--csi-line);
+}
+
+.csi-panel-header h2,
+.csi-manager-section h2,
+.csi-board-section h2,
+.csi-report h2 {
+  margin: 0;
+  color: var(--csi-cyan);
+  font-size: 15px;
+  text-transform: uppercase;
+}
+
+.csi-panel-header p,
+.csi-editor-header p,
+.csi-board-header p {
+  margin: 4px 0 0;
+  color: var(--csi-muted);
+}
+
+.csi-panel-header p {
+  white-space: nowrap;
+}
+
+.csi-case-list-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 10px;
+}
+
+.csi-case-row {
+  display: block;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 12px;
+  border: 1px solid rgba(95, 220, 255, 0.14);
+  border-radius: var(--hs-radius);
+  background: rgba(18, 40, 50, 0.56);
+  color: var(--csi-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.csi-case-row:hover,
+.csi-case-row.is-active {
+  border-color: var(--csi-cyan);
+  box-shadow: var(--csi-shadow);
+}
+
+.csi-case-row-title {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.csi-case-row-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--csi-muted);
+  font-size: 12px;
+}
+
+.csi-case-list-footer {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--csi-line);
+}
+
+.csi-editor {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+}
+
+.csi-editor-header {
+  position: sticky;
+  top: -18px;
+  z-index: 4;
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid var(--csi-line);
+  border-radius: var(--hs-radius);
+  background: rgba(13, 27, 34, 0.96);
+  backdrop-filter: blur(6px);
+}
+
+.csi-editor-header h1,
+.csi-board-header h1 {
+  margin: 0;
+  font-size: 26px;
+  color: #ffffff;
+  text-shadow: 0 0 18px rgba(95, 220, 255, 0.28);
+}
+
+.csi-kicker {
+  color: var(--csi-cyan);
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.csi-editor-actions,
+.csi-board-actions,
+.csi-card-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.csi-toolkit button {
+  min-height: 30px;
+  border: 1px solid rgba(95, 220, 255, 0.28);
+  border-radius: var(--hs-radius);
+  background: rgba(11, 24, 31, 0.92);
+  color: var(--csi-text);
+  cursor: pointer;
+}
+
+.csi-toolkit button:hover {
+  border-color: var(--csi-cyan);
+  box-shadow: 0 0 16px rgba(95, 220, 255, 0.18);
+}
+
+.csi-toolkit button i {
+  margin-right: 5px;
+}
+
+.csi-icon-button i,
+.csi-board-actions button i,
+.csi-editor-card header button i,
+.csi-card-actions button i,
+.csi-timeline-order-actions button i,
+.csi-timeline-title-row button i,
+.csi-field-with-button button i {
+  margin-right: 0;
+}
+
+.csi-card-actions button,
+.csi-timeline-order-actions button,
+.csi-timeline-title-row button {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+}
+
+.csi-toolkit button.csi-primary {
+  border-color: rgba(115, 230, 161, 0.48);
+  background: rgba(34, 92, 65, 0.74);
+}
+
+.csi-toolkit button.csi-danger,
+.csi-editor-card header button[data-action="delete-item"] {
+  border-color: rgba(255, 76, 95, 0.48);
+  background: rgba(90, 24, 32, 0.78);
+}
+
+.csi-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.csi-case-basics,
+.csi-manager-section {
+  margin-bottom: 14px;
+}
+
+.csi-manager-section {
+  padding: 14px;
+  border: 1px solid var(--csi-line);
+  border-radius: var(--hs-radius);
+  background: rgba(13, 27, 34, 0.78);
+}
+
+.csi-manager-section > header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(95, 220, 255, 0.14);
+}
+
+.csi-repeaters {
+  display: grid;
+  gap: 12px;
+}
+
+.csi-editor-card {
+  padding: 12px;
+  border: 1px solid rgba(95, 220, 255, 0.16);
+  border-radius: var(--hs-radius);
+  background: rgba(3, 9, 12, 0.46);
+}
+
+.csi-editor-card--suspect {
+  border-color: rgba(255, 76, 95, 0.24);
+}
+
+.csi-editor-card--connection {
+  border-color: rgba(247, 198, 106, 0.26);
+}
+
+.csi-editor-card > header {
+  margin-bottom: 10px;
+}
+
+.csi-editor-card h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.csi-span-2 {
+  grid-column: span 2;
+}
+
+.csi-toolkit label span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--csi-cyan);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.csi-toggle-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  min-height: 58px;
+  padding: 0 10px;
+  border: 1px solid rgba(95, 220, 255, 0.14);
+  border-radius: var(--hs-radius);
+}
+
+.csi-toolkit .csi-toggle-field label span {
+  margin-bottom: 0;
+}
+
+.csi-toolkit .csi-toggle-field input {
+  width: 18px;
+  height: 18px;
+}
+
+.csi-toolkit input,
+.csi-toolkit select,
+.csi-toolkit textarea {
+  width: 100%;
+  border: 1px solid rgba(95, 220, 255, 0.18);
+  border-radius: var(--hs-radius);
+  background: #061117;
+  color: var(--csi-text);
+}
+
+.csi-toolkit select {
+  color-scheme: dark;
+}
+
+.csi-toolkit option {
+  background: #061117;
+  color: #e6fbff;
+}
+
+.csi-toolkit input:focus,
+.csi-toolkit select:focus,
+.csi-toolkit textarea:focus {
+  border-color: var(--csi-cyan);
+  box-shadow: 0 0 0 2px rgba(95, 220, 255, 0.18);
+  outline: none;
+}
+
+.csi-toolkit textarea {
+  resize: vertical;
+}
+
+.csi-field-with-button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 6px;
+}
+
