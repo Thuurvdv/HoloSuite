@@ -12,7 +12,6 @@ Galaxy Map is a system-agnostic Foundry VTT module for campaign-scale star maps.
 - The GM controls which systems and routes are visible to players. Hidden systems can be revealed one at a time for dramatic discovery moments, complete with a "New System Discovered" notification.
 - Players can request travel to a system, prompting the GM and other players to accept or decline.
 - A current location marker tracks where the party is on the map.
-- A polished sample map called "The Aster Veil" is included to get you started quickly.
 - Maps can be zoomed, panned, and the window can be resized to fit your setup.
 - Full JSON import and export for sharing maps between worlds.
 
@@ -22,8 +21,8 @@ Galaxy Map is a system-agnostic Foundry VTT module for campaign-scale star maps.
 
 1. Enable **Galaxy Map** & **Holosuite-core** in your Foundry world.
 2. Open the **Map Manager** from the HoloSuite launcher.
-3. In the Map Manager, click **Install Sample** to load the included "Aster Veil" sample map. This is a great way to see everything in action before building your own.
-4. Click **Open** on any map to view it.
+3. In the Map Manager, click **Create Map** to start a new map, or **Import JSON** to load an exported map.
+4. Click **Open** on a map to view it.
 
 ### Building Your Own Map
 

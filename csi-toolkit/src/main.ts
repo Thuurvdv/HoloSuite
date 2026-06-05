@@ -39,7 +39,6 @@ declare const ui: any;
   const MODULE_ID = "csi-toolkit";
   const MODULE_TITLE = "CSI Toolkit";
   const SOCKET_NAME = `module.${MODULE_ID}`;
-  const SAMPLE_CASE_PATH = `modules/${MODULE_ID}/samples/glass-orchid.json`;
   const TEMPLATE_PATHS = [
     `modules/${MODULE_ID}/templates/case-manager.hbs`,
     `modules/${MODULE_ID}/templates/case-browser.hbs`,
@@ -126,8 +125,7 @@ declare const ui: any;
       createCase: caseData => createCase(caseData),
       getCases: () => getCases(),
       exportCase: caseId => exportCase(caseId),
-      importCase: caseData => importCase(caseData),
-      importSampleCase: () => importSampleCase()
+      importCase: caseData => importCase(caseData)
     };
   }
 
@@ -285,12 +283,6 @@ declare const ui: any;
     broadcastCaseUpdated(imported.id);
     ui.notifications?.info(`${MODULE_TITLE}: Imported case "${imported.title}".`);
     return imported;
-  }
-
-  async function importSampleCase() {
-    const response = await fetch(SAMPLE_CASE_PATH);
-    if (!response.ok) throw new Error(`Could not load ${SAMPLE_CASE_PATH}`);
-    return importCase(await response.json());
   }
 
   function exportCase(caseId) {
@@ -579,7 +571,6 @@ declare const ui: any;
       html.find("[data-action='export-case']").on("click", () => exportCase(this.selectedCaseId));
       html.find("[data-action='import-case']").on("click", () => this.element[0].querySelector("[data-csi-import-file]")?.click());
       html.find("[data-csi-import-file]").on("change", event => this._importFromFile(event.currentTarget));
-      html.find("[data-action='import-sample']").on("click", () => this._importSample());
     }
 
     _readCurrentCase() {
@@ -674,17 +665,6 @@ declare const ui: any;
         ui.notifications?.error(`${MODULE_TITLE}: Import failed. ${error.message}`);
       } finally {
         input.value = "";
-      }
-    }
-
-    async _importSample() {
-      try {
-        const imported = await importSampleCase();
-        this.selectedCaseId = imported.id;
-        this.render(false);
-      } catch (error) {
-        console.error(`${MODULE_TITLE} | Sample import failed`, error);
-        ui.notifications?.error(`${MODULE_TITLE}: Could not import sample case.`);
       }
     }
 
