@@ -1,0 +1,33 @@
+@media (max-width: 760px) {
+  .hcci-stage {
+    grid-template-columns: 1fr;
+    align-content: center;
+    justify-items: center;
+    gap: 18px;
+  }
+
+  .hcci-portrait-frame {
+    justify-self: center;
+    width: min(70vw, 320px);
+  }
+
+  .hcci-copy {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .hcci-title {
+    max-width: 88vw;
+    font-size: clamp(22px, min(14vw, calc(88vw / var(--hcci-title-chars, 8) * 1.15)), 88px);
+  }
+
+  .hcci-config-header,
+  .hcci-row-title {
+    display: grid;
+  }
+
+  .hcci-config-row,
+  .hcci-row-fields {
+    grid-template-columns: 1fr;
+  }
+}

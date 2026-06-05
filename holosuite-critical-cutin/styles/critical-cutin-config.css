@@ -1,0 +1,312 @@
+.hcci-config-window {
+  --hcci-panel: #071014;
+  --hcci-line: rgba(105, 232, 255, 0.28);
+  --hcci-text: #e7faff;
+  --hcci-muted: #8fb5bf;
+  --hcci-accent: #69e8ff;
+  color: var(--hcci-text);
+  min-width: 1040px;
+}
+
+.hcci-config-window .window-content {
+  background: linear-gradient(180deg, #081116, #030709);
+  color: var(--hcci-text);
+  padding-bottom: 12px;
+}
+
+.hcci-config {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+}
+
+.hcci-config-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: end;
+  border-bottom: 1px solid var(--hcci-line);
+  padding-bottom: 14px;
+}
+
+.hcci-kicker {
+  margin: 0 0 3px;
+  color: var(--hcci-accent);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.hcci-config-header h2 {
+  margin: 0;
+  color: var(--hcci-text);
+  font-size: 28px;
+}
+
+.hcci-unsaved {
+  display: inline-flex;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 209, 102, 0.48);
+  border-radius: 6px;
+  background: rgba(255, 209, 102, 0.1);
+  color: #ffd166;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hcci-unsaved[hidden] {
+  display: none;
+}
+
+.hcci-config-dirty .window-title::after {
+  content: " *";
+  color: #ffd166;
+}
+
+.hcci-config-dirty .hcci-config-actions {
+  border-color: rgba(255, 209, 102, 0.36);
+  box-shadow: 0 -10px 24px rgba(255, 209, 102, 0.06);
+}
+
+.hcci-threshold,
+.hcci-config label {
+  display: grid;
+  gap: 5px;
+  color: var(--hcci-muted);
+  font-size: 12px;
+}
+
+.hcci-threshold input,
+.hcci-config input,
+.hcci-config select {
+  border: 1px solid rgba(143, 181, 191, 0.35);
+  background: #061116;
+  color: var(--hcci-text);
+  border-radius: 5px;
+}
+
+.hcci-config select {
+  appearance: auto;
+  height: 28px;
+}
+
+.hcci-config select option {
+  background: #061116;
+  color: #e7faff;
+}
+
+.hcci-threshold input {
+  width: 96px;
+}
+
+.hcci-top-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.hcci-top-controls .hcci-threshold:last-child input {
+  width: 128px;
+}
+
+.hcci-config-grid {
+  display: grid;
+  gap: 14px;
+  max-height: 62vh;
+  overflow: auto;
+  padding: 2px 6px 2px 0;
+}
+
+.hcci-config-row {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 18px;
+  border: 1px solid var(--hcci-line);
+  border-radius: 8px;
+  background: rgba(12, 26, 32, 0.78);
+  padding: 16px;
+}
+
+.hcci-preview-wrap {
+  display: grid;
+  gap: 7px;
+  align-content: start;
+  color: var(--hcci-accent);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.hcci-preview-wrap img {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--hcci-line);
+  background: rgba(0,0,0,0.35);
+}
+
+.hcci-row-main,
+.hcci-row-fields {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.hcci-row-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.hcci-row-title h3 {
+  margin: 0;
+  color: var(--hcci-text);
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.hcci-row-tabs {
+  display: inline-flex;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 4px;
+  border: 1px solid rgba(143, 181, 191, 0.34);
+  border-radius: 8px;
+  background: rgba(3, 7, 9, 0.55);
+}
+
+.hcci-row-tabs button {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--hcci-muted);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hcci-row-tabs button.is-active {
+  border-color: color-mix(in srgb, var(--hcci-accent), white 18%);
+  background: linear-gradient(180deg, rgba(105, 232, 255, 0.22), rgba(105, 232, 255, 0.08));
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(105, 232, 255, 0.22), inset 0 0 12px rgba(255, 255, 255, 0.05);
+}
+
+.hcci-row-tabs button[data-hcci-tab="failure"].is-active {
+  border-color: rgba(255, 77, 125, 0.72);
+  background: linear-gradient(180deg, rgba(255, 77, 125, 0.24), rgba(255, 77, 125, 0.08));
+  box-shadow: 0 0 14px rgba(255, 77, 125, 0.24), inset 0 0 12px rgba(255, 255, 255, 0.05);
+}
+
+.hcci-row-panel {
+  display: none;
+  gap: 12px;
+  border: 1px solid rgba(143, 181, 191, 0.18);
+  border-radius: 8px;
+  background: rgba(3, 7, 9, 0.22);
+  padding: 14px;
+}
+
+.hcci-row-panel.is-active {
+  display: grid;
+}
+
+.hcci-row-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(143, 181, 191, 0.18);
+}
+
+.hcci-row-panel-heading strong {
+  color: var(--hcci-text);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.hcci-panel-preview {
+  width: 76px;
+  padding: 4px;
+  border: 1px solid rgba(143, 181, 191, 0.2);
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.hcci-panel-preview img {
+  display: block;
+  width: 66px;
+  height: 66px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid rgba(105, 232, 255, 0.2);
+}
+
+.hcci-row-fields {
+  grid-template-columns: minmax(230px, 1.25fr) minmax(230px, 1.25fr) 88px 140px minmax(170px, 0.9fr) 90px;
+  gap: 14px;
+}
+
+.hcci-path-field div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 6px;
+}
+
+.hcci-path-field button,
+.hcci-config-actions button {
+  border: 1px solid var(--hcci-line);
+  background: rgba(105, 232, 255, 0.08);
+  color: var(--hcci-text);
+  border-radius: 6px;
+}
+
+.hcci-path-field button:hover,
+.hcci-config-actions button:hover {
+  border-color: var(--hcci-accent);
+  box-shadow: 0 0 12px rgba(105, 232, 255, 0.24);
+}
+
+.hcci-toggle,
+.hcci-fallback {
+  display: flex;
+  grid-template-columns: none;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  max-width: 100%;
+}
+
+.hcci-row-note {
+  margin: 0;
+  color: var(--hcci-muted);
+  font-size: 12px;
+}
+
+.hcci-toggle input {
+  width: auto;
+}
+
+.hcci-config-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid rgba(143, 181, 191, 0.18);
+  padding: 12px 22px 6px 0;
+}
+
+.hcci-empty {
+  margin: 0;
+  padding: 24px;
+  border: 1px dashed var(--hcci-line);
+  border-radius: 8px;
+  color: var(--hcci-muted);
+  text-align: center;
+}
+

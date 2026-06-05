@@ -1,0 +1,430 @@
+:root {
+  --hs-bg: #05070d;
+  --hs-bg-deep: #03070b;
+  --hs-panel: rgba(8, 18, 28, 0.9);
+  --hs-line: rgba(105, 232, 255, 0.28);
+  --hs-cyan: #69e8ff;
+  --hs-green: #62ffb6;
+  --hs-magenta: #ff4d7d;
+  --hs-amber: #ffd166;
+  --hs-text: #e7faff;
+  --hs-muted: #8fb5bf;
+  --hs-font-ui: "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif;
+}
+
+.hcci-overlay {
+  --hcci-accent: var(--hs-cyan);
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  overflow: hidden;
+  pointer-events: none;
+  color: #f3feff;
+  background: transparent;
+  animation: hcci-in 160ms ease-out both;
+}
+
+.hcci-overlay::before,
+.hcci-overlay::after {
+  content: "";
+  display: none;
+  position: absolute;
+  inset: -12%;
+  background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 8px);
+  mix-blend-mode: screen;
+  opacity: 0.34;
+  transform: skewY(-9deg);
+  animation: hcci-scanlines 620ms linear infinite;
+}
+
+.hcci-overlay::after {
+  background-image: repeating-linear-gradient(90deg, color-mix(in srgb, var(--hcci-accent), transparent 68%) 0 3px, transparent 3px 36px);
+  opacity: 0.2;
+  animation-duration: 480ms;
+}
+
+.hcci-exiting {
+  animation: hcci-out 240ms ease-in both;
+}
+
+.hcci-kind-failure .hcci-flash {
+  background: color-mix(in srgb, var(--hcci-accent), #ffffff 28%);
+}
+
+.hcci-kind-failure .hcci-title {
+  text-shadow:
+    0 0 14px color-mix(in srgb, var(--hcci-accent), transparent 4%),
+    4px 4px 0 rgba(0, 0, 0, 0.78),
+    -4px 0 0 rgba(255, 255, 255, 0.16);
+}
+
+.hcci-kind-failure .hcci-portrait-frame {
+  border-style: dashed;
+  filter: saturate(0.92) contrast(1.18);
+}
+
+.hcci-kind-failure .hcci-portrait-frame .hcci-portrait {
+  animation: hcci-failure-image-flash var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
+.hcci-fracture {
+  display: none;
+  position: absolute;
+  z-index: 3;
+  width: 50%;
+  height: 50%;
+  background-size: 200% 200%;
+  opacity: 0;
+  filter: brightness(1.18) contrast(1.18) drop-shadow(0 0 14px var(--hcci-accent));
+}
+
+.hcci-kind-failure .hcci-fracture {
+  display: block;
+}
+
+.hcci-fracture-1 {
+  left: 0;
+  top: 0;
+  background-position: 0 0;
+  animation: hcci-fracture-1 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
+.hcci-fracture-2 {
+  right: 0;
+  top: 0;
+  background-position: 100% 0;
+  animation: hcci-fracture-2 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
+.hcci-fracture-3 {
+  left: 0;
+  bottom: 0;
+  background-position: 0 100%;
+  animation: hcci-fracture-3 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
+.hcci-fracture-4 {
+  right: 0;
+  bottom: 0;
+  background-position: 100% 100%;
+  animation: hcci-fracture-4 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+}
+
+.hcci-flash {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  animation: hcci-flash 680ms ease-out both;
+}
+
+.hcci-noise {
+  display: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(115deg, transparent 0 42%, rgba(255, 255, 255, 0.16) 42% 43%, transparent 43% 100%),
+    repeating-linear-gradient(0deg, transparent 0 4px, rgba(255, 255, 255, 0.16) 4px 5px);
+  animation: hcci-noise 280ms steps(2, end) infinite;
+}
+
+.hcci-ring,
+.hcci-panel,
+.hcci-tear,
+.hcci-triangle,
+.hcci-sparkle,
+.hcci-orbit-glow {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.hcci-ring {
+  z-index: 1;
+  width: min(62vw, 720px);
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  border: 2px solid color-mix(in srgb, var(--hcci-accent), transparent 20%);
+  border-radius: 50%;
+  box-shadow: 0 0 32px color-mix(in srgb, var(--hcci-accent), transparent 30%);
+  transform: translate(-50%, -50%) scale(0.2);
+}
+
+.hcci-ring-b {
+  width: min(44vw, 520px);
+  border-style: dashed;
+}
+
+.hcci-orbit-glow {
+  z-index: 2;
+  width: min(64vw, 750px);
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    conic-gradient(from 0deg, transparent 0 72%, color-mix(in srgb, var(--hcci-accent), white 22%) 80%, #ffffff 84%, color-mix(in srgb, var(--hcci-accent), transparent 16%) 88%, transparent 96%),
+    radial-gradient(circle, transparent 0 60%, rgba(0, 0, 0, 0.18) 61% 66%, transparent 67%);
+  filter: drop-shadow(0 0 18px var(--hcci-accent));
+  mask: radial-gradient(circle, transparent 0 61%, #000 62% 68%, transparent 69%);
+}
+
+.hcci-panel {
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  width: 54vw;
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), color-mix(in srgb, var(--hcci-accent), transparent 24%));
+  box-shadow: 0 0 36px color-mix(in srgb, var(--hcci-accent), transparent 36%);
+}
+
+.hcci-panel-a {
+  left: 0;
+  transform: translateX(-110%) skewX(-10deg);
+}
+
+.hcci-panel-b {
+  right: 0;
+  transform: translateX(110%) skewX(-10deg);
+}
+
+.hcci-tear {
+  z-index: 4;
+  left: 0;
+  top: 50%;
+  width: 100vw;
+  height: 5px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--hcci-accent), white 18%) 14%, #ffffff 50%, color-mix(in srgb, var(--hcci-accent), white 18%) 86%, transparent);
+  box-shadow: 0 0 16px var(--hcci-accent), 0 0 34px color-mix(in srgb, var(--hcci-accent), transparent 20%);
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: center;
+}
+
+.hcci-tear::before,
+.hcci-tear::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--hcci-accent), transparent 58%), transparent);
+  opacity: 0;
+}
+
+.hcci-tear::before {
+  bottom: 100%;
+}
+
+.hcci-tear::after {
+  top: 100%;
+  transform: scaleY(-1);
+}
+
+.hcci-tear span {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: clamp(18px, 3vw, 38px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0 18%, color-mix(in srgb, var(--hcci-accent), white 22%) 28%, color-mix(in srgb, var(--hcci-accent), transparent 34%) 54%, transparent 72%);
+  box-shadow: 0 0 18px #ffffff, 0 0 42px var(--hcci-accent), 0 0 70px var(--hcci-accent);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+.hcci-triangle {
+  z-index: 2;
+  width: min(36vw, 440px);
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--hcci-accent), white 12%), rgba(255,255,255,0.12));
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 24px var(--hcci-accent));
+}
+
+.hcci-triangle-a {
+  transform: translate(-50%, -50%) rotate(90deg) scale(0.2);
+}
+
+.hcci-triangle-b {
+  transform: translate(-50%, -50%) rotate(210deg) scale(0.2);
+}
+
+.hcci-triangle-c {
+  transform: translate(-50%, -50%) rotate(330deg) scale(0.2);
+}
+
+.hcci-sparkle {
+  z-index: 4;
+  left: 50%;
+  top: 50%;
+  width: min(74vw, 900px);
+  height: 5px;
+  background: linear-gradient(90deg, transparent, #ffffff 45%, var(--hcci-accent) 50%, #ffffff 55%, transparent);
+  box-shadow: 0 0 28px #ffffff, 0 0 54px var(--hcci-accent);
+}
+
+.hcci-sparkle-a {
+  transform: translate(-50%, -50%) rotate(-12deg) scaleX(0);
+}
+
+.hcci-sparkle-b {
+  transform: translate(-50%, -50%) rotate(58deg) scaleX(0);
+}
+
+.hcci-scan,
+.hcci-diagonal {
+  position: absolute;
+  left: -20vw;
+  right: -20vw;
+  height: clamp(28px, 7vh, 82px);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--hcci-accent), transparent 12%) 38%, rgba(255,255,255,0.92) 50%, color-mix(in srgb, var(--hcci-accent), transparent 18%) 64%, transparent);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--hcci-accent), transparent 18%);
+  opacity: 0.86;
+  transform: translateX(-120%) skewX(-18deg);
+}
+
+.hcci-scan-a {
+  top: 18%;
+  animation: hcci-bar 620ms cubic-bezier(.18,.76,.16,1) 40ms both;
+}
+
+.hcci-scan-b {
+  top: 48%;
+  height: clamp(18px, 4vh, 46px);
+  animation: hcci-bar 520ms cubic-bezier(.18,.76,.16,1) 150ms both reverse;
+}
+
+.hcci-scan-c {
+  bottom: 18%;
+  animation: hcci-bar 700ms cubic-bezier(.18,.76,.16,1) 210ms both;
+}
+
+.hcci-diagonal {
+  top: 42%;
+  height: clamp(90px, 18vh, 180px);
+  transform: translateX(-120%) rotate(-10deg) skewX(-20deg);
+  opacity: 0.5;
+  animation: hcci-diagonal 900ms cubic-bezier(.12,.88,.18,1) 60ms both;
+}
+
+.hcci-diagonal-b {
+  top: 30%;
+  transform: translateX(120%) rotate(8deg) skewX(18deg);
+  opacity: 0.34;
+  animation-delay: 180ms;
+  animation-direction: reverse;
+}
+
+.hcci-style-breach {
+  --hcci-breach-half: min(19vw, 220px);
+  background: transparent;
+}
+
+.hcci-style-breach .hcci-panel {
+  display: none;
+}
+
+.hcci-style-breach .hcci-triangle,
+.hcci-style-breach .hcci-sparkle {
+  display: none;
+}
+
+.hcci-style-breach .hcci-tear-top {
+  animation: hcci-tear-top var(--hcci-duration, 2500ms) cubic-bezier(.13,.86,.18,1) both;
+}
+
+.hcci-style-breach .hcci-tear-bottom {
+  animation: hcci-tear-bottom var(--hcci-duration, 2500ms) cubic-bezier(.13,.86,.18,1) both;
+}
+
+.hcci-style-breach .hcci-tear-top span {
+  animation: hcci-orb-left-right var(--hcci-duration, 2500ms) cubic-bezier(.2,.82,.12,1) both;
+}
+
+.hcci-style-breach .hcci-tear-bottom span {
+  animation: hcci-orb-right-left var(--hcci-duration, 2500ms) cubic-bezier(.2,.82,.12,1) both;
+}
+
+.hcci-style-breach .hcci-flash {
+  display: none;
+}
+
+.hcci-style-breach .hcci-scan,
+.hcci-style-breach .hcci-diagonal {
+  display: none;
+}
+
+.hcci-style-breach .hcci-scan {
+  height: clamp(12px, 2.6vh, 34px);
+  opacity: 0.98;
+  animation-duration: 360ms;
+}
+
+.hcci-style-breach .hcci-portrait-frame {
+  clip-path: none;
+  border-radius: 4px;
+  z-index: 3;
+  animation: hcci-portrait-tear var(--hcci-duration, 2500ms) cubic-bezier(.13,.86,.18,1) both;
+}
+
+.hcci-style-breach .hcci-portrait {
+  width: 100%;
+  transform: none;
+}
+
+.hcci-style-breach .hcci-title {
+  animation-name: hcci-title-tear;
+}
+
+.hcci-style-signal {
+  background: transparent;
+}
+
+.hcci-style-signal .hcci-ring {
+  display: none;
+}
+
+.hcci-style-signal .hcci-orbit-glow {
+  display: none;
+}
+
+.hcci-style-signal .hcci-diagonal {
+  opacity: 0.18;
+}
+
+.hcci-style-signal .hcci-portrait-frame {
+  clip-path: none;
+  border-radius: 50%;
+  overflow: visible;
+  animation-name: hcci-portrait-signal;
+}
+
+.hcci-style-signal .hcci-portrait {
+  clip-path: circle(48% at 50% 50%);
+  width: 100%;
+  transform: none;
+}
+
+.hcci-style-signal .hcci-frame-lightning {
+  display: block;
+}
+
+.hcci-style-signal .hcci-frame-lightning-a {
+  animation: hcci-frame-lightning 880ms linear 130ms both;
+}
+
+.hcci-style-signal .hcci-frame-lightning-b {
+  animation: hcci-frame-lightning 720ms steps(7, end) 170ms both reverse;
+}
+
+.hcci-style-signal .hcci-title {
+  animation-name: hcci-title-signal;
+}
+
