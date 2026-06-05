@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createHoloSuiteSocket } from "../../shared/src/index";
 import {
   DEFAULT_CAMERA,
@@ -10,26 +9,14 @@ import {
   STATUS_CHOICES,
   normalizeCamera as normalizeCameraModel,
   normalizeChoice,
-  normalizeNullableNumber,
-  normalizePositiveNumber,
   validateCameraData as validateCameraDataModel
 } from "./camera-model";
 import {
   getShapesRegionBounds,
   toCameraRegionBounds
 } from "./region-geometry";
-import {
-  clampCrop,
-  getCameraCrop as getCameraCropRect,
-  getCropForSceneImage as getSceneImageCropRect,
-  getFullSourceCrop,
-  getScaledOutputSize
-} from "./frame-crop";
-import {
-  getTokenSceneBounds as getTokenDocumentBounds,
-  intersectsBounds,
-  projectBoundsToFrame
-} from "./token-projection";
+import { createSecurityCameraAppClasses } from "./apps";
+import { createLiveFrameController } from "./live-frame";
 
 const MODULE_ID = "security-cameras";
 const SOCKET_NAME = `module.${MODULE_ID}`;
@@ -40,14 +27,10 @@ const moduleSocket = createHoloSuiteSocket(MODULE_ID, {
 const MONITOR_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/monitor.hbs`;
 const FEED_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/feed.hbs`;
 
-const LIVE_FRAME_INTERVAL_MS = 1250;
-const LIVE_FRAME_MAX_WIDTH = 960;
-
 let activeMonitor = null;
 let activeFeed = null;
 let selectedCameraId = "";
 let editingCameraId = "";
-const imageCache = new Map();
 
 function createCameraId() {
   if (foundry?.utils?.randomID) return foundry.utils.randomID();
@@ -441,7 +424,7 @@ function panToCameraRegion(cameraId = selectedCameraId) {
   });
 }
 
-function getElement(app, html) {
+function getElement(app: any, html: any = null) {
   if (html?.[0]) return html[0];
   if (html instanceof HTMLElement) return html;
   if (app.element?.[0]) return app.element[0];
@@ -478,120 +461,6 @@ function getMonitorContext() {
   };
 }
 
-function renderFallbackMonitor(data) {
-  const items = data.cameras.map((camera) => `
-    <button type="button" class="security-camera-list-item ${camera.isSelected ? "active" : ""}" data-security-camera-id="${escapeHTML(camera.id)}">
-      <span>${escapeHTML(camera.name)}</span>
-      <small>${escapeHTML(camera.location)}</small>
-      <i>${escapeHTML(camera.status)}</i>
-    </button>
-  `).join("");
-
-  const camera = data.selectedCamera;
-  const preview = camera ? `
-    <section class="security-camera-monitor-preview ${escapeHTML(camera.statusClass)}">
-      <header>
-        <div>
-          <span class="security-camera-kicker">Selected Feed</span>
-          <h3>${escapeHTML(camera.name)}</h3>
-        </div>
-        <strong>${escapeHTML(camera.status.toUpperCase())}</strong>
-      </header>
-      <div class="security-camera-preview-frame">
-        ${camera.canDisplayImage ? `<img src="${escapeHTML(camera.image)}" alt="${escapeHTML(camera.name)}">` : `<div class="security-camera-placeholder">${escapeHTML(camera.isLive ? "LIVE CANVAS FEED" : camera.signalLabel)}</div>`}
-      </div>
-      <dl>
-        <dt>Location</dt><dd>${escapeHTML(camera.location)}</dd>
-        <dt>Scene</dt><dd>${escapeHTML(camera.sceneName)}</dd>
-        <dt>Source</dt><dd>${escapeHTML(camera.feedSource)}</dd>
-        <dt>Region</dt><dd>${camera.hasRegion ? `${Math.round(camera.regionX)}, ${Math.round(camera.regionY)} / ${Math.round(camera.regionWidth)}x${Math.round(camera.regionHeight)}` : "No region"}</dd>
-        <dt>Mode</dt><dd>${escapeHTML(camera.displayMode)}</dd>
-        <dt>Notes</dt><dd>${escapeHTML(camera.notes || "No notes recorded.")}</dd>
-      </dl>
-    </section>
-  ` : '<section class="security-camera-monitor-preview"><div class="security-camera-empty">No camera selected.</div></section>';
-
-  const editor = data.editorCamera;
-  const sceneOptions = data.sceneChoices.map((scene) => `<option value="${escapeHTML(scene.id)}" ${scene.selected ? "selected" : ""}>${escapeHTML(scene.name)}</option>`).join("");
-  const regionOptions = data.regionChoices.map((region) => `<option value="${escapeHTML(region.id)}" ${region.selected ? "selected" : ""}>${escapeHTML(region.name)}</option>`).join("");
-  const sourceOptions = data.feedSourceChoices.map((source) => `<option value="${escapeHTML(source.value)}" ${source.selected ? "selected" : ""}>${escapeHTML(source.label)}</option>`).join("");
-  const statusOptions = data.statusChoices.map((status) => `<option value="${escapeHTML(status.value)}" ${status.selected ? "selected" : ""}>${escapeHTML(status.label)}</option>`).join("");
-  const displayOptions = data.displayModeChoices.map((mode) => `<option value="${escapeHTML(mode.value)}" ${mode.selected ? "selected" : ""}>${escapeHTML(mode.label)}</option>`).join("");
-  const imageField = `<label data-security-camera-static-image-field ${data.showStaticImageField ? "" : "hidden"}>Static Image <span class="security-camera-path-row"><input type="text" name="image" value="${escapeHTML(editor.image)}"><button type="button" data-security-camera-action="browse-image">Browse</button></span></label>`;
-
-  return `
-    <section class="security-camera-manager">
-      <aside class="security-camera-monitor-list">
-        <header><span class="security-camera-kicker">Network</span><h2>Cameras</h2></header>
-        <div class="security-camera-list">${items || '<p class="security-camera-empty">No cameras registered.</p>'}</div>
-        <div class="security-camera-list-actions">
-          <button type="button" data-security-camera-action="new">New</button>
-          <button type="button" data-security-camera-action="duplicate">Duplicate</button>
-          <button type="button" data-security-camera-action="delete">Delete</button>
-        </div>
-      </aside>
-      ${preview}
-      <form class="security-camera-editor" data-security-camera-form>
-        <header><span class="security-camera-kicker">Manager</span><h2>${data.isNewCamera ? "ADDING Camera" : "Edit Camera"}</h2></header>
-        <input type="hidden" name="originalId" value="${escapeHTML(editor.id)}">
-        <label>ID <input type="text" name="id" value="${escapeHTML(editor.id)}" placeholder="auto-generated"></label>
-        <label>Name <input type="text" name="name" value="${escapeHTML(editor.name)}" required></label>
-        <label>Scene <select name="sceneId">${sceneOptions}</select></label>
-        <label>Scene Region <select name="regionId">${regionOptions}</select></label>
-        <label>Location <input type="text" name="location" value="${escapeHTML(editor.location)}"></label>
-        <label>Feed Source <select name="feedSource">${sourceOptions}</select></label>
-        ${imageField}
-        <label>Status <select name="status">${statusOptions}</select></label>
-        <label>Display Mode <select name="displayMode">${displayOptions}</select></label>
-        <input type="hidden" name="regionX" value="${escapeHTML(editor.regionX ?? "")}">
-        <input type="hidden" name="regionY" value="${escapeHTML(editor.regionY ?? "")}">
-        <input type="hidden" name="regionWidth" value="${escapeHTML(editor.regionWidth ?? "")}">
-        <input type="hidden" name="regionHeight" value="${escapeHTML(editor.regionHeight ?? "")}">
-        <label>Notes <textarea name="notes" rows="4">${escapeHTML(editor.notes)}</textarea></label>
-        <div class="security-camera-editor-actions">
-          <button type="submit">Save Camera</button>
-          <button type="button" data-security-camera-action="pan-region">Pan to Region</button>
-          <button type="button" data-security-camera-action="show">Show to Players</button>
-          <button type="button" data-security-camera-action="close-feed">Close Feeds</button>
-        </div>
-      </form>
-    </section>
-  `;
-}
-
-function renderFallbackFeed(camera) {
-  const canShowLiveFrame = camera.isLive && !camera.isOffline && !camera.isRestricted;
-  const frameMarkup = canShowLiveFrame
-    ? `<img src="${escapeHTML(camera.liveFrame || camera.image || "")}" alt="${escapeHTML(camera.name)}" data-security-camera-live-frame ${camera.liveFrame || camera.image ? "" : "hidden"}><div class="security-camera-feed-warning" data-security-camera-live-waiting ${camera.liveFrame || camera.image ? "hidden" : ""}>AWAITING LIVE SIGNAL</div>`
-    : camera.canDisplayImage
-      ? `<img src="${escapeHTML(camera.image)}" alt="${escapeHTML(camera.name)}">`
-      : `<div class="security-camera-feed-warning">${escapeHTML(camera.signalLabel)}</div>`;
-
-  return `
-    <section class="security-camera-feed ${escapeHTML(camera.statusClass)} ${escapeHTML(camera.sourceClass)} ${escapeHTML(camera.displayClass)}">
-      <div class="security-camera-feed-static" aria-hidden="true"></div>
-      <div class="security-camera-feed-scanline" aria-hidden="true"></div>
-      <header class="security-camera-feed-header">
-        <div>
-          <span class="security-camera-rec"><i></i> REC</span>
-          <h2>${escapeHTML(camera.name)}</h2>
-          <p>${escapeHTML(camera.location)}</p>
-        </div>
-        <div class="security-camera-signal">
-          <strong>${escapeHTML(camera.signalLabel)}</strong>
-          <span aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        </div>
-      </header>
-      <main class="security-camera-feed-frame" style="--security-camera-region-aspect: ${escapeHTML(camera.regionAspect ?? "16 / 9")};">
-        ${frameMarkup}
-      </main>
-      <footer class="security-camera-feed-footer">
-        <span>ID ${escapeHTML(camera.id)}</span>
-      </footer>
-    </section>
-  `;
-}
-
 function browseForImage(form) {
   if (typeof FilePicker === "undefined") {
     ui.notifications?.warn?.("Foundry FilePicker is not available.");
@@ -608,7 +477,7 @@ function browseForImage(form) {
   picker.browse();
 }
 
-function bindMonitorControls(app, html) {
+function bindMonitorControls(app: any, html: any = null) {
   const element = getElement(app, html);
   if (!element) return;
   const form = element.querySelector("[data-security-camera-form]");
@@ -673,7 +542,7 @@ function bindMonitorControls(app, html) {
   });
 }
 
-function applyFeedDisplayMode(app) {
+function applyFeedDisplayMode(app: any) {
   const camera = app?.camera ?? {};
   const mode = normalizeChoice(camera.displayMode, DISPLAY_MODES, DEFAULT_CAMERA.displayMode);
   const element = getElement(app);
@@ -709,500 +578,39 @@ function applyFeedDisplayMode(app) {
   });
 }
 
-function bindFeedControls(app, html) {
+function bindFeedControls(app: any, html: any = null) {
   const element = getElement(app, html);
   if (!element) return;
   applyFeedDisplayMode(app);
-  startLocalLiveRefresh(app);
+  liveFrameController.startLocalLiveRefresh(app);
 }
 
-function isCameraLive(camera) {
-  const normalized = normalizeCamera(camera);
-  return normalized.feedSource === "live" && normalized.status !== "offline" && normalized.status !== "restricted";
-}
+const liveFrameController = createLiveFrameController({
+  applyLinkedRegionBounds,
+  getSceneBackgroundPath,
+  getSceneById,
+  moduleId: MODULE_ID,
+  normalizeCamera
+});
 
-function canCaptureLiveCamera(camera) {
-  if (!canvas?.ready || !canvas?.app?.renderer) return false;
-  if (camera.sceneId && canvas.scene?.id !== camera.sceneId) return false;
-  return true;
-}
-
-function getRenderedCanvasSnapshot() {
-  const renderer = canvas?.app?.renderer;
-  const targets = [
-    canvas?.app?.stage,
-    canvas?.stage
-  ].filter(Boolean);
-
-  try {
-    for (const target of targets) {
-      const extracted = renderer?.extract?.canvas?.(target);
-      if (extracted?.width && extracted?.height) return extracted;
-    }
-  } catch (error) {
-    console.warn(`${MODULE_ID} | PIXI canvas extraction failed, using renderer view fallback.`, error);
+const { SecurityMonitor, CameraFeed } = createSecurityCameraAppClasses({
+  moduleId: MODULE_ID,
+  monitorTemplatePath: MONITOR_TEMPLATE_PATH,
+  feedTemplatePath: FEED_TEMPLATE_PATH,
+  escapeHTML,
+  getMonitorContext,
+  prepareCamera,
+  bindMonitorControls,
+  bindFeedControls,
+  getElement,
+  liveFrameController,
+  clearActiveMonitor: (app) => {
+    if (activeMonitor === app) activeMonitor = null;
+  },
+  clearActiveFeed: (app) => {
+    if (activeFeed === app) activeFeed = null;
   }
-
-  return renderer?.view ?? canvas?.app?.view ?? null;
-}
-
-function getCameraCrop(sourceCanvas, camera) {
-  const cameraWithRegion = applyLinkedRegionBounds(normalizeCamera(camera));
-  const sceneWidth = canvas.dimensions?.width ?? canvas.scene?.width ?? 0;
-  const sceneHeight = canvas.dimensions?.height ?? canvas.scene?.height ?? 0;
-  const sceneSize = sceneWidth && sceneHeight ? { width: sceneWidth, height: sceneHeight } : null;
-
-  return getCameraCropRect(sourceCanvas, cameraWithRegion, sceneSize, () => {
-    if (canvas.stage?.worldTransform?.apply && typeof PIXI !== "undefined") {
-      const topLeft = canvas.stage.worldTransform.apply(new PIXI.Point(cameraWithRegion.regionX, cameraWithRegion.regionY));
-      const bottomRight = canvas.stage.worldTransform.apply(new PIXI.Point(cameraWithRegion.regionX + cameraWithRegion.regionWidth, cameraWithRegion.regionY + cameraWithRegion.regionHeight));
-      return {
-        sx: topLeft.x,
-        sy: topLeft.y,
-        sw: bottomRight.x - topLeft.x,
-        sh: bottomRight.y - topLeft.y
-      };
-    }
-    return null;
-  });
-}
-
-function getSceneDimensions(sceneId = "") {
-  const scene = getSceneById(sceneId);
-  const isActiveScene = scene?.id && canvas?.scene?.id === scene.id;
-  const dimensions = isActiveScene ? canvas.dimensions : null;
-  return {
-    x: normalizeNullableNumber(dimensions?.sceneX ?? dimensions?.sceneRect?.x) ?? 0,
-    y: normalizeNullableNumber(dimensions?.sceneY ?? dimensions?.sceneRect?.y) ?? 0,
-    width: normalizePositiveNumber(dimensions?.sceneWidth ?? dimensions?.sceneRect?.width ?? scene?.width, DEFAULT_CAMERA_REGION_WIDTH),
-    height: normalizePositiveNumber(dimensions?.sceneHeight ?? dimensions?.sceneRect?.height ?? scene?.height, DEFAULT_CAMERA_REGION_HEIGHT)
-  };
-}
-
-function getCropForSceneImage(image, camera) {
-  const cameraWithRegion = applyLinkedRegionBounds(normalizeCamera(camera));
-  if (!Number.isFinite(cameraWithRegion.regionX) || !Number.isFinite(cameraWithRegion.regionY)) {
-    return getFullSourceCrop({ width: image.naturalWidth, height: image.naturalHeight });
-  }
-
-  const sceneDimensions = getSceneDimensions(cameraWithRegion.sceneId);
-  return getSceneImageCropRect({ width: image.naturalWidth, height: image.naturalHeight }, cameraWithRegion, sceneDimensions);
-}
-
-function loadImage(path) {
-  if (!path) return Promise.resolve(null);
-  if (imageCache.has(path)) return imageCache.get(path);
-
-  const promise = new Promise((resolve) => {
-    const finish = (image) => resolve(image);
-    const fallback = () => {
-      const image = new Image();
-      image.onload = () => finish(image);
-      image.onerror = () => finish(null);
-      image.src = path;
-    };
-
-    const image = new Image();
-    image.crossOrigin = "anonymous";
-    image.onload = () => finish(image);
-    image.onerror = fallback;
-    image.src = path;
-  });
-
-  imageCache.set(path, promise);
-  return promise;
-}
-
-async function captureSceneBackgroundFrame(camera = {}) {
-  const sceneBackground = getSceneBackgroundPath(camera.sceneId);
-  const imagePath = sceneBackground || camera.image;
-  const image = await loadImage(imagePath);
-  if (!image?.naturalWidth || !image?.naturalHeight) return "";
-
-  const crop = clampCrop(getCropForSceneImage(image, camera), {
-    width: image.naturalWidth,
-    height: image.naturalHeight
-  });
-  const { width, height } = getScaledOutputSize(crop, LIVE_FRAME_MAX_WIDTH);
-  const output = document.createElement("canvas");
-  output.width = width;
-  output.height = height;
-  const context = output.getContext("2d");
-  context.drawImage(image, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, width, height);
-  await drawTokensOnFrame(context, camera, crop, width, height);
-
-  try {
-    return output.toDataURL("image/webp", 0.72);
-  } catch (error) {
-    console.warn(`${MODULE_ID} | Scene background crop failed.`, error);
-    return "";
-  }
-}
-
-function getTokenSceneBounds(token) {
-  const gridSize = canvas?.dimensions?.size ?? canvas?.grid?.size ?? 100;
-  return getTokenDocumentBounds(token?.document, gridSize);
-}
-
-function shouldDrawToken(token) {
-  if (!token?.document) return false;
-  if (token.document.hidden) return false;
-  return true;
-}
-
-function getTokenImagePath(token) {
-  return String(token?.document?.texture?.src ?? token?.document?.actor?.img ?? token?.actor?.img ?? "").trim();
-}
-
-async function drawTokensOnFrame(context, camera, crop, frameWidth, frameHeight) {
-  if (!canvas?.ready || canvas.scene?.id !== camera.sceneId) return;
-
-  const cameraWithRegion = applyLinkedRegionBounds(normalizeCamera(camera));
-  const region = {
-    x: cameraWithRegion.regionX,
-    y: cameraWithRegion.regionY,
-    width: cameraWithRegion.regionWidth,
-    height: cameraWithRegion.regionHeight
-  };
-  if (![region.x, region.y, region.width, region.height].every(Number.isFinite)) return;
-
-  for (const token of canvas.tokens?.placeables ?? []) {
-    if (!shouldDrawToken(token)) continue;
-    const bounds = getTokenSceneBounds(token);
-    if (!bounds || !intersectsBounds(bounds, region)) continue;
-
-    const imagePath = getTokenImagePath(token);
-    const image = await loadImage(imagePath);
-    if (!image?.naturalWidth || !image?.naturalHeight) continue;
-
-    const { dx, dy, dw, dh } = projectBoundsToFrame(bounds, region, { width: frameWidth, height: frameHeight });
-
-    context.save();
-    context.globalAlpha = token.document.alpha ?? 1;
-    context.drawImage(image, dx, dy, dw, dh);
-    context.restore();
-  }
-}
-
-function isMostlyBlackCanvas(sourceCanvas) {
-  const context = sourceCanvas.getContext("2d", { willReadFrequently: true });
-  if (!context) return false;
-
-  const sampleWidth = Math.min(48, sourceCanvas.width);
-  const sampleHeight = Math.min(48, sourceCanvas.height);
-  const imageData = context.getImageData(0, 0, sampleWidth, sampleHeight).data;
-  let total = 0;
-  const pixels = imageData.length / 4;
-
-  for (let index = 0; index < imageData.length; index += 4) {
-    total += imageData[index] + imageData[index + 1] + imageData[index + 2];
-  }
-
-  return total / (pixels * 3) < 3;
-}
-
-function captureCanvasFrame(camera = {}) {
-  const sourceCanvas = getRenderedCanvasSnapshot();
-  if (!sourceCanvas?.width || !sourceCanvas?.height) return "";
-
-  const crop = clampCrop(getCameraCrop(sourceCanvas, camera), sourceCanvas);
-  const { width, height } = getScaledOutputSize(crop, LIVE_FRAME_MAX_WIDTH);
-  const output = document.createElement("canvas");
-  output.width = width;
-  output.height = height;
-  const context = output.getContext("2d");
-  context.drawImage(sourceCanvas, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, width, height);
-
-  if (isMostlyBlackCanvas(output)) return "";
-
-  try {
-    return output.toDataURL("image/webp", 0.62);
-  } catch (error) {
-    console.warn(`${MODULE_ID} | WebP canvas capture failed, using PNG fallback.`, error);
-    return output.toDataURL("image/png");
-  }
-}
-
-async function updateLocalLiveFrame(app) {
-  if (!isCameraLive(app?.camera)) return;
-  let frame = "";
-  frame = await captureSceneBackgroundFrame(app.camera);
-  if (!frame && canCaptureLiveCamera(app.camera)) frame = captureCanvasFrame(app.camera);
-  if (!frame) return;
-  await app.updateLiveFrame?.(frame);
-}
-
-function stopLocalLiveRefresh(app) {
-  if (!app?.liveFrameTimer) return;
-  window.clearInterval(app.liveFrameTimer);
-  app.liveFrameTimer = null;
-}
-
-function startLocalLiveRefresh(app) {
-  stopLocalLiveRefresh(app);
-  if (!isCameraLive(app?.camera)) return;
-
-  updateLocalLiveFrame(app);
-  app.liveFrameTimer = window.setInterval(() => {
-    updateLocalLiveFrame(app);
-  }, LIVE_FRAME_INTERVAL_MS);
-}
-
-const ApplicationV2 = foundry?.applications?.api?.ApplicationV2;
-const HandlebarsApplicationMixin = foundry?.applications?.api?.HandlebarsApplicationMixin;
-
-class SecurityMonitorV1 extends Application {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "security-camera-monitor",
-      title: "Security Camera Manager",
-      template: MONITOR_TEMPLATE_PATH,
-      classes: ["security-camera-window"],
-      popOut: true,
-      resizable: true,
-      width: 1060,
-      height: "auto"
-    });
-  }
-
-  getData() {
-    return getMonitorContext();
-  }
-
-  async _renderInner(data) {
-    try {
-      return await super._renderInner(data);
-    } catch (error) {
-      console.warn(`${MODULE_ID} | Monitor template render failed, using inline fallback.`, error);
-      return $(renderFallbackMonitor(data));
-    }
-  }
-
-  activateListeners(html) {
-    super.activateListeners(html);
-    bindMonitorControls(this, html);
-  }
-
-  async close(options) {
-    if (activeMonitor === this) activeMonitor = null;
-    return super.close(options);
-  }
-}
-
-class CameraFeedV1 extends Application {
-  constructor(cameraData, options = {}) {
-    super(options);
-    this.camera = prepareCamera(cameraData);
-    this.liveFrame = options.liveFrame ?? "";
-    this.liveFrameTimer = null;
-  }
-
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "security-camera-feed",
-      title: "Camera Feed",
-      template: FEED_TEMPLATE_PATH,
-      classes: ["security-camera-feed-window"],
-      popOut: true,
-      resizable: true,
-      width: 720,
-      height: "auto"
-    });
-  }
-
-  getData() {
-    this.camera = prepareCamera(this.camera);
-    return {
-      camera: {
-        ...this.camera,
-        liveFrame: this.liveFrame,
-        hasLiveFrame: Boolean(this.liveFrame)
-      }
-    };
-  }
-
-  async _renderInner(data) {
-    try {
-      return await super._renderInner(data);
-    } catch (error) {
-      console.warn(`${MODULE_ID} | Feed template render failed, using inline fallback.`, error);
-      return $(renderFallbackFeed({
-        ...this.camera,
-        liveFrame: this.liveFrame
-      }));
-    }
-  }
-
-  activateListeners(html) {
-    super.activateListeners(html);
-    bindFeedControls(this, html);
-  }
-
-  async updateLiveFrame(frame) {
-    this.liveFrame = frame;
-    const element = getElement(this);
-    const image = element?.querySelector?.("[data-security-camera-live-frame]");
-    const waiting = element?.querySelector?.("[data-security-camera-live-waiting]");
-
-    if (image) {
-      image.src = frame;
-      image.hidden = false;
-      if (waiting) waiting.hidden = true;
-      return;
-    }
-
-    await this.render(true);
-  }
-
-  async close(options) {
-    stopLocalLiveRefresh(this);
-    if (activeFeed === this) activeFeed = null;
-    return super.close(options);
-  }
-}
-
-function createSecurityMonitorV2Class() {
-  if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
-
-  return class SecurityMonitorV2 extends HandlebarsApplicationMixin(ApplicationV2) {
-    static DEFAULT_OPTIONS = {
-      id: "security-camera-monitor",
-      tag: "section",
-      classes: ["security-camera-window"],
-      window: {
-        title: "Security Camera Manager",
-        resizable: true
-      },
-      position: {
-        width: 1060,
-        height: "auto"
-      }
-    };
-
-    static PARTS = {
-      main: {
-        template: MONITOR_TEMPLATE_PATH
-      }
-    };
-
-    async _prepareContext(options) {
-      return {
-        ...(await super._prepareContext(options)),
-        ...getMonitorContext()
-      };
-    }
-
-    async _renderHTML(context, options) {
-      try {
-        return await super._renderHTML(context, options);
-      } catch (error) {
-        console.warn(`${MODULE_ID} | Monitor template render failed, using inline fallback.`, error);
-        const wrapper = document.createElement("template");
-        wrapper.innerHTML = renderFallbackMonitor(context).trim();
-        return wrapper.content;
-      }
-    }
-
-    _onRender(context, options) {
-      super._onRender?.(context, options);
-      bindMonitorControls(this);
-    }
-
-    async close(options) {
-      if (activeMonitor === this) activeMonitor = null;
-      return super.close(options);
-    }
-  };
-}
-
-function createCameraFeedV2Class() {
-  if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
-
-  return class CameraFeedV2 extends HandlebarsApplicationMixin(ApplicationV2) {
-    static DEFAULT_OPTIONS = {
-      id: "security-camera-feed",
-      tag: "section",
-      classes: ["security-camera-feed-window"],
-      window: {
-        title: "Camera Feed",
-        resizable: true
-      },
-      position: {
-        width: 720,
-        height: "auto"
-      }
-    };
-
-    static PARTS = {
-      main: {
-        template: FEED_TEMPLATE_PATH
-      }
-    };
-
-    constructor(cameraData, options = {}) {
-      super(options);
-      this.camera = prepareCamera(cameraData);
-      this.liveFrame = options.liveFrame ?? "";
-      this.liveFrameTimer = null;
-    }
-
-    async _prepareContext(options) {
-      this.camera = prepareCamera(this.camera);
-      return {
-        ...(await super._prepareContext(options)),
-        camera: {
-          ...this.camera,
-          liveFrame: this.liveFrame,
-          hasLiveFrame: Boolean(this.liveFrame)
-        }
-      };
-    }
-
-    async _renderHTML(context, options) {
-      try {
-        return await super._renderHTML(context, options);
-      } catch (error) {
-        console.warn(`${MODULE_ID} | Feed template render failed, using inline fallback.`, error);
-        const wrapper = document.createElement("template");
-        wrapper.innerHTML = renderFallbackFeed({
-          ...this.camera,
-          liveFrame: this.liveFrame
-        }).trim();
-        return wrapper.content;
-      }
-    }
-
-    _onRender(context, options) {
-      super._onRender?.(context, options);
-      bindFeedControls(this);
-    }
-
-    async updateLiveFrame(frame) {
-      this.liveFrame = frame;
-      const element = getElement(this);
-      const image = element?.querySelector?.("[data-security-camera-live-frame]");
-      const waiting = element?.querySelector?.("[data-security-camera-live-waiting]");
-
-      if (image) {
-        image.src = frame;
-        image.hidden = false;
-        if (waiting) waiting.hidden = true;
-        return;
-      }
-
-      await this.render(true);
-    }
-
-    async close(options) {
-      stopLocalLiveRefresh(this);
-      if (activeFeed === this) activeFeed = null;
-      return super.close(options);
-    }
-  };
-}
-
-const SecurityMonitor = createSecurityMonitorV2Class() ?? SecurityMonitorV1;
-const CameraFeed = createCameraFeedV2Class() ?? CameraFeedV1;
+});
 
 async function openMonitor() {
   if (!requireGM("open the Security Camera Manager")) return null;
@@ -1224,7 +632,7 @@ async function closeMonitor() {
   await monitor.close();
 }
 
-async function openLocalFeed(cameraData, options = {}) {
+async function openLocalFeed(cameraData: any, options: any = {}) {
   const camera = normalizeCamera(cameraData);
   await closeLocalFeed();
   activeFeed = new CameraFeed(camera, {
