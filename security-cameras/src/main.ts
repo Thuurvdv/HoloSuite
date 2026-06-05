@@ -587,8 +587,18 @@ function bindFeedControls(app: any, html: any = null) {
 
 const liveFrameController = createLiveFrameController({
   applyLinkedRegionBounds,
+  broadcastLiveFrame: (camera, liveFrame) => {
+    if (!game.user?.isGM || !camera?.id || !liveFrame) return;
+    emitSocketMessage({
+      action: "updateFeedFrame",
+      gmUserId: game.user.id,
+      cameraId: camera.id,
+      liveFrame
+    });
+  },
   getSceneBackgroundPath,
   getSceneById,
+  isFrameProducer: () => Boolean(game.user?.isGM),
   moduleId: MODULE_ID,
   normalizeCamera
 });
@@ -658,13 +668,18 @@ async function showFeed(cameraId) {
     return null;
   }
 
+  const liveFrame = await liveFrameController.captureLiveFrame(camera, {
+    preferDataUrl: true
+  });
+
   emitSocketMessage({
     action: "showFeed",
     gmUserId: game.user.id,
-    camera
+    camera,
+    liveFrame
   });
 
-  return openLocalFeed(camera);
+  return openLocalFeed(camera, { liveFrame });
 }
 
 function closeFeedForEveryone() {
@@ -696,7 +711,19 @@ async function handleSocketMessage(message) {
       console.warn(`${MODULE_ID} | Ignoring invalid socket camera payload.`, validation.errors);
       return;
     }
-    await openLocalFeed(validation.camera);
+    await openLocalFeed(validation.camera, {
+      liveFrame: typeof message.liveFrame === "string" ? message.liveFrame : ""
+    });
+    return;
+  }
+
+  if (message.action === "updateFeedFrame") {
+    if (game.user?.isGM) return;
+    if (!isGMSent) return;
+    const cameraId = String(message.cameraId ?? "");
+    if (!cameraId || activeFeed?.camera?.id !== cameraId) return;
+    if (typeof message.liveFrame !== "string" || !message.liveFrame) return;
+    await activeFeed.updateLiveFrame?.(message.liveFrame);
     return;
   }
 

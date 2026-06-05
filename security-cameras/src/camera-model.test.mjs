@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const model = await import("../../.tmp-tests/security-cameras/camera-model.js");
+const model = await import("../../.tmp-tests/camera-model.js");
 
 test("normalizeCamera fills defaults and generates ids", () => {
   const camera = model.normalizeCamera({

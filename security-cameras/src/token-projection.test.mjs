@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const projection = await import("../../.tmp-tests/security-cameras/token-projection.js");
+const projection = await import("../../.tmp-tests/token-projection.js");
 
 test("getTokenSceneBounds converts token grid units to scene pixels", () => {
   assert.deepEqual(projection.getTokenSceneBounds({
@@ -19,6 +19,28 @@ test("getTokenSceneBounds converts token grid units to scene pixels", () => {
 
 test("getTokenSceneBounds rejects missing coordinates", () => {
   assert.equal(projection.getTokenSceneBounds({ width: 1, height: 1 }, 100), null);
+});
+
+test("getTokenSceneBounds reads Foundry document wrappers", () => {
+  assert.deepEqual(projection.getTokenSceneBounds({
+    toObject: () => ({ x: 25, y: 50, width: 1, height: 2 })
+  }, 100), {
+    x: 25,
+    y: 50,
+    width: 100,
+    height: 200
+  });
+});
+
+test("getTokenSceneBounds reads raw source data", () => {
+  assert.deepEqual(projection.getTokenSceneBounds({
+    _source: { x: 75, y: 100, width: 0.5, height: 1 }
+  }, 100), {
+    x: 75,
+    y: 100,
+    width: 50,
+    height: 100
+  });
 });
 
 test("intersectsBounds detects overlap without treating touching edges as overlap", () => {

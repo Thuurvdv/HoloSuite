@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const crop = await import("../../.tmp-tests/security-cameras/frame-crop.js");
+const crop = await import("../../.tmp-tests/frame-crop.js");
 
 const camera = {
   id: "cam",

@@ -14,6 +14,7 @@ import {
   getScaledOutputSize
 } from "./frame-crop";
 import {
+  getTokenData,
   getTokenSceneBounds as getTokenDocumentBounds,
   intersectsBounds,
   projectBoundsToFrame
@@ -23,13 +24,20 @@ const LIVE_FRAME_INTERVAL_MS = 1250;
 const LIVE_FRAME_MAX_WIDTH = 960;
 const LIVE_FRAME_WEBP_QUALITY = 0.62;
 const STATIC_FRAME_WEBP_QUALITY = 0.72;
+const TOKEN_MARKER_MIN_SIZE = 18;
 
 interface LiveFrameDependencies {
   applyLinkedRegionBounds(camera: SecurityCamera): SecurityCamera;
+  broadcastLiveFrame?(camera: SecurityCamera, liveFrame: string): void;
   getSceneBackgroundPath(sceneId?: string): string;
   getSceneById(sceneId?: string): any;
+  isFrameProducer(): boolean;
   moduleId: string;
   normalizeCamera(camera: any): SecurityCamera;
+}
+
+interface CaptureLiveFrameOptions {
+  preferDataUrl?: boolean;
 }
 
 export function createLiveFrameController(dependencies: LiveFrameDependencies) {
@@ -89,12 +97,24 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
   function getSceneDimensions(sceneId = "") {
     const scene = dependencies.getSceneById(sceneId);
     const isActiveScene = scene?.id && canvas?.scene?.id === scene.id;
-    const dimensions = isActiveScene ? canvas.dimensions : null;
+    const dimensions = isActiveScene ? canvas.dimensions : scene?.dimensions;
     return {
       x: normalizeNullableNumber(dimensions?.sceneX ?? dimensions?.sceneRect?.x) ?? 0,
       y: normalizeNullableNumber(dimensions?.sceneY ?? dimensions?.sceneRect?.y) ?? 0,
-      width: normalizePositiveNumber(dimensions?.sceneWidth ?? dimensions?.sceneRect?.width ?? scene?.width, DEFAULT_CAMERA_REGION_WIDTH),
-      height: normalizePositiveNumber(dimensions?.sceneHeight ?? dimensions?.sceneRect?.height ?? scene?.height, DEFAULT_CAMERA_REGION_HEIGHT)
+      width: normalizePositiveNumber(
+        dimensions?.sceneWidth
+        ?? dimensions?.sceneRect?.width
+        ?? dimensions?.width
+        ?? scene?.width,
+        DEFAULT_CAMERA_REGION_WIDTH
+      ),
+      height: normalizePositiveNumber(
+        dimensions?.sceneHeight
+        ?? dimensions?.sceneRect?.height
+        ?? dimensions?.height
+        ?? scene?.height,
+        DEFAULT_CAMERA_REGION_HEIGHT
+      )
     };
   }
 
@@ -150,7 +170,9 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     }
   }
 
-  function canvasToObjectUrl(canvas: HTMLCanvasElement, type: string, quality: number) {
+  function canvasToFrameUrl(canvas: HTMLCanvasElement, type: string, quality: number, options: CaptureLiveFrameOptions = {}) {
+    if (options.preferDataUrl) return Promise.resolve(canvasToDataUrl(canvas, type, quality));
+
     if (!canvas.toBlob || typeof URL === "undefined" || !URL.createObjectURL) {
       return Promise.resolve(canvasToDataUrl(canvas, type, quality));
     }
@@ -171,7 +193,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     });
   }
 
-  async function captureSceneBackgroundFrame(camera: any = {}) {
+  async function captureSceneBackgroundFrame(camera: any = {}, options: CaptureLiveFrameOptions = {}) {
     const sceneBackground = dependencies.getSceneBackgroundPath(camera.sceneId);
     const imagePath = sceneBackground || camera.image;
     const image = await loadImage(imagePath);
@@ -189,7 +211,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     context?.drawImage(image, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, width, height);
     await drawTokensOnFrame(context, camera, width, height);
 
-    return canvasToObjectUrl(output, "image/webp", STATIC_FRAME_WEBP_QUALITY);
+    return canvasToFrameUrl(output, "image/webp", STATIC_FRAME_WEBP_QUALITY, options);
   }
 
   function getSceneGridSize(scene: any) {
@@ -197,7 +219,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     return normalizePositiveNumber(
       isActiveScene
         ? canvas?.dimensions?.size ?? canvas?.grid?.size ?? scene?.grid?.size
-        : scene?.grid?.size,
+        : scene?.dimensions?.size ?? scene?.grid?.size,
       100
     );
   }
@@ -210,20 +232,67 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
         .filter(Boolean);
     }
 
-    const tokenCollection = scene.tokens;
-    if (Array.isArray(tokenCollection)) return tokenCollection;
-    if (Array.isArray(tokenCollection?.contents)) return tokenCollection.contents;
-    return Array.from(tokenCollection ?? []);
+    const candidates = [
+      getEmbeddedDocumentCollection(scene, "Token"),
+      scene.tokens,
+      scene.getEmbeddedDocuments?.("Token"),
+      scene.toObject?.().tokens,
+      scene._source?.tokens
+    ];
+
+    for (const candidate of candidates) {
+      const documents = normalizeTokenCollection(candidate);
+      if (documents.length) return documents;
+    }
+
+    return [];
+  }
+
+  function getEmbeddedDocumentCollection(scene: any, name: string) {
+    try {
+      return scene?.getEmbeddedCollection?.(name);
+    } catch (error) {
+      console.warn(`${dependencies.moduleId} | Could not read ${name} collection for inactive scene.`, error);
+      return null;
+    }
+  }
+
+  function normalizeTokenCollection(collection: any): any[] {
+    if (!collection) return [];
+
+    const source = Array.isArray(collection?.contents)
+      ? collection.contents
+      : Array.isArray(collection)
+        ? collection
+        : typeof collection.values === "function"
+          ? Array.from(collection.values())
+          : Array.from(collection ?? []);
+
+    return source
+      .map((entry: any) => Array.isArray(entry) ? entry[1] : entry)
+      .map((entry: any) => entry?.document ?? entry)
+      .filter(Boolean);
   }
 
   function shouldDrawToken(tokenDocument: any) {
-    if (!tokenDocument) return false;
-    if (tokenDocument.hidden) return false;
+    const data = getTokenData(tokenDocument);
+    if (!data) return false;
+    if (data.hidden) return false;
     return true;
   }
 
   function getTokenImagePath(tokenDocument: any) {
-    return String(tokenDocument?.texture?.src ?? tokenDocument?.actor?.img ?? tokenDocument?.baseActor?.img ?? "").trim();
+    const data: any = getTokenData(tokenDocument);
+    return String(
+      tokenDocument?.getTextureSrc?.()
+      ?? data?.texture?.src
+      ?? data?.img
+      ?? tokenDocument?.texture?.src
+      ?? tokenDocument?.actor?.img
+      ?? tokenDocument?.baseActor?.img
+      ?? tokenDocument?.actor?.prototypeToken?.texture?.src
+      ?? ""
+    ).trim();
   }
 
   async function drawTokensOnFrame(context: CanvasRenderingContext2D | null, camera: any, frameWidth: number, frameHeight: number) {
@@ -241,22 +310,76 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     if (![region.x, region.y, region.width, region.height].every(Number.isFinite)) return;
 
     const gridSize = getSceneGridSize(scene);
+    const sceneDimensions = getSceneDimensions(cameraWithRegion.sceneId);
     for (const tokenDocument of getSceneTokenDocuments(scene)) {
       if (!shouldDrawToken(tokenDocument)) continue;
       const bounds = getTokenDocumentBounds(tokenDocument, gridSize);
-      if (!bounds || !intersectsBounds(bounds, region)) continue;
+      const visibleBounds = getVisibleTokenBounds(bounds, region, sceneDimensions);
+      if (!visibleBounds) continue;
 
       const imagePath = getTokenImagePath(tokenDocument);
       const image = await loadImage(imagePath);
-      if (!image?.naturalWidth || !image?.naturalHeight) continue;
-
-      const { dx, dy, dw, dh } = projectBoundsToFrame(bounds, region, { width: frameWidth, height: frameHeight });
+      const { dx, dy, dw, dh } = projectBoundsToFrame(visibleBounds, region, { width: frameWidth, height: frameHeight });
 
       context.save();
-      context.globalAlpha = tokenDocument.alpha ?? 1;
-      context.drawImage(image, dx, dy, dw, dh);
+      context.globalAlpha = normalizeNullableNumber(tokenDocument.alpha) ?? normalizeNullableNumber(getTokenData(tokenDocument)?.alpha) ?? 1;
+      if (image?.naturalWidth && image?.naturalHeight) {
+        context.drawImage(image, dx, dy, dw, dh);
+      } else {
+        drawTokenMarker(context, tokenDocument, dx, dy, dw, dh);
+      }
       context.restore();
     }
+  }
+
+  function getVisibleTokenBounds(bounds: any, region: any, sceneDimensions: any) {
+    if (!bounds) return null;
+    if (intersectsBounds(bounds, region)) return bounds;
+
+    const offsetX = normalizeNullableNumber(sceneDimensions?.x) ?? 0;
+    const offsetY = normalizeNullableNumber(sceneDimensions?.y) ?? 0;
+    if (!offsetX && !offsetY) return null;
+
+    const withoutOffset = {
+      ...bounds,
+      x: bounds.x - offsetX,
+      y: bounds.y - offsetY
+    };
+    if (intersectsBounds(withoutOffset, region)) return withoutOffset;
+
+    const withOffset = {
+      ...bounds,
+      x: bounds.x + offsetX,
+      y: bounds.y + offsetY
+    };
+    return intersectsBounds(withOffset, region) ? withOffset : null;
+  }
+
+  function drawTokenMarker(context: CanvasRenderingContext2D, tokenDocument: any, dx: number, dy: number, dw: number, dh: number) {
+    const data: any = getTokenData(tokenDocument);
+    const width = Math.max(TOKEN_MARKER_MIN_SIZE, dw);
+    const height = Math.max(TOKEN_MARKER_MIN_SIZE, dh);
+    const x = dx + (dw - width) / 2;
+    const y = dy + (dh - height) / 2;
+    const radius = Math.min(width, height) / 2;
+    const cx = x + width / 2;
+    const cy = y + height / 2;
+
+    context.beginPath();
+    context.arc(cx, cy, radius, 0, Math.PI * 2);
+    context.fillStyle = "rgba(10, 18, 24, 0.82)";
+    context.fill();
+    context.lineWidth = Math.max(2, Math.min(width, height) * 0.08);
+    context.strokeStyle = "rgba(72, 220, 255, 0.95)";
+    context.stroke();
+
+    const label = String(data?.name ?? tokenDocument?.name ?? "").trim().slice(0, 2).toUpperCase();
+    if (!label) return;
+    context.font = `700 ${Math.max(10, Math.round(radius * 0.72))}px sans-serif`;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillStyle = "rgba(224, 252, 255, 0.96)";
+    context.fillText(label, cx, cy + 0.5);
   }
 
   function isMostlyBlackCanvas(sourceCanvas: HTMLCanvasElement) {
@@ -276,7 +399,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     return total / (pixels * 3) < 3;
   }
 
-  async function captureCanvasFrame(camera = {}) {
+  async function captureCanvasFrame(camera = {}, options: CaptureLiveFrameOptions = {}) {
     const sourceCanvas = getRenderedCanvasSnapshot();
     if (!sourceCanvas?.width || !sourceCanvas?.height) return "";
 
@@ -290,17 +413,24 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
 
     if (isMostlyBlackCanvas(output)) return "";
 
-    return canvasToObjectUrl(output, "image/webp", LIVE_FRAME_WEBP_QUALITY);
+    return canvasToFrameUrl(output, "image/webp", LIVE_FRAME_WEBP_QUALITY, options);
+  }
+
+  async function captureLiveFrame(camera: any = {}, options: CaptureLiveFrameOptions = {}) {
+    let frame = await captureSceneBackgroundFrame(camera, options);
+    if (!frame && canCaptureLiveCamera(camera)) frame = await captureCanvasFrame(camera, options);
+    return frame;
   }
 
   async function updateLocalLiveFrame(app: any) {
     if (!isCameraLive(app?.camera)) return;
-    let frame = "";
-    frame = await captureSceneBackgroundFrame(app.camera);
-    if (!frame && canCaptureLiveCamera(app.camera)) frame = await captureCanvasFrame(app.camera);
+    const frame = await captureLiveFrame(app.camera, {
+      preferDataUrl: Boolean(dependencies.broadcastLiveFrame)
+    });
     if (!frame) return;
     if (!canRefreshVisibleFrame(app)) return;
     await app.updateLiveFrame?.(frame);
+    dependencies.broadcastLiveFrame?.(dependencies.normalizeCamera(app.camera), frame);
   }
 
   function canRefreshVisibleFrame(app: any) {
@@ -329,6 +459,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
   function startLocalLiveRefresh(app: any) {
     stopLocalLiveRefresh(app);
     if (!isCameraLive(app?.camera)) return;
+    if (!dependencies.isFrameProducer()) return;
 
     app.liveFrameVisibilityHandler = () => queueLocalLiveFrameUpdate(app);
     document.addEventListener("visibilitychange", app.liveFrameVisibilityHandler);
@@ -339,6 +470,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
   }
 
   return {
+    captureLiveFrame,
     startLocalLiveRefresh,
     stopLocalLiveRefresh
   };

@@ -3,10 +3,14 @@ import type { Size } from "./frame-crop";
 import type { Bounds } from "./region-geometry";
 
 export interface TokenDocumentLike {
+  [key: string]: unknown;
   x?: unknown;
   y?: unknown;
   width?: unknown;
   height?: unknown;
+  document?: TokenDocumentLike;
+  _source?: TokenDocumentLike;
+  toObject?: () => TokenDocumentLike;
 }
 
 export interface TokenDrawRect {
@@ -17,17 +21,29 @@ export interface TokenDrawRect {
 }
 
 export function getTokenSceneBounds(document: TokenDocumentLike | null | undefined, gridSize = 100): Bounds | null {
-  if (!document) return null;
-  const x = normalizeNullableNumber(document.x);
-  const y = normalizeNullableNumber(document.y);
+  const data = getTokenData(document);
+  if (!data) return null;
+  const x = normalizeNullableNumber(data.x);
+  const y = normalizeNullableNumber(data.y);
   if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
 
   return {
     x,
     y,
-    width: normalizePositiveNumber(document.width, 1) * gridSize,
-    height: normalizePositiveNumber(document.height, 1) * gridSize
+    width: normalizePositiveNumber(data.width, 1) * gridSize,
+    height: normalizePositiveNumber(data.height, 1) * gridSize
   };
+}
+
+export function getTokenData(document: TokenDocumentLike | null | undefined): TokenDocumentLike | null {
+  if (!document) return null;
+  if (document.document) return getTokenData(document.document);
+  if (typeof document.toObject === "function") {
+    const data = document.toObject();
+    if (data && typeof data === "object") return data;
+  }
+  if (document._source && typeof document._source === "object") return document._source;
+  return document;
 }
 
 export function intersectsBounds(a: Bounds, b: Bounds): boolean {

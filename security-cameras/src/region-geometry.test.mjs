@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const geometry = await import("../../.tmp-tests/security-cameras/region-geometry.js");
+const geometry = await import("../../.tmp-tests/region-geometry.js");
 
 test("getShapeBounds reads polygon point extents", () => {
   assert.deepEqual(geometry.getShapeBounds({
