@@ -2,7 +2,7 @@
   "id": "cybercall",
   "title": "CyberCall",
   "description": "A sci-fi hologram communication overlay for Foundry VTT.",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "compatibility": {
     "minimum": "12",
     "verified": "13"

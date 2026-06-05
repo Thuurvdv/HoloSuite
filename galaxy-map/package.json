@@ -1,7 +1,7 @@
 {
   "name": "@holosuite/galaxy-map",
   "private": true,
-  "version": "0.2.7",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "build": "vite build"
