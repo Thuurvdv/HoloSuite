@@ -137,7 +137,12 @@ export function createCSICaseBoardClass(deps: any) {
         startClientY: event.clientY,
         startX: current.x,
         startY: current.y,
-        scale: view.scale
+        scale: view.scale,
+        x: current.x,
+        y: current.y,
+        frame: null,
+        cards: this._getBoardCardMap(),
+        connectionGroups: this._getConnectionGroupsForItem(itemId)
       };
 
       document.addEventListener("mousemove", this._boundDragMove = (moveEvent: any) => this._onCardDrag(moveEvent));
@@ -148,17 +153,41 @@ export function createCSICaseBoardClass(deps: any) {
       if (!this._drag) return;
       const x = Math.round(this._drag.startX + (event.clientX - this._drag.startClientX) / this._drag.scale);
       const y = Math.round(this._drag.startY + (event.clientY - this._drag.startClientY) / this._drag.scale);
+      this._drag.x = x;
+      this._drag.y = y;
+
+      if (this._drag.frame) return;
+      this._drag.frame = globalThis.requestAnimationFrame
+        ? globalThis.requestAnimationFrame(() => this._flushCardDrag())
+        : globalThis.setTimeout(() => this._flushCardDrag(), 0);
+    }
+
+    _flushCardDrag() {
+      if (!this._drag) return;
+      this._drag.frame = null;
+      this._applyCardDragPosition(this._drag.x, this._drag.y);
+      this._updateConnectionLines(this._drag.connectionGroups, this._drag.cards);
+    }
+
+    _applyCardDragPosition(x: number, y: number) {
+      if (!this._drag) return;
       this._drag.card.style.left = `${x}px`;
       this._drag.card.style.top = `${y}px`;
       this._drag.card.dataset.x = x;
       this._drag.card.dataset.y = y;
-      this._updateConnectionLines();
     }
 
     _endDrag() {
       if (!this._drag) return;
       document.removeEventListener("mousemove", this._boundDragMove);
       document.removeEventListener("mouseup", this._boundDragEnd);
+      if (this._drag.frame) {
+        if (globalThis.cancelAnimationFrame) globalThis.cancelAnimationFrame(this._drag.frame);
+        else globalThis.clearTimeout?.(this._drag.frame);
+        this._drag.frame = null;
+      }
+      this._applyCardDragPosition(this._drag.x, this._drag.y);
+      this._updateConnectionLines(this._drag.connectionGroups, this._drag.cards);
       const layout = this._getLayout();
       layout.cards[this._drag.itemId] = {
         ...(layout.cards[this._drag.itemId] ?? {}),
@@ -253,13 +282,27 @@ export function createCSICaseBoardClass(deps: any) {
       this.render(true);
     }
 
-    _updateConnectionLines() {
+    _getBoardCardMap() {
+      const root = this.element[0];
+      if (!root) return new Map();
+      return new Map(Array.from(root.querySelectorAll("[data-csi-board-card]")).map((card: any) => [card.dataset.itemId, card]));
+    }
+
+    _getConnectionGroupsForItem(itemId: string) {
+      const root = this.element[0];
+      if (!root || !itemId) return [];
+      return Array.from(root.querySelectorAll("[data-csi-connection-group]"))
+        .filter((group: any) => group.dataset.fromId === itemId || group.dataset.toId === itemId);
+    }
+
+    _updateConnectionLines(groups: any[] | null = null, cards: Map<string, any> | null = null) {
       const root = this.element[0];
       if (!root) return;
-      const cards = new Map(Array.from(root.querySelectorAll("[data-csi-board-card]")).map((card: any) => [card.dataset.itemId, card]));
-      for (const group of root.querySelectorAll("[data-csi-connection-group]")) {
-        const from = cards.get(group.dataset.fromId);
-        const to = cards.get(group.dataset.toId);
+      const cardMap = cards ?? this._getBoardCardMap();
+      const connectionGroups = groups ?? Array.from(root.querySelectorAll("[data-csi-connection-group]"));
+      for (const group of connectionGroups) {
+        const from = cardMap.get(group.dataset.fromId);
+        const to = cardMap.get(group.dataset.toId);
         if (!from || !to) continue;
         const fromRect = this._getCardBoardRect(from);
         const toRect = this._getCardBoardRect(to);
