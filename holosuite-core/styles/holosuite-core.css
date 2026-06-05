@@ -107,13 +107,41 @@
   align-items: center;
   background: var(--hs-control-bg);
   border: 1px solid var(--hs-line);
+  box-sizing: border-box;
   color: var(--hs-text);
   display: inline-flex;
   font-size: 16px;
   height: 34px;
   justify-content: center;
   line-height: 1;
+  padding: 0;
   width: 34px;
+}
+
+.holosuite-dock button[data-holosuite-action="close"] {
+  display: grid !important;
+  height: 34px;
+  min-height: 34px;
+  min-width: 34px;
+  padding: 0 !important;
+  place-items: center;
+  text-align: center;
+  width: 34px;
+}
+
+.holosuite-dock button[data-holosuite-action="close"] i {
+  display: grid;
+  height: 100%;
+  line-height: 1;
+  margin: 0 !important;
+  place-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.holosuite-dock button[data-holosuite-action="close"] i::before {
+  display: block;
+  margin: 0 auto;
 }
 
 .holosuite-app-grid {

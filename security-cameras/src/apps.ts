@@ -26,6 +26,24 @@ export function createSecurityCameraAppClasses(deps: any) {
   const ApplicationV2 = foundry?.applications?.api?.ApplicationV2;
   const HandlebarsApplicationMixin = foundry?.applications?.api?.HandlebarsApplicationMixin;
 
+  function isObjectUrl(value: string) {
+    return typeof value === "string" && value.startsWith("blob:");
+  }
+
+  function releaseLiveFrameUrl(app: any) {
+    if (isObjectUrl(app?.liveFrameObjectUrl) && typeof URL !== "undefined") {
+      URL.revokeObjectURL(app.liveFrameObjectUrl);
+    }
+    if (app) app.liveFrameObjectUrl = null;
+  }
+
+  function setLiveFrame(app: any, frame: string) {
+    if (app.liveFrame === frame) return;
+    releaseLiveFrameUrl(app);
+    app.liveFrame = frame;
+    app.liveFrameObjectUrl = isObjectUrl(frame) ? frame : null;
+  }
+
   class SecurityMonitorV1 extends Application {
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
@@ -67,12 +85,14 @@ export function createSecurityCameraAppClasses(deps: any) {
   class CameraFeedV1 extends Application {
     camera: any;
     liveFrame: string;
+    liveFrameObjectUrl: string | null;
     liveFrameTimer: any;
 
     constructor(cameraData: any, options: any = {}) {
       super(options);
       this.camera = prepareCamera(cameraData);
       this.liveFrame = options.liveFrame ?? "";
+      this.liveFrameObjectUrl = isObjectUrl(this.liveFrame) ? this.liveFrame : null;
       this.liveFrameTimer = null;
     }
 
@@ -118,7 +138,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     }
 
     async updateLiveFrame(frame: string) {
-      this.liveFrame = frame;
+      setLiveFrame(this, frame);
       const element = getElement(this);
       const image = element?.querySelector?.("[data-security-camera-live-frame]");
       const waiting = element?.querySelector?.("[data-security-camera-live-waiting]");
@@ -135,6 +155,7 @@ export function createSecurityCameraAppClasses(deps: any) {
 
     async close(options: any) {
       liveFrameController.stopLocalLiveRefresh(this);
+      releaseLiveFrameUrl(this);
       clearActiveFeed(this);
       return super.close(options);
     }
@@ -200,6 +221,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     return class CameraFeedV2 extends HandlebarsApplicationMixin(ApplicationV2) {
       camera: any;
       liveFrame: string;
+      liveFrameObjectUrl: string | null;
       liveFrameTimer: any;
 
       static DEFAULT_OPTIONS = {
@@ -226,6 +248,7 @@ export function createSecurityCameraAppClasses(deps: any) {
         super(options);
         this.camera = prepareCamera(cameraData);
         this.liveFrame = options.liveFrame ?? "";
+        this.liveFrameObjectUrl = isObjectUrl(this.liveFrame) ? this.liveFrame : null;
         this.liveFrameTimer = null;
       }
 
@@ -261,7 +284,7 @@ export function createSecurityCameraAppClasses(deps: any) {
       }
 
       async updateLiveFrame(frame: string) {
-        this.liveFrame = frame;
+        setLiveFrame(this, frame);
         const element = getElement(this);
         const image = element?.querySelector?.("[data-security-camera-live-frame]");
         const waiting = element?.querySelector?.("[data-security-camera-live-waiting]");
@@ -278,6 +301,7 @@ export function createSecurityCameraAppClasses(deps: any) {
 
       async close(options: any) {
         liveFrameController.stopLocalLiveRefresh(this);
+        releaseLiveFrameUrl(this);
         clearActiveFeed(this);
         return super.close(options);
       }

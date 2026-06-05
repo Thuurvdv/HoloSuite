@@ -21,6 +21,8 @@ import {
 
 const LIVE_FRAME_INTERVAL_MS = 1250;
 const LIVE_FRAME_MAX_WIDTH = 960;
+const LIVE_FRAME_WEBP_QUALITY = 0.62;
+const STATIC_FRAME_WEBP_QUALITY = 0.72;
 
 interface LiveFrameDependencies {
   applyLinkedRegionBounds(camera: SecurityCamera): SecurityCamera;
@@ -130,6 +132,45 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     return promise;
   }
 
+  function canvasToDataUrl(canvas: HTMLCanvasElement, type: string, quality?: number) {
+    try {
+      return canvas.toDataURL(type, quality);
+    } catch (error) {
+      if (type !== "image/png") {
+        console.warn(`${dependencies.moduleId} | ${type} canvas encode failed, using PNG fallback.`, error);
+        try {
+          return canvas.toDataURL("image/png");
+        } catch (pngError) {
+          console.warn(`${dependencies.moduleId} | PNG canvas encode failed.`, pngError);
+          return "";
+        }
+      }
+      console.warn(`${dependencies.moduleId} | PNG canvas encode failed.`, error);
+      return "";
+    }
+  }
+
+  function canvasToObjectUrl(canvas: HTMLCanvasElement, type: string, quality: number) {
+    if (!canvas.toBlob || typeof URL === "undefined" || !URL.createObjectURL) {
+      return Promise.resolve(canvasToDataUrl(canvas, type, quality));
+    }
+
+    return new Promise<string>((resolve) => {
+      try {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(URL.createObjectURL(blob));
+            return;
+          }
+          resolve(canvasToDataUrl(canvas, type, quality));
+        }, type, quality);
+      } catch (error) {
+        console.warn(`${dependencies.moduleId} | ${type} canvas blob encode failed, using data URL fallback.`, error);
+        resolve(canvasToDataUrl(canvas, type, quality));
+      }
+    });
+  }
+
   async function captureSceneBackgroundFrame(camera: any = {}) {
     const sceneBackground = dependencies.getSceneBackgroundPath(camera.sceneId);
     const imagePath = sceneBackground || camera.image;
@@ -148,12 +189,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     context?.drawImage(image, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, width, height);
     await drawTokensOnFrame(context, camera, width, height);
 
-    try {
-      return output.toDataURL("image/webp", 0.72);
-    } catch (error) {
-      console.warn(`${dependencies.moduleId} | Scene background crop failed.`, error);
-      return "";
-    }
+    return canvasToObjectUrl(output, "image/webp", STATIC_FRAME_WEBP_QUALITY);
   }
 
   function getSceneGridSize(scene: any) {
@@ -240,7 +276,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     return total / (pixels * 3) < 3;
   }
 
-  function captureCanvasFrame(camera = {}) {
+  async function captureCanvasFrame(camera = {}) {
     const sourceCanvas = getRenderedCanvasSnapshot();
     if (!sourceCanvas?.width || !sourceCanvas?.height) return "";
 
@@ -254,36 +290,51 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
 
     if (isMostlyBlackCanvas(output)) return "";
 
-    try {
-      return output.toDataURL("image/webp", 0.62);
-    } catch (error) {
-      console.warn(`${dependencies.moduleId} | WebP canvas capture failed, using PNG fallback.`, error);
-      return output.toDataURL("image/png");
-    }
+    return canvasToObjectUrl(output, "image/webp", LIVE_FRAME_WEBP_QUALITY);
   }
 
   async function updateLocalLiveFrame(app: any) {
     if (!isCameraLive(app?.camera)) return;
     let frame = "";
     frame = await captureSceneBackgroundFrame(app.camera);
-    if (!frame && canCaptureLiveCamera(app.camera)) frame = captureCanvasFrame(app.camera);
+    if (!frame && canCaptureLiveCamera(app.camera)) frame = await captureCanvasFrame(app.camera);
     if (!frame) return;
+    if (!canRefreshVisibleFrame(app)) return;
     await app.updateLiveFrame?.(frame);
   }
 
+  function canRefreshVisibleFrame(app: any) {
+    if (document.visibilityState === "hidden") return false;
+    if (app?.rendered === false) return false;
+    return true;
+  }
+
+  function queueLocalLiveFrameUpdate(app: any) {
+    if (!canRefreshVisibleFrame(app) || app?.liveFrameRefreshPending) return;
+    app.liveFrameRefreshPending = true;
+    updateLocalLiveFrame(app).finally(() => {
+      app.liveFrameRefreshPending = false;
+    });
+  }
+
   function stopLocalLiveRefresh(app: any) {
-    if (!app?.liveFrameTimer) return;
-    window.clearInterval(app.liveFrameTimer);
+    if (!app) return;
+    if (app.liveFrameTimer) window.clearInterval(app.liveFrameTimer);
+    if (app.liveFrameVisibilityHandler) document.removeEventListener("visibilitychange", app.liveFrameVisibilityHandler);
     app.liveFrameTimer = null;
+    app.liveFrameVisibilityHandler = null;
+    app.liveFrameRefreshPending = false;
   }
 
   function startLocalLiveRefresh(app: any) {
     stopLocalLiveRefresh(app);
     if (!isCameraLive(app?.camera)) return;
 
-    updateLocalLiveFrame(app);
+    app.liveFrameVisibilityHandler = () => queueLocalLiveFrameUpdate(app);
+    document.addEventListener("visibilitychange", app.liveFrameVisibilityHandler);
+    queueLocalLiveFrameUpdate(app);
     app.liveFrameTimer = window.setInterval(() => {
-      updateLocalLiveFrame(app);
+      queueLocalLiveFrameUpdate(app);
     }, LIVE_FRAME_INTERVAL_MS);
   }
 

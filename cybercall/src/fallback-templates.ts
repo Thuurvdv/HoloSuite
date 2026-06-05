@@ -123,6 +123,9 @@ export function renderContactsFallbackTemplate(data: any, escapeHTML: EscapeHTML
     : '<li class="cybercall-contacts-empty">No contacts stored.</li>';
   const personalActive = data.activeTab !== "group";
   const groupActive = data.activeTab === "group";
+  const imageField = data.canEditContactImages
+    ? '<label>Picture <input type="text" name="image" placeholder="icons/..."></label>'
+    : "";
 
   return `
     <section class="cybercall-contacts">
@@ -146,7 +149,7 @@ export function renderContactsFallbackTemplate(data: any, escapeHTML: EscapeHTML
         <input type="hidden" name="scope" value="${escapeHTML(data.activeTab)}">
         <label>Name <input type="text" name="name" required></label>
         <label>Number <input type="text" name="number" required></label>
-        <label>Picture <input type="text" name="image" placeholder="icons/..."></label>
+        ${imageField}
         <button type="submit">Add Contact</button>
       </form>
       <footer class="cybercall-contacts-footer">

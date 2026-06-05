@@ -98,7 +98,11 @@ async function saveGroupContacts(contacts) {
 }
 
 async function addContact(name: any, number: any, scope = "personal", image: any = "") {
-  const contact = normalizeContact({ name, number, image });
+  const contact = normalizeContact({
+    name,
+    number,
+    image: canEditContactImages() ? image : ""
+  });
   if (!contact.name || !contact.number) {
     ui.notifications?.warn?.("Contact name and number are required.");
     return;
@@ -161,6 +165,10 @@ function canUseCyberCall(user = game.user) {
     console.warn(`${MODULE_ID} | Permission setting unavailable, using Player role fallback.`, error);
   }
   return Number(user?.role ?? 0) >= Number(requiredRole);
+}
+
+function canEditContactImages(user = game.user) {
+  return Boolean(user?.isGM);
 }
 
 function getElement(app: any, html: any = null) {
@@ -378,6 +386,7 @@ const { CyberCallApplication, CyberCallComposer, CyberCallContacts } = createCyb
   getRingtoneChoices,
   getSoundPath,
   getActiveContactsTab: () => activeContactsTab,
+  canEditContactImages,
   bindCallControls,
   bindComposerControls,
   bindContactsControls,
@@ -603,7 +612,10 @@ async function handleSocketMessage(message) {
 
   if (message.action === "groupContactAdd") {
     if (!game.user.isGM) return;
-    const contact = normalizeContact(message.contact);
+    const contact = normalizeContact({
+      ...message.contact,
+      image: ""
+    });
     if (!contact.name || !contact.number) return;
     const contacts = getGroupContacts();
     contacts.push(contact);

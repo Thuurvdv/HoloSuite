@@ -84,10 +84,12 @@
       <input type="text" name="number" autocomplete="off" required>
     </label>
 
-    <label>
-      <span>Picture</span>
-      <input type="text" name="image" autocomplete="off" placeholder="icons/...">
-    </label>
+    {{#if canEditContactImages}}
+      <label>
+        <span>Picture</span>
+        <input type="text" name="image" autocomplete="off" placeholder="icons/...">
+      </label>
+    {{/if}}
 
     <button type="submit">Add Contact</button>
   </form>

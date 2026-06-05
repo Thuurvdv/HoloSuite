@@ -23,6 +23,7 @@ export function createCyberCallAppClasses(deps: any) {
     getRingtoneChoices,
     getSoundPath,
     getActiveContactsTab,
+    canEditContactImages,
     bindCallControls,
     bindComposerControls,
     bindContactsControls,
@@ -151,6 +152,7 @@ export function createCyberCallAppClasses(deps: any) {
         activeTab: activeContactsTab,
         isPersonalTab: activeContactsTab !== "group",
         isGroupTab: activeContactsTab === "group",
+        canEditContactImages: canEditContactImages(),
         ringtoneChoices: getRingtoneChoices(),
         currentRingtone: getSoundPath()
       };
@@ -331,6 +333,7 @@ export function createCyberCallAppClasses(deps: any) {
           activeTab: activeContactsTab,
           isPersonalTab: activeContactsTab !== "group",
           isGroupTab: activeContactsTab === "group",
+          canEditContactImages: canEditContactImages(),
           ringtoneChoices: getRingtoneChoices(),
           currentRingtone: getSoundPath()
         };
