@@ -23,11 +23,9 @@ export function createGalaxyMapManagerClass(deps: any) {
     duplicateMap,
     deleteMap,
     createMap,
-    importMapData,
     deleteSystem,
     deleteRoute,
     deleteFaction,
-    notifyError,
     openMap,
     showMapToPlayers,
     closePlayerMap,
@@ -115,10 +113,6 @@ export function createGalaxyMapManagerClass(deps: any) {
       html.querySelector("[data-action='export-map']")?.addEventListener("click", () => {
         if (this.selectedMapId) exportMap(this.selectedMapId);
       });
-      html.querySelector("[data-action='import-map']")?.addEventListener("click", () => {
-        html.querySelector("[name='map-import']")?.click();
-      });
-      html.querySelector("[name='map-import']")?.addEventListener("change", (event: any) => this._onImportFile(event));
       html.querySelectorAll("[data-select-map]").forEach((button: any) => {
         button.addEventListener("click", () => {
           this.selectedMapId = button.dataset.selectMap;
@@ -180,27 +174,6 @@ export function createGalaxyMapManagerClass(deps: any) {
       });
       if (map) {
         this.selectedMapId = map.id;
-        this.jsonDraft = "";
-        this.render({ force: true });
-      }
-    }
-
-    async _onImportFile(event: any) {
-      const file = event.currentTarget.files?.[0];
-      event.currentTarget.value = "";
-      if (!file) return;
-
-      let parsed;
-      try {
-        parsed = JSON.parse(await file.text());
-      } catch (error: any) {
-        notifyError(`Import failed: ${error.message}`);
-        return;
-      }
-
-      const imported = await importMapData(parsed);
-      if (imported) {
-        this.selectedMapId = imported.id;
         this.jsonDraft = "";
         this.render({ force: true });
       }
