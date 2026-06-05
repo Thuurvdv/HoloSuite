@@ -1,0 +1,65 @@
+@keyframes gmf-route-pulse {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+@keyframes gmf-system-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.82;
+  }
+  50% {
+    transform: scale(1.55);
+    opacity: 0.28;
+  }
+}
+
+@keyframes gmf-glitch {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+  45% {
+    opacity: 0.65;
+    transform: translate(1px, -50%);
+  }
+  55% {
+    opacity: 0.95;
+    transform: translate(-1px, -50%);
+  }
+}
+
+@keyframes gmf-current-ping {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@media (max-width: 900px) {
+  .gmf-manager__body,
+  .gmf-galaxy__content {
+    grid-template-columns: 1fr;
+  }
+
+  .gmf-map-list,
+  .gmf-map-stage {
+    border-right: 0;
+    border-bottom: 1px solid var(--gmf-line);
+  }
+
+  .gmf-galaxy__content {
+    height: auto;
+  }
+}
