@@ -57,8 +57,19 @@ function getActorChoices() {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function getContacts() {
+function getWorldContactsKey() {
+  return String(game.world?.id ?? game.world?.title ?? "default");
+}
+
+function getContactsStore() {
   const contacts = game.settings.get(MODULE_ID, "contacts");
+  if (Array.isArray(contacts)) return { [getWorldContactsKey()]: contacts };
+  if (!contacts || typeof contacts !== "object") return {};
+  return contacts;
+}
+
+function getContacts() {
+  const contacts = getContactsStore()[getWorldContactsKey()];
   if (!Array.isArray(contacts)) return [];
 
   return contacts
@@ -85,7 +96,10 @@ function getGroupContacts() {
 }
 
 async function saveContacts(contacts) {
-  await game.settings.set(MODULE_ID, "contacts", contacts.map(normalizeContact));
+  await game.settings.set(MODULE_ID, "contacts", {
+    ...getContactsStore(),
+    [getWorldContactsKey()]: contacts.map(normalizeContact)
+  });
 }
 
 async function saveGroupContacts(contacts) {
@@ -786,11 +800,11 @@ function registerSettings() {
 
   game.settings.register(MODULE_ID, "contacts", {
     name: "CyberCall Contacts",
-    hint: "Player contact directory stored locally for this client.",
+    hint: "Player contact directory stored locally for this client and isolated per world.",
     scope: "client",
     config: false,
     type: Object,
-    default: []
+    default: {}
   });
 
   game.settings.register(MODULE_ID, "groupContacts", {
@@ -800,6 +814,14 @@ function registerSettings() {
     config: false,
     type: Object,
     default: []
+  });
+}
+
+async function migrateLegacyContactsSetting() {
+  const contacts = game.settings.get(MODULE_ID, "contacts");
+  if (!Array.isArray(contacts)) return;
+  await game.settings.set(MODULE_ID, "contacts", {
+    [getWorldContactsKey()]: contacts.map(normalizeContact)
   });
 }
 
@@ -838,7 +860,8 @@ Hooks.once("init", () => {
 
 // HoloSuite Core is the suite launcher; keep this module out of the scene-control toolbar.
 
-Hooks.once("ready", () => {
+Hooks.once("ready", async () => {
+  await migrateLegacyContactsSetting();
   registerApi();
   registerWithHoloSuite();
   game.socket.on(SOCKET_NAME, handleSocketMessage);
