@@ -19,6 +19,7 @@ const allowedTsNocheckDebt = new Set();
 
 const failures = [];
 const warnings = [];
+const VERIFIED_FOUNDRY_GENERATION = 14;
 
 for (const moduleId of modules) {
   const moduleRoot = join(root, moduleId);
@@ -35,9 +36,13 @@ for (const moduleId of modules) {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const esmodules = manifest.esmodules ?? [];
   const styles = manifest.styles ?? [];
+  const verifiedGeneration = Number.parseInt(String(manifest.compatibility?.verified ?? ""), 10);
 
   if (!esmodules.includes("dist/main.js")) failures.push(`${moduleId}: manifest must load dist/main.js`);
   if (styles[0] !== "styles/holosuite-tokens.css") failures.push(`${moduleId}: shared tokens must be the first stylesheet`);
+  if (verifiedGeneration < VERIFIED_FOUNDRY_GENERATION) {
+    failures.push(`${moduleId}: manifest compatibility.verified must target Foundry VTT v${VERIFIED_FOUNDRY_GENERATION}`);
+  }
   if (!existsSync(tokenPath)) failures.push(`${moduleId}: missing synced holosuite-tokens.css`);
   if (!existsSync(packagePath)) failures.push(`${moduleId}: missing package.json`);
 
