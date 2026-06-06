@@ -95,34 +95,6 @@ function openLauncher() {
   return launcherApp;
 }
 
-function renderLaunchControl(controls) {
-  if (!game.user?.isGM) return;
-
-  const onClick = () => openLauncher();
-  const tool = {
-    name: "holosuite-hacking-launch",
-    title: "HoloSuite Hacking",
-    icon: "fa-solid fa-terminal",
-    button: true,
-    visible: true,
-    onClick,
-    onChange: onClick
-  };
-
-  if (Array.isArray(controls)) {
-    const tokenControls = controls.find((control) => control.name === "token") ?? controls[0];
-    if (tokenControls?.tools && !tokenControls.tools.some?.((candidate) => candidate.name === tool.name)) {
-      tokenControls.tools.push(tool);
-    }
-    return;
-  }
-
-  const record = controls ?? {};
-  const tokenControls = record.tokens ?? record.token ?? Object.values(record)[0];
-  if (!tokenControls?.tools || tokenControls.tools[tool.name]) return;
-  tokenControls.tools[tool.name] = { ...tool, order: Object.keys(tokenControls.tools).length };
-}
-
 function exposeApi() {
   api = api ?? createHackingApi({ moduleId: MODULE_ID, openLauncher });
   api.sendHackToPlayer = sendHackToPlayer;
@@ -356,8 +328,6 @@ Hooks.once("init", () => {
   registerMinigames();
   exposeApi();
 });
-
-Hooks.on("getSceneControlButtons", renderLaunchControl);
 
 Hooks.once("ready", () => {
   exposeApi();

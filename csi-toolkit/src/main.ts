@@ -72,29 +72,6 @@ declare const ui: any;
     console.log(`${MODULE_TITLE} | API available at game.csiToolkit`);
   });
 
-  /*
-  HoloSuite Core is the suite launcher; keep this module out of the scene-control toolbar.
-  Hooks.on("getSceneControlButtons", controls => {
-    const tool = {
-      name: "csi-toolkit-manager",
-      title: "CSI Toolkit",
-      icon: "fas fa-fingerprint",
-      button: true,
-      visible: true,
-      onClick: () => game.user?.isGM ? openCaseManager() : openCaseBrowser()
-    };
-
-    if (Array.isArray(controls)) {
-      const tokenControls = controls.find(control => control.name === "token") ?? controls[0];
-      if (tokenControls?.tools) tokenControls.tools.push(tool);
-      return;
-    }
-
-    const tokenControls = controls?.tokens ?? controls?.token ?? Object.values(controls ?? {})[0];
-    if (tokenControls?.tools) tokenControls.tools["csi-toolkit-manager"] = tool;
-  });
-  */
-
   function registerSettings() {
     game.settings.register(MODULE_ID, "cases", {
       name: "CSI Toolkit Cases",

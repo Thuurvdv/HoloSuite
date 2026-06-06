@@ -123,12 +123,12 @@ function k(e) {
     allowMainPathFirewalls: e.nodeIntrusion.allowFirewallOnMainPath
   };
 }
-function _(e = 0, t = 10) {
+function G(e = 0, t = 10) {
   const n = Number(e) || 0, i = Number(t) || 10;
   return n <= i - 10 ? k(A.critical_failure) : n >= i + 10 ? k(A.critical_success) : n >= i + 5 ? k(A.strong_success) : n >= i ? k(A.success) : k(A.failure_but_playable);
 }
 const X = /* @__PURE__ */ new Map(), D = /* @__PURE__ */ new Map();
-function rt(e) {
+function st(e) {
   const t = String((e == null ? void 0 : e.id) ?? "").trim();
   if (!t || typeof (e == null ? void 0 : e.create) != "function")
     throw new Error("HoloSuite Hacking minigames require an id and create(options) function.");
@@ -163,7 +163,7 @@ function Lt({ moduleId: e, openLauncher: t }) {
     return { ...a, visualGlitchIntensity: l };
   }
   function i(a = {}) {
-    const o = Number(game.settings.get(e, "defaultDc") ?? 15), c = Number(a.dc ?? o), l = Number(a.rollTotal ?? c), h = n(a.profile ?? _(l, c));
+    const o = Number(game.settings.get(e, "defaultDc") ?? 15), c = Number(a.dc ?? o), l = Number(a.rollTotal ?? c), h = n(a.profile ?? G(l, c));
     return { ...a, dc: c, rollTotal: l, profile: h };
   }
   function s(a = {}) {
@@ -175,7 +175,7 @@ function Lt({ moduleId: e, openLauncher: t }) {
     startNodeIntrusion: (a = {}) => s({ ...a, type: "node-intrusion" }),
     startSignalAlignment: (a = {}) => s({ ...a, type: "signal-alignment" }),
     openLauncher: t,
-    getDifficultyProfile: _,
+    getDifficultyProfile: G,
     difficultyProfiles: A,
     getMinigames: Pt,
     getActiveApp: Ft,
@@ -242,7 +242,7 @@ function Z(e) {
   const t = P(e) ? [P(e)] : [], n = Q().filter((s) => H(s, e));
   return [...new Map([...t, ...n].filter(Boolean).map((s) => [s.id, s])).values()].sort((s, r) => s.name.localeCompare(r.name));
 }
-function at(e = "") {
+function rt(e = "") {
   const t = V(), n = t.find((s) => s.id === e);
   return (n ? Z(n) : Q()).filter((s) => !n || H(s, n)).map((s) => ({
     id: s.id,
@@ -282,13 +282,13 @@ const qt = {
   tech: "Technology",
   technology: "Technology"
 };
-function ot(e) {
+function at(e) {
   var n;
   const t = (n = e == null ? void 0 : e.system) == null ? void 0 : n.skills;
   if (t && typeof t == "object") {
     const i = Object.entries(t).map(([s, r]) => ({
       id: s,
-      name: z(s, r),
+      name: j(s, r),
       label: Et(s, r),
       modifier: tt(r)
     }));
@@ -301,11 +301,11 @@ function ot(e) {
     { id: "intelligence", name: "Intelligence", label: "Intelligence (+0)", modifier: 0 }
   ];
 }
-function wt(e, t) {
+function It(e, t) {
   var n, i;
   return ((i = (n = e == null ? void 0 : e.system) == null ? void 0 : n.skills) == null ? void 0 : i[t]) ?? null;
 }
-function z(e, t) {
+function j(e, t) {
   const n = String((t == null ? void 0 : t.label) ?? (t == null ? void 0 : t.name) ?? (t == null ? void 0 : t.localizedName) ?? e ?? "Skill").trim(), i = n.toLowerCase().replace(/[^a-z0-9]/g, "");
   return String(qt[i] ?? n).replace(/[_-]/g, " ").replace(/\b\w/g, (s) => s.toUpperCase());
 }
@@ -335,13 +335,13 @@ function tt(e) {
   ].find((f) => Number.isFinite(Number(f)));
   if (n !== void 0) return Number(n);
   const i = [];
-  return Mt(e, i, 0), i.sort((f, w) => w.score - f.score), Number(((b = i[0]) == null ? void 0 : b.value) ?? 0);
+  return wt(e, i, 0), i.sort((f, w) => w.score - f.score), Number(((b = i[0]) == null ? void 0 : b.value) ?? 0);
 }
 function Et(e, t) {
-  const n = z(e, t), i = tt(t), s = i >= 0 ? "+" : "-";
+  const n = j(e, t), i = tt(t), s = i >= 0 ? "+" : "-";
   return `${n} (${s}${Math.abs(i)})`;
 }
-function Mt(e, t, n, i = "") {
+function wt(e, t, n, i = "") {
   if (!(!e || typeof e != "object" || n > 4))
     for (const [s, r] of Object.entries(e)) {
       const a = i ? `${i}.${s}` : s, o = Number(r);
@@ -349,13 +349,13 @@ function Mt(e, t, n, i = "") {
         const c = a.toLowerCase();
         let l = 1;
         /(total|mod|modifier|bonus|check|roll|value)$/.test(c) && (l += 6), /(dc|rank|ranks|proficient|prof|trained|ability|base|label|name)/.test(c) && (l -= 4), Math.abs(o) > 30 && (l -= 5), t.push({ value: o, score: l, path: a });
-      } else r && typeof r == "object" && Mt(r, t, n + 1, a);
+      } else r && typeof r == "object" && wt(r, t, n + 1, a);
     }
 }
-const G = "holosuite-hacking", Rt = `modules/${G}/templates/hacking-launcher.html`;
-var ht, ft, mt;
-const Gt = globalThis.Application ?? ((mt = (ft = (ht = globalThis.foundry) == null ? void 0 : ht.appv1) == null ? void 0 : ft.api) == null ? void 0 : mt.Application);
-class _t extends Gt {
+const _ = "holosuite-hacking", Rt = `modules/${_}/templates/hacking-launcher.html`;
+var dt, ht, ft;
+const _t = globalThis.Application ?? ((ft = (ht = (dt = globalThis.foundry) == null ? void 0 : dt.appv1) == null ? void 0 : ht.api) == null ? void 0 : ft.Application);
+class Gt extends _t {
   constructor(t = {}) {
     super(t), this.api = t.api;
   }
@@ -372,7 +372,7 @@ class _t extends Gt {
     });
   }
   getData() {
-    const t = Number(game.settings.get(G, "defaultDc") ?? 15), n = V(), i = n[0] ?? null, s = at(i == null ? void 0 : i.id), r = s.length ? x(s[0].id) : null;
+    const t = Number(game.settings.get(_, "defaultDc") ?? 15), n = V(), i = n[0] ?? null, s = rt(i == null ? void 0 : i.id), r = s.length ? x(s[0].id) : null;
     return {
       defaultDc: t,
       defaultTestRoll: t,
@@ -386,7 +386,7 @@ class _t extends Gt {
         id: a.id,
         name: a.name
       })),
-      skills: ot(r)
+      skills: at(r)
     };
   }
   activateListeners(t) {
@@ -411,7 +411,7 @@ class _t extends Gt {
       return;
     }
     if (!t) {
-      (N = (y = ui.notifications) == null ? void 0 : y.error) == null || N.call(y, "HoloSuite Hacking launcher form was not found."), console.error(`${G} | Launcher form was not found.`);
+      (N = (y = ui.notifications) == null ? void 0 : y.error) == null || N.call(y, "HoloSuite Hacking launcher form was not found."), console.error(`${_} | Launcher form was not found.`);
       return;
     }
     const n = t.querySelector("[name='minigameType']"), i = t.querySelector("[name='actorId']"), s = t.querySelector("[name='userId']"), r = t.querySelector("[name='skillId']"), a = t.querySelector("[name='dc']"), o = ((T = r == null ? void 0 : r.selectedOptions) == null ? void 0 : T[0]) ?? null, c = String((n == null ? void 0 : n.value) || "node-intrusion"), l = String((i == null ? void 0 : i.value) || ""), h = String((s == null ? void 0 : s.value) || ""), d = String((r == null ? void 0 : r.value) || ""), g = String((o == null ? void 0 : o.dataset.skillLabel) || (o == null ? void 0 : o.textContent) || d || "Skill"), b = Number((o == null ? void 0 : o.dataset.skillModifier) ?? 0), f = Number((a == null ? void 0 : a.value) ?? 15);
@@ -439,7 +439,7 @@ class _t extends Gt {
       (d = (h = ui.notifications) == null ? void 0 : h.error) == null || d.call(h, "HoloSuite Hacking launcher form was not found.");
       return;
     }
-    const n = String(((g = t.querySelector("[name='minigameType']")) == null ? void 0 : g.value) || "node-intrusion"), i = String(((b = t.querySelector("[name='actorId']")) == null ? void 0 : b.value) || ""), s = Number(((f = t.querySelector("[name='dc']")) == null ? void 0 : f.value) ?? game.settings.get(G, "defaultDc") ?? 15), r = Number(((w = t.querySelector("[name='testRollTotal']")) == null ? void 0 : w.value) ?? s);
+    const n = String(((g = t.querySelector("[name='minigameType']")) == null ? void 0 : g.value) || "node-intrusion"), i = String(((b = t.querySelector("[name='actorId']")) == null ? void 0 : b.value) || ""), s = Number(((f = t.querySelector("[name='dc']")) == null ? void 0 : f.value) ?? game.settings.get(_, "defaultDc") ?? 15), r = Number(((w = t.querySelector("[name='testRollTotal']")) == null ? void 0 : w.value) ?? s);
     if (!Number.isFinite(r)) {
       (m = (u = ui.notifications) == null ? void 0 : u.warn) == null || m.call(u, "Enter a fake roll result before testing the minigame.");
       return;
@@ -462,15 +462,15 @@ class _t extends Gt {
     s && t.find("[name='userId']").val(s.id);
   }
   syncSkillOptions(t, n) {
-    const i = x(n), s = ot(i);
+    const i = x(n), s = at(i);
     t.find("[name='skillId']").html(s.map((r) => `<option value="${M(r.id)}" data-skill-label="${M(r.name ?? r.label)}" data-skill-modifier="${Number(r.modifier ?? 0)}">${M(r.label)}</option>`).join(""));
   }
   syncActorsForUser(t, n) {
-    const i = at(n), s = i.length ? i.map((r) => `<option value="${M(r.id)}">${M(r.name)} (${M(r.owners.map((a) => a.name).join(", ") || "No owner")})</option>`).join("") : '<option value="">Use assigned character</option>';
+    const i = rt(n), s = i.length ? i.map((r) => `<option value="${M(r.id)}">${M(r.name)} (${M(r.owners.map((a) => a.name).join(", ") || "No owner")})</option>`).join("") : '<option value="">Use assigned character</option>';
     t.find("[name='actorId']").html(s), this.syncSkillOptions(t, t.find("[name='actorId']").val());
   }
 }
-async function vt({ title: e, result: t, actorName: n, message: i, rollTotal: s, dc: r }) {
+async function Mt({ title: e, result: t, actorName: n, message: i, rollTotal: s, dc: r }) {
   const a = t === "success", o = a ? "#38f28f" : "#ff477e", c = a ? "HACK SUCCESS" : "HACK FAILED", l = i || (a ? "Objective completed." : "Trace or countermeasure completed."), h = Number.isFinite(Number(s)) && Number.isFinite(Number(r)) ? `<p style="margin: 4px 0 0; color: #bdeff6;">Roll ${Number(s)} vs DC ${Number(r)}</p>` : "", d = `
     <div class="holosuite-hacking-chat-result" style="border-left: 4px solid ${o}; padding: 8px 10px; background: rgba(5, 8, 14, 0.88); color: ${o};">
       <strong>${F(c)} // ${F(e)} // ${F(n || "Hacker")}</strong>
@@ -497,7 +497,7 @@ function Ut(e) {
     n ^= t.charCodeAt(i), n = Math.imul(n, 16777619);
   return n >>> 0;
 }
-function jt(e) {
+function zt(e) {
   let t = Ut(e);
   return () => {
     t += 1831565813;
@@ -535,14 +535,14 @@ function C(e, t) {
 function q(e, t, n) {
   return Math.sign((t.y - e.y) * (n.x - t.x) - (t.x - e.x) * (n.y - t.y));
 }
-function zt(e, t, n, i) {
+function jt(e, t, n, i) {
   const s = q(e, t, n), r = q(e, t, i), a = q(n, i, e), o = q(n, i, t);
   return s !== r && a !== o;
 }
 function Bt(e, t, n) {
   if (t.from === n.from || t.from === n.to || t.to === n.from || t.to === n.to) return !1;
   const i = C(e, t.from), s = C(e, t.to), r = C(e, n.from), a = C(e, n.to);
-  return !i || !s || !r || !a ? !1 : zt(i, s, r, a);
+  return !i || !s || !r || !a ? !1 : jt(i, s, r, a);
 }
 function Vt(e, t, n) {
   const i = n.x - t.x, s = n.y - t.y, r = i * i + s * s;
@@ -563,7 +563,7 @@ function Wt(e, t = et(e)) {
       Bt(e, t[i], t[s]) && (n += 1);
   return n;
 }
-function Nt(e) {
+function vt(e) {
   const t = et(e);
   let n = Wt(e, t) * 900;
   for (let i = 0; i < e.length; i += 1)
@@ -585,9 +585,9 @@ function Kt(e, t, n) {
   const i = e.map((s) => ({ ...s, connected: [...s.connected] }));
   i.push({ ...t, connected: [] });
   for (const s of n) $(i, t.id, s);
-  return Nt(i);
+  return vt(i);
 }
-function ct(e, t, n, i, s, r, a = {}) {
+function ot(e, t, n, i, s, r, a = {}) {
   const {
     radiusMin: o = 17,
     radiusMax: c = 34,
@@ -611,9 +611,9 @@ function Xt(e) {
         s.type !== "start" && s.type !== "target" && (s.x = v(s.x - h, 6, 94), s.y = v(s.y - d, 10, 90)), r.type !== "start" && r.type !== "target" && (r.x = v(r.x + h, 6, 94), r.y = v(r.y + d, 10, 90));
       }
 }
-function lt(e, t = Date.now()) {
+function ct(e, t = Date.now()) {
   var b, f, w;
-  const n = jt(t), i = Math.max(6, Number(e.nodeCount ?? ((b = e.nodeIntrusion) == null ? void 0 : b.nodeCount)) || 10), s = v(Number(e.decoyCount ?? ((f = e.nodeIntrusion) == null ? void 0 : f.decoyCount)) || 0, 0, i - 4), r = Math.max(0, i - s), a = v(Math.round(r * 0.55), 5, r), o = [], c = [];
+  const n = zt(t), i = Math.max(6, Number(e.nodeCount ?? ((b = e.nodeIntrusion) == null ? void 0 : b.nodeCount)) || 10), s = v(Number(e.decoyCount ?? ((f = e.nodeIntrusion) == null ? void 0 : f.decoyCount)) || 0, 0, i - 4), r = Math.max(0, i - s), a = v(Math.round(r * 0.55), 5, r), o = [], c = [];
   for (let u = 0; u < a; u += 1) {
     const m = u === 0 ? "start" : u === a - 1 ? "target" : `node-${u}`, p = u === 0 ? "start" : u === a - 1 ? "target" : "normal", y = u / Math.max(1, a - 1), N = Math.sin(y * Math.PI * 1.35) * 10, T = u === 0 || u === a - 1 ? 0 : (n() - 0.5) * 5, $t = u === 0 || u === a - 1 ? 0 : (n() - 0.5) * 12;
     o.push(W(m, p, 9 + y * 82 + T, 52 + N + $t)), c.push(m), u > 0 && $(o, c[u - 1], m);
@@ -622,7 +622,7 @@ function lt(e, t = Date.now()) {
   for (; o.length < i - s; ) {
     const u = L(o.filter((T) => T.type !== "target"), n) ?? o[0], m = `node-${l}`;
     l += 1;
-    const p = n() > 0.45 ? L(o.filter((T) => T.id !== u.id && T.type !== "start"), n) : null, y = p ? [u.id, p.id] : [u.id], N = ct(o, m, "normal", u, n, y, {
+    const p = n() > 0.45 ? L(o.filter((T) => T.id !== u.id && T.type !== "start"), n) : null, y = p ? [u.id, p.id] : [u.id], N = ot(o, m, "normal", u, n, y, {
       radiusMin: 16,
       radiusMax: 31,
       biasX: n() > 0.35 ? 5 : -4,
@@ -631,7 +631,7 @@ function lt(e, t = Date.now()) {
     o.push(N), $(o, u.id, m), p && $(o, m, p.id);
   }
   for (let u = 0; u < s; u += 1) {
-    const m = L(o.filter((N) => N.type !== "target" && N.type !== "decoy"), n) ?? o[0], p = `decoy-${u + 1}`, y = ct(o, p, "decoy", m, n, [m.id], {
+    const m = L(o.filter((N) => N.type !== "target" && N.type !== "decoy"), n) ?? o[0], p = `decoy-${u + 1}`, y = ot(o, p, "decoy", m, n, [m.id], {
       radiusMin: 18,
       radiusMax: 34,
       biasX: n() > 0.5 ? -6 : 6,
@@ -651,7 +651,7 @@ function lt(e, t = Date.now()) {
     startNodeId: "start",
     targetNodeId: "target",
     mainPathIds: c,
-    layoutScore: Nt(o)
+    layoutScore: vt(o)
   };
 }
 function Yt(e, t = Date.now()) {
@@ -659,23 +659,23 @@ function Yt(e, t = Date.now()) {
   const n = v(Math.ceil(Number(e.nodeCount ?? ((s = e.nodeIntrusion) == null ? void 0 : s.nodeCount)) || 10), 7, 14);
   let i = null;
   for (let r = 0; r < n; r += 1) {
-    const a = lt(e, `${t}:${r}`);
+    const a = ct(e, `${t}:${r}`);
     if ((!i || a.layoutScore < i.layoutScore) && (i = a), a.layoutScore < 1) break;
   }
-  return i ?? lt(e, t);
+  return i ?? ct(e, t);
 }
-const Tt = "holosuite-hacking", Jt = `modules/${Tt}/templates/node-intrusion.html`;
-var gt, pt, yt;
-const Qt = globalThis.Application ?? ((yt = (pt = (gt = globalThis.foundry) == null ? void 0 : gt.appv1) == null ? void 0 : pt.api) == null ? void 0 : yt.Application);
+const Nt = "holosuite-hacking", Jt = `modules/${Nt}/templates/node-intrusion.html`;
+var mt, gt, pt;
+const Qt = globalThis.Application ?? ((pt = (gt = (mt = globalThis.foundry) == null ? void 0 : mt.appv1) == null ? void 0 : gt.api) == null ? void 0 : pt.Application);
 function Zt(e, t, n) {
   return Math.min(n, Math.max(t, e));
 }
-function ut(e) {
+function lt(e) {
   return e === "start" ? "entry" : e === "target" ? "target" : e === "firewall" ? "firewall" : e === "decoy" ? "decoy" : "relay";
 }
 class te extends Qt {
   constructor(t = {}) {
-    super(t), this.rollTotal = Number(t.rollTotal ?? 15), this.dc = Number(t.dc ?? 15), this.profile = t.profile ? { ...t.profile } : _(this.rollTotal, this.dc), this.seed = t.seed ?? `${this.rollTotal}:${this.dc}:${this.profile.profileId ?? this.profile.id}`, this.onSuccess = typeof t.onSuccess == "function" ? t.onSuccess : null, this.onFailure = typeof t.onFailure == "function" ? t.onFailure : null, this.actorName = String(t.actorName ?? "Hacker"), this.chatOnResult = t.chatOnResult !== !1, this.graph = Yt(this.profile, this.seed), this.state = {
+    super(t), this.rollTotal = Number(t.rollTotal ?? 15), this.dc = Number(t.dc ?? 15), this.profile = t.profile ? { ...t.profile } : G(this.rollTotal, this.dc), this.seed = t.seed ?? `${this.rollTotal}:${this.dc}:${this.profile.profileId ?? this.profile.id}`, this.onSuccess = typeof t.onSuccess == "function" ? t.onSuccess : null, this.onFailure = typeof t.onFailure == "function" ? t.onFailure : null, this.actorName = String(t.actorName ?? "Hacker"), this.chatOnResult = t.chatOnResult !== !1, this.graph = Yt(this.profile, this.seed), this.state = {
       currentNodeId: this.graph.startNodeId,
       visitedNodeIds: /* @__PURE__ */ new Set([this.graph.startNodeId]),
       traversedEdgeIds: /* @__PURE__ */ new Set(),
@@ -703,7 +703,7 @@ class te extends Qt {
   }
   getData() {
     const t = this.getCurrentNode(), n = t.connected, i = this.graph.nodes.map((s) => {
-      const r = s.id === this.state.currentNodeId, a = this.state.visitedNodeIds.has(s.id), o = s.type === "target" && a, c = s.type !== "target" && (this.profile.hintsEnabled || s.revealed || a || s.type === "start"), l = o || c ? ut(s.type) : "unknown";
+      const r = s.id === this.state.currentNodeId, a = this.state.visitedNodeIds.has(s.id), o = s.type === "target" && a, c = s.type !== "target" && (this.profile.hintsEnabled || s.revealed || a || s.type === "start"), l = o || c ? lt(s.type) : "unknown";
       return {
         ...s,
         visualType: o ? "target" : s.type === "target" ? "normal" : s.type,
@@ -737,7 +737,7 @@ class te extends Qt {
       movement: this.state.movement,
       currentNode: {
         id: t.id,
-        label: ut(t.type),
+        label: lt(t.type),
         availableRoutes: i.filter((s) => s.canMove).length
       },
       state: {
@@ -822,7 +822,7 @@ class te extends Qt {
   }
   startTimer() {
     if (this.timer || !this.state.hasStarted || !this.startedAt) return;
-    const t = Number(game.settings.get(Tt, "traceDurationMultiplier") ?? 1) || 1, n = Math.max(5, this.profile.traceDurationSeconds * t);
+    const t = Number(game.settings.get(Nt, "traceDurationMultiplier") ?? 1) || 1, n = Math.max(5, this.profile.traceDurationSeconds * t);
     this.timer = window.setInterval(() => {
       if (!this.state.hasStarted || !this.state.isRunning) return;
       const i = (performance.now() - this.startedAt) / 1e3;
@@ -850,7 +850,7 @@ class te extends Qt {
       traceProgress: this.state.traceProgress,
       visitedNodeIds: [...this.state.visitedNodeIds]
     };
-    this.chatOnResult && await vt({
+    this.chatOnResult && await Mt({
       title: "Node Intrusion",
       result: t,
       actorName: this.actorName,
@@ -867,7 +867,7 @@ class te extends Qt {
     n && (n.style.width = `${this.state.traceProgress}%`), i && (i.textContent = `${Math.round(this.state.traceProgress)}%`), s && (s.textContent = `${this.state.mistakes}/${this.profile.maxMistakes}`);
   }
 }
-function At(e, t, n) {
+function Tt(e, t, n) {
   return Math.min(n, Math.max(t, e));
 }
 function ee(e) {
@@ -886,11 +886,11 @@ function ne(e) {
   };
 }
 function U(e) {
-  return At(Number(e) || 0, 0, 100);
+  return Tt(Number(e) || 0, 0, 100);
 }
 function ie(e, t = Date.now()) {
   var a, o, c;
-  const n = ne(t), i = At(Number(e.channelCount ?? ((a = e.signalAlignment) == null ? void 0 : a.channelCount)) || 3, 2, 5), s = Number(e.tolerance ?? ((o = e.signalAlignment) == null ? void 0 : o.tolerance) ?? 5), r = Number(e.decoyFrequencies ?? ((c = e.signalAlignment) == null ? void 0 : c.decoyFrequencies) ?? 0);
+  const n = ne(t), i = Tt(Number(e.channelCount ?? ((a = e.signalAlignment) == null ? void 0 : a.channelCount)) || 3, 2, 5), s = Number(e.tolerance ?? ((o = e.signalAlignment) == null ? void 0 : o.tolerance) ?? 5), r = Number(e.decoyFrequencies ?? ((c = e.signalAlignment) == null ? void 0 : c.decoyFrequencies) ?? 0);
   return Array.from({ length: i }, (l, h) => {
     const d = Math.round(18 + n() * 64), g = n() > 0.5 ? 1 : -1, b = s + 8 + Math.round(n() * 18), f = n() > 0.5 ? 1 : -1, w = Array.from({ length: r }, () => U(d + (n() > 0.5 ? 1 : -1) * (s + 9 + n() * 18)));
     return {
@@ -904,15 +904,15 @@ function ie(e, t = Date.now()) {
     };
   });
 }
-const xt = "holosuite-hacking", se = `modules/${xt}/templates/signal-alignment.html`;
-var bt, St, It;
-const re = globalThis.Application ?? ((It = (St = (bt = globalThis.foundry) == null ? void 0 : bt.appv1) == null ? void 0 : St.api) == null ? void 0 : It.Application);
+const At = "holosuite-hacking", se = `modules/${At}/templates/signal-alignment.html`;
+var yt, bt, St;
+const re = globalThis.Application ?? ((St = (bt = (yt = globalThis.foundry) == null ? void 0 : yt.appv1) == null ? void 0 : bt.api) == null ? void 0 : St.Application);
 function E(e, t, n) {
   return Math.min(n, Math.max(t, e));
 }
 class ae extends re {
   constructor(t = {}) {
-    super(t), this.rollTotal = Number(t.rollTotal ?? 15), this.dc = Number(t.dc ?? 15), this.profile = t.profile ? { ...t.profile } : _(this.rollTotal, this.dc), this.seed = t.seed ?? `${this.rollTotal}:${this.dc}:${this.profile.profileId ?? this.profile.id}:signal`, this.onSuccess = typeof t.onSuccess == "function" ? t.onSuccess : null, this.onFailure = typeof t.onFailure == "function" ? t.onFailure : null, this.actorName = String(t.actorName ?? "Hacker"), this.chatOnResult = t.chatOnResult !== !1, this.channels = ie(this.profile, this.seed), this.state = {
+    super(t), this.rollTotal = Number(t.rollTotal ?? 15), this.dc = Number(t.dc ?? 15), this.profile = t.profile ? { ...t.profile } : G(this.rollTotal, this.dc), this.seed = t.seed ?? `${this.rollTotal}:${this.dc}:${this.profile.profileId ?? this.profile.id}:signal`, this.onSuccess = typeof t.onSuccess == "function" ? t.onSuccess : null, this.onFailure = typeof t.onFailure == "function" ? t.onFailure : null, this.actorName = String(t.actorName ?? "Hacker"), this.chatOnResult = t.chatOnResult !== !1, this.channels = ie(this.profile, this.seed), this.state = {
       traceProgress: 0,
       mistakes: 0,
       lockProgress: 0,
@@ -988,7 +988,7 @@ class ae extends re {
   }
   startTimer() {
     if (this.timer || !this.state.hasStarted || !this.startedAt || !this.lastTickAt) return;
-    const t = Number(game.settings.get(xt, "traceDurationMultiplier") ?? 1) || 1, n = Math.max(5, this.profile.traceDurationSeconds * t);
+    const t = Number(game.settings.get(At, "traceDurationMultiplier") ?? 1) || 1, n = Math.max(5, this.profile.traceDurationSeconds * t);
     this.timer = window.setInterval(() => {
       if (!this.state.hasStarted || !this.state.isRunning) return;
       const i = performance.now(), s = Math.min(0.5, (i - this.lastTickAt) / 1e3);
@@ -1027,7 +1027,7 @@ class ae extends re {
       lockProgress: this.state.lockProgress,
       channels: this.channels.map((o) => ({ ...o }))
     };
-    this.chatOnResult && await vt({
+    this.chatOnResult && await Mt({
       title: "Signal Alignment",
       result: t,
       actorName: this.actorName,
@@ -1056,7 +1056,7 @@ class ae extends re {
 }
 const S = "holosuite-hacking", nt = `module.${S}`, oe = 10 * 60 * 1e3;
 let I = null, R = null;
-const j = /* @__PURE__ */ new Map();
+const z = /* @__PURE__ */ new Map();
 function ce() {
   game.settings.register(S, "defaultDc", {
     name: "Default Hacking DC",
@@ -1094,54 +1094,34 @@ function ce() {
   });
 }
 function le() {
-  rt({
+  st({
     id: "node-intrusion",
     title: "Node Intrusion",
     icon: "fa-solid fa-network-wired",
     create: (e) => new te(e)
-  }), rt({
+  }), st({
     id: "signal-alignment",
     title: "Signal Alignment",
     icon: "fa-solid fa-wave-square",
     create: (e) => new ae(e)
   });
 }
-function it() {
+function xt() {
   var e, t, n;
-  return (e = game.user) != null && e.isGM ? (R = R ?? new _t({ api: I }), R.render(!0), R) : ((n = (t = ui.notifications) == null ? void 0 : t.warn) == null || n.call(t, "Only the GM can open HoloSuite Hacking."), null);
-}
-function ue(e) {
-  var r, a, o;
-  if (!((r = game.user) != null && r.isGM)) return;
-  const t = () => it(), n = {
-    name: "holosuite-hacking-launch",
-    title: "HoloSuite Hacking",
-    icon: "fa-solid fa-terminal",
-    button: !0,
-    visible: !0,
-    onClick: t,
-    onChange: t
-  };
-  if (Array.isArray(e)) {
-    const c = e.find((l) => l.name === "token") ?? e[0];
-    c != null && c.tools && !((o = (a = c.tools).some) != null && o.call(a, (l) => l.name === n.name)) && c.tools.push(n);
-    return;
-  }
-  const i = e ?? {}, s = i.tokens ?? i.token ?? Object.values(i)[0];
-  !(s != null && s.tools) || s.tools[n.name] || (s.tools[n.name] = { ...n, order: Object.keys(s.tools).length });
+  return (e = game.user) != null && e.isGM ? (R = R ?? new Gt({ api: I }), R.render(!0), R) : ((n = (t = ui.notifications) == null ? void 0 : t.warn) == null || n.call(t, "Only the GM can open HoloSuite Hacking."), null);
 }
 function Ct() {
-  I = I ?? Lt({ moduleId: S, openLauncher: it }), I.sendHackToPlayer = de, I.registerWithHoloSuite = K;
+  I = I ?? Lt({ moduleId: S, openLauncher: xt }), I.sendHackToPlayer = ue, I.registerWithHoloSuite = K;
   const e = game.modules.get(S);
   return e && (e.api = I), game.holosuiteHacking = I, I;
 }
-function de(e = {}) {
+function ue(e = {}) {
   var o, c, l, h, d, g, b;
   if (!((o = game.user) != null && o.isGM))
     return (l = (c = ui.notifications) == null ? void 0 : c.warn) == null || l.call(c, "Only the GM can send HoloSuite hacking challenges."), !1;
   if (!game.socket)
     return (d = (h = ui.notifications) == null ? void 0 : h.error) == null || d.call(h, "Foundry sockets are not available."), !1;
-  const t = kt(e), n = J(t.userId), i = st(t.actorId, n);
+  const t = kt(e), n = J(t.userId), i = it(t.actorId, n);
   i ? n && !H(i, n) && console.warn(`${S} | ${n.name} does not appear to own ${i.name}; sending fallback roll data anyway.`) : console.warn(`${S} | Could not resolve hacker actor.`, {
     actorId: t.actorId,
     userId: t.userId,
@@ -1149,10 +1129,10 @@ function de(e = {}) {
     userCharacter: P(n),
     ownedActors: Z(n).map((f) => ({ id: f.id, name: f.name }))
   });
-  const s = wt(i, t.skillId), r = t.skillLabel || z(t.skillId, s), a = Number.isFinite(Number(t.skillModifier)) && Number(t.skillModifier) !== 0 ? Number(t.skillModifier) : tt(s);
+  const s = It(i, t.skillId), r = t.skillLabel || j(t.skillId, s), a = Number.isFinite(Number(t.skillModifier)) && Number(t.skillModifier) !== 0 ? Number(t.skillModifier) : tt(s);
   if (typeof e.onSuccess == "function" || typeof e.onFailure == "function") {
-    const f = window.setTimeout(() => j.delete(t.requestId), oe);
-    j.set(t.requestId, {
+    const f = window.setTimeout(() => z.delete(t.requestId), oe);
+    z.set(t.requestId, {
       onSuccess: typeof e.onSuccess == "function" ? e.onSuccess : null,
       onFailure: typeof e.onFailure == "function" ? e.onFailure : null,
       timeoutId: f
@@ -1170,25 +1150,25 @@ function de(e = {}) {
     }
   }), (b = (g = ui.notifications) == null ? void 0 : g.info) == null || b.call(g, `${B(t.minigameType)} sent${n ? ` to ${n.name}` : " to players"}.`), !0;
 }
-function he(e) {
+function de(e) {
   var t, n, i, s;
   try {
     if ((e == null ? void 0 : e.type) === "result-report") {
-      ge(e.payload ?? {});
+      me(e.payload ?? {});
       return;
     }
     if ((e == null ? void 0 : e.type) !== "launch-request") return;
     const r = kt(e.payload ?? {});
     if (r.userId && r.userId !== ((t = game.user) == null ? void 0 : t.id) || !r.userId && ((n = game.user) != null && n.isGM)) return;
-    const a = st(r.actorId, J(r.userId) ?? game.user), o = r.actorName || (a == null ? void 0 : a.name) || "Intruder", c = r.skillLabel || z(r.skillId, wt(a, r.skillId));
+    const a = it(r.actorId, J(r.userId) ?? game.user), o = r.actorName || (a == null ? void 0 : a.name) || "Intruder", c = r.skillLabel || j(r.skillId, It(a, r.skillId));
     new Dialog({
       title: B(r.minigameType),
-      content: pe(r, o, c),
+      content: ge(r, o, c),
       buttons: {
         start: {
           icon: '<i class="fa-solid fa-terminal"></i>',
           label: "Accept and roll",
-          callback: async () => fe(r)
+          callback: async () => he(r)
         }
       },
       default: "start"
@@ -1199,8 +1179,8 @@ function he(e) {
     console.error(`${S} | Failed to handle hacking launch request.`, r), (s = (i = ui.notifications) == null ? void 0 : i.error) == null || s.call(i, "HoloSuite Hacking launch failed. See console for details.");
   }
 }
-async function fe(e) {
-  const t = st(e.actorId, J(e.userId) ?? game.user), n = await me(e);
+async function he(e) {
+  const t = it(e.actorId, J(e.userId) ?? game.user), n = await fe(e);
   if (!Number.isFinite(n == null ? void 0 : n.total)) return null;
   const i = {
     rollTotal: n.total,
@@ -1209,12 +1189,12 @@ async function fe(e) {
     actorName: (t == null ? void 0 : t.name) ?? e.actorName ?? "Hacker",
     userId: e.userId,
     skillId: e.skillId,
-    onSuccess: (s) => dt(e, s),
-    onFailure: (s) => dt(e, s)
+    onSuccess: (s) => ut(e, s),
+    onFailure: (s) => ut(e, s)
   };
   return e.minigameType === "signal-alignment" ? I.startSignalAlignment(i) : I.startNodeIntrusion(i);
 }
-async function me(e) {
+async function fe(e) {
   var t, n;
   try {
     const i = Number(e.skillModifier ?? 0), s = `1d20 ${i >= 0 ? "+" : "-"} ${Math.abs(i)}`, r = await new Roll(s).evaluate({ async: !0 });
@@ -1226,7 +1206,7 @@ async function me(e) {
     return console.error(`${S} | Fallback skill roll failed.`, i), (n = (t = ui.notifications) == null ? void 0 : t.warn) == null || n.call(t, "HoloSuite Hacking skill check failed."), null;
   }
 }
-function dt(e, t) {
+function ut(e, t) {
   var n, i;
   (i = (n = game.socket) == null ? void 0 : n.emit) == null || i.call(n, nt, {
     type: "result-report",
@@ -1237,15 +1217,15 @@ function dt(e, t) {
     }
   });
 }
-function ge(e = {}) {
+function me(e = {}) {
   var i, s, r;
   if (!((i = game.user) != null && i.isGM) || e.gmUserId !== game.user.id) return;
-  const t = j.get(e.requestId);
-  j.delete(e.requestId), t != null && t.timeoutId && window.clearTimeout(t.timeoutId);
+  const t = z.get(e.requestId);
+  z.delete(e.requestId), t != null && t.timeoutId && window.clearTimeout(t.timeoutId);
   const n = e.result ?? {};
   n.result === "success" ? (s = t == null ? void 0 : t.onSuccess) == null || s.call(t, n) : (r = t == null ? void 0 : t.onFailure) == null || r.call(t, n);
 }
-function pe(e, t, n) {
+function ge(e, t, n) {
   return `
     <section class="holosuite-hacking-start-prompt">
       <p>Incoming hacking challenge</p>
@@ -1269,7 +1249,7 @@ function kt(e = {}) {
     gmUserId: String(e.gmUserId ?? "")
   };
 }
-function st(e, t) {
+function it(e, t) {
   const n = x(e);
   if (n) return n;
   const i = P(t);
@@ -1294,14 +1274,13 @@ function K() {
     featureId: S,
     playerVisible: !1,
     description: "Reusable hacking minigames for terminals, traces, and signal puzzles.",
-    open: () => it()
+    open: () => xt()
   }), !0);
 }
 Hooks.once("init", () => {
   ce(), le(), Ct();
 });
-Hooks.on("getSceneControlButtons", ue);
 Hooks.once("ready", () => {
   var e, t;
-  Ct(), (t = (e = game.socket) == null ? void 0 : e.on) == null || t.call(e, nt, he), K(), window.setTimeout(() => K(), 500), console.log(`${S} | Ready. API available at game.modules.get("${S}").api`);
+  Ct(), (t = (e = game.socket) == null ? void 0 : e.on) == null || t.call(e, nt, de), K(), window.setTimeout(() => K(), 500), console.log(`${S} | Ready. API available at game.modules.get("${S}").api`);
 });

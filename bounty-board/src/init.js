@@ -11,32 +11,6 @@ import {
   upsertBounty
 } from "./bounty-service.js";
 
-function addSceneControlButton(controls) {
-  const openBoard = () => openBountyBoard();
-  const tool = {
-    name: "bounty-board",
-    title: "Bounty Board",
-    icon: "fa-solid fa-crosshairs",
-    button: true,
-    visible: true,
-    onClick: openBoard,
-    onChange: openBoard
-  };
-
-  if (Array.isArray(controls)) {
-    const tokenControls = controls.find((control) => control.name === "token") ?? controls[0];
-    if (tokenControls?.tools && !tokenControls.tools.some?.((candidate) => candidate.name === tool.name)) {
-      tokenControls.tools.push(tool);
-    }
-    return;
-  }
-
-  const record = controls ?? {};
-  const tokenControls = record.tokens ?? record.token ?? Object.values(record)[0];
-  if (!tokenControls?.tools || tokenControls.tools[tool.name]) return;
-  tokenControls.tools[tool.name] = { ...tool, order: Object.keys(tokenControls.tools).length };
-}
-
 function exposeApi() {
   const api = {
     open: openBountyBoard,
@@ -77,8 +51,6 @@ Hooks.once("init", async () => {
     `${TEMPLATE_ROOT}/bounty-chat-card.hbs`
   ]);
 });
-
-Hooks.on("getSceneControlButtons", addSceneControlButton);
 
 Hooks.once("ready", () => {
   exposeApi();
