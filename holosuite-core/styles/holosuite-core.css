@@ -153,17 +153,23 @@
 .holosuite-app-tile {
   background: var(--hs-card-bg);
   border: 1px solid var(--hs-line);
+  box-sizing: border-box;
   color: var(--hs-text);
   cursor: pointer;
-  min-height: 132px;
+  display: grid;
+  gap: 12px;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  min-height: 116px;
+  overflow: hidden;
   padding: 14px;
   position: relative;
-  text-align: left;
+  text-align: center;
+  width: 100%;
 }
 
 .holosuite-app-tile:has(.holosuite-app-count) {
+  grid-template-rows: auto auto auto;
   min-height: 116px;
-  padding-bottom: 38px;
 }
 
 .holosuite-app-tile:hover {
@@ -180,13 +186,20 @@
 .holosuite-app-icon {
   align-items: center;
   border: 1px solid var(--hs-line);
+  box-sizing: border-box;
   color: var(--hs-cyan);
   display: inline-flex;
   font-size: 20px;
   height: 42px;
   justify-content: center;
-  margin-bottom: 10px;
+  justify-self: center;
   width: 42px;
+}
+
+.holosuite-app-icon i {
+  display: block;
+  line-height: 1;
+  margin: 0;
 }
 
 .holosuite-app-title {
@@ -194,14 +207,9 @@
   font-size: 15px;
   font-weight: 700;
   line-height: 1.15;
-}
-
-.holosuite-app-tile p {
-  color: var(--hs-muted);
-  font-family: system-ui, sans-serif;
-  font-size: 12px;
-  line-height: 1.35;
-  margin: 7px 0 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .holosuite-app-badge {
@@ -215,16 +223,12 @@
 
 .holosuite-app-count {
   border-top: 1px solid rgba(105, 232, 255, 0.2);
-  bottom: 10px;
   color: var(--hs-green);
   font-size: 11px;
   font-weight: 700;
-  left: 14px;
   line-height: 1;
   overflow: hidden;
   padding-top: 9px;
-  position: absolute;
-  right: 14px;
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;

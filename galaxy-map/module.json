@@ -11,7 +11,7 @@
   ],
   "compatibility": {
     "minimum": "12",
-    "verified": "13"
+    "verified": "14.363"
   },
   "socket": true,
   "esmodules": [

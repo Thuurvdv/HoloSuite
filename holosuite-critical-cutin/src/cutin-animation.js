@@ -19,7 +19,9 @@ function shouldPlayForAudience(payload) {
   const audience = payload?.audience ?? setting(SETTINGS.audience);
   if (audience === AUDIENCE.everyone) return true;
   if (audience === AUDIENCE.gm) return game.user?.isGM === true;
-  if (audience === AUDIENCE.triggeringPlayer) return game.user?.id === payload?.userId;
+  if (audience === AUDIENCE.triggeringPlayer) {
+    return game.user?.isGM === true || game.user?.id === payload?.userId || game.user?.id === payload?.authorId;
+  }
   return true;
 }
 

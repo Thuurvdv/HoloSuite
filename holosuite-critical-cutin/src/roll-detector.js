@@ -12,6 +12,28 @@ function isDamageRoll(message, roll) {
   return [dnd5eRollType, pf2eContextType].some((type) => String(type ?? "").toLowerCase().includes("damage"));
 }
 
+function normalizeRolls(message) {
+  const candidates = [];
+  if (Array.isArray(message?.rolls)) candidates.push(...message.rolls);
+  if (message?.roll) candidates.push(message.roll);
+  if (Array.isArray(message?._source?.rolls)) candidates.push(...message._source.rolls);
+
+  return candidates.map((roll) => {
+    if (!roll || typeof roll !== "string") return roll;
+    try {
+      if (globalThis.Roll?.fromJSON) return globalThis.Roll.fromJSON(roll);
+    } catch (error) {
+      debugLog("Roll.fromJSON failed; falling back to raw JSON parse.", error);
+    }
+    try {
+      return JSON.parse(roll);
+    } catch (error) {
+      debugLog("Unable to parse serialized roll data.", { roll, error });
+      return null;
+    }
+  }).filter(Boolean);
+}
+
 function getActiveD20Results(roll) {
   const results = [];
   const diceTerms = [...(roll?.terms ?? []), ...(roll?.dice ?? [])];
@@ -47,22 +69,34 @@ function hasOwner(actor, userId) {
   return Number(actor.ownership?.[userId] ?? actor.ownership?.default ?? 0) >= ownerLevel;
 }
 
+function resolveMessageAuthorId(message) {
+  const candidate = message?.user?.id
+    ?? message?.userId
+    ?? message?._source?.user
+    ?? (typeof message?.user === "string" ? message.user : null);
+  if (candidate) return String(candidate);
+  if (message?.isAuthor) return game.user?.id ?? null;
+  return null;
+}
+
 function resolveActor(message) {
   const speaker = message?.speaker ?? {};
+  if (message?.speakerActor) return message.speakerActor;
   if (speaker.actor) return game.actors?.get(speaker.actor) ?? null;
   if (message?.actor) return message.actor;
   return null;
 }
 
 function resolveTriggerUser(message, actor) {
-  const authorId = message?.user?.id ?? message?.user ?? message?.userId;
-  const author = game.users?.get(authorId);
-  if (author && !author.isGM) return author;
+  const authorId = resolveMessageAuthorId(message);
+  const author = authorId ? game.users?.get(authorId) : null;
+  if (!author && message?.isAuthor && game.user) return game.user;
+  if (author) return author;
   if (actor) {
     const owner = game.users?.find((user) => !user.isGM && hasOwner(actor, user.id));
     if (owner) return owner;
   }
-  return author ?? game.users?.get(authorId) ?? null;
+  return author ?? null;
 }
 
 function normalizeTriggerConfig(rawConfig = {}, kind, actor) {
@@ -100,10 +134,13 @@ function buildPayload(message, qualifyingResult, actor, user, config) {
     return null;
   }
 
+  const authorId = resolveMessageAuthorId(message);
+
   return {
     id: foundry.utils.randomID(),
     messageId: message.id,
     userId: user?.id ?? null,
+    authorId: authorId ?? user?.id ?? null,
     actorId: actor?.id ?? null,
     userName: user?.name ?? "",
     actorName: actor?.name ?? user?.name ?? "",
@@ -125,8 +162,9 @@ function buildPayload(message, qualifyingResult, actor, user, config) {
 }
 
 function messageHasQualifyingD20(message, threshold, kind = "success") {
-  if (!message?.isRoll && !message?.rolls?.length) return null;
-  for (const roll of message.rolls ?? []) {
+  const rolls = normalizeRolls(message);
+  if (!message?.isRoll && !rolls.length) return null;
+  for (const roll of rolls) {
     if (isDamageRoll(message, roll)) continue;
     const d20Results = getActiveD20Results(roll);
     const qualifying = kind === "failure"
@@ -184,6 +222,7 @@ export function createManualPayloadForUser(userId, options = {}) {
   return {
     id: foundry.utils.randomID(),
     userId,
+    authorId: game.user?.id ?? userId,
     actorId: actor?.id ?? null,
     userName: user?.name ?? "",
     actorName: actor?.name ?? user?.name ?? "",

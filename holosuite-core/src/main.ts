@@ -7,6 +7,8 @@ const registeredApps = new Map<string, HoloSuiteAppRegistration>();
 let launcherApp: HoloSuiteLauncher | null = null;
 
 const LegacyApplication = (globalThis as any).Application ?? foundry?.appv1?.api?.Application;
+const ApplicationV2 = foundry?.applications?.api?.ApplicationV2;
+
 function escapeHtml(value: unknown): string {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
@@ -62,6 +64,15 @@ function getAppBadgeLabel(appId: string): string {
 
 function safeArray(value: unknown): any[] {
   return Array.isArray(value) ? value : [];
+}
+
+function isAppV2(app: unknown): boolean {
+  return Boolean((app as any)?.constructor?.DEFAULT_OPTIONS);
+}
+
+function renderApp(app: unknown, force = false): Promise<unknown> | unknown {
+  if (isAppV2(app)) return (app as any).render({ force });
+  return (app as any)?.render?.(force);
 }
 
 function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration | null {
@@ -178,13 +189,13 @@ function renderLauncherHtml(): string {
   const appCards = apps.length
     ? apps.map((app) => {
       const title = app.title;
-      const description = isGM && app.description ? `<p>${escapeHtml(app.description)}</p>` : "";
+      const description = isGM && app.description ? app.description : "";
       const badgeLabel = !isGM ? getAppBadgeLabel(app.id) : "";
+      const tooltip = description ? ` title="${escapeHtml(description)}" data-tooltip="${escapeHtml(description)}"` : "";
       return `
-        <button type="button" class="holosuite-app-tile" data-holosuite-app="${escapeHtml(app.id)}">
+        <button type="button" class="holosuite-app-tile" data-holosuite-app="${escapeHtml(app.id)}"${tooltip}>
           <span class="holosuite-app-icon"><i class="${escapeHtml(app.icon)}"></i></span>
           <span class="holosuite-app-title">${escapeHtml(title)}</span>
-          ${description}
           ${badgeLabel ? `<span class="holosuite-app-count">${escapeHtml(badgeLabel)}</span>` : ""}
         </button>
       `;
@@ -217,7 +228,7 @@ function renderLauncherHtml(): string {
   `;
 }
 
-class HoloSuiteLauncher extends LegacyApplication {
+class HoloSuiteLauncherV1 extends LegacyApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "holosuite-launcher",
@@ -248,25 +259,72 @@ class HoloSuiteLauncher extends LegacyApplication {
   }
 }
 
+function createHoloSuiteLauncherV2() {
+  if (!ApplicationV2) return null;
+
+  return class HoloSuiteLauncherV2 extends ApplicationV2 {
+    static DEFAULT_OPTIONS = {
+      id: "holosuite-launcher",
+      tag: "section",
+      classes: ["holosuite-launcher-window"],
+      window: {
+        title: "HoloSuite",
+        resizable: false
+      },
+      position: {
+        width: 420,
+        height: "auto"
+      }
+    };
+
+    async _renderHTML() {
+      const template = document.createElement("template");
+      template.innerHTML = renderLauncherHtml().trim();
+      return template.content;
+    }
+
+    _replaceHTML(result: DocumentFragment | HTMLElement, content: HTMLElement) {
+      const nodes = result instanceof DocumentFragment ? [...result.childNodes] : [result];
+      content.replaceChildren(...nodes);
+    }
+
+    _onRender(context: unknown, options: unknown) {
+      super._onRender?.(context, options);
+      this.element.querySelectorAll("[data-holosuite-app]").forEach((button: HTMLElement) => {
+        button.addEventListener("click", () => openRegisteredApp(button.dataset.holosuiteApp ?? ""));
+      });
+      this.element.querySelector("[data-holosuite-action='close']")?.addEventListener("click", () => this.close());
+    }
+
+    async close(options = {}) {
+      launcherApp = null;
+      return super.close(options);
+    }
+  };
+}
+
+const HoloSuiteLauncherClass = createHoloSuiteLauncherV2() ?? HoloSuiteLauncherV1;
+type HoloSuiteLauncher = InstanceType<typeof HoloSuiteLauncherClass>;
+
 const api = {
   registerApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration | null {
     const normalized = normalizeApp(app);
     if (!normalized) return null;
     registeredApps.set(normalized.id, normalized);
-    launcherApp?.render(false);
+    if (launcherApp) renderApp(launcherApp, false);
     return normalized;
   },
   unregisterApp(id: string): boolean {
     const removed = registeredApps.delete(String(id ?? ""));
-    if (removed) launcherApp?.render(false);
+    if (removed && launcherApp) renderApp(launcherApp, false);
     return removed;
   },
   getApps(): HoloSuiteAppRegistration[] {
     return [...registeredApps.values()];
   },
   async openLauncher(): Promise<HoloSuiteLauncher | null> {
-    if (!launcherApp) launcherApp = new HoloSuiteLauncher();
-    await launcherApp.render(true);
+    if (!launcherApp) launcherApp = new HoloSuiteLauncherClass();
+    await renderApp(launcherApp, true);
     return launcherApp;
   }
 };
