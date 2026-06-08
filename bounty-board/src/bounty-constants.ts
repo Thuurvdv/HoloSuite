@@ -4,6 +4,7 @@ export const SETTING_BOUNTIES = "bounties";
 export const SETTING_POST_PUBLISH_CHAT = "postPublishChat";
 export const SETTING_POST_RESULT_CHAT = "postResultChat";
 export const SETTING_PUBLIC_DOCUMENT_LINKS = "publicDocumentLinks";
+export const SETTING_REMOVED_TAGS = "removedTags";
 
 export const TEMPLATE_ROOT = `modules/${MODULE_ID}/templates`;
 

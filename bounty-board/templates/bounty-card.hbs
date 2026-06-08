@@ -78,7 +78,9 @@
       {{else}}
         <button type="button" title="Publish" data-action="publishBounty"><i class="fa-solid fa-bullhorn"></i></button>
       {{/if}}
-      <button type="button" title="Assign claim" data-action="claimBounty"><i class="fa-solid fa-handshake"></i></button>
+      {{#unless bounty.isClaimed}}
+        <button type="button" title="Assign claim" data-action="claimBounty"><i class="fa-solid fa-handshake"></i></button>
+      {{/unless}}
       <button type="button" title="Complete" data-action="completeBounty"><i class="fa-solid fa-check"></i></button>
       <button type="button" title="Fail" data-action="failBounty"><i class="fa-solid fa-xmark"></i></button>
       <button type="button" title="Hide" data-action="hideBounty"><i class="fa-solid fa-user-lock"></i></button>

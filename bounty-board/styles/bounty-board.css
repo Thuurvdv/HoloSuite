@@ -113,6 +113,12 @@
   padding: 0;
 }
 
+.bb-tag-filter-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  gap: 6px;
+}
+
 .bb-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
@@ -415,11 +421,16 @@
 }
 
 .bb-chat-card {
+  --bb-line: var(--hs-line);
+  --bb-neon: var(--hs-cyan);
+  --bb-text: var(--hs-text);
+  --bb-muted: var(--hs-muted);
   border: 1px solid var(--bb-line);
   background: var(--hs-card-bg);
   color: var(--bb-text);
   border-radius: 8px;
   padding: 12px;
+  font-family: var(--hs-font-ui);
 }
 
 .bb-chat-card h3 {
@@ -444,6 +455,7 @@
 }
 
 .bb-chat-card dd {
+  color: var(--bb-text);
   margin: 0;
 }
 
