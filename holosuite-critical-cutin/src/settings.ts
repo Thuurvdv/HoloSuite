@@ -23,7 +23,10 @@ export const AUDIENCE = {
   triggeringPlayer: "triggeringPlayer"
 };
 
-export function registerSettings(configAppClass) {
+declare const foundry: any;
+declare const game: any;
+
+export function registerSettings(configAppClass: any) {
   game.settings.register(MODULE_ID, SETTINGS.enabled, {
     name: "Enable Critical Cut-In",
     hint: "Play a configured cut-in when a qualifying natural d20 result is rolled.",
@@ -141,11 +144,11 @@ export function registerSettings(configAppClass) {
   });
 }
 
-export function setting(key) {
+export function setting(key: string) {
   return game.settings.get(MODULE_ID, key);
 }
 
-export async function setSetting(key, value) {
+export async function setSetting(key: string, value: any) {
   return game.settings.set(MODULE_ID, key, value);
 }
 
@@ -162,10 +165,10 @@ export function getPlayerConfigs() {
   return foundry.utils.deepClone(configs && typeof configs === "object" ? configs : {});
 }
 
-export async function savePlayerConfigs(configs) {
+export async function savePlayerConfigs(configs: any) {
   return setSetting(SETTINGS.playerConfigs, configs && typeof configs === "object" ? configs : {});
 }
 
-export function debugLog(...args) {
+export function debugLog(...args: any[]) {
   if (setting(SETTINGS.debug)) console.log(`${MODULE_ID} |`, ...args);
 }

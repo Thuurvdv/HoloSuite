@@ -1,5 +1,7 @@
-import { MODULE_ID, MODULE_TITLE, SETTINGS, setting } from "./settings.js";
-import { openPlayerConfig } from "./player-config-app.js";
+import { MODULE_ID, MODULE_TITLE, SETTINGS, setting } from "./settings";
+import { openPlayerConfig } from "./player-config-app";
+
+declare const game: any;
 
 function getHoloSuiteApi() {
   const requestedModuleApi = game.modules.get("holosuite")?.active ? game.modules.get("holosuite")?.api : null;
