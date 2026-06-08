@@ -1,5 +1,5 @@
-import { MODULE_ID, MODULE_TITLE, TEMPLATE_ROOT } from "./bounty-constants.js";
-import { openBountyBoard } from "./bounty-board-app.js";
+import { MODULE_ID, MODULE_TITLE, TEMPLATE_ROOT } from "./bounty-constants";
+import { openBountyBoard } from "./bounty-board-app";
 import {
   archiveBounty,
   claimBounty,
@@ -9,7 +9,12 @@ import {
   publishBounty,
   registerSettings,
   upsertBounty
-} from "./bounty-service.js";
+} from "./bounty-service";
+
+declare const game: any;
+declare const Hooks: any;
+declare const Handlebars: any;
+declare const loadTemplates: any;
 
 function exposeApi() {
   const api = {
