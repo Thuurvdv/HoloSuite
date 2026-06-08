@@ -1,8 +1,10 @@
-import { getDifficultyProfile, DIFFICULTY_PROFILES } from "./difficulty.js";
-import { getActiveApp, getMinigames, startMinigame } from "./minigame-runner.js";
+import { getDifficultyProfile, DIFFICULTY_PROFILES } from "./difficulty";
+import { getActiveApp, getMinigames, startMinigame } from "./minigame-runner";
 
-export function createHackingApi({ moduleId, openLauncher }) {
-  function applyVisualGlitchSetting(profile) {
+declare const game: any;
+
+export function createHackingApi({ moduleId, openLauncher }: any) {
+  function applyVisualGlitchSetting(profile: any) {
     const preference = String(game.settings.get(moduleId, "visualGlitchIntensity") ?? "medium");
     const base = Number(profile.visualGlitchIntensity ?? 0.4);
     const visualGlitchIntensity = preference === "low"
@@ -14,7 +16,7 @@ export function createHackingApi({ moduleId, openLauncher }) {
     return { ...profile, visualGlitchIntensity };
   }
 
-  function normalizeOptions(options = {}) {
+  function normalizeOptions(options: any = {}) {
     const defaultDc = Number(game.settings.get(moduleId, "defaultDc") ?? 15);
     const dc = Number(options.dc ?? defaultDc);
     const rollTotal = Number(options.rollTotal ?? dc);
@@ -22,7 +24,7 @@ export function createHackingApi({ moduleId, openLauncher }) {
     return { ...options, dc, rollTotal, profile };
   }
 
-  function startHack(options = {}) {
+  function startHack(options: any = {}) {
     const type = String(options.type ?? "node-intrusion");
     return startMinigame(type, normalizeOptions(options));
   }

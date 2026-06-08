@@ -1,4 +1,4 @@
-import { BOUNTY_STATUSES, MODULE_ID, TEMPLATE_ROOT } from "./bounty-constants.js";
+import { BOUNTY_STATUSES, MODULE_ID, TEMPLATE_ROOT } from "./bounty-constants";
 import {
   archiveBounty,
   claimBounty,
@@ -11,20 +11,45 @@ import {
   publishBounty,
   requestContract,
   updateBountyState
-} from "./bounty-service.js";
-import { BountyEditorApp } from "./bounty-editor-app.js";
+} from "./bounty-service";
+import { BountyEditorApp } from "./bounty-editor-app";
+
+declare const foundry: any;
+declare const Application: any;
+declare const game: any;
+declare const Dialog: any;
+declare const ImagePopout: any;
 
 const ApplicationV2 = foundry.applications?.api?.ApplicationV2 ?? Application;
 const HandlebarsApplicationMixin = foundry.applications?.api?.HandlebarsApplicationMixin;
 const BaseApplication = HandlebarsApplicationMixin ? HandlebarsApplicationMixin(ApplicationV2) : ApplicationV2;
 
-let boardApp = null;
+type BountyFilters = {
+  status: string;
+  threatLevel: string;
+  faction: string;
+  tag: string;
+  search: string;
+};
 
-function getBountyIdFromEvent(event) {
-  return event.target.closest("[data-bounty-id]")?.dataset.bountyId;
+type SearchSelection = {
+  start: number;
+  end: number;
+};
+
+let boardApp: BountyBoardApp | null = null;
+
+function getBountyIdFromEvent(event: Event) {
+  return (event.target as Element | null)?.closest("[data-bounty-id]")?.getAttribute("data-bounty-id") ?? "";
 }
 
 export class BountyBoardApp extends BaseApplication {
+  filters: BountyFilters;
+  expanded: Set<string>;
+  pendingFilterRender: ReturnType<typeof window.setTimeout> | null;
+  searchSelection: SearchSelection | null;
+  restoreSearchFocus: boolean;
+
   static DEFAULT_OPTIONS = {
     id: "bounty-board-app",
     tag: "section",
@@ -62,7 +87,7 @@ export class BountyBoardApp extends BaseApplication {
     }
   };
 
-  constructor(options = {}) {
+  constructor(options: any = {}) {
     super(options);
     this.filters = {
       status: "",
@@ -77,7 +102,7 @@ export class BountyBoardApp extends BaseApplication {
     this.restoreSearchFocus = false;
   }
 
-  async _prepareContext(options) {
+  async _prepareContext(options: any) {
     const isGM = game.user?.isGM === true;
     const bounties = getAllBounties({ includeHidden: isGM })
       .map(prepareBountyForDisplay)
@@ -93,21 +118,21 @@ export class BountyBoardApp extends BaseApplication {
     };
   }
 
-  _onRender(context, options) {
+  _onRender(context: any, options: any) {
     super._onRender?.(context, options);
     const html = this.element;
     html.querySelector(".bb-filters")?.addEventListener("submit", (event) => {
       event.preventDefault();
       event.stopPropagation();
     });
-    html.querySelectorAll("[data-filter]").forEach((input) => {
+    html.querySelectorAll("[data-filter]").forEach((input: HTMLInputElement | HTMLSelectElement) => {
       input.addEventListener("change", () => this.#updateFilter(input, { immediate: true }));
       input.addEventListener("input", () => this.#updateFilter(input));
     });
     this.#restoreSearchFocus();
-    html.querySelectorAll("[data-bounty-toggle]").forEach((button) => {
+    html.querySelectorAll("[data-bounty-toggle]").forEach((button: HTMLElement) => {
       button.addEventListener("click", () => {
-        const id = button.dataset.bountyToggle;
+        const id = button.dataset.bountyToggle ?? "";
         if (this.expanded.has(id)) this.expanded.delete(id);
         else this.expanded.add(id);
         this.render({ force: true });
@@ -115,17 +140,20 @@ export class BountyBoardApp extends BaseApplication {
     });
   }
 
-  #updateFilter(input, { immediate = false } = {}) {
-    this.filters[input.dataset.filter] = input.value;
-    if (input.dataset.filter === "search") {
+  #updateFilter(input: HTMLInputElement | HTMLSelectElement, { immediate = false } = {}) {
+    const filterKey = input.dataset.filter as keyof BountyFilters | undefined;
+    if (!filterKey) return;
+    this.filters[filterKey] = input.value;
+    if (filterKey === "search") {
+      const searchInput = input as HTMLInputElement;
       this.searchSelection = {
-        start: input.selectionStart ?? input.value.length,
-        end: input.selectionEnd ?? input.value.length
+        start: searchInput.selectionStart ?? input.value.length,
+        end: searchInput.selectionEnd ?? input.value.length
       };
       this.restoreSearchFocus = true;
     }
     if (this.pendingFilterRender) window.clearTimeout(this.pendingFilterRender);
-    if (!immediate && input.dataset.filter === "search") {
+    if (!immediate && filterKey === "search") {
       this.pendingFilterRender = window.setTimeout(() => {
         this.pendingFilterRender = null;
         this.render({ force: true });
@@ -136,7 +164,7 @@ export class BountyBoardApp extends BaseApplication {
   }
 
   #restoreSearchFocus() {
-    const search = this.element?.querySelector?.("[data-filter='search']");
+    const search = this.element?.querySelector?.("[data-filter='search']") as HTMLInputElement | null;
     if (!search || !this.restoreSearchFocus || document.activeElement === search || this.searchSelection === null) return;
     this.restoreSearchFocus = false;
     search.focus({ preventScroll: true });
@@ -145,7 +173,7 @@ export class BountyBoardApp extends BaseApplication {
     search.setSelectionRange?.(start, end);
   }
 
-  async close(options = {}) {
+  async close(options: any = {}) {
     if (boardApp === this) boardApp = null;
     if (this.pendingFilterRender) window.clearTimeout(this.pendingFilterRender);
     return super.close(options);
@@ -155,17 +183,17 @@ export class BountyBoardApp extends BaseApplication {
     new BountyEditorApp().render({ force: true });
   }
 
-  static #onEditBounty(event) {
+  static #onEditBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) new BountyEditorApp({ bountyId }).render({ force: true });
   }
 
-  static async #onDeleteBounty(event) {
+  static async #onDeleteBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId && await deleteBounty(bountyId)) this.render({ force: true });
   }
 
-  static async #onPublishBounty(event) {
+  static async #onPublishBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
       await publishBounty(bountyId, true);
@@ -173,7 +201,7 @@ export class BountyBoardApp extends BaseApplication {
     }
   }
 
-  static async #onUnpublishBounty(event) {
+  static async #onUnpublishBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
       await publishBounty(bountyId, false);
@@ -181,7 +209,7 @@ export class BountyBoardApp extends BaseApplication {
     }
   }
 
-  static async #onArchiveBounty(event) {
+  static async #onArchiveBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
       await archiveBounty(bountyId);
@@ -189,7 +217,7 @@ export class BountyBoardApp extends BaseApplication {
     }
   }
 
-  static async #onCompleteBounty(event) {
+  static async #onCompleteBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
       await markBountyCompleted(bountyId, false);
@@ -197,7 +225,7 @@ export class BountyBoardApp extends BaseApplication {
     }
   }
 
-  static async #onFailBounty(event) {
+  static async #onFailBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
       await markBountyCompleted(bountyId, true);
@@ -205,7 +233,7 @@ export class BountyBoardApp extends BaseApplication {
     }
   }
 
-  static async #onHideBounty(event) {
+  static async #onHideBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
       await updateBountyState(bountyId, { status: BOUNTY_STATUSES.HIDDEN, published: false });
@@ -213,24 +241,24 @@ export class BountyBoardApp extends BaseApplication {
     }
   }
 
-  static async #onClaimBounty(event) {
+  static async #onClaimBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
-    const claimedBy = event.target.closest("[data-bounty-id]")?.querySelector("[data-claimed-by]")?.value ?? "";
+    const claimedBy = (event.target as Element | null)?.closest("[data-bounty-id]")?.querySelector<HTMLInputElement>("[data-claimed-by]")?.value ?? "";
     if (bountyId) {
       await claimBounty(bountyId, claimedBy);
       this.render({ force: true });
     }
   }
 
-  static async #onRequestContract(event) {
+  static async #onRequestContract(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) await requestContract(bountyId);
   }
 
-  static #onOpenImage(event) {
-    const image = event.target.closest("[data-image-src]")?.dataset.imageSrc;
+  static #onOpenImage(event: Event) {
+    const image = (event.target as Element | null)?.closest("[data-image-src]")?.getAttribute("data-image-src");
     if (!image) return;
-    const title = event.target.closest("[data-bounty-id]")?.querySelector(".bb-card-title")?.textContent?.trim() || "Bounty Image";
+    const title = (event.target as Element | null)?.closest("[data-bounty-id]")?.querySelector(".bb-card-title")?.textContent?.trim() || "Bounty Image";
     if (globalThis.ImagePopout) {
       new ImagePopout(image, { title }).render(true);
       return;
@@ -245,8 +273,8 @@ export class BountyBoardApp extends BaseApplication {
     }, { classes: ["bounty-board-window"], width: 720 }).render(true);
   }
 
-  static #onOpenJournal(event) {
-    const id = event.target.closest("[data-open-journal]")?.dataset.openJournal;
+  static #onOpenJournal(event: Event) {
+    const id = (event.target as Element | null)?.closest("[data-open-journal]")?.getAttribute("data-open-journal");
     game.journal?.get(id)?.sheet?.render(true);
   }
 

@@ -1,17 +1,37 @@
-import { getDifficultyProfile } from "../../core/difficulty.js";
-import { postHackResultMessage } from "../../core/chat.js";
-import { clampFrequency, generateSignalChannels } from "./signal-alignment-generator.js";
+import { getDifficultyProfile } from "../../core/difficulty";
+import { postHackResultMessage } from "../../core/chat";
+import { clampFrequency, generateSignalChannels } from "./signal-alignment-generator";
+
+declare const foundry: any;
+declare const game: any;
+declare const ui: any;
 
 const MODULE_ID = "holosuite-hacking";
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/signal-alignment.html`;
-const LegacyApplication = globalThis.Application ?? globalThis.foundry?.appv1?.api?.Application;
+const LegacyApplication = (globalThis as any).Application ?? (globalThis as any).foundry?.appv1?.api?.Application;
 
-function clamp(value, min, max) {
+function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
 export class SignalAlignmentApp extends LegacyApplication {
-  constructor(options = {}) {
+  rollTotal: number;
+  dc: number;
+  profile: any;
+  seed: string;
+  onSuccess: any;
+  onFailure: any;
+  actorName: string;
+  chatOnResult: boolean;
+  channels: any[];
+  state: any;
+  startedAt: number | null;
+  lastTickAt: number | null;
+  timer: ReturnType<typeof window.setInterval> | null;
+  wasAligned: boolean;
+  resultMessage?: string;
+
+  constructor(options: any = {}) {
     super(options);
     this.rollTotal = Number(options.rollTotal ?? 15);
     this.dc = Number(options.dc ?? 15);
@@ -79,7 +99,7 @@ export class SignalAlignmentApp extends LegacyApplication {
     };
   }
 
-  activateListeners(html) {
+  activateListeners(html: any) {
     super.activateListeners(html);
     html.find("[data-channel-slider]").on("input", (event) => this.handleSlider(event.currentTarget));
     html.find("[data-action='start']").on("click", () => this.startRun());
@@ -87,13 +107,13 @@ export class SignalAlignmentApp extends LegacyApplication {
     this.syncDom();
   }
 
-  async render(force, options) {
+  async render(force?: any, options?: any) {
     const rendered = await super.render(force, options);
     if (this.state.hasStarted && this.state.isRunning) this.startTimer();
     return rendered;
   }
 
-  async close(options = {}) {
+  async close(options: any = {}) {
     this.stopTimer();
     return super.close(options);
   }
@@ -108,7 +128,7 @@ export class SignalAlignmentApp extends LegacyApplication {
     this.render(false);
   }
 
-  handleSlider(slider) {
+  handleSlider(slider: HTMLInputElement) {
     if (!this.state.hasStarted || !this.state.isRunning) return;
     const channel = this.channels.find((candidate) => candidate.id === slider.dataset.channelSlider);
     if (!channel) return;
@@ -165,7 +185,7 @@ export class SignalAlignmentApp extends LegacyApplication {
     }, 120);
   }
 
-  applyDrift(deltaSeconds) {
+  applyDrift(deltaSeconds: number) {
     const driftSpeed = Number(this.profile.signalDriftSpeed ?? 0);
     if (driftSpeed <= 0) return;
     for (const channel of this.channels) {
@@ -184,7 +204,7 @@ export class SignalAlignmentApp extends LegacyApplication {
     await this.finish("failure", "Manual disconnect", { close: true });
   }
 
-  async finish(result, message, { close = false } = {}) {
+  async finish(result: "success" | "failure", message: string, { close = false } = {}) {
     if (this.state.result) return;
     this.state.isRunning = false;
     this.state.result = result;

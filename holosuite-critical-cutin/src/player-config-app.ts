@@ -1,8 +1,13 @@
-import { MODULE_ID, MODULE_TITLE, SETTINGS, TEMPLATE_PATH, getFailureThreshold, getPlayerConfigs, getThreshold, savePlayerConfigs, setSetting, setting } from "./settings.js";
+import { MODULE_ID, MODULE_TITLE, SETTINGS, TEMPLATE_PATH, getFailureThreshold, getPlayerConfigs, getThreshold, savePlayerConfigs, setSetting, setting } from "./settings";
 
-const BaseFormApplication = globalThis.FormApplication ?? globalThis.foundry?.appv1?.api?.FormApplication;
+declare const foundry: any;
+declare const game: any;
+declare const ui: any;
+declare const FilePicker: any;
 
-function targetKey(type, id) {
+const BaseFormApplication = (globalThis as any).FormApplication ?? (globalThis as any).foundry?.appv1?.api?.FormApplication;
+
+function targetKey(type: string, id: string) {
   return `${type}:${id}`;
 }
 
@@ -10,12 +15,12 @@ function gmTargetKey() {
   return targetKey("gm", "default");
 }
 
-function userOwnsActor(user, actor) {
-  const ownerLevel = globalThis.CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OWNER ?? 3;
+function userOwnsActor(user: any, actor: any) {
+  const ownerLevel = (globalThis as any).CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OWNER ?? 3;
   return Number(actor?.ownership?.[user.id] ?? actor?.ownership?.default ?? 0) >= ownerLevel;
 }
 
-function normalizeTriggerConfig(config = {}, { defaultAccent = "#69e8ff" } = {}) {
+function normalizeTriggerConfig(config: any = {}, { defaultAccent = "#69e8ff" } = {}) {
   const threshold = Number(config.threshold);
   const animationStyle = ["strike", "breach", "signal"].includes(config.animationStyle) ? config.animationStyle : "strike";
   return {
@@ -34,7 +39,7 @@ function normalizeTriggerConfig(config = {}, { defaultAccent = "#69e8ff" } = {})
   };
 }
 
-function normalizeConfig(config = {}) {
+function normalizeConfig(config: any = {}) {
   return {
     success: normalizeTriggerConfig(config, { defaultAccent: "#69e8ff" }),
     failure: normalizeTriggerConfig(config.failure, { defaultAccent: "#ff4d7d" })
@@ -73,7 +78,9 @@ function buildTargets() {
 }
 
 export class PlayerConfigApp extends BaseFormApplication {
-  constructor(options = {}) {
+  activeTabs: Map<string, string>;
+
+  constructor(options: any = {}) {
     super(options);
     this.activeTabs = new Map();
   }
@@ -129,7 +136,7 @@ export class PlayerConfigApp extends BaseFormApplication {
     };
   }
 
-  activateListeners(html) {
+  activateListeners(html: any) {
     super.activateListeners(html);
     const markDirty = () => {
       html.closest(".app")?.addClass("hcci-config-dirty");
@@ -155,7 +162,7 @@ export class PlayerConfigApp extends BaseFormApplication {
       const picker = new FilePicker({
         type: field === "audioPath" ? "audio" : "image",
         current: input.value,
-        callback: (path) => {
+        callback: (path: string) => {
           input.value = path;
           input.dispatchEvent(new Event("change", { bubbles: true }));
           if (field === "imagePath") {
@@ -184,37 +191,38 @@ export class PlayerConfigApp extends BaseFormApplication {
     });
   }
 
-  async _updateObject(event) {
-    const form = event.currentTarget;
-    const configs = {};
+  async _updateObject(event: Event) {
+    const form = event.currentTarget as HTMLFormElement;
+    const configs: Record<string, any> = {};
 
-    const readPanel = (row, scope) => {
-      const panel = row.querySelector(`[data-hcci-panel="${scope}"]`);
+    const readPanel = (row: HTMLElement, scope: string) => {
+      const panel = row.querySelector<HTMLElement>(`[data-hcci-panel="${scope}"]`);
+      const field = (name: string) => panel?.querySelector<HTMLInputElement | HTMLSelectElement>(`[data-hcci-field="${name}"]`);
       return {
-        enabled: panel?.querySelector('[data-hcci-field="enabled"]')?.checked === true,
+        enabled: panel?.querySelector<HTMLInputElement>('[data-hcci-field="enabled"]')?.checked === true,
         threshold: (() => {
-          const value = Number(panel?.querySelector('[data-hcci-field="threshold"]')?.value);
+          const value = Number(field("threshold")?.value);
           return Number.isInteger(value) && value >= 1 && value <= 20 ? value : "";
         })(),
-        animationStyle: panel?.querySelector('[data-hcci-field="animationStyle"]')?.value || "strike",
-        imagePath: panel?.querySelector('[data-hcci-field="imagePath"]')?.value?.trim() ?? "",
-        audioPath: panel?.querySelector('[data-hcci-field="audioPath"]')?.value?.trim() ?? "",
-        overlayText: panel?.querySelector('[data-hcci-field="overlayText"]')?.value?.trim() ?? "",
-        accentColor: panel?.querySelector('[data-hcci-field="accentColor"]')?.value || (scope === "failure" ? "#ff4d7d" : "#69e8ff")
+        animationStyle: field("animationStyle")?.value || "strike",
+        imagePath: field("imagePath")?.value?.trim() ?? "",
+        audioPath: field("audioPath")?.value?.trim() ?? "",
+        overlayText: field("overlayText")?.value?.trim() ?? "",
+        accentColor: field("accentColor")?.value || (scope === "failure" ? "#ff4d7d" : "#69e8ff")
       };
     };
 
-    for (const row of form.querySelectorAll("[data-hcci-row]")) {
+    for (const row of form.querySelectorAll<HTMLElement>("[data-hcci-row]")) {
       const key = row.dataset.hcciRow;
-      const activePanel = row.querySelector("[data-hcci-panel].is-active")?.dataset.hcciPanel;
+      const activePanel = row.querySelector<HTMLElement>("[data-hcci-panel].is-active")?.dataset.hcciPanel;
       if (activePanel) this.activeTabs.set(key, activePanel);
       configs[key] = readPanel(row, "success");
       configs[key].failure = readPanel(row, "failure");
     }
 
-    const threshold = Number(form.querySelector('[name="threshold"]')?.value ?? getThreshold());
-    const failureThreshold = Number(form.querySelector('[name="failureThreshold"]')?.value ?? getFailureThreshold());
-    const duration = Number(form.querySelector('[name="duration"]')?.value ?? setting(SETTINGS.duration));
+    const threshold = Number(form.querySelector<HTMLInputElement>('[name="threshold"]')?.value ?? getThreshold());
+    const failureThreshold = Number(form.querySelector<HTMLInputElement>('[name="failureThreshold"]')?.value ?? getFailureThreshold());
+    const duration = Number(form.querySelector<HTMLInputElement>('[name="duration"]')?.value ?? setting(SETTINGS.duration));
     await setSetting(SETTINGS.threshold, Math.min(20, Math.max(1, threshold)));
     await setSetting(SETTINGS.failureThreshold, Math.min(20, Math.max(1, failureThreshold)));
     await setSetting(SETTINGS.duration, Math.min(8000, Math.max(800, duration)));

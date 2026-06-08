@@ -1,18 +1,22 @@
-import { MODULE_ID, MODULE_TITLE, registerSettings } from "./settings.js";
-import { playCutin } from "./cutin-animation.js";
-import { broadcastPayload, createManualPayloadForActor, createManualPayloadForUser, registerRollDetection } from "./roll-detector.js";
-import { openPlayerConfig, PlayerConfigApp } from "./player-config-app.js";
-import { registerHoloSuiteIntegration } from "./holosuite-integration.js";
+import { MODULE_ID, MODULE_TITLE, registerSettings } from "./settings";
+import { playCutin } from "./cutin-animation";
+import { broadcastPayload, createManualPayloadForActor, createManualPayloadForUser, registerRollDetection } from "./roll-detector";
+import { openPlayerConfig, PlayerConfigApp } from "./player-config-app";
+import { registerHoloSuiteIntegration } from "./holosuite-integration";
+
+declare const game: any;
+declare const Hooks: any;
+declare const loadTemplates: any;
 
 function exposeApi() {
   const api = {
-    playCutinForUser(userId, options = {}) {
+    playCutinForUser(userId: string, options: any = {}) {
       const payload = createManualPayloadForUser(userId, options);
       if (game.user?.isGM) broadcastPayload(payload);
       else playCutin(payload);
       return payload;
     },
-    playCutinForActor(actorId, options = {}) {
+    playCutinForActor(actorId: string, options: any = {}) {
       const payload = createManualPayloadForActor(actorId, options);
       if (game.user?.isGM) broadcastPayload(payload);
       else playCutin(payload);

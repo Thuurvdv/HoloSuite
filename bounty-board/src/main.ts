@@ -1,1 +1,1 @@
-import "./init.js";
+import "./init";

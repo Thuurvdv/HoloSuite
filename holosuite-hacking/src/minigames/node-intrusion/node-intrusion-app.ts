@@ -1,16 +1,20 @@
-import { getDifficultyProfile } from "../../core/difficulty.js";
-import { postHackResultMessage } from "../../core/chat.js";
-import { edgeKey, generateIntrusionGraph } from "./node-intrusion-generator.js";
+import { getDifficultyProfile } from "../../core/difficulty";
+import { postHackResultMessage } from "../../core/chat";
+import { edgeKey, generateIntrusionGraph } from "./node-intrusion-generator";
+
+declare const foundry: any;
+declare const game: any;
+declare const ui: any;
 
 const MODULE_ID = "holosuite-hacking";
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/node-intrusion.html`;
-const LegacyApplication = globalThis.Application ?? globalThis.foundry?.appv1?.api?.Application;
+const LegacyApplication = (globalThis as any).Application ?? (globalThis as any).foundry?.appv1?.api?.Application;
 
-function clamp(value, min, max) {
+function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-function nodeTypeLabel(type) {
+function nodeTypeLabel(type: string) {
   if (type === "start") return "entry";
   if (type === "target") return "target";
   if (type === "firewall") return "firewall";
@@ -19,7 +23,21 @@ function nodeTypeLabel(type) {
 }
 
 export class NodeIntrusionApp extends LegacyApplication {
-  constructor(options = {}) {
+  rollTotal: number;
+  dc: number;
+  profile: any;
+  seed: string;
+  onSuccess: any;
+  onFailure: any;
+  actorName: string;
+  chatOnResult: boolean;
+  graph: any;
+  state: any;
+  startedAt: number | null;
+  timer: ReturnType<typeof window.setInterval> | null;
+  resultMessage?: string;
+
+  constructor(options: any = {}) {
     super(options);
     this.rollTotal = Number(options.rollTotal ?? 15);
     this.dc = Number(options.dc ?? 15);
@@ -124,7 +142,7 @@ export class NodeIntrusionApp extends LegacyApplication {
     };
   }
 
-  activateListeners(html) {
+  activateListeners(html: any) {
     super.activateListeners(html);
     html.find("[data-node-id]").on("click", (event) => this.handleNodeClick(event.currentTarget.dataset.nodeId));
     html.find("[data-action='start']").on("click", () => this.startRun());
@@ -132,13 +150,13 @@ export class NodeIntrusionApp extends LegacyApplication {
     this.syncDom();
   }
 
-  async render(force, options) {
+  async render(force?: any, options?: any) {
     const rendered = await super.render(force, options);
     if (this.state.hasStarted && this.state.isRunning) this.startTimer();
     return rendered;
   }
 
-  async close(options = {}) {
+  async close(options: any = {}) {
     this.stopTimer();
     return super.close(options);
   }
@@ -156,7 +174,7 @@ export class NodeIntrusionApp extends LegacyApplication {
     this.render(false);
   }
 
-  handleNodeClick(nodeId) {
+  handleNodeClick(nodeId: string) {
     if (!this.state.hasStarted || !this.state.isRunning) return;
     const current = this.getCurrentNode();
     const node = this.graph.nodes.find((candidate) => candidate.id === nodeId);
@@ -252,7 +270,7 @@ export class NodeIntrusionApp extends LegacyApplication {
     await this.finish("failure", "Manual disconnect", { close: true });
   }
 
-  async finish(result, message, { close = false } = {}) {
+  async finish(result: "success" | "failure", message: string, { close = false } = {}) {
     if (this.state.result) return;
     this.state.isRunning = false;
     this.state.result = result;

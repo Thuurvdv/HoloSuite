@@ -1,4 +1,6 @@
-export async function postHackResultMessage({ title, result, actorName, message, rollTotal, dc }) {
+declare const ChatMessage: any;
+
+export async function postHackResultMessage({ title, result, actorName, message, rollTotal, dc }: any) {
   const success = result === "success";
   const color = success ? "#38f28f" : "#ff477e";
   const label = success ? "HACK SUCCESS" : "HACK FAILED";
@@ -21,7 +23,7 @@ export async function postHackResultMessage({ title, result, actorName, message,
   });
 }
 
-function escapeHtml(value) {
+function escapeHtml(value: any) {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
   return div.innerHTML;
