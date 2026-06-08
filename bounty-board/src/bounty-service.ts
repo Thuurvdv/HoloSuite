@@ -8,6 +8,7 @@ import {
   SETTING_POST_PUBLISH_CHAT,
   SETTING_POST_RESULT_CHAT,
   SETTING_PUBLIC_DOCUMENT_LINKS,
+  SETTING_REMOVED_TAGS,
   STATUS_LABELS,
   THREAT_LEVELS
 } from "./bounty-constants";
@@ -76,6 +77,24 @@ function normalizeTags(value: any) {
     .split(",")
     .map((tag) => tag.trim())
     .filter(Boolean);
+}
+
+function uniqueTags(tags: string[]) {
+  const seen = new Set();
+  return tags.filter((tag) => {
+    const key = normalizeString(tag).toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function getRemovedTags(): string[] {
+  try {
+    return normalizeTags(game.settings.get(MODULE_ID, SETTING_REMOVED_TAGS));
+  } catch (_error) {
+    return [];
+  }
 }
 
 function escapeHtml(value: any) {
@@ -153,6 +172,7 @@ export function prepareBountyForDisplay(bounty: Partial<BountyData>) {
     rewardLabel: getRewardLabel(normalized),
     tagsText: normalized.tags.join(", "),
     hasImage: Boolean(normalized.image),
+    isClaimed: normalized.status === BOUNTY_STATUSES.CLAIMED,
     isVisibleToPlayers: isBountyVisibleToPlayers(normalized),
     linkedJournalName: linkedJournal?.name ?? "",
     canSeeJournal,
@@ -218,6 +238,8 @@ export async function upsertBounty(data: Partial<BountyData> & Record<string, an
     createdAt: existing?.createdAt || timestamp,
     updatedAt: timestamp
   });
+  const removedTags = new Set(getRemovedTags().map((tag) => tag.toLowerCase()));
+  bounty.tags = bounty.tags.filter((tag) => !removedTags.has(tag.toLowerCase()));
   const errors = validateBounty(bounty);
   if (errors.length) {
     ui.notifications?.error?.(errors.join(" "));
@@ -286,15 +308,51 @@ export async function claimBounty(id: string, claimedBy: string) {
   return updateBountyState(id, { status: BOUNTY_STATUSES.CLAIMED, claimedBy: normalizeString(claimedBy) });
 }
 
+export async function removeTag(tag: any) {
+  if (!requireGM("remove bounty tags")) return false;
+  const normalizedTag = normalizeString(tag);
+  if (!normalizedTag) {
+    ui.notifications?.warn?.("Select a tag to remove.");
+    return false;
+  }
+
+  const confirmed = await Dialog.confirm({
+    title: "Remove Tag",
+    content: `<p>Remove <strong>${escapeHtml(normalizedTag)}</strong> from the dropdown and all bounties?</p>`
+  });
+  if (!confirmed) return false;
+
+  const target = normalizedTag.toLowerCase();
+  const store = getBountyStore();
+  let changedCount = 0;
+  for (const bounty of Object.values(store)) {
+    const originalLength = bounty.tags.length;
+    bounty.tags = bounty.tags.filter((candidate) => candidate.toLowerCase() !== target);
+    if (bounty.tags.length !== originalLength) {
+      bounty.updatedAt = now();
+      changedCount += 1;
+    }
+  }
+
+  const removedTags = uniqueTags([...getRemovedTags(), normalizedTag]);
+  await game.settings.set(MODULE_ID, SETTING_REMOVED_TAGS, removedTags);
+  await saveBountyStore(store);
+  ui.notifications?.info?.(`Removed "${normalizedTag}" from ${changedCount} bount${changedCount === 1 ? "y" : "ies"}.`);
+  return true;
+}
+
 export function getFilterOptions() {
   const bounties = getAllBounties({ includeHidden: true });
   const unique = (values: any[]) => [...new Set(values.map((value) => normalizeString(value)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const removedTags = new Set(getRemovedTags().map((tag) => tag.toLowerCase()));
+  const availableTags = unique([...DEFAULT_TAGS, ...bounties.flatMap((bounty) => bounty.tags)])
+    .filter((tag) => !removedTags.has(tag.toLowerCase()));
 
   return {
     statuses: Object.values(BOUNTY_STATUSES).map((value) => ({ value, label: getStatusLabel(value) })),
     threatLevels: THREAT_LEVELS,
     factions: unique(bounties.map((bounty) => bounty.faction)),
-    tags: unique([...DEFAULT_TAGS, ...bounties.flatMap((bounty) => bounty.tags)])
+    tags: availableTags
   };
 }
 
@@ -379,5 +437,12 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: false
+  });
+
+  game.settings.register(MODULE_ID, SETTING_REMOVED_TAGS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: []
   });
 }

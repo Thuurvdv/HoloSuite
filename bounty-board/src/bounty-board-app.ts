@@ -9,6 +9,7 @@ import {
   markBountyCompleted,
   prepareBountyForDisplay,
   publishBounty,
+  removeTag,
   requestContract,
   updateBountyState
 } from "./bounty-service";
@@ -77,6 +78,7 @@ export class BountyBoardApp extends BaseApplication {
       requestContract: BountyBoardApp.#onRequestContract,
       openImage: BountyBoardApp.#onOpenImage,
       openJournal: BountyBoardApp.#onOpenJournal,
+      removeTag: BountyBoardApp.#onRemoveTag,
       clearFilters: BountyBoardApp.#onClearFilters
     }
   };
@@ -276,6 +278,14 @@ export class BountyBoardApp extends BaseApplication {
   static #onOpenJournal(event: Event) {
     const id = (event.target as Element | null)?.closest("[data-open-journal]")?.getAttribute("data-open-journal");
     game.journal?.get(id)?.sheet?.render(true);
+  }
+
+  static async #onRemoveTag() {
+    const tag = this.filters.tag;
+    if (await removeTag(tag)) {
+      this.filters.tag = "";
+      this.render({ force: true });
+    }
   }
 
   static #onClearFilters() {
