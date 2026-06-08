@@ -1,8 +1,8 @@
-function clamp(value, min, max) {
+function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-function hashSeed(value) {
+function hashSeed(value: any) {
   const text = String(value ?? "signal-alignment");
   let hash = 2166136261;
   for (let index = 0; index < text.length; index += 1) {
@@ -12,7 +12,7 @@ function hashSeed(value) {
   return hash >>> 0;
 }
 
-function createRng(seed) {
+function createRng(seed: any) {
   let state = hashSeed(seed);
   return () => {
     state += 0x6D2B79F5;
@@ -23,11 +23,11 @@ function createRng(seed) {
   };
 }
 
-export function clampFrequency(value) {
+export function clampFrequency(value: any) {
   return clamp(Number(value) || 0, 0, 100);
 }
 
-export function generateSignalChannels(profile, seed = Date.now()) {
+export function generateSignalChannels(profile: any, seed: any = Date.now()) {
   const rng = createRng(seed);
   const channelCount = clamp(Number(profile.channelCount ?? profile.signalAlignment?.channelCount) || 3, 2, 5);
   const tolerance = Number(profile.tolerance ?? profile.signalAlignment?.tolerance ?? 5);

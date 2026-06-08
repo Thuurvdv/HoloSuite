@@ -1,4 +1,10 @@
-export function escapeHtml(value) {
+declare const game: any;
+declare const canvas: any;
+declare const Roll: any;
+declare const ChatMessage: any;
+declare const ui: any;
+
+export function escapeHtml(value: any) {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
   return div.innerHTML;
@@ -14,7 +20,7 @@ export function getWorldUsers() {
   return game.users?.contents ?? [...(game.users ?? [])];
 }
 
-export function getUserById(userId) {
+export function getUserById(userId: string) {
   const id = String(userId ?? "");
   return game.users?.get?.(id) ?? getWorldUsers().find((user) => user.id === id) ?? null;
 }
@@ -24,24 +30,24 @@ export function getWorldActors() {
   return game.actors?.contents ?? [...(game.actors ?? [])];
 }
 
-export function getActorById(actorId) {
+export function getActorById(actorId: string) {
   const id = String(actorId ?? "");
   return game.actors?.get?.(id) ?? getWorldActors().find((actor) => actor.id === id || actor.uuid === id) ?? null;
 }
 
-export function getUserCharacter(user) {
+export function getUserCharacter(user: any) {
   const character = user?.character;
   if (!character) return null;
   if (typeof character === "string") return getActorById(character);
   return character;
 }
 
-export function actorIsOwnedByUser(actor, user) {
+export function actorIsOwnedByUser(actor: any, user: any) {
   if (!actor || !user) return false;
   if (actor === getUserCharacter(user)) return true;
   if (actor.testUserPermission?.(user, "OWNER")) return true;
 
-  const ownerLevel = globalThis.CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OWNER ?? 3;
+  const ownerLevel = (globalThis as any).CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OWNER ?? 3;
   const ownership = actor.ownership ?? actor.data?.permission ?? {};
   return Number(ownership[user.id] ?? ownership.default ?? 0) >= ownerLevel;
 }
@@ -50,7 +56,7 @@ export function getSelectedTokenActor() {
   return canvas?.tokens?.controlled?.[0]?.actor ?? null;
 }
 
-export function getUserOwnedActors(user) {
+export function getUserOwnedActors(user: any) {
   const assigned = getUserCharacter(user) ? [getUserCharacter(user)] : [];
   const owned = getWorldActors().filter((actor) => actorIsOwnedByUser(actor, user));
   const actors = new Map([...assigned, ...owned].filter(Boolean).map((actor) => [actor.id, actor]));
@@ -104,7 +110,7 @@ const SKILL_LABEL_OVERRIDES = {
   technology: "Technology"
 };
 
-export function getActorSkillOptions(actor) {
+export function getActorSkillOptions(actor: any) {
   const skills = actor?.system?.skills;
   if (skills && typeof skills === "object") {
     const entries = Object.entries(skills).map(([id, skill]) => ({
@@ -124,11 +130,11 @@ export function getActorSkillOptions(actor) {
   ];
 }
 
-export function getSkillData(actor, skillId) {
+export function getSkillData(actor: any, skillId: string) {
   return actor?.system?.skills?.[skillId] ?? null;
 }
 
-export function getSkillLabel(skillId, skill) {
+export function getSkillLabel(skillId: string, skill: any) {
   const raw = String(skill?.label ?? skill?.name ?? skill?.localizedName ?? skillId ?? "Skill").trim();
   const normalized = raw.toLowerCase().replace(/[^a-z0-9]/g, "");
   return String(SKILL_LABEL_OVERRIDES[normalized] ?? raw)
@@ -136,7 +142,7 @@ export function getSkillLabel(skillId, skill) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-export function getSkillModifier(skill) {
+export function getSkillModifier(skill: any) {
   if (typeof skill === "number") return skill;
   if (!skill || typeof skill !== "object") return 0;
   const candidates = [
@@ -168,14 +174,14 @@ export function getSkillModifier(skill) {
   return Number(weighted[0]?.value ?? 0);
 }
 
-export function formatSkillOptionLabel(skillId, skill) {
+export function formatSkillOptionLabel(skillId: string, skill: any) {
   const label = getSkillLabel(skillId, skill);
   const modifier = getSkillModifier(skill);
   const sign = modifier >= 0 ? "+" : "-";
   return `${label} (${sign}${Math.abs(modifier)})`;
 }
 
-function collectNumericFields(value, results, depth, path = "") {
+function collectNumericFields(value: any, results: any[], depth: number, path = "") {
   if (!value || typeof value !== "object" || depth > 4) return;
   for (const [key, child] of Object.entries(value)) {
     const childPath = path ? `${path}.${key}` : key;
@@ -193,7 +199,7 @@ function collectNumericFields(value, results, depth, path = "") {
   }
 }
 
-export async function rollActorSkill(actor, skillId, dc, flavorPrefix = "HoloSuite Hacking") {
+export async function rollActorSkill(actor: any, skillId: string, dc: number, flavorPrefix = "HoloSuite Hacking") {
   try {
     if (typeof actor.rollSkill === "function") {
       const roll = await actor.rollSkill(skillId, { dc, event: null });

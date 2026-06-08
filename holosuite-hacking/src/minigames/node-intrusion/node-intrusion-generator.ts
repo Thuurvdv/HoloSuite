@@ -1,8 +1,8 @@
-function clamp(value, min, max) {
+function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-function hashSeed(value) {
+function hashSeed(value: any) {
   const text = String(value ?? "node-intrusion");
   let hash = 2166136261;
   for (let index = 0; index < text.length; index += 1) {
@@ -12,7 +12,7 @@ function hashSeed(value) {
   return hash >>> 0;
 }
 
-function createRng(seed) {
+function createRng(seed: any) {
   let state = hashSeed(seed);
   return () => {
     state += 0x6D2B79F5;
@@ -23,12 +23,12 @@ function createRng(seed) {
   };
 }
 
-function pickRandom(items, rng) {
+function pickRandom<T>(items: T[], rng: () => number): T | null {
   if (!items.length) return null;
   return items[Math.floor(rng() * items.length)];
 }
 
-function connect(nodes, leftId, rightId) {
+function connect(nodes: any[], leftId: string, rightId: string) {
   const left = nodes.find((node) => node.id === leftId);
   const right = nodes.find((node) => node.id === rightId);
   if (!left || !right) return;
@@ -36,11 +36,11 @@ function connect(nodes, leftId, rightId) {
   if (!right.connected.includes(leftId)) right.connected.push(leftId);
 }
 
-export function edgeKey(leftId, rightId) {
+export function edgeKey(leftId: string, rightId: string) {
   return [leftId, rightId].sort().join("--");
 }
 
-function createNode(id, type, x, y) {
+function createNode(id: string, type: string, x: number, y: number) {
   return {
     id,
     x: clamp(Math.round(x), 6, 94),
@@ -52,21 +52,21 @@ function createNode(id, type, x, y) {
   };
 }
 
-function getEdges(nodes) {
+function getEdges(nodes: any[]) {
   return nodes.flatMap((node) => node.connected
     .filter((connectedId) => node.id < connectedId)
     .map((connectedId) => ({ from: node.id, to: connectedId })));
 }
 
-function getNode(nodes, nodeId) {
+function getNode(nodes: any[], nodeId: string) {
   return nodes.find((node) => node.id === nodeId);
 }
 
-function orientation(a, b, c) {
+function orientation(a: any, b: any, c: any) {
   return Math.sign(((b.y - a.y) * (c.x - b.x)) - ((b.x - a.x) * (c.y - b.y)));
 }
 
-function segmentsCross(a, b, c, d) {
+function segmentsCross(a: any, b: any, c: any, d: any) {
   const first = orientation(a, b, c);
   const second = orientation(a, b, d);
   const third = orientation(c, d, a);
@@ -74,7 +74,7 @@ function segmentsCross(a, b, c, d) {
   return first !== second && third !== fourth;
 }
 
-function edgesCross(nodes, leftEdge, rightEdge) {
+function edgesCross(nodes: any[], leftEdge: any, rightEdge: any) {
   if (
     leftEdge.from === rightEdge.from
     || leftEdge.from === rightEdge.to
@@ -90,7 +90,7 @@ function edgesCross(nodes, leftEdge, rightEdge) {
   return segmentsCross(leftFrom, leftTo, rightFrom, rightTo);
 }
 
-function pointToSegmentDistance(point, start, end) {
+function pointToSegmentDistance(point: any, start: any, end: any) {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
   const lengthSquared = (dx * dx) + (dy * dy);
@@ -110,7 +110,7 @@ function pointToSegmentDistance(point, start, end) {
   return Math.sqrt((px * px) + (py * py));
 }
 
-function countEdgeCrossings(nodes, edges = getEdges(nodes)) {
+function countEdgeCrossings(nodes: any[], edges = getEdges(nodes)) {
   let crossings = 0;
   for (let leftIndex = 0; leftIndex < edges.length; leftIndex += 1) {
     for (let rightIndex = leftIndex + 1; rightIndex < edges.length; rightIndex += 1) {
@@ -120,7 +120,7 @@ function countEdgeCrossings(nodes, edges = getEdges(nodes)) {
   return crossings;
 }
 
-function scoreLayout(nodes) {
+function scoreLayout(nodes: any[]) {
   const edges = getEdges(nodes);
   let score = countEdgeCrossings(nodes, edges) * 900;
 
@@ -150,14 +150,14 @@ function scoreLayout(nodes) {
   return score;
 }
 
-function scoreCandidate(nodes, candidate, connectedIds) {
+function scoreCandidate(nodes: any[], candidate: any, connectedIds: string[]) {
   const trialNodes = nodes.map((node) => ({ ...node, connected: [...node.connected] }));
   trialNodes.push({ ...candidate, connected: [] });
   for (const connectedId of connectedIds) connect(trialNodes, candidate.id, connectedId);
   return scoreLayout(trialNodes);
 }
 
-function createPlacedNode(nodes, id, type, anchor, rng, connectedIds, options = {}) {
+function createPlacedNode(nodes: any[], id: string, type: string, anchor: any, rng: () => number, connectedIds: string[], options: any = {}) {
   const {
     radiusMin = 17,
     radiusMax = 34,
@@ -183,7 +183,7 @@ function createPlacedNode(nodes, id, type, anchor, rng, connectedIds, options = 
   return best ?? createNode(id, type, anchor.x + biasX, anchor.y);
 }
 
-function relaxNodePositions(nodes) {
+function relaxNodePositions(nodes: any[]) {
   for (let pass = 0; pass < 24; pass += 1) {
     for (let leftIndex = 0; leftIndex < nodes.length; leftIndex += 1) {
       for (let rightIndex = leftIndex + 1; rightIndex < nodes.length; rightIndex += 1) {
@@ -210,14 +210,14 @@ function relaxNodePositions(nodes) {
   }
 }
 
-function buildIntrusionGraph(profile, seed = Date.now()) {
+function buildIntrusionGraph(profile: any, seed: any = Date.now()) {
   const rng = createRng(seed);
   const totalNodes = Math.max(6, Number(profile.nodeCount ?? profile.nodeIntrusion?.nodeCount) || 10);
   const decoyCount = clamp(Number(profile.decoyCount ?? profile.nodeIntrusion?.decoyCount) || 0, 0, totalNodes - 4);
   const branchCount = Math.max(0, totalNodes - decoyCount);
   const mainPathLength = clamp(Math.round(branchCount * 0.55), 5, branchCount);
-  const nodes = [];
-  const mainPathIds = [];
+  const nodes: any[] = [];
+  const mainPathIds: string[] = [];
 
   // Build the solvable route first; branches can add pressure without making
   // the generated puzzle impossible.
@@ -291,7 +291,7 @@ function buildIntrusionGraph(profile, seed = Date.now()) {
   };
 }
 
-export function generateIntrusionGraph(profile, seed = Date.now()) {
+export function generateIntrusionGraph(profile: any, seed: any = Date.now()) {
   const attempts = clamp(Math.ceil(Number(profile.nodeCount ?? profile.nodeIntrusion?.nodeCount) || 10), 7, 14);
   let best = null;
 
