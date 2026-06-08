@@ -194,6 +194,17 @@
   gap: 4px;
 }
 
+.csi-editor-header .csi-editor-actions button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 54px;
+  padding: 6px 8px;
+  line-height: 1.1;
+}
+
 .csi-toolkit button {
   min-height: 30px;
   border: 1px solid rgba(95, 220, 255, 0.28);
@@ -213,6 +224,7 @@
 }
 
 .csi-icon-button i,
+.csi-editor-header .csi-editor-actions button i,
 .csi-board-actions button i,
 .csi-editor-card header button i,
 .csi-card-actions button i,
