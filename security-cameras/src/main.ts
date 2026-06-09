@@ -17,38 +17,18 @@ import {
 } from "./region-geometry";
 import { createSecurityCameraAppClasses } from "./apps";
 import { createLiveFrameController } from "./live-frame";
+import { FEED_TEMPLATE_PATH, MODULE_ID, MONITOR_TEMPLATE_PATH, SOCKET_NAME } from "./constants";
+import { createCameraId, escapeHTML, getDeepClone } from "./utils";
 
-const MODULE_ID = "security-cameras";
-const SOCKET_NAME = `module.${MODULE_ID}`;
 const moduleSocket = createHoloSuiteSocket(MODULE_ID, {
   socketName: SOCKET_NAME,
   title: "Security Cameras"
 });
-const MONITOR_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/monitor.hbs`;
-const FEED_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/feed.hbs`;
 
 let activeMonitor = null;
 let activeFeed = null;
 let selectedCameraId = "";
 let editingCameraId = "";
-
-function createCameraId() {
-  if (foundry?.utils?.randomID) return foundry.utils.randomID();
-  if (crypto?.randomUUID) return crypto.randomUUID();
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function getDeepClone(value) {
-  if (foundry?.utils?.deepClone) return foundry.utils.deepClone(value);
-  return JSON.parse(JSON.stringify(value));
-}
-
-function escapeHTML(value) {
-  if (foundry?.utils?.escapeHTML) return foundry.utils.escapeHTML(String(value));
-  const element = document.createElement("div");
-  element.innerText = String(value);
-  return element.innerHTML;
-}
 
 function normalizeCamera(cameraData = {}, options = {}) {
   return normalizeCameraModel(cameraData, { ...options, createId: createCameraId });

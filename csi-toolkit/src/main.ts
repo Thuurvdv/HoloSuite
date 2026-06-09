@@ -25,6 +25,10 @@ import {
 } from "./case-model";
 import { createCSICaseBoardClass } from "./board-app";
 import { createCSIBoardItemEditorClass } from "./item-editor-app";
+import { MODULE_ID, MODULE_TITLE, SOCKET_NAME, TEMPLATE_PATHS } from "./constants";
+import { registerSettings } from "./settings";
+import { registerHandlebarsHelpers } from "./handlebars";
+import { escapeHtml, labelize, slugify } from "./text-utils";
 
 declare const foundry: any;
 declare const game: any;
@@ -35,17 +39,6 @@ declare const ui: any;
 
 (() => {
   "use strict";
-
-  const MODULE_ID = "csi-toolkit";
-  const MODULE_TITLE = "CSI Toolkit";
-  const SOCKET_NAME = `module.${MODULE_ID}`;
-  const TEMPLATE_PATHS = [
-    `modules/${MODULE_ID}/templates/case-manager.hbs`,
-    `modules/${MODULE_ID}/templates/case-browser.hbs`,
-    `modules/${MODULE_ID}/templates/case-board.hbs`,
-    `modules/${MODULE_ID}/templates/item-card.hbs`,
-    `modules/${MODULE_ID}/templates/board-item-editor.hbs`
-  ];
 
   const LegacyApplication = (globalThis as any).Application ?? foundry.appv1?.api?.Application;
 
@@ -71,28 +64,6 @@ declare const ui: any;
     game.socket.on(SOCKET_NAME, handleSocketMessage);
     console.log(`${MODULE_TITLE} | API available at game.csiToolkit`);
   });
-
-  function registerSettings() {
-    game.settings.register(MODULE_ID, "cases", {
-      name: "CSI Toolkit Cases",
-      hint: "Stores all investigation cases for this world.",
-      scope: "world",
-      config: false,
-      type: Object,
-      default: {}
-    });
-
-  }
-
-  function registerHandlebarsHelpers() {
-    Handlebars.registerHelper("csiEq", (left, right) => left === right);
-    Handlebars.registerHelper("csiLabel", value => labelize(value));
-    Handlebars.registerHelper("csiCount", value => Array.isArray(value) ? value.length : 0);
-    Handlebars.registerHelper("csiFallback", (value, fallback) => value || fallback);
-    Handlebars.registerHelper("csiJoin", value => Array.isArray(value) ? value.join(", ") : "");
-    Handlebars.registerHelper("csiOption", (value, selected) => value === selected ? "selected" : "");
-    Handlebars.registerHelper("csiChecked", value => value === "players" ? "checked" : "");
-  }
 
   function buildPublicApi() {
     return {
@@ -883,14 +854,6 @@ declare const ui: any;
     return JSON.parse(JSON.stringify(value));
   }
 
-  function labelize(value) {
-    return String(value ?? "").replace(/_/g, " ").replace(/\b\w/g, letter => letter.toUpperCase());
-  }
-
-  function slugify(value) {
-    return String(value || "case").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "case";
-  }
-
   function singularLabel(collection) {
     if (collection === "suspects") return "suspect";
     if (collection === "locations") return "location";
@@ -931,9 +894,4 @@ declare const ui: any;
     return Promise.resolve(globalThis.confirm?.(options.content?.replace(/<[^>]+>/g, "") ?? options.title));
   }
 
-  function escapeHtml(value) {
-    const div = document.createElement("div");
-    div.textContent = String(value ?? "");
-    return div.innerHTML;
-  }
 })();

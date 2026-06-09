@@ -6,12 +6,15 @@ import {
   normalizeCallData,
   normalizeContact
 } from "./call-model";
-
-const MODULE_ID = "cybercall";
-const SOCKET_NAME = `module.${MODULE_ID}`;
-const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall.hbs`;
-const COMPOSER_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-composer.hbs`;
-const CONTACTS_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-contacts.hbs`;
+import {
+  COMPOSER_TEMPLATE_PATH,
+  CONTACTS_TEMPLATE_PATH,
+  MODULE_ID,
+  RINGTONE_CHOICES,
+  SOCKET_NAME,
+  TEMPLATE_PATH
+} from "./constants";
+import { escapeHTML } from "./dom-utils";
 
 let activeCall = null;
 let activeComposer = null;
@@ -19,20 +22,6 @@ let activeContacts = null;
 let activeContactsTab = "personal";
 let ringingAudio = null;
 let groupContactsCache = null;
-
-const RINGTONE_CHOICES = {
-  "": "Silent",
-  [`modules/${MODULE_ID}/audio/Ringtone1.ogg`]: "Ringtone 1",
-  [`modules/${MODULE_ID}/audio/Ringtone2.ogg`]: "Ringtone 2",
-  [`modules/${MODULE_ID}/audio/Ringtone3.ogg`]: "Ringtone 3"
-};
-
-function escapeHTML(value) {
-  if (foundry?.utils?.escapeHTML) return foundry.utils.escapeHTML(String(value));
-  const element = document.createElement("div");
-  element.innerText = String(value);
-  return element.innerHTML;
-}
 
 function getDefaultComposerData() {
   return normalizeCallData({
