@@ -1,16 +1,22 @@
-import { BOUNTY_STATUSES, MODULE_ID, TEMPLATE_ROOT, THREAT_LEVELS } from "./bounty-constants.js";
-import { getBounty, normalizeBounty, upsertBounty } from "./bounty-service.js";
-import { refreshBountyBoard } from "./bounty-board-app.js";
+import { BOUNTY_STATUSES, MODULE_ID, TEMPLATE_ROOT, THREAT_LEVELS } from "./bounty-constants";
+import { getBounty, normalizeBounty, upsertBounty } from "./bounty-service";
+import { refreshBountyBoard } from "./bounty-board-app";
+
+declare const foundry: any;
+declare const Application: any;
+declare const game: any;
+declare const ui: any;
+declare const FilePicker: any;
 
 const ApplicationV2 = foundry.applications?.api?.ApplicationV2 ?? Application;
 const HandlebarsApplicationMixin = foundry.applications?.api?.HandlebarsApplicationMixin;
 const BaseApplication = HandlebarsApplicationMixin ? HandlebarsApplicationMixin(ApplicationV2) : ApplicationV2;
 
-function getDocuments(collection) {
+function getDocuments(collection: any) {
   return (collection?.contents ?? []).map((document) => ({ id: document.id, name: document.name }));
 }
 
-function parseForm(form) {
+function parseForm(form: HTMLFormElement): Record<string, any> {
   const formData = new FormData(form);
   return {
     id: String(formData.get("id") ?? ""),
@@ -33,6 +39,8 @@ function parseForm(form) {
 }
 
 export class BountyEditorApp extends BaseApplication {
+  bountyId: string | null;
+
   static DEFAULT_OPTIONS = {
     id: "bounty-editor-app",
     tag: "form",
@@ -48,7 +56,7 @@ export class BountyEditorApp extends BaseApplication {
     },
     position: {
       width: 660,
-      height: "auto"
+      height: 720
     },
     classes: ["bounty-editor-window"],
     actions: {
@@ -62,7 +70,7 @@ export class BountyEditorApp extends BaseApplication {
     }
   };
 
-  constructor({ bountyId = null } = {}) {
+  constructor({ bountyId = null }: { bountyId?: string | null } = {}) {
     super();
     this.bountyId = bountyId;
   }
@@ -71,7 +79,7 @@ export class BountyEditorApp extends BaseApplication {
     return this.bountyId ? "Edit Bounty" : "Create Bounty";
   }
 
-  async _prepareContext(options) {
+  async _prepareContext(options: any) {
     const bounty = this.bountyId ? getBounty(this.bountyId) : normalizeBounty({});
     return {
       bounty: {
@@ -85,13 +93,13 @@ export class BountyEditorApp extends BaseApplication {
     };
   }
 
-  _onRender(context, options) {
+  _onRender(context: any, options: any) {
     super._onRender?.(context, options);
     const root = this.element;
     root.querySelector("[name='title']")?.focus();
   }
 
-  static async #onSubmit(event, form, formData) {
+  static async #onSubmit(event: Event, form: HTMLFormElement, formData: any) {
     event.preventDefault();
     if (!game.user?.isGM) {
       ui.notifications?.warn?.("Only a GM can edit bounties.");
@@ -101,14 +109,14 @@ export class BountyEditorApp extends BaseApplication {
     if (bounty) refreshBountyBoard();
   }
 
-  static #onBrowseImage(event) {
+  static #onBrowseImage(event: Event) {
     event.preventDefault();
     const input = this.element.querySelector("[name='image']");
     if (!input) return;
     new FilePicker({
       type: "image",
       current: input.value,
-      callback: (path) => {
+      callback: (path: string) => {
         input.value = path;
         input.dispatchEvent(new Event("change", { bubbles: true }));
       }

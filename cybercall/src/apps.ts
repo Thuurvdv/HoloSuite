@@ -53,7 +53,7 @@ export function createCyberCallAppClasses(deps: any) {
         popOut: true,
         resizable: true,
         width: 440,
-        height: "auto"
+        height: 420
       });
     }
 
@@ -94,7 +94,7 @@ export function createCyberCallAppClasses(deps: any) {
         popOut: true,
         resizable: true,
         width: 560,
-        height: "auto"
+        height: 560
       });
     }
 
@@ -136,7 +136,7 @@ export function createCyberCallAppClasses(deps: any) {
         popOut: true,
         resizable: true,
         width: 500,
-        height: "auto"
+        height: 620
       });
     }
 
@@ -194,7 +194,7 @@ export function createCyberCallAppClasses(deps: any) {
         },
         position: {
           width: 440,
-          height: "auto"
+          height: 420
         }
       };
 
@@ -254,7 +254,7 @@ export function createCyberCallAppClasses(deps: any) {
         },
         position: {
           width: 560,
-          height: "auto"
+          height: 560
         }
       };
 
@@ -310,7 +310,7 @@ export function createCyberCallAppClasses(deps: any) {
         },
         position: {
           width: 500,
-          height: "auto"
+          height: 620
         }
       };
 

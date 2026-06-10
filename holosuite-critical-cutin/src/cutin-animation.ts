@@ -1,16 +1,42 @@
-import { AUDIENCE, SETTINGS, debugLog, setting } from "./settings.js";
+import { AUDIENCE, SETTINGS, debugLog, setting } from "./settings";
 
-const activeQueue = [];
-const seenPayloads = new Set();
+declare const foundry: any;
+declare const game: any;
+
+export type CutinPayload = {
+  id?: string;
+  messageId?: string;
+  userId?: string | null;
+  actorId?: string | null;
+  userName?: string;
+  actorName?: string;
+  triggerKind?: "success" | "failure" | string;
+  naturalResult?: number;
+  threshold?: number;
+  animationStyle?: "strike" | "breach" | "signal" | string;
+  blind?: boolean;
+  whisper?: string[];
+  imagePath?: string;
+  audioPath?: string;
+  overlayText?: string;
+  accentColor?: string;
+  textEnabled?: boolean;
+  duration?: number;
+  volume?: number;
+  audience?: string;
+};
+
+const activeQueue: CutinPayload[] = [];
+const seenPayloads = new Set<string>();
 let playing = false;
 
-function escapeHtml(value) {
+function escapeHtml(value: any) {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
   return div.innerHTML;
 }
 
-function shouldPlayForAudience(payload) {
+function shouldPlayForAudience(payload: CutinPayload) {
   if (payload?.blind && !game.user?.isGM) return false;
   if (Array.isArray(payload?.whisper) && payload.whisper.length && !payload.whisper.includes(game.user?.id) && !game.user?.isGM) {
     return false;
@@ -23,15 +49,16 @@ function shouldPlayForAudience(payload) {
   return true;
 }
 
-async function playAudio(src, volume) {
+async function playAudio(src?: string, volume?: number) {
   if (!src) return;
   try {
     const baseVolume = Math.min(1, Math.max(0, Number(volume ?? setting(SETTINGS.volume) ?? 0.8)));
     if (foundry.audio?.AudioHelper?.play) {
       return foundry.audio.AudioHelper.play({ src, volume: baseVolume, autoplay: true, loop: false }, false);
     }
-    if (globalThis.AudioHelper?.play) {
-      return globalThis.AudioHelper.play({ src, volume: baseVolume, autoplay: true, loop: false }, false);
+    const globalAudioHelper = (globalThis as any).AudioHelper;
+    if (globalAudioHelper?.play) {
+      return globalAudioHelper.play({ src, volume: baseVolume, autoplay: true, loop: false }, false);
     }
     const interfaceVolume = Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5);
     const audio = new Audio(src);
@@ -44,7 +71,7 @@ async function playAudio(src, volume) {
   }
 }
 
-function stopAudio(handle) {
+function stopAudio(handle: any) {
   try {
     if (!handle) return;
     if (typeof handle.stop === "function") {
@@ -60,7 +87,7 @@ function stopAudio(handle) {
   }
 }
 
-function createOverlay(payload) {
+function createOverlay(payload: CutinPayload) {
   const accent = payload.accentColor || "#69e8ff";
   const animationStyle = ["strike", "breach", "signal"].includes(payload.animationStyle) ? payload.animationStyle : "strike";
   const triggerKind = payload.triggerKind === "failure" ? "failure" : "success";
@@ -115,7 +142,7 @@ function createOverlay(payload) {
   return overlay;
 }
 
-async function playNow(payload) {
+async function playNow(payload: CutinPayload) {
   if (!shouldPlayForAudience(payload)) return;
 
   const duration = Math.min(8000, Math.max(800, Number(payload.duration ?? setting(SETTINGS.duration) ?? 2500)));
@@ -143,12 +170,13 @@ async function drainQueue() {
   playing = false;
 }
 
-export function playCutin(payload) {
+export function playCutin(payload: CutinPayload | null | undefined) {
   if (!payload) return;
   if (payload.id) {
     if (seenPayloads.has(payload.id)) return;
     seenPayloads.add(payload.id);
-    if (seenPayloads.size > 100) seenPayloads.delete(seenPayloads.values().next().value);
+    const oldest = seenPayloads.values().next().value;
+    if (seenPayloads.size > 100 && oldest) seenPayloads.delete(oldest);
   }
   activeQueue.push(payload);
   if (activeQueue.length > 3) activeQueue.splice(1, activeQueue.length - 3);

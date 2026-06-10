@@ -1,6 +1,10 @@
-import { MODULE_ID, STATUS_LABELS, TEMPLATE_ROOT } from "./bounty-constants.js";
+import { MODULE_ID, STATUS_LABELS, TEMPLATE_ROOT } from "./bounty-constants";
+import type { BountyData } from "./bounty-service";
 
-function normalizeForChat(bounty = {}) {
+declare const renderTemplate: any;
+declare const ChatMessage: any;
+
+function normalizeForChat(bounty: Partial<BountyData> = {}) {
   const amount = Number(bounty.rewardAmount ?? 0);
   const currency = bounty.rewardCurrency || "credits";
   return {
@@ -15,7 +19,7 @@ function normalizeForChat(bounty = {}) {
   };
 }
 
-export async function postBountyChatCard(bounty, mode = "published") {
+export async function postBountyChatCard(bounty: Partial<BountyData>, mode = "published") {
   const normalized = normalizeForChat(bounty);
   const content = await renderTemplate(`${TEMPLATE_ROOT}/bounty-chat-card.hbs`, {
     bounty: normalized,

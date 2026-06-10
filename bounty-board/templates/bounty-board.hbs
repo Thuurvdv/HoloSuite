@@ -41,14 +41,21 @@
         {{/each}}
       </select>
     </label>
-    <label>
+    <label class="bb-tag-filter">
       <span>Tag</span>
-      <select data-filter="tag" name="tag">
-        <option value="">All Tags</option>
-        {{#each options.tags as |tag|}}
-          <option value="{{tag}}" {{#if (bbEq ../filters.tag tag)}}selected{{/if}}>{{tag}}</option>
-        {{/each}}
-      </select>
+      <span class="bb-tag-filter-row">
+        <select data-filter="tag" name="tag">
+          <option value="">All Tags</option>
+          {{#each options.tags as |tag|}}
+            <option value="{{tag}}" {{#if (bbEq ../filters.tag tag)}}selected{{/if}}>{{tag}}</option>
+          {{/each}}
+        </select>
+        {{#if isGM}}
+          <button type="button" class="bb-icon-button" data-action="removeTag" title="Remove selected tag" {{#unless filters.tag}}disabled{{/unless}}>
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        {{/if}}
+      </span>
     </label>
     <label class="bb-search">
       <span>Search</span>

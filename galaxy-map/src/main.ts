@@ -16,14 +16,11 @@ import {
 } from "./galaxy-model";
 import { createGalaxyMapManagerClass } from "./manager-app";
 import { createGalaxyMapViewClass } from "./view-app";
+import { MODULE_ID, SETTING_MAPS, SOCKET_NAME, TEMPLATE_ROOT } from "./constants";
+import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, slugify } from "./dom-utils";
 
 (() => {
   "use strict";
-
-  const MODULE_ID = "galaxy-map";
-  const SETTING_MAPS = "maps";
-  const SOCKET_NAME = `module.${MODULE_ID}`;
-  const TEMPLATE_ROOT = `modules/${MODULE_ID}/templates`;
 
   let managerApp = null;
   const openMaps = new Map();
@@ -82,57 +79,6 @@ import { createGalaxyMapViewClass } from "./view-app";
     if (!requireGM("save galaxy map data")) return maps;
     await game.settings.set(MODULE_ID, SETTING_MAPS, maps ?? {});
     return maps;
-  }
-
-  function slugify(value) {
-    return String(value || "galaxy-map")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "galaxy-map";
-  }
-
-  function downloadJson(filename, data) {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function escapeHtml(value) {
-    const div = document.createElement("div");
-    div.textContent = String(value ?? "");
-    return div.innerHTML;
-  }
-
-  function optionList(options, selected) {
-    return options.map((option) => {
-      const value = typeof option === "string" ? option : option.value;
-      const label = typeof option === "string" ? option : option.label;
-      return `<option value="${escapeHtml(value)}" ${value === selected ? "selected" : ""}>${escapeHtml(label)}</option>`;
-    }).join("");
-  }
-
-  function documentOptions(collection, selectedId) {
-    const documents = collection?.contents ?? [];
-    return [
-      { value: "", label: "None" },
-      ...documents.map((doc) => ({ value: doc.id, label: doc.name }))
-    ].map((option) => `<option value="${escapeHtml(option.value)}" ${option.value === selectedId ? "selected" : ""}>${escapeHtml(option.label)}</option>`).join("");
-  }
-
-  function getHtmlElement(html) {
-    return html?.[0] ?? html;
-  }
-
-  function getFormValues(html) {
-    const element = getHtmlElement(html);
-    const form = element?.matches?.("form") ? element : element?.querySelector("form");
-    return Object.fromEntries(new FormData(form).entries());
   }
 
   function activateCrudDialog(html) {

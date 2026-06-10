@@ -1,19 +1,19 @@
 .cybercall-app {
-  --cybercall-cyan: var(--hs-cyan);
-  --cybercall-blue: #00a7ff;
-  --cybercall-deep: rgba(4, 16, 28, 0.82);
-  --cybercall-line: var(--hs-line);
-  --cybercall-text: var(--hs-text);
-  --cybercall-danger: var(--hs-magenta);
+  --cybercall-cyan: var(--hs-color-primary);
+  --cybercall-blue: var(--hs-color-accent);
+  --cybercall-deep: var(--hs-panel);
+  --cybercall-line: var(--hs-border-subtle);
+  --cybercall-text: var(--hs-text-primary);
+  --cybercall-danger: var(--hs-color-danger);
   color: var(--cybercall-text);
   font-family: var(--hs-font-ui);
 }
 
 .cybercall-composer-app,
 .cybercall-contacts-app {
-  --cybercall-cyan: var(--hs-cyan);
-  --cybercall-blue: #00a7ff;
-  --cybercall-text: var(--hs-text);
+  --cybercall-cyan: var(--hs-color-primary);
+  --cybercall-blue: var(--hs-color-accent);
+  --cybercall-text: var(--hs-text-primary);
   color: var(--cybercall-text);
   font-family: var(--hs-font-ui);
 }
@@ -118,9 +118,9 @@
 }
 
 .cybercall-emergency {
-  --cybercall-cyan: #ff6c7e;
-  --cybercall-blue: #ff274b;
-  --cybercall-line: rgba(255, 65, 93, 0.52);
+  --cybercall-cyan: var(--hs-color-danger);
+  --cybercall-blue: var(--hs-color-danger);
+  --cybercall-line: color-mix(in srgb, var(--hs-color-danger) 52%, transparent);
   background:
     linear-gradient(135deg, rgba(255, 65, 93, 0.20), transparent 34%),
     linear-gradient(180deg, rgba(42, 4, 13, 0.78), rgba(18, 3, 9, 0.9));
@@ -130,10 +130,10 @@
 }
 
 .cybercall-corrupted {
-  --cybercall-cyan: #7dff9a;
-  --cybercall-blue: #12c96d;
-  --cybercall-line: rgba(125, 255, 154, 0.48);
-  --cybercall-text: #d8ffe2;
+  --cybercall-cyan: var(--hs-color-success);
+  --cybercall-blue: var(--hs-color-success);
+  --cybercall-line: color-mix(in srgb, var(--hs-color-success) 48%, transparent);
+  --cybercall-text: var(--hs-text-primary);
   background:
     linear-gradient(135deg, rgba(125, 255, 154, 0.18), transparent 36%),
     linear-gradient(180deg, rgba(5, 42, 20, 0.76), rgba(1, 16, 10, 0.92));

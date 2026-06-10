@@ -1,5 +1,5 @@
-import { MODULE_ID, MODULE_TITLE, TEMPLATE_ROOT } from "./bounty-constants.js";
-import { openBountyBoard } from "./bounty-board-app.js";
+import { MODULE_ID, MODULE_TITLE, TEMPLATE_ROOT } from "./bounty-constants";
+import { openBountyBoard } from "./bounty-board-app";
 import {
   archiveBounty,
   claimBounty,
@@ -9,33 +9,12 @@ import {
   publishBounty,
   registerSettings,
   upsertBounty
-} from "./bounty-service.js";
+} from "./bounty-service";
 
-function addSceneControlButton(controls) {
-  const openBoard = () => openBountyBoard();
-  const tool = {
-    name: "bounty-board",
-    title: "Bounty Board",
-    icon: "fa-solid fa-crosshairs",
-    button: true,
-    visible: true,
-    onClick: openBoard,
-    onChange: openBoard
-  };
-
-  if (Array.isArray(controls)) {
-    const tokenControls = controls.find((control) => control.name === "token") ?? controls[0];
-    if (tokenControls?.tools && !tokenControls.tools.some?.((candidate) => candidate.name === tool.name)) {
-      tokenControls.tools.push(tool);
-    }
-    return;
-  }
-
-  const record = controls ?? {};
-  const tokenControls = record.tokens ?? record.token ?? Object.values(record)[0];
-  if (!tokenControls?.tools || tokenControls.tools[tool.name]) return;
-  tokenControls.tools[tool.name] = { ...tool, order: Object.keys(tokenControls.tools).length };
-}
+declare const game: any;
+declare const Hooks: any;
+declare const Handlebars: any;
+declare const loadTemplates: any;
 
 function exposeApi() {
   const api = {
@@ -77,8 +56,6 @@ Hooks.once("init", async () => {
     `${TEMPLATE_ROOT}/bounty-chat-card.hbs`
   ]);
 });
-
-Hooks.on("getSceneControlButtons", addSceneControlButton);
 
 Hooks.once("ready", () => {
   exposeApi();

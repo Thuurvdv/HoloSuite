@@ -21,6 +21,12 @@
   --hs-glow-green: 0 0 16px rgba(98, 255, 182, 0.22);
   --hs-shadow-panel: 0 16px 42px rgba(0, 0, 0, 0.38), inset 0 0 28px rgba(105, 232, 255, 0.08);
   --hs-shadow-control: inset 0 0 12px rgba(105, 232, 255, 0.08);
+  --hs-focus-ring: 0 0 0 2px rgba(105, 232, 255, 0.18);
+  --hs-disabled-opacity: 0.55;
+  --hs-control-min-height: 32px;
+  --hs-space-window: 14px;
+  --hs-space-panel: 12px;
+  --hs-transition-fast: 140ms ease;
   --hs-window-header-bg: rgba(2, 13, 24, 0.94);
   --hs-surface-bg:
     linear-gradient(rgba(231, 250, 255, 0.026) 50%, rgba(0, 0, 0, 0.035) 50%) 0 0 / 100% 4px,
@@ -37,6 +43,49 @@
   --hs-grid-bg:
     linear-gradient(rgba(105, 232, 255, 0.055) 1px, transparent 1px),
     linear-gradient(90deg, rgba(105, 232, 255, 0.045) 1px, transparent 1px);
+
+  --hs-color-primary: var(--hs-cyan);
+  --hs-color-success: var(--hs-green);
+  --hs-color-danger: var(--hs-magenta);
+  --hs-color-warning: var(--hs-amber);
+  --hs-color-accent: var(--hs-violet);
+  --hs-surface-window: var(--hs-surface-bg);
+  --hs-surface-panel: var(--hs-panel-bg);
+  --hs-surface-card: var(--hs-card-bg);
+  --hs-surface-control: var(--hs-control-bg);
+  --hs-surface-control-hover: var(--hs-control-bg-hover);
+  --hs-surface-active: var(--hs-active-bg);
+  --hs-border-subtle: var(--hs-line);
+  --hs-border-strong: var(--hs-line-strong);
+  --hs-text-primary: var(--hs-text);
+  --hs-text-secondary: var(--hs-muted);
+  --hs-text-tertiary: var(--hs-dim);
+}
+
+:root[data-holosuite-theme="ember"],
+body[data-holosuite-theme="ember"] {
+  --hs-cyan: #ffb86b;
+  --hs-green: #ffe08a;
+  --hs-magenta: #ff5d7d;
+  --hs-amber: #ffd166;
+  --hs-violet: #ff8bd1;
+  --hs-line: rgba(255, 184, 107, 0.3);
+  --hs-line-strong: rgba(255, 214, 128, 0.62);
+  --hs-glow-cyan: 0 0 16px rgba(255, 184, 107, 0.25);
+  --hs-glow-green: 0 0 16px rgba(255, 224, 138, 0.2);
+}
+
+:root[data-holosuite-theme="violet"],
+body[data-holosuite-theme="violet"] {
+  --hs-cyan: #a9b8ff;
+  --hs-green: #7dffc4;
+  --hs-magenta: #ff70c8;
+  --hs-amber: #f5d87a;
+  --hs-violet: #c9a3ff;
+  --hs-line: rgba(169, 184, 255, 0.3);
+  --hs-line-strong: rgba(201, 163, 255, 0.62);
+  --hs-glow-cyan: 0 0 16px rgba(169, 184, 255, 0.25);
+  --hs-glow-green: 0 0 16px rgba(125, 255, 196, 0.2);
 }
 
 /* ── Window root styles ─────────────────────────────────────────────────────
@@ -139,6 +188,7 @@
     background: rgba(2, 13, 24, 0.9);
     color: var(--hs-cyan);
     box-shadow: var(--hs-glow-cyan);
+    cursor: nwse-resize;
   }
 
   & .window-resizable-handle > * {
@@ -191,14 +241,15 @@
   .security-camera-manager,
   .security-camera-feed
 ) :where(button, .dialog-button) {
-  min-height: 30px;
-  border: 1px solid var(--hs-line);
+  min-height: var(--hs-control-min-height);
+  border: 1px solid var(--hs-border-subtle);
   border-radius: var(--hs-radius);
-  background: var(--hs-control-bg);
-  color: var(--hs-text);
+  background: var(--hs-surface-control);
+  color: var(--hs-text-primary);
   box-shadow: var(--hs-shadow-control);
   cursor: pointer;
   font-family: var(--hs-font-ui);
+  transition: border-color var(--hs-transition-fast), box-shadow var(--hs-transition-fast), background var(--hs-transition-fast), color var(--hs-transition-fast), opacity var(--hs-transition-fast);
 }
 
 :where(
@@ -219,10 +270,33 @@
   .security-camera-manager,
   .security-camera-feed
 ) :where(button, .dialog-button):where(:hover, :focus-visible) {
-  border-color: var(--hs-line-strong);
-  background: var(--hs-control-bg-hover);
+  border-color: var(--hs-border-strong);
+  background: var(--hs-surface-control-hover);
   box-shadow: var(--hs-glow-cyan), var(--hs-shadow-control);
   outline: none;
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .holosuite-phone,
+  .hcci-config-window,
+  .holosuite-hacking-launcher,
+  .node-intrusion-shell,
+  .signal-alignment-shell,
+  .pulse-scanner,
+  .security-camera-manager,
+  .security-camera-feed
+) :where(button, .dialog-button):disabled {
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: var(--hs-disabled-opacity);
 }
 
 /* ── Form field base styles ─────────────────────────────────────────────────── */
@@ -239,10 +313,10 @@
   .pulse-scanner,
   .security-camera-manager
 ) :where(input, select, textarea) {
-  border: 1px solid rgba(105, 232, 255, 0.24);
+  border: 1px solid var(--hs-border-subtle);
   border-radius: var(--hs-radius);
   background: var(--hs-field);
-  color: var(--hs-text);
+  color: var(--hs-text-primary);
   box-shadow: inset 0 0 12px rgba(105, 232, 255, 0.06);
 }
 
@@ -259,8 +333,8 @@
   .pulse-scanner,
   .security-camera-manager
 ) :where(input, select, textarea):focus {
-  border-color: var(--hs-line-strong);
-  box-shadow: 0 0 0 2px rgba(105, 232, 255, 0.18), inset 0 0 12px rgba(105, 232, 255, 0.08);
+  border-color: var(--hs-border-strong);
+  box-shadow: var(--hs-focus-ring), inset 0 0 12px rgba(105, 232, 255, 0.08);
   outline: none;
 }
 
@@ -280,7 +354,7 @@
   .pulse-scanner,
   .security-camera-manager
 ) :where(.bb-kicker, .csi-kicker, .gmf-kicker, .cybercall-kicker, .cybercall-composer-kicker, .cybercall-contacts-kicker, .holosuite-kicker, .hcci-kicker, .node-intrusion-kicker, .signal-alignment-kicker, .pulse-scanner-kicker, .security-camera-kicker) {
-  color: var(--hs-cyan);
+  color: var(--hs-color-primary);
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -310,8 +384,8 @@
   .security-camera-monitor-preview,
   .security-camera-editor
 ) {
-  border-color: var(--hs-line);
-  background: var(--hs-card-bg);
+  border-color: var(--hs-border-subtle);
+  background: var(--hs-surface-card);
   box-shadow: var(--hs-shadow-panel);
 }
 
@@ -324,6 +398,6 @@
   .pulse-scanner-empty-state,
   .security-camera-empty
 ) {
-  border-color: var(--hs-line);
-  color: var(--hs-muted);
+  border-color: var(--hs-border-subtle);
+  color: var(--hs-text-secondary);
 }

@@ -54,7 +54,7 @@ export function createSecurityCameraAppClasses(deps: any) {
         popOut: true,
         resizable: true,
         width: 1060,
-        height: "auto"
+        height: 760
       });
     }
 
@@ -105,7 +105,7 @@ export function createSecurityCameraAppClasses(deps: any) {
         popOut: true,
         resizable: true,
         width: 720,
-        height: "auto"
+        height: 520
       });
     }
 
@@ -175,7 +175,7 @@ export function createSecurityCameraAppClasses(deps: any) {
         },
         position: {
           width: 1060,
-          height: "auto"
+          height: 760
         }
       };
 
@@ -234,7 +234,7 @@ export function createSecurityCameraAppClasses(deps: any) {
         },
         position: {
           width: 720,
-          height: "auto"
+          height: 520
         }
       };
 

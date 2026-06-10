@@ -14,7 +14,7 @@ Players can also call the GM using a built-in contacts directory, making two-way
 - Calls can ring with a looping sci-fi ringtone until someone picks up.
 - Players can accept or end calls, and the state syncs across all connected clients.
 - Fullscreen mode turns a call into a dramatic table-wide broadcast.
-- Players can keep a personal contacts list and a shared group contacts list, and place calls to the GM from those contacts.
+- Players can keep a personal contacts list for each world and a shared group contacts list, and place calls to the GM from those contacts.
 
 ## Tutorial: Using CyberCall as a DM
 
@@ -63,4 +63,4 @@ Players can also call the GM using a built-in contacts directory, making two-way
 
 - Open **Configure Settings** and find the **CyberCall** section.
 - Pick a ringtone from the dropdown, or choose **Silent** if you prefer no sound.
-- Your ringtone choice is saved per browser, so it only affects your own client.
+- Your personal contacts and ringtone choice are saved per browser, so they only affect your own client. Personal contacts are separated per world.

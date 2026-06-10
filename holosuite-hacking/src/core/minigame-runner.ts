@@ -1,7 +1,9 @@
-const minigames = new Map();
-const activeApps = new Map();
+declare const ui: any;
 
-export function registerMinigame(definition) {
+const minigames = new Map<string, any>();
+const activeApps = new Map<string, any>();
+
+export function registerMinigame(definition: any) {
   const id = String(definition?.id ?? "").trim();
   if (!id || typeof definition?.create !== "function") {
     throw new Error("HoloSuite Hacking minigames require an id and create(options) function.");
@@ -15,7 +17,7 @@ export function registerMinigame(definition) {
   });
 }
 
-export function getMinigame(id) {
+export function getMinigame(id: string) {
   return minigames.get(String(id ?? ""));
 }
 
@@ -23,7 +25,7 @@ export function getMinigames() {
   return [...minigames.values()];
 }
 
-export function startMinigame(type, options = {}) {
+export function startMinigame(type: string, options: any = {}) {
   const definition = getMinigame(type);
   if (!definition) {
     ui.notifications?.warn?.(`Unknown HoloSuite hacking minigame: ${type}`);
@@ -42,7 +44,7 @@ export function startMinigame(type, options = {}) {
   return app;
 }
 
-export function getActiveApp(type) {
+export function getActiveApp(type?: string) {
   if (type) return activeApps.get(String(type)) ?? null;
   return [...activeApps.values()].at(-1) ?? null;
 }

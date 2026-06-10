@@ -1,17 +1,3 @@
-:root {
-  --hs-bg: #05070d;
-  --hs-bg-deep: #03070b;
-  --hs-panel: rgba(8, 18, 28, 0.9);
-  --hs-line: rgba(105, 232, 255, 0.28);
-  --hs-cyan: #69e8ff;
-  --hs-green: #62ffb6;
-  --hs-magenta: #ff4d7d;
-  --hs-amber: #ffd166;
-  --hs-text: #e7faff;
-  --hs-muted: #8fb5bf;
-  --hs-font-ui: "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif;
-}
-
 .hcci-overlay {
   --hcci-accent: var(--hs-cyan);
   position: fixed;

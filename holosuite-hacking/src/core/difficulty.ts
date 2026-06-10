@@ -116,7 +116,7 @@ export const DIFFICULTY_PROFILES = {
   }
 };
 
-function flattenProfile(profile) {
+function flattenProfile(profile: any) {
   return {
     ...profile,
     ...profile.nodeIntrusion,

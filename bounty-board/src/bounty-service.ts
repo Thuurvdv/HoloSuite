@@ -8,12 +8,50 @@ import {
   SETTING_POST_PUBLISH_CHAT,
   SETTING_POST_RESULT_CHAT,
   SETTING_PUBLIC_DOCUMENT_LINKS,
+  SETTING_REMOVED_TAGS,
   STATUS_LABELS,
   THREAT_LEVELS
-} from "./bounty-constants.js";
-import { postBountyChatCard } from "./bounty-chat.js";
+} from "./bounty-constants";
+import { postBountyChatCard } from "./bounty-chat";
 
-function clone(value) {
+declare const foundry: any;
+declare const game: any;
+declare const ui: any;
+declare const Dialog: any;
+declare const ChatMessage: any;
+
+export type BountyData = {
+  id: string;
+  title: string;
+  targetName: string;
+  description: string;
+  longDescription: string;
+  rewardAmount: number;
+  rewardCurrency: string;
+  threatLevel: string;
+  faction: string;
+  location: string;
+  tags: string[];
+  status: string;
+  image: string;
+  createdAt: string;
+  updatedAt: string;
+  published: boolean;
+  claimedBy: string;
+  notesGM: string;
+  notesPublic: string;
+  linkedJournalId: string;
+};
+
+export type BountyFilters = {
+  status?: string;
+  threatLevel?: string;
+  faction?: string;
+  tag?: string;
+  search?: string;
+};
+
+function clone<T = any>(value: T): T {
   if (foundry.utils.deepClone) return foundry.utils.deepClone(value);
   if (foundry.utils.duplicate) return foundry.utils.duplicate(value);
   return JSON.parse(JSON.stringify(value ?? null));
@@ -29,11 +67,11 @@ function requireGM(action = "change bounty data") {
   return false;
 }
 
-function normalizeString(value, fallback = "") {
+function normalizeString(value: any, fallback = "") {
   return String(value ?? fallback).trim();
 }
 
-function normalizeTags(value) {
+function normalizeTags(value: any) {
   if (Array.isArray(value)) return value.map((tag) => normalizeString(tag)).filter(Boolean);
   return normalizeString(value)
     .split(",")
@@ -41,38 +79,56 @@ function normalizeTags(value) {
     .filter(Boolean);
 }
 
-function escapeHtml(value) {
+function uniqueTags(tags: string[]) {
+  const seen = new Set();
+  return tags.filter((tag) => {
+    const key = normalizeString(tag).toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function getRemovedTags(): string[] {
+  try {
+    return normalizeTags(game.settings.get(MODULE_ID, SETTING_REMOVED_TAGS));
+  } catch (_error) {
+    return [];
+  }
+}
+
+function escapeHtml(value: any) {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
   return div.innerHTML;
 }
 
-function normalizeStatus(value, fallback = BOUNTY_STATUSES.AVAILABLE) {
+function normalizeStatus(value: any, fallback = BOUNTY_STATUSES.AVAILABLE) {
   const statuses = Object.values(BOUNTY_STATUSES);
   return statuses.includes(value) ? value : fallback;
 }
 
-function normalizeThreat(value) {
+function normalizeThreat(value: any) {
   const threat = normalizeString(value, "Moderate");
   return THREAT_LEVELS.includes(threat) ? threat : "Moderate";
 }
 
-function normalizeRewardAmount(value) {
+function normalizeRewardAmount(value: any) {
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : 0;
 }
 
-export function getStatusLabel(status) {
+export function getStatusLabel(status: string) {
   return STATUS_LABELS[status] ?? STATUS_LABELS[BOUNTY_STATUSES.AVAILABLE];
 }
 
-export function getRewardLabel(bounty) {
+export function getRewardLabel(bounty: Partial<BountyData>) {
   const amount = Number(bounty?.rewardAmount ?? 0);
   const currency = bounty?.rewardCurrency || "credits";
   return `${amount.toLocaleString()} ${currency}`;
 }
 
-export function normalizeBounty(source = {}) {
+export function normalizeBounty(source: Partial<BountyData> & Record<string, any> = {}): BountyData {
   const timestamp = now();
   const id = normalizeString(source.id) || `bounty-${foundry.utils.randomID(12)}`;
   const createdAt = normalizeString(source.createdAt) || timestamp;
@@ -103,7 +159,7 @@ export function normalizeBounty(source = {}) {
   };
 }
 
-export function prepareBountyForDisplay(bounty) {
+export function prepareBountyForDisplay(bounty: Partial<BountyData>) {
   const normalized = normalizeBounty(bounty);
   const linkedJournal = normalized.linkedJournalId ? game.journal?.get(normalized.linkedJournalId) ?? null : null;
   const publicLinks = game.settings.get(MODULE_ID, SETTING_PUBLIC_DOCUMENT_LINKS) === true;
@@ -116,6 +172,7 @@ export function prepareBountyForDisplay(bounty) {
     rewardLabel: getRewardLabel(normalized),
     tagsText: normalized.tags.join(", "),
     hasImage: Boolean(normalized.image),
+    isClaimed: normalized.status === BOUNTY_STATUSES.CLAIMED,
     isVisibleToPlayers: isBountyVisibleToPlayers(normalized),
     linkedJournalName: linkedJournal?.name ?? "",
     canSeeJournal,
@@ -123,12 +180,12 @@ export function prepareBountyForDisplay(bounty) {
   };
 }
 
-export function isBountyVisibleToPlayers(bounty) {
+export function isBountyVisibleToPlayers(bounty: Partial<BountyData>) {
   const normalized = normalizeBounty(bounty);
-  return normalized.published && ![BOUNTY_STATUSES.HIDDEN, BOUNTY_STATUSES.ARCHIVED].includes(normalized.status);
+  return normalized.published && ![BOUNTY_STATUSES.HIDDEN, BOUNTY_STATUSES.ARCHIVED].includes(normalized.status as any);
 }
 
-export function getBountyStore() {
+export function getBountyStore(): Record<string, BountyData> {
   const raw = game.settings.get(MODULE_ID, SETTING_BOUNTIES);
   if (!raw) return {};
 
@@ -144,7 +201,7 @@ export function getBountyStore() {
   return {};
 }
 
-async function saveBountyStore(store) {
+async function saveBountyStore(store: Record<string, BountyData>) {
   if (!requireGM("save bounties")) return getBountyStore();
   await game.settings.set(MODULE_ID, SETTING_BOUNTIES, store ?? {});
   return store;
@@ -156,12 +213,12 @@ export function getAllBounties({ includeHidden = game.user?.isGM === true } = {}
   return visible.sort((left, right) => String(right.updatedAt).localeCompare(String(left.updatedAt)));
 }
 
-export function getBounty(id) {
+export function getBounty(id: string): BountyData | null {
   const bounty = getBountyStore()[id];
   return bounty ? normalizeBounty(bounty) : null;
 }
 
-export function validateBounty(data) {
+export function validateBounty(data: Partial<BountyData>) {
   const errors = [];
   if (!normalizeString(data.title)) errors.push("Title is required.");
   if (!normalizeString(data.targetName)) errors.push("Target name is required.");
@@ -170,7 +227,7 @@ export function validateBounty(data) {
   return errors;
 }
 
-export async function upsertBounty(data) {
+export async function upsertBounty(data: Partial<BountyData> & Record<string, any>) {
   if (!requireGM("create or edit bounties")) return null;
   const existing = data.id ? getBounty(data.id) : null;
   const timestamp = now();
@@ -181,6 +238,8 @@ export async function upsertBounty(data) {
     createdAt: existing?.createdAt || timestamp,
     updatedAt: timestamp
   });
+  const removedTags = new Set(getRemovedTags().map((tag) => tag.toLowerCase()));
+  bounty.tags = bounty.tags.filter((tag) => !removedTags.has(tag.toLowerCase()));
   const errors = validateBounty(bounty);
   if (errors.length) {
     ui.notifications?.error?.(errors.join(" "));
@@ -193,7 +252,7 @@ export async function upsertBounty(data) {
   return bounty;
 }
 
-export async function deleteBounty(id) {
+export async function deleteBounty(id: string) {
   if (!requireGM("delete bounties")) return false;
   const confirmed = await Dialog.confirm({
     title: "Delete Bounty",
@@ -206,7 +265,7 @@ export async function deleteBounty(id) {
   return true;
 }
 
-export async function updateBountyState(id, patch = {}, { chat = false } = {}) {
+export async function updateBountyState(id: string, patch: Partial<BountyData> = {}, { chat = false } = {}) {
   if (!requireGM("update bounty status")) return null;
   const existing = getBounty(id);
   if (!existing) {
@@ -221,7 +280,7 @@ export async function updateBountyState(id, patch = {}, { chat = false } = {}) {
   return updated;
 }
 
-export async function publishBounty(id, published = true) {
+export async function publishBounty(id: string, published = true) {
   const updated = await updateBountyState(id, {
     published,
     status: published ? BOUNTY_STATUSES.AVAILABLE : BOUNTY_STATUSES.HIDDEN
@@ -232,7 +291,7 @@ export async function publishBounty(id, published = true) {
   return updated;
 }
 
-export async function markBountyCompleted(id, failed = false) {
+export async function markBountyCompleted(id: string, failed = false) {
   const status = failed ? BOUNTY_STATUSES.FAILED : BOUNTY_STATUSES.COMPLETED;
   const updated = await updateBountyState(id, { status });
   if (updated && game.settings.get(MODULE_ID, SETTING_POST_RESULT_CHAT)) {
@@ -241,27 +300,63 @@ export async function markBountyCompleted(id, failed = false) {
   return updated;
 }
 
-export async function archiveBounty(id) {
+export async function archiveBounty(id: string) {
   return updateBountyState(id, { status: BOUNTY_STATUSES.ARCHIVED, published: false });
 }
 
-export async function claimBounty(id, claimedBy) {
+export async function claimBounty(id: string, claimedBy: string) {
   return updateBountyState(id, { status: BOUNTY_STATUSES.CLAIMED, claimedBy: normalizeString(claimedBy) });
+}
+
+export async function removeTag(tag: any) {
+  if (!requireGM("remove bounty tags")) return false;
+  const normalizedTag = normalizeString(tag);
+  if (!normalizedTag) {
+    ui.notifications?.warn?.("Select a tag to remove.");
+    return false;
+  }
+
+  const confirmed = await Dialog.confirm({
+    title: "Remove Tag",
+    content: `<p>Remove <strong>${escapeHtml(normalizedTag)}</strong> from the dropdown and all bounties?</p>`
+  });
+  if (!confirmed) return false;
+
+  const target = normalizedTag.toLowerCase();
+  const store = getBountyStore();
+  let changedCount = 0;
+  for (const bounty of Object.values(store)) {
+    const originalLength = bounty.tags.length;
+    bounty.tags = bounty.tags.filter((candidate) => candidate.toLowerCase() !== target);
+    if (bounty.tags.length !== originalLength) {
+      bounty.updatedAt = now();
+      changedCount += 1;
+    }
+  }
+
+  const removedTags = uniqueTags([...getRemovedTags(), normalizedTag]);
+  await game.settings.set(MODULE_ID, SETTING_REMOVED_TAGS, removedTags);
+  await saveBountyStore(store);
+  ui.notifications?.info?.(`Removed "${normalizedTag}" from ${changedCount} bount${changedCount === 1 ? "y" : "ies"}.`);
+  return true;
 }
 
 export function getFilterOptions() {
   const bounties = getAllBounties({ includeHidden: true });
-  const unique = (values) => [...new Set(values.map(normalizeString).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const unique = (values: any[]) => [...new Set(values.map((value) => normalizeString(value)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const removedTags = new Set(getRemovedTags().map((tag) => tag.toLowerCase()));
+  const availableTags = unique([...DEFAULT_TAGS, ...bounties.flatMap((bounty) => bounty.tags)])
+    .filter((tag) => !removedTags.has(tag.toLowerCase()));
 
   return {
     statuses: Object.values(BOUNTY_STATUSES).map((value) => ({ value, label: getStatusLabel(value) })),
     threatLevels: THREAT_LEVELS,
     factions: unique(bounties.map((bounty) => bounty.faction)),
-    tags: unique([...DEFAULT_TAGS, ...bounties.flatMap((bounty) => bounty.tags)])
+    tags: availableTags
   };
 }
 
-export function filterBounties(bounties, filters = {}) {
+export function filterBounties(bounties: Partial<BountyData>[], filters: BountyFilters = {}) {
   const status = normalizeString(filters.status);
   const threatLevel = normalizeString(filters.threatLevel);
   const faction = normalizeString(filters.faction).toLowerCase();
@@ -290,7 +385,7 @@ export function filterBounties(bounties, filters = {}) {
   });
 }
 
-export async function requestContract(id) {
+export async function requestContract(id: string) {
   const bounty = getBounty(id);
   if (!bounty) return;
   const speaker = ChatMessage.getSpeaker({ user: game.user });
@@ -303,7 +398,7 @@ export async function requestContract(id) {
   `;
   await ChatMessage.create({
     speaker,
-    whisper: ChatMessage.getWhisperRecipients("GM").map((user) => user.id),
+    whisper: ChatMessage.getWhisperRecipients("GM").map((user: any) => user.id),
     content
   });
   ui.notifications?.info?.("Contract request sent to the GM.");
@@ -342,5 +437,12 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: false
+  });
+
+  game.settings.register(MODULE_ID, SETTING_REMOVED_TAGS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: []
   });
 }

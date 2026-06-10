@@ -277,7 +277,7 @@
 
 .csi-connection-label {
   fill: #ffffff;
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--hs-font-mono);
   font-size: 13px;
   font-weight: 700;
   opacity: 0;
@@ -618,7 +618,7 @@
 
 .csi-timeline time {
   color: var(--csi-cyan);
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--hs-font-mono);
 }
 
 .csi-timeline h3 {

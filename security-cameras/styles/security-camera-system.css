@@ -2,13 +2,13 @@
 .security-camera-feed-window {
   --security-camera-bg: var(--hs-bg-deep);
   --security-camera-panel: var(--hs-panel);
-  --security-camera-blue: var(--hs-cyan);
-  --security-camera-green: var(--hs-green);
-  --security-camera-red: var(--hs-magenta);
-  --security-camera-yellow: var(--hs-amber);
-  --security-camera-text: var(--hs-text);
-  --security-camera-muted: var(--hs-muted);
-  --security-camera-line: var(--hs-line);
+  --security-camera-blue: var(--hs-color-primary);
+  --security-camera-green: var(--hs-color-success);
+  --security-camera-red: var(--hs-color-danger);
+  --security-camera-yellow: var(--hs-color-warning);
+  --security-camera-text: var(--hs-text-primary);
+  --security-camera-muted: var(--hs-text-secondary);
+  --security-camera-line: var(--hs-border-subtle);
   --security-camera-field: var(--hs-field);
   color: var(--security-camera-text);
 }
@@ -233,12 +233,12 @@
   color: var(--security-camera-text);
   background: var(--security-camera-field);
   border: 1px solid rgba(105, 232, 255, 0.24);
-  font-family: "Roboto Mono", "Consolas", monospace;
+  font-family: var(--hs-font-mono);
   font-size: 12px;
 }
 
 .security-camera-editor textarea {
-  resize: vertical;
+  resize: both;
   min-height: 76px;
 }
 
@@ -277,7 +277,7 @@
     radial-gradient(circle at 80% 0%, rgba(72, 199, 255, 0.18), transparent 30%),
     var(--hs-bg-deep);
   border: 1px solid var(--security-camera-line);
-  font-family: "Roboto Mono", "Consolas", monospace;
+  font-family: var(--hs-font-mono);
 }
 
 .security-camera-feed::before {

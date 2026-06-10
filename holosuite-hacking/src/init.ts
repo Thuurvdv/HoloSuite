@@ -1,4 +1,4 @@
-import { createHackingApi } from "./core/hacking-api.js";
+import { createHackingApi } from "./core/hacking-api";
 import {
   actorIsOwnedByUser,
   escapeHtml,
@@ -11,19 +11,27 @@ import {
   getUserCharacter,
   getUserOwnedActors,
   getWorldUsers
-} from "./core/actor-skills.js";
-import { registerMinigame } from "./core/minigame-runner.js";
-import { HackingLauncherApp } from "./ui/hacking-launcher-app.js";
-import { NodeIntrusionApp } from "./minigames/node-intrusion/node-intrusion-app.js";
-import { SignalAlignmentApp } from "./minigames/signal-alignment/signal-alignment-app.js";
+} from "./core/actor-skills";
+import { registerMinigame } from "./core/minigame-runner";
+import { HackingLauncherApp } from "./ui/hacking-launcher-app";
+import { NodeIntrusionApp } from "./minigames/node-intrusion/node-intrusion-app";
+import { SignalAlignmentApp } from "./minigames/signal-alignment/signal-alignment-app";
+
+declare const foundry: any;
+declare const game: any;
+declare const ui: any;
+declare const Hooks: any;
+declare const Dialog: any;
+declare const Roll: any;
+declare const ChatMessage: any;
 
 const MODULE_ID = "holosuite-hacking";
 const SOCKET_NAME = `module.${MODULE_ID}`;
 const PENDING_CALLBACK_TTL_MS = 10 * 60 * 1000;
 
-let api = null;
-let launcherApp = null;
-const pendingCallbacks = new Map();
+let api: any = null;
+let launcherApp: any = null;
+const pendingCallbacks = new Map<string, any>();
 
 function registerSettings() {
   game.settings.register(MODULE_ID, "defaultDc", {
@@ -73,14 +81,14 @@ function registerMinigames() {
     id: "node-intrusion",
     title: "Node Intrusion",
     icon: "fa-solid fa-network-wired",
-    create: (options) => new NodeIntrusionApp(options)
+    create: (options: any) => new NodeIntrusionApp(options)
   });
 
   registerMinigame({
     id: "signal-alignment",
     title: "Signal Alignment",
     icon: "fa-solid fa-wave-square",
-    create: (options) => new SignalAlignmentApp(options)
+    create: (options: any) => new SignalAlignmentApp(options)
   });
 }
 
@@ -95,34 +103,6 @@ function openLauncher() {
   return launcherApp;
 }
 
-function renderLaunchControl(controls) {
-  if (!game.user?.isGM) return;
-
-  const onClick = () => openLauncher();
-  const tool = {
-    name: "holosuite-hacking-launch",
-    title: "HoloSuite Hacking",
-    icon: "fa-solid fa-terminal",
-    button: true,
-    visible: true,
-    onClick,
-    onChange: onClick
-  };
-
-  if (Array.isArray(controls)) {
-    const tokenControls = controls.find((control) => control.name === "token") ?? controls[0];
-    if (tokenControls?.tools && !tokenControls.tools.some?.((candidate) => candidate.name === tool.name)) {
-      tokenControls.tools.push(tool);
-    }
-    return;
-  }
-
-  const record = controls ?? {};
-  const tokenControls = record.tokens ?? record.token ?? Object.values(record)[0];
-  if (!tokenControls?.tools || tokenControls.tools[tool.name]) return;
-  tokenControls.tools[tool.name] = { ...tool, order: Object.keys(tokenControls.tools).length };
-}
-
 function exposeApi() {
   api = api ?? createHackingApi({ moduleId: MODULE_ID, openLauncher });
   api.sendHackToPlayer = sendHackToPlayer;
@@ -133,7 +113,7 @@ function exposeApi() {
   return api;
 }
 
-function sendHackToPlayer(options = {}) {
+function sendHackToPlayer(options: any = {}) {
   if (!game.user?.isGM) {
     ui.notifications?.warn?.("Only the GM can send HoloSuite hacking challenges.");
     return false;
@@ -188,7 +168,7 @@ function sendHackToPlayer(options = {}) {
   return true;
 }
 
-function receiveSocketMessage(message) {
+function receiveSocketMessage(message: any) {
   try {
     if (message?.type === "result-report") {
       receiveResultReport(message.payload ?? {});
@@ -222,7 +202,7 @@ function receiveSocketMessage(message) {
   }
 }
 
-async function startPlayerHack(payload) {
+async function startPlayerHack(payload: any) {
   const actor = resolveHackerActor(payload.actorId, getUserById(payload.userId) ?? game.user);
 
   const rollResult = await rollFallbackSkill(payload);
@@ -235,8 +215,8 @@ async function startPlayerHack(payload) {
     actorName: actor?.name ?? payload.actorName ?? "Hacker",
     userId: payload.userId,
     skillId: payload.skillId,
-    onSuccess: (result) => reportPlayerResult(payload, result),
-    onFailure: (result) => reportPlayerResult(payload, result)
+    onSuccess: (result: any) => reportPlayerResult(payload, result),
+    onFailure: (result: any) => reportPlayerResult(payload, result)
   };
 
 
@@ -245,7 +225,7 @@ async function startPlayerHack(payload) {
   return api.startNodeIntrusion(options);
 }
 
-async function rollFallbackSkill(payload) {
+async function rollFallbackSkill(payload: any) {
   try {
     const modifier = Number(payload.skillModifier ?? 0);
     const formula = `1d20 ${modifier >= 0 ? "+" : "-"} ${Math.abs(modifier)}`;
@@ -262,7 +242,7 @@ async function rollFallbackSkill(payload) {
   }
 }
 
-function reportPlayerResult(payload, result) {
+function reportPlayerResult(payload: any, result: any) {
   game.socket?.emit?.(SOCKET_NAME, {
     type: "result-report",
     payload: {
@@ -273,7 +253,7 @@ function reportPlayerResult(payload, result) {
   });
 }
 
-function receiveResultReport(payload = {}) {
+function receiveResultReport(payload: any = {}) {
   if (!game.user?.isGM || payload.gmUserId !== game.user.id) return;
   const callbacks = pendingCallbacks.get(payload.requestId);
   pendingCallbacks.delete(payload.requestId);
@@ -284,7 +264,7 @@ function receiveResultReport(payload = {}) {
   else callbacks?.onFailure?.(result);
 }
 
-function renderStartPrompt(payload, actorName, skillLabel) {
+function renderStartPrompt(payload: any, actorName: string, skillLabel: string) {
   return `
     <section class="holosuite-hacking-start-prompt">
       <p>Incoming hacking challenge</p>
@@ -294,7 +274,7 @@ function renderStartPrompt(payload, actorName, skillLabel) {
   `;
 }
 
-function sanitizeLaunchPayload(payload = {}) {
+function sanitizeLaunchPayload(payload: any = {}) {
   const defaultDc = Number(game.settings.get(MODULE_ID, "defaultDc") ?? 15);
   return {
     requestId: String(payload.requestId ?? foundry.utils.randomID()),
@@ -310,7 +290,7 @@ function sanitizeLaunchPayload(payload = {}) {
   };
 }
 
-function resolveHackerActor(actorId, user) {
+function resolveHackerActor(actorId: string, user: any) {
   const chosenActor = getActorById(actorId);
   if (chosenActor) return chosenActor;
 
@@ -326,7 +306,7 @@ function resolveHackerActor(actorId, user) {
   return null;
 }
 
-function getMinigameTitle(type) {
+function getMinigameTitle(type: string) {
   return api?.getMinigames?.().find((minigame) => minigame.id === type)?.title ?? String(type ?? "Hacking");
 }
 
@@ -356,8 +336,6 @@ Hooks.once("init", () => {
   registerMinigames();
   exposeApi();
 });
-
-Hooks.on("getSceneControlButtons", renderLaunchControl);
 
 Hooks.once("ready", () => {
   exposeApi();

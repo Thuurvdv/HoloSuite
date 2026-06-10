@@ -1,11 +1,17 @@
-import { escapeHtml, getActorById, getActorSkillOptions, getPlayerActorOptions, getPlayerUsers } from "../core/actor-skills.js";
+import { escapeHtml, getActorById, getActorSkillOptions, getPlayerActorOptions, getPlayerUsers } from "../core/actor-skills";
+
+declare const foundry: any;
+declare const game: any;
+declare const ui: any;
 
 const MODULE_ID = "holosuite-hacking";
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/hacking-launcher.html`;
-const LegacyApplication = globalThis.Application ?? globalThis.foundry?.appv1?.api?.Application;
+const LegacyApplication = (globalThis as any).Application ?? (globalThis as any).foundry?.appv1?.api?.Application;
 
 export class HackingLauncherApp extends LegacyApplication {
-  constructor(options = {}) {
+  api: any;
+
+  constructor(options: any = {}) {
     super(options);
     this.api = options.api;
   }
@@ -46,7 +52,7 @@ export class HackingLauncherApp extends LegacyApplication {
     };
   }
 
-  activateListeners(html) {
+  activateListeners(html: any) {
     super.activateListeners(html);
     const form = html.is("form") ? html[0] : html.find("form")[0];
     html.find("[data-action='start']").on("click", (event) => {
@@ -72,7 +78,7 @@ export class HackingLauncherApp extends LegacyApplication {
     this.syncSkillOptions(html, html.find("[name='actorId']").val());
   }
 
-  submit(form) {
+  submit(form: HTMLFormElement | null) {
     if (!game.user?.isGM) {
       ui.notifications?.warn?.("Only the GM can open the HoloSuite Hacking launcher.");
       return;
@@ -83,11 +89,11 @@ export class HackingLauncherApp extends LegacyApplication {
       return;
     }
 
-    const minigameSelect = form.querySelector("[name='minigameType']");
-    const actorSelect = form.querySelector("[name='actorId']");
-    const userSelect = form.querySelector("[name='userId']");
-    const skillSelect = form.querySelector("[name='skillId']");
-    const dcInput = form.querySelector("[name='dc']");
+    const minigameSelect = form.querySelector<HTMLSelectElement>("[name='minigameType']");
+    const actorSelect = form.querySelector<HTMLSelectElement>("[name='actorId']");
+    const userSelect = form.querySelector<HTMLSelectElement>("[name='userId']");
+    const skillSelect = form.querySelector<HTMLSelectElement>("[name='skillId']");
+    const dcInput = form.querySelector<HTMLInputElement>("[name='dc']");
     const selectedSkill = skillSelect?.selectedOptions?.[0] ?? null;
 
     const minigameType = String(minigameSelect?.value || "node-intrusion");
@@ -112,7 +118,7 @@ export class HackingLauncherApp extends LegacyApplication {
     if (sent) this.close();
   }
 
-  testSelf(form) {
+  testSelf(form: HTMLFormElement | null) {
     if (!game.user?.isGM) {
       ui.notifications?.warn?.("Only the GM can test HoloSuite Hacking minigames.");
       return;
@@ -122,10 +128,10 @@ export class HackingLauncherApp extends LegacyApplication {
       return;
     }
 
-    const minigameType = String(form.querySelector("[name='minigameType']")?.value || "node-intrusion");
-    const actorId = String(form.querySelector("[name='actorId']")?.value || "");
-    const dc = Number(form.querySelector("[name='dc']")?.value ?? game.settings.get(MODULE_ID, "defaultDc") ?? 15);
-    const rollTotal = Number(form.querySelector("[name='testRollTotal']")?.value ?? dc);
+    const minigameType = String(form.querySelector<HTMLSelectElement>("[name='minigameType']")?.value || "node-intrusion");
+    const actorId = String(form.querySelector<HTMLSelectElement>("[name='actorId']")?.value || "");
+    const dc = Number(form.querySelector<HTMLInputElement>("[name='dc']")?.value ?? game.settings.get(MODULE_ID, "defaultDc") ?? 15);
+    const rollTotal = Number(form.querySelector<HTMLInputElement>("[name='testRollTotal']")?.value ?? dc);
     if (!Number.isFinite(rollTotal)) {
       ui.notifications?.warn?.("Enter a fake roll result before testing the minigame.");
       return;
@@ -144,13 +150,13 @@ export class HackingLauncherApp extends LegacyApplication {
     this.close();
   }
 
-  syncUserToActor(html, actorId) {
+  syncUserToActor(html: any, actorId: string) {
     const actor = getActorById(actorId);
     const user = getPlayerUsers().find((candidate) => actor?.testUserPermission(candidate, "OWNER"));
     if (user) html.find("[name='userId']").val(user.id);
   }
 
-  syncSkillOptions(html, actorId) {
+  syncSkillOptions(html: any, actorId: string) {
     const actor = getActorById(actorId);
     const skills = getActorSkillOptions(actor);
     html.find("[name='skillId']").html(skills.map((skill) => (
@@ -158,7 +164,7 @@ export class HackingLauncherApp extends LegacyApplication {
     )).join(""));
   }
 
-  syncActorsForUser(html, userId) {
+  syncActorsForUser(html: any, userId: string) {
     const actors = getPlayerActorOptions(userId);
     const actorRows = actors.length
       ? actors.map((actor) => (
