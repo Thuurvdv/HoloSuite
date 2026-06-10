@@ -554,7 +554,7 @@ function applyFeedDisplayMode(app: any) {
 
   app.setPosition?.({
     width: 720,
-    height: "auto"
+    height: 520
   });
 }
 

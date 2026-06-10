@@ -273,7 +273,7 @@ function dt(e) {
         popOut: !0,
         resizable: !0,
         width: 1060,
-        height: "auto"
+        height: 760
       });
     }
     getData() {
@@ -311,7 +311,7 @@ function dt(e) {
         popOut: !0,
         resizable: !0,
         width: 720,
-        height: "auto"
+        height: 520
       });
     }
     getData() {
@@ -385,7 +385,7 @@ function dt(e) {
       },
       position: {
         width: 1060,
-        height: "auto"
+        height: 760
       }
     }), L(F, "PARTS", {
       main: {
@@ -453,7 +453,7 @@ function dt(e) {
       },
       position: {
         width: 720,
-        height: "auto"
+        height: 520
       }
     }), L(F, "PARTS", {
       main: {
@@ -1175,7 +1175,7 @@ function qe(e) {
   }
   (l = e.setPosition) == null || l.call(e, {
     width: 720,
-    height: "auto"
+    height: 520
   });
 }
 function _t(e, t = null) {

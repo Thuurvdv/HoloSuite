@@ -433,7 +433,7 @@ B = new WeakSet(), pt = async function(n, a, r) {
   },
   position: {
     width: 660,
-    height: "auto"
+    height: 720
   },
   classes: ["bounty-editor-window"],
   actions: {

@@ -2,6 +2,15 @@ import type { HoloSuiteAppRegistration } from "../../shared/src/index";
 
 const MODULE_ID = "holosuite-core";
 const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
+const SETTING_THEME = "theme";
+
+const THEME_CHOICES = {
+  default: "Default Cyan",
+  ember: "Ember",
+  violet: "Violet"
+} as const;
+
+type HoloSuiteTheme = keyof typeof THEME_CHOICES;
 
 const registeredApps = new Map<string, HoloSuiteAppRegistration>();
 let launcherApp: HoloSuiteLauncher | null = null;
@@ -114,6 +123,17 @@ function renderOpenLauncherControl(controls: unknown): void {
 }
 
 function registerSettings(): void {
+  game.settings.register(MODULE_ID, SETTING_THEME, {
+    name: "HoloSuite Theme",
+    hint: "Changes the shared color theme used by HoloSuite windows.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: THEME_CHOICES,
+    default: "default",
+    onChange: (value: string) => applyTheme(value)
+  });
+
   game.settings.register(MODULE_ID, SETTING_DISABLE_FOR_PLAYERS, {
     name: "Disable HoloSuite for Players",
     hint: "When enabled, the HoloSuite launcher and all apps are hidden from players.",
@@ -122,6 +142,23 @@ function registerSettings(): void {
     type: Boolean,
     default: false
   });
+}
+
+function normalizeTheme(value: unknown): HoloSuiteTheme {
+  return Object.hasOwn(THEME_CHOICES, String(value)) ? String(value) as HoloSuiteTheme : "default";
+}
+
+function applyTheme(value: unknown): void {
+  const theme = normalizeTheme(value);
+  const targets = [document.documentElement, document.body].filter(Boolean);
+  for (const target of targets) {
+    if (theme === "default") target.removeAttribute("data-holosuite-theme");
+    else target.setAttribute("data-holosuite-theme", theme);
+  }
+}
+
+function applySavedTheme(): void {
+  applyTheme(safeGetSetting(MODULE_ID, SETTING_THEME));
 }
 
 function isDisabledForPlayers(): boolean {
@@ -286,5 +323,6 @@ Hooks.on("getSceneControlButtons", renderOpenLauncherControl);
 
 Hooks.once("ready", () => {
   exposeApi();
+  applySavedTheme();
   console.log(`${MODULE_ID} | Ready. API available at game.modules.get("${MODULE_ID}").api`);
 });

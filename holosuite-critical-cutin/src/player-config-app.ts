@@ -92,7 +92,7 @@ export class PlayerConfigApp extends BaseFormApplication {
       template: TEMPLATE_PATH,
       classes: ["hcci-config-window"],
       width: 1320,
-      height: "auto",
+      height: 760,
       resizable: true,
       closeOnSubmit: false,
       submitOnChange: false

@@ -463,7 +463,7 @@ class oe extends Ie {
       template: ge,
       classes: ["hcci-config-window"],
       width: 1320,
-      height: "auto",
+      height: 760,
       resizable: !0,
       closeOnSubmit: !1,
       submitOnChange: !1

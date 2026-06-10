@@ -56,7 +56,7 @@ export class BountyEditorApp extends BaseApplication {
     },
     position: {
       width: 660,
-      height: "auto"
+      height: 720
     },
     classes: ["bounty-editor-window"],
     actions: {

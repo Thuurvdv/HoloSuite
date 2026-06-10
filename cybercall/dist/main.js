@@ -234,7 +234,7 @@ function Me(e) {
         popOut: !0,
         resizable: !0,
         width: 440,
-        height: "auto"
+        height: 420
       });
     }
     getData() {
@@ -266,7 +266,7 @@ function Me(e) {
         popOut: !0,
         resizable: !0,
         width: 560,
-        height: "auto"
+        height: 560
       });
     }
     getData() {
@@ -300,7 +300,7 @@ function Me(e) {
         popOut: !0,
         resizable: !0,
         width: 500,
-        height: "auto"
+        height: 620
       });
     }
     getData() {
@@ -372,7 +372,7 @@ function Me(e) {
       },
       position: {
         width: 440,
-        height: "auto"
+        height: 420
       }
     }), S(f, "PARTS", {
       main: {
@@ -417,7 +417,7 @@ function Me(e) {
       },
       position: {
         width: 560,
-        height: "auto"
+        height: 560
       }
     }), S(f, "PARTS", {
       main: {
@@ -470,7 +470,7 @@ function Me(e) {
       },
       position: {
         width: 500,
-        height: "auto"
+        height: 620
       }
     }), S(f, "PARTS", {
       main: {

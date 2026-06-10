@@ -6,17 +6,67 @@
   --hcci-accent: var(--hs-color-primary);
   color: var(--hcci-text);
   min-width: 1040px;
+  min-height: 520px;
 }
 
 .hcci-config-window .window-content {
   background: var(--hs-surface-window);
   color: var(--hcci-text);
+  height: 100%;
+  overflow: hidden;
   padding-bottom: 12px;
 }
 
+.hcci-config-window :where(.window-resizable-handle, .window-resize-handle) {
+  right: 8px;
+  bottom: 8px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--hs-line);
+  border-radius: var(--hs-radius);
+  background: rgba(2, 13, 24, 0.9);
+  color: var(--hs-cyan);
+  box-shadow: var(--hs-glow-cyan);
+  cursor: nwse-resize;
+  font-size: 0;
+  line-height: 1;
+  overflow: hidden;
+}
+
+.hcci-config-window :where(.window-resizable-handle, .window-resize-handle) > * {
+  display: none !important;
+}
+
+.hcci-config-window :where(.window-resizable-handle, .window-resize-handle)::before {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+
+.hcci-config-window :where(.window-resizable-handle, .window-resize-handle)::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 8px;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.72;
+}
+
 .hcci-config {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 18px;
+  height: 100%;
+  min-height: 0;
   padding: 20px;
 }
 
@@ -113,8 +163,9 @@
 
 .hcci-config-grid {
   display: grid;
+  flex: 1 1 auto;
   gap: 14px;
-  max-height: 62vh;
+  min-height: 0;
   overflow: auto;
   padding: 2px 6px 2px 0;
 }
@@ -294,6 +345,7 @@
 }
 
 .hcci-config-actions {
+  flex: 0 0 auto;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
