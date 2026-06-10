@@ -90,7 +90,7 @@
 
 .cybercall-composer textarea {
   min-height: 104px;
-  resize: vertical;
+  resize: both;
 }
 
 .cybercall-composer input:focus-visible,

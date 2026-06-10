@@ -1,16 +1,16 @@
 .csi-toolkit {
-  --csi-bg: #071014;
+  --csi-bg: var(--hs-bg-deep);
   --csi-panel: var(--hs-panel);
   --csi-panel-2: var(--hs-panel-strong);
-  --csi-line: var(--hs-line);
-  --csi-text: var(--hs-text);
-  --csi-muted: var(--hs-muted);
-  --csi-cyan: var(--hs-cyan);
-  --csi-red: var(--hs-magenta);
-  --csi-amber: var(--hs-amber);
-  --csi-green: var(--hs-green);
-  --csi-paper: #d2c5a2;
-  --csi-shadow: 0 0 28px rgba(95, 220, 255, 0.12);
+  --csi-line: var(--hs-border-subtle);
+  --csi-text: var(--hs-text-primary);
+  --csi-muted: var(--hs-text-secondary);
+  --csi-cyan: var(--hs-color-primary);
+  --csi-red: var(--hs-color-danger);
+  --csi-amber: var(--hs-color-warning);
+  --csi-green: var(--hs-color-success);
+  --csi-paper: var(--hs-surface-panel);
+  --csi-shadow: var(--hs-glow-cyan);
   color: var(--csi-text);
   font-family: var(--hs-font-ui);
 }
@@ -40,15 +40,15 @@
 }
 
 .csi-theme-noir {
-  --csi-bg: #18130f;
-  --csi-panel: #241b14;
-  --csi-panel-2: #37281c;
-  --csi-line: rgba(247, 198, 106, 0.3);
-  --csi-text: #f4ead4;
-  --csi-muted: #c2aa83;
-  --csi-cyan: #f7c66a;
-  --csi-red: #b63231;
-  --csi-shadow: 0 0 20px rgba(247, 198, 106, 0.12);
+  --csi-bg: var(--hs-bg-deep);
+  --csi-panel: var(--hs-panel);
+  --csi-panel-2: var(--hs-panel-strong);
+  --csi-line: var(--hs-border-subtle);
+  --csi-text: var(--hs-text-primary);
+  --csi-muted: var(--hs-text-secondary);
+  --csi-cyan: var(--hs-color-warning);
+  --csi-red: var(--hs-color-danger);
+  --csi-shadow: var(--hs-glow-cyan);
 }
 
 .csi-manager-shell {
@@ -368,7 +368,7 @@
 }
 
 .csi-toolkit textarea {
-  resize: vertical;
+  resize: both;
 }
 
 .csi-field-with-button {

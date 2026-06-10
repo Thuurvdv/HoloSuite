@@ -807,11 +807,7 @@ function bt(e) {
     stopLocalLiveRefresh: I
   };
 }
-const E = "security-cameras", je = `module.${E}`, Xe = it(E, {
-  socketName: je,
-  title: "Security Cameras"
-}), Ft = `modules/${E}/templates/monitor.hbs`, St = `modules/${E}/templates/feed.hbs`;
-let M = null, A = null, p = "", T = "";
+const E = "security-cameras", je = `module.${E}`, Ft = `modules/${E}/templates/monitor.hbs`, St = `modules/${E}/templates/feed.hbs`;
 function Q() {
   var e;
   return (e = foundry == null ? void 0 : foundry.utils) != null && e.randomID ? foundry.utils.randomID() : crypto != null && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -820,12 +816,17 @@ function Z(e) {
   var t;
   return (t = foundry == null ? void 0 : foundry.utils) != null && t.deepClone ? foundry.utils.deepClone(e) : JSON.parse(JSON.stringify(e));
 }
-function Ye(e) {
+function Xe(e) {
   var i;
   if ((i = foundry == null ? void 0 : foundry.utils) != null && i.escapeHTML) return foundry.utils.escapeHTML(String(e));
   const t = document.createElement("div");
   return t.innerText = String(e), t.innerHTML;
 }
+const Ye = it(E, {
+  socketName: je,
+  title: "Security Cameras"
+});
+let M = null, A = null, p = "", T = "";
 function B(e = {}, t = {}) {
   return ve(e, { ...t, createId: Q });
 }
@@ -967,7 +968,7 @@ function j(e = "manage security cameras") {
   return (t = game.user) != null && t.isGM ? !0 : ((n = (i = ui.notifications) == null ? void 0 : i.warn) == null || n.call(i, `Only the GM can ${e}.`), !1);
 }
 function Ce(e) {
-  return Xe.emit(e);
+  return Ye.emit(e);
 }
 async function xt(e = {}) {
   var o, l;
@@ -987,7 +988,7 @@ async function Ve(e) {
   const i = G(t);
   if (!(typeof Dialog < "u" ? await Dialog.confirm({
     title: "Delete Security Camera",
-    content: `<p>Delete camera <strong>${Ye(i.name)}</strong>?</p>`,
+    content: `<p>Delete camera <strong>${Xe(i.name)}</strong>?</p>`,
     yes: () => !0,
     no: () => !1,
     defaultYes: !1
@@ -1203,7 +1204,7 @@ const Ie = bt({
   moduleId: E,
   monitorTemplatePath: Ft,
   feedTemplatePath: St,
-  escapeHTML: Ye,
+  escapeHTML: Xe,
   getMonitorContext: Lt,
   prepareCamera: ae,
   bindMonitorControls: Ut,
@@ -1265,7 +1266,7 @@ async function Tt() {
 async function Bt(e) {
   var i, n, o, l, u;
   if (!e || typeof e != "object") return;
-  const t = Xe.isGMSender(e.gmUserId);
+  const t = Ye.isGMSender(e.gmUserId);
   if (e.action === "showFeed") {
     if ((i = game.user) != null && i.isGM) return;
     if (!t) {

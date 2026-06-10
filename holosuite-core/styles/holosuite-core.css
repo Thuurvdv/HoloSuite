@@ -198,7 +198,7 @@
 
 .holosuite-app-tile p {
   color: var(--hs-muted);
-  font-family: system-ui, sans-serif;
+  font-family: var(--hs-font-ui);
   font-size: 12px;
   line-height: 1.35;
   margin: 7px 0 0;
@@ -233,7 +233,7 @@
 .holosuite-empty {
   border: 1px dashed var(--hs-line);
   color: var(--hs-muted);
-  font-family: system-ui, sans-serif;
+  font-family: var(--hs-font-ui);
   grid-column: 1 / -1;
   margin: 0;
   padding: 20px;

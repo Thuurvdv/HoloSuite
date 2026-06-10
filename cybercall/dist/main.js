@@ -484,9 +484,7 @@ function Me(e) {
     CyberCallContacts: ke() ?? Ee
   };
 }
-const u = "cybercall", P = `module.${u}`, _e = `modules/${u}/templates/cybercall.hbs`, Ge = `modules/${u}/templates/cybercall-composer.hbs`, xe = `modules/${u}/templates/cybercall-contacts.hbs`;
-let r = null, A = null, C = null, _ = "personal", R = null, G = null;
-const pe = {
+const u = "cybercall", P = `module.${u}`, _e = `modules/${u}/templates/cybercall.hbs`, Ge = `modules/${u}/templates/cybercall-composer.hbs`, xe = `modules/${u}/templates/cybercall-contacts.hbs`, pe = {
   "": "Silent",
   [`modules/${u}/audio/Ringtone1.ogg`]: "Ringtone 1",
   [`modules/${u}/audio/Ringtone2.ogg`]: "Ringtone 2",
@@ -498,6 +496,7 @@ function Fe(e) {
   const t = document.createElement("div");
   return t.innerText = String(e), t.innerHTML;
 }
+let r = null, A = null, C = null, _ = "personal", R = null, G = null;
 function Ue() {
   var e, t, a, n, i, l, c, o;
   return L({

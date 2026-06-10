@@ -1,15 +1,15 @@
 .hcci-config-window {
-  --hcci-panel: #071014;
-  --hcci-line: rgba(105, 232, 255, 0.28);
-  --hcci-text: #e7faff;
-  --hcci-muted: #8fb5bf;
-  --hcci-accent: #69e8ff;
+  --hcci-panel: var(--hs-panel);
+  --hcci-line: var(--hs-border-subtle);
+  --hcci-text: var(--hs-text-primary);
+  --hcci-muted: var(--hs-text-secondary);
+  --hcci-accent: var(--hs-color-primary);
   color: var(--hcci-text);
   min-width: 1040px;
 }
 
 .hcci-config-window .window-content {
-  background: linear-gradient(180deg, #081116, #030709);
+  background: var(--hs-surface-window);
   color: var(--hcci-text);
   padding-bottom: 12px;
 }
