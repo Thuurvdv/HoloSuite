@@ -56,6 +56,16 @@ function checkboxValue(formData: FormData, key: string) {
   return formData.get(key) === "on";
 }
 
+function clampNumberInput(input: HTMLInputElement) {
+  if (input.type !== "number" || input.value === "") return;
+  const value = Number(input.value);
+  if (!Number.isFinite(value)) return;
+  const min = input.min === "" ? -Infinity : Number(input.min);
+  const max = input.max === "" ? Infinity : Number(input.max);
+  const clamped = clamp(value, min, max);
+  if (clamped !== value) input.value = String(clamped);
+}
+
 function getProfileConstraints(nodeCountInput: number, decoyCountInput: number, routeCountInput: number, allowProtectedRouteFirewalls: boolean) {
   const nodeCount = clamp(Math.round(nodeCountInput), 6, 40);
   const maxDecoys = Math.max(0, nodeCount - 4);
@@ -89,6 +99,7 @@ function normalizeNodeIntrusionProfile(formData: FormData, prefix: string, base:
   const constraints = getProfileConstraints(nodeCount, decoyCount, routeCount, allowFirewallOnMainPath);
 
   return {
+    traceDurationSeconds: clamp(Math.round(numberValue(formData, `${prefix}nodeTraceDurationSeconds`, base.nodeIntrusion.traceDurationSeconds ?? base.traceDurationSeconds ?? 60)), 5, 300),
     nodeCount: constraints.nodeCount,
     firewallCount: clamp(Math.round(numberValue(formData, `${prefix}firewallCount`, base.nodeIntrusion.firewallCount)), 0, constraints.maxFirewalls),
     decoyCount: constraints.decoyCount,
@@ -103,6 +114,19 @@ function normalizeNodeIntrusionProfile(formData: FormData, prefix: string, base:
   };
 }
 
+function normalizeSignalAlignmentProfile(formData: FormData, prefix: string, base: any) {
+  return {
+    traceDurationSeconds: clamp(Math.round(numberValue(formData, `${prefix}signalTraceDurationSeconds`, base.signalAlignment.traceDurationSeconds ?? base.traceDurationSeconds ?? 60)), 5, 300),
+    channelCount: clamp(Math.round(numberValue(formData, `${prefix}signalChannelCount`, base.signalAlignment.channelCount ?? 3)), 2, 5),
+    tolerance: clamp(numberValue(formData, `${prefix}signalTolerance`, base.signalAlignment.tolerance ?? 5), 0.5, 20),
+    signalDriftSpeed: clamp(numberValue(formData, `${prefix}signalDriftSpeed`, base.signalAlignment.signalDriftSpeed ?? 0), 0, 5),
+    noiseLevel: clamp(numberValue(formData, `${prefix}signalNoiseLevel`, base.signalAlignment.noiseLevel ?? 0), 0, 1),
+    lockHoldSeconds: clamp(numberValue(formData, `${prefix}signalLockHoldSeconds`, base.signalAlignment.lockHoldSeconds ?? 4), 0.5, 30),
+    targetRevealRadius: clamp(numberValue(formData, `${prefix}signalTargetRevealRadius`, base.signalAlignment.targetRevealRadius ?? 100), 0, 100),
+    destabilizationPenaltySeconds: clamp(numberValue(formData, `${prefix}signalDestabilizationPenaltySeconds`, base.signalAlignment.destabilizationPenaltySeconds ?? 0), 0, 60)
+  };
+}
+
 function getDefaultProfileView(id: string) {
   const base = (DIFFICULTY_PROFILES as any)[id];
   const constraints = getProfileConstraints(
@@ -112,10 +136,10 @@ function getDefaultProfileView(id: string) {
     Boolean(base.nodeIntrusion.allowFirewallOnMainPath)
   );
   return {
-    traceDurationSeconds: Number(base.traceDurationSeconds ?? 60),
     hintsEnabled: Boolean(base.hintsEnabled),
     visualGlitchIntensity: Number(base.visualGlitchIntensity ?? 0.4),
     nodeIntrusion: {
+      traceDurationSeconds: Number(base.nodeIntrusion.traceDurationSeconds ?? base.traceDurationSeconds ?? 60),
       nodeCount: constraints.nodeCount,
       firewallCount: clamp(Number(base.nodeIntrusion.firewallCount ?? 0), 0, constraints.maxFirewalls),
       decoyCount: constraints.decoyCount,
@@ -127,6 +151,16 @@ function getDefaultProfileView(id: string) {
       decoyPenaltySeconds: Number(base.nodeIntrusion.decoyPenaltySeconds ?? 4),
       showTarget: Boolean(base.nodeIntrusion.showTarget),
       allowFirewallOnMainPath: Boolean(base.nodeIntrusion.allowFirewallOnMainPath)
+    },
+    signalAlignment: {
+      traceDurationSeconds: Number(base.signalAlignment.traceDurationSeconds ?? base.traceDurationSeconds ?? 60),
+      channelCount: Number(base.signalAlignment.channelCount ?? 3),
+      tolerance: Number(base.signalAlignment.tolerance ?? 5),
+      signalDriftSpeed: Number(base.signalAlignment.signalDriftSpeed ?? 0),
+      noiseLevel: Number(base.signalAlignment.noiseLevel ?? 0),
+      lockHoldSeconds: Number(base.signalAlignment.lockHoldSeconds ?? 4),
+      targetRevealRadius: Number(base.signalAlignment.targetRevealRadius ?? 100),
+      destabilizationPenaltySeconds: Number(base.signalAlignment.destabilizationPenaltySeconds ?? 0)
     }
   };
 }
@@ -159,10 +193,10 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
       return {
         id,
         label: profile.label,
-        traceDurationSeconds: Number(profile.traceDurationSeconds ?? 60),
         hintsEnabled: Boolean(profile.hintsEnabled),
         visualGlitchIntensity: Number(profile.visualGlitchIntensity ?? 0.4),
         nodeIntrusion: {
+          traceDurationSeconds: Number(profile.nodeIntrusion?.traceDurationSeconds ?? profile.traceDurationSeconds ?? 60),
           nodeCount: constraints.nodeCount,
           firewallCount: clamp(Number(profile.nodeIntrusion?.firewallCount ?? 0), 0, constraints.maxFirewalls),
           decoyCount: constraints.decoyCount,
@@ -174,6 +208,16 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
           decoyPenaltySeconds: Number(profile.nodeIntrusion?.decoyPenaltySeconds ?? 4),
           showTarget: Boolean(profile.nodeIntrusion?.showTarget),
           allowFirewallOnMainPath
+        },
+        signalAlignment: {
+          traceDurationSeconds: Number(profile.signalAlignment?.traceDurationSeconds ?? profile.traceDurationSeconds ?? 60),
+          channelCount: Number(profile.signalAlignment?.channelCount ?? 3),
+          tolerance: Number(profile.signalAlignment?.tolerance ?? 5),
+          signalDriftSpeed: Number(profile.signalAlignment?.signalDriftSpeed ?? 0),
+          noiseLevel: Number(profile.signalAlignment?.noiseLevel ?? 0),
+          lockHoldSeconds: Number(profile.signalAlignment?.lockHoldSeconds ?? 4),
+          targetRevealRadius: Number(profile.signalAlignment?.targetRevealRadius ?? 100),
+          destabilizationPenaltySeconds: Number(profile.signalAlignment?.destabilizationPenaltySeconds ?? 0)
         },
         constraints
       };
@@ -188,6 +232,9 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
   activateListeners(html: any) {
     super.activateListeners(html);
     this.syncConstraints(html);
+    html.find("input[type='number']").on("change", (event: Event) => {
+      clampNumberInput(event.currentTarget as HTMLInputElement);
+    });
     html.find("[data-profile-section] input").on("input change", (event: Event) => {
       const section = (event.currentTarget as HTMLElement | null)?.closest("[data-profile-section]");
       if (section) this.syncProfileConstraints(section as HTMLElement);
@@ -207,6 +254,10 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
 
   syncConstraints(html: any) {
     html.find("[data-profile-section]").each((_index: number, section: HTMLElement) => this.syncProfileConstraints(section));
+  }
+
+  clampNumberInputs() {
+    this.element?.[0]?.querySelectorAll<HTMLInputElement>("input[type='number']").forEach((input) => clampNumberInput(input));
   }
 
   syncProfileConstraints(section: HTMLElement) {
@@ -245,8 +296,8 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
     if (!PROFILE_IDS.includes(profileId)) return;
     const defaults = getDefaultProfileView(profileId);
     const values: Record<string, any> = {
-      traceDurationSeconds: defaults.traceDurationSeconds,
       visualGlitchIntensity: defaults.visualGlitchIntensity,
+      nodeTraceDurationSeconds: defaults.nodeIntrusion.traceDurationSeconds,
       nodeCount: defaults.nodeIntrusion.nodeCount,
       routeCount: defaults.nodeIntrusion.routeCount,
       firewallCount: defaults.nodeIntrusion.firewallCount,
@@ -254,7 +305,15 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
       claimDurationSeconds: defaults.nodeIntrusion.claimDurationSeconds,
       firewallClaimMultiplier: defaults.nodeIntrusion.firewallClaimMultiplier,
       firewallPenaltySeconds: defaults.nodeIntrusion.firewallPenaltySeconds,
-      decoyPenaltySeconds: defaults.nodeIntrusion.decoyPenaltySeconds
+      decoyPenaltySeconds: defaults.nodeIntrusion.decoyPenaltySeconds,
+      signalTraceDurationSeconds: defaults.signalAlignment.traceDurationSeconds,
+      signalChannelCount: defaults.signalAlignment.channelCount,
+      signalTolerance: defaults.signalAlignment.tolerance,
+      signalDriftSpeed: defaults.signalAlignment.signalDriftSpeed,
+      signalNoiseLevel: defaults.signalAlignment.noiseLevel,
+      signalLockHoldSeconds: defaults.signalAlignment.lockHoldSeconds,
+      signalTargetRevealRadius: defaults.signalAlignment.targetRevealRadius,
+      signalDestabilizationPenaltySeconds: defaults.signalAlignment.destabilizationPenaltySeconds
     };
     for (const [field, value] of Object.entries(values)) {
       const input = section.querySelector<HTMLInputElement>(`[name="${profileId}.${field}"]`);
@@ -273,20 +332,20 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
     this.syncProfileConstraints(section);
   }
 
-  async _updateObject(_event: Event, formDataSource: any) {
-    const formData = formDataSource instanceof FormData
-      ? formDataSource
-      : new FormData(this.form as HTMLFormElement);
+  async _updateObject(_event: Event, _formDataSource: any) {
+    this.clampNumberInputs();
+    const formData = new FormData(this.form as HTMLFormElement);
     const overrides: any = {};
 
     for (const id of PROFILE_IDS) {
       const base = (DIFFICULTY_PROFILES as any)[id];
       const prefix = `${id}.`;
       overrides[id] = {
-        traceDurationSeconds: clamp(Math.round(numberValue(formData, `${prefix}traceDurationSeconds`, base.traceDurationSeconds)), 5, 300),
+        traceDurationSeconds: clamp(Math.round(numberValue(formData, `${prefix}nodeTraceDurationSeconds`, base.traceDurationSeconds)), 5, 300),
         hintsEnabled: checkboxValue(formData, `${prefix}hintsEnabled`),
         visualGlitchIntensity: clamp(numberValue(formData, `${prefix}visualGlitchIntensity`, base.visualGlitchIntensity), 0, 1),
-        nodeIntrusion: normalizeNodeIntrusionProfile(formData, prefix, base)
+        nodeIntrusion: normalizeNodeIntrusionProfile(formData, prefix, base),
+        signalAlignment: normalizeSignalAlignmentProfile(formData, prefix, base)
       };
     }
 

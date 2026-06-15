@@ -4,10 +4,10 @@ export const DIFFICULTY_PROFILES = {
     id: "critical_success",
     label: "Critical Success",
     traceDurationSeconds: 95,
-    maxMistakes: 4,
     hintsEnabled: true,
     visualGlitchIntensity: 0.15,
     nodeIntrusion: {
+      traceDurationSeconds: 95,
       nodeCount: 14,
       firewallCount: 2,
       decoyCount: 2,
@@ -21,12 +21,14 @@ export const DIFFICULTY_PROFILES = {
       decoyPenaltySeconds: 2
     },
     signalAlignment: {
+      traceDurationSeconds: 95,
       channelCount: 2,
       tolerance: 8,
       signalDriftSpeed: 0,
       noiseLevel: 0.05,
       lockHoldSeconds: 2.5,
-      decoyFrequencies: 0
+      targetRevealRadius: 100,
+      destabilizationPenaltySeconds: 0
     }
   },
   strong_success: {
@@ -34,10 +36,10 @@ export const DIFFICULTY_PROFILES = {
     id: "strong_success",
     label: "Strong Success",
     traceDurationSeconds: 75,
-    maxMistakes: 3,
     hintsEnabled: true,
     visualGlitchIntensity: 0.25,
     nodeIntrusion: {
+      traceDurationSeconds: 75,
       nodeCount: 16,
       firewallCount: 3,
       decoyCount: 3,
@@ -51,12 +53,14 @@ export const DIFFICULTY_PROFILES = {
       decoyPenaltySeconds: 3
     },
     signalAlignment: {
+      traceDurationSeconds: 75,
       channelCount: 3,
       tolerance: 7,
-      signalDriftSpeed: 0.08,
+      signalDriftSpeed: 0.15,
       noiseLevel: 0.12,
       lockHoldSeconds: 3,
-      decoyFrequencies: 0
+      targetRevealRadius: 30,
+      destabilizationPenaltySeconds: 2
     }
   },
   success: {
@@ -64,10 +68,10 @@ export const DIFFICULTY_PROFILES = {
     id: "success",
     label: "Success",
     traceDurationSeconds: 60,
-    maxMistakes: 3,
     hintsEnabled: false,
     visualGlitchIntensity: 0.4,
     nodeIntrusion: {
+      traceDurationSeconds: 60,
       nodeCount: 18,
       firewallCount: 4,
       decoyCount: 4,
@@ -81,12 +85,14 @@ export const DIFFICULTY_PROFILES = {
       decoyPenaltySeconds: 4
     },
     signalAlignment: {
+      traceDurationSeconds: 60,
       channelCount: 3,
       tolerance: 5,
-      signalDriftSpeed: 0.16,
+      signalDriftSpeed: 0.35,
       noiseLevel: 0.2,
       lockHoldSeconds: 4,
-      decoyFrequencies: 1
+      targetRevealRadius: 20,
+      destabilizationPenaltySeconds: 4
     }
   },
   failure_but_playable: {
@@ -94,10 +100,10 @@ export const DIFFICULTY_PROFILES = {
     id: "failure_but_playable",
     label: "Failure, But Playable",
     traceDurationSeconds: 45,
-    maxMistakes: 2,
     hintsEnabled: false,
     visualGlitchIntensity: 0.65,
     nodeIntrusion: {
+      traceDurationSeconds: 45,
       nodeCount: 20,
       firewallCount: 6,
       decoyCount: 5,
@@ -111,12 +117,14 @@ export const DIFFICULTY_PROFILES = {
       decoyPenaltySeconds: 5
     },
     signalAlignment: {
+      traceDurationSeconds: 45,
       channelCount: 4,
       tolerance: 4,
-      signalDriftSpeed: 0.28,
+      signalDriftSpeed: 0.55,
       noiseLevel: 0.32,
       lockHoldSeconds: 5,
-      decoyFrequencies: 2
+      targetRevealRadius: 12,
+      destabilizationPenaltySeconds: 6
     }
   },
   critical_failure: {
@@ -124,10 +132,10 @@ export const DIFFICULTY_PROFILES = {
     id: "critical_failure",
     label: "Critical Failure",
     traceDurationSeconds: 24,
-    maxMistakes: 1,
     hintsEnabled: false,
     visualGlitchIntensity: 0.9,
     nodeIntrusion: {
+      traceDurationSeconds: 24,
       nodeCount: 24,
       firewallCount: 10,
       decoyCount: 8,
@@ -141,12 +149,14 @@ export const DIFFICULTY_PROFILES = {
       decoyPenaltySeconds: 8
     },
     signalAlignment: {
+      traceDurationSeconds: 24,
       channelCount: 5,
       tolerance: 2,
-      signalDriftSpeed: 0.45,
+      signalDriftSpeed: 0.6,
       noiseLevel: 0.5,
       lockHoldSeconds: 6.5,
-      decoyFrequencies: 3
+      targetRevealRadius: 0,
+      destabilizationPenaltySeconds: 8
     }
   }
 };

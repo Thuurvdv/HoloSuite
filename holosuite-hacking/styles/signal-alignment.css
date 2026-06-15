@@ -235,8 +235,27 @@
 .signal-wave-fill {
   position: absolute;
   inset: 0 auto 0 0;
-  background: linear-gradient(90deg, rgba(40, 247, 255, 0.22), rgba(255, 230, 111, 0.55));
-  clip-path: polygon(0 50%, 5% 25%, 10% 50%, 15% 75%, 20% 50%, 25% 25%, 30% 50%, 35% 75%, 40% 50%, 45% 25%, 50% 50%, 55% 75%, 60% 50%, 65% 25%, 70% 50%, 75% 75%, 80% 50%, 85% 25%, 90% 50%, 95% 75%, 100% 50%, 100% 100%, 0 100%);
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(40, 247, 255, 0.12), rgba(255, 230, 111, 0.28));
+}
+
+.signal-wave-fill::before,
+.signal-wave-fill::after {
+  content: "";
+  position: absolute;
+  inset: 4px -30px;
+  background: linear-gradient(90deg, rgba(40, 247, 255, 0), rgba(40, 247, 255, 0.85), rgba(255, 230, 111, 0.86), rgba(40, 247, 255, 0));
+  clip-path: polygon(0 50%, 3% 36%, 6% 25%, 9% 20%, 12% 25%, 15% 36%, 18% 50%, 21% 64%, 24% 75%, 27% 80%, 30% 75%, 33% 64%, 36% 50%, 39% 36%, 42% 25%, 45% 20%, 48% 25%, 51% 36%, 54% 50%, 57% 64%, 60% 75%, 63% 80%, 66% 75%, 69% 64%, 72% 50%, 75% 36%, 78% 25%, 81% 20%, 84% 25%, 87% 36%, 90% 50%, 93% 64%, 96% 75%, 100% 80%, 100% 100%, 0 100%);
+  opacity: 0.8;
+  animation: signal-wave-wiggle var(--wave-duration, 2.8s) linear infinite;
+}
+
+.signal-wave-fill::after {
+  inset-block: 8px;
+  opacity: 0.38;
+  transform: scaleY(-1);
+  animation-duration: 1.9s;
+  animation-direction: reverse;
 }
 
 .signal-tolerance {
@@ -244,6 +263,8 @@
   inset: 0 auto 0 0;
   background: rgba(77, 255, 155, 0.16);
   border-inline: 1px solid rgba(77, 255, 155, 0.72);
+  opacity: 0;
+  transition: opacity 160ms ease;
 }
 
 .signal-target {
@@ -253,6 +274,18 @@
   width: 2px;
   background: #ffe66f;
   box-shadow: 0 0 10px #ffe66f;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.signal-channel.is-target-visible .signal-tolerance,
+.signal-channel.is-target-visible .signal-target {
+  opacity: 1;
+}
+
+.signal-channel.is-aligned .signal-wave-fill::before {
+  background: linear-gradient(90deg, rgba(77, 255, 155, 0), rgba(77, 255, 155, 0.9), rgba(255, 230, 111, 0.82), rgba(77, 255, 155, 0));
+  animation-duration: 3.4s;
 }
 
 .signal-channel input[type="range"] {
@@ -271,20 +304,9 @@
   font-size: 12px;
 }
 
-.signal-decoys {
-  position: absolute;
-  inset: auto 12px 48px 12px;
-  height: 10px;
-  pointer-events: none;
-}
-
-.signal-decoys span {
-  position: absolute;
-  top: 0;
-  width: 2px;
-  height: 10px;
-  background: rgba(255, 71, 126, 0.72);
-  box-shadow: 0 0 8px rgba(255, 71, 126, 0.75);
+@keyframes signal-wave-wiggle {
+  from { transform: translateX(-18px); }
+  to { transform: translateX(18px); }
 }
 
 .signal-alignment-result {

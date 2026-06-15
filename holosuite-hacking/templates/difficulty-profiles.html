@@ -1,4 +1,4 @@
-<form class="holosuite-profile-config">
+<form class="holosuite-profile-config" novalidate>
   <header class="holosuite-profile-config-header">
     <p>HoloSuite / hacking profiles</p>
     <h2>Difficulty Profiles</h2>
@@ -15,14 +15,22 @@
           <button type="button" data-action="reset-profile" title="Reset this profile" aria-label="Reset {{label}}"><i class="fa-solid fa-rotate-left"></i></button>
         </header>
 
-        <div class="holosuite-profile-grid">
-          <label>
-            <span title="How long the player has before the trace reaches 100%.">Trace seconds</span>
-            <input type="number" name="{{id}}.traceDurationSeconds" value="{{traceDurationSeconds}}" min="5" max="300" step="1" />
-          </label>
+        <div class="holosuite-profile-fieldset">
+          <h4>Shared</h4>
+          <div class="holosuite-profile-grid">
           <label>
             <span title="How intense the profile's visual distortion is before client visual preference is applied.">Visual glitch</span>
-            <input type="number" name="{{id}}.visualGlitchIntensity" value="{{visualGlitchIntensity}}" min="0" max="1" step="0.05" />
+            <input type="number" name="{{id}}.visualGlitchIntensity" value="{{visualGlitchIntensity}}" min="0" max="1" step="0.01" />
+          </label>
+          </div>
+        </div>
+
+        <div class="holosuite-profile-fieldset">
+          <h4>Node Intrusion</h4>
+          <div class="holosuite-profile-grid">
+          <label>
+            <span title="How long Node Intrusion has before the trace reaches 100%.">Node trace seconds</span>
+            <input type="number" name="{{id}}.nodeTraceDurationSeconds" value="{{nodeIntrusion.traceDurationSeconds}}" min="5" max="300" step="1" />
           </label>
           <label>
             <span title="Total node count for the generated Node Intrusion map.">Nodes</span>
@@ -42,11 +50,11 @@
           </label>
           <label>
             <span title="Base time required to claim a normal node.">Takeover seconds</span>
-            <input type="number" name="{{id}}.claimDurationSeconds" value="{{nodeIntrusion.claimDurationSeconds}}" min="0.1" max="5" step="0.05" />
+            <input type="number" name="{{id}}.claimDurationSeconds" value="{{nodeIntrusion.claimDurationSeconds}}" min="0.1" max="5" step="0.01" />
           </label>
           <label>
             <span title="Multiplier applied to takeover time when claiming a firewall node.">Firewall takeover x</span>
-            <input type="number" name="{{id}}.firewallClaimMultiplier" value="{{nodeIntrusion.firewallClaimMultiplier}}" min="1" max="5" step="0.05" />
+            <input type="number" name="{{id}}.firewallClaimMultiplier" value="{{nodeIntrusion.firewallClaimMultiplier}}" min="1" max="5" step="0.01" />
           </label>
           <label>
             <span title="Seconds added to trace pressure when a firewall is claimed.">Firewall penalty</span>
@@ -56,32 +64,71 @@
             <span title="Seconds added to trace pressure when a decoy is claimed.">Decoy penalty</span>
             <input type="number" name="{{id}}.decoyPenaltySeconds" value="{{nodeIntrusion.decoyPenaltySeconds}}" min="0" max="60" step="1" />
           </label>
+          </div>
+
+          <div class="holosuite-profile-limits">
+            <span>Max decoys <strong data-constraint="maxDecoys">{{constraints.maxDecoys}}</strong></span>
+            <span>Max firewalls <strong data-constraint="maxFirewalls">{{constraints.maxFirewalls}}</strong></span>
+            <span>Max safe routes <strong data-constraint="maxRoutes">{{constraints.maxRoutes}}</strong></span>
+            <span>Protected nodes <strong data-constraint="protectedNodes">{{constraints.protectedNodes}}</strong></span>
+          </div>
+
+          <div class="holosuite-profile-toggles">
+            <label>
+              <input type="checkbox" name="{{id}}.hintsEnabled" {{#if hintsEnabled}}checked{{/if}} />
+              <span title="Shows firewall and decoy node types when they are in view.">Reveal hazard types</span>
+            </label>
+            <label>
+              <input type="checkbox" name="{{id}}.radarEnabled" {{#if nodeIntrusion.radarEnabled}}checked{{/if}} />
+              <span title="Shows adjacent danger signals on current, visited, and reachable nodes without revealing exact hazard locations.">Radar</span>
+            </label>
+            <label>
+              <input type="checkbox" name="{{id}}.showTarget" {{#if nodeIntrusion.showTarget}}checked{{/if}} />
+              <span title="Shows the target marker before the player reaches it. Intended for critical success by default.">Show target marker</span>
+            </label>
+            <label>
+              <input type="checkbox" name="{{id}}.allowFirewallOnMainPath" {{#if nodeIntrusion.allowFirewallOnMainPath}}checked{{/if}} />
+              <span title="Allows firewalls on protected routes. In this mode those firewalls are passable, slower to claim, and apply trace penalties.">Allow passable firewalls on protected routes</span>
+            </label>
+          </div>
         </div>
 
-        <div class="holosuite-profile-limits">
-          <span>Max decoys <strong data-constraint="maxDecoys">{{constraints.maxDecoys}}</strong></span>
-          <span>Max firewalls <strong data-constraint="maxFirewalls">{{constraints.maxFirewalls}}</strong></span>
-          <span>Max safe routes <strong data-constraint="maxRoutes">{{constraints.maxRoutes}}</strong></span>
-          <span>Protected nodes <strong data-constraint="protectedNodes">{{constraints.protectedNodes}}</strong></span>
-        </div>
-
-        <div class="holosuite-profile-toggles">
+        <div class="holosuite-profile-fieldset">
+          <h4>Signal Alignment</h4>
+          <div class="holosuite-profile-grid">
           <label>
-            <input type="checkbox" name="{{id}}.hintsEnabled" {{#if hintsEnabled}}checked{{/if}} />
-            <span title="Shows firewall and decoy node types when they are in view.">Reveal hazard types</span>
+            <span title="How long Signal Alignment has before the trace reaches 100%.">Signal trace seconds</span>
+            <input type="number" name="{{id}}.signalTraceDurationSeconds" value="{{signalAlignment.traceDurationSeconds}}" min="5" max="300" step="1" />
           </label>
           <label>
-            <input type="checkbox" name="{{id}}.radarEnabled" {{#if nodeIntrusion.radarEnabled}}checked{{/if}} />
-            <span title="Shows adjacent danger signals on current, visited, and reachable nodes without revealing exact hazard locations.">Radar</span>
+            <span title="Number of sliders generated for Signal Alignment.">Signal channels</span>
+            <input type="number" name="{{id}}.signalChannelCount" value="{{signalAlignment.channelCount}}" min="2" max="5" step="1" />
           </label>
           <label>
-            <input type="checkbox" name="{{id}}.showTarget" {{#if nodeIntrusion.showTarget}}checked{{/if}} />
-            <span title="Shows the target marker before the player reaches it. Intended for critical success by default.">Show target marker</span>
+            <span title="Distance from the target that counts as aligned.">Signal tolerance</span>
+            <input type="number" name="{{id}}.signalTolerance" value="{{signalAlignment.tolerance}}" min="0.5" max="20" step="0.01" />
           </label>
           <label>
-            <input type="checkbox" name="{{id}}.allowFirewallOnMainPath" {{#if nodeIntrusion.allowFirewallOnMainPath}}checked{{/if}} />
-            <span title="Allows firewalls on protected routes. In this mode those firewalls are passable, slower to claim, and apply trace penalties.">Allow passable firewalls on protected routes</span>
+            <span title="How quickly Signal Alignment sliders drift while the trace runs.">Signal drift</span>
+            <input type="number" name="{{id}}.signalDriftSpeed" value="{{signalAlignment.signalDriftSpeed}}" min="0" max="5" step="0.01" />
           </label>
+          <label>
+            <span title="Visual signal instability reserved for Signal Alignment effects.">Signal noise</span>
+            <input type="number" name="{{id}}.signalNoiseLevel" value="{{signalAlignment.noiseLevel}}" min="0" max="1" step="0.01" />
+          </label>
+          <label>
+            <span title="Seconds all channels must stay aligned before the hack succeeds.">Signal hold</span>
+            <input type="number" name="{{id}}.signalLockHoldSeconds" value="{{signalAlignment.lockHoldSeconds}}" min="0.5" max="30" step="0.01" />
+          </label>
+          <label>
+            <span title="How close a slider must be before the Signal Alignment target is revealed. 100 means always visible.">Reveal radius</span>
+            <input type="number" name="{{id}}.signalTargetRevealRadius" value="{{signalAlignment.targetRevealRadius}}" min="0" max="100" step="1" />
+          </label>
+          <label>
+            <span title="Seconds added to trace progress when Signal Alignment loses lock.">Trace spike</span>
+            <input type="number" name="{{id}}.signalDestabilizationPenaltySeconds" value="{{signalAlignment.destabilizationPenaltySeconds}}" min="0" max="60" step="0.01" />
+          </label>
+          </div>
         </div>
       </section>
     {{/each}}

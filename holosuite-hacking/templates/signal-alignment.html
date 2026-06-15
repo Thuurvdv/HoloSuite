@@ -37,8 +37,8 @@
       </div>
 
       <div class="signal-alignment-readout">
-        <span>Destabilizations</span>
-        <strong data-mistake-text>{{state.mistakes}}/{{profile.maxMistakes}}</strong>
+        <span>Trace spikes</span>
+        <strong data-mistake-text>{{state.tracePenaltySeconds}}s</strong>
       </div>
 
       <dl class="signal-alignment-specs">
@@ -54,24 +54,19 @@
 
     <main class="signal-alignment-board {{#unless state.hasStarted}}is-standby{{/unless}}" aria-label="Signal channels">
       {{#each channels}}
-        <section class="signal-channel {{#if aligned}}is-aligned{{/if}}" data-channel-row="{{id}}">
+        <section class="signal-channel {{#if aligned}}is-aligned{{/if}} {{#if targetVisible}}is-target-visible{{/if}}" data-channel-row="{{id}}">
           <header>
             <strong>{{label}}</strong>
-            <span>target {{target}} / current <b data-channel-value>{{valueLabel}}</b> / delta <b data-channel-delta>{{deltaLabel}}</b></span>
+            <span><b data-channel-state>{{targetStateLabel}}</b> / target <b data-channel-target>{{targetLabel}}</b> / current <b data-channel-value>{{valueLabel}}</b> / delta <b data-channel-delta>{{deltaRevealLabel}}</b></span>
           </header>
           <div class="signal-waveform">
             <div class="signal-tolerance" style="left: {{toleranceLeft}}%; width: {{toleranceWidth}}%;"></div>
             <div class="signal-target" style="left: {{targetLeft}}%;"></div>
-            <div class="signal-wave-fill" data-wave-fill style="width: {{value}}%"></div>
+            <div class="signal-wave-fill" data-wave-fill style="width: {{value}}%; --wave-duration: {{waveDurationSeconds}}s;"></div>
           </div>
           <input type="range" min="0" max="100" step="0.1" value="{{value}}" data-channel-slider="{{id}}" {{#unless ../state.hasStarted}}disabled{{/unless}} />
           {{#if ../profile.hintsEnabled}}
             <p class="signal-channel-hint">Tune inside the highlighted lock band.</p>
-          {{/if}}
-          {{#if decoys.length}}
-            <div class="signal-decoys">
-              {{#each decoys}}<span style="left: {{this}}%;"></span>{{/each}}
-            </div>
           {{/if}}
         </section>
       {{/each}}

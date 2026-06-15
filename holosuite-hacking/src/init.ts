@@ -65,7 +65,7 @@ function registerSettings() {
   game.settings.registerMenu(MODULE_ID, "difficultyProfilesMenu", {
     name: "Difficulty Profiles",
     label: "Configure Profiles",
-    hint: "Tune Node Intrusion profile timers, map size, hazards, radar, takeover speed, and penalties.",
+    hint: "Tune Node Intrusion maps and Signal Alignment channels, drift, reveal radius, hold time, and trace pressure.",
     icon: "fas fa-sliders",
     type: DifficultyProfilesApp,
     restricted: true

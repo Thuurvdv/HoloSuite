@@ -191,7 +191,8 @@ export class NodeIntrusionApp extends LegacyApplication {
 
   getTraceDuration() {
     const multiplier = Number(game.settings.get(MODULE_ID, "traceDurationMultiplier") ?? 1) || 1;
-    return Math.max(5, this.profile.traceDurationSeconds * multiplier);
+    const traceDurationSeconds = Number(this.profile.nodeIntrusion?.traceDurationSeconds ?? this.profile.traceDurationSeconds ?? 60);
+    return Math.max(5, traceDurationSeconds * multiplier);
   }
 
   countAdjacentBadNodes(nodeId: string) {

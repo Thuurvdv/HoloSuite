@@ -214,6 +214,28 @@
   line-height: 1;
 }
 
+.holosuite-profile-fieldset {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(105, 232, 255, 0.15);
+  padding-top: 10px;
+}
+
+.holosuite-profile-fieldset:first-of-type {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.holosuite-profile-fieldset h4 {
+  margin: 0;
+  color: var(--hs-cyan);
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 .holosuite-profile-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -267,7 +289,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px 16px;
-  margin-top: 12px;
+  margin-top: 0;
   border-top: 1px solid rgba(105, 232, 255, 0.15);
   padding-top: 10px;
 }
