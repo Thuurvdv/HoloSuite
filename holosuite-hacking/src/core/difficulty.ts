@@ -8,10 +8,17 @@ export const DIFFICULTY_PROFILES = {
     hintsEnabled: true,
     visualGlitchIntensity: 0.15,
     nodeIntrusion: {
-      nodeCount: 8,
-      firewallCount: 1,
-      decoyCount: 1,
-      allowFirewallOnMainPath: false
+      nodeCount: 14,
+      firewallCount: 2,
+      decoyCount: 2,
+      allowFirewallOnMainPath: false,
+      routeCount: 3,
+      showTarget: true,
+      radarEnabled: true,
+      claimDurationSeconds: 0.35,
+      firewallClaimMultiplier: 1.5,
+      firewallPenaltySeconds: 4,
+      decoyPenaltySeconds: 2
     },
     signalAlignment: {
       channelCount: 2,
@@ -31,10 +38,17 @@ export const DIFFICULTY_PROFILES = {
     hintsEnabled: true,
     visualGlitchIntensity: 0.25,
     nodeIntrusion: {
-      nodeCount: 10,
-      firewallCount: 2,
-      decoyCount: 2,
-      allowFirewallOnMainPath: false
+      nodeCount: 16,
+      firewallCount: 3,
+      decoyCount: 3,
+      allowFirewallOnMainPath: false,
+      routeCount: 3,
+      showTarget: false,
+      radarEnabled: true,
+      claimDurationSeconds: 0.45,
+      firewallClaimMultiplier: 1.6,
+      firewallPenaltySeconds: 5,
+      decoyPenaltySeconds: 3
     },
     signalAlignment: {
       channelCount: 3,
@@ -54,10 +68,17 @@ export const DIFFICULTY_PROFILES = {
     hintsEnabled: false,
     visualGlitchIntensity: 0.4,
     nodeIntrusion: {
-      nodeCount: 12,
-      firewallCount: 3,
-      decoyCount: 3,
-      allowFirewallOnMainPath: false
+      nodeCount: 18,
+      firewallCount: 4,
+      decoyCount: 4,
+      allowFirewallOnMainPath: false,
+      routeCount: 3,
+      showTarget: false,
+      radarEnabled: false,
+      claimDurationSeconds: 0.6,
+      firewallClaimMultiplier: 1.75,
+      firewallPenaltySeconds: 6,
+      decoyPenaltySeconds: 4
     },
     signalAlignment: {
       channelCount: 3,
@@ -77,10 +98,17 @@ export const DIFFICULTY_PROFILES = {
     hintsEnabled: false,
     visualGlitchIntensity: 0.65,
     nodeIntrusion: {
-      nodeCount: 15,
-      firewallCount: 5,
-      decoyCount: 4,
-      allowFirewallOnMainPath: false
+      nodeCount: 20,
+      firewallCount: 6,
+      decoyCount: 5,
+      allowFirewallOnMainPath: false,
+      routeCount: 2,
+      showTarget: false,
+      radarEnabled: false,
+      claimDurationSeconds: 0.75,
+      firewallClaimMultiplier: 2,
+      firewallPenaltySeconds: 8,
+      decoyPenaltySeconds: 5
     },
     signalAlignment: {
       channelCount: 4,
@@ -95,15 +123,22 @@ export const DIFFICULTY_PROFILES = {
     profileId: "critical_failure",
     id: "critical_failure",
     label: "Critical Failure",
-    traceDurationSeconds: 32,
+    traceDurationSeconds: 24,
     maxMistakes: 1,
     hintsEnabled: false,
     visualGlitchIntensity: 0.9,
     nodeIntrusion: {
-      nodeCount: 18,
-      firewallCount: 7,
-      decoyCount: 6,
-      allowFirewallOnMainPath: true
+      nodeCount: 24,
+      firewallCount: 10,
+      decoyCount: 8,
+      allowFirewallOnMainPath: false,
+      routeCount: 1,
+      showTarget: false,
+      radarEnabled: false,
+      claimDurationSeconds: 1.2,
+      firewallClaimMultiplier: 2.25,
+      firewallPenaltySeconds: 12,
+      decoyPenaltySeconds: 8
     },
     signalAlignment: {
       channelCount: 5,
@@ -125,10 +160,13 @@ function flattenProfile(profile: any) {
   };
 }
 
-export function getDifficultyProfile(rollTotal = 0, dc = 10) {
+export function getDifficultyProfile(rollTotal = 0, dc = 10, naturalRoll: number | null = null) {
   const roll = Number(rollTotal) || 0;
   const target = Number(dc) || 10;
+  const natural = Number(naturalRoll);
 
+  if (natural === 1) return flattenProfile(DIFFICULTY_PROFILES.critical_failure);
+  if (natural === 20) return flattenProfile(DIFFICULTY_PROFILES.critical_success);
   if (roll <= target - 10) return flattenProfile(DIFFICULTY_PROFILES.critical_failure);
   if (roll >= target + 10) return flattenProfile(DIFFICULTY_PROFILES.critical_success);
   if (roll >= target + 5) return flattenProfile(DIFFICULTY_PROFILES.strong_success);

@@ -28,6 +28,15 @@ function pickRandom<T>(items: T[], rng: () => number): T | null {
   return items[Math.floor(rng() * items.length)];
 }
 
+function shuffle<T>(items: T[], rng: () => number) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(rng() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
 function connect(nodes: any[], leftId: string, rightId: string) {
   const left = nodes.find((node) => node.id === leftId);
   const right = nodes.find((node) => node.id === rightId);
@@ -210,12 +219,107 @@ function relaxNodePositions(nodes: any[]) {
   }
 }
 
+function randomEndpoint(rng: () => number) {
+  const side = Math.floor(rng() * 4);
+  if (side === 0) return { x: 8 + (rng() * 22), y: 12 + (rng() * 76) };
+  if (side === 1) return { x: 70 + (rng() * 22), y: 12 + (rng() * 76) };
+  if (side === 2) return { x: 12 + (rng() * 76), y: 10 + (rng() * 20) };
+  return { x: 12 + (rng() * 76), y: 70 + (rng() * 20) };
+}
+
+function createEndpointPair(rng: () => number) {
+  let start = randomEndpoint(rng);
+  let target = randomEndpoint(rng);
+  let best = { start, target, distance: 0 };
+
+  for (let attempt = 0; attempt < 24; attempt += 1) {
+    start = randomEndpoint(rng);
+    target = randomEndpoint(rng);
+    const dx = target.x - start.x;
+    const dy = target.y - start.y;
+    const distance = Math.sqrt((dx * dx) + (dy * dy));
+    if (distance > best.distance) best = { start, target, distance };
+    if (distance >= 58) return { start, target };
+  }
+
+  return { start: best.start, target: best.target };
+}
+
+function getPathIds(nodes: any[], startId: string, targetId: string, blockedTypes = new Set<string>()) {
+  const queue = [startId];
+  const previous = new Map<string, string | null>([[startId, null]]);
+
+  for (let index = 0; index < queue.length; index += 1) {
+    const node = getNode(nodes, queue[index]);
+    if (!node) continue;
+    if (node.id === targetId) break;
+
+    for (const connectedId of node.connected) {
+      if (previous.has(connectedId)) continue;
+      const connected = getNode(nodes, connectedId);
+      if (!connected || blockedTypes.has(connected.type)) continue;
+      previous.set(connectedId, node.id);
+      queue.push(connectedId);
+    }
+  }
+
+  if (!previous.has(targetId)) return [];
+  const path = [];
+  let current: string | null = targetId;
+  while (current) {
+    path.unshift(current);
+    current = previous.get(current) ?? null;
+  }
+  return path;
+}
+
+function countSafeRoutes(nodes: any[], startId: string, targetId: string) {
+  const firstRoute = getPathIds(nodes, startId, targetId, new Set(["firewall", "decoy"]));
+  if (!firstRoute.length) return 0;
+
+  const protectedEndpoints = new Set([startId, targetId]);
+  const withoutFirstInterior = nodes.map((node) => ({
+    ...node,
+    connected: protectedEndpoints.has(node.id) || !firstRoute.includes(node.id) ? [...node.connected] : []
+  }));
+  return 1 + (getPathIds(withoutFirstInterior, startId, targetId, new Set(["firewall", "decoy"])).length ? 1 : 0);
+}
+
+function addAlternateRoutes(nodes: any[], mainPathIds: string[], rng: () => number, desiredRoutes: number) {
+  let nextIndex = nodes.length + 1;
+  const protectedRouteIds: string[] = [];
+  for (let route = 1; route < desiredRoutes; route += 1) {
+    if (mainPathIds.length < 5) break;
+    const startIndex = 1 + Math.floor(rng() * Math.max(1, mainPathIds.length - 4));
+    const endIndex = clamp(startIndex + 2 + Math.floor(rng() * 3), startIndex + 2, mainPathIds.length - 2);
+    const start = getNode(nodes, mainPathIds[startIndex]);
+    const end = getNode(nodes, mainPathIds[endIndex]);
+    if (!start || !end) continue;
+
+    const middleId = `node-${nextIndex}`;
+    nextIndex += 1;
+    const middle = createNode(
+      middleId,
+      "normal",
+      (start.x + end.x) / 2 + ((rng() - 0.5) * 34),
+      (start.y + end.y) / 2 + ((rng() - 0.5) * 34)
+    );
+    nodes.push(middle);
+    protectedRouteIds.push(start.id, middle.id, end.id);
+    connect(nodes, start.id, middle.id);
+    connect(nodes, middle.id, end.id);
+  }
+  return protectedRouteIds;
+}
+
 function buildIntrusionGraph(profile: any, seed: any = Date.now()) {
   const rng = createRng(seed);
   const totalNodes = Math.max(6, Number(profile.nodeCount ?? profile.nodeIntrusion?.nodeCount) || 10);
   const decoyCount = clamp(Number(profile.decoyCount ?? profile.nodeIntrusion?.decoyCount) || 0, 0, totalNodes - 4);
   const branchCount = Math.max(0, totalNodes - decoyCount);
-  const mainPathLength = clamp(Math.round(branchCount * 0.55), 5, branchCount);
+  const mainPathLength = clamp(Math.round(branchCount * 0.48), 6, branchCount);
+  const routeCount = clamp(Number(profile.routeCount ?? profile.nodeIntrusion?.routeCount) || 2, 1, 3);
+  const endpoints = createEndpointPair(rng);
   const nodes: any[] = [];
   const mainPathIds: string[] = [];
 
@@ -225,15 +329,27 @@ function buildIntrusionGraph(profile: any, seed: any = Date.now()) {
     const id = index === 0 ? "start" : index === mainPathLength - 1 ? "target" : `node-${index}`;
     const type = index === 0 ? "start" : index === mainPathLength - 1 ? "target" : "normal";
     const progress = index / Math.max(1, mainPathLength - 1);
-    const wave = Math.sin(progress * Math.PI * 1.35) * 10;
+    const dx = endpoints.target.x - endpoints.start.x;
+    const dy = endpoints.target.y - endpoints.start.y;
+    const length = Math.sqrt((dx * dx) + (dy * dy)) || 1;
+    const normalX = -dy / length;
+    const normalY = dx / length;
+    const wave = Math.sin(progress * Math.PI * (1.15 + rng() * 0.6)) * (10 + rng() * 8);
     const jitterX = index === 0 || index === mainPathLength - 1 ? 0 : (rng() - 0.5) * 5;
     const jitterY = index === 0 || index === mainPathLength - 1 ? 0 : (rng() - 0.5) * 12;
-    nodes.push(createNode(id, type, 9 + progress * 82 + jitterX, 52 + wave + jitterY));
+    nodes.push(createNode(
+      id,
+      type,
+      endpoints.start.x + (dx * progress) + (normalX * wave) + jitterX,
+      endpoints.start.y + (dy * progress) + (normalY * wave) + jitterY
+    ));
     mainPathIds.push(id);
     if (index > 0) connect(nodes, mainPathIds[index - 1], id);
   }
 
-  let nextIndex = mainPathLength;
+  const protectedRouteIds = new Set([...mainPathIds, ...addAlternateRoutes(nodes, mainPathIds, rng, routeCount)]);
+
+  let nextIndex = nodes.length + 1;
   while (nodes.length < totalNodes - decoyCount) {
     const anchor = pickRandom(nodes.filter((node) => node.type !== "target"), rng) ?? nodes[0];
     const id = `node-${nextIndex}`;
@@ -266,20 +382,18 @@ function buildIntrusionGraph(profile: any, seed: any = Date.now()) {
     connect(nodes, anchor.id, id);
   }
 
-  const allowMainPath = profile.allowFirewallOnMainPath ?? profile.allowMainPathFirewalls ?? false;
+  const allowProtectedRouteFirewalls = Boolean(profile.allowFirewallOnMainPath ?? profile.allowMainPathFirewalls ?? profile.nodeIntrusion?.allowFirewallOnMainPath);
   const firewallCandidates = nodes.filter((node) => {
     if (node.type === "start" || node.type === "target" || node.type === "decoy") return false;
-    return allowMainPath || !mainPathIds.includes(node.id);
+    return allowProtectedRouteFirewalls || !protectedRouteIds.has(node.id);
   });
   const firewallCount = clamp(Number(profile.firewallCount ?? profile.nodeIntrusion?.firewallCount) || 0, 0, firewallCandidates.length);
-  for (let placed = 0; placed < firewallCount; placed += 1) {
-    const remaining = firewallCandidates.filter((node) => node.type !== "firewall");
-    const node = pickRandom(remaining, rng);
-    if (!node) break;
+  for (const node of shuffle(firewallCandidates, rng).slice(0, firewallCount)) {
     node.type = "firewall";
   }
 
   relaxNodePositions(nodes);
+  const safeRoutes = countSafeRoutes(nodes, "start", "target");
 
   return {
     nodes,
@@ -287,6 +401,7 @@ function buildIntrusionGraph(profile: any, seed: any = Date.now()) {
     startNodeId: "start",
     targetNodeId: "target",
     mainPathIds,
+    safeRoutes,
     layoutScore: scoreLayout(nodes)
   };
 }
@@ -298,7 +413,7 @@ export function generateIntrusionGraph(profile: any, seed: any = Date.now()) {
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     const graph = buildIntrusionGraph(profile, `${seed}:${attempt}`);
     if (!best || graph.layoutScore < best.layoutScore) best = graph;
-    if (graph.layoutScore < 1) break;
+    if (graph.layoutScore < 1 && graph.safeRoutes > 1) break;
   }
 
   return best ?? buildIntrusionGraph(profile, seed);

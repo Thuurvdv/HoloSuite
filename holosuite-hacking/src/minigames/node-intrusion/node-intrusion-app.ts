@@ -22,6 +22,14 @@ function nodeTypeLabel(type: string) {
   return "relay";
 }
 
+function createRunSeed(rollTotal: number, dc: number, profile: any) {
+  const cryptoApi = globalThis.crypto;
+  const entropy = typeof cryptoApi?.randomUUID === "function"
+    ? cryptoApi.randomUUID()
+    : `${Date.now()}:${performance.now()}:${Math.random()}`;
+  return `${rollTotal}:${dc}:${profile.profileId ?? profile.id}:${entropy}`;
+}
+
 export class NodeIntrusionApp extends LegacyApplication {
   rollTotal: number;
   dc: number;
@@ -35,6 +43,7 @@ export class NodeIntrusionApp extends LegacyApplication {
   state: any;
   startedAt: number | null;
   timer: ReturnType<typeof window.setInterval> | null;
+  claimTimer: ReturnType<typeof window.setTimeout> | null;
   resultMessage?: string;
 
   constructor(options: any = {}) {
@@ -42,7 +51,7 @@ export class NodeIntrusionApp extends LegacyApplication {
     this.rollTotal = Number(options.rollTotal ?? 15);
     this.dc = Number(options.dc ?? 15);
     this.profile = options.profile ? { ...options.profile } : getDifficultyProfile(this.rollTotal, this.dc);
-    this.seed = options.seed ?? `${this.rollTotal}:${this.dc}:${this.profile.profileId ?? this.profile.id}`;
+    this.seed = options.seed ?? createRunSeed(this.rollTotal, this.dc, this.profile);
     this.onSuccess = typeof options.onSuccess === "function" ? options.onSuccess : null;
     this.onFailure = typeof options.onFailure === "function" ? options.onFailure : null;
     this.actorName = String(options.actorName ?? "Hacker");
@@ -55,14 +64,17 @@ export class NodeIntrusionApp extends LegacyApplication {
       blockedEdgeIds: new Map(),
       deadNodeIds: new Set(),
       movement: null,
+      claimingNodeId: null,
       mistakes: 0,
       traceProgress: 0,
+      tracePenaltyProgress: 0,
       hasStarted: false,
       isRunning: false,
       result: null
     };
     this.startedAt = null;
     this.timer = null;
+    this.claimTimer = null;
   }
 
   static get defaultOptions() {
@@ -81,25 +93,36 @@ export class NodeIntrusionApp extends LegacyApplication {
   getData() {
     const currentNode = this.getCurrentNode();
     const currentConnections = currentNode.connected;
+    const radarEnabled = Boolean(this.profile.radarEnabled ?? this.profile.nodeIntrusion?.radarEnabled ?? Number(this.profile.radarRange ?? this.profile.nodeIntrusion?.radarRange) > 0);
     const nodes = this.graph.nodes.map((node) => {
       const isCurrent = node.id === this.state.currentNodeId;
       const isVisited = this.state.visitedNodeIds.has(node.id);
-      const isTargetVisible = node.type === "target" && isVisited;
+      const isClaiming = node.id === this.state.claimingNodeId;
+      const isTargetVisible = node.type === "target" && (isVisited || this.profile.showTarget || this.profile.hintsEnabled);
       const isTypeVisible = node.type !== "target" && (this.profile.hintsEnabled || node.revealed || isVisited || node.type === "start");
       const displayType = isTargetVisible || isTypeVisible ? nodeTypeLabel(node.type) : "unknown";
+      const radarVisible = radarEnabled && (isCurrent || isVisited || currentConnections.includes(node.id));
+      const adjacentDanger = radarVisible && node.type !== "start" && node.type !== "target"
+        ? this.countAdjacentBadNodes(node.id)
+        : 0;
+      const dangerSignal = clamp(adjacentDanger, 0, 2);
 
       return {
         ...node,
         visualType: isTargetVisible ? "target" : node.type === "target" ? "normal" : node.type,
+        isTargetVisible,
         isCurrent,
         isVisited,
+        isClaiming,
         isNeighbor: currentConnections.includes(node.id),
         canMove: currentConnections.includes(node.id)
+          && !this.state.claimingNodeId
           && !this.state.blockedEdgeIds.has(edgeKey(currentNode.id, node.id))
           && !this.state.deadNodeIds.has(node.id),
         isDangerVisible: node.type !== "target" && (this.profile.hintsEnabled || node.revealed || isVisited),
+        dangerSignal,
         displayType,
-        title: `${node.id} - ${displayType}`
+        title: `${node.id} - ${displayType}${dangerSignal ? ` / signal ${dangerSignal}` : ""}`
       };
     });
 
@@ -118,7 +141,6 @@ export class NodeIntrusionApp extends LegacyApplication {
           to,
           isVisitedPath: this.state.traversedEdgeIds.has(edgeKey(edge.from, edge.to)),
           isAvailable: !blockedType && (currentConnections.includes(edge.from) || currentConnections.includes(edge.to)),
-          isBlocked: Boolean(blockedType),
           isFirewallPath: blockedType === "firewall",
           isDecoyPath: blockedType === "decoy"
         };
@@ -158,11 +180,31 @@ export class NodeIntrusionApp extends LegacyApplication {
 
   async close(options: any = {}) {
     this.stopTimer();
+    if (this.claimTimer) window.clearTimeout(this.claimTimer);
+    this.claimTimer = null;
     return super.close(options);
   }
 
   getCurrentNode() {
     return this.graph.nodes.find((node) => node.id === this.state.currentNodeId) ?? this.graph.nodes[0];
+  }
+
+  getTraceDuration() {
+    const multiplier = Number(game.settings.get(MODULE_ID, "traceDurationMultiplier") ?? 1) || 1;
+    return Math.max(5, this.profile.traceDurationSeconds * multiplier);
+  }
+
+  countAdjacentBadNodes(nodeId: string) {
+    const node = this.graph.nodes.find((candidate) => candidate.id === nodeId);
+    if (!node) return 0;
+    return node.connected.reduce((danger, connectedId) => {
+      const connected = this.graph.nodes.find((candidate) => candidate.id === connectedId);
+      return connected?.type === "firewall" || connected?.type === "decoy" ? danger + 1 : danger;
+    }, 0);
+  }
+
+  firewallsArePassable() {
+    return Boolean(this.profile.allowFirewallOnMainPath ?? this.profile.allowMainPathFirewalls ?? this.profile.nodeIntrusion?.allowFirewallOnMainPath);
   }
 
   startRun() {
@@ -176,6 +218,7 @@ export class NodeIntrusionApp extends LegacyApplication {
 
   handleNodeClick(nodeId: string) {
     if (!this.state.hasStarted || !this.state.isRunning) return;
+    if (this.state.claimingNodeId) return;
     const current = this.getCurrentNode();
     const node = this.graph.nodes.find((candidate) => candidate.id === nodeId);
     if (!node) return;
@@ -193,8 +236,6 @@ export class NodeIntrusionApp extends LegacyApplication {
       return;
     }
 
-    this.state.visitedNodeIds.add(nodeId);
-    this.state.traversedEdgeIds.add(routeKey);
     this.state.movement = {
       fromX: current.x,
       fromY: current.y,
@@ -202,17 +243,42 @@ export class NodeIntrusionApp extends LegacyApplication {
       toY: node.y,
       path: `M ${current.x} ${current.y} L ${node.x} ${node.y}`
     };
+    this.state.claimingNodeId = nodeId;
+    this.render(false);
+
+    const baseClaimSeconds = Math.max(0.1, Number(this.profile.claimDurationSeconds ?? this.profile.nodeIntrusion?.claimDurationSeconds) || 0.5);
+    const firewallMultiplier = Math.max(1, Number(this.profile.firewallClaimMultiplier ?? this.profile.nodeIntrusion?.firewallClaimMultiplier) || 1);
+    const claimSeconds = node.type === "firewall" ? baseClaimSeconds * firewallMultiplier : baseClaimSeconds;
+    this.claimTimer = window.setTimeout(() => {
+      this.claimTimer = null;
+      this.completeNodeClaim(current.id, nodeId);
+    }, claimSeconds * 1000);
+  }
+
+  completeNodeClaim(fromNodeId: string, nodeId: string) {
+    if (!this.state.hasStarted || !this.state.isRunning) return;
+    const current = this.graph.nodes.find((candidate) => candidate.id === fromNodeId);
+    const node = this.graph.nodes.find((candidate) => candidate.id === nodeId);
+    if (!current || !node) return;
+
+    const routeKey = edgeKey(current.id, nodeId);
+    this.state.claimingNodeId = null;
+    this.state.visitedNodeIds.add(nodeId);
+    this.state.traversedEdgeIds.add(routeKey);
     node.visited = true;
     node.revealed = true;
 
     if (node.type === "firewall") {
       this.state.mistakes += 1;
-      this.state.blockedEdgeIds.set(routeKey, "firewall");
-      this.state.deadNodeIds.add(nodeId);
-      ui.notifications?.warn?.(`Firewall tripped (${this.state.mistakes}/${this.profile.maxMistakes}).`);
-      if (this.state.mistakes > this.profile.maxMistakes) {
-        this.finish("failure", "Firewall countermeasures locked the intrusion");
-        return;
+      const penalty = Number(this.profile.firewallPenaltySeconds ?? this.profile.nodeIntrusion?.firewallPenaltySeconds) || 6;
+      this.addTracePenalty(penalty);
+      ui.notifications?.warn?.(`Firewall surge: trace accelerated by ${penalty}s.`);
+      if (this.state.result) return;
+      if (this.firewallsArePassable()) {
+        this.state.currentNodeId = nodeId;
+      } else {
+        this.state.blockedEdgeIds.set(routeKey, "firewall");
+        this.state.deadNodeIds.add(nodeId);
       }
       this.render(false);
       return;
@@ -222,11 +288,9 @@ export class NodeIntrusionApp extends LegacyApplication {
       this.state.mistakes += 1;
       this.state.blockedEdgeIds.set(routeKey, "decoy");
       this.state.deadNodeIds.add(nodeId);
-      ui.notifications?.warn?.(`Decoy route burned (${this.state.mistakes}/${this.profile.maxMistakes}).`);
-      if (this.state.mistakes > this.profile.maxMistakes) {
-        this.finish("failure", "The intrusion collapsed into decoy space");
-        return;
-      }
+      const penalty = Number(this.profile.decoyPenaltySeconds ?? this.profile.nodeIntrusion?.decoyPenaltySeconds) || 4;
+      this.addTracePenalty(penalty);
+      ui.notifications?.warn?.(`Decoy sink: trace accelerated by ${penalty}s.`);
       this.render(false);
       return;
     }
@@ -238,23 +302,25 @@ export class NodeIntrusionApp extends LegacyApplication {
       return;
     }
 
-    if (this.state.mistakes > this.profile.maxMistakes) {
-      this.finish("failure", "Firewall countermeasures locked the intrusion");
-      return;
-    }
-
     this.render(false);
+  }
+
+  addTracePenalty(seconds: number) {
+    const penaltyProgress = (Math.max(0, seconds) / this.getTraceDuration()) * 100;
+    this.state.tracePenaltyProgress = clamp(this.state.tracePenaltyProgress + penaltyProgress, 0, 100);
+    this.state.traceProgress = clamp(this.state.traceProgress + penaltyProgress, 0, 100);
+    this.syncDom();
+    if (this.state.traceProgress >= 100) this.finish("failure", "Trace complete");
   }
 
   startTimer() {
     if (this.timer) return;
     if (!this.state.hasStarted || !this.startedAt) return;
-    const multiplier = Number(game.settings.get(MODULE_ID, "traceDurationMultiplier") ?? 1) || 1;
-    const duration = Math.max(5, this.profile.traceDurationSeconds * multiplier);
+    const duration = this.getTraceDuration();
     this.timer = window.setInterval(() => {
       if (!this.state.hasStarted || !this.state.isRunning) return;
       const elapsedSeconds = (performance.now() - this.startedAt) / 1000;
-      this.state.traceProgress = clamp((elapsedSeconds / duration) * 100, 0, 100);
+      this.state.traceProgress = clamp(((elapsedSeconds / duration) * 100) + this.state.tracePenaltyProgress, 0, 100);
       this.syncDom();
       if (this.state.traceProgress >= 100) this.finish("failure", "Trace complete");
     }, 120);
@@ -287,6 +353,7 @@ export class NodeIntrusionApp extends LegacyApplication {
       dc: this.dc,
       profile: this.profile,
       mistakes: this.state.mistakes,
+      tracePenaltyProgress: this.state.tracePenaltyProgress,
       traceProgress: this.state.traceProgress,
       visitedNodeIds: [...this.state.visitedNodeIds]
     };
@@ -312,9 +379,9 @@ export class NodeIntrusionApp extends LegacyApplication {
     if (!element) return;
     const trace = element.querySelector("[data-trace-fill]");
     const traceText = element.querySelector("[data-trace-text]");
-    const mistakeText = element.querySelector("[data-mistake-text]");
+    const penaltyText = element.querySelector("[data-penalty-text]");
     if (trace) trace.style.width = `${this.state.traceProgress}%`;
     if (traceText) traceText.textContent = `${Math.round(this.state.traceProgress)}%`;
-    if (mistakeText) mistakeText.textContent = `${this.state.mistakes}/${this.profile.maxMistakes}`;
+    if (penaltyText) penaltyText.textContent = `${Math.round(this.state.tracePenaltyProgress)}%`;
   }
 }
