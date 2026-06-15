@@ -2,7 +2,7 @@
   "id": "holosuite-hacking",
   "title": "HoloSuite Hacking",
   "description": "Reusable cyberpunk hacking minigames for Foundry VTT.",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "socket": true,
   "authors": [
     {
