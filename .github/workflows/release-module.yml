@@ -56,9 +56,8 @@ jobs:
 
           mkdir -p "staging/$MODULE_ID"
 
-          # Foundry manifest URL: always points to the latest module.json for this module.
-          # Foundry download URL: points to this specific version's zip.
-          MANIFEST_URL="https://github.com/$REPO/releases/download/${MODULE_ID}-latest/module.json"
+          # Foundry manifest and download URLs point to this specific versioned release.
+          MANIFEST_URL="https://github.com/$REPO/releases/download/$TAG/module.json"
           DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$MODULE_ID.zip"
 
           jq \
@@ -93,24 +92,5 @@ jobs:
           gh release create "$TAG" "$MODULE_ID.zip" "staging/$MODULE_ID/module.json" \
             --title "$MODULE_ID v$VERSION" \
             --generate-notes
-
-      - name: Update latest manifest
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          MODULE_ID="${{ steps.meta.outputs.module_id }}"
-          LATEST_TAG="${MODULE_ID}-latest"
-          REPO="${{ github.repository }}"
-          NOTES="Auto-updated manifest for **$MODULE_ID**.
-          Install URL: \`https://github.com/$REPO/releases/download/$LATEST_TAG/module.json\`"
-
-          if gh release view "$LATEST_TAG" &>/dev/null; then
-            gh release upload "$LATEST_TAG" "staging/$MODULE_ID/module.json" --clobber
-          else
-            gh release create "$LATEST_TAG" "staging/$MODULE_ID/module.json" \
-              --title "$MODULE_ID – latest manifest" \
-              --notes "$NOTES" \
-              --latest=false
-          fi
 
       # ── Protected (Patreon) modules: artifact only ──────────────────
