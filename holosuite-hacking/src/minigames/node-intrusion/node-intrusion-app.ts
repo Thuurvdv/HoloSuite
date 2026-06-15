@@ -141,7 +141,6 @@ export class NodeIntrusionApp extends LegacyApplication {
           to,
           isVisitedPath: this.state.traversedEdgeIds.has(edgeKey(edge.from, edge.to)),
           isAvailable: !blockedType && (currentConnections.includes(edge.from) || currentConnections.includes(edge.to)),
-          isBlocked: Boolean(blockedType),
           isFirewallPath: blockedType === "firewall",
           isDecoyPath: blockedType === "decoy"
         };
