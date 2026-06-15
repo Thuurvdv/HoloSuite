@@ -14,6 +14,7 @@ import {
 } from "./core/actor-skills";
 import { registerMinigame } from "./core/minigame-runner";
 import { HackingLauncherApp } from "./ui/hacking-launcher-app";
+import { DifficultyProfilesApp } from "./ui/difficulty-profiles-app";
 import { NodeIntrusionApp } from "./minigames/node-intrusion/node-intrusion-app";
 import { SignalAlignmentApp } from "./minigames/signal-alignment/signal-alignment-app";
 
@@ -50,6 +51,33 @@ function registerSettings() {
     config: true,
     type: Number,
     default: 1
+  });
+
+  game.settings.register(MODULE_ID, "nodeTakeoverDurationSeconds", {
+    name: "Node Takeover Duration Override",
+    hint: "Optional fixed seconds for claiming a Node Intrusion node. Set to 0 to use the selected difficulty profile.",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 0
+  });
+
+  game.settings.registerMenu(MODULE_ID, "difficultyProfilesMenu", {
+    name: "Difficulty Profiles",
+    label: "Configure Profiles",
+    hint: "Tune Node Intrusion maps and Signal Alignment channels, drift, reveal radius, hold time, and trace pressure.",
+    icon: "fas fa-sliders",
+    type: DifficultyProfilesApp,
+    restricted: true
+  });
+
+  game.settings.register(MODULE_ID, "difficultyProfileOverrides", {
+    name: "Difficulty Profile Data",
+    hint: "Internal storage for the Difficulty Profiles configuration menu.",
+    scope: "world",
+    config: false,
+    type: String,
+    default: ""
   });
 
   game.settings.register(MODULE_ID, "allowPlayerInteraction", {
@@ -205,11 +233,12 @@ function receiveSocketMessage(message: any) {
 async function startPlayerHack(payload: any) {
   const actor = resolveHackerActor(payload.actorId, getUserById(payload.userId) ?? game.user);
 
-  const rollResult = await rollFallbackSkill(payload);
+    const rollResult = await rollFallbackSkill(payload);
   if (!Number.isFinite(rollResult?.total)) return null;
 
   const options = {
     rollTotal: rollResult.total,
+    naturalRoll: rollResult.naturalRoll,
     dc: payload.dc,
     actorId: payload.actorId,
     actorName: actor?.name ?? payload.actorName ?? "Hacker",
@@ -234,12 +263,24 @@ async function rollFallbackSkill(payload: any) {
       speaker: ChatMessage.getSpeaker(),
       flavor: `${escapeHtml(getMinigameTitle(payload.minigameType))}: ${escapeHtml(payload.skillLabel || payload.skillId || "Skill")} vs DC ${Number(payload.dc)}`
     });
-    return { total: Number(roll.total), roll };
+    return {
+      total: Number(roll.total),
+      naturalRoll: getNaturalD20Result(roll),
+      roll
+    };
   } catch (error) {
     console.error(`${MODULE_ID} | Fallback skill roll failed.`, error);
     ui.notifications?.warn?.("HoloSuite Hacking skill check failed.");
     return null;
   }
+}
+
+function getNaturalD20Result(roll: any) {
+  const dice = roll?.dice ?? roll?.terms?.filter?.((term: any) => term?.faces === 20) ?? [];
+  const d20 = dice.find((die: any) => Number(die?.faces) === 20);
+  const result = d20?.results?.find?.((entry: any) => !entry.discarded && !entry.rerolled)?.result;
+  const natural = Number(result);
+  return Number.isFinite(natural) ? natural : null;
 }
 
 function reportPlayerResult(payload: any, result: any) {

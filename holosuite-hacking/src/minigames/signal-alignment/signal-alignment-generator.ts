@@ -31,22 +31,19 @@ export function generateSignalChannels(profile: any, seed: any = Date.now()) {
   const rng = createRng(seed);
   const channelCount = clamp(Number(profile.channelCount ?? profile.signalAlignment?.channelCount) || 3, 2, 5);
   const tolerance = Number(profile.tolerance ?? profile.signalAlignment?.tolerance ?? 5);
-  const decoyCount = Number(profile.decoyFrequencies ?? profile.signalAlignment?.decoyFrequencies ?? 0);
 
   return Array.from({ length: channelCount }, (_, index) => {
     const target = Math.round(18 + rng() * 64);
     const side = rng() > 0.5 ? 1 : -1;
     const offset = tolerance + 8 + Math.round(rng() * 18);
     const driftDirection = rng() > 0.5 ? 1 : -1;
-    const decoys = Array.from({ length: decoyCount }, () => clampFrequency(target + ((rng() > 0.5 ? 1 : -1) * (tolerance + 9 + rng() * 18))));
     return {
       id: `channel-${index + 1}`,
       label: `CH-${String(index + 1).padStart(2, "0")}`,
       value: clampFrequency(target + side * offset),
       target,
       tolerance,
-      driftDirection,
-      decoys
+      driftDirection
     };
   });
 }

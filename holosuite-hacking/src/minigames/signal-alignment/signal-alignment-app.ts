@@ -46,7 +46,7 @@ export class SignalAlignmentApp extends LegacyApplication {
       traceProgress: 0,
       mistakes: 0,
       lockProgress: 0,
-      destabilizations: 0,
+      tracePenaltySeconds: 0,
       hasStarted: false,
       isRunning: false,
       result: null
@@ -74,11 +74,16 @@ export class SignalAlignmentApp extends LegacyApplication {
     const channels = this.channels.map((channel) => {
       const delta = Math.abs(channel.value - channel.target);
       const aligned = delta <= channel.tolerance;
+      const targetVisible = this.isTargetVisible(channel);
       return {
         ...channel,
         valueLabel: channel.value.toFixed(1),
-        deltaLabel: delta.toFixed(1),
         aligned,
+        targetVisible,
+        targetLabel: targetVisible ? channel.target : "??",
+        deltaRevealLabel: targetVisible ? delta.toFixed(1) : "--",
+        targetStateLabel: aligned ? "locked" : targetVisible ? "signal found" : "searching",
+        waveDurationSeconds: Math.max(1.2, 3.2 - (Number(this.profile.noiseLevel ?? 0) * 2)),
         targetLeft: channel.target,
         toleranceLeft: clamp(channel.target - channel.tolerance, 0, 100),
         toleranceWidth: clamp(channel.tolerance * 2, 1, 100)
@@ -141,22 +146,38 @@ export class SignalAlignmentApp extends LegacyApplication {
     return this.channels.every((channel) => Math.abs(channel.value - channel.target) <= channel.tolerance);
   }
 
-  checkDestabilization() {
-    const aligned = this.areAllChannelsAligned();
+  isTargetVisible(channel: any) {
+    const delta = Math.abs(channel.value - channel.target);
+    const revealRadius = Number(this.profile.targetRevealRadius ?? this.profile.signalAlignment?.targetRevealRadius ?? 100);
+    if (revealRadius >= 100) return true;
+    if (delta <= channel.tolerance) return true;
+    return delta <= revealRadius;
+  }
+
+  updateAlignmentState(aligned = this.areAllChannelsAligned()) {
     if (this.wasAligned && !aligned) {
-      this.state.mistakes += 1;
-      this.state.destabilizations += 1;
-      ui.notifications?.warn?.(`Signal destabilized (${this.state.mistakes}/${this.profile.maxMistakes}).`);
-      if (this.state.mistakes > this.profile.maxMistakes) this.finish("failure", "Signal destabilized too often");
+      this.recordTraceSpike();
     }
     this.wasAligned = aligned;
+  }
+
+  checkDestabilization() {
+    this.updateAlignmentState();
+  }
+
+  recordTraceSpike() {
+    const penalty = Math.max(0, Number(this.profile.destabilizationPenaltySeconds ?? 0));
+    this.state.mistakes += 1;
+    this.state.tracePenaltySeconds += penalty;
+    if (penalty > 0) ui.notifications?.warn?.(`Signal destabilized. Trace jumped by ${penalty}s.`);
   }
 
   startTimer() {
     if (this.timer) return;
     if (!this.state.hasStarted || !this.startedAt || !this.lastTickAt) return;
     const multiplier = Number(game.settings.get(MODULE_ID, "traceDurationMultiplier") ?? 1) || 1;
-    const duration = Math.max(5, this.profile.traceDurationSeconds * multiplier);
+    const traceDurationSeconds = Number(this.profile.signalAlignment?.traceDurationSeconds ?? this.profile.traceDurationSeconds ?? 60);
+    const duration = Math.max(5, traceDurationSeconds * multiplier);
     this.timer = window.setInterval(() => {
       if (!this.state.hasStarted || !this.state.isRunning) return;
       const now = performance.now();
@@ -169,19 +190,14 @@ export class SignalAlignmentApp extends LegacyApplication {
         ? clamp(this.state.lockProgress + (deltaSeconds / this.profile.lockHoldSeconds), 0, 1)
         : 0;
 
-      if (this.wasAligned && !aligned) {
-        this.state.mistakes += 1;
-        this.state.destabilizations += 1;
-      }
-      this.wasAligned = aligned;
+      this.updateAlignmentState(aligned);
 
-      const elapsedSeconds = (now - this.startedAt) / 1000;
+      const elapsedSeconds = ((now - this.startedAt) / 1000) + this.state.tracePenaltySeconds;
       this.state.traceProgress = clamp((elapsedSeconds / duration) * 100, 0, 100);
       this.syncDom();
 
       if (this.state.lockProgress >= 1) this.finish("success", "Transmission Decrypted");
       else if (this.state.traceProgress >= 100) this.finish("failure", "Trace Complete");
-      else if (this.state.mistakes > this.profile.maxMistakes) this.finish("failure", "Signal destabilized too often");
     }, 120);
   }
 
@@ -221,6 +237,7 @@ export class SignalAlignmentApp extends LegacyApplication {
       dc: this.dc,
       profile: this.profile,
       mistakes: this.state.mistakes,
+      tracePenaltySeconds: this.state.tracePenaltySeconds,
       traceProgress: this.state.traceProgress,
       lockProgress: this.state.lockProgress,
       channels: this.channels.map((channel) => ({ ...channel }))
@@ -252,7 +269,7 @@ export class SignalAlignmentApp extends LegacyApplication {
     const lockText = element.querySelector("[data-lock-text]");
     if (trace) trace.style.width = `${this.state.traceProgress}%`;
     if (traceText) traceText.textContent = `${Math.round(this.state.traceProgress)}%`;
-    if (mistakeText) mistakeText.textContent = `${this.state.mistakes}/${this.profile.maxMistakes}`;
+    if (mistakeText) mistakeText.textContent = `${this.state.tracePenaltySeconds.toFixed(0)}s`;
     if (lock) lock.style.width = `${Math.round(this.state.lockProgress * 100)}%`;
     if (lockText) lockText.textContent = `${Math.round(this.state.lockProgress * 100)}%`;
 
@@ -260,13 +277,20 @@ export class SignalAlignmentApp extends LegacyApplication {
       const row = element.querySelector(`[data-channel-row="${channel.id}"]`);
       if (!row) continue;
       const aligned = Math.abs(channel.value - channel.target) <= channel.tolerance;
+      const targetVisible = this.isTargetVisible(channel);
       row.classList.toggle("is-aligned", aligned);
+      row.classList.toggle("is-target-visible", targetVisible);
       row.querySelector("[data-channel-value]").textContent = channel.value.toFixed(1);
-      row.querySelector("[data-channel-delta]").textContent = Math.abs(channel.value - channel.target).toFixed(1);
+      row.querySelector("[data-channel-target]").textContent = targetVisible ? String(channel.target) : "??";
+      row.querySelector("[data-channel-delta]").textContent = targetVisible ? Math.abs(channel.value - channel.target).toFixed(1) : "--";
+      row.querySelector("[data-channel-state]").textContent = aligned ? "locked" : targetVisible ? "signal found" : "searching";
       const slider = row.querySelector("[data-channel-slider]");
       if (slider && document.activeElement !== slider) slider.value = channel.value;
       const wave = row.querySelector("[data-wave-fill]");
-      if (wave) wave.style.width = `${channel.value}%`;
+      if (wave) {
+        wave.style.width = `${channel.value}%`;
+        wave.style.setProperty("--wave-duration", `${Math.max(1.2, 3.2 - (Number(this.profile.noiseLevel ?? 0) * 2))}s`);
+      }
     }
   }
 }
