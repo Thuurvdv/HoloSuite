@@ -9,20 +9,20 @@ HoloSuite Hacking brings interactive hacking minigames to your Foundry VTT sessi
 ## What Does It Do?
 
 - Adds playable hacking minigames that the GM can launch for any player during a session.
-- **Node Intrusion**: The player navigates through a connected network of nodes, avoiding firewalls and dead ends, trying to reach the target node before a trace timer runs out.
+- **Node Intrusion**: The player navigates through a randomized network of nodes, reading local radar warnings, managing firewall and decoy risks, and trying to reach the target before a trace timer runs out.
 - **Signal Alignment**: The player tunes unstable signal channels into their target range and holds them steady until a transmission decrypts.
-- Difficulty scales with the player's skill check. A good roll makes the puzzle easier (more time, more hints, fewer traps). A bad roll makes it harder.
+- Difficulty scales with the player's skill check. A good roll makes the puzzle easier with more time, radar support, clearer hints, and safer routes. A bad roll makes the map denser, faster, and more punishing.
 - The GM picks the minigame, selects a player and their character's hacking skill, sets a DC, and sends the challenge. The player's client rolls the skill check and launches the minigame based on the result.
 
 ## How Difficulty Works
 
-When the GM sends a hacking challenge, the player's skill check is compared to the DC. The margin of success or failure determines one of five difficulty profiles:
+When the GM sends a hacking challenge, the player's skill check is compared to the DC. The margin of success or failure determines one of five difficulty profiles. A natural 20 always uses the critical success profile, and a natural 1 always uses the critical failure profile.
 
-- **Critical Success** (beat the DC by 10 or more): Long trace timer, extra hints, fewer obstacles. The player is in total control.
-- **Strong Success** (beat the DC by 5 or more): Comfortable difficulty with a reasonable margin for error.
-- **Success** (met or beat the DC): Standard difficulty. The puzzle is fair but requires focus.
-- **Failure** (missed the DC): The puzzle is harder. Less time, fewer hints, more obstacles. Still playable, but tense.
-- **Critical Failure** (missed the DC by 10 or more): Maximum difficulty. Very little time, almost no hints, dense obstacles. It is meant to feel desperate.
+- **Critical Success** (natural 20 or beat the DC by 10 or more): Long trace timer, radar enabled, target marker visible, and fewer hazards.
+- **Strong Success** (beat the DC by 5 or more): Comfortable difficulty with radar enabled and a reasonable margin for error.
+- **Success** (met or beat the DC): Standard difficulty. The puzzle is fair but requires focus, and the target is not revealed up front.
+- **Failure** (missed the DC): Less time, fewer assists, more hazards, and fewer protected route options. Still playable, but tense.
+- **Critical Failure** (natural 1 or missed the DC by 10 or more): Maximum difficulty. Very little time, no radar by default, dense hazards, slower node takeovers, and harsher trace penalties.
 
 ## Tutorial: Using HoloSuite Hacking as a DM
 
@@ -48,7 +48,11 @@ When the GM sends a hacking challenge, the player's skill check is compared to t
 
 - **Default Hacking DC**: Sets the default DC in the launcher so you do not have to type it every time.
 - **Default Trace Duration Multiplier**: Scales all trace timers up or down. Increase this to give players more breathing room, or decrease it for a faster pace.
+- **Node Takeover Duration Override**: Optionally forces one global node takeover time for Node Intrusion. Set it to 0 to use each difficulty profile's own timing.
+- **Difficulty Profiles**: Opens a profile editor for Node Intrusion tuning. Each profile can adjust trace time, node count, safe routes, firewalls, decoys, radar, takeover timing, penalties, target visibility, and whether protected-route firewalls are allowed.
 - **Visual Glitch Intensity**: A client-side setting (low, medium, or high) that controls how much visual noise the minigame displays. Players can set this to their own preference.
+
+The difficulty profile editor applies logical limits while you edit. Decoys are capped by node count, firewalls are capped by available non-protected nodes unless protected-route firewalls are enabled, and route counts are capped by what the generated map can support. Each profile also has its own reset button to return only that profile to the module default.
 
 ## Tutorial: Using HoloSuite Hacking as a Player
 
@@ -60,11 +64,12 @@ When the GM sends a hacking challenge, the player's skill check is compared to t
 
 ### Playing Node Intrusion
 
-1. You see a network of connected nodes. Your goal is to reach the target node before the trace timer fills up.
-2. Click on adjacent nodes to move through the network.
-3. Avoid firewall nodes (they cost you time or block your path) and dead ends.
-4. Reach the target node before the trace catches you to succeed.
-5. If the trace completes before you reach the target, the hack fails.
+1. You see a randomized network of connected nodes. Your goal is to reach the target before the trace timer fills up.
+2. Click on adjacent nodes to claim them. Claiming a node takes a short amount of time, so rushing across the map is risky.
+3. Radar, when enabled, shows adjacent danger on current, visited, and reachable nodes. It warns that nearby choices may contain firewalls or decoys, but it does not reveal the exact hazard unless hints are enabled.
+4. Firewalls add trace pressure. By default they burn the route they are on; if the GM enables passable protected-route firewalls, they take longer to claim but can be crossed.
+5. Decoys add trace pressure and burn that route.
+6. Reach the target node before the trace catches you to succeed. If the trace completes first, the hack fails.
 
 ### Playing Signal Alignment
 
@@ -76,6 +81,7 @@ When the GM sends a hacking challenge, the player's skill check is compared to t
 ### Things to Know
 
 - A better skill check gives you an easier puzzle. A worse check makes it harder, but you still get to play.
-- Even on a critical failure, you can attempt the puzzle. It will be very difficult, but not impossible.
+- Critical successes reveal the target marker by default. Other profiles hide the target until you find it unless the GM changes the profile settings.
+- Even on a critical failure, you can attempt the puzzle. It will be very difficult, but the generator keeps at least one protected route unless the GM deliberately enables harsher protected-route firewall behavior.
 - The trace timer is always running. Work quickly but carefully.
 - You can adjust the **Visual Glitch Intensity** in module settings if the visual effects are too distracting or not intense enough for your taste.

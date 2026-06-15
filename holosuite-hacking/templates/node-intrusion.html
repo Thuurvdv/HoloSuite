@@ -35,8 +35,8 @@
         </div>
 
         <div class="node-intrusion-readout">
-          <span>Firewall strikes</span>
-          <strong data-mistake-text>{{state.mistakes}}/{{profile.maxMistakes}}</strong>
+          <span>Trace penalty</span>
+          <strong data-penalty-text>{{state.tracePenaltyProgress}}%</strong>
         </div>
 
         <div class="node-intrusion-objective">
@@ -49,13 +49,14 @@
           <div><dt>Nodes</dt><dd>{{profile.nodeCount}}</dd></div>
           <div><dt>Firewalls</dt><dd>{{profile.firewallCount}}</dd></div>
           <div><dt>Decoys</dt><dd>{{profile.decoyCount}}</dd></div>
-          <div><dt>Hints</dt><dd>{{#if profile.hintsEnabled}}online{{else}}masked{{/if}}</dd></div>
+          <div><dt>Radar</dt><dd>{{#if profile.radarEnabled}}online{{else}}offline{{/if}}</dd></div>
         </dl>
 
         <div class="node-intrusion-legend" aria-label="Node legend">
           <span><i class="legend-node is-current"></i> active</span>
           <span><i class="legend-line is-open"></i> open route</span>
           <span><i class="legend-node is-target"></i> target</span>
+          <span><i class="legend-node is-radar"></i> adjacent danger</span>
           <span><i class="legend-node is-firewall"></i> firewall</span>
           <span><i class="legend-node is-decoy"></i> decoy</span>
         </div>
@@ -78,7 +79,7 @@
         {{#each nodes}}
           <button
             type="button"
-            class="node-intrusion-node type-{{visualType}}{{#if isCurrent}} is-current{{/if}}{{#if isVisited}} is-visited{{/if}}{{#if isNeighbor}} is-neighbor{{/if}}{{#if canMove}} can-move{{/if}}{{#if isDangerVisible}} is-revealed{{/if}}"
+            class="node-intrusion-node type-{{visualType}} radar-{{dangerSignal}}{{#if isCurrent}} is-current{{/if}}{{#if isVisited}} is-visited{{/if}}{{#if isNeighbor}} is-neighbor{{/if}}{{#if canMove}} can-move{{/if}}{{#if isDangerVisible}} is-revealed{{/if}}{{#if isClaiming}} is-claiming{{/if}}"
             data-node-id="{{id}}"
             style="left: {{x}}%; top: {{y}}%;"
             title="{{title}}"
@@ -86,7 +87,10 @@
             {{#unless ../state.hasStarted}}disabled{{else}}{{#unless canMove}}{{#unless isCurrent}}disabled{{/unless}}{{/unless}}{{/unless}}
           >
             {{#if isCurrent}}<i class="fa-solid fa-location-crosshairs node-intrusion-current-icon"></i>{{/if}}
+            {{#if isTargetVisible}}<i class="fa-solid fa-bullseye node-intrusion-target-icon"></i>{{/if}}
+            {{#if isClaiming}}<i class="fa-solid fa-spinner node-intrusion-claim-icon"></i>{{/if}}
             {{#if isNeighbor}}<i class="fa-solid fa-chevron-right node-intrusion-neighbor-icon"></i>{{/if}}
+            {{#if isVisited}}{{#if dangerSignal}}<i class="node-intrusion-radar-count">{{dangerSignal}}</i>{{/if}}{{/if}}
             <span></span>
           </button>
         {{/each}}
