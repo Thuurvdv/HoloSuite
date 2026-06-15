@@ -4,4 +4,7 @@ node_modules/
 *.zip
 .env
 .env.*
-scripts/
+scripts/*
+!scripts/
+!scripts/audit-workspace.mjs
+!scripts/sync-shared-styles.mjs
