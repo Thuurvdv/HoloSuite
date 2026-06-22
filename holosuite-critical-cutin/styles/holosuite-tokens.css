@@ -401,3 +401,127 @@ body[data-holosuite-theme="violet"] {
   border-color: var(--hs-border-subtle);
   color: var(--hs-text-secondary);
 }
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .holosuite-hacking-start-dialog,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) :where(.window-resizable-handle, .window-resize-handle) {
+  right: 8px;
+  bottom: 8px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--hs-line);
+  border-radius: var(--hs-radius);
+  background: rgba(2, 13, 24, 0.9);
+  color: var(--hs-cyan);
+  box-shadow: var(--hs-glow-cyan);
+  cursor: nwse-resize;
+  font-size: 0;
+  line-height: 1;
+  overflow: hidden;
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .holosuite-hacking-start-dialog,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) :where(.window-resizable-handle, .window-resize-handle) > * {
+  display: none !important;
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .holosuite-hacking-start-dialog,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) :where(.window-resizable-handle, .window-resize-handle)::before {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+
+:where(
+  .bounty-board-window,
+  .bounty-editor-window,
+  .csi-toolkit,
+  .galaxy-map,
+  .galaxy-map-framework,
+  .gmf-crud-dialog,
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .holosuite-launcher-window,
+  .hcci-config-window,
+  .holosuite-hacking-window,
+  .holosuite-hacking-launcher-window,
+  .holosuite-hacking-start-dialog,
+  .node-intrusion-window,
+  .signal-alignment-window,
+  .pulse-scanner,
+  .security-camera-window,
+  .security-camera-feed-window
+) :where(.window-resizable-handle, .window-resize-handle)::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 8px;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.72;
+}

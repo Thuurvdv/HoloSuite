@@ -147,6 +147,47 @@
   accent-color: var(--cybercall-cyan);
 }
 
+.cybercall-composer-targets {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(94, 231, 255, 0.16);
+}
+
+.cybercall-composer-targets > span {
+  color: rgba(217, 251, 255, 0.72);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cybercall-recipient-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.cybercall-recipient-grid label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 8px;
+  border: 1px solid rgba(94, 231, 255, 0.18);
+  border-radius: var(--hs-radius);
+  background: rgba(1, 7, 12, 0.42);
+}
+
+.cybercall-recipient-grid input {
+  width: auto;
+}
+
+.cybercall-recipient-grid p {
+  margin: 0;
+  color: rgba(217, 251, 255, 0.62);
+}
+
 .cybercall-composer-actions {
   display: flex;
   flex-wrap: wrap;

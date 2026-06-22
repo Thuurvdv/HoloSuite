@@ -6,11 +6,14 @@ import {
   filterBounties,
   getAllBounties,
   getFilterOptions,
+  isBoardVisibleToPlayers,
   markBountyCompleted,
   prepareBountyForDisplay,
   publishBounty,
   removeTag,
   requestContract,
+  setBoardVisibleToPlayers,
+  setBountiesPublished,
   updateBountyState
 } from "./bounty-service";
 import { BountyEditorApp } from "./bounty-editor-app";
@@ -79,6 +82,9 @@ export class BountyBoardApp extends BaseApplication {
       openImage: BountyBoardApp.#onOpenImage,
       openJournal: BountyBoardApp.#onOpenJournal,
       removeTag: BountyBoardApp.#onRemoveTag,
+      showFiltered: BountyBoardApp.#onShowFiltered,
+      hideFiltered: BountyBoardApp.#onHideFiltered,
+      toggleBoardVisibility: BountyBoardApp.#onToggleBoardVisibility,
       clearFilters: BountyBoardApp.#onClearFilters
     }
   };
@@ -106,17 +112,22 @@ export class BountyBoardApp extends BaseApplication {
 
   async _prepareContext(options: any) {
     const isGM = game.user?.isGM === true;
+    const boardVisibleToPlayers = isBoardVisibleToPlayers();
+    const boardHiddenForPlayers = !isGM && !boardVisibleToPlayers;
     const bounties = getAllBounties({ includeHidden: isGM })
       .map(prepareBountyForDisplay)
       .map((bounty) => ({ ...bounty, expanded: this.expanded.has(bounty.id) }));
+    const filteredBounties = boardHiddenForPlayers ? [] : filterBounties(bounties, this.filters);
 
     return {
       isGM,
+      boardVisibleToPlayers,
+      boardHiddenForPlayers,
       filters: this.filters,
       options: getFilterOptions(),
-      bounties: filterBounties(bounties, this.filters),
+      bounties: filteredBounties,
       totalCount: bounties.length,
-      visibleCount: filterBounties(bounties, this.filters).length
+      visibleCount: filteredBounties.length
     };
   }
 
@@ -128,10 +139,13 @@ export class BountyBoardApp extends BaseApplication {
       event.stopPropagation();
     });
     html.querySelectorAll("[data-filter]").forEach((input: HTMLInputElement | HTMLSelectElement) => {
-      input.addEventListener("change", () => this.#updateFilter(input, { immediate: true }));
-      input.addEventListener("input", () => this.#updateFilter(input));
+      if (input.dataset.filter === "search") {
+        input.addEventListener("input", () => this.#updateFilter(input));
+      } else {
+        input.addEventListener("change", () => this.#updateFilter(input, { immediate: true }));
+      }
     });
-    this.#restoreSearchFocus();
+    window.requestAnimationFrame(() => this.#restoreSearchFocus());
     html.querySelectorAll("[data-bounty-toggle]").forEach((button: HTMLElement) => {
       button.addEventListener("click", () => {
         const id = button.dataset.bountyToggle ?? "";
@@ -286,6 +300,20 @@ export class BountyBoardApp extends BaseApplication {
       this.filters.tag = "";
       this.render({ force: true });
     }
+  }
+
+  static async #onShowFiltered() {
+    const bounties = filterBounties(getAllBounties({ includeHidden: true }), this.filters);
+    if (await setBountiesPublished(bounties.map((bounty) => bounty.id), true)) this.render({ force: true });
+  }
+
+  static async #onHideFiltered() {
+    const bounties = filterBounties(getAllBounties({ includeHidden: true }), this.filters);
+    if (await setBountiesPublished(bounties.map((bounty) => bounty.id), false)) this.render({ force: true });
+  }
+
+  static async #onToggleBoardVisibility() {
+    if (await setBoardVisibleToPlayers(!isBoardVisibleToPlayers())) this.render({ force: true });
   }
 
   static #onClearFilters() {

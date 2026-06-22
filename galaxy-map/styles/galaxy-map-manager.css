@@ -230,14 +230,16 @@
 
 .gmf-manager-preview {
   display: grid;
+  align-content: start;
+  gap: 14px;
   min-width: 0;
-  place-items: center;
   padding: 18px;
   background: rgba(2, 6, 12, 0.42);
+  overflow: auto;
 }
 
 .gmf-manager-preview__panel {
-  width: min(560px, 100%);
+  width: 100%;
   border: 1px solid rgba(88, 216, 255, 0.22);
   border-radius: var(--hs-radius);
   padding: 18px;

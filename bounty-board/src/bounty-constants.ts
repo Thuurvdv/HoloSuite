@@ -5,6 +5,7 @@ export const SETTING_POST_PUBLISH_CHAT = "postPublishChat";
 export const SETTING_POST_RESULT_CHAT = "postResultChat";
 export const SETTING_PUBLIC_DOCUMENT_LINKS = "publicDocumentLinks";
 export const SETTING_REMOVED_TAGS = "removedTags";
+export const SETTING_BOARD_VISIBLE_TO_PLAYERS = "boardVisibleToPlayers";
 
 export const TEMPLATE_ROOT = `modules/${MODULE_ID}/templates`;
 
@@ -26,7 +27,7 @@ export const STATUS_LABELS = Object.freeze({
   [BOUNTY_STATUSES.ARCHIVED]: "Archived"
 });
 
-export const THREAT_LEVELS = Object.freeze(["Low", "Moderate", "High", "Severe", "Extreme"]);
+export const THREAT_LEVELS = Object.freeze(["Unknown", "Low", "Moderate", "High", "Severe", "Extreme"]);
 
 export const DEFAULT_TAGS = Object.freeze([
   "Smuggling",
