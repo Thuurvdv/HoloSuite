@@ -21,6 +21,11 @@
     </header>
   {{/unless}}
 
+  <section class="cybercall-context">
+    <span>{{call.directionLabel}}</span>
+    {{#if call.contactNumber}}<span>Channel {{call.contactNumber}}</span>{{/if}}
+  </section>
+
   <main class="cybercall-body">
     <div class="cybercall-portrait">
       {{#if call.image}}

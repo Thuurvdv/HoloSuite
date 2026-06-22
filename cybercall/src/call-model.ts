@@ -38,6 +38,12 @@ export function createCallId() {
 }
 
 export function normalizeCallData(data: any = {}) {
+  const targetUserIds = Array.isArray(data.targetUserIds)
+    ? data.targetUserIds.map((id: any) => String(id)).filter(Boolean)
+    : [];
+  const targetUserNames = Array.isArray(data.targetUserNames)
+    ? data.targetUserNames.map((name: any) => String(name)).filter(Boolean)
+    : [];
   const call: any = {
     ...DEFAULT_CALL,
     ...data,
@@ -56,7 +62,9 @@ export function normalizeCallData(data: any = {}) {
     allowBroadcast: data.allowBroadcast !== false,
     outgoing: data.outgoing === true,
     callerUserId: String(data.callerUserId ?? ""),
-    contactNumber: String(data.contactNumber ?? "")
+    contactNumber: String(data.contactNumber ?? ""),
+    targetUserIds,
+    targetUserNames
   };
   call.initials = getInitials(call.callerName);
   call.showBroadcast = Boolean(game?.user?.isGM && call.allowBroadcast);
@@ -64,6 +72,9 @@ export function normalizeCallData(data: any = {}) {
   call.isEmergency = call.variant === "emergency";
   call.isCorrupted = call.variant === "corrupted";
   call.isIncoming = !call.accepted;
+  call.hasTargets = call.targetUserIds.length > 0;
+  call.recipientLabel = call.hasTargets ? call.targetUserNames.join(", ") : "All players";
+  call.directionLabel = call.outgoing ? `Calling ${call.recipientLabel}` : `From ${call.callerName}`;
   call.kicker = call.outgoing ? "Outgoing CyberCall" : call.fullscreen ? "System-wide Broadcast" : "Incoming CyberCall";
   return call;
 }

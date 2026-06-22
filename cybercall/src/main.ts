@@ -46,6 +46,17 @@ function getActorChoices() {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function getPlayerChoices() {
+  return (game.users?.contents ?? [])
+    .filter((user) => !user.isGM)
+    .map((user) => ({
+      id: user.id,
+      name: user.name,
+      active: user.active === true
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 function getWorldContactsKey() {
   return String(game.world?.id ?? game.world?.title ?? "default");
 }
@@ -221,6 +232,9 @@ function readComposerForm(form) {
   const actor = game.actors?.get(formData.get("actorId"));
   const image = String(formData.get("image") ?? "").trim() || actor?.img || "";
   const callerName = String(formData.get("callerName") ?? "").trim() || actor?.name || "UNKNOWN CALLER";
+  const targetUserIds = formData.getAll("targetUserIds").map((id) => String(id)).filter(Boolean);
+  const usersById = new Map<string, any>((game.users?.contents ?? []).map((user) => [user.id, user]));
+  const targetUserNames = targetUserIds.map((id) => usersById.get(id)?.name ?? id);
 
   return normalizeCallData({
     callerName,
@@ -230,7 +244,9 @@ function readComposerForm(form) {
     signal: formData.get("signal"),
     variant: String(formData.get("variant") ?? DEFAULT_CALL.variant),
     fullscreen: formData.get("fullscreen") === "on",
-    ringing: formData.get("ringing") === "on"
+    ringing: formData.get("ringing") === "on",
+    targetUserIds,
+    targetUserNames
   });
 }
 
@@ -384,6 +400,7 @@ const { CyberCallApplication, CyberCallComposer, CyberCallContacts } = createCyb
   escapeHTML,
   getDefaultComposerData,
   getActorChoices,
+  getPlayerChoices,
   getContacts,
   getGroupContacts,
   getRingtoneChoices,
@@ -582,7 +599,8 @@ async function broadcastCall(callData: any = {}) {
 
   game.socket.emit(SOCKET_NAME, {
     action: "openCall",
-    callData: call
+    callData: call,
+    targetUserIds: call.targetUserIds
   });
 
   return openCall({ ...call, outgoing: true });
@@ -590,6 +608,12 @@ async function broadcastCall(callData: any = {}) {
 
 async function handleSocketMessage(message) {
   if (!message) return;
+  if (Array.isArray(message.targetUserIds) && message.targetUserIds.length && !message.targetUserIds.includes(game.user?.id)) {
+    return;
+  }
+  if (Array.isArray(message.callData?.targetUserIds) && message.callData.targetUserIds.length && !message.callData.targetUserIds.includes(game.user?.id)) {
+    return;
+  }
 
   if (message.action === "openCall") {
     if (!canUseCyberCall()) return;

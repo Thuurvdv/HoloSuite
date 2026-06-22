@@ -1,114 +1,116 @@
-var ut = Object.defineProperty;
-var ft = (r, p, u) => p in r ? ut(r, p, { enumerable: !0, configurable: !0, writable: !0, value: u }) : r[p] = u;
-var F = (r, p, u) => ft(r, typeof p != "symbol" ? p + "" : p, u);
-const Ze = ["core", "colony", "frontier", "station", "anomaly", "ruins", "restricted", "unknown"], Je = ["undiscovered", "known", "visited", "danger", "locked"], We = ["safe", "dangerous", "restricted", "smuggler", "unknown"], Se = ["gm", "players"], Qe = ["planet", "ringed", "star", "diamond", "void"];
-function W(r = "gmf") {
+var pt = Object.defineProperty;
+var yt = (r, y, f) => y in r ? pt(r, y, { enumerable: !0, configurable: !0, writable: !0, value: f }) : r[y] = f;
+var F = (r, y, f) => yt(r, typeof y != "symbol" ? y + "" : y, f);
+const Ke = ["core", "colony", "frontier", "station", "anomaly", "ruins", "restricted", "unknown"], et = ["undiscovered", "known", "visited", "danger", "locked"], tt = ["safe", "dangerous", "restricted", "smuggler", "unknown"], Me = ["gm", "players"], it = ["planet", "ringed", "star", "diamond", "void"];
+function K(r = "gmf") {
   return `${r}-${foundry.utils.randomID(10)}`;
 }
-function De(r, p = "players") {
-  const u = Se.includes(p) ? p : "players";
-  return Se.includes(r) ? String(r) : u;
+function Fe(r, y = "players") {
+  const f = Me.includes(y) ? y : "players";
+  return Me.includes(r) ? String(r) : f;
 }
-function mt(r) {
+function gt(r) {
   return typeof r == "string" && /^#[0-9a-f]{6}$/i.test(r) ? r : "#58d8ff";
 }
-function pt(r) {
+function ht(r) {
   return typeof r == "string" && /^#[0-9a-f]{6}$/i.test(r) ? r : "";
 }
-function ve(r, p = 0) {
-  const u = Number(r);
-  return Number.isFinite(u) ? u : p;
+function Ie(r, y = 0) {
+  const f = Number(r);
+  return Number.isFinite(f) ? f : y;
 }
-function ee(r, p, u) {
-  return Math.min(u, Math.max(p, r));
+function ne(r, y, f) {
+  return Math.min(f, Math.max(y, r));
 }
-function Fe(r = {}) {
+function je(r = {}) {
   return {
-    id: String(r.id || W("system")),
+    id: String(r.id || K("system")),
     name: String(r.name || "Unnamed System"),
-    x: Math.min(100, Math.max(0, ve(r.x, 50))),
-    y: Math.min(100, Math.max(0, ve(r.y, 50))),
-    type: Ze.includes(r.type) ? r.type : "unknown",
+    x: Math.min(100, Math.max(0, Ie(r.x, 50))),
+    y: Math.min(100, Math.max(0, Ie(r.y, 50))),
+    type: Ke.includes(r.type) ? r.type : "unknown",
     factionId: String(r.factionId || ""),
-    status: Je.includes(r.status) ? r.status : "known",
+    status: et.includes(r.status) ? r.status : "known",
     description: String(r.description || ""),
     image: String(r.image || ""),
     sceneId: String(r.sceneId || ""),
     journalId: String(r.journalId || ""),
-    visibility: De(r.visibility, "players"),
+    visibility: Fe(r.visibility, "players"),
     notes: String(r.notes || ""),
-    iconColor: pt(r.iconColor),
-    iconSize: ee(ve(r.iconSize, 28), 18, 56),
-    iconStyle: Qe.includes(r.iconStyle) ? r.iconStyle : "planet",
+    iconColor: ht(r.iconColor),
+    iconSize: ne(Ie(r.iconSize, 28), 18, 56),
+    iconStyle: it.includes(r.iconStyle) ? r.iconStyle : "planet",
     pulse: r.pulse !== !1
   };
 }
-function Oe(r = {}) {
+function Xe(r = {}) {
   return {
-    id: String(r.id || W("route")),
+    id: String(r.id || K("route")),
     fromSystemId: String(r.fromSystemId || ""),
     toSystemId: String(r.toSystemId || ""),
-    type: We.includes(r.type) ? r.type : "unknown",
+    type: tt.includes(r.type) ? r.type : "unknown",
     travelTime: String(r.travelTime || ""),
-    fuelCost: ve(r.fuelCost, 0),
-    visibility: De(r.visibility, "players"),
+    fuelCost: Ie(r.fuelCost, 0),
+    visibility: Fe(r.visibility, "players"),
     notes: String(r.notes || "")
   };
 }
-function Ge(r = {}) {
+function Ue(r = {}) {
   return {
-    id: String(r.id || W("faction")),
+    id: String(r.id || K("faction")),
     name: String(r.name || "Unaffiliated"),
-    color: mt(r.color),
+    color: gt(r.color),
     description: String(r.description || ""),
-    visibility: De(r.visibility, "players")
+    visibility: Fe(r.visibility, "players")
   };
 }
-function k(r = {}) {
-  var w;
-  const p = Array.isArray(r.systems) ? r.systems.map(Fe) : [], u = Array.isArray(r.routes) ? r.routes.map(Oe) : [], v = Array.isArray(r.factions) ? r.factions.map(Ge) : [];
+function _(r = {}) {
+  var $;
+  const y = Array.isArray(r.systems) ? r.systems.map(je) : [], f = Array.isArray(r.routes) ? r.routes.map(Xe) : [], v = Array.isArray(r.factions) ? r.factions.map(Ue) : [];
   return {
-    id: String(r.id || W("map")),
+    id: String(r.id || K("map")),
     title: String(r.title || "Untitled Galaxy Map"),
     subtitle: String(r.subtitle || ""),
     description: String(r.description || ""),
     backgroundImage: String(r.backgroundImage || ""),
-    visibility: De(r.visibility, "players"),
-    currentSystemId: String(r.currentSystemId || ((w = p[0]) == null ? void 0 : w.id) || ""),
-    systems: p,
-    routes: u,
+    visibility: Fe(r.visibility, "players"),
+    currentSystemId: String(r.currentSystemId || (($ = y[0]) == null ? void 0 : $.id) || ""),
+    systems: y,
+    routes: f,
     factions: v
   };
 }
-function yt() {
-  var u, v, w, $;
-  const r = (v = (u = foundry.applications) == null ? void 0 : u.api) == null ? void 0 : v.ApplicationV2, p = ($ = (w = foundry.applications) == null ? void 0 : w.api) == null ? void 0 : $.HandlebarsApplicationMixin;
-  return r && p ? p(r) : Application;
+function St() {
+  var f, v, $, w;
+  const r = (v = (f = foundry.applications) == null ? void 0 : f.api) == null ? void 0 : v.ApplicationV2, y = (w = ($ = foundry.applications) == null ? void 0 : $.api) == null ? void 0 : w.HandlebarsApplicationMixin;
+  return r && y ? y(r) : Application;
 }
-function gt(r) {
-  var ie;
+function vt(r) {
+  var X;
   const {
-    templateRoot: p,
-    getMaps: u,
+    templateRoot: y,
+    getMaps: f,
     prepareMapForManager: v,
-    getRawMap: w,
-    openMapMetadataDialog: $,
-    openSystemDialog: I,
+    getRawMap: $,
+    openMapMetadataDialog: w,
+    openSystemDialog: M,
     openRouteDialog: N,
     openFactionDialog: T,
-    exportMap: fe,
-    duplicateMap: oe,
-    deleteMap: me,
-    createMap: pe,
+    exportMap: ge,
+    duplicateMap: ce,
+    deleteMap: de,
+    createMap: ue,
     deleteSystem: q,
-    deleteRoute: R,
-    deleteFaction: be,
-    openMap: te,
+    deleteRoute: C,
+    deleteFaction: fe,
+    openMap: ae,
     showMapToPlayers: D,
-    closePlayerMap: le,
-    clearManagerApp: ce
+    closePlayerMap: we,
+    hideSystemFromPlayers: he,
+    hideRouteFromPlayers: Se,
+    clearManagerApp: me
   } = r;
-  return ie = class extends yt() {
+  return X = class extends St() {
     constructor(L = {}) {
       super(L);
       F(this, "selectedMapId");
@@ -116,67 +118,75 @@ function gt(r) {
       this.selectedMapId = L.selectedMapId ?? null, this.jsonDraft = "";
     }
     async _prepareContext(L) {
-      var o, a;
-      const b = await ((o = super._prepareContext) == null ? void 0 : o.call(this, L)) ?? {}, H = u().sort((c, d) => c.title.localeCompare(d.title));
-      (!this.selectedMapId || !H.some((c) => c.id === this.selectedMapId)) && (this.selectedMapId = ((a = H[0]) == null ? void 0 : a.id) ?? null);
-      const ne = this.selectedMapId ? v(w(this.selectedMapId)) : null;
+      var Z, l;
+      const b = await ((Z = super._prepareContext) == null ? void 0 : Z.call(this, L)) ?? {}, G = f().sort((a, c) => a.title.localeCompare(c.title));
+      (!this.selectedMapId || !G.some((a) => a.id === this.selectedMapId)) && (this.selectedMapId = ((l = G[0]) == null ? void 0 : l.id) ?? null);
+      const ee = this.selectedMapId ? v($(this.selectedMapId)) : null;
       return {
         ...b,
-        maps: H,
-        selectedMap: ne,
+        maps: G,
+        selectedMap: ee,
         selectedMapId: this.selectedMapId,
-        hasMaps: H.length > 0
+        hasMaps: G.length > 0
       };
     }
-    _attachPartListeners(L, b, H) {
-      var ne, o, a, c, d, m, g, x;
-      (ne = super._attachPartListeners) == null || ne.call(this, L, b, H), (o = b.querySelector("[data-action='create-map']")) == null || o.addEventListener("click", () => this._onCreateMap()), (a = b.querySelector("[data-action='edit-map-metadata']")) == null || a.addEventListener("click", () => {
-        this.selectedMapId && $(this.selectedMapId);
-      }), (c = b.querySelector("[data-action='create-system']")) == null || c.addEventListener("click", () => {
-        this.selectedMapId && I(this.selectedMapId);
-      }), (d = b.querySelector("[data-action='create-route']")) == null || d.addEventListener("click", () => {
+    _attachPartListeners(L, b, G) {
+      var ee, Z, l, a, c, d, p, g;
+      (ee = super._attachPartListeners) == null || ee.call(this, L, b, G), (Z = b.querySelector("[data-action='create-map']")) == null || Z.addEventListener("click", () => this._onCreateMap()), (l = b.querySelector("[data-action='edit-map-metadata']")) == null || l.addEventListener("click", () => {
+        this.selectedMapId && w(this.selectedMapId);
+      }), (a = b.querySelector("[data-action='create-system']")) == null || a.addEventListener("click", () => {
+        this.selectedMapId && M(this.selectedMapId);
+      }), (c = b.querySelector("[data-action='create-route']")) == null || c.addEventListener("click", () => {
         this.selectedMapId && N(this.selectedMapId);
-      }), (m = b.querySelector("[data-action='create-faction']")) == null || m.addEventListener("click", () => {
+      }), (d = b.querySelector("[data-action='create-faction']")) == null || d.addEventListener("click", () => {
         this.selectedMapId && T(this.selectedMapId);
-      }), b.querySelectorAll("[data-edit-system]").forEach((y) => {
-        y.addEventListener("click", () => I(this.selectedMapId, y.dataset.editSystem));
-      }), b.querySelectorAll("[data-delete-system]").forEach((y) => {
-        y.addEventListener("click", () => this._confirmDeleteSystem(y.dataset.deleteSystem));
-      }), b.querySelectorAll("[data-edit-route]").forEach((y) => {
-        y.addEventListener("click", () => N(this.selectedMapId, y.dataset.editRoute));
-      }), b.querySelectorAll("[data-delete-route]").forEach((y) => {
-        y.addEventListener("click", () => this._confirmDeleteRoute(y.dataset.deleteRoute));
-      }), b.querySelectorAll("[data-edit-faction]").forEach((y) => {
-        y.addEventListener("click", () => T(this.selectedMapId, y.dataset.editFaction));
-      }), b.querySelectorAll("[data-delete-faction]").forEach((y) => {
-        y.addEventListener("click", () => this._confirmDeleteFaction(y.dataset.deleteFaction));
-      }), (g = b.querySelector("[data-action='export-map']")) == null || g.addEventListener("click", () => {
-        this.selectedMapId && fe(this.selectedMapId);
-      }), b.querySelectorAll("[data-select-map]").forEach((y) => {
-        y.addEventListener("click", () => {
-          this.selectedMapId = y.dataset.selectMap, this.jsonDraft = "", this.render({ force: !0 });
+      }), b.querySelectorAll("[data-edit-system]").forEach((m) => {
+        m.addEventListener("click", () => M(this.selectedMapId, m.dataset.editSystem));
+      }), b.querySelectorAll("[data-show-system]").forEach((m) => {
+        m.addEventListener("click", () => he(this.selectedMapId, m.dataset.showSystem, !1));
+      }), b.querySelectorAll("[data-hide-system]").forEach((m) => {
+        m.addEventListener("click", () => he(this.selectedMapId, m.dataset.hideSystem, !0));
+      }), b.querySelectorAll("[data-delete-system]").forEach((m) => {
+        m.addEventListener("click", () => this._confirmDeleteSystem(m.dataset.deleteSystem));
+      }), b.querySelectorAll("[data-edit-route]").forEach((m) => {
+        m.addEventListener("click", () => N(this.selectedMapId, m.dataset.editRoute));
+      }), b.querySelectorAll("[data-show-route]").forEach((m) => {
+        m.addEventListener("click", () => Se(this.selectedMapId, m.dataset.showRoute, !1));
+      }), b.querySelectorAll("[data-hide-route]").forEach((m) => {
+        m.addEventListener("click", () => Se(this.selectedMapId, m.dataset.hideRoute, !0));
+      }), b.querySelectorAll("[data-delete-route]").forEach((m) => {
+        m.addEventListener("click", () => this._confirmDeleteRoute(m.dataset.deleteRoute));
+      }), b.querySelectorAll("[data-edit-faction]").forEach((m) => {
+        m.addEventListener("click", () => T(this.selectedMapId, m.dataset.editFaction));
+      }), b.querySelectorAll("[data-delete-faction]").forEach((m) => {
+        m.addEventListener("click", () => this._confirmDeleteFaction(m.dataset.deleteFaction));
+      }), (p = b.querySelector("[data-action='export-map']")) == null || p.addEventListener("click", () => {
+        this.selectedMapId && ge(this.selectedMapId);
+      }), b.querySelectorAll("[data-select-map]").forEach((m) => {
+        m.addEventListener("click", () => {
+          this.selectedMapId = m.dataset.selectMap, this.jsonDraft = "", this.render({ force: !0 });
         });
-      }), b.querySelectorAll("[data-open-map]").forEach((y) => {
-        y.addEventListener("click", () => te(y.dataset.openMap));
-      }), b.querySelectorAll("[data-show-map]").forEach((y) => {
-        y.addEventListener("click", () => D(y.dataset.showMap));
-      }), b.querySelectorAll("[data-duplicate-map]").forEach((y) => {
-        y.addEventListener("click", async () => {
-          const _ = await oe(y.dataset.duplicateMap);
-          _ && (this.selectedMapId = _.id, this.jsonDraft = "", this.render({ force: !0 }));
+      }), b.querySelectorAll("[data-open-map]").forEach((m) => {
+        m.addEventListener("click", () => ae(m.dataset.openMap));
+      }), b.querySelectorAll("[data-show-map]").forEach((m) => {
+        m.addEventListener("click", () => D(m.dataset.showMap));
+      }), b.querySelectorAll("[data-duplicate-map]").forEach((m) => {
+        m.addEventListener("click", async () => {
+          const x = await ce(m.dataset.duplicateMap);
+          x && (this.selectedMapId = x.id, this.jsonDraft = "", this.render({ force: !0 }));
         });
-      }), b.querySelectorAll("[data-delete-map]").forEach((y) => {
-        y.addEventListener("click", async () => {
-          const _ = y.dataset.deleteMap, M = w(_);
+      }), b.querySelectorAll("[data-delete-map]").forEach((m) => {
+        m.addEventListener("click", async () => {
+          const x = m.dataset.deleteMap, R = $(x);
           await Dialog.confirm({
             title: "Delete Galaxy Map",
-            content: `<p>Delete <strong>${(M == null ? void 0 : M.title) ?? _}</strong>? This cannot be undone.</p>`
-          }) && (await me(_), this.selectedMapId === _ && (this.selectedMapId = null), this.jsonDraft = "", this.render({ force: !0 }));
+            content: `<p>Delete <strong>${(R == null ? void 0 : R.title) ?? x}</strong>? This cannot be undone.</p>`
+          }) && (await de(x), this.selectedMapId === x && (this.selectedMapId = null), this.jsonDraft = "", this.render({ force: !0 }));
         });
-      }), (x = b.querySelector("[data-action='close-player-map']")) == null || x.addEventListener("click", () => le());
+      }), (g = b.querySelector("[data-action='close-player-map']")) == null || g.addEventListener("click", () => we());
     }
     async _onCreateMap() {
-      const L = await pe({
+      const L = await ue({
         title: "New Galaxy Map",
         subtitle: "Uncharted theatre",
         description: "A campaign-scale navigation map.",
@@ -205,18 +215,18 @@ function gt(r) {
       await Dialog.confirm({
         title: "Delete Route",
         content: "<p>Delete this route?</p>"
-      }) && await R(this.selectedMapId, L);
+      }) && await C(this.selectedMapId, L);
     }
     async _confirmDeleteFaction(L) {
       await Dialog.confirm({
         title: "Delete Faction",
         content: "<p>Delete this faction? Systems assigned to it become unaffiliated.</p>"
-      }) && await be(this.selectedMapId, L);
+      }) && await fe(this.selectedMapId, L);
     }
     async close(L = {}) {
-      return ce(this), super.close(L);
+      return me(this), super.close(L);
     }
-  }, F(ie, "DEFAULT_OPTIONS", {
+  }, F(X, "DEFAULT_OPTIONS", {
     id: "galaxy-map-manager",
     classes: ["galaxy-map", "gmf-manager-window"],
     window: {
@@ -227,50 +237,53 @@ function gt(r) {
       width: 980,
       height: 720
     }
-  }), F(ie, "PARTS", {
+  }), F(X, "PARTS", {
     main: {
-      template: `${p}/map-manager.hbs`
+      template: `${y}/map-manager.hbs`
     }
-  }), ie;
+  }), X;
 }
-function ht() {
-  var u, v, w, $;
-  const r = (v = (u = foundry.applications) == null ? void 0 : u.api) == null ? void 0 : v.ApplicationV2, p = ($ = (w = foundry.applications) == null ? void 0 : w.api) == null ? void 0 : $.HandlebarsApplicationMixin;
-  return r && p ? p(r) : Application;
+function bt() {
+  var f, v, $, w;
+  const r = (v = (f = foundry.applications) == null ? void 0 : f.api) == null ? void 0 : v.ApplicationV2, y = (w = ($ = foundry.applications) == null ? void 0 : $.api) == null ? void 0 : w.HandlebarsApplicationMixin;
+  return r && y ? y(r) : Application;
 }
-function St(r) {
-  var b;
+function Mt(r) {
+  var G;
   const {
-    templateRoot: p,
-    getRawMap: u,
+    templateRoot: y,
+    getRawMap: f,
     prepareMapForDisplay: v,
-    openSystemDialog: w,
-    openRouteDialog: $,
-    openFactionDialog: I,
+    openSystemDialog: $,
+    openRouteDialog: w,
+    openFactionDialog: M,
     openFactionManagerDialog: N,
     openMapMetadataDialog: T,
-    revealSystemToPlayers: fe,
-    revealRouteToPlayers: oe,
-    deleteSystem: me,
-    deleteRoute: pe,
-    setCurrentSystem: q,
-    requestTravelToSystem: R,
-    notifySystemDiscovered: be,
-    exportMap: te,
-    getTravelRoute: D,
-    notifyInfo: le,
-    notifyError: ce,
-    saveSystemPosition: ie,
-    showMapToPlayers: Ee,
-    openMapManager: Me,
-    clearMapView: L
+    revealSystemToPlayers: ge,
+    revealRouteToPlayers: ce,
+    hideSystemFromPlayers: de,
+    hideRouteFromPlayers: ue,
+    deleteSystem: q,
+    deleteRoute: C,
+    setCurrentSystem: fe,
+    requestTravelToSystem: ae,
+    notifySystemDiscovered: D,
+    exportMap: we,
+    getTravelRoute: he,
+    broadcastTravelAnimation: Se,
+    notifyInfo: me,
+    notifyError: X,
+    saveSystemPosition: xe,
+    showMapToPlayers: $e,
+    openMapManager: L,
+    clearMapView: b
   } = r;
-  return b = class extends ht() {
-    constructor(o = {}) {
+  return G = class extends bt() {
+    constructor(l = {}) {
       var d;
-      const a = o.mapId, c = o.playerMode ?? !((d = game.user) != null && d.isGM);
+      const a = l.mapId, c = l.playerMode ?? !((d = game.user) != null && d.isGM);
       super({
-        ...o,
+        ...l,
         id: `galaxy-map-view-${c ? "player" : "gm"}-${a}`
       });
       F(this, "mapId");
@@ -283,15 +296,15 @@ function St(r) {
       F(this, "_drag");
       F(this, "_contextTarget");
       F(this, "_boundContextClose");
-      this.mapId = a, this.playerMode = c, this.selectedSystemId = o.selectedSystemId ?? null, this.selectedRouteId = o.selectedRouteId ?? null, this.zoom = 1, this.panX = 0, this.panY = 0, this._drag = null, this._contextTarget = null, this._boundContextClose = null;
+      this.mapId = a, this.playerMode = c, this.selectedSystemId = l.selectedSystemId ?? null, this.selectedRouteId = l.selectedRouteId ?? null, this.zoom = 1, this.panX = 0, this.panY = 0, this._drag = null, this._contextTarget = null, this._boundContextClose = null;
     }
     get title() {
-      const o = u(this.mapId), a = this.playerMode ? "Player View" : "GM View";
-      return o ? `${o.title} - ${a}` : `Galaxy Map - ${a}`;
+      const l = f(this.mapId), a = this.playerMode ? "Player View" : "GM View";
+      return l ? `${l.title} - ${a}` : `Galaxy Map - ${a}`;
     }
-    async _prepareContext(o) {
-      var m;
-      const a = await ((m = super._prepareContext) == null ? void 0 : m.call(this, o)) ?? {}, c = u(this.mapId), d = c ? v(c, {
+    async _prepareContext(l) {
+      var p;
+      const a = await ((p = super._prepareContext) == null ? void 0 : p.call(this, l)) ?? {}, c = f(this.mapId), d = c ? v(c, {
         playerMode: this.playerMode,
         selectedSystemId: this.selectedSystemId,
         selectedRouteId: this.selectedRouteId
@@ -308,136 +321,145 @@ function St(r) {
         missingMap: !c
       };
     }
-    _onRender(o, a) {
-      var d, m;
-      (d = super._onRender) == null || d.call(this, o, a);
-      const c = this.element instanceof HTMLElement ? this.element : (m = this.element) == null ? void 0 : m[0];
+    _onRender(l, a) {
+      var d, p;
+      (d = super._onRender) == null || d.call(this, l, a);
+      const c = this.element instanceof HTMLElement ? this.element : (p = this.element) == null ? void 0 : p[0];
       c && this._attachPartListeners("main", c, a);
     }
-    _attachPartListeners(o, a, c) {
-      var g, x, y, _, M, z, Y, O, B, Q, K, _e, Ie, we, xe, de, $e, ke, ue, P;
-      const d = (g = a.matches) != null && g.call(a, ".gmf-map-stage") ? a : (x = a.querySelector) == null ? void 0 : x.call(a, ".gmf-map-stage");
+    _attachPartListeners(l, a, c) {
+      var g, m, x, R, I, U, z, Y, J, te, ie, Te, Ee, ke, pe, _e, Ce, ye, P, De, Re, qe;
+      const d = (g = a.matches) != null && g.call(a, ".gmf-map-stage") ? a : (m = a.querySelector) == null ? void 0 : m.call(a, ".gmf-map-stage");
       if ((d == null ? void 0 : d.dataset.gmfMapBound) === "true") return;
-      d && (d.dataset.gmfMapBound = "true"), (y = super._attachPartListeners) == null || y.call(this, o, a, c), this._applyViewportTransform(a), a.querySelectorAll("[data-system-id]").forEach((E) => {
-        var se;
-        E.addEventListener("click", (ye) => {
-          if (E.dataset.dragged === "true") {
-            E.dataset.dragged = "false";
+      d && (d.dataset.gmfMapBound = "true"), (x = super._attachPartListeners) == null || x.call(this, l, a, c), this._applyViewportTransform(a), a.querySelectorAll("[data-system-id]").forEach((k) => {
+        var re;
+        k.addEventListener("click", (se) => {
+          if (k.dataset.dragged === "true") {
+            k.dataset.dragged = "false";
             return;
           }
-          ye.stopPropagation(), this.selectedSystemId = E.dataset.systemId, this.selectedRouteId = null, this.render({ force: !0 });
-        }), !this.playerMode && ((se = game.user) != null && se.isGM) && E.addEventListener("pointerdown", (ye) => this._startSystemDrag(ye, a, E));
-      }), a.querySelectorAll("[data-route-id]").forEach((E) => {
-        E.addEventListener("click", (se) => {
-          se.stopPropagation(), this.selectedRouteId = E.dataset.routeId, this.selectedSystemId = null, this.render({ force: !0 });
+          se.stopPropagation(), this.selectedSystemId = k.dataset.systemId, this.selectedRouteId = null, this.render({ force: !0 });
+        }), !this.playerMode && ((re = game.user) != null && re.isGM) && k.addEventListener("pointerdown", (se) => this._startSystemDrag(se, a, k));
+      }), a.querySelectorAll("[data-route-id]").forEach((k) => {
+        k.addEventListener("click", (re) => {
+          var se;
+          if (re.stopPropagation(), !this.playerMode && ((se = game.user) != null && se.isGM)) {
+            w(this.mapId, k.dataset.routeId);
+            return;
+          }
+          this.selectedRouteId = k.dataset.routeId, this.selectedSystemId = null, this.render({ force: !0 });
         });
       });
-      const m = a.querySelector(".gmf-map-stage");
-      m == null || m.addEventListener("wheel", (E) => this._onWheelZoom(E, a), { passive: !1 }), m == null || m.addEventListener("pointerdown", (E) => this._startPan(E, a)), m == null || m.addEventListener("contextmenu", (E) => this._openContextMenu(E, a), { capture: !0 }), a.querySelectorAll("[data-context-action]").forEach((E) => {
-        E.addEventListener("click", (se) => this._handleContextAction(se, a));
-      }), (_ = a.querySelector("[data-action='open-map-menu']")) == null || _.addEventListener("click", (E) => this._openStageMenuFromButton(E, a)), (M = a.querySelector("[data-action='zoom-in']")) == null || M.addEventListener("click", () => this._setZoom(this.zoom + 0.15, a)), (z = a.querySelector("[data-action='zoom-out']")) == null || z.addEventListener("click", () => this._setZoom(this.zoom - 0.15, a)), (Y = a.querySelector("[data-action='reset-view']")) == null || Y.addEventListener("click", () => {
+      const p = a.querySelector(".gmf-map-stage");
+      p == null || p.addEventListener("wheel", (k) => this._onWheelZoom(k, a), { passive: !1 }), p == null || p.addEventListener("pointerdown", (k) => this._startPan(k, a)), p == null || p.addEventListener("contextmenu", (k) => this._openContextMenu(k, a), { capture: !0 }), a.querySelectorAll("[data-context-action]").forEach((k) => {
+        k.addEventListener("click", (re) => this._handleContextAction(re, a));
+      }), (R = a.querySelector("[data-action='open-map-menu']")) == null || R.addEventListener("click", (k) => this._openStageMenuFromButton(k, a)), (I = a.querySelector("[data-action='zoom-in']")) == null || I.addEventListener("click", () => this._setZoom(this.zoom + 0.15, a)), (U = a.querySelector("[data-action='zoom-out']")) == null || U.addEventListener("click", () => this._setZoom(this.zoom - 0.15, a)), (z = a.querySelector("[data-action='reset-view']")) == null || z.addEventListener("click", () => {
         this.zoom = 1, this.panX = 0, this.panY = 0, this._applyViewportTransform(a);
-      }), (O = a.querySelector("[data-action='open-scene']")) == null || O.addEventListener("click", () => this._openLinkedScene()), (B = a.querySelector("[data-action='open-journal']")) == null || B.addEventListener("click", () => this._openLinkedJournal()), (Q = a.querySelector("[data-action='edit-system']")) == null || Q.addEventListener("click", () => {
-        this.selectedSystemId && w(this.mapId, this.selectedSystemId);
-      }), (K = a.querySelector("[data-action='reveal-system']")) == null || K.addEventListener("click", () => {
-        this.selectedSystemId && fe(this.mapId, this.selectedSystemId);
-      }), (_e = a.querySelector("[data-action='delete-system']")) == null || _e.addEventListener("click", () => {
+      }), (Y = a.querySelector("[data-action='open-scene']")) == null || Y.addEventListener("click", () => this._openLinkedScene()), (J = a.querySelector("[data-action='open-journal']")) == null || J.addEventListener("click", () => this._openLinkedJournal()), (te = a.querySelector("[data-action='edit-system']")) == null || te.addEventListener("click", () => {
+        this.selectedSystemId && $(this.mapId, this.selectedSystemId);
+      }), (ie = a.querySelector("[data-action='reveal-system']")) == null || ie.addEventListener("click", () => {
+        this.selectedSystemId && ge(this.mapId, this.selectedSystemId);
+      }), (Te = a.querySelector("[data-action='hide-system']")) == null || Te.addEventListener("click", () => {
+        this.selectedSystemId && de(this.mapId, this.selectedSystemId, !0);
+      }), (Ee = a.querySelector("[data-action='delete-system']")) == null || Ee.addEventListener("click", () => {
         this.selectedSystemId && this._confirmDeleteSystem(this.selectedSystemId);
-      }), (Ie = a.querySelector("[data-action='set-current-system']")) == null || Ie.addEventListener("click", () => {
-        this.selectedSystemId && q(this.mapId, this.selectedSystemId);
-      }), (we = a.querySelector("[data-action='travel-to-system']")) == null || we.addEventListener("click", () => {
-        this.selectedSystemId && (this.playerMode ? R(this.mapId, this.selectedSystemId) : this._travelToSystem(this.selectedSystemId, a));
-      }), (xe = a.querySelector("[data-action='edit-route']")) == null || xe.addEventListener("click", () => {
-        this.selectedRouteId && $(this.mapId, this.selectedRouteId);
-      }), (de = a.querySelector("[data-action='reveal-route']")) == null || de.addEventListener("click", () => {
-        this.selectedRouteId && oe(this.mapId, this.selectedRouteId);
-      }), ($e = a.querySelector("[data-action='delete-route']")) == null || $e.addEventListener("click", () => {
+      }), (ke = a.querySelector("[data-action='set-current-system']")) == null || ke.addEventListener("click", () => {
+        this.selectedSystemId && fe(this.mapId, this.selectedSystemId);
+      }), (pe = a.querySelector("[data-action='travel-to-system']")) == null || pe.addEventListener("click", () => {
+        this.selectedSystemId && (this.playerMode ? ae(this.mapId, this.selectedSystemId) : this._travelToSystem(this.selectedSystemId, a));
+      }), (_e = a.querySelector("[data-action='edit-route']")) == null || _e.addEventListener("click", () => {
+        this.selectedRouteId && w(this.mapId, this.selectedRouteId);
+      }), (Ce = a.querySelector("[data-action='reveal-route']")) == null || Ce.addEventListener("click", () => {
+        this.selectedRouteId && ce(this.mapId, this.selectedRouteId);
+      }), (ye = a.querySelector("[data-action='hide-route']")) == null || ye.addEventListener("click", () => {
+        this.selectedRouteId && ue(this.mapId, this.selectedRouteId, !0);
+      }), (P = a.querySelector("[data-action='delete-route']")) == null || P.addEventListener("click", () => {
         this.selectedRouteId && this._confirmDeleteRoute(this.selectedRouteId);
-      }), (ke = a.querySelector("[data-action='notify-discovery']")) == null || ke.addEventListener("click", () => {
-        this.selectedSystemId && be(this.mapId, this.selectedSystemId);
-      }), (ue = a.querySelector("[data-action='show-to-players']")) == null || ue.addEventListener("click", () => Ee(this.mapId)), (P = a.querySelector("[data-action='edit-map']")) == null || P.addEventListener("click", () => {
-        const E = Me();
-        E && (E.selectedMapId = this.mapId, E.render({ force: !0 }));
+      }), (De = a.querySelector("[data-action='notify-discovery']")) == null || De.addEventListener("click", () => {
+        this.selectedSystemId && D(this.mapId, this.selectedSystemId);
+      }), (Re = a.querySelector("[data-action='show-to-players']")) == null || Re.addEventListener("click", () => $e(this.mapId)), (qe = a.querySelector("[data-action='edit-map']")) == null || qe.addEventListener("click", () => {
+        const k = L();
+        k && (k.selectedMapId = this.mapId, k.render({ force: !0 }));
       });
     }
-    _applyViewportTransform(o) {
+    _applyViewportTransform(l) {
       var c;
-      const a = o.querySelector(".gmf-map-viewport");
-      a && (a.style.setProperty("--gmf-pan-x", `${this.panX}px`), a.style.setProperty("--gmf-pan-y", `${this.panY}px`), a.style.setProperty("--gmf-zoom", String(this.zoom)), (c = o.querySelector("[data-zoom-label]")) == null || c.replaceChildren(`${Math.round(this.zoom * 100)}%`));
+      const a = l.querySelector(".gmf-map-viewport");
+      a && (a.style.setProperty("--gmf-pan-x", `${this.panX}px`), a.style.setProperty("--gmf-pan-y", `${this.panY}px`), a.style.setProperty("--gmf-zoom", String(this.zoom)), (c = l.querySelector("[data-zoom-label]")) == null || c.replaceChildren(`${Math.round(this.zoom * 100)}%`));
     }
-    _setZoom(o, a) {
-      this.zoom = ee(o, 0.55, 2.6), this._applyViewportTransform(a);
+    _setZoom(l, a) {
+      this.zoom = ne(l, 0.55, 2.6), this._applyViewportTransform(a);
     }
-    _onWheelZoom(o, a) {
-      o.preventDefault();
+    _onWheelZoom(l, a) {
+      l.preventDefault();
       const c = a.querySelector(".gmf-map-stage");
       if (!c) return;
-      const d = c.getBoundingClientRect(), m = this.zoom, g = ee(m + (o.deltaY < 0 ? 0.12 : -0.12), 0.55, 2.6), x = o.clientX - d.left, y = o.clientY - d.top, _ = (x - this.panX) / m, M = (y - this.panY) / m;
-      this.zoom = g, this.panX = x - _ * g, this.panY = y - M * g, this._applyViewportTransform(a);
+      const d = c.getBoundingClientRect(), p = this.zoom, g = ne(p + (l.deltaY < 0 ? 0.12 : -0.12), 0.55, 2.6), m = l.clientX - d.left, x = l.clientY - d.top, R = (m - this.panX) / p, I = (x - this.panY) / p;
+      this.zoom = g, this.panX = m - R * g, this.panY = x - I * g, this._applyViewportTransform(a);
     }
-    _startPan(o, a) {
-      if (o.button !== 0 || o.target.closest("[data-system-id], [data-route-id], button")) return;
-      o.preventDefault();
-      const c = o.clientX, d = o.clientY, m = this.panX, g = this.panY, x = (_) => {
-        this.panX = m + _.clientX - c, this.panY = g + _.clientY - d, this._applyViewportTransform(a);
-      }, y = () => {
-        window.removeEventListener("pointermove", x), window.removeEventListener("pointerup", y);
+    _startPan(l, a) {
+      if (l.button !== 0 || l.target.closest("[data-system-id], [data-route-id], button")) return;
+      l.preventDefault();
+      const c = l.clientX, d = l.clientY, p = this.panX, g = this.panY, m = (R) => {
+        this.panX = p + R.clientX - c, this.panY = g + R.clientY - d, this._applyViewportTransform(a);
+      }, x = () => {
+        window.removeEventListener("pointermove", m), window.removeEventListener("pointerup", x);
       };
-      window.addEventListener("pointermove", x), window.addEventListener("pointerup", y, { once: !0 });
+      window.addEventListener("pointermove", m), window.addEventListener("pointerup", x, { once: !0 });
     }
-    _startSystemDrag(o, a, c) {
-      var O;
-      if (o.button !== 0) return;
-      o.preventDefault(), o.stopPropagation(), (O = c.setPointerCapture) == null || O.call(c, o.pointerId);
-      const d = o.clientX, m = o.clientY;
-      let g = this._pointerToMapPercent(o, a), x = !1, y = null;
-      const _ = Array.from(a.querySelectorAll(`[data-route-from="${c.dataset.systemId}"]`)), M = Array.from(a.querySelectorAll(`[data-route-to="${c.dataset.systemId}"]`));
+    _startSystemDrag(l, a, c) {
+      var Y;
+      if (l.button !== 0) return;
+      l.preventDefault(), l.stopPropagation(), (Y = c.setPointerCapture) == null || Y.call(c, l.pointerId);
+      const d = l.clientX, p = l.clientY;
+      let g = this._pointerToMapPercent(l, a), m = !1, x = null;
+      const R = Array.from(a.querySelectorAll(`[data-route-from="${c.dataset.systemId}"]`)), I = Array.from(a.querySelectorAll(`[data-route-to="${c.dataset.systemId}"]`));
       c.classList.add("is-dragging");
-      const z = (B) => {
-        const Q = Math.abs(B.clientX - d), K = Math.abs(B.clientY - m);
-        x = x || Q > 3 || K > 3, g = this._pointerToMapPercent(B, a), c.dataset.dragged = x ? "true" : "false", !y && (y = requestAnimationFrame(() => {
-          y = null, c.style.left = `${g.x}%`, c.style.top = `${g.y}%`, this._updateConnectedRoutes(_, M, g.x, g.y);
+      const U = (J) => {
+        const te = Math.abs(J.clientX - d), ie = Math.abs(J.clientY - p);
+        m = m || te > 3 || ie > 3, g = this._pointerToMapPercent(J, a), c.dataset.dragged = m ? "true" : "false", !x && (x = requestAnimationFrame(() => {
+          x = null, c.style.left = `${g.x}%`, c.style.top = `${g.y}%`, this._updateConnectedRoutes(R, I, g.x, g.y);
         }));
-      }, Y = async () => {
-        y && cancelAnimationFrame(y), c.style.left = `${g.x}%`, c.style.top = `${g.y}%`, this._updateConnectedRoutes(_, M, g.x, g.y), c.classList.remove("is-dragging"), window.removeEventListener("pointermove", z), window.removeEventListener("pointerup", Y), x && await ie(this.mapId, c.dataset.systemId, g.x, g.y);
+      }, z = async () => {
+        x && cancelAnimationFrame(x), c.style.left = `${g.x}%`, c.style.top = `${g.y}%`, this._updateConnectedRoutes(R, I, g.x, g.y), c.classList.remove("is-dragging"), window.removeEventListener("pointermove", U), window.removeEventListener("pointerup", z), m && await xe(this.mapId, c.dataset.systemId, g.x, g.y);
       };
-      window.addEventListener("pointermove", z), window.addEventListener("pointerup", Y, { once: !0 });
+      window.addEventListener("pointermove", U), window.addEventListener("pointerup", z, { once: !0 });
     }
-    _pointerToMapPercent(o, a) {
+    _pointerToMapPercent(l, a) {
       const d = a.querySelector(".gmf-map-stage").getBoundingClientRect();
       return {
-        x: ee((o.clientX - d.left - this.panX) / this.zoom / d.width * 100, 0, 100),
-        y: ee((o.clientY - d.top - this.panY) / this.zoom / d.height * 100, 0, 100)
+        x: ne((l.clientX - d.left - this.panX) / this.zoom / d.width * 100, 0, 100),
+        y: ne((l.clientY - d.top - this.panY) / this.zoom / d.height * 100, 0, 100)
       };
     }
-    _updateConnectedRoutes(o, a, c, d) {
-      o.forEach((m) => {
-        m.setAttribute("x1", c), m.setAttribute("y1", d);
-      }), a.forEach((m) => {
-        m.setAttribute("x2", c), m.setAttribute("y2", d);
+    _updateConnectedRoutes(l, a, c, d) {
+      l.forEach((p) => {
+        p.setAttribute("x1", c), p.setAttribute("y1", d);
+      }), a.forEach((p) => {
+        p.setAttribute("x2", c), p.setAttribute("y2", d);
       });
     }
-    _openContextMenu(o, a) {
-      var Q;
-      if (!((Q = game.user) != null && Q.isGM) || this.playerMode || o.target.closest(".gmf-map-toolbar, .gmf-context-menu")) return;
-      o.preventDefault(), o.stopPropagation();
-      const c = o.target.closest("[data-route-id]"), d = o.target.closest("[data-system-id]"), m = this._pointerToMapPercent(o, a);
-      this._contextTarget = c ? { type: "route", id: c.dataset.routeId, position: m } : d ? { type: "system", id: d.dataset.systemId, position: m } : { type: "stage", id: null, position: m };
+    _openContextMenu(l, a) {
+      var te;
+      if (!((te = game.user) != null && te.isGM) || this.playerMode || l.target.closest(".gmf-map-toolbar, .gmf-context-menu")) return;
+      l.preventDefault(), l.stopPropagation();
+      const c = l.target.closest("[data-route-id]"), d = l.target.closest("[data-system-id]"), p = this._pointerToMapPercent(l, a);
+      this._contextTarget = c ? { type: "route", id: c.dataset.routeId, position: p } : d ? { type: "system", id: d.dataset.systemId, position: p } : { type: "stage", id: null, position: p };
       const g = a.querySelector("[data-gmf-context-menu]");
       if (!g) return;
-      g.querySelectorAll("[data-context-show]").forEach((K) => {
-        K.hidden = K.dataset.contextShow !== this._contextTarget.type;
+      g.querySelectorAll("[data-context-show]").forEach((ie) => {
+        ie.hidden = ie.dataset.contextShow !== this._contextTarget.type;
       }), g.hidden = !1;
-      const x = g.offsetWidth || 184, y = g.offsetHeight || 260, M = a.querySelector(".gmf-map-stage").getBoundingClientRect(), z = o.clientX - M.left, Y = o.clientY - M.top, O = Math.max(4, M.width - x - 4), B = Math.max(4, M.height - y - 4);
-      g.style.left = `${ee(z, 4, O)}px`, g.style.top = `${ee(Y, 4, B)}px`, this._boundContextClose && document.removeEventListener("click", this._boundContextClose), this._boundContextClose = () => this._hideContextMenu(a), globalThis.setTimeout(() => document.addEventListener("click", this._boundContextClose, { once: !0 }), 0);
+      const m = g.offsetWidth || 184, x = g.offsetHeight || 260, I = a.querySelector(".gmf-map-stage").getBoundingClientRect(), U = l.clientX - I.left, z = l.clientY - I.top, Y = Math.max(4, I.width - m - 4), J = Math.max(4, I.height - x - 4);
+      g.style.left = `${ne(U, 4, Y)}px`, g.style.top = `${ne(z, 4, J)}px`, this._boundContextClose && document.removeEventListener("click", this._boundContextClose), this._boundContextClose = () => this._hideContextMenu(a), globalThis.setTimeout(() => document.addEventListener("click", this._boundContextClose, { once: !0 }), 0);
     }
-    _openStageMenuFromButton(o, a) {
+    _openStageMenuFromButton(l, a) {
       var g;
       if (!((g = game.user) != null && g.isGM) || this.playerMode) return;
-      o.preventDefault(), o.stopPropagation();
+      l.preventDefault(), l.stopPropagation();
       const c = a.querySelector(".gmf-map-stage"), d = c == null ? void 0 : c.getBoundingClientRect();
       if (!d) return;
-      const m = {
+      const p = {
         clientX: d.left + d.width / 2,
         clientY: d.top + d.height / 2,
         target: c,
@@ -446,96 +468,96 @@ function St(r) {
         stopPropagation: () => {
         }
       };
-      this._openContextMenu(m, a);
+      this._openContextMenu(p, a);
     }
-    _hideContextMenu(o = null) {
-      var d, m, g;
-      const a = o ?? this.element ?? null, c = ((d = a == null ? void 0 : a.querySelector) == null ? void 0 : d.call(a, "[data-gmf-context-menu]")) ?? ((g = (m = a == null ? void 0 : a[0]) == null ? void 0 : m.querySelector) == null ? void 0 : g.call(m, "[data-gmf-context-menu]"));
+    _hideContextMenu(l = null) {
+      var d, p, g;
+      const a = l ?? this.element ?? null, c = ((d = a == null ? void 0 : a.querySelector) == null ? void 0 : d.call(a, "[data-gmf-context-menu]")) ?? ((g = (p = a == null ? void 0 : a[0]) == null ? void 0 : p.querySelector) == null ? void 0 : g.call(p, "[data-gmf-context-menu]"));
       c && (c.hidden = !0), this._boundContextClose && document.removeEventListener("click", this._boundContextClose), this._boundContextClose = null;
     }
-    async _handleContextAction(o, a) {
-      o.preventDefault(), o.stopPropagation();
-      const c = o.currentTarget.dataset.contextAction, d = this._contextTarget;
-      this._hideContextMenu(a), d && (c === "add-system" ? w(this.mapId, null, { x: d.position.x, y: d.position.y }) : c === "add-route" ? $(this.mapId) : c === "manage-factions" ? N(this.mapId) : c === "add-faction" ? I(this.mapId) : c === "edit-map-details" ? T(this.mapId) : c === "export-map" ? te(this.mapId) : c === "edit-system" ? w(this.mapId, d.id) : c === "add-route-from-system" ? $(this.mapId, null, { fromSystemId: d.id }) : c === "reveal-system" ? await fe(this.mapId, d.id) : c === "delete-system" ? await this._confirmDeleteSystem(d.id) : c === "edit-route" ? $(this.mapId, d.id) : c === "reveal-route" ? await oe(this.mapId, d.id) : c === "delete-route" && await this._confirmDeleteRoute(d.id));
+    async _handleContextAction(l, a) {
+      l.preventDefault(), l.stopPropagation();
+      const c = l.currentTarget.dataset.contextAction, d = this._contextTarget;
+      this._hideContextMenu(a), d && (c === "add-system" ? $(this.mapId, null, { x: d.position.x, y: d.position.y }) : c === "add-route" ? w(this.mapId) : c === "manage-factions" ? N(this.mapId) : c === "add-faction" ? M(this.mapId) : c === "edit-map-details" ? T(this.mapId) : c === "export-map" ? we(this.mapId) : c === "edit-system" ? $(this.mapId, d.id) : c === "add-route-from-system" ? w(this.mapId, null, { fromSystemId: d.id }) : c === "reveal-system" ? await ge(this.mapId, d.id) : c === "hide-system" ? await de(this.mapId, d.id, !0) : c === "delete-system" ? await this._confirmDeleteSystem(d.id) : c === "edit-route" ? w(this.mapId, d.id) : c === "reveal-route" ? await ce(this.mapId, d.id) : c === "hide-route" ? await ue(this.mapId, d.id, !0) : c === "delete-route" && await this._confirmDeleteRoute(d.id));
     }
-    async _confirmDeleteSystem(o) {
+    async _confirmDeleteSystem(l) {
       await Dialog.confirm({
         title: "Delete Star System",
         content: "<p>Delete this star system and any connected routes?</p>"
-      }) && await me(this.mapId, o);
+      }) && await q(this.mapId, l);
     }
-    async _confirmDeleteRoute(o) {
+    async _confirmDeleteRoute(l) {
       await Dialog.confirm({
         title: "Delete Route",
         content: "<p>Delete this route?</p>"
-      }) && await pe(this.mapId, o);
+      }) && await C(this.mapId, l);
     }
-    async _travelToSystem(o, a) {
-      const c = k(u(this.mapId)), d = c.systems.find((x) => x.id === c.currentSystemId), m = c.systems.find((x) => x.id === o);
-      if (!m) return;
+    async _travelToSystem(l, a) {
+      const c = _(f(this.mapId)), d = c.systems.find((m) => m.id === c.currentSystemId), p = c.systems.find((m) => m.id === l);
+      if (!p) return;
       if (!d) {
-        await q(this.mapId, m.id), le(`Current location set to ${m.name}.`);
+        await fe(this.mapId, p.id), me(`Current location set to ${p.name}.`);
         return;
       }
-      if (d.id === m.id) {
-        le(`${m.name} is already the current location.`);
+      if (d.id === p.id) {
+        me(`${p.name} is already the current location.`);
         return;
       }
-      if (!D(c, d.id, m.id)) {
-        ce(`No direct route from ${d.name} to ${m.name}.`);
+      if (!he(c, d.id, p.id)) {
+        X(`No direct route from ${d.name} to ${p.name}.`);
         return;
       }
-      await this._animateShipTravel(d, m, a), await q(this.mapId, m.id), le(`Arrived at ${m.name}.`);
+      Se(this.mapId, d.id, p.id), await this._animateShipTravel(d, p, a), await fe(this.mapId, p.id), me(`Arrived at ${p.name}.`);
     }
-    _animateShipTravel(o, a, c) {
-      const d = c.querySelector("[data-ship-layer]"), m = c.querySelector(".gmf-map-stage");
-      if (!d || !m) return Promise.resolve();
-      const g = m.getBoundingClientRect(), x = (a.x - o.x) * g.width / 100, y = (a.y - o.y) * g.height / 100, _ = Math.atan2(y, x) * 180 / Math.PI, M = document.createElement("div");
-      return M.className = "gmf-travel-ship", M.innerHTML = '<i class="fa-solid fa-rocket"></i>', M.style.left = `${o.x}%`, M.style.top = `${o.y}%`, M.style.setProperty("--gmf-ship-angle", `${_}deg`), d.replaceChildren(M), new Promise((z) => {
-        let Y = !1;
-        const O = () => {
-          Y || (Y = !0, M.removeEventListener("transitionend", O), M.classList.add("is-arrived"), globalThis.setTimeout(() => {
-            M.remove(), z();
+    _animateShipTravel(l, a, c) {
+      const d = c.querySelector("[data-ship-layer]"), p = c.querySelector(".gmf-map-stage");
+      if (!d || !p) return Promise.resolve();
+      const g = p.getBoundingClientRect(), m = (a.x - l.x) * g.width / 100, x = (a.y - l.y) * g.height / 100, R = Math.atan2(x, m) * 180 / Math.PI, I = document.createElement("div");
+      return I.className = "gmf-travel-ship", I.innerHTML = '<i class="fa-solid fa-rocket"></i>', I.style.left = `${l.x}%`, I.style.top = `${l.y}%`, I.style.setProperty("--gmf-ship-angle", `${R}deg`), d.replaceChildren(I), new Promise((U) => {
+        let z = !1;
+        const Y = () => {
+          z || (z = !0, I.removeEventListener("transitionend", Y), I.classList.add("is-arrived"), globalThis.setTimeout(() => {
+            I.remove(), U();
           }, 260));
         };
-        M.addEventListener("transitionend", O, { once: !0 }), requestAnimationFrame(() => {
+        I.addEventListener("transitionend", Y, { once: !0 }), requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            M.style.left = `${a.x}%`, M.style.top = `${a.y}%`;
+            I.style.left = `${a.x}%`, I.style.top = `${a.y}%`;
           });
-        }), globalThis.setTimeout(O, 2400);
+        }), globalThis.setTimeout(Y, 2400);
       });
     }
     _openLinkedScene() {
       var c;
-      const o = this._getSelectedRawSystem();
-      if (!(o != null && o.sceneId)) return;
-      const a = (c = game.scenes) == null ? void 0 : c.get(o.sceneId);
+      const l = this._getSelectedRawSystem();
+      if (!(l != null && l.sceneId)) return;
+      const a = (c = game.scenes) == null ? void 0 : c.get(l.sceneId);
       if (!a) {
-        ce(`Scene "${o.sceneId}" was not found.`);
+        X(`Scene "${l.sceneId}" was not found.`);
         return;
       }
       a.view();
     }
     _openLinkedJournal() {
       var c, d;
-      const o = this._getSelectedRawSystem();
-      if (!(o != null && o.journalId)) return;
-      const a = (c = game.journal) == null ? void 0 : c.get(o.journalId);
+      const l = this._getSelectedRawSystem();
+      if (!(l != null && l.journalId)) return;
+      const a = (c = game.journal) == null ? void 0 : c.get(l.journalId);
       if (!a) {
-        ce(`Journal "${o.journalId}" was not found.`);
+        X(`Journal "${l.journalId}" was not found.`);
         return;
       }
       (d = a.sheet) == null || d.render(!0);
     }
     _getSelectedRawSystem() {
       var a;
-      const o = u(this.mapId);
-      return ((a = o == null ? void 0 : o.systems) == null ? void 0 : a.find((c) => c.id === this.selectedSystemId)) ?? null;
+      const l = f(this.mapId);
+      return ((a = l == null ? void 0 : l.systems) == null ? void 0 : a.find((c) => c.id === this.selectedSystemId)) ?? null;
     }
-    async close(o = {}) {
-      return this._hideContextMenu(), L(this), super.close(o);
+    async close(l = {}) {
+      return this._hideContextMenu(), b(this), super.close(l);
     }
-  }, F(b, "DEFAULT_OPTIONS", {
+  }, F(G, "DEFAULT_OPTIONS", {
     id: "galaxy-map-view",
     classes: ["galaxy-map", "gmf-map-window"],
     window: {
@@ -548,54 +570,54 @@ function St(r) {
       width: 1120,
       height: 760
     }
-  }), F(b, "PARTS", {
+  }), F(G, "PARTS", {
     main: {
-      template: `${p}/galaxy-map.hbs`
+      template: `${y}/galaxy-map.hbs`
     }
-  }), b;
+  }), G;
 }
-const re = "galaxy-map", Pe = "maps", A = `module.${re}`, Te = `modules/${re}/templates`;
-function vt(r) {
+const le = "galaxy-map", Ye = "maps", A = `module.${le}`, Le = `modules/${le}/templates`;
+function It(r) {
   return String(r || "galaxy-map").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "galaxy-map";
 }
-function bt(r, p) {
-  const u = new Blob([JSON.stringify(p, null, 2)], { type: "application/json" }), v = URL.createObjectURL(u), w = document.createElement("a");
-  w.href = v, w.download = r, document.body.appendChild(w), w.click(), w.remove(), URL.revokeObjectURL(v);
+function wt(r, y) {
+  const f = new Blob([JSON.stringify(y, null, 2)], { type: "application/json" }), v = URL.createObjectURL(f), $ = document.createElement("a");
+  $.href = v, $.download = r, document.body.appendChild($), $.click(), $.remove(), URL.revokeObjectURL(v);
 }
 function S(r) {
-  const p = document.createElement("div");
-  return p.textContent = String(r ?? ""), p.innerHTML;
+  const y = document.createElement("div");
+  return y.textContent = String(r ?? ""), y.innerHTML;
 }
-function U(r, p) {
-  return r.map((u) => {
-    const v = typeof u == "string" ? u : u.value, w = typeof u == "string" ? u : u.label;
-    return `<option value="${S(v)}" ${v === p ? "selected" : ""}>${S(w)}</option>`;
+function B(r, y) {
+  return r.map((f) => {
+    const v = typeof f == "string" ? f : f.value, $ = typeof f == "string" ? f : f.label;
+    return `<option value="${S(v)}" ${v === y ? "selected" : ""}>${S($)}</option>`;
   }).join("");
 }
-function Be(r, p) {
-  const u = (r == null ? void 0 : r.contents) ?? [];
+function Qe(r, y) {
+  const f = (r == null ? void 0 : r.contents) ?? [];
   return [
     { value: "", label: "None" },
-    ...u.map((v) => ({ value: v.id, label: v.name }))
-  ].map((v) => `<option value="${S(v.value)}" ${v.value === p ? "selected" : ""}>${S(v.label)}</option>`).join("");
+    ...f.map((v) => ({ value: v.id, label: v.name }))
+  ].map((v) => `<option value="${S(v.value)}" ${v.value === y ? "selected" : ""}>${S(v.label)}</option>`).join("");
 }
-function Le(r) {
+function Pe(r) {
   return (r == null ? void 0 : r[0]) ?? r ?? null;
 }
-function Mt(r) {
+function xt(r) {
   var v;
-  const p = Le(r), u = (v = p == null ? void 0 : p.matches) != null && v.call(p, "form") ? p : p == null ? void 0 : p.querySelector("form");
-  return Object.fromEntries(new FormData(u).entries());
+  const y = Pe(r), f = (v = y == null ? void 0 : y.matches) != null && v.call(y, "form") ? y : y == null ? void 0 : y.querySelector("form");
+  return Object.fromEntries(new FormData(f).entries());
 }
 (() => {
   let r = null;
-  const p = /* @__PURE__ */ new Map();
-  let u = null;
-  const v = /* @__PURE__ */ new Map(), w = /* @__PURE__ */ new Set();
-  function $(e) {
+  const y = /* @__PURE__ */ new Map();
+  let f = null;
+  const v = /* @__PURE__ */ new Map(), $ = /* @__PURE__ */ new Set();
+  function w(e) {
     return foundry.utils.deepClone ? foundry.utils.deepClone(e) : foundry.utils.duplicate ? foundry.utils.duplicate(e) : JSON.parse(JSON.stringify(e ?? {}));
   }
-  function I(e) {
+  function M(e) {
     var t;
     (t = ui.notifications) == null || t.error(`[Galaxy Map] ${e}`);
   }
@@ -605,54 +627,54 @@ function Mt(r) {
   }
   function T(e = "change galaxy maps") {
     var t;
-    return (t = game.user) != null && t.isGM ? !0 : (I(`Only a GM can ${e}.`), !1);
+    return (t = game.user) != null && t.isGM ? !0 : (M(`Only a GM can ${e}.`), !1);
   }
-  function fe() {
+  function ge() {
     var e;
     return ((e = game.users) == null ? void 0 : e.contents) ?? Array.from(game.users ?? []);
   }
-  function oe() {
-    return fe().filter((e) => e.active);
+  function ce() {
+    return ge().filter((e) => e.active);
   }
-  function me() {
-    return oe().filter((e) => e.isGM).sort((e, t) => String(e.id).localeCompare(String(t.id)))[0] ?? null;
+  function de() {
+    return ce().filter((e) => e.isGM).sort((e, t) => String(e.id).localeCompare(String(t.id)))[0] ?? null;
   }
-  function pe() {
+  function ue() {
     var e, t;
-    return !!((e = game.user) != null && e.isGM && ((t = me()) == null ? void 0 : t.id) === game.user.id);
+    return !!((e = game.user) != null && e.isGM && ((t = de()) == null ? void 0 : t.id) === game.user.id);
   }
   function q() {
-    return $(game.settings.get(re, Pe) ?? {});
+    return w(game.settings.get(le, Ye) ?? {});
   }
-  async function R(e) {
-    return T("save galaxy map data") && await game.settings.set(re, Pe, e ?? {}), e;
+  async function C(e) {
+    return T("save galaxy map data") && await game.settings.set(le, Ye, e ?? {}), e;
   }
-  function be(e) {
-    const t = Le(e);
-    t == null || t.querySelectorAll("[data-browse-target]").forEach((s) => {
-      s.addEventListener("click", (i) => {
+  function fe(e) {
+    const t = Pe(e);
+    t == null || t.querySelectorAll("[data-browse-target]").forEach((n) => {
+      n.addEventListener("click", (i) => {
         i.preventDefault();
-        const n = t.querySelector(`[name="${s.dataset.browseTarget}"]`);
-        n && new FilePicker({
+        const s = t.querySelector(`[name="${n.dataset.browseTarget}"]`);
+        s && new FilePicker({
           type: "image",
-          current: n.value,
-          callback: (l) => {
-            n.value = l, n.dispatchEvent(new Event("change", { bubbles: !0 }));
+          current: s.value,
+          callback: (o) => {
+            s.value = o, s.dispatchEvent(new Event("change", { bubbles: !0 }));
           }
         }).browse();
       });
     });
   }
-  function te({ title: e, content: t, submitLabel: s = "Save", onSubmit: i, render: n = be }) {
+  function ae({ title: e, content: t, submitLabel: n = "Save", onSubmit: i, render: s = fe }) {
     new Dialog({
       title: e,
       content: t,
-      render: n,
+      render: s,
       buttons: {
         save: {
           icon: '<i class="fa-solid fa-floppy-disk"></i>',
-          label: s,
-          callback: (l) => i(Mt(l))
+          label: n,
+          callback: (o) => i(xt(o))
         },
         cancel: {
           icon: '<i class="fa-solid fa-xmark"></i>',
@@ -667,182 +689,194 @@ function Mt(r) {
   }
   function D(e) {
     const t = q();
-    return t[e] ? $(t[e]) : null;
+    return t[e] ? w(t[e]) : null;
   }
-  function le(e) {
+  function we(e) {
     return new Map((e ?? []).map((t) => [t.id, t]));
   }
-  function ce(e) {
+  function he(e) {
     return e.visibility === "players";
   }
-  function ie(e, t) {
+  function Se(e, t) {
     return t && e.status === "undiscovered";
   }
-  function Ee(e, { playerMode: t = !1, selectedSystemId: s = null, selectedRouteId: i = null } = {}) {
-    var Ue, He;
-    const n = k(e), l = t ? n.systems.filter(ce) : n.systems, f = new Set(l.map((h) => h.id)), C = t ? n.factions.filter((h) => h.visibility === "players") : n.factions, G = le(C), V = l.map((h) => {
-      const X = G.get(h.factionId), J = ie(h, t);
+  function me(e, { playerMode: t = !1, selectedSystemId: n = null, selectedRouteId: i = null } = {}) {
+    var Je, We;
+    const s = _(e), o = t ? s.systems.filter(he) : s.systems, u = new Set(o.map((h) => h.id)), E = t ? s.factions.filter((h) => h.visibility === "players") : s.factions, O = we(E), V = o.map((h) => {
+      const H = O.get(h.factionId), Q = Se(h, t);
       return {
         ...h,
-        displayName: J ? "???" : h.name,
-        displayDescription: J ? "Unresolved sensor contact. Details are not available." : h.description,
-        displayType: J ? "unknown" : h.type,
-        displayStatus: J ? "undiscovered" : h.status,
-        factionName: (X == null ? void 0 : X.name) ?? "Unaffiliated",
-        factionColor: h.iconColor || (X == null ? void 0 : X.color) || "#58d8ff",
-        obscured: J,
-        isCurrent: h.id === n.currentSystemId,
-        isSelected: h.id === s,
+        displayName: Q ? "???" : h.name,
+        displayDescription: Q ? "Unresolved sensor contact. Details are not available." : h.description,
+        displayType: Q ? "unknown" : h.type,
+        displayStatus: Q ? "undiscovered" : h.status,
+        factionName: (H == null ? void 0 : H.name) ?? "Unaffiliated",
+        factionColor: h.iconColor || (H == null ? void 0 : H.color) || "#58d8ff",
+        obscured: Q,
+        isCurrent: h.id === s.currentSystemId,
+        isSelected: h.id === n,
         gmOnly: h.visibility === "gm"
       };
-    }), he = n.routes.filter((h) => !t || h.visibility === "players").filter((h) => f.has(h.fromSystemId) && f.has(h.toSystemId)).map((h) => {
-      const X = V.find((Ne) => Ne.id === h.fromSystemId), J = V.find((Ne) => Ne.id === h.toSystemId);
+    }), be = s.routes.filter((h) => !t || h.visibility === "players").filter((h) => u.has(h.fromSystemId) && u.has(h.toSystemId)).map((h) => {
+      const H = V.find((Ve) => Ve.id === h.fromSystemId), Q = V.find((Ve) => Ve.id === h.toSystemId);
       return {
         ...h,
-        from: X,
-        to: J,
-        fromName: (X == null ? void 0 : X.displayName) ?? h.fromSystemId,
-        toName: (J == null ? void 0 : J.displayName) ?? h.toSystemId,
+        from: H,
+        to: Q,
+        fromName: (H == null ? void 0 : H.displayName) ?? h.fromSystemId,
+        toName: (Q == null ? void 0 : Q.displayName) ?? h.toSystemId,
         isSelected: h.id === i,
-        connectsCurrent: h.fromSystemId === n.currentSystemId || h.toSystemId === n.currentSystemId,
+        connectsCurrent: h.fromSystemId === s.currentSystemId || h.toSystemId === s.currentSystemId,
         gmOnly: h.visibility === "gm"
       };
-    }), Z = he.find((h) => h.id === i) ?? null, j = Z ? null : V.find((h) => h.id === s) ?? V[0] ?? null;
+    }), W = be.find((h) => h.id === i) ?? null, j = W ? null : V.find((h) => h.id === n) ?? V[0] ?? null;
     j && (j.isSelected = !0);
-    const ae = V.find((h) => h.id === n.currentSystemId) ?? V[0] ?? null, Ce = j && ae && j.id !== ae.id ? he.find((h) => h.fromSystemId === ae.id && h.toSystemId === j.id || h.toSystemId === ae.id && h.fromSystemId === j.id) : null;
-    return j && (j.canTravel = !!Ce, j.travelRouteId = (Ce == null ? void 0 : Ce.id) ?? "", j.isCurrent = j.id === (ae == null ? void 0 : ae.id)), {
-      ...n,
+    const oe = V.find((h) => h.id === s.currentSystemId) ?? V[0] ?? null, Ne = j && oe && j.id !== oe.id ? be.find((h) => h.fromSystemId === oe.id && h.toSystemId === j.id || h.toSystemId === oe.id && h.fromSystemId === j.id) : null;
+    return j && (j.canTravel = !!Ne, j.travelRouteId = (Ne == null ? void 0 : Ne.id) ?? "", j.isCurrent = j.id === (oe == null ? void 0 : oe.id)), {
+      ...s,
       systems: V,
-      routes: he,
-      factions: C,
+      routes: be,
+      factions: E,
       selectedSystem: j,
-      selectedRoute: Z,
-      currentSystem: ae,
-      selectedType: Z ? "route" : "system",
+      selectedRoute: W,
+      currentSystem: oe,
+      selectedType: W ? "route" : "system",
       playerMode: t,
-      isGM: ((Ue = game.user) == null ? void 0 : Ue.isGM) ?? !1,
-      canEdit: ((He = game.user) == null ? void 0 : He.isGM) && !t
+      isGM: ((Je = game.user) == null ? void 0 : Je.isGM) ?? !1,
+      canEdit: ((We = game.user) == null ? void 0 : We.isGM) && !t
     };
   }
-  async function Me(e = {}) {
+  async function X(e = {}) {
     if (!T("create galaxy maps")) return null;
-    const t = q(), s = k(e);
-    return t[s.id] = s, await R(t), P(s.id), $(s);
+    const t = q(), n = _(e);
+    return t[n.id] = n, await C(t), P(n.id), w(n);
   }
-  async function L(e, t = {}) {
+  async function xe(e, t = {}) {
     if (!T("update galaxy maps")) return null;
-    const s = q();
-    if (!s[e])
-      return I(`Map "${e}" was not found.`), null;
-    const i = k({ ...t, id: e });
-    return s[e] = i, await R(s), P(e), $(i);
+    const n = q();
+    if (!n[e])
+      return M(`Map "${e}" was not found.`), null;
+    const i = _({ ...t, id: e });
+    return n[e] = i, await C(n), P(e), w(i);
   }
-  async function b(e, t = {}) {
+  async function $e(e, t = {}) {
     if (!T("update galaxy map metadata")) return null;
-    const s = D(e);
-    return s ? L(e, {
-      ...s,
+    const n = D(e);
+    return n ? xe(e, {
+      ...n,
       title: t.title,
       subtitle: t.subtitle,
       description: t.description,
       backgroundImage: t.backgroundImage,
       visibility: t.visibility
-    }) : (I(`Map "${e}" was not found.`), null);
+    }) : (M(`Map "${e}" was not found.`), null);
   }
-  async function H(e) {
+  async function L(e) {
     if (!T("delete galaxy maps")) return !1;
     const t = q();
-    return t[e] ? (delete t[e], await R(t), rt(e), P(), !0) : !1;
+    return t[e] ? (delete t[e], await C(t), ct(e), P(), !0) : !1;
   }
-  async function ne(e) {
+  async function b(e) {
     if (!T("duplicate galaxy maps")) return null;
     const t = D(e);
     if (!t)
-      return I(`Map "${e}" was not found.`), null;
-    const s = k({
+      return M(`Map "${e}" was not found.`), null;
+    const n = _({
       ...t,
-      id: W("map"),
+      id: K("map"),
       title: `${t.title} Copy`
     }), i = q();
-    return i[s.id] = s, await R(i), P(s.id), $(s);
+    return i[n.id] = n, await C(i), P(n.id), w(n);
   }
-  async function o(e, t = {}) {
+  async function G(e, t = {}) {
     if (!T("save star systems")) return null;
-    const s = q(), i = s[e];
+    const n = q(), i = n[e];
     if (!i)
-      return I(`Map "${e}" was not found.`), null;
-    const n = Fe(t), l = i.systems.findIndex((f) => f.id === n.id);
-    return l >= 0 ? i.systems[l] = n : i.systems.push(n), s[e] = k(i), await R(s), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), $(n);
+      return M(`Map "${e}" was not found.`), null;
+    const s = je(t), o = i.systems.findIndex((u) => u.id === s.id);
+    return o >= 0 ? i.systems[o] = s : i.systems.push(s), n[e] = _(i), await C(n), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), w(s);
+  }
+  async function ee(e, t) {
+    var s;
+    if (!T("delete star systems")) return !1;
+    const n = q(), i = n[e];
+    return i ? (i.systems = i.systems.filter((o) => o.id !== t), i.routes = i.routes.filter((o) => o.fromSystemId !== t && o.toSystemId !== t), i.currentSystemId === t && (i.currentSystemId = ((s = i.systems[0]) == null ? void 0 : s.id) ?? ""), n[e] = _(i), await C(n), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), !0) : !1;
+  }
+  async function Z(e, t) {
+    var o;
+    if (!T("set current location")) return null;
+    const n = q(), i = n[e], s = (o = i == null ? void 0 : i.systems) == null ? void 0 : o.find((u) => u.id === t);
+    return s ? (i.currentSystemId = t, n[e] = _(i), await C(n), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), w(s)) : (M(`System "${t}" was not found.`), null);
+  }
+  async function l(e, t = {}) {
+    if (!T("save routes")) return null;
+    const n = q(), i = n[e];
+    if (!i)
+      return M(`Map "${e}" was not found.`), null;
+    const s = Xe(t);
+    if (!s.fromSystemId || !s.toSystemId || s.fromSystemId === s.toSystemId)
+      return M("Routes require two different systems."), null;
+    const o = i.routes.findIndex((u) => u.id === s.id);
+    return o >= 0 ? i.routes[o] = s : i.routes.push(s), n[e] = _(i), await C(n), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), w(s);
   }
   async function a(e, t) {
-    var n;
-    if (!T("delete star systems")) return !1;
-    const s = q(), i = s[e];
-    return i ? (i.systems = i.systems.filter((l) => l.id !== t), i.routes = i.routes.filter((l) => l.fromSystemId !== t && l.toSystemId !== t), i.currentSystemId === t && (i.currentSystemId = ((n = i.systems[0]) == null ? void 0 : n.id) ?? ""), s[e] = k(i), await R(s), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), !0) : !1;
-  }
-  async function c(e, t) {
-    var l;
-    if (!T("set current location")) return null;
-    const s = q(), i = s[e], n = (l = i == null ? void 0 : i.systems) == null ? void 0 : l.find((f) => f.id === t);
-    return n ? (i.currentSystemId = t, s[e] = k(i), await R(s), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), $(n)) : (I(`System "${t}" was not found.`), null);
-  }
-  async function d(e, t = {}) {
-    if (!T("save routes")) return null;
-    const s = q(), i = s[e];
-    if (!i)
-      return I(`Map "${e}" was not found.`), null;
-    const n = Oe(t);
-    if (!n.fromSystemId || !n.toSystemId || n.fromSystemId === n.toSystemId)
-      return I("Routes require two different systems."), null;
-    const l = i.routes.findIndex((f) => f.id === n.id);
-    return l >= 0 ? i.routes[l] = n : i.routes.push(n), s[e] = k(i), await R(s), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), $(n);
-  }
-  async function m(e, t) {
     if (!T("delete routes")) return !1;
-    const s = q(), i = s[e];
-    return i ? (i.routes = i.routes.filter((n) => n.id !== t), s[e] = k(i), await R(s), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), !0) : !1;
+    const n = q(), i = n[e];
+    return i ? (i.routes = i.routes.filter((s) => s.id !== t), n[e] = _(i), await C(n), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), !0) : !1;
   }
-  async function g(e, t = {}) {
+  async function c(e, t = {}) {
     if (!T("save factions")) return null;
-    const s = q(), i = s[e];
+    const n = q(), i = n[e];
     if (!i)
-      return I(`Map "${e}" was not found.`), null;
-    const n = Ge(t), l = i.factions.findIndex((f) => f.id === n.id);
-    return l >= 0 ? i.factions[l] = n : i.factions.push(n), s[e] = k(i), await R(s), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), $(n);
+      return M(`Map "${e}" was not found.`), null;
+    const s = Ue(t), o = i.factions.findIndex((u) => u.id === s.id);
+    return o >= 0 ? i.factions[o] = s : i.factions.push(s), n[e] = _(i), await C(n), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), w(s);
+  }
+  async function d(e, t) {
+    if (!T("delete factions")) return !1;
+    const n = q(), i = n[e];
+    if (!i) return !1;
+    i.factions = i.factions.filter((s) => s.id !== t);
+    for (const s of i.systems)
+      s.factionId === t && (s.factionId = "");
+    return n[e] = _(i), await C(n), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), !0;
+  }
+  async function p(e, t, n, i) {
+    var E;
+    if (!T("move star systems")) return null;
+    const s = q(), o = s[e], u = (E = o == null ? void 0 : o.systems) == null ? void 0 : E.find((O) => O.id === t);
+    return u ? (u.x = ne(Ie(n, u.x), 0, 100), u.y = ne(Ie(i, u.y), 0, 100), s[e] = _(o), await C(s), game.socket.emit(A, { action: "refresh", mapId: e }), w(u)) : (M(`System "${t}" was not found.`), null);
+  }
+  async function g(e, t, { notify: n = !0 } = {}) {
+    var u;
+    if (!T("reveal star systems")) return null;
+    const i = q(), s = i[e], o = (u = s == null ? void 0 : s.systems) == null ? void 0 : u.find((E) => E.id === t);
+    return o ? (o.visibility = "players", (o.status === "undiscovered" || o.status === "locked") && (o.status = "known"), i[e] = _(s), await C(i), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), n && I(e, o.id), N(`${o.name} revealed to players.`), w(o)) : (M(`System "${t}" was not found.`), null);
+  }
+  async function m(e, t, n = !0) {
+    var u;
+    if (!T(n ? "hide star systems" : "reveal star systems")) return null;
+    const i = q(), s = i[e], o = (u = s == null ? void 0 : s.systems) == null ? void 0 : u.find((E) => E.id === t);
+    return o ? (o.visibility = n ? "gm" : "players", i[e] = _(s), await C(i), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), N(`${o.name} ${n ? "hidden from" : "visible to"} players.`), w(o)) : (M(`System "${t}" was not found.`), null);
   }
   async function x(e, t) {
-    if (!T("delete factions")) return !1;
-    const s = q(), i = s[e];
-    if (!i) return !1;
-    i.factions = i.factions.filter((n) => n.id !== t);
-    for (const n of i.systems)
-      n.factionId === t && (n.factionId = "");
-    return s[e] = k(i), await R(s), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), !0;
-  }
-  async function y(e, t, s, i) {
-    var C;
-    if (!T("move star systems")) return null;
-    const n = q(), l = n[e], f = (C = l == null ? void 0 : l.systems) == null ? void 0 : C.find((G) => G.id === t);
-    return f ? (f.x = ee(ve(s, f.x), 0, 100), f.y = ee(ve(i, f.y), 0, 100), n[e] = k(l), await R(n), game.socket.emit(A, { action: "refresh", mapId: e }), $(f)) : (I(`System "${t}" was not found.`), null);
-  }
-  async function _(e, t, { notify: s = !0 } = {}) {
-    var f;
-    if (!T("reveal star systems")) return null;
-    const i = q(), n = i[e], l = (f = n == null ? void 0 : n.systems) == null ? void 0 : f.find((C) => C.id === t);
-    return l ? (l.visibility = "players", (l.status === "undiscovered" || l.status === "locked") && (l.status = "known"), i[e] = k(n), await R(i), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), s && z(e, l.id), N(`${l.name} revealed to players.`), $(l)) : (I(`System "${t}" was not found.`), null);
-  }
-  async function M(e, t) {
-    var l;
+    var o;
     if (!T("reveal routes")) return null;
-    const s = q(), i = s[e], n = (l = i == null ? void 0 : i.routes) == null ? void 0 : l.find((f) => f.id === t);
-    return n ? (n.visibility = "players", s[e] = k(i), await R(s), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), N("Route revealed to players."), $(n)) : (I(`Route "${t}" was not found.`), null);
+    const n = q(), i = n[e], s = (o = i == null ? void 0 : i.routes) == null ? void 0 : o.find((u) => u.id === t);
+    return s ? (s.visibility = "players", n[e] = _(i), await C(n), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), N("Route revealed to players."), w(s)) : (M(`Route "${t}" was not found.`), null);
   }
-  function z(e, t) {
-    var n;
+  async function R(e, t, n = !0) {
+    var u;
+    if (!T(n ? "hide routes" : "reveal routes")) return null;
+    const i = q(), s = i[e], o = (u = s == null ? void 0 : s.routes) == null ? void 0 : u.find((E) => E.id === t);
+    return o ? (o.visibility = n ? "gm" : "players", i[e] = _(s), await C(i), P(e), game.socket.emit(A, { action: "refresh", mapId: e }), N(`Route ${n ? "hidden from" : "visible to"} players.`), w(o)) : (M(`Route "${t}" was not found.`), null);
+  }
+  function I(e, t) {
+    var s;
     if (!T("notify players about discoveries")) return;
-    const s = D(e), i = (n = s == null ? void 0 : s.systems) == null ? void 0 : n.find((l) => l.id === t);
+    const n = D(e), i = (s = n == null ? void 0 : n.systems) == null ? void 0 : s.find((o) => o.id === t);
     if (!i) {
-      I(`System "${t}" was not found.`);
+      M(`System "${t}" was not found.`);
       return;
     }
     game.socket.emit(A, {
@@ -852,106 +886,106 @@ function Mt(r) {
       message: `New System Discovered: ${i.name}`
     }), N(`Discovery notification sent: ${i.name}.`);
   }
-  async function Y(e, { replace: t = !1 } = {}) {
+  async function U(e, { replace: t = !1 } = {}) {
     if (!T("import galaxy maps")) return null;
-    const s = q();
-    let i = k(e);
-    return s[i.id] && !t && (i = k({
+    const n = q();
+    let i = _(e);
+    return n[i.id] && !t && (i = _({
       ...i,
-      id: W("map"),
+      id: K("map"),
       title: `${i.title} Import`
-    })), s[i.id] = i, await R(s), P(i.id), N(`Imported ${i.title}.`), $(i);
+    })), n[i.id] = i, await C(n), P(i.id), N(`Imported ${i.title}.`), w(i);
   }
-  function O(e) {
+  function z(e) {
     const t = D(e);
     if (!t) {
-      I(`Map "${e}" was not found.`);
+      M(`Map "${e}" was not found.`);
       return;
     }
-    bt(`${vt(t.title)}.json`, k(t));
+    wt(`${It(t.title)}.json`, _(t));
   }
-  function B(e, t = {}, s = {}) {
-    const i = D(e), n = Fe({ ...s, ...t }), l = [
+  function Y(e, t = {}, n = {}) {
+    const i = D(e), s = je({ ...n, ...t }), o = [
       { value: "", label: "Unaffiliated" },
-      ...((i == null ? void 0 : i.factions) ?? []).map((G) => ({ value: G.id, label: G.name }))
-    ], f = ((i == null ? void 0 : i.factions) ?? []).find((G) => G.id === n.factionId), C = n.iconColor || (f == null ? void 0 : f.color) || "#58d8ff";
+      ...((i == null ? void 0 : i.factions) ?? []).map((O) => ({ value: O.id, label: O.name }))
+    ], u = ((i == null ? void 0 : i.factions) ?? []).find((O) => O.id === s.factionId), E = s.iconColor || (u == null ? void 0 : u.color) || "#58d8ff";
     return `
       <form class="gmf-crud-form">
-        <input type="hidden" name="id" value="${S(n.id)}" />
-        <input type="hidden" name="x" value="${S(n.x)}" />
-        <input type="hidden" name="y" value="${S(n.y)}" />
-        <label>Name <input type="text" name="name" value="${S(n.name)}" /></label>
+        <input type="hidden" name="id" value="${S(s.id)}" />
+        <input type="hidden" name="x" value="${S(s.x)}" />
+        <input type="hidden" name="y" value="${S(s.y)}" />
+        <label>Name <input type="text" name="name" value="${S(s.name)}" /></label>
         <div class="gmf-form-grid">
-          <label>Type <select name="type">${U(Ze, n.type)}</select></label>
-          <label>Status <select name="status">${U(Je, n.status)}</select></label>
+          <label>Type <select name="type">${B(Ke, s.type)}</select></label>
+          <label>Status <select name="status">${B(et, s.status)}</select></label>
         </div>
         <div class="gmf-form-grid">
-          <label>Faction <select name="factionId">${U(l, n.factionId)}</select></label>
-          <label>Visibility <select name="visibility">${U(Se, n.visibility)}</select></label>
+          <label>Faction <select name="factionId">${B(o, s.factionId)}</select></label>
+          <label>Visibility <select name="visibility">${B(Me, s.visibility)}</select></label>
         </div>
         <div class="gmf-form-grid">
-          <label>Icon Style <select name="iconStyle">${U(Qe, n.iconStyle)}</select></label>
-          <label>Icon Size <input type="range" name="iconSize" value="${S(n.iconSize)}" min="18" max="56" step="1" /></label>
+          <label>Icon Style <select name="iconStyle">${B(it, s.iconStyle)}</select></label>
+          <label>Icon Size <input type="range" name="iconSize" value="${S(s.iconSize)}" min="18" max="56" step="1" /></label>
         </div>
         <div class="gmf-form-grid">
-          <label>Icon Color <input type="color" name="iconColor" value="${S(C)}" /></label>
-          <label class="gmf-checkbox-label"><input type="checkbox" name="pulse" value="true" ${n.pulse ? "checked" : ""} /> Pulse Glow</label>
+          <label>Icon Color <input type="color" name="iconColor" value="${S(E)}" /></label>
+          <label class="gmf-checkbox-label"><input type="checkbox" name="pulse" value="true" ${s.pulse ? "checked" : ""} /> Pulse Glow</label>
         </div>
-        <label>Description <textarea name="description">${S(n.description)}</textarea></label>
+        <label>Description <textarea name="description">${S(s.description)}</textarea></label>
         <label>Image Path
           <div class="gmf-path-field">
-            <input type="text" name="image" value="${S(n.image)}" />
+            <input type="text" name="image" value="${S(s.image)}" />
             <button type="button" data-browse-target="image"><i class="fa-solid fa-folder-open"></i> Browse</button>
           </div>
         </label>
         <div class="gmf-form-grid">
-          <label>Scene <select name="sceneId">${Be(game.scenes, n.sceneId)}</select></label>
-          <label>Journal <select name="journalId">${Be(game.journal, n.journalId)}</select></label>
+          <label>Scene <select name="sceneId">${Qe(game.scenes, s.sceneId)}</select></label>
+          <label>Journal <select name="journalId">${Qe(game.journal, s.journalId)}</select></label>
         </div>
-        <label>GM Notes <textarea name="notes">${S(n.notes)}</textarea></label>
+        <label>GM Notes <textarea name="notes">${S(s.notes)}</textarea></label>
       </form>
     `;
   }
-  function Q(e, t = {}, s = {}) {
-    var G, V, he;
-    const i = D(e), n = { ...s, ...t }, l = (i == null ? void 0 : i.systems) ?? [];
-    n.fromSystemId || (n.fromSystemId = ((G = l[0]) == null ? void 0 : G.id) ?? ""), n.toSystemId || (n.toSystemId = ((V = l.find((Z) => Z.id !== n.fromSystemId)) == null ? void 0 : V.id) ?? ""), n.fromSystemId && !n.toSystemId && (n.toSystemId = ((he = l.find((Z) => Z.id !== n.fromSystemId)) == null ? void 0 : he.id) ?? "");
-    const f = Oe(n), C = l.map((Z) => ({ value: Z.id, label: Z.name }));
+  function J(e, t = {}, n = {}) {
+    var O, V, be;
+    const i = D(e), s = { ...n, ...t }, o = (i == null ? void 0 : i.systems) ?? [];
+    s.fromSystemId || (s.fromSystemId = ((O = o[0]) == null ? void 0 : O.id) ?? ""), s.toSystemId || (s.toSystemId = ((V = o.find((W) => W.id !== s.fromSystemId)) == null ? void 0 : V.id) ?? ""), s.fromSystemId && !s.toSystemId && (s.toSystemId = ((be = o.find((W) => W.id !== s.fromSystemId)) == null ? void 0 : be.id) ?? "");
+    const u = Xe(s), E = o.map((W) => ({ value: W.id, label: W.name }));
     return `
       <form class="gmf-crud-form">
-        <input type="hidden" name="id" value="${S(f.id)}" />
+        <input type="hidden" name="id" value="${S(u.id)}" />
         <div class="gmf-form-grid">
-          <label>From <select name="fromSystemId">${U(C, f.fromSystemId)}</select></label>
-          <label>To <select name="toSystemId">${U(C, f.toSystemId)}</select></label>
+          <label>From <select name="fromSystemId">${B(E, u.fromSystemId)}</select></label>
+          <label>To <select name="toSystemId">${B(E, u.toSystemId)}</select></label>
         </div>
         <div class="gmf-form-grid">
-          <label>Type <select name="type">${U(We, f.type)}</select></label>
-          <label>Visibility <select name="visibility">${U(Se, f.visibility)}</select></label>
+          <label>Type <select name="type">${B(tt, u.type)}</select></label>
+          <label>Visibility <select name="visibility">${B(Me, u.visibility)}</select></label>
         </div>
         <div class="gmf-form-grid">
-          <label>Travel Time <input type="text" name="travelTime" value="${S(f.travelTime)}" /></label>
-          <label>Fuel Cost <input type="number" name="fuelCost" value="${S(f.fuelCost)}" min="0" step="1" /></label>
+          <label>Travel Time <input type="text" name="travelTime" value="${S(u.travelTime)}" /></label>
+          <label>Fuel Cost <input type="number" name="fuelCost" value="${S(u.fuelCost)}" min="0" step="1" /></label>
         </div>
-        <label>Notes <textarea name="notes">${S(f.notes)}</textarea></label>
+        <label>Notes <textarea name="notes">${S(u.notes)}</textarea></label>
       </form>
     `;
   }
-  function K(e = {}) {
-    const t = Ge(e);
+  function te(e = {}) {
+    const t = Ue(e);
     return `
       <form class="gmf-crud-form">
         <input type="hidden" name="id" value="${S(t.id)}" />
         <label>Name <input type="text" name="name" value="${S(t.name)}" /></label>
         <div class="gmf-form-grid">
           <label>Color <input type="color" name="color" value="${S(t.color)}" /></label>
-          <label>Visibility <select name="visibility">${U(Se, t.visibility)}</select></label>
+          <label>Visibility <select name="visibility">${B(Me, t.visibility)}</select></label>
         </div>
         <label>Description <textarea name="description">${S(t.description)}</textarea></label>
       </form>
     `;
   }
-  function _e(e = {}) {
-    const t = k(e);
+  function ie(e = {}) {
+    const t = _(e);
     return `
       <form class="gmf-crud-form">
         <label>Title <input type="text" name="title" value="${S(t.title)}" /></label>
@@ -963,57 +997,57 @@ function Mt(r) {
             <button type="button" data-browse-target="backgroundImage"><i class="fa-solid fa-folder-open"></i> Browse</button>
           </div>
         </label>
-        <label>Visibility <select name="visibility">${U(Se, t.visibility)}</select></label>
+        <label>Visibility <select name="visibility">${B(Me, t.visibility)}</select></label>
       </form>
     `;
   }
-  function Ie(e) {
+  function Te(e) {
     const t = D(e);
-    t && te({
+    t && ae({
       title: "Edit Galaxy Map",
-      content: _e(t),
-      onSubmit: (s) => b(e, s)
+      content: ie(t),
+      onSubmit: (n) => $e(e, n)
     });
   }
-  function we(e, t = null, s = {}) {
-    var l;
-    const i = D(e), n = t ? (l = i == null ? void 0 : i.systems) == null ? void 0 : l.find((f) => f.id === t) : null;
-    te({
-      title: n ? "Edit Star System" : "Create Star System",
-      content: B(e, n ?? { id: W("system"), name: "New System" }, s),
-      submitLabel: n ? "Save System" : "Create System",
-      onSubmit: (f) => o(e, { ...f, pulse: f.pulse === "true" })
+  function Ee(e, t = null, n = {}) {
+    var o;
+    const i = D(e), s = t ? (o = i == null ? void 0 : i.systems) == null ? void 0 : o.find((u) => u.id === t) : null;
+    ae({
+      title: s ? "Edit Star System" : "Create Star System",
+      content: Y(e, s ?? { id: K("system"), name: "New System" }, n),
+      submitLabel: s ? "Save System" : "Create System",
+      onSubmit: (u) => G(e, { ...u, pulse: u.pulse === "true" })
     });
   }
-  function xe(e, t = null, s = {}) {
-    var l;
+  function ke(e, t = null, n = {}) {
+    var o;
     const i = D(e);
-    if ((((l = i == null ? void 0 : i.systems) == null ? void 0 : l.length) ?? 0) < 2) {
-      I("Create at least two systems before adding a route.");
+    if ((((o = i == null ? void 0 : i.systems) == null ? void 0 : o.length) ?? 0) < 2) {
+      M("Create at least two systems before adding a route.");
       return;
     }
-    const n = t ? i.routes.find((f) => f.id === t) : null;
-    te({
-      title: n ? "Edit Route" : "Create Route",
-      content: Q(e, n ?? { id: W("route") }, s),
-      submitLabel: n ? "Save Route" : "Create Route",
-      onSubmit: (f) => d(e, f)
+    const s = t ? i.routes.find((u) => u.id === t) : null;
+    ae({
+      title: s ? "Edit Route" : "Create Route",
+      content: J(e, s ?? { id: K("route") }, n),
+      submitLabel: s ? "Save Route" : "Create Route",
+      onSubmit: (u) => l(e, u)
     });
   }
-  function de(e, t = null) {
-    var n;
-    const s = D(e), i = t ? (n = s == null ? void 0 : s.factions) == null ? void 0 : n.find((l) => l.id === t) : null;
-    te({
+  function pe(e, t = null) {
+    var s;
+    const n = D(e), i = t ? (s = n == null ? void 0 : n.factions) == null ? void 0 : s.find((o) => o.id === t) : null;
+    ae({
       title: i ? "Edit Faction" : "Create Faction",
-      content: K(i ?? { id: W("faction"), name: "New Faction" }),
+      content: te(i ?? { id: K("faction"), name: "New Faction" }),
       submitLabel: i ? "Save Faction" : "Create Faction",
-      onSubmit: (l) => g(e, l)
+      onSubmit: (o) => c(e, o)
     });
   }
-  function $e(e) {
+  function _e(e) {
     const t = D(e);
     if (!t) return;
-    const s = k(t).factions.map((i) => `
+    const n = _(t).factions.map((i) => `
       <article class="gmf-dialog-row">
         <div>
           <strong><span class="gmf-color-dot" style="--gmf-faction-color: ${S(i.color)};"></span>${S(i.name)}</strong>
@@ -1033,20 +1067,20 @@ function Mt(r) {
             <p>Factions tint systems and help organize territory on the map.</p>
             <button type="button" data-dialog-add-faction><i class="fa-solid fa-plus"></i> Add Faction</button>
           </div>
-          <div class="gmf-dialog-list">${s}</div>
+          <div class="gmf-dialog-list">${n}</div>
         </section>
       `,
       render: (i) => {
-        var l;
-        const n = Le(i);
-        (l = n.querySelector("[data-dialog-add-faction]")) == null || l.addEventListener("click", () => de(e)), n.querySelectorAll("[data-dialog-edit-faction]").forEach((f) => {
-          f.addEventListener("click", () => de(e, f.dataset.dialogEditFaction));
-        }), n.querySelectorAll("[data-dialog-delete-faction]").forEach((f) => {
-          f.addEventListener("click", async () => {
+        var o;
+        const s = Pe(i);
+        (o = s.querySelector("[data-dialog-add-faction]")) == null || o.addEventListener("click", () => pe(e)), s.querySelectorAll("[data-dialog-edit-faction]").forEach((u) => {
+          u.addEventListener("click", () => pe(e, u.dataset.dialogEditFaction));
+        }), s.querySelectorAll("[data-dialog-delete-faction]").forEach((u) => {
+          u.addEventListener("click", async () => {
             await Dialog.confirm({
               title: "Delete Faction",
               content: "<p>Delete this faction? Systems assigned to it become unaffiliated.</p>"
-            }) && (await x(e, f.dataset.dialogDeleteFaction), $e(e));
+            }) && (await d(e, u.dataset.dialogDeleteFaction), _e(e));
           });
         });
       },
@@ -1062,110 +1096,110 @@ function Mt(r) {
       width: 560
     }).render(!0);
   }
-  function ke(e) {
+  function Ce(e) {
     if (!e) return null;
-    const t = k(e), s = new Map(t.systems.map((n) => [n.id, n])), i = new Map(t.factions.map((n) => [n.id, n]));
+    const t = _(e), n = new Map(t.systems.map((s) => [s.id, s])), i = new Map(t.factions.map((s) => [s.id, s]));
     return {
       ...t,
-      systems: t.systems.map((n) => {
-        var l;
+      systems: t.systems.map((s) => {
+        var o;
         return {
-          ...n,
-          factionName: ((l = i.get(n.factionId)) == null ? void 0 : l.name) ?? "Unaffiliated"
+          ...s,
+          factionName: ((o = i.get(s.factionId)) == null ? void 0 : o.name) ?? "Unaffiliated"
         };
       }),
-      routes: t.routes.map((n) => {
-        var l, f;
+      routes: t.routes.map((s) => {
+        var o, u;
         return {
-          ...n,
-          fromName: ((l = s.get(n.fromSystemId)) == null ? void 0 : l.name) ?? n.fromSystemId,
-          toName: ((f = s.get(n.toSystemId)) == null ? void 0 : f.name) ?? n.toSystemId
+          ...s,
+          fromName: ((o = n.get(s.fromSystemId)) == null ? void 0 : o.name) ?? s.fromSystemId,
+          toName: ((u = n.get(s.toSystemId)) == null ? void 0 : u.name) ?? s.toSystemId
         };
       })
     };
   }
-  function ue() {
-    return Object.values(q()).map(k);
+  function ye() {
+    return Object.values(q()).map(_);
   }
   function P(e = null) {
     r != null && r.rendered && r.render({ force: !0 });
-    for (const [t, s] of p.entries())
-      (!e || t === e) && s.render({ force: !0 });
-    u != null && u.rendered && (!e || u.mapId === e) && u.render({ force: !0 });
+    for (const [t, n] of y.entries())
+      (!e || t === e) && n.render({ force: !0 });
+    f != null && f.rendered && (!e || f.mapId === e) && f.render({ force: !0 });
   }
-  function E(e) {
-    const t = [...p.values()];
-    return u && t.push(u), t.filter((s) => (s == null ? void 0 : s.rendered) && s.mapId === e);
+  function De(e) {
+    const t = [...y.values()];
+    return f && t.push(f), t.filter((n) => (n == null ? void 0 : n.rendered) && n.mapId === e);
   }
-  function se(e) {
+  function Re(e) {
     var t;
     return e.element instanceof HTMLElement ? e.element : ((t = e.element) == null ? void 0 : t[0]) ?? null;
   }
-  function ye(e, t, s) {
-    return e.routes.find((i) => i.fromSystemId === t && i.toSystemId === s || i.toSystemId === t && i.fromSystemId === s) ?? null;
+  function qe(e, t, n) {
+    return e.routes.find((i) => i.fromSystemId === t && i.toSystemId === n || i.toSystemId === t && i.fromSystemId === n) ?? null;
   }
-  function Ke(e) {
-    return oe().filter((t) => t.id !== e).map((t) => t.id);
+  function k(e) {
+    return ce().filter((t) => t.id !== e).map((t) => t.id);
   }
-  function et(e, t) {
-    const s = D(e);
-    if (!s)
-      return I(`Map "${e}" was not found.`), null;
-    const i = k(s), n = i.systems.find((V) => V.id === i.currentSystemId), l = i.systems.find((V) => V.id === t);
-    if (!l)
-      return I(`System "${t}" was not found.`), null;
+  function re(e, t) {
+    const n = D(e);
     if (!n)
-      return I("This map does not have a current location yet. Ask the GM to set one first."), null;
-    if (n.id === l.id)
-      return N(`${l.name} is already the current location.`), null;
-    if (i.visibility !== "players" || n.visibility !== "players" || l.visibility !== "players")
-      return I("That travel destination is not visible to players."), null;
-    const f = ye(i, n.id, l.id);
-    if (!f || f.visibility !== "players")
-      return I(`No player-visible direct route from ${n.name} to ${l.name}.`), null;
-    const C = me();
-    if (!C)
-      return I("A GM must be online to approve player travel."), null;
-    const G = Ke(game.user.id);
-    return G.includes(C.id) || G.push(C.id), {
+      return M(`Map "${e}" was not found.`), null;
+    const i = _(n), s = i.systems.find((V) => V.id === i.currentSystemId), o = i.systems.find((V) => V.id === t);
+    if (!o)
+      return M(`System "${t}" was not found.`), null;
+    if (!s)
+      return M("This map does not have a current location yet. Ask the GM to set one first."), null;
+    if (s.id === o.id)
+      return N(`${o.name} is already the current location.`), null;
+    if (i.visibility !== "players" || s.visibility !== "players" || o.visibility !== "players")
+      return M("That travel destination is not visible to players."), null;
+    const u = qe(i, s.id, o.id);
+    if (!u || u.visibility !== "players")
+      return M(`No player-visible direct route from ${s.name} to ${o.name}.`), null;
+    const E = de();
+    if (!E)
+      return M("A GM must be online to approve player travel."), null;
+    const O = k(game.user.id);
+    return O.includes(E.id) || O.push(E.id), {
       action: "travel-request",
-      requestId: W("travel"),
+      requestId: K("travel"),
       mapId: e,
       mapTitle: i.title,
-      fromSystemId: n.id,
-      fromName: n.name,
-      toSystemId: l.id,
-      toName: l.name,
-      routeId: f.id,
-      routeType: f.type,
-      travelTime: f.travelTime,
-      fuelCost: f.fuelCost,
+      fromSystemId: s.id,
+      fromName: s.name,
+      toSystemId: o.id,
+      toName: o.name,
+      routeId: u.id,
+      routeType: u.type,
+      travelTime: u.travelTime,
+      fuelCost: u.fuelCost,
       requesterId: game.user.id,
       requesterName: game.user.name,
-      voterIds: [...new Set(G)]
+      voterIds: [...new Set(O)]
     };
   }
-  function ze(e, t) {
-    const s = et(e, t);
-    return s ? (game.socket.emit(A, s), N(`Travel request sent: ${s.fromName} to ${s.toName}.`), s) : null;
+  function se(e, t) {
+    const n = re(e, t);
+    return n ? (game.socket.emit(A, n), N(`Travel request sent: ${n.fromName} to ${n.toName}.`), n) : null;
   }
-  function tt(e) {
-    var i, n, l;
-    if (!(e != null && e.requestId) || e.requesterId === ((i = game.user) == null ? void 0 : i.id) || !((l = e.voterIds) != null && l.includes((n = game.user) == null ? void 0 : n.id)) || w.has(e.requestId)) return;
-    w.add(e.requestId);
+  function st(e) {
+    var i, s, o;
+    if (!(e != null && e.requestId) || e.requesterId === ((i = game.user) == null ? void 0 : i.id) || !((o = e.voterIds) != null && o.includes((s = game.user) == null ? void 0 : s.id)) || $.has(e.requestId)) return;
+    $.add(e.requestId);
     let t = !1;
-    const s = (f) => {
+    const n = (u) => {
       if (t) return;
       t = !0;
-      const C = {
+      const E = {
         action: "travel-vote",
         requestId: e.requestId,
         mapId: e.mapId,
         userId: game.user.id,
         userName: game.user.name,
-        accepted: f
+        accepted: u
       };
-      game.socket.emit(A, C), je(C);
+      game.socket.emit(A, E), Be(E);
     };
     new Dialog({
       title: "Travel Request",
@@ -1180,26 +1214,26 @@ function Mt(r) {
         accept: {
           icon: '<i class="fa-solid fa-check"></i>',
           label: "Accept",
-          callback: () => s(!0)
+          callback: () => n(!0)
         },
         decline: {
           icon: '<i class="fa-solid fa-xmark"></i>',
           label: "Decline",
-          callback: () => s(!1)
+          callback: () => n(!1)
         }
       },
       default: "accept",
-      close: () => s(!1)
+      close: () => n(!1)
     }, {
       classes: ["galaxy-map", "gmf-crud-dialog"],
       width: 420
     }).render(!0);
   }
-  function it(e) {
-    if (!pe() || !(e != null && e.requestId)) return;
+  function nt(e) {
+    if (!ue() || !(e != null && e.requestId)) return;
     const t = globalThis.setTimeout(() => {
-      const s = v.get(e.requestId);
-      s && Ye(s, "Request timeout");
+      const n = v.get(e.requestId);
+      n && He(n, "Request timeout");
     }, 6e4);
     v.set(e.requestId, {
       ...e,
@@ -1208,15 +1242,25 @@ function Mt(r) {
       timeoutId: t
     });
   }
-  function Ve(e) {
-    const t = k(D(e.mapId)), s = t.systems.find((n) => n.id === e.fromSystemId), i = t.systems.find((n) => n.id === e.toSystemId);
-    !s || !i || E(e.mapId).forEach((n) => {
-      var f;
-      const l = se(n);
-      l && (n.selectedSystemId = i.id, n.selectedRouteId = null, (f = n._animateShipTravel) == null || f.call(n, s, i, l));
+  function Oe(e) {
+    const t = _(D(e.mapId)), n = t.systems.find((s) => s.id === e.fromSystemId), i = t.systems.find((s) => s.id === e.toSystemId);
+    !n || !i || De(e.mapId).forEach((s) => {
+      var u;
+      const o = Re(s);
+      o && (s.selectedSystemId = i.id, s.selectedRouteId = null, (u = s._animateShipTravel) == null || u.call(s, n, i, o));
     });
   }
-  async function nt(e) {
+  function at(e, t, n) {
+    var i;
+    game.socket.emit(A, {
+      action: "travel-animation",
+      mapId: e,
+      fromSystemId: t,
+      toSystemId: n,
+      coordinatorId: (i = game.user) == null ? void 0 : i.id
+    });
+  }
+  async function rt(e) {
     v.delete(e.requestId), e.timeoutId && globalThis.clearTimeout(e.timeoutId);
     const t = {
       action: "travel-approved",
@@ -1228,11 +1272,11 @@ function Mt(r) {
       toName: e.toName,
       coordinatorId: game.user.id
     };
-    game.socket.emit(A, t), Ve(t), N(`Travel approved: ${e.fromName} to ${e.toName}.`), globalThis.setTimeout(() => c(e.mapId, e.toSystemId), 2400);
+    game.socket.emit(A, t), Oe(t), N(`Travel approved: ${e.fromName} to ${e.toName}.`), globalThis.setTimeout(() => Z(e.mapId, e.toSystemId), 2400);
   }
-  function Ye(e, t = "A player") {
+  function He(e, t = "A player") {
     v.delete(e.requestId), e.timeoutId && globalThis.clearTimeout(e.timeoutId);
-    const s = {
+    const n = {
       action: "travel-declined",
       requestId: e.requestId,
       mapId: e.mapId,
@@ -1241,68 +1285,68 @@ function Mt(r) {
       voterName: t,
       coordinatorId: game.user.id
     };
-    game.socket.emit(A, s), N(`Travel declined by ${t}: ${e.fromName} to ${e.toName}.`);
+    game.socket.emit(A, n), N(`Travel declined by ${t}: ${e.fromName} to ${e.toName}.`);
   }
-  function je(e) {
-    if (!pe() || !(e != null && e.requestId)) return;
+  function Be(e) {
+    if (!ue() || !(e != null && e.requestId)) return;
     const t = v.get(e.requestId);
     if (!(!t || !t.voterIds.includes(e.userId))) {
       if (!e.accepted) {
-        Ye(t, e.userName);
+        He(t, e.userName);
         return;
       }
-      t.accepted.add(e.userId), t.voterIds.every((s) => t.accepted.has(s)) && nt(t);
+      t.accepted.add(e.userId), t.voterIds.every((n) => t.accepted.has(n)) && rt(t);
     }
   }
-  function st(e) {
-    var t, s;
-    e.coordinatorId !== ((t = game.user) == null ? void 0 : t.id) && (e.requestId && w.delete(e.requestId), Ve(e), (s = ui.notifications) == null || s.info(`Travel approved: ${e.fromName} to ${e.toName}.`));
+  function ot(e) {
+    var t, n;
+    e.coordinatorId !== ((t = game.user) == null ? void 0 : t.id) && (e.requestId && $.delete(e.requestId), Oe(e), (n = ui.notifications) == null || n.info(`Travel approved: ${e.fromName} to ${e.toName}.`));
   }
-  function at(e) {
-    var t, s;
-    e.coordinatorId !== ((t = game.user) == null ? void 0 : t.id) && (e.requestId && w.delete(e.requestId), (s = ui.notifications) == null || s.warn(`Travel declined by ${e.voterName}: ${e.fromName} to ${e.toName}.`));
+  function lt(e) {
+    var t, n;
+    e.coordinatorId !== ((t = game.user) == null ? void 0 : t.id) && (e.requestId && $.delete(e.requestId), (n = ui.notifications) == null || n.warn(`Travel declined by ${e.voterName}: ${e.fromName} to ${e.toName}.`));
   }
-  function rt(e) {
-    const t = p.get(e);
-    t && t.close(), (u == null ? void 0 : u.mapId) === e && u.close();
+  function ct(e) {
+    const t = y.get(e);
+    t && t.close(), (f == null ? void 0 : f.mapId) === e && f.close();
   }
-  function ge(e, t = {}) {
-    var C;
-    const s = D(e);
-    if (!s)
-      return I(`Map "${e}" was not found.`), null;
-    const i = t.playerMode ?? !((C = game.user) != null && C.isGM);
-    if (i && s.visibility !== "players" && !t.broadcast)
-      return I("That galaxy map is not visible to players."), null;
-    const n = i ? `player:${e}` : e, l = i && (u == null ? void 0 : u.mapId) === e ? u : p.get(n);
-    if (l != null && l.rendered)
-      return l.bringToFront(), l;
-    const f = new ct({ mapId: e, playerMode: i });
-    return i ? u = f : p.set(n, f), f.render({ force: !0 }), f;
+  function ve(e, t = {}) {
+    var E;
+    const n = D(e);
+    if (!n)
+      return M(`Map "${e}" was not found.`), null;
+    const i = t.playerMode ?? !((E = game.user) != null && E.isGM);
+    if (i && n.visibility !== "players" && !t.broadcast)
+      return M("That galaxy map is not visible to players."), null;
+    const s = i ? `player:${e}` : e, o = i && (f == null ? void 0 : f.mapId) === e ? f : y.get(s);
+    if (o != null && o.rendered)
+      return o.bringToFront(), o;
+    const u = new ft({ mapId: e, playerMode: i });
+    return i ? f = u : y.set(s, u), u.render({ force: !0 }), u;
   }
-  function qe() {
-    return T("open the map manager") ? (r || (r = new lt()), r.render({ force: !0 }), r) : null;
+  function Ae() {
+    return T("open the map manager") ? (r || (r = new ut()), r.render({ force: !0 }), r) : null;
   }
-  function Re() {
-    const e = ue().filter((i) => i.visibility === "players").sort((i, n) => i.title.localeCompare(n.title));
+  function Ge() {
+    const e = ye().filter((i) => i.visibility === "players").sort((i, s) => i.title.localeCompare(s.title));
     if (!e.length)
       return N("No galaxy map is currently visible to players."), null;
-    if (e.length === 1) return ge(e[0].id, { playerMode: !0 });
+    if (e.length === 1) return ve(e[0].id, { playerMode: !0 });
     const t = e.map((i) => `
       <button type="button" class="gmf-player-map-choice" data-player-open-map="${S(i.id)}">
         <span class="gmf-player-map-choice__title">${S(i.title)}</span>
         <span class="gmf-player-map-choice__meta">${S(i.subtitle || i.description || "Player-visible galaxy map")}</span>
       </button>
     `).join("");
-    let s = null;
-    return s = new Dialog({
+    let n = null;
+    return n = new Dialog({
       title: "Choose Galaxy Map",
       content: `<section class="gmf-player-map-chooser">${t}</section>`,
       render: (i) => {
-        const n = Le(i);
-        n == null || n.querySelectorAll("[data-player-open-map]").forEach((l) => {
-          l.addEventListener("click", () => {
-            ge(l.dataset.playerOpenMap, { playerMode: !0 }), s == null || s.close();
+        const s = Pe(i);
+        s == null || s.querySelectorAll("[data-player-open-map]").forEach((o) => {
+          o.addEventListener("click", () => {
+            ve(o.dataset.playerOpenMap, { playerMode: !0 }), n == null || n.close();
           });
         });
       },
@@ -1316,150 +1360,161 @@ function Mt(r) {
     }, {
       classes: ["galaxy-map", "gmf-crud-dialog", "gmf-map-chooser-dialog"],
       width: 460
-    }), s.render(!0), s;
+    }), n.render(!0), n;
   }
-  function ot() {
+  function dt() {
     var t;
-    const e = ue().sort((s, i) => s.title.localeCompare(i.title));
-    return (t = game.user) != null && t.isGM ? e.length === 1 ? ge(e[0].id) : qe() : Re();
+    const e = ye().sort((n, i) => n.title.localeCompare(i.title));
+    return (t = game.user) != null && t.isGM ? e.length === 1 ? ve(e[0].id) : Ae() : Ge();
   }
-  function Ae(e) {
+  function ze(e) {
     if (T("broadcast galaxy maps")) {
       if (!D(e)) {
-        I(`Map "${e}" was not found.`);
+        M(`Map "${e}" was not found.`);
         return;
       }
       game.socket.emit(A, { action: "open", mapId: e }), N("Map broadcast sent to players.");
     }
   }
-  function Xe() {
+  function Ze() {
     T("close player galaxy maps") && (game.socket.emit(A, { action: "close" }), N("Close-map signal sent to players."));
   }
-  const lt = gt({
-    templateRoot: Te,
-    getMaps: ue,
-    prepareMapForManager: ke,
+  const ut = vt({
+    templateRoot: Le,
+    getMaps: ye,
+    prepareMapForManager: Ce,
     getRawMap: D,
-    openMapMetadataDialog: Ie,
-    openSystemDialog: we,
-    openRouteDialog: xe,
-    openFactionDialog: de,
-    exportMap: O,
-    duplicateMap: ne,
-    deleteMap: H,
-    createMap: Me,
-    deleteSystem: a,
-    deleteRoute: m,
-    deleteFaction: x,
-    openMap: ge,
-    showMapToPlayers: Ae,
-    closePlayerMap: Xe,
+    openMapMetadataDialog: Te,
+    openSystemDialog: Ee,
+    openRouteDialog: ke,
+    openFactionDialog: pe,
+    exportMap: z,
+    duplicateMap: b,
+    deleteMap: L,
+    createMap: X,
+    deleteSystem: ee,
+    deleteRoute: a,
+    deleteFaction: d,
+    openMap: ve,
+    showMapToPlayers: ze,
+    closePlayerMap: Ze,
+    hideSystemFromPlayers: m,
+    hideRouteFromPlayers: R,
     clearManagerApp: (e) => {
       r === e && (r = null);
     }
-  }), ct = St({
-    templateRoot: Te,
+  }), ft = Mt({
+    templateRoot: Le,
     getRawMap: D,
-    prepareMapForDisplay: Ee,
-    openSystemDialog: we,
-    openRouteDialog: xe,
-    openFactionDialog: de,
-    openFactionManagerDialog: $e,
-    openMapMetadataDialog: Ie,
-    revealSystemToPlayers: _,
-    revealRouteToPlayers: M,
-    deleteSystem: a,
-    deleteRoute: m,
-    setCurrentSystem: c,
-    requestTravelToSystem: ze,
-    notifySystemDiscovered: z,
-    exportMap: O,
-    getTravelRoute: ye,
+    prepareMapForDisplay: me,
+    openSystemDialog: Ee,
+    openRouteDialog: ke,
+    openFactionDialog: pe,
+    openFactionManagerDialog: _e,
+    openMapMetadataDialog: Te,
+    revealSystemToPlayers: g,
+    revealRouteToPlayers: x,
+    hideSystemFromPlayers: m,
+    hideRouteFromPlayers: R,
+    deleteSystem: ee,
+    deleteRoute: a,
+    setCurrentSystem: Z,
+    requestTravelToSystem: se,
+    notifySystemDiscovered: I,
+    exportMap: z,
+    getTravelRoute: qe,
+    broadcastTravelAnimation: at,
     notifyInfo: N,
-    notifyError: I,
-    saveSystemPosition: y,
-    showMapToPlayers: Ae,
-    openMapManager: qe,
+    notifyError: M,
+    saveSystemPosition: p,
+    showMapToPlayers: ze,
+    openMapManager: Ae,
     clearMapView: (e) => {
-      e.playerMode && u === e && (u = null);
-      for (const [t, s] of p.entries())
-        s === e && p.delete(t);
+      e.playerMode && f === e && (f = null);
+      for (const [t, n] of y.entries())
+        n === e && y.delete(t);
     }
   });
-  function dt() {
+  function mt() {
     const e = game.modules.get("holosuite-core"), t = e != null && e.active ? e.api : null;
     return t != null && t.registerApp ? (t.registerApp({
-      id: re,
+      id: le,
       title: "Galaxy Map",
       icon: "fa-solid fa-route",
       premium: !1,
       description: "Open cinematic campaign maps and navigation charts.",
       open: () => {
-        var s;
-        return (s = game.user) != null && s.isGM ? qe() : Re();
+        var n;
+        return (n = game.user) != null && n.isGM ? Ae() : Ge();
       }
     }), !0) : !1;
   }
   Hooks.once("init", async () => {
-    game.settings.register(re, Pe, {
+    game.settings.register(le, Ye, {
       scope: "world",
       config: !1,
       type: Object,
       default: {}
     }), Handlebars.registerHelper("gmfEq", (e, t) => e === t), Handlebars.registerHelper("gmfJson", (e) => JSON.stringify(e, null, 2)), Handlebars.registerHelper("gmfPercent", (e) => `${Number(e).toFixed(3)}%`), Handlebars.registerHelper("gmfFallback", (e, t) => e || t), await loadTemplates([
-      `${Te}/map-manager.hbs`,
-      `${Te}/galaxy-map.hbs`,
-      `${Te}/system-details.hbs`
+      `${Le}/map-manager.hbs`,
+      `${Le}/galaxy-map.hbs`,
+      `${Le}/system-details.hbs`
     ]);
   }), Hooks.once("ready", () => {
     game.galaxyMap = {
-      openMap: ge,
-      openMapManager: qe,
-      openGalaxyMapFromSceneControls: ot,
-      openPlayerMapChooser: Re,
-      createMap: Me,
-      getMaps: ue,
-      showMapToPlayers: Ae,
-      closePlayerMap: Xe,
-      updateMap: L,
-      updateMapMetadata: b,
-      deleteMap: H,
-      duplicateMap: ne,
-      upsertSystem: o,
-      deleteSystem: a,
-      upsertRoute: d,
-      deleteRoute: m,
-      upsertFaction: g,
-      deleteFaction: x,
-      saveSystemPosition: y,
-      setCurrentSystem: c,
-      revealSystemToPlayers: _,
-      revealRouteToPlayers: M,
-      notifySystemDiscovered: z,
-      requestTravelToSystem: ze,
-      importMapData: Y,
-      exportMap: O
+      openMap: ve,
+      openMapManager: Ae,
+      openGalaxyMapFromSceneControls: dt,
+      openPlayerMapChooser: Ge,
+      createMap: X,
+      getMaps: ye,
+      showMapToPlayers: ze,
+      closePlayerMap: Ze,
+      updateMap: xe,
+      updateMapMetadata: $e,
+      deleteMap: L,
+      duplicateMap: b,
+      upsertSystem: G,
+      deleteSystem: ee,
+      upsertRoute: l,
+      deleteRoute: a,
+      upsertFaction: c,
+      deleteFaction: d,
+      saveSystemPosition: p,
+      setCurrentSystem: Z,
+      revealSystemToPlayers: g,
+      revealRouteToPlayers: x,
+      hideSystemFromPlayers: m,
+      hideRouteFromPlayers: R,
+      notifySystemDiscovered: I,
+      requestTravelToSystem: se,
+      importMapData: U,
+      exportMap: z
     };
-    const e = game.modules.get(re);
-    e && (e.api = game.galaxyMap), dt(), game.socket.on(A, (t = {}) => {
-      var s, i;
+    const e = game.modules.get(le);
+    e && (e.api = game.galaxyMap), mt(), game.socket.on(A, (t = {}) => {
+      var n, i, s;
       if (t.action === "travel-request") {
-        it(t), tt(t);
+        nt(t), st(t);
         return;
       }
       if (t.action === "travel-vote") {
-        je(t);
+        Be(t);
         return;
       }
       if (t.action === "travel-approved") {
-        st(t);
+        ot(t);
         return;
       }
       if (t.action === "travel-declined") {
-        at(t);
+        lt(t);
         return;
       }
-      (s = game.user) != null && s.isGM || (t.action === "open" && t.mapId && (u == null || u.close(), ge(t.mapId, { playerMode: !0, broadcast: !0 })), t.action === "close" && (u == null || u.close()), t.action === "refresh" && (u == null ? void 0 : u.mapId) === t.mapId && u.render({ force: !0 }), t.action === "notify" && ((i = ui.notifications) == null || i.info(t.message || "New system discovered."), (u == null ? void 0 : u.mapId) === t.mapId && u.render({ force: !0 })));
-    }), console.log(`${re} | Ready. API available at game.galaxyMap.`);
+      if (t.action === "travel-animation") {
+        t.coordinatorId !== ((n = game.user) == null ? void 0 : n.id) && Oe(t);
+        return;
+      }
+      (i = game.user) != null && i.isGM || (t.action === "open" && t.mapId && (f == null || f.close(), ve(t.mapId, { playerMode: !0, broadcast: !0 })), t.action === "close" && (f == null || f.close()), t.action === "refresh" && (f == null ? void 0 : f.mapId) === t.mapId && f.render({ force: !0 }), t.action === "notify" && ((s = ui.notifications) == null || s.info(t.message || "New system discovered."), (f == null ? void 0 : f.mapId) === t.mapId && f.render({ force: !0 })));
+    }), console.log(`${le} | Ready. API available at game.galaxyMap.`);
   });
 })();

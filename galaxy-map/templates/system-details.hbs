@@ -2,7 +2,7 @@
   {{#if route}}
     <div class="gmf-system-panel__top">
       <p class="gmf-kicker">Travel Route</p>
-      <h3>{{route.fromName}} / {{route.toName}}</h3>
+      <h3>{{route.fromName}} to {{route.toName}}</h3>
       <div class="gmf-chip-row">
         <span class="gmf-chip">{{route.type}}</span>
         <span class="gmf-chip">{{route.travelTime}}</span>
@@ -25,6 +25,10 @@
         <button type="button" data-action="reveal-route">
           <i class="fa-solid fa-eye"></i>
           Reveal Route
+        </button>
+        <button type="button" data-action="hide-route">
+          <i class="fa-solid fa-eye-slash"></i>
+          Hide Route
         </button>
         <button type="button" data-action="delete-route">
           <i class="fa-solid fa-trash"></i>
@@ -106,6 +110,10 @@
           <button type="button" data-action="reveal-system">
             <i class="fa-solid fa-eye"></i>
             Reveal System
+          </button>
+          <button type="button" data-action="hide-system">
+            <i class="fa-solid fa-eye-slash"></i>
+            Hide System
           </button>
           <button type="button" data-action="notify-discovery">
             <i class="fa-solid fa-bell"></i>

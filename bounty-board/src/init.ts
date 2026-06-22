@@ -8,6 +8,8 @@ import {
   getBounty,
   publishBounty,
   registerSettings,
+  setBoardVisibleToPlayers,
+  setBountiesPublished,
   upsertBounty
 } from "./bounty-service";
 
@@ -24,6 +26,8 @@ function exposeApi() {
     upsertBounty,
     deleteBounty,
     publishBounty,
+    setBountiesPublished,
+    setBoardVisibleToPlayers,
     archiveBounty,
     claimBounty,
     // Future extension hooks:

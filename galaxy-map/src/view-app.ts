@@ -30,6 +30,8 @@ export function createGalaxyMapViewClass(deps: any) {
     openMapMetadataDialog,
     revealSystemToPlayers,
     revealRouteToPlayers,
+    hideSystemFromPlayers,
+    hideRouteFromPlayers,
     deleteSystem,
     deleteRoute,
     setCurrentSystem,
@@ -37,6 +39,7 @@ export function createGalaxyMapViewClass(deps: any) {
     notifySystemDiscovered,
     exportMap,
     getTravelRoute,
+    broadcastTravelAnimation,
     notifyInfo,
     notifyError,
     saveSystemPosition,
@@ -156,6 +159,10 @@ export function createGalaxyMapViewClass(deps: any) {
       html.querySelectorAll("[data-route-id]").forEach((route: any) => {
         route.addEventListener("click", (event: any) => {
           event.stopPropagation();
+          if (!this.playerMode && game.user?.isGM) {
+            openRouteDialog(this.mapId, route.dataset.routeId);
+            return;
+          }
           this.selectedRouteId = route.dataset.routeId;
           this.selectedSystemId = null;
           this.render({ force: true });
@@ -185,6 +192,9 @@ export function createGalaxyMapViewClass(deps: any) {
       html.querySelector("[data-action='reveal-system']")?.addEventListener("click", () => {
         if (this.selectedSystemId) revealSystemToPlayers(this.mapId, this.selectedSystemId);
       });
+      html.querySelector("[data-action='hide-system']")?.addEventListener("click", () => {
+        if (this.selectedSystemId) hideSystemFromPlayers(this.mapId, this.selectedSystemId, true);
+      });
       html.querySelector("[data-action='delete-system']")?.addEventListener("click", () => {
         if (this.selectedSystemId) this._confirmDeleteSystem(this.selectedSystemId);
       });
@@ -201,6 +211,9 @@ export function createGalaxyMapViewClass(deps: any) {
       });
       html.querySelector("[data-action='reveal-route']")?.addEventListener("click", () => {
         if (this.selectedRouteId) revealRouteToPlayers(this.mapId, this.selectedRouteId);
+      });
+      html.querySelector("[data-action='hide-route']")?.addEventListener("click", () => {
+        if (this.selectedRouteId) hideRouteFromPlayers(this.mapId, this.selectedRouteId, true);
       });
       html.querySelector("[data-action='delete-route']")?.addEventListener("click", () => {
         if (this.selectedRouteId) this._confirmDeleteRoute(this.selectedRouteId);
@@ -426,12 +439,16 @@ export function createGalaxyMapViewClass(deps: any) {
         openRouteDialog(this.mapId, null, { fromSystemId: target.id });
       } else if (action === "reveal-system") {
         await revealSystemToPlayers(this.mapId, target.id);
+      } else if (action === "hide-system") {
+        await hideSystemFromPlayers(this.mapId, target.id, true);
       } else if (action === "delete-system") {
         await this._confirmDeleteSystem(target.id);
       } else if (action === "edit-route") {
         openRouteDialog(this.mapId, target.id);
       } else if (action === "reveal-route") {
         await revealRouteToPlayers(this.mapId, target.id);
+      } else if (action === "hide-route") {
+        await hideRouteFromPlayers(this.mapId, target.id, true);
       } else if (action === "delete-route") {
         await this._confirmDeleteRoute(target.id);
       }
@@ -474,6 +491,7 @@ export function createGalaxyMapViewClass(deps: any) {
         return;
       }
 
+      broadcastTravelAnimation(this.mapId, from.id, to.id);
       await this._animateShipTravel(from, to, html);
       await setCurrentSystem(this.mapId, to.id);
       notifyInfo(`Arrived at ${to.name}.`);

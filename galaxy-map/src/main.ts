@@ -450,6 +450,25 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
     return clone(system);
   }
 
+  async function hideSystemFromPlayers(mapId, systemId, hidden = true) {
+    if (!requireGM(hidden ? "hide star systems" : "reveal star systems")) return null;
+    const maps = getMapStore();
+    const map = maps[mapId];
+    const system = map?.systems?.find((candidate) => candidate.id === systemId);
+    if (!system) {
+      notifyError(`System "${systemId}" was not found.`);
+      return null;
+    }
+
+    system.visibility = hidden ? "gm" : "players";
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    notifyInfo(`${system.name} ${hidden ? "hidden from" : "visible to"} players.`);
+    return clone(system);
+  }
+
   async function revealRouteToPlayers(mapId, routeId) {
     if (!requireGM("reveal routes")) return null;
     const maps = getMapStore();
@@ -466,6 +485,25 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
     refreshOpenApps(mapId);
     game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
     notifyInfo("Route revealed to players.");
+    return clone(route);
+  }
+
+  async function hideRouteFromPlayers(mapId, routeId, hidden = true) {
+    if (!requireGM(hidden ? "hide routes" : "reveal routes")) return null;
+    const maps = getMapStore();
+    const map = maps[mapId];
+    const route = map?.routes?.find((candidate) => candidate.id === routeId);
+    if (!route) {
+      notifyError(`Route "${routeId}" was not found.`);
+      return null;
+    }
+
+    route.visibility = hidden ? "gm" : "players";
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    notifyInfo(`Route ${hidden ? "hidden from" : "visible to"} players.`);
     return clone(route);
   }
 
@@ -933,6 +971,16 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
     });
   }
 
+  function broadcastTravelAnimation(mapId, fromSystemId, toSystemId) {
+    game.socket.emit(SOCKET_NAME, {
+      action: "travel-animation",
+      mapId,
+      fromSystemId,
+      toSystemId,
+      coordinatorId: game.user?.id
+    });
+  }
+
   async function approveTravelRequest(pending) {
     pendingTravelRequests.delete(pending.requestId);
     if (pending.timeoutId) globalThis.clearTimeout(pending.timeoutId);
@@ -1163,6 +1211,8 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
     openMap,
     showMapToPlayers,
     closePlayerMap,
+    hideSystemFromPlayers,
+    hideRouteFromPlayers,
     clearManagerApp: (app) => {
       if (managerApp === app) managerApp = null;
     }
@@ -1179,6 +1229,8 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
     openMapMetadataDialog,
     revealSystemToPlayers,
     revealRouteToPlayers,
+    hideSystemFromPlayers,
+    hideRouteFromPlayers,
     deleteSystem,
     deleteRoute,
     setCurrentSystem,
@@ -1186,6 +1238,7 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
     notifySystemDiscovered,
     exportMap,
     getTravelRoute,
+    broadcastTravelAnimation,
     notifyInfo,
     notifyError,
     saveSystemPosition,
@@ -1261,6 +1314,8 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
       setCurrentSystem,
       revealSystemToPlayers,
       revealRouteToPlayers,
+      hideSystemFromPlayers,
+      hideRouteFromPlayers,
       notifySystemDiscovered,
       requestTravelToSystem,
       importMapData,
@@ -1286,6 +1341,10 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
       }
       if (payload.action === "travel-declined") {
         handleTravelDeclined(payload);
+        return;
+      }
+      if (payload.action === "travel-animation") {
+        if (payload.coordinatorId !== game.user?.id) animateTravelOnOpenMaps(payload);
         return;
       }
 

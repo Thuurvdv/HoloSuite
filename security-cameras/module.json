@@ -2,7 +2,7 @@
   "id": "security-cameras",
   "title": "Security Cameras",
   "description": "A sci-fi security camera monitor and still-feed overlay for Foundry VTT.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": {
     "minimum": "12",
     "verified": "13"

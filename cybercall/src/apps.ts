@@ -18,6 +18,7 @@ export function createCyberCallAppClasses(deps: any) {
     escapeHTML,
     getDefaultComposerData,
     getActorChoices,
+    getPlayerChoices,
     getContacts,
     getGroupContacts,
     getRingtoneChoices,
@@ -102,6 +103,7 @@ export function createCyberCallAppClasses(deps: any) {
       return {
         call: getDefaultComposerData(),
         actors: getActorChoices(),
+        players: getPlayerChoices(),
         ringtoneChoices: getRingtoneChoices()
       };
     }
@@ -269,6 +271,7 @@ export function createCyberCallAppClasses(deps: any) {
           ...(await super._prepareContext(options)),
           call: getDefaultComposerData(),
           actors: getActorChoices(),
+          players: getPlayerChoices(),
           ringtoneChoices: getRingtoneChoices()
         };
       }

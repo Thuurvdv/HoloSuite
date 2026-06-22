@@ -29,6 +29,8 @@ export function createGalaxyMapManagerClass(deps: any) {
     openMap,
     showMapToPlayers,
     closePlayerMap,
+    hideSystemFromPlayers,
+    hideRouteFromPlayers,
     clearManagerApp
   } = deps;
 
@@ -95,11 +97,23 @@ export function createGalaxyMapManagerClass(deps: any) {
       html.querySelectorAll("[data-edit-system]").forEach((button: any) => {
         button.addEventListener("click", () => openSystemDialog(this.selectedMapId, button.dataset.editSystem));
       });
+      html.querySelectorAll("[data-show-system]").forEach((button: any) => {
+        button.addEventListener("click", () => hideSystemFromPlayers(this.selectedMapId, button.dataset.showSystem, false));
+      });
+      html.querySelectorAll("[data-hide-system]").forEach((button: any) => {
+        button.addEventListener("click", () => hideSystemFromPlayers(this.selectedMapId, button.dataset.hideSystem, true));
+      });
       html.querySelectorAll("[data-delete-system]").forEach((button: any) => {
         button.addEventListener("click", () => this._confirmDeleteSystem(button.dataset.deleteSystem));
       });
       html.querySelectorAll("[data-edit-route]").forEach((button: any) => {
         button.addEventListener("click", () => openRouteDialog(this.selectedMapId, button.dataset.editRoute));
+      });
+      html.querySelectorAll("[data-show-route]").forEach((button: any) => {
+        button.addEventListener("click", () => hideRouteFromPlayers(this.selectedMapId, button.dataset.showRoute, false));
+      });
+      html.querySelectorAll("[data-hide-route]").forEach((button: any) => {
+        button.addEventListener("click", () => hideRouteFromPlayers(this.selectedMapId, button.dataset.hideRoute, true));
       });
       html.querySelectorAll("[data-delete-route]").forEach((button: any) => {
         button.addEventListener("click", () => this._confirmDeleteRoute(button.dataset.deleteRoute));

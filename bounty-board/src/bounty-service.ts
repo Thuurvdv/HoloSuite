@@ -9,6 +9,7 @@ import {
   SETTING_POST_RESULT_CHAT,
   SETTING_PUBLIC_DOCUMENT_LINKS,
   SETTING_REMOVED_TAGS,
+  SETTING_BOARD_VISIBLE_TO_PLAYERS,
   STATUS_LABELS,
   THREAT_LEVELS
 } from "./bounty-constants";
@@ -185,6 +186,16 @@ export function isBountyVisibleToPlayers(bounty: Partial<BountyData>) {
   return normalized.published && ![BOUNTY_STATUSES.HIDDEN, BOUNTY_STATUSES.ARCHIVED].includes(normalized.status as any);
 }
 
+export function isBoardVisibleToPlayers() {
+  return game.settings.get(MODULE_ID, SETTING_BOARD_VISIBLE_TO_PLAYERS) !== false;
+}
+
+export async function setBoardVisibleToPlayers(visible: boolean) {
+  if (!requireGM(visible ? "show the bounty board" : "hide the bounty board")) return false;
+  await game.settings.set(MODULE_ID, SETTING_BOARD_VISIBLE_TO_PLAYERS, visible === true);
+  return true;
+}
+
 export function getBountyStore(): Record<string, BountyData> {
   const raw = game.settings.get(MODULE_ID, SETTING_BOUNTIES);
   if (!raw) return {};
@@ -302,6 +313,30 @@ export async function markBountyCompleted(id: string, failed = false) {
 
 export async function archiveBounty(id: string) {
   return updateBountyState(id, { status: BOUNTY_STATUSES.ARCHIVED, published: false });
+}
+
+export async function setBountiesPublished(ids: string[], published: boolean) {
+  if (!requireGM(published ? "publish bounties" : "hide bounties")) return 0;
+  const uniqueIds = [...new Set(ids)].filter(Boolean);
+  if (!uniqueIds.length) return 0;
+  const store = getBountyStore();
+  let changed = 0;
+  const timestamp = now();
+  for (const id of uniqueIds) {
+    const existing = store[id];
+    if (!existing) continue;
+    const bounty = normalizeBounty(existing);
+    if (published && bounty.status === BOUNTY_STATUSES.ARCHIVED) continue;
+    bounty.published = published;
+    if (published && bounty.status === BOUNTY_STATUSES.HIDDEN) bounty.status = BOUNTY_STATUSES.AVAILABLE;
+    if (!published) bounty.status = BOUNTY_STATUSES.HIDDEN;
+    bounty.updatedAt = timestamp;
+    store[id] = bounty;
+    changed += 1;
+  }
+  await saveBountyStore(store);
+  ui.notifications?.info?.(`${changed} bount${changed === 1 ? "y" : "ies"} ${published ? "shown to" : "hidden from"} players.`);
+  return changed;
 }
 
 export async function claimBounty(id: string, claimedBy: string) {
@@ -437,6 +472,15 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: false
+  });
+
+  game.settings.register(MODULE_ID, SETTING_BOARD_VISIBLE_TO_PLAYERS, {
+    name: "Show Bounty Board To Players",
+    hint: "Allow players to open the bounty board and see currently published contracts.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
   });
 
   game.settings.register(MODULE_ID, SETTING_REMOVED_TAGS, {

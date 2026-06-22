@@ -58,6 +58,13 @@
   margin: 4px 0 0;
 }
 
+.bb-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .bb-primary,
 .bb-terminal button,
 .bb-editor button {
@@ -76,6 +83,11 @@
 .bb-editor button:hover {
   border-color: var(--bb-neon);
   box-shadow: 0 0 12px rgba(105, 232, 255, 0.24);
+}
+
+.bb-terminal button:disabled {
+  cursor: not-allowed;
+  opacity: var(--hs-disabled-opacity);
 }
 
 .bb-filters {

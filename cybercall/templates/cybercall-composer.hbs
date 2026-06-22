@@ -68,6 +68,20 @@
     </label>
   </section>
 
+  <section class="cybercall-composer-targets">
+    <span>Recipients</span>
+    <div class="cybercall-recipient-grid">
+      {{#each players as |player|}}
+        <label>
+          <input type="checkbox" name="targetUserIds" value="{{player.id}}">
+          <span>{{player.name}}{{#unless player.active}} (offline){{/unless}}</span>
+        </label>
+      {{else}}
+        <p>No player users found.</p>
+      {{/each}}
+    </div>
+  </section>
+
   <section class="cybercall-composer-ringtone">
     <label class="cybercall-ringtone-select">
       <span>Ringtone</span>

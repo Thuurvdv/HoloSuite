@@ -58,10 +58,113 @@
               <i class="fa-solid fa-map-location-dot"></i>
               Open Map
             </button>
+            <button type="button" data-show-map="{{selectedMap.id}}">
+              <i class="fa-solid fa-satellite-dish"></i>
+              Show
+            </button>
+            <button type="button" data-action="close-player-map">
+              <i class="fa-solid fa-eye-slash"></i>
+              Close Players
+            </button>
             <button type="button" data-delete-map="{{selectedMap.id}}">
               <i class="fa-solid fa-trash"></i>
               Delete Map
             </button>
+          </div>
+        </section>
+
+        <section class="gmf-crud-editor">
+          <div class="gmf-crud-editor__bar">
+            <div>
+              <p class="gmf-kicker">Map Contents</p>
+              <h3>Systems, Routes, and Factions</h3>
+            </div>
+            <div class="gmf-actions">
+              <button type="button" data-action="create-system"><i class="fa-solid fa-plus"></i>System</button>
+              <button type="button" data-action="create-route"><i class="fa-solid fa-route"></i>Route</button>
+              <button type="button" data-action="create-faction"><i class="fa-solid fa-flag"></i>Faction</button>
+            </div>
+          </div>
+
+          <div class="gmf-crud-grid">
+            <section class="gmf-crud-section">
+              <header>
+                <h4>Systems</h4>
+                <button type="button" data-action="create-system" title="Add system"><i class="fa-solid fa-plus"></i></button>
+              </header>
+              <div class="gmf-crud-list">
+                {{#each selectedMap.systems as |system|}}
+                  <article class="gmf-crud-row">
+                    <div>
+                      <strong>{{system.name}}</strong>
+                      <span>{{system.type}} - {{system.status}} - {{system.visibility}}</span>
+                    </div>
+                    <div class="gmf-row-actions">
+                      <button type="button" data-edit-system="{{system.id}}" title="Edit system"><i class="fa-solid fa-pen"></i></button>
+                      {{#if (gmfEq system.visibility "players")}}
+                        <button type="button" data-hide-system="{{system.id}}" title="Hide from players"><i class="fa-solid fa-eye-slash"></i></button>
+                      {{else}}
+                        <button type="button" data-show-system="{{system.id}}" title="Show to players"><i class="fa-solid fa-eye"></i></button>
+                      {{/if}}
+                      <button type="button" data-delete-system="{{system.id}}" title="Delete system"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                  </article>
+                {{else}}
+                  <p class="gmf-empty-inline">No systems yet.</p>
+                {{/each}}
+              </div>
+            </section>
+
+            <section class="gmf-crud-section">
+              <header>
+                <h4>Routes</h4>
+                <button type="button" data-action="create-route" title="Add route"><i class="fa-solid fa-plus"></i></button>
+              </header>
+              <div class="gmf-crud-list">
+                {{#each selectedMap.routes as |route|}}
+                  <article class="gmf-crud-row">
+                    <div>
+                      <strong>{{route.fromName}} / {{route.toName}}</strong>
+                      <span>{{route.type}} - {{route.visibility}} - {{gmfFallback route.travelTime "unknown time"}}</span>
+                    </div>
+                    <div class="gmf-row-actions">
+                      <button type="button" data-edit-route="{{route.id}}" title="Edit route"><i class="fa-solid fa-pen"></i></button>
+                      {{#if (gmfEq route.visibility "players")}}
+                        <button type="button" data-hide-route="{{route.id}}" title="Hide from players"><i class="fa-solid fa-eye-slash"></i></button>
+                      {{else}}
+                        <button type="button" data-show-route="{{route.id}}" title="Show to players"><i class="fa-solid fa-eye"></i></button>
+                      {{/if}}
+                      <button type="button" data-delete-route="{{route.id}}" title="Delete route"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                  </article>
+                {{else}}
+                  <p class="gmf-empty-inline">No routes yet.</p>
+                {{/each}}
+              </div>
+            </section>
+
+            <section class="gmf-crud-section">
+              <header>
+                <h4>Factions</h4>
+                <button type="button" data-action="create-faction" title="Add faction"><i class="fa-solid fa-plus"></i></button>
+              </header>
+              <div class="gmf-crud-list">
+                {{#each selectedMap.factions as |faction|}}
+                  <article class="gmf-crud-row">
+                    <div>
+                      <strong><span class="gmf-color-dot" style="--gmf-faction-color: {{faction.color}};"></span>{{faction.name}}</strong>
+                      <span>{{faction.visibility}}</span>
+                    </div>
+                    <div class="gmf-row-actions">
+                      <button type="button" data-edit-faction="{{faction.id}}" title="Edit faction"><i class="fa-solid fa-pen"></i></button>
+                      <button type="button" data-delete-faction="{{faction.id}}" title="Delete faction"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                  </article>
+                {{else}}
+                  <p class="gmf-empty-inline">No factions yet.</p>
+                {{/each}}
+              </div>
+            </section>
           </div>
         </section>
       {{else}}
