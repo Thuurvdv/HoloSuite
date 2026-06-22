@@ -36,11 +36,6 @@ type BountyFilters = {
   search: string;
 };
 
-type SearchSelection = {
-  start: number;
-  end: number;
-};
-
 let boardApp: BountyBoardApp | null = null;
 
 function getBountyIdFromEvent(event: Event) {
@@ -50,9 +45,6 @@ function getBountyIdFromEvent(event: Event) {
 export class BountyBoardApp extends BaseApplication {
   filters: BountyFilters;
   expanded: Set<string>;
-  pendingFilterRender: ReturnType<typeof window.setTimeout> | null;
-  searchSelection: SearchSelection | null;
-  restoreSearchFocus: boolean;
 
   static DEFAULT_OPTIONS = {
     id: "bounty-board-app",
@@ -105,9 +97,6 @@ export class BountyBoardApp extends BaseApplication {
       search: ""
     };
     this.expanded = new Set();
-    this.pendingFilterRender = null;
-    this.searchSelection = null;
-    this.restoreSearchFocus = false;
   }
 
   async _prepareContext(options: any) {
@@ -117,7 +106,8 @@ export class BountyBoardApp extends BaseApplication {
     const bounties = getAllBounties({ includeHidden: isGM })
       .map(prepareBountyForDisplay)
       .map((bounty) => ({ ...bounty, expanded: this.expanded.has(bounty.id) }));
-    const filteredBounties = boardHiddenForPlayers ? [] : filterBounties(bounties, this.filters);
+    const structuralFilters = { ...this.filters, search: "" };
+    const filteredBounties = boardHiddenForPlayers ? [] : filterBounties(bounties, structuralFilters);
 
     return {
       isGM,
@@ -140,12 +130,15 @@ export class BountyBoardApp extends BaseApplication {
     });
     html.querySelectorAll("[data-filter]").forEach((input: HTMLInputElement | HTMLSelectElement) => {
       if (input.dataset.filter === "search") {
-        input.addEventListener("input", () => this.#updateFilter(input));
+        input.addEventListener("input", () => {
+          this.filters.search = input.value;
+          this.#applySearchFilter();
+        });
       } else {
         input.addEventListener("change", () => this.#updateFilter(input, { immediate: true }));
       }
     });
-    window.requestAnimationFrame(() => this.#restoreSearchFocus());
+    this.#applySearchFilter();
     html.querySelectorAll("[data-bounty-toggle]").forEach((button: HTMLElement) => {
       button.addEventListener("click", () => {
         const id = button.dataset.bountyToggle ?? "";
@@ -160,38 +153,29 @@ export class BountyBoardApp extends BaseApplication {
     const filterKey = input.dataset.filter as keyof BountyFilters | undefined;
     if (!filterKey) return;
     this.filters[filterKey] = input.value;
-    if (filterKey === "search") {
-      const searchInput = input as HTMLInputElement;
-      this.searchSelection = {
-        start: searchInput.selectionStart ?? input.value.length,
-        end: searchInput.selectionEnd ?? input.value.length
-      };
-      this.restoreSearchFocus = true;
-    }
-    if (this.pendingFilterRender) window.clearTimeout(this.pendingFilterRender);
-    if (!immediate && filterKey === "search") {
-      this.pendingFilterRender = window.setTimeout(() => {
-        this.pendingFilterRender = null;
-        this.render({ force: true });
-      }, 120);
-      return;
-    }
     this.render({ force: true });
   }
 
-  #restoreSearchFocus() {
-    const search = this.element?.querySelector?.("[data-filter='search']") as HTMLInputElement | null;
-    if (!search || !this.restoreSearchFocus || document.activeElement === search || this.searchSelection === null) return;
-    this.restoreSearchFocus = false;
-    search.focus({ preventScroll: true });
-    const start = Math.min(this.searchSelection.start, search.value.length);
-    const end = Math.min(this.searchSelection.end, search.value.length);
-    search.setSelectionRange?.(start, end);
+  #applySearchFilter() {
+    const search = this.filters.search.trim().toLowerCase();
+    const cards = Array.from(this.element?.querySelectorAll?.("[data-bounty-id]") ?? []) as HTMLElement[];
+    let visibleCount = 0;
+    for (const card of cards) {
+      const matches = !search || String(card.textContent ?? "").toLowerCase().includes(search);
+      card.hidden = !matches;
+      if (matches) visibleCount += 1;
+    }
+
+    const subtitle = this.element?.querySelector?.(".bb-subtitle");
+    const totalCount = Number(subtitle?.textContent?.match(/of\s+(\d+)/i)?.[1] ?? cards.length);
+    if (subtitle) subtitle.textContent = `${visibleCount} of ${totalCount} contracts displayed`;
+    this.element?.querySelectorAll?.("[data-action='showFiltered'], [data-action='hideFiltered']").forEach((button: HTMLButtonElement) => {
+      button.disabled = visibleCount === 0;
+    });
   }
 
   async close(options: any = {}) {
     if (boardApp === this) boardApp = null;
-    if (this.pendingFilterRender) window.clearTimeout(this.pendingFilterRender);
     return super.close(options);
   }
 
