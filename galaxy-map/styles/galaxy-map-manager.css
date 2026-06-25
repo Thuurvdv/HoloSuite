@@ -1,3 +1,4 @@
+.galaxy-map,
 .galaxy-map-framework {
   --gmf-bg: var(--hs-bg);
   --gmf-panel: var(--hs-panel);
@@ -13,6 +14,25 @@
   font-family: var(--hs-font-ui);
 }
 
+.galaxy-map :where(.window-content, .standard-form),
+.gmf-manager-window :where(.window-content, .standard-form) {
+  background: var(--hs-surface-bg);
+  color: var(--gmf-text);
+}
+
+.gmf-manager {
+  color: var(--gmf-text);
+}
+
+.gmf-manager :where(p, span, label, strong, h2, h3, h4, button) {
+  color: inherit;
+}
+
+.gmf-manager :where(.gmf-map-card__meta, .gmf-manager-preview__panel p, .gmf-crud-row span, .gmf-empty, .gmf-empty-inline) {
+  color: var(--gmf-muted);
+}
+
+.galaxy-map button,
 .galaxy-map-framework button {
   border: 1px solid rgba(88, 216, 255, 0.35);
   border-radius: var(--hs-radius);
@@ -23,6 +43,8 @@
   cursor: pointer;
 }
 
+.galaxy-map button:hover,
+.galaxy-map button:focus-visible,
 .galaxy-map-framework button:hover,
 .galaxy-map-framework button:focus-visible {
   border-color: rgba(125, 255, 189, 0.75);

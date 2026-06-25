@@ -4,6 +4,48 @@
   overflow: hidden;
 }
 
+.holosuite-sidebar-launcher {
+  align-items: center;
+  color: var(--hs-cyan);
+  cursor: pointer;
+  display: inline-flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.holosuite-sidebar-launcher span {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.holosuite-sidebar-launcher:hover,
+.holosuite-sidebar-launcher:focus-visible {
+  color: var(--hs-amber);
+}
+
+.holosuite-floating-launcher {
+  align-items: center;
+  background: var(--hs-control-bg);
+  border: 1px solid var(--hs-line-strong);
+  bottom: 12px;
+  box-shadow: var(--hs-shadow-panel);
+  color: var(--hs-cyan);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--hs-font-ui);
+  gap: 6px;
+  padding: 8px 10px;
+  position: fixed;
+  right: 312px;
+  text-transform: uppercase;
+  z-index: 100;
+}
+
+.holosuite-floating-launcher:hover,
+.holosuite-floating-launcher:focus-visible {
+  color: var(--hs-amber);
+}
+
 .holosuite-phone {
   color: var(--hs-text);
   font-family: var(--hs-font-ui);
@@ -155,10 +197,12 @@
   border: 1px solid var(--hs-line);
   color: var(--hs-text);
   cursor: pointer;
+  display: block !important;
   min-height: 132px;
   padding: 14px;
   position: relative;
   text-align: left;
+  white-space: normal;
 }
 
 .holosuite-app-tile:has(.holosuite-app-count) {
@@ -181,7 +225,7 @@
   align-items: center;
   border: 1px solid var(--hs-line);
   color: var(--hs-cyan);
-  display: inline-flex;
+  display: flex;
   font-size: 20px;
   height: 42px;
   justify-content: center;
@@ -194,9 +238,12 @@
   font-size: 15px;
   font-weight: 700;
   line-height: 1.15;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .holosuite-app-tile p {
+  display: block;
   color: var(--hs-muted);
   font-family: var(--hs-font-ui);
   font-size: 12px;

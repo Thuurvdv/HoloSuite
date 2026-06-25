@@ -1,12 +1,17 @@
 .signal-alignment-window .window-content {
   background: var(--hs-surface-bg, #05070d);
+  box-sizing: border-box;
   color: var(--hs-text, #d9fbff);
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
   padding: 0;
 }
 
 .signal-alignment-shell {
   position: relative;
-  min-height: 600px;
+  box-sizing: border-box;
+  min-height: max(600px, 100%);
   overflow: hidden;
   background:
     var(--hs-grid-bg, linear-gradient(rgba(83, 235, 255, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(83, 235, 255, 0.05) 1px, transparent 1px)),

@@ -12,7 +12,9 @@
 .hcci-config-window .window-content {
   background: var(--hs-surface-window);
   color: var(--hcci-text);
+  box-sizing: border-box;
   height: 100%;
+  min-height: 100%;
   overflow: hidden;
   padding-bottom: 12px;
 }
@@ -61,6 +63,7 @@
   opacity: 0.72;
 }
 
+.hcci-config-window form,
 .hcci-config {
   display: flex;
   flex-direction: column;

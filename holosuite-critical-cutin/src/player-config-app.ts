@@ -1,11 +1,12 @@
 import { MODULE_ID, MODULE_TITLE, SETTINGS, TEMPLATE_PATH, getFailureThreshold, getPlayerConfigs, getThreshold, savePlayerConfigs, setSetting, setting } from "./settings";
+import { getLegacyFormApplicationBase } from "../../shared/src/application-base";
 
 declare const foundry: any;
 declare const game: any;
 declare const ui: any;
 declare const FilePicker: any;
 
-const BaseFormApplication = (globalThis as any).FormApplication ?? (globalThis as any).foundry?.appv1?.api?.FormApplication;
+const BaseFormApplication = getLegacyFormApplicationBase();
 
 function targetKey(type: string, id: string) {
   return `${type}:${id}`;

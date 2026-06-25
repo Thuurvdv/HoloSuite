@@ -1,4 +1,5 @@
 import { escapeHtml, getActorById, getActorSkillOptions, getPlayerActorOptions, getPlayerUsers } from "../core/actor-skills";
+import { getLegacyApplicationBase } from "../../../shared/src/application-base";
 
 declare const foundry: any;
 declare const game: any;
@@ -6,7 +7,7 @@ declare const ui: any;
 
 const MODULE_ID = "holosuite-hacking";
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/hacking-launcher.html`;
-const LegacyApplication = (globalThis as any).Application ?? (globalThis as any).foundry?.appv1?.api?.Application;
+const LegacyApplication = getLegacyApplicationBase();
 
 export class HackingLauncherApp extends LegacyApplication {
   api: any;
@@ -22,9 +23,9 @@ export class HackingLauncherApp extends LegacyApplication {
       title: "HoloSuite Hacking",
       classes: ["holosuite-hacking-launcher-window"],
       popOut: true,
-      resizable: false,
+      resizable: true,
       width: 460,
-      height: "auto",
+      height: 440,
       template: TEMPLATE_PATH
     });
   }

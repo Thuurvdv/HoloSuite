@@ -40,10 +40,11 @@ export function createGalaxyMapManagerClass(deps: any) {
 
     static DEFAULT_OPTIONS = {
       id: "galaxy-map-manager",
-      classes: ["galaxy-map", "gmf-manager-window"],
+      classes: ["galaxy-map", "galaxy-map-framework", "gmf-manager-window"],
       window: {
         title: "Galaxy Map Manager",
-        icon: "fa-solid fa-satellite"
+        icon: "fa-solid fa-satellite",
+        resizable: true
       },
       position: {
         width: 980,

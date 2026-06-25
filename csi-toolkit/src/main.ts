@@ -29,6 +29,7 @@ import { MODULE_ID, MODULE_TITLE, SOCKET_NAME, TEMPLATE_PATHS } from "./constant
 import { registerSettings } from "./settings";
 import { registerHandlebarsHelpers } from "./handlebars";
 import { escapeHtml, labelize, slugify } from "./text-utils";
+import { getLegacyApplicationBase } from "../../shared/src/application-base";
 
 declare const foundry: any;
 declare const game: any;
@@ -40,7 +41,7 @@ declare const ui: any;
 (() => {
   "use strict";
 
-  const LegacyApplication = (globalThis as any).Application ?? foundry.appv1?.api?.Application;
+  const LegacyApplication = getLegacyApplicationBase();
 
   const state: any = {
     manager: null,

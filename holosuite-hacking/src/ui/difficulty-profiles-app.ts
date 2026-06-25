@@ -1,4 +1,5 @@
 import { DIFFICULTY_PROFILES } from "../core/difficulty";
+import { getLegacyFormApplicationBase } from "../../../shared/src/application-base";
 
 declare const foundry: any;
 declare const game: any;
@@ -6,7 +7,7 @@ declare const ui: any;
 
 const MODULE_ID = "holosuite-hacking";
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/difficulty-profiles.html`;
-const LegacyFormApplication = (globalThis as any).FormApplication ?? (globalThis as any).foundry?.appv1?.api?.FormApplication;
+const LegacyFormApplication = getLegacyFormApplicationBase();
 
 const PROFILE_IDS = [
   "critical_success",
@@ -170,10 +171,11 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "holosuite-hacking-difficulty-profiles",
       title: "HoloSuite Hacking Difficulty Profiles",
-      classes: ["holosuite-hacking-profile-window"],
+      classes: ["holosuite-hacking-window", "holosuite-hacking-profile-window"],
       template: TEMPLATE_PATH,
       width: 720,
-      height: "auto",
+      height: 760,
+      resizable: true,
       closeOnSubmit: true,
       submitOnChange: false,
       submitOnClose: false
@@ -257,7 +259,8 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
   }
 
   clampNumberInputs() {
-    this.element?.[0]?.querySelectorAll<HTMLInputElement>("input[type='number']").forEach((input) => clampNumberInput(input));
+    const element = this.element?.[0] as HTMLElement | undefined;
+    element?.querySelectorAll<HTMLInputElement>("input[type='number']").forEach((input) => clampNumberInput(input));
   }
 
   syncProfileConstraints(section: HTMLElement) {
