@@ -222,7 +222,10 @@ function receiveSocketMessage(message: any) {
       },
       default: "start"
     }, {
-      classes: ["holosuite-hacking-start-dialog"]
+      classes: ["holosuite-hacking-start-dialog"],
+      width: 520,
+      height: 320,
+      resizable: true
     }).render(true);
   } catch (error) {
     console.error(`${MODULE_ID} | Failed to handle hacking launch request.`, error);

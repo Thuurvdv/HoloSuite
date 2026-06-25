@@ -50,8 +50,19 @@ export function getShapeBounds(shapeData: unknown = {}): Bounds | null {
 
   const x = normalizeNullableNumber(shape.x) ?? 0;
   const y = normalizeNullableNumber(shape.y) ?? 0;
-  const width = normalizePositiveNumber(shape.width ?? shape.radiusX ?? shape.radius, 0);
-  const height = normalizePositiveNumber(shape.height ?? shape.radiusY ?? shape.radius, 0);
+  const radiusX = normalizeNullableNumber(shape.radiusX ?? shape.radius);
+  const radiusY = normalizeNullableNumber(shape.radiusY ?? shape.radius);
+  if (radiusX && radiusY) {
+    return {
+      x: x - radiusX,
+      y: y - radiusY,
+      width: radiusX * 2,
+      height: radiusY * 2
+    };
+  }
+
+  const width = normalizePositiveNumber(shape.width, 0);
+  const height = normalizePositiveNumber(shape.height, 0);
   if (!width || !height) return null;
 
   return { x, y, width, height };

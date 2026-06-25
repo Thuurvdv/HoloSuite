@@ -17,11 +17,17 @@
 
 .csi-toolkit .window-content {
   background: var(--csi-bg);
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
   padding: 0;
 }
 
 .csi-shell {
   position: relative;
+  box-sizing: border-box;
+  height: 100%;
   min-height: 100%;
   background:
     linear-gradient(rgba(255, 255, 255, 0.025) 50%, rgba(0, 0, 0, 0.04) 50%) 0 0 / 100% 4px,
@@ -55,6 +61,7 @@
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   height: 100%;
+  min-height: 0;
 }
 
 .csi-case-list {

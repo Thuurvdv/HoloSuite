@@ -1,6 +1,7 @@
 import { getDifficultyProfile } from "../../core/difficulty";
 import { postHackResultMessage } from "../../core/chat";
 import { edgeKey, generateIntrusionGraph } from "./node-intrusion-generator";
+import { getLegacyApplicationBase } from "../../../../shared/src/application-base";
 
 declare const foundry: any;
 declare const game: any;
@@ -8,7 +9,7 @@ declare const ui: any;
 
 const MODULE_ID = "holosuite-hacking";
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/node-intrusion.html`;
-const LegacyApplication = (globalThis as any).Application ?? (globalThis as any).foundry?.appv1?.api?.Application;
+const LegacyApplication = getLegacyApplicationBase();
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));

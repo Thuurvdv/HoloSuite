@@ -2,10 +2,23 @@ import {
   renderFallbackFeed,
   renderFallbackMonitor
 } from "./fallback-templates";
+import { shouldUseApplicationV2 } from "../../shared/src/application-base";
 
 declare const foundry: any;
 declare const Application: any;
 declare const $: any;
+
+function getLegacyApplicationBase(): any {
+  const appv1 = (globalThis as any).foundry?.appv1?.api ?? foundry?.appv1?.api ?? null;
+  const applications = (globalThis as any).foundry?.applications?.api ?? foundry?.applications?.api ?? null;
+  return (globalThis as any).Application
+    ?? appv1?.Application
+    ?? applications?.ApplicationV1
+    ?? (globalThis as any).FormApplication
+    ?? appv1?.FormApplication
+    ?? applications?.FormApplication
+    ?? applications?.ApplicationV2;
+}
 
 export function createSecurityCameraAppClasses(deps: any) {
   const {
@@ -25,6 +38,8 @@ export function createSecurityCameraAppClasses(deps: any) {
 
   const ApplicationV2 = foundry?.applications?.api?.ApplicationV2;
   const HandlebarsApplicationMixin = foundry?.applications?.api?.HandlebarsApplicationMixin;
+  const LegacyApplication = getLegacyApplicationBase();
+  const useApplicationV2 = shouldUseApplicationV2();
 
   function isObjectUrl(value: string) {
     return typeof value === "string" && value.startsWith("blob:");
@@ -44,7 +59,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     app.liveFrameObjectUrl = isObjectUrl(frame) ? frame : null;
   }
 
-  class SecurityMonitorV1 extends Application {
+  class SecurityMonitorV1 extends LegacyApplication {
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         id: "security-camera-monitor",
@@ -82,7 +97,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     }
   }
 
-  class CameraFeedV1 extends Application {
+  class CameraFeedV1 extends LegacyApplication {
     camera: any;
     liveFrame: string;
     liveFrameObjectUrl: string | null;
@@ -162,7 +177,7 @@ export function createSecurityCameraAppClasses(deps: any) {
   }
 
   function createSecurityMonitorV2Class() {
-    if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
+    if (!useApplicationV2 || !ApplicationV2 || !HandlebarsApplicationMixin) return null;
 
     return class SecurityMonitorV2 extends HandlebarsApplicationMixin(ApplicationV2) {
       static DEFAULT_OPTIONS = {
@@ -216,7 +231,7 @@ export function createSecurityCameraAppClasses(deps: any) {
   }
 
   function createCameraFeedV2Class() {
-    if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
+    if (!useApplicationV2 || !ApplicationV2 || !HandlebarsApplicationMixin) return null;
 
     return class CameraFeedV2 extends HandlebarsApplicationMixin(ApplicationV2) {
       camera: any;

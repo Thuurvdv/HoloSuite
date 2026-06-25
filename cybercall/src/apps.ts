@@ -4,10 +4,23 @@ import {
   renderFallbackTemplate
 } from "./fallback-templates";
 import { normalizeCallData } from "./call-model";
+import { shouldUseApplicationV2 } from "../../shared/src/application-base";
 
 declare const foundry: any;
 declare const Application: any;
 declare const $: any;
+
+function getLegacyApplicationBase(): any {
+  const appv1 = (globalThis as any).foundry?.appv1?.api ?? foundry?.appv1?.api ?? null;
+  const applications = (globalThis as any).foundry?.applications?.api ?? foundry?.applications?.api ?? null;
+  return (globalThis as any).Application
+    ?? appv1?.Application
+    ?? applications?.ApplicationV1
+    ?? (globalThis as any).FormApplication
+    ?? appv1?.FormApplication
+    ?? applications?.FormApplication
+    ?? applications?.ApplicationV2;
+}
 
 export function createCyberCallAppClasses(deps: any) {
   const {
@@ -36,8 +49,10 @@ export function createCyberCallAppClasses(deps: any) {
 
   const ApplicationV2 = foundry?.applications?.api?.ApplicationV2;
   const HandlebarsApplicationMixin = foundry?.applications?.api?.HandlebarsApplicationMixin;
+  const LegacyApplication = getLegacyApplicationBase();
+  const useApplicationV2 = shouldUseApplicationV2();
 
-  class CyberCallApplicationV1 extends Application {
+  class CyberCallApplicationV1 extends LegacyApplication {
     callData: any;
 
     constructor(callData: any, options: any = {}) {
@@ -85,7 +100,7 @@ export function createCyberCallAppClasses(deps: any) {
     }
   }
 
-  class CyberCallComposerV1 extends Application {
+  class CyberCallComposerV1 extends LegacyApplication {
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         id: "cybercall-composer",
@@ -128,7 +143,7 @@ export function createCyberCallAppClasses(deps: any) {
     }
   }
 
-  class CyberCallContactsV1 extends Application {
+  class CyberCallContactsV1 extends LegacyApplication {
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         id: "cybercall-contacts",
@@ -181,7 +196,7 @@ export function createCyberCallAppClasses(deps: any) {
   }
 
   function createApplicationV2Class() {
-    if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
+    if (!useApplicationV2 || !ApplicationV2 || !HandlebarsApplicationMixin) return null;
 
     return class CyberCallApplicationV2 extends HandlebarsApplicationMixin(ApplicationV2) {
       callData: any;
@@ -243,7 +258,7 @@ export function createCyberCallAppClasses(deps: any) {
   }
 
   function createComposerV2Class() {
-    if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
+    if (!useApplicationV2 || !ApplicationV2 || !HandlebarsApplicationMixin) return null;
 
     return class CyberCallComposerV2 extends HandlebarsApplicationMixin(ApplicationV2) {
       static DEFAULT_OPTIONS = {
@@ -300,7 +315,7 @@ export function createCyberCallAppClasses(deps: any) {
   }
 
   function createContactsV2Class() {
-    if (!ApplicationV2 || !HandlebarsApplicationMixin) return null;
+    if (!useApplicationV2 || !ApplicationV2 || !HandlebarsApplicationMixin) return null;
 
     return class CyberCallContactsV2 extends HandlebarsApplicationMixin(ApplicationV2) {
       static DEFAULT_OPTIONS = {

@@ -21,8 +21,8 @@
     "prebuild": "npm run sync:styles",
     "build": "npm run build --workspaces --if-present",
     "check": "tsc --noEmit",
-    "pretest": "tsc security-cameras/src/camera-model.ts security-cameras/src/region-geometry.ts security-cameras/src/frame-crop.ts security-cameras/src/token-projection.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests --skipLibCheck",
-    "test": "node --test security-cameras/src/*.test.mjs",
+    "pretest": "tsc security-cameras/src/camera-model.ts security-cameras/src/region-geometry.ts security-cameras/src/frame-crop.ts security-cameras/src/token-projection.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests --skipLibCheck && tsc holosuite-core/src/scene-controls.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests/core --skipLibCheck",
+    "test": "node --test security-cameras/src/*.test.mjs holosuite-core/src/*.test.mjs",
     "verify": "npm run audit && npm run check && npm run test && npm run build"
   },
   "devDependencies": {

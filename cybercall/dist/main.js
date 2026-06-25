@@ -1,11 +1,11 @@
-var Pe = Object.defineProperty;
-var Le = (e, t, a) => t in e ? Pe(e, t, { enumerable: !0, configurable: !0, writable: !0, value: a }) : e[t] = a;
-var S = (e, t, a) => Le(e, typeof t != "symbol" ? t + "" : t, a);
-function Oe(e, t) {
+var Oe = Object.defineProperty;
+var Ue = (e, t, a) => t in e ? Oe(e, t, { enumerable: !0, configurable: !0, writable: !0, value: a }) : e[t] = a;
+var S = (e, t, a) => Ue(e, typeof t != "symbol" ? t + "" : t, a);
+function Me(e, t) {
   return e.image ? `<img src="${t(e.image)}" alt="${t(e.callerName)}">` : `<div class="cybercall-initials" aria-hidden="true">${t(e.initials)}</div>`;
 }
-function se(e, t) {
-  const a = `--cybercall-signal: ${e.signal}%;`, n = e.fullscreen ? "cybercall-broadcast" : "", r = e.ringing ? "cybercall-ringing-panel" : "", l = e.accepted ? "cybercall-connected-panel" : "", i = e.showBroadcast ? '<button type="button" data-cybercall-action="broadcast">Broadcast</button>' : "", o = e.accepted ? "" : `
+function ge(e, t) {
+  const a = `--cybercall-signal: ${e.signal}%;`, n = e.fullscreen ? "cybercall-broadcast" : "", r = e.ringing ? "cybercall-ringing-panel" : "", i = e.accepted ? "cybercall-connected-panel" : "", l = e.showBroadcast ? '<button type="button" data-cybercall-action="broadcast">Broadcast</button>' : "", o = e.accepted ? "" : `
       <header class="cybercall-header">
         <div>
           <div class="cybercall-kicker">${t(e.kicker)}</div>
@@ -20,15 +20,15 @@ function se(e, t) {
     `, s = e.accepted ? "" : `<blockquote>${t(e.message)}</blockquote>`, m = e.accepted || e.outgoing ? '<button type="button" data-cybercall-action="end">End Call</button>' : `
         ${e.canAccept ? '<button type="button" data-cybercall-action="accept">Accept</button>' : ""}
         <button type="button" data-cybercall-action="decline">Decline</button>
-        ${i}
+        ${l}
       `;
   return `
-    <div class="cybercall-panel cybercall-${e.variant} ${n} ${r} ${l}" style="${a}">
+    <div class="cybercall-panel cybercall-${e.variant} ${n} ${r} ${i}" style="${a}">
       <div class="cybercall-static" aria-hidden="true"></div>
       <div class="cybercall-reticle" aria-hidden="true"></div>
       ${o}
       <main class="cybercall-body">
-        <div class="cybercall-portrait">${Oe(e, t)}</div>
+        <div class="cybercall-portrait">${Me(e, t)}</div>
         ${s}
       </main>
       <footer class="cybercall-actions">
@@ -37,7 +37,7 @@ function se(e, t) {
     </div>
   `;
 }
-function ue(e, t) {
+function de(e, t) {
   const a = e.call;
   return `
     <form class="cybercall-composer" data-cybercall-composer>
@@ -79,8 +79,8 @@ function ue(e, t) {
     </form>
   `;
 }
-function ge(e, t) {
-  const a = (i, o) => i.length ? i.map((s) => `
+function me(e, t) {
+  const a = (l, o) => l.length ? l.map((s) => `
         <li>
           <div class="cybercall-contact-avatar">
             ${s.image ? `<img src="${t(s.image)}" alt="">` : `<span>${t(s.initials)}</span>`}
@@ -94,7 +94,7 @@ function ge(e, t) {
             <button type="button" data-cybercall-contact-action="remove" data-contact-scope="${o}" data-contact-id="${t(s.id)}">Remove</button>
           </div>
         </li>
-      `).join("") : '<li class="cybercall-contacts-empty">No contacts stored.</li>', n = e.activeTab !== "group", r = e.activeTab === "group", l = e.canEditContactImages ? '<label>Picture <input type="text" name="image" placeholder="icons/..."></label>' : "";
+      `).join("") : '<li class="cybercall-contacts-empty">No contacts stored.</li>', n = e.activeTab !== "group", r = e.activeTab === "group", i = e.canEditContactImages ? '<label>Picture <input type="text" name="image" placeholder="icons/..."></label>' : "";
   return `
     <section class="cybercall-contacts">
       <header class="cybercall-contacts-header">
@@ -117,7 +117,7 @@ function ge(e, t) {
         <input type="hidden" name="scope" value="${t(e.activeTab)}">
         <label>Name <input type="text" name="name" required></label>
         <label>Number <input type="text" name="number" required></label>
-        ${l}
+        ${i}
         <button type="submit">Add Contact</button>
       </form>
       <footer class="cybercall-contacts-footer">
@@ -125,7 +125,7 @@ function ge(e, t) {
           <span>Ringtone</span>
           <select data-cybercall-ringtone>
             ${(e.ringtoneChoices ?? []).map(
-    (i) => `<option value="${t(i.value)}" ${i.selected ? "selected" : ""}>${t(i.label)}</option>`
+    (l) => `<option value="${t(l.value)}" ${l.selected ? "selected" : ""}>${t(l.label)}</option>`
   ).join("")}
           </select>
         </label>
@@ -147,33 +147,33 @@ const w = {
   canDecline: !0,
   allowBroadcast: !0,
   outgoing: !1
-}, Me = /* @__PURE__ */ new Set(["standard", "emergency", "corrupted"]);
-function me(e) {
+}, Ge = /* @__PURE__ */ new Set(["standard", "emergency", "corrupted"]);
+function be(e) {
   const t = Number(e);
   return Number.isNaN(t) ? w.signal : Math.min(100, Math.max(0, Math.round(t)));
 }
-function pe(e) {
+function ye(e) {
   return String(e).split(/\s+/).filter(Boolean).slice(0, 2).map((t) => {
     var a;
     return (a = t[0]) == null ? void 0 : a.toUpperCase();
   }).join("") || "?";
 }
-function J() {
+function X() {
   var e;
   return (e = foundry == null ? void 0 : foundry.utils) != null && e.randomID ? foundry.utils.randomID() : crypto != null && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 function L(e = {}) {
   var r;
-  const t = Array.isArray(e.targetUserIds) ? e.targetUserIds.map((l) => String(l)).filter(Boolean) : [], a = Array.isArray(e.targetUserNames) ? e.targetUserNames.map((l) => String(l)).filter(Boolean) : [], n = {
+  const t = Array.isArray(e.targetUserIds) ? e.targetUserIds.map((i) => String(i)).filter(Boolean) : [], a = Array.isArray(e.targetUserNames) ? e.targetUserNames.map((i) => String(i)).filter(Boolean) : [], n = {
     ...w,
     ...e,
-    id: String(e.id ?? J()),
+    id: String(e.id ?? X()),
     callerName: String(e.callerName ?? w.callerName),
     subtitle: String(e.subtitle ?? w.subtitle),
     image: String(e.image ?? w.image),
     message: String(e.message ?? w.message),
-    signal: me(e.signal ?? w.signal),
-    variant: Me.has(e.variant) ? e.variant : w.variant,
+    signal: be(e.signal ?? w.signal),
+    variant: Ge.has(e.variant) ? e.variant : w.variant,
     fullscreen: !!(e.fullscreen ?? w.fullscreen),
     ringing: e.ringing !== !1 && e.accepted !== !0,
     accepted: e.accepted === !0,
@@ -186,32 +186,46 @@ function L(e = {}) {
     targetUserIds: t,
     targetUserNames: a
   };
-  return n.initials = pe(n.callerName), n.showBroadcast = !!((r = game == null ? void 0 : game.user) != null && r.isGM && n.allowBroadcast), n.isStandard = n.variant === "standard", n.isEmergency = n.variant === "emergency", n.isCorrupted = n.variant === "corrupted", n.isIncoming = !n.accepted, n.hasTargets = n.targetUserIds.length > 0, n.recipientLabel = n.hasTargets ? n.targetUserNames.join(", ") : "All players", n.directionLabel = n.outgoing ? `Calling ${n.recipientLabel}` : `From ${n.callerName}`, n.kicker = n.outgoing ? "Outgoing CyberCall" : n.fullscreen ? "System-wide Broadcast" : "Incoming CyberCall", n;
+  return n.initials = ye(n.callerName), n.showBroadcast = !!((r = game == null ? void 0 : game.user) != null && r.isGM && n.allowBroadcast), n.isStandard = n.variant === "standard", n.isEmergency = n.variant === "emergency", n.isCorrupted = n.variant === "corrupted", n.isIncoming = !n.accepted, n.hasTargets = n.targetUserIds.length > 0, n.recipientLabel = n.hasTargets ? n.targetUserNames.join(", ") : "All players", n.directionLabel = n.outgoing ? `Calling ${n.recipientLabel}` : `From ${n.callerName}`, n.kicker = n.outgoing ? "Outgoing CyberCall" : n.fullscreen ? "System-wide Broadcast" : "Incoming CyberCall", n;
 }
-function D(e = {}) {
+function T(e = {}) {
   return {
-    id: String(e.id ?? J()),
+    id: String(e.id ?? X()),
     name: String(e.name ?? "").trim(),
     number: String(e.number ?? "").trim(),
     image: String(e.image ?? e.img ?? "").trim(),
-    initials: pe(e.name)
+    initials: ye(e.name)
   };
 }
-function Ue(e) {
-  var re, ce, le, ie;
+function _e() {
+  var t, a, n;
+  const e = Number(((a = (t = globalThis.game) == null ? void 0 : t.release) == null ? void 0 : a.generation) ?? ((n = game == null ? void 0 : game.release) == null ? void 0 : n.generation));
+  return Number.isFinite(e) ? e : null;
+}
+function Fe() {
+  const e = _e();
+  return e === null || e >= 13;
+}
+function xe() {
+  var a, n, r, i, l, o;
+  const e = ((n = (a = globalThis.foundry) == null ? void 0 : a.appv1) == null ? void 0 : n.api) ?? ((r = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : r.api) ?? null, t = ((l = (i = globalThis.foundry) == null ? void 0 : i.applications) == null ? void 0 : l.api) ?? ((o = foundry == null ? void 0 : foundry.applications) == null ? void 0 : o.api) ?? null;
+  return globalThis.Application ?? (e == null ? void 0 : e.Application) ?? (t == null ? void 0 : t.ApplicationV1) ?? globalThis.FormApplication ?? (e == null ? void 0 : e.FormApplication) ?? (t == null ? void 0 : t.FormApplication) ?? (t == null ? void 0 : t.ApplicationV2);
+}
+function Be(e) {
+  var ie, le, oe, se;
   const {
     moduleId: t,
     templatePath: a,
     composerTemplatePath: n,
     contactsTemplatePath: r,
-    escapeHTML: l,
-    getDefaultComposerData: i,
+    escapeHTML: i,
+    getDefaultComposerData: l,
     getActorChoices: o,
     getPlayerChoices: s,
     getContacts: m,
     getGroupContacts: p,
     getRingtoneChoices: C,
-    getSoundPath: T,
+    getSoundPath: D,
     getActiveContactsTab: F,
     canEditContactImages: x,
     bindCallControls: k,
@@ -221,8 +235,8 @@ function Ue(e) {
     clearActiveCall: V,
     clearActiveComposer: E,
     clearActiveContacts: z
-  } = e, O = (ce = (re = foundry == null ? void 0 : foundry.applications) == null ? void 0 : re.api) == null ? void 0 : ce.ApplicationV2, M = (ie = (le = foundry == null ? void 0 : foundry.applications) == null ? void 0 : le.api) == null ? void 0 : ie.HandlebarsApplicationMixin;
-  class Te extends Application {
+  } = e, O = (le = (ie = foundry == null ? void 0 : foundry.applications) == null ? void 0 : ie.api) == null ? void 0 : le.ApplicationV2, U = (se = (oe = foundry == null ? void 0 : foundry.applications) == null ? void 0 : oe.api) == null ? void 0 : se.HandlebarsApplicationMixin, K = xe(), J = Fe();
+  class Ne extends K {
     constructor(u, d = {}) {
       super(d);
       S(this, "callData");
@@ -249,7 +263,7 @@ function Ue(e) {
       try {
         return await super._renderInner(u);
       } catch (d) {
-        return console.warn(`${t} | Template render failed, using inline fallback.`, d), $(se(this.callData, l));
+        return console.warn(`${t} | Template render failed, using inline fallback.`, d), $(ge(this.callData, i));
       }
     }
     activateListeners(u) {
@@ -259,7 +273,7 @@ function Ue(e) {
       return V(this), P(), super.close(u);
     }
   }
-  class Ee extends Application {
+  class Ie extends K {
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         id: "cybercall-composer",
@@ -274,7 +288,7 @@ function Ue(e) {
     }
     getData() {
       return {
-        call: i(),
+        call: l(),
         actors: o(),
         players: s(),
         ringtoneChoices: C()
@@ -284,7 +298,7 @@ function Ue(e) {
       try {
         return await super._renderInner(b);
       } catch (u) {
-        return console.warn(`${t} | Composer template render failed, using inline fallback.`, u), $(ue(b, l));
+        return console.warn(`${t} | Composer template render failed, using inline fallback.`, u), $(de(b, i));
       }
     }
     activateListeners(b) {
@@ -294,7 +308,7 @@ function Ue(e) {
       return E(this), super.close(b);
     }
   }
-  class Ne extends Application {
+  class Re extends K {
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         id: "cybercall-contacts",
@@ -319,14 +333,14 @@ function Ue(e) {
         isGroupTab: d === "group",
         canEditContactImages: x(),
         ringtoneChoices: C(),
-        currentRingtone: T()
+        currentRingtone: D()
       };
     }
     async _renderInner(b) {
       try {
         return await super._renderInner(b);
       } catch (u) {
-        return console.warn(`${t} | Contacts template render failed, using inline fallback.`, u), $(ge(b, l));
+        return console.warn(`${t} | Contacts template render failed, using inline fallback.`, u), $(me(b, i));
       }
     }
     activateListeners(b) {
@@ -336,9 +350,9 @@ function Ue(e) {
       return z(this), super.close(b);
     }
   }
-  function Ie() {
+  function ke() {
     var f;
-    return !O || !M ? null : (f = class extends M(O) {
+    return !J || !O || !U ? null : (f = class extends U(O) {
       constructor(d, y = {}) {
         super(y);
         S(this, "callData");
@@ -355,8 +369,8 @@ function Ue(e) {
           return await super._renderHTML(d, y);
         } catch (v) {
           console.warn(`${t} | Template render failed, using inline fallback.`, v);
-          const oe = document.createElement("template");
-          return oe.innerHTML = se(this.callData, l).trim(), oe.content;
+          const ue = document.createElement("template");
+          return ue.innerHTML = ge(this.callData, i).trim(), ue.content;
         }
       }
       _onRender(d, y) {
@@ -384,13 +398,13 @@ function Ue(e) {
       }
     }), f);
   }
-  function Re() {
+  function Pe() {
     var f;
-    return !O || !M ? null : (f = class extends M(O) {
+    return !J || !O || !U ? null : (f = class extends U(O) {
       async _prepareContext(u) {
         return {
           ...await super._prepareContext(u),
-          call: i(),
+          call: l(),
           actors: o(),
           players: s(),
           ringtoneChoices: C()
@@ -402,7 +416,7 @@ function Ue(e) {
         } catch (y) {
           console.warn(`${t} | Composer template render failed, using inline fallback.`, y);
           const v = document.createElement("template");
-          return v.innerHTML = ue(u, l).trim(), v.content;
+          return v.innerHTML = de(u, i).trim(), v.content;
         }
       }
       _onRender(u, d) {
@@ -430,9 +444,9 @@ function Ue(e) {
       }
     }), f);
   }
-  function ke() {
+  function Le() {
     var f;
-    return !O || !M ? null : (f = class extends M(O) {
+    return !J || !O || !U ? null : (f = class extends U(O) {
       async _prepareContext(u) {
         const d = m(), y = p(), v = F();
         return {
@@ -446,7 +460,7 @@ function Ue(e) {
           isGroupTab: v === "group",
           canEditContactImages: x(),
           ringtoneChoices: C(),
-          currentRingtone: T()
+          currentRingtone: D()
         };
       }
       async _renderHTML(u, d) {
@@ -455,7 +469,7 @@ function Ue(e) {
         } catch (y) {
           console.warn(`${t} | Contacts template render failed, using inline fallback.`, y);
           const v = document.createElement("template");
-          return v.innerHTML = ge(u, l).trim(), v.content;
+          return v.innerHTML = me(u, i).trim(), v.content;
         }
       }
       _onRender(u, d) {
@@ -484,38 +498,38 @@ function Ue(e) {
     }), f);
   }
   return {
-    CyberCallApplication: Ie() ?? Te,
-    CyberCallComposer: Re() ?? Ee,
-    CyberCallContacts: ke() ?? Ne
+    CyberCallApplication: ke() ?? Ne,
+    CyberCallComposer: Pe() ?? Ie,
+    CyberCallContacts: Le() ?? Re
   };
 }
-const g = "cybercall", R = `module.${g}`, Ge = `modules/${g}/templates/cybercall.hbs`, _e = `modules/${g}/templates/cybercall-composer.hbs`, Fe = `modules/${g}/templates/cybercall-contacts.hbs`, be = {
+const g = "cybercall", R = `module.${g}`, qe = `modules/${g}/templates/cybercall.hbs`, Ve = `modules/${g}/templates/cybercall-composer.hbs`, je = `modules/${g}/templates/cybercall-contacts.hbs`, fe = {
   "": "Silent",
   [`modules/${g}/audio/Ringtone1.ogg`]: "Ringtone 1",
   [`modules/${g}/audio/Ringtone2.ogg`]: "Ringtone 2",
   [`modules/${g}/audio/Ringtone3.ogg`]: "Ringtone 3"
 };
-function xe(e) {
+function ze(e) {
   var a;
   if ((a = foundry == null ? void 0 : foundry.utils) != null && a.escapeHTML) return foundry.utils.escapeHTML(String(e));
   const t = document.createElement("div");
   return t.innerText = String(e), t.innerHTML;
 }
-let c = null, A = null, h = null, U = "personal", N = null, G = null;
-function Be() {
-  var e, t, a, n, r, l, i, o;
+let c = null, A = null, h = null, M = "personal", N = null, G = null;
+function He() {
+  var e, t, a, n, r, i, l, o;
   return L({
     callerName: ((e = c == null ? void 0 : c.callData) == null ? void 0 : e.callerName) ?? w.callerName,
     subtitle: ((t = c == null ? void 0 : c.callData) == null ? void 0 : t.subtitle) ?? w.subtitle,
     image: ((a = c == null ? void 0 : c.callData) == null ? void 0 : a.image) ?? "",
     message: ((n = c == null ? void 0 : c.callData) == null ? void 0 : n.message) ?? w.message,
     signal: ((r = c == null ? void 0 : c.callData) == null ? void 0 : r.signal) ?? game.settings.get(g, "defaultSignal"),
-    variant: ((l = c == null ? void 0 : c.callData) == null ? void 0 : l.variant) ?? "standard",
-    fullscreen: ((i = c == null ? void 0 : c.callData) == null ? void 0 : i.fullscreen) ?? !1,
+    variant: ((i = c == null ? void 0 : c.callData) == null ? void 0 : i.variant) ?? "standard",
+    fullscreen: ((l = c == null ? void 0 : c.callData) == null ? void 0 : l.fullscreen) ?? !1,
     ringing: ((o = c == null ? void 0 : c.callData) == null ? void 0 : o.ringing) ?? !0
   });
 }
-function qe() {
+function We() {
   var e;
   return (((e = game.actors) == null ? void 0 : e.contents) ?? []).map((t) => ({
     id: t.id,
@@ -523,7 +537,7 @@ function qe() {
     img: t.img ?? ""
   })).sort((t, a) => t.name.localeCompare(a.name));
 }
-function Ve() {
+function Ye() {
   var e;
   return (((e = game.users) == null ? void 0 : e.contents) ?? []).filter((t) => !t.isGM).map((t) => ({
     id: t.id,
@@ -535,45 +549,45 @@ function W() {
   var e, t;
   return String(((e = game.world) == null ? void 0 : e.id) ?? ((t = game.world) == null ? void 0 : t.title) ?? "default");
 }
-function ye() {
+function Ce() {
   const e = game.settings.get(g, "contacts");
   return Array.isArray(e) ? { [W()]: e } : !e || typeof e != "object" ? {} : e;
 }
 function Y() {
-  const e = ye()[W()];
-  return Array.isArray(e) ? e.map(D).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name)) : [];
+  const e = Ce()[W()];
+  return Array.isArray(e) ? e.map(T).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name)) : [];
 }
 function _() {
   if (Array.isArray(G))
-    return G.map(D).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name));
+    return G.map(T).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name));
   const e = game.settings.get(g, "groupContacts");
-  return Array.isArray(e) ? e.map(D).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name)) : [];
+  return Array.isArray(e) ? e.map(T).filter((t) => t.name && t.number).sort((t, a) => t.name.localeCompare(a.name)) : [];
 }
-async function fe(e) {
+async function he(e) {
   await game.settings.set(g, "contacts", {
-    ...ye(),
-    [W()]: e.map(D)
+    ...Ce(),
+    [W()]: e.map(T)
   });
 }
 async function H(e) {
-  G = e.map(D), await game.settings.set(g, "groupContacts", G), game.socket.emit(R, {
+  G = e.map(T), await game.settings.set(g, "groupContacts", G), game.socket.emit(R, {
     action: "groupContactsChanged",
     contacts: G
   });
 }
-async function je(e, t, a = "personal", n = "") {
-  var i, o, s, m, p, C;
-  const r = D({
+async function Ke(e, t, a = "personal", n = "") {
+  var l, o, s, m, p, C;
+  const r = T({
     name: e,
     number: t,
-    image: Ce() ? n : ""
+    image: ve() ? n : ""
   });
   if (!r.name || !r.number) {
-    (o = (i = ui.notifications) == null ? void 0 : i.warn) == null || o.call(i, "Contact name and number are required.");
+    (o = (l = ui.notifications) == null ? void 0 : l.warn) == null || o.call(l, "Contact name and number are required.");
     return;
   }
   if (a === "group" && !game.user.isGM) {
-    if (!Q()) {
+    if (!Z()) {
       (m = (s = ui.notifications) == null ? void 0 : s.warn) == null || m.call(s, "A GM must be connected to update group contacts.");
       return;
     }
@@ -583,33 +597,33 @@ async function je(e, t, a = "personal", n = "") {
     }), (C = (p = ui.notifications) == null ? void 0 : p.info) == null || C.call(p, "Group contact update sent to the GM.");
     return;
   }
-  const l = a === "group" ? _() : Y();
-  l.push(r), a === "group" ? await H(l) : await fe(l), await j();
+  const i = a === "group" ? _() : Y();
+  i.push(r), a === "group" ? await H(i) : await he(i), await j();
 }
-async function ze(e, t = "personal") {
-  var a, n, r, l;
+async function Je(e, t = "personal") {
+  var a, n, r, i;
   if (t === "group") {
     if (!game.user.isGM) {
-      if (!Q()) {
+      if (!Z()) {
         (n = (a = ui.notifications) == null ? void 0 : a.warn) == null || n.call(a, "A GM must be connected to update group contacts.");
         return;
       }
       game.socket.emit(R, {
         action: "groupContactRemove",
         contactId: e
-      }), (l = (r = ui.notifications) == null ? void 0 : r.info) == null || l.call(r, "Group contact removal sent to the GM.");
+      }), (i = (r = ui.notifications) == null ? void 0 : r.info) == null || i.call(r, "Group contact removal sent to the GM.");
       return;
     }
-    await H(_().filter((i) => i.id !== e));
+    await H(_().filter((l) => l.id !== e));
   } else
-    await fe(Y().filter((i) => i.id !== e));
+    await he(Y().filter((l) => l.id !== e));
   await j();
 }
-function Q() {
+function Z() {
   var e;
   return ((e = game.users) == null ? void 0 : e.some((t) => t.isGM && t.active)) ?? !1;
 }
-function X(e = game.user) {
+function ee(e = game.user) {
   if (e != null && e.isGM) return !0;
   let t = CONST.USER_ROLES.PLAYER;
   try {
@@ -619,43 +633,43 @@ function X(e = game.user) {
   }
   return Number((e == null ? void 0 : e.role) ?? 0) >= Number(t);
 }
-function Ce(e = game.user) {
+function ve(e = game.user) {
   return !!(e != null && e.isGM);
 }
-function Z(e, t = null) {
+function te(e, t = null) {
   var a;
   return t != null && t[0] ? t[0] : t instanceof HTMLElement ? t : (a = e.element) != null && a[0] ? e.element[0] : e.element ?? null;
 }
-function He(e, t = null) {
-  const a = Z(e, t);
+function Qe(e, t = null) {
+  const a = te(e, t);
   a && (a.classList.toggle("cybercall-fullscreen", e.callData.fullscreen), a.classList.toggle("cybercall-ringing", e.callData.ringing && !e.callData.accepted), a.classList.toggle("cybercall-connected", e.callData.accepted), a.querySelectorAll("[data-cybercall-action]").forEach((n) => {
     n.addEventListener("click", (r) => {
-      const l = r.currentTarget.dataset.cybercallAction;
-      if (l === "accept") {
-        at(e.callData.id);
+      const i = r.currentTarget.dataset.cybercallAction;
+      if (i === "accept") {
+        lt(e.callData.id);
         return;
       }
-      if (l === "broadcast") {
-        te({
+      if (i === "broadcast") {
+        ne({
           ...e.callData,
           fullscreen: !0,
           ringing: !0
         });
         return;
       }
-      (l === "decline" || l === "end") && we(e.callData.id);
+      (i === "decline" || i === "end") && Se(e.callData.id);
     });
   }));
 }
-function We(e) {
+function Xe(e) {
   var t;
   return (t = e == null ? void 0 : e.querySelector) == null ? void 0 : t.call(e, "form[data-cybercall-composer]");
 }
-function de(e) {
+function pe(e) {
   var s, m;
-  const t = new FormData(e), a = (s = game.actors) == null ? void 0 : s.get(t.get("actorId")), n = String(t.get("image") ?? "").trim() || (a == null ? void 0 : a.img) || "", r = String(t.get("callerName") ?? "").trim() || (a == null ? void 0 : a.name) || "UNKNOWN CALLER", l = t.getAll("targetUserIds").map((p) => String(p)).filter(Boolean), i = new Map((((m = game.users) == null ? void 0 : m.contents) ?? []).map((p) => [p.id, p])), o = l.map((p) => {
+  const t = new FormData(e), a = (s = game.actors) == null ? void 0 : s.get(t.get("actorId")), n = String(t.get("image") ?? "").trim() || (a == null ? void 0 : a.img) || "", r = String(t.get("callerName") ?? "").trim() || (a == null ? void 0 : a.name) || "UNKNOWN CALLER", i = t.getAll("targetUserIds").map((p) => String(p)).filter(Boolean), l = new Map((((m = game.users) == null ? void 0 : m.contents) ?? []).map((p) => [p.id, p])), o = i.map((p) => {
     var C;
-    return ((C = i.get(p)) == null ? void 0 : C.name) ?? p;
+    return ((C = l.get(p)) == null ? void 0 : C.name) ?? p;
   });
   return L({
     callerName: r,
@@ -666,47 +680,47 @@ function de(e) {
     variant: String(t.get("variant") ?? w.variant),
     fullscreen: t.get("fullscreen") === "on",
     ringing: t.get("ringing") === "on",
-    targetUserIds: l,
+    targetUserIds: i,
     targetUserNames: o
   });
 }
-function K(e) {
+function Q(e) {
   var n, r;
   const t = (n = e == null ? void 0 : e.elements) == null ? void 0 : n.signal, a = (r = e == null ? void 0 : e.querySelector) == null ? void 0 : r.call(e, "[data-cybercall-signal-output]");
-  !t || !a || (a.textContent = `${me(t.value)}%`);
+  !t || !a || (a.textContent = `${be(t.value)}%`);
 }
-function Ye(e, t = null) {
-  var l, i;
-  const a = Z(e, t), n = We(a);
+function Ze(e, t = null) {
+  var i, l;
+  const a = te(e, t), n = Xe(a);
   if (!a || !n) return;
-  K(n);
+  Q(n);
   const r = a.querySelector("[data-cybercall-ringtone]");
   r && r.addEventListener("change", async (o) => {
     await game.settings.set(g, "ringSound", o.currentTarget.value);
-  }), (l = n.elements.signal) == null || l.addEventListener("input", () => K(n)), (i = n.elements.actorId) == null || i.addEventListener("change", () => {
+  }), (i = n.elements.signal) == null || i.addEventListener("input", () => Q(n)), (l = n.elements.actorId) == null || l.addEventListener("change", () => {
     var s;
     const o = (s = game.actors) == null ? void 0 : s.get(n.elements.actorId.value);
     o && (n.elements.callerName.value = o.name, n.elements.image.value = o.img ?? "");
   }), n.addEventListener("submit", (o) => {
-    o.preventDefault(), I(de(n));
+    o.preventDefault(), I(pe(n));
   }), a.querySelectorAll("[data-cybercall-compose-action]").forEach((o) => {
     o.addEventListener("click", async (s) => {
-      var C, T, F, x, k, B, q;
-      const m = s.currentTarget.dataset.cybercallComposeAction, p = de(n);
+      var C, D, F, x, k, B, q;
+      const m = s.currentTarget.dataset.cybercallComposeAction, p = pe(n);
       if (m === "preview") {
         await I(p);
         return;
       }
       if (m === "broadcast") {
-        await te(p);
+        await ne(p);
         return;
       }
       if (m === "close-active") {
-        we((C = c == null ? void 0 : c.callData) == null ? void 0 : C.id);
+        Se((C = c == null ? void 0 : c.callData) == null ? void 0 : C.id);
         return;
       }
       if (m === "browse-image") {
-        const P = n.elements.image, V = globalThis.FilePicker ?? ((x = (F = (T = globalThis.foundry) == null ? void 0 : T.applications) == null ? void 0 : F.apps) == null ? void 0 : x.FilePicker);
+        const P = n.elements.image, V = globalThis.FilePicker ?? ((x = (F = (D = globalThis.foundry) == null ? void 0 : D.applications) == null ? void 0 : F.apps) == null ? void 0 : x.FilePicker);
         if (!P || !V) {
           (B = (k = ui.notifications) == null ? void 0 : k.warn) == null || B.call(k, "Foundry FilePicker is unavailable.");
           return;
@@ -721,64 +735,64 @@ function Ye(e, t = null) {
         typeof E.browse == "function" ? E.browse() : (q = E.render) == null || q.call(E, !0);
         return;
       }
-      m === "reset" && (n.reset(), K(n));
+      m === "reset" && (n.reset(), Q(n));
     });
   });
 }
-function Ke(e) {
+function et(e) {
   var t;
   return (t = e == null ? void 0 : e.querySelector) == null ? void 0 : t.call(e, "form[data-cybercall-contacts-form]");
 }
-function Je(e, t = null) {
-  const a = Z(e, t), n = Ke(a);
+function tt(e, t = null) {
+  const a = te(e, t), n = et(a);
   if (!a || !n) return;
-  n.addEventListener("submit", async (l) => {
+  n.addEventListener("submit", async (i) => {
     var s;
-    l.preventDefault();
-    const i = new FormData(n), o = String(i.get("scope") ?? U);
-    await je(i.get("name"), i.get("number"), o, i.get("image")), n.reset(), n.elements.scope.value = o, (s = n.elements.name) == null || s.focus();
-  }), a.querySelectorAll("[data-cybercall-contact-tab]").forEach((l) => {
-    l.addEventListener("click", (i) => {
-      U = i.currentTarget.dataset.cybercallContactTab, a.querySelectorAll("[data-cybercall-contact-tab]").forEach((o) => {
-        o.classList.toggle("active", o.dataset.cybercallContactTab === U);
+    i.preventDefault();
+    const l = new FormData(n), o = String(l.get("scope") ?? M);
+    await Ke(l.get("name"), l.get("number"), o, l.get("image")), n.reset(), n.elements.scope.value = o, (s = n.elements.name) == null || s.focus();
+  }), a.querySelectorAll("[data-cybercall-contact-tab]").forEach((i) => {
+    i.addEventListener("click", (l) => {
+      M = l.currentTarget.dataset.cybercallContactTab, a.querySelectorAll("[data-cybercall-contact-tab]").forEach((o) => {
+        o.classList.toggle("active", o.dataset.cybercallContactTab === M);
       }), a.querySelectorAll("[data-cybercall-contact-panel]").forEach((o) => {
-        o.hidden = o.dataset.cybercallContactPanel !== U;
-      }), n.elements.scope && (n.elements.scope.value = U);
+        o.hidden = o.dataset.cybercallContactPanel !== M;
+      }), n.elements.scope && (n.elements.scope.value = M);
     });
   });
   const r = a.querySelector("[data-cybercall-ringtone]");
-  r && r.addEventListener("change", async (l) => {
-    await game.settings.set(g, "ringSound", l.currentTarget.value);
-  }), a.querySelectorAll("[data-cybercall-contact-action]").forEach((l) => {
-    l.addEventListener("click", async (i) => {
-      const o = i.currentTarget.dataset.cybercallContactAction, s = i.currentTarget.dataset.contactId, m = i.currentTarget.dataset.contactScope ?? "personal", C = (m === "group" ? _() : Y()).find((T) => T.id === s);
+  r && r.addEventListener("change", async (i) => {
+    await game.settings.set(g, "ringSound", i.currentTarget.value);
+  }), a.querySelectorAll("[data-cybercall-contact-action]").forEach((i) => {
+    i.addEventListener("click", async (l) => {
+      const o = l.currentTarget.dataset.cybercallContactAction, s = l.currentTarget.dataset.contactId, m = l.currentTarget.dataset.contactScope ?? "personal", C = (m === "group" ? _() : Y()).find((D) => D.id === s);
       if (o === "remove") {
-        await ze(s, m);
+        await Je(s, m);
         return;
       }
-      o === "call" && C && await nt(C) && h === e && await e.close();
+      o === "call" && C && await ot(C) && h === e && await e.close();
     });
   });
 }
-const { CyberCallApplication: Qe, CyberCallComposer: Xe, CyberCallContacts: Ze } = Ue({
+const { CyberCallApplication: at, CyberCallComposer: nt, CyberCallContacts: rt } = Be({
   moduleId: g,
-  templatePath: Ge,
-  composerTemplatePath: _e,
-  contactsTemplatePath: Fe,
-  escapeHTML: xe,
-  getDefaultComposerData: Be,
-  getActorChoices: qe,
-  getPlayerChoices: Ve,
+  templatePath: qe,
+  composerTemplatePath: Ve,
+  contactsTemplatePath: je,
+  escapeHTML: ze,
+  getDefaultComposerData: He,
+  getActorChoices: We,
+  getPlayerChoices: Ye,
   getContacts: Y,
   getGroupContacts: _,
-  getRingtoneChoices: ct,
-  getSoundPath: ae,
-  getActiveContactsTab: () => U,
-  canEditContactImages: Ce,
-  bindCallControls: He,
-  bindComposerControls: Ye,
-  bindContactsControls: Je,
-  stopRinging: ne,
+  getRingtoneChoices: ut,
+  getSoundPath: re,
+  getActiveContactsTab: () => M,
+  canEditContactImages: ve,
+  bindCallControls: Qe,
+  bindComposerControls: Ze,
+  bindContactsControls: tt,
+  stopRinging: ce,
   clearActiveCall: (e) => {
     c === e && (c = null);
   },
@@ -791,41 +805,41 @@ const { CyberCallApplication: Qe, CyberCallComposer: Xe, CyberCallContacts: Ze }
 });
 async function I(e = {}) {
   var t, a;
-  return X() ? (h && await h.close(), await ee(), c = new Qe(e), await c.render(!0), $e(c), lt(c.callData), c) : ((a = (t = ui.notifications) == null ? void 0 : t.warn) == null || a.call(t, "You do not have permission to open CyberCall transmissions."), null);
+  return ee() ? (h && await h.close(), await ae(), c = new at(e), await c.render(!0), De(c), gt(c.callData), c) : ((a = (t = ui.notifications) == null ? void 0 : t.warn) == null || a.call(t, "You do not have permission to open CyberCall transmissions."), null);
 }
-async function ee() {
+async function ae() {
   if (!c) return;
   const e = c;
   c = null, await e.close();
 }
-function et(e) {
+function ct(e) {
   var t;
   return !!((t = c == null ? void 0 : c.callData) != null && t.id) && c.callData.id === e;
 }
-async function tt() {
-  c && (await c.render(!0), $e(c));
+async function it() {
+  c && (await c.render(!0), De(c));
 }
-async function he(e) {
-  et(e) && (c.callData.accepted = !0, c.callData.ringing = !1, ne(), await tt());
+async function we(e) {
+  ct(e) && (c.callData.accepted = !0, c.callData.ringing = !1, ce(), await it());
 }
-function at(e) {
+function lt(e) {
   e && (game.socket.emit(R, {
     action: "acceptCall",
     callId: e
-  }), he(e));
+  }), we(e));
 }
-async function ve(e) {
+async function Ae(e) {
   var t;
-  e && ((t = c == null ? void 0 : c.callData) != null && t.id) && c.callData.id !== e || await ee();
+  e && ((t = c == null ? void 0 : c.callData) != null && t.id) && c.callData.id !== e || await ae();
 }
-function we(e) {
+function Se(e) {
   game.socket.emit(R, {
     action: "endCall",
     callId: e
-  }), ve(e);
+  }), Ae(e);
 }
-async function nt(e) {
-  var i, o, s, m, p;
+async function ot(e) {
+  var l, o, s, m, p;
   if (game.user.isGM)
     return I({
       callerName: e.name,
@@ -836,9 +850,9 @@ async function nt(e) {
       variant: "standard",
       ringing: !1
     });
-  if (!Q())
-    return (o = (i = ui.notifications) == null ? void 0 : i.warn) == null || o.call(i, "No GM is connected to receive the CyberCall."), null;
-  const t = J(), a = String(((s = game.user) == null ? void 0 : s.avatar) ?? ((p = (m = game.user) == null ? void 0 : m.character) == null ? void 0 : p.img) ?? "").trim(), n = {
+  if (!Z())
+    return (o = (l = ui.notifications) == null ? void 0 : l.warn) == null || o.call(l, "No GM is connected to receive the CyberCall."), null;
+  const t = X(), a = String(((s = game.user) == null ? void 0 : s.avatar) ?? ((p = (m = game.user) == null ? void 0 : m.character) == null ? void 0 : p.img) ?? "").trim(), n = {
     id: t,
     signal: game.settings.get(g, "defaultSignal"),
     variant: "standard",
@@ -857,7 +871,7 @@ async function nt(e) {
     canDecline: !1,
     outgoing: !0,
     ringing: !0
-  }), l = L({
+  }), i = L({
     ...n,
     callerName: game.user.name,
     subtitle: `Call request from ${game.user.name}`,
@@ -868,21 +882,21 @@ async function nt(e) {
   });
   return game.socket.emit(R, {
     action: "playerCallRequest",
-    callData: l
+    callData: i
   }), I(r);
 }
-async function Ae() {
+async function $e() {
   var e, t, a;
-  return game.user.isGM ? A ? ((a = A.bringToFront) == null || a.call(A), A) : (A = new Xe(), await A.render(!0), A) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "Only the GM can open the CyberCall composer."), null);
+  return game.user.isGM ? A ? ((a = A.bringToFront) == null || a.call(A), A) : (A = new nt(), await A.render(!0), A) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "Only the GM can open the CyberCall composer."), null);
 }
-async function Se() {
+async function Te() {
   var e, t, a, n;
-  return X() ? c ? ((a = c.bringToFront) == null || a.call(c), c) : h ? ((n = h.bringToFront) == null || n.call(h), h) : (h = new Ze(), await h.render(!0), h) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "You do not have permission to use CyberCall contacts."), null);
+  return ee() ? c ? ((a = c.bringToFront) == null || a.call(c), c) : h ? ((n = h.bringToFront) == null || n.call(h), h) : (h = new rt(), await h.render(!0), h) : ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "You do not have permission to use CyberCall contacts."), null);
 }
 async function j() {
   h && await h.render(!0);
 }
-async function te(e = {}) {
+async function ne(e = {}) {
   var a, n;
   if (!game.user.isGM)
     return (n = (a = ui.notifications) == null ? void 0 : a.warn) == null || n.call(a, "Only the GM can broadcast CyberCalls to all players."), null;
@@ -897,11 +911,11 @@ async function te(e = {}) {
     targetUserIds: t.targetUserIds
   }), I({ ...t, outgoing: !0 });
 }
-async function rt(e) {
+async function st(e) {
   var t, a, n;
   if (e && !(Array.isArray(e.targetUserIds) && e.targetUserIds.length && !e.targetUserIds.includes((t = game.user) == null ? void 0 : t.id)) && !(Array.isArray((a = e.callData) == null ? void 0 : a.targetUserIds) && e.callData.targetUserIds.length && !e.callData.targetUserIds.includes((n = game.user) == null ? void 0 : n.id))) {
     if (e.action === "openCall") {
-      if (!X()) return;
+      if (!ee()) return;
       I(e.callData);
       return;
     }
@@ -911,22 +925,22 @@ async function rt(e) {
       return;
     }
     if (e.action === "acceptCall") {
-      he(e.callId);
+      we(e.callId);
       return;
     }
     if (e.action === "endCall") {
-      ve(e.callId);
+      Ae(e.callId);
       return;
     }
     if (e.action === "groupContactAdd") {
       if (!game.user.isGM) return;
-      const r = D({
+      const r = T({
         ...e.contact,
         image: ""
       });
       if (!r.name || !r.number) return;
-      const l = _();
-      l.push(r), await H(l), await j();
+      const i = _();
+      i.push(r), await H(i), await j();
       return;
     }
     if (e.action === "groupContactRemove") {
@@ -934,10 +948,10 @@ async function rt(e) {
       await H(_().filter((r) => r.id !== e.contactId)), await j();
       return;
     }
-    e.action === "groupContactsChanged" && (G = Array.isArray(e.contacts) ? e.contacts.map(D) : null, await j());
+    e.action === "groupContactsChanged" && (G = Array.isArray(e.contacts) ? e.contacts.map(T) : null, await j());
   }
 }
-function $e(e) {
+function De(e) {
   var t, a;
   (t = e == null ? void 0 : e.callData) != null && t.fullscreen && ((a = e.setPosition) == null || a.call(e, {
     left: 0,
@@ -946,44 +960,44 @@ function $e(e) {
     height: window.innerHeight
   }));
 }
-function ae() {
+function re() {
   return String(game.settings.get(g, "ringSound") ?? "").trim();
 }
-function ct() {
-  const e = ae();
-  return Object.entries(be).map(([t, a]) => ({
+function ut() {
+  const e = re();
+  return Object.entries(fe).map(([t, a]) => ({
     value: t,
     label: a,
     selected: t === e
   }));
 }
-function ne() {
+function ce() {
   if (!N) return;
   const e = N;
   N = null, typeof e.stop == "function" ? e.stop() : (e.pause(), e.currentTime = 0);
 }
-function lt(e) {
-  var l;
-  if (ne(), !e.ringing) return;
-  const t = ae();
+function gt(e) {
+  var i;
+  if (ce(), !e.ringing) return;
+  const t = re();
   if (!t) return;
-  const n = 0.65 * Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5), r = ((l = foundry == null ? void 0 : foundry.audio) == null ? void 0 : l.AudioHelper) ?? globalThis.AudioHelper;
-  r != null && r.play ? r.play({ src: t, volume: n, autoplay: !0, loop: !0 }, !1).then((i) => {
-    N = i;
-  }).catch((i) => {
-    console.warn(`${g} | Unable to play ringing sound.`, i);
-  }) : (N = new Audio(t), N.loop = !0, N.volume = n, N.play().catch((i) => {
-    console.warn(`${g} | Unable to play ringing sound.`, i);
+  const n = 0.65 * Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5), r = ((i = foundry == null ? void 0 : foundry.audio) == null ? void 0 : i.AudioHelper) ?? globalThis.AudioHelper;
+  r != null && r.play ? r.play({ src: t, volume: n, autoplay: !0, loop: !0 }, !1).then((l) => {
+    N = l;
+  }).catch((l) => {
+    console.warn(`${g} | Unable to play ringing sound.`, l);
+  }) : (N = new Audio(t), N.loop = !0, N.volume = n, N.play().catch((l) => {
+    console.warn(`${g} | Unable to play ringing sound.`, l);
   }));
 }
-function De() {
+function Ee() {
   const e = game.modules.get(g);
   e && (e.api = {
     openCall: I,
-    closeCall: ee,
-    broadcastCall: te,
-    openComposer: Ae,
-    openContacts: Se,
+    closeCall: ae,
+    broadcastCall: ne,
+    openComposer: $e,
+    openContacts: Te,
     get activeCall() {
       return c;
     },
@@ -995,7 +1009,7 @@ function De() {
     }
   });
 }
-function it() {
+function dt() {
   const e = game.modules.get("holosuite-core"), t = e != null && e.active ? e.api : null;
   return t != null && t.registerApp ? (t.registerApp({
     id: g,
@@ -1005,11 +1019,11 @@ function it() {
     description: "Compose calls, contacts, and holographic broadcasts.",
     open: () => {
       var a;
-      return (a = game.user) != null && a.isGM ? Ae() : Se();
+      return (a = game.user) != null && a.isGM ? $e() : Te();
     }
   }), !0) : !1;
 }
-function ot() {
+function mt() {
   const e = CONST.USER_ROLES, t = {};
   for (const [a, n] of [
     ["NONE", "None"],
@@ -1039,7 +1053,7 @@ function ot() {
     config: !1,
     type: String,
     default: "",
-    choices: be
+    choices: fe
   }), game.settings.register(g, "minimumRole", {
     name: "Minimum Player Role",
     hint: "Minimum role allowed to open CyberCall overlays and receive GM broadcasts.",
@@ -1064,15 +1078,15 @@ function ot() {
     default: []
   });
 }
-async function st() {
+async function pt() {
   const e = game.settings.get(g, "contacts");
   Array.isArray(e) && await game.settings.set(g, "contacts", {
-    [W()]: e.map(D)
+    [W()]: e.map(T)
   });
 }
 Hooks.once("init", () => {
-  ot(), De();
+  mt(), Ee();
 });
 Hooks.once("ready", async () => {
-  await st(), De(), it(), game.socket.on(R, rt), console.log(`${g} | Ready. Use game.modules.get("${g}").api.openCall({...})`);
+  await pt(), Ee(), dt(), game.socket.on(R, st), console.log(`${g} | Ready. Use game.modules.get("${g}").api.openCall({...})`);
 });

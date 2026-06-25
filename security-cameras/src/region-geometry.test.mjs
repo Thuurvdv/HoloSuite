@@ -14,12 +14,26 @@ test("getShapeBounds reads polygon point extents", () => {
   });
 });
 
-test("getShapeBounds falls back to rectangle and radius fields", () => {
+test("getShapeBounds expands ellipse radius fields from center", () => {
   assert.deepEqual(geometry.getShapeBounds({
     x: "12",
     y: "18",
     radiusX: "100",
     radiusY: "40"
+  }), {
+    x: -88,
+    y: -22,
+    width: 200,
+    height: 80
+  });
+});
+
+test("getShapeBounds reads rectangle fields as top-left dimensions", () => {
+  assert.deepEqual(geometry.getShapeBounds({
+    x: "12",
+    y: "18",
+    width: "100",
+    height: "40"
   }), {
     x: 12,
     y: 18,

@@ -228,10 +228,11 @@ function vt(r) {
     }
   }, F(X, "DEFAULT_OPTIONS", {
     id: "galaxy-map-manager",
-    classes: ["galaxy-map", "gmf-manager-window"],
+    classes: ["galaxy-map", "galaxy-map-framework", "gmf-manager-window"],
     window: {
       title: "Galaxy Map Manager",
-      icon: "fa-solid fa-satellite"
+      icon: "fa-solid fa-satellite",
+      resizable: !0
     },
     position: {
       width: 980,
@@ -559,7 +560,7 @@ function Mt(r) {
     }
   }, F(G, "DEFAULT_OPTIONS", {
     id: "galaxy-map-view",
-    classes: ["galaxy-map", "gmf-map-window"],
+    classes: ["galaxy-map", "galaxy-map-framework", "gmf-map-window"],
     window: {
       title: "Galaxy Map",
       icon: "fa-solid fa-meteor",

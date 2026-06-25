@@ -62,7 +62,7 @@ export function createGalaxyMapViewClass(deps: any) {
 
     static DEFAULT_OPTIONS = {
       id: "galaxy-map-view",
-      classes: ["galaxy-map", "gmf-map-window"],
+      classes: ["galaxy-map", "galaxy-map-framework", "gmf-map-window"],
       window: {
         title: "Galaxy Map",
         icon: "fa-solid fa-meteor",

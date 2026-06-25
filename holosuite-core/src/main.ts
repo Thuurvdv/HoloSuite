@@ -1,4 +1,5 @@
 import type { HoloSuiteAppRegistration } from "../../shared/src/index";
+import { addSceneControlTool } from "./scene-controls";
 
 const MODULE_ID = "holosuite-core";
 const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
@@ -14,8 +15,19 @@ type HoloSuiteTheme = keyof typeof THEME_CHOICES;
 
 const registeredApps = new Map<string, HoloSuiteAppRegistration>();
 let launcherApp: HoloSuiteLauncher | null = null;
+let launcherObserver: MutationObserver | null = null;
 
-const LegacyApplication = (globalThis as any).Application ?? foundry?.appv1?.api?.Application;
+function getLegacyApplicationBase(): any {
+  const appv1 = (globalThis as any).foundry?.appv1?.api ?? foundry?.appv1?.api ?? null;
+  const applications = (globalThis as any).foundry?.applications?.api ?? foundry?.applications?.api ?? null;
+  return (globalThis as any).FormApplication
+    ?? appv1?.FormApplication
+    ?? (globalThis as any).Application
+    ?? appv1?.Application
+    ?? applications?.ApplicationV2;
+}
+
+const LegacyApplication = getLegacyApplicationBase();
 function escapeHtml(value: unknown): string {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
@@ -98,28 +110,120 @@ function renderOpenLauncherControl(controls: unknown): void {
   const isGM = game.user?.isGM === true;
   if (!isGM && isDisabledForPlayers()) return;
   const openLauncher = () => api.openLauncher();
-  const tool = {
+  const createTool = () => ({
     name: "holosuite-core-launcher",
     title: isGM ? "HoloSuite Command Deck" : "HoloSuite Player View",
-    icon: "fa-solid fa-mobile-screen-button",
+    icon: "fa-solid fa-terminal",
     button: true,
     visible: true,
     onClick: openLauncher,
     onChange: openLauncher
-  };
+  });
 
-  if (Array.isArray(controls)) {
-    const tokenControls = controls.find((control) => control.name === "token") ?? controls[0];
-    if (tokenControls?.tools && !tokenControls.tools.some?.((candidate) => candidate.name === tool.name)) {
-      tokenControls.tools.push(tool);
-    }
-    return;
-  }
+  const addedToTiles = addSceneControlTool(controls, createTool(), ["tiles", "tile"]);
+  addSceneControlTool(controls, createTool(), ["tokens", "token"], { allowFallback: !addedToTiles });
+}
 
-  const record = controls as Record<string, any>;
-  const tokenControls = record?.tokens ?? record?.token ?? Object.values(record ?? {})[0];
-  if (!tokenControls?.tools || tokenControls.tools[tool.name]) return;
-  tokenControls.tools[tool.name] = { ...tool, order: Object.keys(tokenControls.tools).length };
+function canOpenLauncher(): boolean {
+  return game.user?.isGM === true || !isDisabledForPlayers();
+}
+
+function createLauncherButton(tagName: "a" | "button", className: string): HTMLElement {
+  const button = document.createElement(tagName);
+  button.className = className;
+  button.dataset.holosuiteLauncher = "true";
+  button.title = "HoloSuite";
+  button.setAttribute("aria-label", "Open HoloSuite");
+  button.setAttribute("data-tooltip", "HoloSuite");
+  button.innerHTML = `<i class="fa-solid fa-terminal" aria-hidden="true"></i><span>HoloSuite</span>`;
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    api.openLauncher();
+  });
+  button.addEventListener("keydown", (event) => {
+    if (!(event instanceof KeyboardEvent)) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    api.openLauncher();
+  });
+  return button;
+}
+
+function injectSidebarLauncher(): boolean {
+  if (!canOpenLauncher()) return false;
+  if (document.querySelector("[data-holosuite-launcher='true']")) return true;
+
+  const sidebarTabs = document.querySelector<HTMLElement>(
+    "#sidebar-tabs, #ui-right #sidebar-tabs, #sidebar nav.tabs, #sidebar .tabs, nav.sidebar-tabs"
+  );
+  if (!sidebarTabs) return false;
+
+  const launcher = createLauncherButton("a", "item holosuite-sidebar-launcher");
+  launcher.setAttribute("role", "button");
+  launcher.setAttribute("tabindex", "0");
+  sidebarTabs.appendChild(launcher);
+  return true;
+}
+
+function injectFloatingLauncherFallback(): void {
+  if (!canOpenLauncher()) return;
+  if (document.querySelector("[data-holosuite-launcher='true']")) return;
+  document.body.appendChild(createLauncherButton("button", "holosuite-floating-launcher"));
+}
+
+function ensureLauncherButton(): void {
+  if (injectSidebarLauncher()) return;
+  window.setTimeout(() => {
+    if (injectSidebarLauncher()) return;
+    injectFloatingLauncherFallback();
+  }, 250);
+}
+
+function observeLauncherContainers(): void {
+  if (launcherObserver || !document.body) return;
+  launcherObserver = new MutationObserver(() => {
+    if (document.querySelector(".holosuite-sidebar-launcher")) return;
+    injectSidebarLauncher();
+  });
+  launcherObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+function removeSidebarLaunchers(): void {
+  document.querySelectorAll(".holosuite-sidebar-launcher, .holosuite-floating-launcher").forEach((element) => element.remove());
+}
+
+function unwrapHtmlElement(html: unknown): HTMLElement | null {
+  if (html instanceof HTMLElement) return html;
+  if (Array.isArray(html) && html[0] instanceof HTMLElement) return html[0];
+  const jqueryElement = html as { 0?: unknown; get?: (index: number) => unknown } | null;
+  const first = jqueryElement?.get?.(0) ?? jqueryElement?.[0];
+  return first instanceof HTMLElement ? first : null;
+}
+
+function injectRenderedLauncherControl(html: unknown): void {
+  const isGM = game.user?.isGM === true;
+  if (!isGM && isDisabledForPlayers()) return;
+
+  const root = unwrapHtmlElement(html) ?? document.querySelector("#controls, #scene-controls");
+  if (!root || root.querySelector("[data-tool='holosuite-core-launcher']")) return;
+
+  const controlsList = root.querySelector<HTMLElement>(
+    ".control-tools.active, .sub-controls.active, .scene-control-tools.active, .control-tools, .sub-controls, .scene-control-tools"
+  );
+  if (!controlsList) return;
+
+  const launcher = document.createElement("li");
+  launcher.className = "control-tool holosuite-scene-control";
+  launcher.dataset.tool = "holosuite-core-launcher";
+  launcher.title = isGM ? "HoloSuite Command Deck" : "HoloSuite Player View";
+  launcher.innerHTML = `<i class="fa-solid fa-terminal"></i>`;
+  launcher.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    api.openLauncher();
+  });
+  controlsList.appendChild(launcher);
 }
 
 function registerSettings(): void {
@@ -131,6 +235,7 @@ function registerSettings(): void {
     type: String,
     choices: THEME_CHOICES,
     default: "default",
+    restricted: true,
     onChange: (value: string) => applyTheme(value)
   });
 
@@ -140,7 +245,17 @@ function registerSettings(): void {
     scope: "world",
     config: true,
     type: Boolean,
-    default: false
+    default: false,
+    restricted: true
+  });
+
+  game.settings.registerMenu(MODULE_ID, "launcher", {
+    name: "HoloSuite Command Deck",
+    label: "Open HoloSuite",
+    hint: "Open the HoloSuite launcher and registered app deck.",
+    icon: "fas fa-terminal",
+    type: HoloSuiteLauncher,
+    restricted: true
   });
 }
 
@@ -254,7 +369,33 @@ function renderLauncherHtml(): string {
   `;
 }
 
+function bindLauncherControls(root: HTMLElement | null): void {
+  if (!root) return;
+  root.querySelectorAll<HTMLElement>("[data-holosuite-app]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      openRegisteredApp((event.currentTarget as HTMLElement).dataset.holosuiteApp ?? "");
+    });
+  });
+  root.querySelectorAll<HTMLElement>("[data-holosuite-action='close']").forEach((button) => {
+    button.addEventListener("click", () => launcherApp?.close());
+  });
+}
+
 class HoloSuiteLauncher extends LegacyApplication {
+  static DEFAULT_OPTIONS = {
+    id: "holosuite-launcher",
+    tag: "section",
+    classes: ["holosuite-launcher-window"],
+    window: {
+      title: "HoloSuite",
+      resizable: false
+    },
+    position: {
+      width: 420,
+      height: "auto"
+    }
+  };
+
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "holosuite-launcher",
@@ -273,15 +414,27 @@ class HoloSuiteLauncher extends LegacyApplication {
 
   activateListeners(html) {
     super.activateListeners(html);
-    html.find("[data-holosuite-app]").on("click", (event) => {
-      openRegisteredApp(event.currentTarget.dataset.holosuiteApp);
-    });
-    html.find("[data-holosuite-action='close']").on("click", () => this.close());
+    bindLauncherControls(unwrapHtmlElement(html));
+  }
+
+  async _renderHTML() {
+    const wrapper = document.createElement("template");
+    wrapper.innerHTML = renderLauncherHtml().trim();
+    return wrapper.content;
+  }
+
+  _replaceHTML(result: DocumentFragment | HTMLElement, content: HTMLElement) {
+    content.replaceChildren(result);
+    bindLauncherControls(content);
   }
 
   async close(options = {}) {
     launcherApp = null;
     return super.close(options);
+  }
+
+  async _updateObject() {
+    return undefined;
   }
 }
 
@@ -310,8 +463,18 @@ const api = {
 
 function exposeApi(): void {
   const foundryModule = game.modules.get(MODULE_ID);
-  if (foundryModule) foundryModule.api = api;
   game.holosuite = api;
+  (globalThis as any).HoloSuiteCoreApi = api;
+
+  if (foundryModule) {
+    try {
+      foundryModule.api = api;
+    } catch (error) {
+      console.warn(`${MODULE_ID} | Could not attach API to game.modules; using game.holosuite fallback.`, error);
+    }
+  }
+
+  Hooks.callAll(`${MODULE_ID}.apiReady`, api);
 }
 
 Hooks.once("init", () => {
@@ -320,9 +483,13 @@ Hooks.once("init", () => {
 });
 
 Hooks.on("getSceneControlButtons", renderOpenLauncherControl);
+Hooks.on("renderSceneControls", (_app: unknown, html: unknown) => injectRenderedLauncherControl(html));
+Hooks.on("renderSidebar", removeSidebarLaunchers);
+Hooks.on("renderSidebarTab", removeSidebarLaunchers);
 
 Hooks.once("ready", () => {
   exposeApi();
   applySavedTheme();
+  removeSidebarLaunchers();
   console.log(`${MODULE_ID} | Ready. API available at game.modules.get("${MODULE_ID}").api`);
 });
