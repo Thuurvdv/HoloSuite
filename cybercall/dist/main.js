@@ -251,7 +251,7 @@ function Be(e) {
         popOut: !0,
         resizable: !0,
         width: 440,
-        height: 420
+        height: 460
       });
     }
     getData() {
@@ -390,7 +390,7 @@ function Be(e) {
       },
       position: {
         width: 440,
-        height: 420
+        height: 460
       }
     }), S(f, "PARTS", {
       main: {

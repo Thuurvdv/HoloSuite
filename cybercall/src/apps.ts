@@ -69,7 +69,7 @@ export function createCyberCallAppClasses(deps: any) {
         popOut: true,
         resizable: true,
         width: 440,
-        height: 420
+        height: 460
       });
     }
 
@@ -211,7 +211,7 @@ export function createCyberCallAppClasses(deps: any) {
         },
         position: {
           width: 440,
-          height: 420
+          height: 460
         }
       };
 
