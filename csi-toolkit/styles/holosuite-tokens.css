@@ -527,7 +527,7 @@ body[data-holosuite-theme="violet"] {
 }
 
 /* v12 compatibility: explicit selectors for systems that override or miss nested CSS. */
-:where(
+:root[data-holosuite-foundry-generation="12"] :where(
   .bounty-board-window,
   .bounty-editor-window,
   .csi-toolkit,
@@ -554,7 +554,7 @@ body[data-holosuite-theme="violet"] {
   letter-spacing: 0;
 }
 
-:where(
+:root[data-holosuite-foundry-generation="12"] :where(
   .bounty-board-window,
   .bounty-editor-window,
   .csi-toolkit,
@@ -578,7 +578,7 @@ body[data-holosuite-theme="violet"] {
   box-sizing: border-box;
 }
 
-:where(
+:root[data-holosuite-foundry-generation="12"] :where(
   .bounty-board-window,
   .bounty-editor-window,
   .csi-toolkit,
@@ -603,7 +603,7 @@ body[data-holosuite-theme="violet"] {
   color: var(--hs-text) !important;
 }
 
-:where(
+:root[data-holosuite-foundry-generation="12"] :where(
   .bounty-board-window,
   .bounty-editor-window,
   .csi-toolkit,
@@ -631,7 +631,7 @@ body[data-holosuite-theme="violet"] {
   font-family: var(--hs-font-ui) !important;
 }
 
-:where(
+:root[data-holosuite-foundry-generation="12"] :where(
   .bounty-board-window,
   .bounty-editor-window,
   .csi-toolkit,
@@ -658,7 +658,7 @@ body[data-holosuite-theme="violet"] {
   font-family: var(--hs-font-ui) !important;
 }
 
-:where(
+:root[data-holosuite-foundry-generation="12"] :where(
   .bounty-board-window,
   .bounty-editor-window,
   .csi-toolkit,
@@ -682,7 +682,7 @@ body[data-holosuite-theme="violet"] {
   outline: none;
 }
 
-:where(
+:root[data-holosuite-foundry-generation="12"] :where(
   .bounty-board-window,
   .bounty-editor-window,
   .csi-toolkit,
@@ -703,7 +703,7 @@ body[data-holosuite-theme="violet"] {
   font-family: var(--hs-font-ui) !important;
 }
 
-:where(
+:root[data-holosuite-foundry-generation="12"] :where(
   .bb-card,
   .bb-chat-card,
   .csi-manager-section,

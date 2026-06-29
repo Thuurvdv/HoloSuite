@@ -4,6 +4,7 @@ import { addSceneControlTool } from "./scene-controls";
 const MODULE_ID = "holosuite-core";
 const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
 const SETTING_THEME = "theme";
+const FOUNDRY_GENERATION_ATTRIBUTE = "data-holosuite-foundry-generation";
 
 const THEME_CHOICES = {
   default: "Default Cyan",
@@ -113,7 +114,7 @@ function renderOpenLauncherControl(controls: unknown): void {
   const createTool = () => ({
     name: "holosuite-core-launcher",
     title: isGM ? "HoloSuite Command Deck" : "HoloSuite Player View",
-    icon: "fa-solid fa-terminal",
+    icon: getLauncherIconClass(),
     button: true,
     visible: true,
     onClick: openLauncher,
@@ -135,7 +136,7 @@ function createLauncherButton(tagName: "a" | "button", className: string): HTMLE
   button.title = "HoloSuite";
   button.setAttribute("aria-label", "Open HoloSuite");
   button.setAttribute("data-tooltip", "HoloSuite");
-  button.innerHTML = `<i class="fa-solid fa-terminal" aria-hidden="true"></i><span>HoloSuite</span>`;
+  button.innerHTML = `<i class="${getLauncherIconClass()}" aria-hidden="true"></i><span>HoloSuite</span>`;
   button.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -217,7 +218,7 @@ function injectRenderedLauncherControl(html: unknown): void {
   launcher.className = "control-tool holosuite-scene-control";
   launcher.dataset.tool = "holosuite-core-launcher";
   launcher.title = isGM ? "HoloSuite Command Deck" : "HoloSuite Player View";
-  launcher.innerHTML = `<i class="fa-solid fa-terminal"></i>`;
+  launcher.innerHTML = `<i class="${getLauncherIconClass()}"></i>`;
   launcher.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -274,6 +275,24 @@ function applyTheme(value: unknown): void {
 
 function applySavedTheme(): void {
   applyTheme(safeGetSetting(MODULE_ID, SETTING_THEME));
+}
+
+function getFoundryGeneration(): number | null {
+  const generation = Number((globalThis as any).game?.release?.generation ?? game?.release?.generation);
+  return Number.isFinite(generation) ? generation : null;
+}
+
+function applyFoundryGenerationMarker(): void {
+  const generation = getFoundryGeneration();
+  const targets = [document.documentElement, document.body].filter(Boolean);
+  for (const target of targets) {
+    if (generation === null) target.removeAttribute(FOUNDRY_GENERATION_ATTRIBUTE);
+    else target.setAttribute(FOUNDRY_GENERATION_ATTRIBUTE, String(generation));
+  }
+}
+
+function getLauncherIconClass(): string {
+  return getFoundryGeneration() === 12 ? "fa-solid fa-terminal" : "fa-solid fa-mobile-screen-button";
 }
 
 function isDisabledForPlayers(): boolean {
@@ -478,6 +497,7 @@ function exposeApi(): void {
 }
 
 Hooks.once("init", () => {
+  applyFoundryGenerationMarker();
   registerSettings();
   exposeApi();
 });
@@ -489,6 +509,7 @@ Hooks.on("renderSidebarTab", removeSidebarLaunchers);
 
 Hooks.once("ready", () => {
   exposeApi();
+  applyFoundryGenerationMarker();
   applySavedTheme();
   removeSidebarLaunchers();
   console.log(`${MODULE_ID} | Ready. API available at game.modules.get("${MODULE_ID}").api`);
