@@ -358,12 +358,23 @@
 }
 
 .csi-toolkit select {
+  appearance: auto;
+  background-color: #061117 !important;
+  color: #e6fbff !important;
   color-scheme: dark;
+  text-shadow: none;
 }
 
-.csi-toolkit option {
-  background: #061117;
-  color: #e6fbff;
+.csi-toolkit select option,
+.csi-toolkit select optgroup {
+  background-color: #061117 !important;
+  color: #e6fbff !important;
+  text-shadow: none;
+}
+
+.csi-toolkit select option:checked {
+  background-color: #123342 !important;
+  color: #ffffff !important;
 }
 
 .csi-toolkit input:focus,
