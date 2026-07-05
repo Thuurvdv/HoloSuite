@@ -1,0 +1,480 @@
+.cybercall-messages {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.42fr) minmax(360px, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-width: 700px;
+  min-height: 560px;
+  border: 1px solid rgba(94, 231, 255, 0.42);
+  border-radius: var(--hs-radius, 6px);
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    linear-gradient(135deg, rgba(94, 231, 255, 0.13), transparent 38%),
+    rgba(3, 13, 24, 0.94);
+  box-shadow:
+    0 0 22px rgba(0, 167, 255, 0.24),
+    inset 0 0 28px rgba(94, 231, 255, 0.1);
+  color: #e5fbff;
+  overflow: hidden;
+}
+
+.cybercall-messages *,
+.cybercall-chat-card * {
+  box-sizing: border-box;
+}
+
+.cybercall-messages > .cybercall-mode-tabs {
+  grid-column: 1 / -1;
+  margin: 14px 14px 0;
+}
+
+.cybercall-thread-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px;
+  border-right: 1px solid rgba(94, 231, 255, 0.22);
+  background: rgba(1, 8, 16, 0.34);
+  overflow: auto;
+}
+
+.cybercall-thread-list header,
+.cybercall-conversation header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  margin-bottom: 8px;
+}
+
+.cybercall-thread-list header {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.cybercall-message-header-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cybercall-message-header-actions button,
+.cybercall-delete-thread {
+  min-width: 72px;
+  border: 1px solid rgba(94, 231, 255, 0.42);
+  border-radius: var(--hs-radius, 6px);
+  background: rgba(0, 124, 190, 0.18);
+  color: #b9f4ff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cybercall-message-header-actions button:hover,
+.cybercall-message-header-actions button:focus-visible,
+.cybercall-delete-thread:hover,
+.cybercall-delete-thread:focus-visible,
+.cybercall-message-form > button[type="submit"]:hover,
+.cybercall-message-form > button[type="submit"]:focus-visible {
+  border-color: var(--cybercall-cyan, #5ee7ff);
+  background: rgba(94, 231, 255, 0.22);
+  color: #d2f9ff;
+  box-shadow: 0 0 14px rgba(94, 231, 255, 0.25);
+  outline: none;
+}
+
+.cybercall-delete-thread {
+  border-color: rgba(255, 71, 126, 0.48);
+  background: rgba(255, 71, 126, 0.12);
+}
+
+.cybercall-delete-thread.confirming {
+  border-color: rgba(255, 207, 99, 0.58);
+  background: rgba(255, 207, 99, 0.16);
+  color: #ffe9a8;
+}
+
+.cybercall-thread-list h2,
+.cybercall-conversation h3 {
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.cybercall-thread {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-height: 58px;
+  min-width: 0;
+  padding: 9px;
+  overflow: hidden;
+  border: 1px solid rgba(94, 231, 255, 0.24);
+  border-radius: var(--hs-radius, 6px);
+  background: rgba(0, 124, 190, 0.1);
+  color: inherit;
+  font: inherit;
+  line-height: 1.2;
+  text-align: left;
+  white-space: normal;
+}
+
+.cybercall-thread.active {
+  border-color: var(--cybercall-cyan, #5ee7ff);
+  background: rgba(94, 231, 255, 0.2);
+  box-shadow: 0 0 14px rgba(94, 231, 255, 0.2);
+}
+
+.cybercall-thread:hover,
+.cybercall-thread:focus-visible {
+  border-color: var(--cybercall-cyan, #5ee7ff);
+  background: rgba(94, 231, 255, 0.16);
+  outline: none;
+}
+
+.cybercall-thread-initials {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid rgba(94, 231, 255, 0.38);
+  border-radius: 50%;
+  background: rgba(0, 124, 190, 0.14);
+  color: var(--cybercall-cyan, #5ee7ff);
+  font-weight: 700;
+}
+
+.cybercall-thread-body {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.cybercall-thread-body strong,
+.cybercall-thread-body small {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cybercall-thread-body strong {
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.cybercall-thread-body small {
+  color: rgba(217, 251, 255, 0.72);
+  font-family: var(--hs-font-mono, monospace);
+}
+
+.cybercall-thread-unread {
+  justify-self: end;
+  min-width: 22px;
+  max-width: 44px;
+  padding: 2px 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ff477e;
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cybercall-modern-messages .cybercall-thread {
+  grid-template-columns: 44px minmax(0, 1fr) minmax(22px, auto);
+  flex: 0 0 auto;
+  min-height: 78px !important;
+  height: auto !important;
+  padding: 12px;
+}
+
+.cybercall-modern-messages .cybercall-thread-initials {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+}
+
+.cybercall-modern-messages .cybercall-thread-body {
+  align-self: center;
+}
+
+.cybercall-modern-messages .cybercall-thread-body strong {
+  line-height: 1.15;
+}
+
+.cybercall-modern-messages .cybercall-thread-body small {
+  margin-top: 4px;
+  line-height: 1.25;
+}
+
+.cybercall-conversation {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 14px;
+  background: rgba(3, 13, 24, 0.16);
+}
+
+.cybercall-message-log {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  margin-top: 4px;
+  padding: 10px;
+  border: 1px solid rgba(94, 231, 255, 0.16);
+  border-radius: var(--hs-radius, 6px);
+  background: rgba(1, 7, 12, 0.34);
+  overflow: auto;
+}
+
+.cybercall-message {
+  align-self: flex-start;
+  max-width: min(520px, 82%);
+  padding: 10px 12px;
+  border: 1px solid rgba(94, 231, 255, 0.24);
+  border-radius: var(--hs-radius, 6px);
+  background: rgba(0, 124, 190, 0.1);
+  box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.06);
+}
+
+.cybercall-message.mine {
+  align-self: flex-end;
+  border-color: rgba(56, 242, 143, 0.4);
+  background: rgba(18, 201, 109, 0.14);
+}
+
+.cybercall-message.event {
+  align-self: center;
+  max-width: min(480px, 90%);
+  border-color: rgba(255, 207, 99, 0.32);
+  background: rgba(58, 45, 13, 0.72);
+  color: rgba(255, 244, 210, 0.92);
+  text-align: center;
+}
+
+.cybercall-message strong,
+.cybercall-message p,
+.cybercall-message time {
+  display: block;
+  margin: 0;
+}
+
+.cybercall-message strong {
+  color: #ffffff;
+}
+
+.cybercall-message p {
+  margin-top: 5px;
+  white-space: pre-wrap;
+}
+
+.cybercall-message time {
+  margin-top: 6px;
+  color: rgba(229, 251, 255, 0.58);
+  font-size: 11px;
+}
+
+.cybercall-message-form {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  padding-top: 10px;
+  border-top: 1px solid rgba(94, 231, 255, 0.22);
+}
+
+.cybercall-message-form.has-reply-as {
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) auto;
+}
+
+.cybercall-message-form.has-send-as {
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) auto;
+}
+
+.cybercall-message-form label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cybercall-thread-reply-target {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: rgba(229, 251, 255, 0.78);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cybercall-message-form label {
+  color: rgba(217, 251, 255, 0.82);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cybercall-thread-reply-target strong {
+  display: block;
+  overflow: hidden;
+  color: #f2feff;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.cybercall-message-form textarea {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: 100%;
+  min-height: 72px;
+  border: 1px solid rgba(94, 231, 255, 0.32);
+  border-radius: var(--hs-radius, 6px);
+  background: rgba(1, 8, 16, 0.72);
+  color: #e5fbff;
+  box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
+  resize: vertical;
+}
+
+.cybercall-modern-messages .cybercall-message-form textarea {
+  min-height: 84px;
+  height: auto !important;
+}
+
+.cybercall-modern-messages .cybercall-message-form select {
+  min-height: 34px;
+  height: auto !important;
+}
+
+.cybercall-message-form select,
+.cybercall-message-form button {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(94, 231, 255, 0.32);
+  border-radius: var(--hs-radius, 6px);
+  background: rgba(1, 8, 16, 0.72);
+  color: #b9f4ff;
+  box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
+}
+
+.cybercall-message-form textarea:focus-visible,
+.cybercall-message-form select:focus-visible {
+  border-color: var(--cybercall-cyan, #5ee7ff);
+  box-shadow:
+    0 0 10px rgba(94, 231, 255, 0.22),
+    inset 0 0 12px rgba(94, 231, 255, 0.1);
+  outline: none;
+}
+
+.cybercall-message-form > button[type="submit"] {
+  grid-column: -2 / -1;
+  grid-row: 3;
+  justify-self: end;
+  width: auto;
+  min-width: 96px;
+  border-color: rgba(94, 231, 255, 0.48);
+  background: rgba(0, 124, 190, 0.18);
+  color: #b9f4ff;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cybercall-messages-empty {
+  padding: 16px;
+  border: 1px dashed rgba(65, 224, 255, 0.25);
+  color: rgba(229, 251, 255, 0.65);
+}
+
+.cybercall-chat-card {
+  border-left: 3px solid #41e0ff;
+  padding: 8px 10px;
+  background: rgba(5, 12, 20, 0.92);
+  color: #e5fbff;
+}
+
+.cybercall-chat-card strong,
+.cybercall-chat-card span,
+.cybercall-chat-card p {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.cybercall-chat-card span {
+  margin-top: 2px;
+  color: rgba(229, 251, 255, 0.64);
+  font-size: 12px;
+}
+
+.cybercall-chat-card p {
+  margin: 5px 0 0;
+  white-space: pre-wrap;
+}
+
+.cybercall-chat-card button {
+  margin-top: 8px;
+  border: 1px solid rgba(65, 224, 255, 0.42);
+  background: rgba(65, 224, 255, 0.12);
+  color: #b9f4ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cybercall-chat-card--event {
+  border-left-color: #ffcf63;
+}
+
+@media (max-width: 720px) {
+  .cybercall-messages {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
+  .cybercall-thread-list {
+    max-height: 220px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(65, 224, 255, 0.18);
+  }
+
+  .cybercall-message-form {
+    grid-template-columns: 1fr;
+  }
+
+  .cybercall-message-form.has-reply-as,
+  .cybercall-message-form.has-send-as {
+    grid-template-columns: 1fr;
+  }
+
+  .cybercall-message-form textarea,
+  .cybercall-message-form > button[type="submit"] {
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
+  }
+}

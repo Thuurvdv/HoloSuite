@@ -1,4 +1,391 @@
 @import url("./cybercall-overlay.css");
 @import url("./cybercall-composer.css");
 @import url("./cybercall-contacts.css");
+@import url("./cybercall-messages.css");
 @import url("./cybercall-effects.css");
+
+.cybercall-mode-tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 8px;
+  border: 1px solid rgba(94, 231, 255, 0.24);
+  border-radius: var(--hs-radius);
+  background:
+    linear-gradient(90deg, rgba(94, 231, 255, 0.11), rgba(125, 255, 154, 0.05)),
+    rgba(1, 8, 16, 0.38);
+  box-shadow: inset 0 0 18px rgba(94, 231, 255, 0.07);
+}
+
+.cybercall-mode-tabs::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  bottom: -10px;
+  left: 8px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(94, 231, 255, 0.38), transparent);
+}
+
+.cybercall-mode-tabs button {
+  min-height: 38px;
+  border: 1px solid rgba(94, 231, 255, 0.34);
+  border-radius: var(--hs-radius);
+  background: rgba(0, 124, 190, 0.16);
+  color: #b9f4ff;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+
+.cybercall-mode-tabs button.active,
+.cybercall-mode-tabs button:hover,
+.cybercall-mode-tabs button:focus-visible {
+  border-color: var(--cybercall-cyan);
+  background: rgba(94, 231, 255, 0.22);
+  color: #d2f9ff;
+  box-shadow: 0 0 14px rgba(94, 231, 255, 0.22);
+}
+
+/* v12 parity shim: explicit selectors, no nesting, and late enough to beat core UI styles. */
+.cybercall-app,
+.cybercall-composer-app,
+.cybercall-contacts-app,
+.cybercall-messages-app,
+.cybercall-phone-app {
+  --cybercall-cyan: var(--hs-color-primary, #69e8ff);
+  --cybercall-blue: var(--hs-color-accent, #b48cff);
+  --cybercall-text: var(--hs-text-primary, #e7faff);
+  --cybercall-field: rgba(2, 12, 20, 0.88);
+  --cybercall-control: rgba(0, 124, 190, 0.18);
+  --cybercall-control-hover: rgba(94, 231, 255, 0.22);
+  color: var(--cybercall-text) !important;
+  color-scheme: dark;
+  font-family: var(--hs-font-ui, "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif) !important;
+}
+
+.cybercall-app .window-content,
+.cybercall-composer-app .window-content,
+.cybercall-contacts-app .window-content,
+.cybercall-messages-app .window-content,
+.cybercall-phone-app .window-content,
+.cybercall-app .window-content.standard-form,
+.cybercall-composer-app .window-content.standard-form,
+.cybercall-contacts-app .window-content.standard-form,
+.cybercall-messages-app .window-content.standard-form,
+.cybercall-phone-app .window-content.standard-form {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.035) 0,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    rgba(3, 13, 24, 0.94) !important;
+  color: var(--cybercall-text) !important;
+  display: grid !important;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.cybercall-app.cybercall-fullscreen .window-content {
+  overflow: hidden !important;
+  place-items: center;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(94, 231, 255, 0.04) 0 1px,
+      transparent 1px 64px
+    ),
+    radial-gradient(circle at center, rgba(94, 231, 255, 0.12), rgba(0, 0, 0, 0.74) 62%) !important;
+}
+
+.cybercall-app .window-header,
+.cybercall-composer-app .window-header,
+.cybercall-contacts-app .window-header,
+.cybercall-messages-app .window-header,
+.cybercall-phone-app .window-header {
+  border-bottom: 1px solid rgba(105, 232, 255, 0.28) !important;
+  background: rgba(2, 13, 24, 0.94) !important;
+  color: #d8f8ff !important;
+  box-shadow: inset 0 -1px 0 rgba(105, 232, 255, 0.08);
+}
+
+.cybercall-composer,
+.cybercall-contacts,
+.cybercall-messages {
+  box-sizing: border-box;
+  border-color: rgba(105, 232, 255, 0.28) !important;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    linear-gradient(135deg, rgba(94, 231, 255, 0.13), transparent 38%),
+    rgba(3, 13, 24, 0.94) !important;
+  color: var(--cybercall-text) !important;
+  box-shadow:
+    0 0 22px rgba(0, 167, 255, 0.24),
+    inset 0 0 28px rgba(94, 231, 255, 0.1) !important;
+}
+
+.cybercall-phone-shell {
+  display: grid;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.cybercall-phone-shell > .cybercall-composer,
+.cybercall-phone-shell > .cybercall-contacts,
+.cybercall-phone-shell > .cybercall-messages,
+.cybercall-composer-app .cybercall-composer,
+.cybercall-contacts-app .cybercall-contacts,
+.cybercall-messages-app .cybercall-messages {
+  min-width: 0;
+  min-height: 100%;
+  height: 100%;
+  max-height: 100%;
+}
+
+.cybercall-app button,
+.cybercall-composer-app button,
+.cybercall-contacts-app button,
+.cybercall-messages-app button,
+.cybercall-phone-app button,
+.cybercall-panel button,
+.cybercall-composer button,
+.cybercall-contacts button,
+.cybercall-messages button,
+.cybercall-chat-card button {
+  min-height: var(--hs-control-min-height, 32px);
+  border: 1px solid rgba(105, 232, 255, 0.34) !important;
+  border-radius: var(--hs-radius, 6px) !important;
+  background: var(--cybercall-control) !important;
+  color: #b9f4ff !important;
+  box-shadow: inset 0 0 12px rgba(105, 232, 255, 0.08) !important;
+  font-family: var(--hs-font-ui, "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif) !important;
+  font-weight: 700;
+  text-shadow: none !important;
+}
+
+.cybercall-app button:hover,
+.cybercall-app button:focus,
+.cybercall-app button:focus-visible,
+.cybercall-composer-app button:hover,
+.cybercall-composer-app button:focus,
+.cybercall-composer-app button:focus-visible,
+.cybercall-contacts-app button:hover,
+.cybercall-contacts-app button:focus,
+.cybercall-contacts-app button:focus-visible,
+.cybercall-messages-app button:hover,
+.cybercall-messages-app button:focus,
+.cybercall-messages-app button:focus-visible,
+.cybercall-phone-app button:hover,
+.cybercall-phone-app button:focus,
+.cybercall-phone-app button:focus-visible,
+.cybercall-mode-tabs button.active,
+.cybercall-contact-tabs button.active {
+  border-color: rgba(125, 249, 255, 0.58) !important;
+  background: var(--cybercall-control-hover) !important;
+  color: #d2f9ff !important;
+  box-shadow:
+    0 0 16px rgba(105, 232, 255, 0.26),
+    inset 0 0 12px rgba(105, 232, 255, 0.08) !important;
+  outline: none;
+}
+
+.cybercall-app .window-header button,
+.cybercall-app .window-header a,
+.cybercall-app .window-header .header-control,
+.cybercall-composer-app .window-header button,
+.cybercall-composer-app .window-header a,
+.cybercall-composer-app .window-header .header-control,
+.cybercall-contacts-app .window-header button,
+.cybercall-contacts-app .window-header a,
+.cybercall-contacts-app .window-header .header-control,
+.cybercall-messages-app .window-header button,
+.cybercall-messages-app .window-header a,
+.cybercall-messages-app .window-header .header-control,
+.cybercall-phone-app .window-header button,
+.cybercall-phone-app .window-header a,
+.cybercall-phone-app .window-header .header-control {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0 4px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  font: inherit !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+}
+
+.cybercall-app .window-header button:hover,
+.cybercall-app .window-header button:focus,
+.cybercall-app .window-header a:hover,
+.cybercall-app .window-header a:focus,
+.cybercall-app .window-header .header-control:hover,
+.cybercall-app .window-header .header-control:focus,
+.cybercall-composer-app .window-header button:hover,
+.cybercall-composer-app .window-header button:focus,
+.cybercall-composer-app .window-header a:hover,
+.cybercall-composer-app .window-header a:focus,
+.cybercall-composer-app .window-header .header-control:hover,
+.cybercall-composer-app .window-header .header-control:focus,
+.cybercall-contacts-app .window-header button:hover,
+.cybercall-contacts-app .window-header button:focus,
+.cybercall-contacts-app .window-header a:hover,
+.cybercall-contacts-app .window-header a:focus,
+.cybercall-contacts-app .window-header .header-control:hover,
+.cybercall-contacts-app .window-header .header-control:focus,
+.cybercall-messages-app .window-header button:hover,
+.cybercall-messages-app .window-header button:focus,
+.cybercall-messages-app .window-header a:hover,
+.cybercall-messages-app .window-header a:focus,
+.cybercall-messages-app .window-header .header-control:hover,
+.cybercall-messages-app .window-header .header-control:focus,
+.cybercall-phone-app .window-header button:hover,
+.cybercall-phone-app .window-header button:focus,
+.cybercall-phone-app .window-header a:hover,
+.cybercall-phone-app .window-header a:focus,
+.cybercall-phone-app .window-header .header-control:hover,
+.cybercall-phone-app .window-header .header-control:focus {
+  border: 0 !important;
+  background: transparent !important;
+  color: #d8f8ff !important;
+  box-shadow: none !important;
+  outline: none;
+}
+
+.cybercall-actions button[data-cybercall-action="broadcast"],
+.cybercall-composer-actions button[data-cybercall-compose-action="broadcast"] {
+  border-color: rgba(125, 255, 154, 0.58) !important;
+  background: rgba(18, 201, 109, 0.18) !important;
+}
+
+.cybercall-actions button[data-cybercall-action="decline"],
+.cybercall-actions button[data-cybercall-action="end"],
+.cybercall-composer-actions button[data-cybercall-compose-action="close-active"],
+.cybercall-contact-actions button[data-cybercall-contact-action="remove"],
+.cybercall-delete-thread {
+  border-color: rgba(255, 65, 93, 0.54) !important;
+}
+
+.cybercall-delete-thread {
+  background: rgba(255, 71, 126, 0.12) !important;
+}
+
+.cybercall-delete-thread.confirming {
+  border-color: rgba(255, 207, 99, 0.58) !important;
+  background: rgba(255, 207, 99, 0.16) !important;
+  color: #ffe9a8 !important;
+}
+
+.cybercall-app input,
+.cybercall-app select,
+.cybercall-app textarea,
+.cybercall-composer-app input,
+.cybercall-composer-app select,
+.cybercall-composer-app textarea,
+.cybercall-contacts-app input,
+.cybercall-contacts-app select,
+.cybercall-contacts-app textarea,
+.cybercall-messages-app input,
+.cybercall-messages-app select,
+.cybercall-messages-app textarea,
+.cybercall-phone-app input,
+.cybercall-phone-app select,
+.cybercall-phone-app textarea {
+  border: 1px solid rgba(105, 232, 255, 0.28) !important;
+  border-radius: var(--hs-radius, 6px) !important;
+  background: var(--cybercall-field) !important;
+  background-color: #020c14 !important;
+  color: var(--cybercall-text) !important;
+  box-shadow: inset 0 0 12px rgba(105, 232, 255, 0.06) !important;
+  font-family: var(--hs-font-ui, "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif) !important;
+}
+
+.cybercall-app select option,
+.cybercall-app select optgroup,
+.cybercall-composer-app select option,
+.cybercall-composer-app select optgroup,
+.cybercall-contacts-app select option,
+.cybercall-contacts-app select optgroup,
+.cybercall-messages-app select option,
+.cybercall-messages-app select optgroup,
+.cybercall-phone-app select option,
+.cybercall-phone-app select optgroup,
+.cybercall-phone-shell select option,
+.cybercall-phone-shell select optgroup,
+.cybercall-composer select option,
+.cybercall-composer select optgroup,
+.cybercall-contacts select option,
+.cybercall-contacts select optgroup,
+.cybercall-messages select option,
+.cybercall-messages select optgroup {
+  background: #06111a !important;
+  background-color: #06111a !important;
+  color: #e7faff !important;
+}
+
+.cybercall-app select option:checked,
+.cybercall-app select option:hover,
+.cybercall-composer-app select option:checked,
+.cybercall-composer-app select option:hover,
+.cybercall-contacts-app select option:checked,
+.cybercall-contacts-app select option:hover,
+.cybercall-messages-app select option:checked,
+.cybercall-messages-app select option:hover,
+.cybercall-phone-app select option:checked,
+.cybercall-phone-app select option:hover,
+.cybercall-phone-shell select option:checked,
+.cybercall-phone-shell select option:hover,
+.cybercall-composer select option:checked,
+.cybercall-composer select option:hover,
+.cybercall-contacts select option:checked,
+.cybercall-contacts select option:hover,
+.cybercall-messages select option:checked,
+.cybercall-messages select option:hover {
+  background: #0b4f6f !important;
+  background-color: #0b4f6f !important;
+  color: #d2f9ff !important;
+}
+
+.cybercall-app input:focus,
+.cybercall-app select:focus,
+.cybercall-app textarea:focus,
+.cybercall-composer-app input:focus,
+.cybercall-composer-app select:focus,
+.cybercall-composer-app textarea:focus,
+.cybercall-contacts-app input:focus,
+.cybercall-contacts-app select:focus,
+.cybercall-contacts-app textarea:focus,
+.cybercall-messages-app input:focus,
+.cybercall-messages-app select:focus,
+.cybercall-messages-app textarea:focus,
+.cybercall-phone-app input:focus,
+.cybercall-phone-app select:focus,
+.cybercall-phone-app textarea:focus {
+  border-color: rgba(125, 249, 255, 0.58) !important;
+  box-shadow:
+    0 0 0 2px rgba(105, 232, 255, 0.18),
+    inset 0 0 12px rgba(105, 232, 255, 0.08) !important;
+  outline: none;
+}

@@ -1,13 +1,15 @@
 import {
   renderComposerFallbackTemplate,
   renderContactsFallbackTemplate,
-  renderFallbackTemplate
+  renderFallbackTemplate,
+  renderMessagesFallbackTemplate
 } from "./fallback-templates";
 import { normalizeCallData } from "./call-model";
 import { shouldUseApplicationV2 } from "../../shared/src/application-base";
 
 declare const foundry: any;
 declare const Application: any;
+declare const game: any;
 declare const $: any;
 
 function getLegacyApplicationBase(): any {
@@ -28,12 +30,15 @@ export function createCyberCallAppClasses(deps: any) {
     templatePath,
     composerTemplatePath,
     contactsTemplatePath,
+    messagesTemplatePath,
+    phoneTemplatePath,
     escapeHTML,
     getDefaultComposerData,
     getActorChoices,
     getPlayerChoices,
     getContacts,
     getGroupContacts,
+    getMessageContext,
     getRingtoneChoices,
     getSoundPath,
     getActiveContactsTab,
@@ -41,16 +46,89 @@ export function createCyberCallAppClasses(deps: any) {
     bindCallControls,
     bindComposerControls,
     bindContactsControls,
+    bindMessagesControls,
     stopRinging,
     clearActiveCall,
     clearActiveComposer,
-    clearActiveContacts
+    clearActiveContacts,
+    clearActiveMessages,
+    clearActivePhone
   } = deps;
 
   const ApplicationV2 = foundry?.applications?.api?.ApplicationV2;
   const HandlebarsApplicationMixin = foundry?.applications?.api?.HandlebarsApplicationMixin;
   const LegacyApplication = getLegacyApplicationBase();
   const useApplicationV2 = shouldUseApplicationV2();
+
+  function getContactsContext() {
+    const contacts = getContacts();
+    const groupContacts = getGroupContacts();
+    const activeContactsTab = getActiveContactsTab();
+    return {
+      contacts,
+      groupContacts,
+      hasContacts: contacts.length > 0,
+      hasGroupContacts: groupContacts.length > 0,
+      activeTab: activeContactsTab,
+      isPersonalTab: activeContactsTab !== "group",
+      isGroupTab: activeContactsTab === "group",
+      canEditContactImages: canEditContactImages(),
+      canManageNpcContacts: canEditContactImages(),
+      actors: getActorChoices(),
+      unreadMessageCount: getMessageContext().unreadCount,
+      hasUnreadMessages: getMessageContext().unreadCount > 0,
+      ringtoneChoices: getRingtoneChoices(),
+      currentRingtone: getSoundPath()
+    };
+  }
+
+  function getComposerContext() {
+    return {
+      call: getDefaultComposerData(),
+      actors: getActorChoices(),
+      players: getPlayerChoices(),
+      ringtoneChoices: getRingtoneChoices()
+    };
+  }
+
+  function getPhoneContext(mode: string, contact: any = null) {
+    const isMessagesMode = mode === "messages";
+    const isComposerMode = !isMessagesMode && game.user?.isGM;
+    const isContactsMode = !isMessagesMode && !game.user?.isGM;
+    const data = isMessagesMode ? getMessageContext(contact) : isComposerMode ? getComposerContext() : getContactsContext();
+    return {
+      ...data,
+      mode,
+      isMessagesMode,
+      isComposerMode,
+      isContactsMode,
+      isCallsMode: !isMessagesMode
+    };
+  }
+
+  function renderPhoneFallback(mode: string, data: any) {
+    if (mode === "messages") return renderMessagesFallbackTemplate(data, escapeHTML);
+    if (game.user?.isGM) return renderComposerFallbackTemplate(data, escapeHTML);
+    return renderContactsFallbackTemplate(data, escapeHTML);
+  }
+
+  function renderFallbackPart(html: string) {
+    const wrapper = document.createElement("template");
+    wrapper.innerHTML = html.trim();
+    const element = wrapper.content.firstElementChild;
+    return {
+      main: element instanceof HTMLElement ? element : document.createElement("div")
+    };
+  }
+
+  function bindPhoneControls(app: any, html: any = null) {
+    if (app.mode === "messages") {
+      bindMessagesControls(app, html);
+      return;
+    }
+    if (game.user?.isGM) bindComposerControls(app, html);
+    else bindContactsControls(app, html);
+  }
 
   class CyberCallApplicationV1 extends LegacyApplication {
     callData: any;
@@ -158,21 +236,7 @@ export function createCyberCallAppClasses(deps: any) {
     }
 
     getData() {
-      const contacts = getContacts();
-      const groupContacts = getGroupContacts();
-      const activeContactsTab = getActiveContactsTab();
-      return {
-        contacts,
-        groupContacts,
-        hasContacts: contacts.length > 0,
-        hasGroupContacts: groupContacts.length > 0,
-        activeTab: activeContactsTab,
-        isPersonalTab: activeContactsTab !== "group",
-        isGroupTab: activeContactsTab === "group",
-        canEditContactImages: canEditContactImages(),
-        ringtoneChoices: getRingtoneChoices(),
-        currentRingtone: getSoundPath()
-      };
+      return getContactsContext();
     }
 
     async _renderInner(data: any) {
@@ -191,6 +255,98 @@ export function createCyberCallAppClasses(deps: any) {
 
     async close(options: any) {
       clearActiveContacts(this);
+      return super.close(options);
+    }
+  }
+
+  class CyberCallPhoneV1 extends LegacyApplication {
+    mode: string;
+    contact: any;
+
+    constructor(mode = "calls", contact: any = null, options: any = {}) {
+      super(options);
+      this.mode = mode;
+      this.contact = contact;
+    }
+
+    static get defaultOptions() {
+      return foundry.utils.mergeObject(super.defaultOptions, {
+        id: "cybercall-phone",
+        title: "CyberCall",
+        template: phoneTemplatePath,
+        classes: ["cybercall-phone-app"],
+        popOut: true,
+        resizable: true,
+        width: 720,
+        height: 640
+      });
+    }
+
+    getData() {
+      return getPhoneContext(this.mode, this.contact);
+    }
+
+    async _renderInner(data: any) {
+      try {
+        return await super._renderInner(data);
+      } catch (error) {
+        console.warn(`${moduleId} | Phone template render failed, using inline fallback.`, error);
+        return $(renderPhoneFallback(this.mode, data));
+      }
+    }
+
+    activateListeners(html: any) {
+      super.activateListeners(html);
+      bindPhoneControls(this, html);
+    }
+
+    async close(options: any) {
+      clearActivePhone(this);
+      return super.close(options);
+    }
+  }
+
+  class CyberCallMessagesV1 extends LegacyApplication {
+    contact: any;
+
+    constructor(contact: any = null, options: any = {}) {
+      super(options);
+      this.contact = contact;
+    }
+
+    static get defaultOptions() {
+      return foundry.utils.mergeObject(super.defaultOptions, {
+        id: "cybercall-messages",
+        title: "CyberCall Messages",
+        template: messagesTemplatePath,
+        classes: ["cybercall-messages-app"],
+        popOut: true,
+        resizable: true,
+        width: 720,
+        height: 640
+      });
+    }
+
+    getData() {
+      return getMessageContext(this.contact);
+    }
+
+    async _renderInner(data: any) {
+      try {
+        return await super._renderInner(data);
+      } catch (error) {
+        console.warn(`${moduleId} | Messages template render failed, using inline fallback.`, error);
+        return $(renderMessagesFallbackTemplate(data, escapeHTML));
+      }
+    }
+
+    activateListeners(html: any) {
+      super.activateListeners(html);
+      bindMessagesControls(this, html);
+    }
+
+    async close(options: any) {
+      clearActiveMessages(this);
       return super.close(options);
     }
   }
@@ -238,9 +394,7 @@ export function createCyberCallAppClasses(deps: any) {
           return await super._renderHTML(context, options);
         } catch (error) {
           console.warn(`${moduleId} | Template render failed, using inline fallback.`, error);
-          const wrapper = document.createElement("template");
-          wrapper.innerHTML = renderFallbackTemplate(this.callData, escapeHTML).trim();
-          return wrapper.content;
+          return renderFallbackPart(renderFallbackTemplate(this.callData, escapeHTML));
         }
       }
 
@@ -296,9 +450,7 @@ export function createCyberCallAppClasses(deps: any) {
           return await super._renderHTML(context, options);
         } catch (error) {
           console.warn(`${moduleId} | Composer template render failed, using inline fallback.`, error);
-          const wrapper = document.createElement("template");
-          wrapper.innerHTML = renderComposerFallbackTemplate(context, escapeHTML).trim();
-          return wrapper.content;
+          return renderFallbackPart(renderComposerFallbackTemplate(context, escapeHTML));
         }
       }
 
@@ -339,21 +491,9 @@ export function createCyberCallAppClasses(deps: any) {
       };
 
       async _prepareContext(options: any) {
-        const contacts = getContacts();
-        const groupContacts = getGroupContacts();
-        const activeContactsTab = getActiveContactsTab();
         return {
           ...(await super._prepareContext(options)),
-          contacts,
-          groupContacts,
-          hasContacts: contacts.length > 0,
-          hasGroupContacts: groupContacts.length > 0,
-          activeTab: activeContactsTab,
-          isPersonalTab: activeContactsTab !== "group",
-          isGroupTab: activeContactsTab === "group",
-          canEditContactImages: canEditContactImages(),
-          ringtoneChoices: getRingtoneChoices(),
-          currentRingtone: getSoundPath()
+          ...getContactsContext()
         };
       }
 
@@ -362,9 +502,7 @@ export function createCyberCallAppClasses(deps: any) {
           return await super._renderHTML(context, options);
         } catch (error) {
           console.warn(`${moduleId} | Contacts template render failed, using inline fallback.`, error);
-          const wrapper = document.createElement("template");
-          wrapper.innerHTML = renderContactsFallbackTemplate(context, escapeHTML).trim();
-          return wrapper.content;
+          return renderFallbackPart(renderContactsFallbackTemplate(context, escapeHTML));
         }
       }
 
@@ -380,9 +518,131 @@ export function createCyberCallAppClasses(deps: any) {
     };
   }
 
+  function createPhoneV2Class() {
+    if (!useApplicationV2 || !ApplicationV2 || !HandlebarsApplicationMixin) return null;
+
+    return class CyberCallPhoneV2 extends HandlebarsApplicationMixin(ApplicationV2) {
+      mode: string;
+      contact: any;
+
+      static DEFAULT_OPTIONS = {
+        id: "cybercall-phone",
+        tag: "section",
+        classes: ["cybercall-phone-app"],
+        window: {
+          title: "CyberCall",
+          resizable: true
+        },
+        position: {
+          width: 720,
+          height: 640
+        }
+      };
+
+      static PARTS = {
+        main: {
+          template: phoneTemplatePath
+        }
+      };
+
+      constructor(mode = "calls", contact: any = null, options: any = {}) {
+        super(options);
+        this.mode = mode;
+        this.contact = contact;
+      }
+
+      async _prepareContext(options: any) {
+        return {
+          ...(await super._prepareContext(options)),
+          ...getPhoneContext(this.mode, this.contact)
+        };
+      }
+
+      async _renderHTML(context: any, options: any) {
+        try {
+          return await super._renderHTML(context, options);
+        } catch (error) {
+          console.warn(`${moduleId} | Phone template render failed, using inline fallback.`, error);
+          return renderFallbackPart(renderPhoneFallback(this.mode, context));
+        }
+      }
+
+      _onRender(context: any, options: any) {
+        super._onRender?.(context, options);
+        bindPhoneControls(this);
+      }
+
+      async close(options: any) {
+        clearActivePhone(this);
+        return super.close(options);
+      }
+    };
+  }
+
+  function createMessagesV2Class() {
+    if (!useApplicationV2 || !ApplicationV2 || !HandlebarsApplicationMixin) return null;
+
+    return class CyberCallMessagesV2 extends HandlebarsApplicationMixin(ApplicationV2) {
+      contact: any;
+
+      static DEFAULT_OPTIONS = {
+        id: "cybercall-messages",
+        tag: "section",
+        classes: ["cybercall-messages-app"],
+        window: {
+          title: "CyberCall Messages",
+          resizable: true
+        },
+        position: {
+          width: 720,
+          height: 640
+        }
+      };
+
+      static PARTS = {
+        main: {
+          template: messagesTemplatePath
+        }
+      };
+
+      constructor(contact: any = null, options: any = {}) {
+        super(options);
+        this.contact = contact;
+      }
+
+      async _prepareContext(options: any) {
+        return {
+          ...(await super._prepareContext(options)),
+          ...getMessageContext(this.contact)
+        };
+      }
+
+      async _renderHTML(context: any, options: any) {
+        try {
+          return await super._renderHTML(context, options);
+        } catch (error) {
+          console.warn(`${moduleId} | Messages template render failed, using inline fallback.`, error);
+          return renderFallbackPart(renderMessagesFallbackTemplate(context, escapeHTML));
+        }
+      }
+
+      _onRender(context: any, options: any) {
+        super._onRender?.(context, options);
+        bindMessagesControls(this);
+      }
+
+      async close(options: any) {
+        clearActiveMessages(this);
+        return super.close(options);
+      }
+    };
+  }
+
   return {
     CyberCallApplication: createApplicationV2Class() ?? CyberCallApplicationV1,
     CyberCallComposer: createComposerV2Class() ?? CyberCallComposerV1,
-    CyberCallContacts: createContactsV2Class() ?? CyberCallContactsV1
+    CyberCallContacts: createContactsV2Class() ?? CyberCallContactsV1,
+    CyberCallMessages: createMessagesV2Class() ?? CyberCallMessagesV1,
+    CyberCallPhone: createPhoneV2Class() ?? CyberCallPhoneV1
   };
 }

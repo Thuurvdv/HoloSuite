@@ -3,6 +3,10 @@ export const SOCKET_NAME = `module.${MODULE_ID}`;
 export const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall.hbs`;
 export const COMPOSER_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-composer.hbs`;
 export const CONTACTS_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-contacts.hbs`;
+export const MESSAGES_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-messages.hbs`;
+export const PHONE_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-phone.hbs`;
+export const MESSAGE_FLAG_KIND = "phoneMessage";
+export const MESSAGE_SCHEMA_VERSION = 1;
 
 export const RINGTONE_CHOICES = {
   "": "Silent",

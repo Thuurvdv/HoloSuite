@@ -1,5 +1,9 @@
 .cybercall-contacts {
+  box-sizing: border-box;
+  min-height: 100%;
+  height: 100%;
   padding: 16px;
+  overflow: auto;
   border: 1px solid rgba(94, 231, 255, 0.42);
   border-radius: var(--hs-radius);
   background:
@@ -15,7 +19,6 @@
   box-shadow:
     0 0 22px rgba(0, 167, 255, 0.24),
     inset 0 0 28px rgba(94, 231, 255, 0.1);
-  overflow: visible;
 }
 
 .cybercall-contacts-header {
@@ -32,6 +35,9 @@
 }
 
 .cybercall-contacts-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 4px 0 0;
   color: #ffffff;
   font-size: 22px;
@@ -39,20 +45,41 @@
   text-transform: uppercase;
 }
 
+.cybercall-unread-label {
+  display: inline-grid;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 7px;
+  place-items: center;
+  border-radius: 999px;
+  background: #ff477e;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+}
+
 .cybercall-contact-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  max-width: 320px;
+  margin: 0 0 10px;
+  padding: 4px;
+  border: 1px solid rgba(94, 231, 255, 0.16);
+  border-radius: var(--hs-radius);
+  background: rgba(1, 8, 16, 0.3);
 }
 
 .cybercall-contact-tabs button {
-  border: 1px solid rgba(94, 231, 255, 0.34);
+  min-height: 28px;
+  border: 1px solid rgba(94, 231, 255, 0.22);
   border-radius: var(--hs-radius);
-  background: rgba(0, 124, 190, 0.12);
-  color: rgba(217, 251, 255, 0.78);
+  background: rgba(0, 124, 190, 0.08);
+  color: #a8eaf5;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
+  text-shadow: none;
 }
 
 .cybercall-contact-tabs button.active,
@@ -60,7 +87,7 @@
 .cybercall-contact-tabs button:focus-visible {
   border-color: var(--cybercall-cyan);
   background: rgba(94, 231, 255, 0.22);
-  color: #ffffff;
+  color: #d2f9ff;
   box-shadow: 0 0 14px rgba(94, 231, 255, 0.22);
 }
 
@@ -145,7 +172,7 @@
 
 .cybercall-contacts-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
   align-items: end;
   margin-top: 12px;
@@ -163,7 +190,8 @@
   text-transform: uppercase;
 }
 
-.cybercall-contacts-form input {
+.cybercall-contacts-form input,
+.cybercall-contacts-form select {
   width: 100%;
   border: 1px solid rgba(94, 231, 255, 0.32);
   border-radius: var(--hs-radius);
@@ -172,12 +200,23 @@
   box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
 }
 
-.cybercall-contacts-form input:focus-visible {
+.cybercall-contacts-form input:focus-visible,
+.cybercall-contacts-form select:focus-visible {
   border-color: var(--cybercall-cyan);
   box-shadow:
     0 0 10px rgba(94, 231, 255, 0.22),
     inset 0 0 12px rgba(94, 231, 255, 0.1);
   outline: none;
+}
+
+.cybercall-contact-toggle {
+  align-self: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  text-transform: none;
+}
+
+.cybercall-contact-toggle input {
+  width: auto;
 }
 
 .cybercall-contact-actions button,
@@ -186,9 +225,10 @@
   border: 1px solid rgba(94, 231, 255, 0.48);
   border-radius: var(--hs-radius);
   background: rgba(0, 124, 190, 0.18);
-  color: var(--cybercall-text);
+  color: #b9f4ff;
   font-weight: 700;
   text-transform: uppercase;
+  text-shadow: none;
 }
 
 .cybercall-contact-actions button[data-cybercall-contact-action="remove"] {
@@ -201,6 +241,7 @@
 .cybercall-contacts-form button:focus-visible {
   border-color: var(--cybercall-cyan);
   background: rgba(94, 231, 255, 0.22);
+  color: #d2f9ff;
   box-shadow: 0 0 14px rgba(94, 231, 255, 0.25);
 }
 

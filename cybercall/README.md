@@ -15,6 +15,9 @@ Players can also call the GM using a built-in contacts directory, making two-way
 - Players can accept or end calls, and the state syncs across all connected clients.
 - Fullscreen mode turns a call into a dramatic table-wide broadcast.
 - Players can keep a personal contacts list for each world and a shared group contacts list, and place calls to the GM from those contacts.
+- Players can send persistent private CyberCall messages to other players or to contacts handled by the GM.
+- GMs can link contacts to Actors and reply in message threads as that NPC/contact.
+- Direct calls now leave lightweight history events in the related message thread.
 
 ## Tutorial: Using CyberCall as a DM
 
@@ -64,3 +67,18 @@ Players can also call the GM using a built-in contacts directory, making two-way
 - Open **Configure Settings** and find the **CyberCall** section.
 - Pick a ringtone from the dropdown, or choose **Silent** if you prefer no sound.
 - Your personal contacts and ringtone choice are saved per browser, so they only affect your own client. Personal contacts are separated per world.
+
+### Sending Messages
+
+- Open **CyberCall Contacts** and click **Messages** to open the message console.
+- Use the **Calls** and **Messages** tabs to switch between call/contact tools and message threads.
+- Click **New** in the message console to start a new conversation.
+- Use the **To** dropdown to message another player, GM, personal contact, or group contact directly, or click **Message** beside a saved contact.
+- Messages to saved contacts without a linked player are whispered to the GM users, so the GM can answer in character.
+- When a GM opens an NPC/contact thread, the **Reply As** dropdown can send the reply under the contact identity instead of the GM name.
+- When a GM starts a new conversation, **Send As** can send from a GM-managed contact or Actor/NPC identity.
+- Replies inside an existing thread automatically go back to the current conversation partner; the **To** picker is only used for starting a new thread.
+- CyberCall message history is stored as private Foundry chat messages with CyberCall flags. Read state is saved locally per client.
+- CyberCall chat cards in Foundry chat include an **Open CyberCall** button that opens the related message thread.
+- **Delete Thread** clears a conversation from your local CyberCall message list. Newer messages in that thread can appear again later.
+- Outgoing, connected, ended, and missed direct-call events appear in the same thread as message history.

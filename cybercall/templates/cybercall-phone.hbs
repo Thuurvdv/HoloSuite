@@ -1,0 +1,343 @@
+<section class="cybercall-phone-shell cybercall-phone-{{mode}}">
+  {{#if isComposerMode}}
+    <form class="cybercall-composer" data-cybercall-composer>
+      <header class="cybercall-composer-header">
+        <div>
+          <div class="cybercall-composer-kicker">Transmission Console</div>
+          <h2>CyberCall Composer</h2>
+        </div>
+        <output data-cybercall-signal-output>{{call.signal}}%</output>
+      </header>
+
+      <nav class="cybercall-mode-tabs">
+        <button type="button" class="active" data-cybercall-mode-tab="calls">Calls</button>
+        <button type="button" data-cybercall-compose-action="open-messages" data-cybercall-mode-tab="messages">Messages</button>
+      </nav>
+
+      <section class="cybercall-composer-grid">
+        <label>
+          <span>Actor Portrait</span>
+          <select name="actorId">
+            <option value="">Manual / no actor</option>
+            {{#each actors}}
+              <option value="{{id}}">{{name}}</option>
+            {{/each}}
+          </select>
+        </label>
+
+        <label>
+          <span>Variant</span>
+          <select name="variant">
+            <option value="standard" {{#if call.isStandard}}selected{{/if}}>Standard Blue</option>
+            <option value="emergency" {{#if call.isEmergency}}selected{{/if}}>Emergency Red</option>
+            <option value="corrupted" {{#if call.isCorrupted}}selected{{/if}}>Corrupted Green</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Caller Name</span>
+          <input type="text" name="callerName" value="{{call.callerName}}" placeholder="UNKNOWN CALLER">
+        </label>
+
+        <label>
+          <span>Subtitle / Faction</span>
+          <input type="text" name="subtitle" value="{{call.subtitle}}" placeholder="ATLAS Corporation">
+        </label>
+
+        <label class="cybercall-composer-wide">
+          <span>Portrait Image Path</span>
+          <div class="cybercall-composer-path-row">
+            <input type="text" name="image" value="{{call.image}}" placeholder="path/to/image.webp">
+            <button type="button" data-cybercall-compose-action="browse-image" title="Browse portrait image"><i class="fa-solid fa-folder-open"></i></button>
+          </div>
+        </label>
+
+        <label class="cybercall-composer-wide">
+          <span>Message</span>
+          <textarea name="message" rows="5" placeholder="Officer, we have a situation.">{{call.message}}</textarea>
+        </label>
+
+        <label class="cybercall-composer-wide cybercall-composer-range">
+          <span>Signal Strength</span>
+          <input type="range" name="signal" min="0" max="100" step="1" value="{{call.signal}}">
+        </label>
+      </section>
+
+      <section class="cybercall-composer-toggles">
+        <label>
+          <input type="checkbox" name="fullscreen" {{#if call.fullscreen}}checked{{/if}}>
+          <span>Fullscreen broadcast mode</span>
+        </label>
+
+        <label>
+          <input type="checkbox" name="ringing" {{#if call.ringing}}checked{{/if}}>
+          <span>Incoming ringing animation and sound</span>
+        </label>
+      </section>
+
+      <section class="cybercall-composer-targets">
+        <span>Recipients</span>
+        <div class="cybercall-recipient-grid">
+          {{#each players as |player|}}
+            <label>
+              <input type="checkbox" name="targetUserIds" value="{{player.id}}">
+              <span>{{player.name}}{{#unless player.active}} (offline){{/unless}}</span>
+            </label>
+          {{else}}
+            <p>No player users found.</p>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="cybercall-composer-ringtone">
+        <label class="cybercall-ringtone-select">
+          <span>Ringtone</span>
+          <select data-cybercall-ringtone>
+            {{#each ringtoneChoices}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </label>
+      </section>
+
+      <footer class="cybercall-composer-actions">
+        <button type="button" data-cybercall-compose-action="preview">Preview Locally</button>
+        <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>
+        <button type="button" data-cybercall-compose-action="close-active">Close Active Call</button>
+        <button type="button" data-cybercall-compose-action="reset">Reset Form</button>
+      </footer>
+    </form>
+  {{/if}}
+
+  {{#if isContactsMode}}
+    <section class="cybercall-contacts">
+      <header class="cybercall-contacts-header">
+        <div>
+          <div class="cybercall-contacts-kicker">Personal Comms Directory</div>
+          <h2>CyberCall Contacts{{#if hasUnreadMessages}} <span class="cybercall-unread-label">{{unreadMessageCount}}</span>{{/if}}</h2>
+        </div>
+      </header>
+
+      <nav class="cybercall-mode-tabs">
+        <button type="button" class="active" data-cybercall-mode-tab="calls">Calls</button>
+        <button type="button" data-cybercall-open-messages data-cybercall-mode-tab="messages">Messages</button>
+      </nav>
+
+      <nav class="cybercall-contact-tabs">
+        <button type="button" class="{{#if isPersonalTab}}active{{/if}}" data-cybercall-contact-tab="personal">Personal</button>
+        <button type="button" class="{{#if isGroupTab}}active{{/if}}" data-cybercall-contact-tab="group">Group</button>
+      </nav>
+
+      <section data-cybercall-contact-panel="personal" {{#unless isPersonalTab}}hidden{{/unless}}>
+        <ul class="cybercall-contacts-list">
+          {{#if hasContacts}}
+            {{#each contacts}}
+              <li>
+                <div class="cybercall-contact-avatar">
+                  {{#if image}}
+                    <img src="{{image}}" alt="">
+                  {{else}}
+                    <span>{{initials}}</span>
+                  {{/if}}
+                </div>
+                <div class="cybercall-contact-id">
+                  <strong>{{name}}</strong>
+                  <span>{{number}}</span>
+                </div>
+                <div class="cybercall-contact-actions">
+                  <button type="button" data-cybercall-contact-action="call" data-contact-scope="personal" data-contact-id="{{id}}">Call</button>
+                  <button type="button" data-cybercall-contact-action="message" data-contact-scope="personal" data-contact-id="{{id}}">Message</button>
+                  <button type="button" data-cybercall-contact-action="remove" data-contact-scope="personal" data-contact-id="{{id}}">Remove</button>
+                </div>
+              </li>
+            {{/each}}
+          {{else}}
+            <li class="cybercall-contacts-empty">
+              <span>No personal contacts stored.</span>
+            </li>
+          {{/if}}
+        </ul>
+      </section>
+
+      <section data-cybercall-contact-panel="group" {{#unless isGroupTab}}hidden{{/unless}}>
+        <ul class="cybercall-contacts-list">
+          {{#if hasGroupContacts}}
+            {{#each groupContacts}}
+              <li>
+                <div class="cybercall-contact-avatar">
+                  {{#if image}}
+                    <img src="{{image}}" alt="">
+                  {{else}}
+                    <span>{{initials}}</span>
+                  {{/if}}
+                </div>
+                <div class="cybercall-contact-id">
+                  <strong>{{name}}</strong>
+                  <span>{{number}}</span>
+                </div>
+                <div class="cybercall-contact-actions">
+                  <button type="button" data-cybercall-contact-action="call" data-contact-scope="group" data-contact-id="{{id}}">Call</button>
+                  <button type="button" data-cybercall-contact-action="message" data-contact-scope="group" data-contact-id="{{id}}">Message</button>
+                  <button type="button" data-cybercall-contact-action="remove" data-contact-scope="group" data-contact-id="{{id}}">Remove</button>
+                </div>
+              </li>
+            {{/each}}
+          {{else}}
+            <li class="cybercall-contacts-empty">
+              <span>No group contacts stored.</span>
+            </li>
+          {{/if}}
+        </ul>
+      </section>
+
+      <form class="cybercall-contacts-form" data-cybercall-contacts-form>
+        <input type="hidden" name="scope" value="{{activeTab}}">
+
+        <label>
+          <span>Name</span>
+          <input type="text" name="name" autocomplete="off" required>
+        </label>
+
+        <label>
+          <span>Number</span>
+          <input type="text" name="number" autocomplete="off" required>
+        </label>
+
+        {{#if canEditContactImages}}
+          <label>
+            <span>Actor</span>
+            <select name="actorId">
+              <option value="">No linked actor</option>
+              {{#each actors}}
+                <option value="{{id}}">{{name}}</option>
+              {{/each}}
+            </select>
+          </label>
+
+          <label>
+            <span>Picture</span>
+            <input type="text" name="image" autocomplete="off" placeholder="icons/...">
+          </label>
+
+          <label class="cybercall-contact-toggle">
+            <input type="checkbox" name="managedByGM">
+            <span>GM replies as contact</span>
+          </label>
+        {{/if}}
+
+        <button type="submit">Add Contact</button>
+      </form>
+
+      <footer class="cybercall-contacts-footer">
+        <label class="cybercall-ringtone-select">
+          <span>Ringtone</span>
+          <select data-cybercall-ringtone>
+            {{#each ringtoneChoices}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </label>
+      </footer>
+    </section>
+  {{/if}}
+
+  {{#if isMessagesMode}}
+    <section class="cybercall-messages {{#if isFoundryV13Plus}}cybercall-modern-messages{{/if}}" data-cybercall-active-thread="{{activeThreadId}}">
+      <nav class="cybercall-mode-tabs">
+        <button type="button" data-cybercall-message-action="open-calls" data-cybercall-mode-tab="calls">Calls</button>
+        <button type="button" class="active" data-cybercall-mode-tab="messages">Messages</button>
+      </nav>
+
+      <aside class="cybercall-thread-list">
+        <header>
+          <h2>Messages</h2>
+          <div class="cybercall-message-header-actions">
+            <button type="button" data-cybercall-message-action="new">New</button>
+            <button type="button" data-cybercall-message-action="refresh">Refresh</button>
+          </div>
+        </header>
+
+        {{#if hasThreads}}
+          {{#each threads}}
+            <button type="button" class="cybercall-thread {{#if active}}active{{/if}}" data-cybercall-thread-id="{{id}}">
+              <span class="cybercall-thread-initials">{{initials}}</span>
+              <span class="cybercall-thread-body">
+                <strong>{{title}}</strong>
+                <small>{{lastPreview}}</small>
+              </span>
+              {{#if unread}}<span class="cybercall-thread-unread">{{unreadCount}}</span>{{/if}}
+            </button>
+          {{/each}}
+        {{else}}
+          <div class="cybercall-messages-empty">No messages yet.</div>
+        {{/if}}
+      </aside>
+
+      <main class="cybercall-conversation">
+        <header>
+          <div>
+            <div class="cybercall-contacts-kicker">{{#if activeThread}}{{activeThread.subtitle}}{{else}}Secure Channel{{/if}}</div>
+            <h3>{{#if activeThread}}{{activeThread.title}}{{else}}New Message{{/if}}</h3>
+          </div>
+          {{#if canDeleteThread}}
+            <button type="button" class="cybercall-delete-thread" data-cybercall-message-action="delete-thread">Delete Thread</button>
+          {{/if}}
+        </header>
+
+        <div class="cybercall-message-log">
+          {{#if activeThread}}
+            {{#each activeThread.messages}}
+              <article class="cybercall-message {{#if isMine}}mine{{/if}} {{#if isEvent}}event{{/if}}">
+                <strong>{{senderName}}</strong>
+                <p>{{body}}</p>
+                <time>{{createdAtLabel}}</time>
+              </article>
+            {{/each}}
+          {{else}}
+            <div class="cybercall-messages-empty">Select a thread or send a new message.</div>
+          {{/if}}
+        </div>
+
+        <form class="cybercall-message-form {{#if canReplyAs}}has-reply-as{{/if}} {{#if canSendAs}}has-send-as{{/if}}" data-cybercall-message-form>
+          {{#if isThreadReply}}
+            <div class="cybercall-thread-reply-target">
+              <span>To</span>
+              <strong>{{threadReplyLabel}}</strong>
+            </div>
+          {{else}}
+            <label>
+              <span>To</span>
+              <select name="contactId" {{#unless hasContacts}}disabled{{/unless}}>
+                {{#each allContacts}}
+                  <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}} - {{number}}</option>
+                {{/each}}
+              </select>
+            </label>
+          {{/if}}
+          {{#if canReplyAs}}
+            <label>
+              <span>Reply As</span>
+              <select name="replyAs">
+                {{#each replyAsChoices}}
+                  <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+            </label>
+          {{/if}}
+          {{#if canSendAs}}
+            <label>
+              <span>Send As</span>
+              <select name="sendAs">
+                {{#each sendAsChoices}}
+                  <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+            </label>
+          {{/if}}
+          <textarea name="body" rows="3" placeholder="Type message..." required></textarea>
+          <button type="submit" {{#unless hasContacts}}disabled{{/unless}}>Send</button>
+        </form>
+      </main>
+    </section>
+  {{/if}}
+</section>

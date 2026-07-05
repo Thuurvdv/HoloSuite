@@ -80,11 +80,21 @@ export function normalizeCallData(data: any = {}) {
 }
 
 export function normalizeContact(contact: any = {}) {
+  const userIds = Array.isArray(contact.userIds)
+    ? contact.userIds.map((id: any) => String(id)).filter(Boolean)
+    : contact.userId
+      ? [String(contact.userId)]
+      : [];
   return {
     id: String(contact.id ?? createCallId()),
     name: String(contact.name ?? "").trim(),
     number: String(contact.number ?? "").trim(),
     image: String(contact.image ?? contact.img ?? "").trim(),
+    actorId: String(contact.actorId ?? "").trim(),
+    userId: String(contact.userId ?? userIds[0] ?? "").trim(),
+    userIds,
+    managedByGM: contact.managedByGM === true,
+    isNpc: contact.isNpc === true || Boolean(contact.actorId) || contact.managedByGM === true,
     initials: getInitials(contact.name)
   };
 }
