@@ -1,0 +1,97 @@
+<section class="cybercall-messages {{#if isFoundryV13Plus}}cybercall-modern-messages{{/if}}" data-cybercall-active-thread="{{activeThreadId}}">
+  <nav class="cybercall-mode-tabs">
+    <button type="button" data-cybercall-message-action="open-calls" data-cybercall-mode-tab="calls">Calls</button>
+    <button type="button" class="active" data-cybercall-mode-tab="messages">Messages</button>
+  </nav>
+
+  <aside class="cybercall-thread-list">
+    <header>
+      <h2>Messages</h2>
+      <div class="cybercall-message-header-actions">
+        <button type="button" data-cybercall-message-action="new">New</button>
+        <button type="button" data-cybercall-message-action="refresh">Refresh</button>
+      </div>
+    </header>
+
+    {{#if hasThreads}}
+      {{#each threads}}
+        <button type="button" class="cybercall-thread {{#if active}}active{{/if}}" data-cybercall-thread-id="{{id}}">
+          <span class="cybercall-thread-initials">{{initials}}</span>
+          <span class="cybercall-thread-body">
+            <strong>{{title}}</strong>
+            <small>{{lastPreview}}</small>
+          </span>
+          {{#if unread}}<span class="cybercall-thread-unread">{{unreadCount}}</span>{{/if}}
+        </button>
+      {{/each}}
+    {{else}}
+      <div class="cybercall-messages-empty">No messages yet.</div>
+    {{/if}}
+  </aside>
+
+  <main class="cybercall-conversation">
+    <header>
+      <div>
+        <div class="cybercall-contacts-kicker">{{#if activeThread}}{{activeThread.subtitle}}{{else}}Secure Channel{{/if}}</div>
+        <h3>{{#if activeThread}}{{activeThread.title}}{{else}}New Message{{/if}}</h3>
+      </div>
+      {{#if canDeleteThread}}
+        <button type="button" class="cybercall-delete-thread" data-cybercall-message-action="delete-thread">Delete Thread</button>
+      {{/if}}
+    </header>
+
+    <div class="cybercall-message-log">
+      {{#if activeThread}}
+        {{#each activeThread.messages}}
+          <article class="cybercall-message {{#if isMine}}mine{{/if}} {{#if isEvent}}event{{/if}}">
+            <strong>{{senderName}}</strong>
+            <p>{{body}}</p>
+            <time>{{createdAtLabel}}</time>
+          </article>
+        {{/each}}
+      {{else}}
+        <div class="cybercall-messages-empty">Select a thread or send a new message.</div>
+      {{/if}}
+    </div>
+
+    <form class="cybercall-message-form {{#if canReplyAs}}has-reply-as{{/if}} {{#if canSendAs}}has-send-as{{/if}}" data-cybercall-message-form>
+      {{#if isThreadReply}}
+        <div class="cybercall-thread-reply-target">
+          <span>To</span>
+          <strong>{{threadReplyLabel}}</strong>
+        </div>
+      {{else}}
+        <label>
+          <span>To</span>
+          <select name="contactId" {{#unless hasContacts}}disabled{{/unless}}>
+            {{#each allContacts}}
+              <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}} - {{number}}</option>
+            {{/each}}
+          </select>
+        </label>
+      {{/if}}
+      {{#if canReplyAs}}
+        <label>
+          <span>Reply As</span>
+          <select name="replyAs">
+            {{#each replyAsChoices}}
+              <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </label>
+      {{/if}}
+      {{#if canSendAs}}
+        <label>
+          <span>Send As</span>
+          <select name="sendAs">
+            {{#each sendAsChoices}}
+              <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </label>
+      {{/if}}
+      <textarea name="body" rows="3" placeholder="Type message..." required></textarea>
+      <button type="submit" {{#unless hasContacts}}disabled{{/unless}}>Send</button>
+    </form>
+  </main>
+</section>

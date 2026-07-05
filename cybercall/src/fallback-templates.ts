@@ -64,6 +64,10 @@ export function renderComposerFallbackTemplate(data: any, escapeHTML: EscapeHTML
 
   return `
     <form class="cybercall-composer" data-cybercall-composer>
+      <nav class="cybercall-mode-tabs">
+        <button type="button" class="active" data-cybercall-mode-tab="calls">Calls</button>
+        <button type="button" data-cybercall-compose-action="open-messages" data-cybercall-mode-tab="messages">Messages</button>
+      </nav>
       <label>Actor Portrait
         <select name="actorId">
           <option value="">Manual / no actor</option>
@@ -116,6 +120,7 @@ export function renderContactsFallbackTemplate(data: any, escapeHTML: EscapeHTML
           </div>
           <div class="cybercall-contact-actions">
             <button type="button" data-cybercall-contact-action="call" data-contact-scope="${scope}" data-contact-id="${escapeHTML(contact.id)}">Call</button>
+            <button type="button" data-cybercall-contact-action="message" data-contact-scope="${scope}" data-contact-id="${escapeHTML(contact.id)}">Message</button>
             <button type="button" data-cybercall-contact-action="remove" data-contact-scope="${scope}" data-contact-id="${escapeHTML(contact.id)}">Remove</button>
           </div>
         </li>
@@ -123,18 +128,35 @@ export function renderContactsFallbackTemplate(data: any, escapeHTML: EscapeHTML
     : '<li class="cybercall-contacts-empty">No contacts stored.</li>';
   const personalActive = data.activeTab !== "group";
   const groupActive = data.activeTab === "group";
+  const actorOptions = (data.actors ?? [])
+    .map((actor: any) => `<option value="${escapeHTML(actor.id)}">${escapeHTML(actor.name)}</option>`)
+    .join("");
   const imageField = data.canEditContactImages
-    ? '<label>Picture <input type="text" name="image" placeholder="icons/..."></label>'
+    ? `
+        <label>Actor
+          <select name="actorId">
+            <option value="">No linked actor</option>
+            ${actorOptions}
+          </select>
+        </label>
+        <label>Picture <input type="text" name="image" placeholder="icons/..."></label>
+        <label class="cybercall-contact-toggle"><input type="checkbox" name="managedByGM"> <span>GM replies as contact</span></label>
+      `
     : "";
+  const unreadLabel = data.hasUnreadMessages ? ` <span class="cybercall-unread-label">${escapeHTML(data.unreadMessageCount)}</span>` : "";
 
   return `
     <section class="cybercall-contacts">
       <header class="cybercall-contacts-header">
         <div>
           <div class="cybercall-contacts-kicker">Personal Comms Directory</div>
-          <h2>CyberCall Contacts</h2>
+          <h2>CyberCall Contacts${unreadLabel}</h2>
         </div>
       </header>
+      <nav class="cybercall-mode-tabs">
+        <button type="button" class="active" data-cybercall-mode-tab="calls">Calls</button>
+        <button type="button" data-cybercall-open-messages data-cybercall-mode-tab="messages">Messages</button>
+      </nav>
       <nav class="cybercall-contact-tabs">
         <button type="button" class="${personalActive ? "active" : ""}" data-cybercall-contact-tab="personal">Personal</button>
         <button type="button" class="${groupActive ? "active" : ""}" data-cybercall-contact-tab="group">Group</button>
@@ -162,6 +184,111 @@ export function renderContactsFallbackTemplate(data: any, escapeHTML: EscapeHTML
           </select>
         </label>
       </footer>
+    </section>
+  `;
+}
+
+export function renderMessagesFallbackTemplate(data: any, escapeHTML: EscapeHTML) {
+  const threads = data.threads ?? [];
+  const activeThread = data.activeThread ?? null;
+  const contacts = data.allContacts ?? [];
+  const threadMarkup = threads.length
+    ? threads.map((thread: any) => `
+        <button type="button" class="cybercall-thread ${thread.active ? "active" : ""}" data-cybercall-thread-id="${escapeHTML(thread.id)}">
+          <span class="cybercall-thread-initials">${escapeHTML(thread.initials)}</span>
+          <span class="cybercall-thread-body">
+            <strong>${escapeHTML(thread.title)}</strong>
+            <small>${escapeHTML(thread.lastPreview)}</small>
+          </span>
+          ${thread.unread ? `<span class="cybercall-thread-unread">${thread.unreadCount}</span>` : ""}
+        </button>
+      `).join("")
+    : '<div class="cybercall-messages-empty">No messages yet.</div>';
+  const contactOptions = contacts
+    .map((contact: any) => `<option value="${escapeHTML(contact.id)}" ${data.selectedContactId === contact.id ? "selected" : ""}>${escapeHTML(contact.name)} - ${escapeHTML(contact.number)}</option>`)
+    .join("");
+  const replyAsMarkup = data.canReplyAs
+    ? `
+      <label>
+        <span>Reply As</span>
+        <select name="replyAs">
+          ${(data.replyAsChoices ?? []).map((choice: any) =>
+            `<option value="${escapeHTML(choice.id)}" ${choice.selected ? "selected" : ""}>${escapeHTML(choice.label)}</option>`
+          ).join("")}
+        </select>
+      </label>
+    `
+    : "";
+  const sendAsMarkup = data.canSendAs
+    ? `
+      <label>
+        <span>Send As</span>
+        <select name="sendAs">
+          ${(data.sendAsChoices ?? []).map((choice: any) =>
+            `<option value="${escapeHTML(choice.id)}" ${choice.selected ? "selected" : ""}>${escapeHTML(choice.label)}</option>`
+          ).join("")}
+        </select>
+      </label>
+    `
+    : "";
+  const toMarkup = data.isThreadReply
+    ? `
+      <div class="cybercall-thread-reply-target">
+        <span>To</span>
+        <strong>${escapeHTML(data.threadReplyLabel ?? "")}</strong>
+      </div>
+    `
+    : `
+      <label>
+        <span>To</span>
+        <select name="contactId" ${contacts.length ? "" : "disabled"}>
+          ${contactOptions}
+        </select>
+      </label>
+    `;
+  const messageMarkup = activeThread?.messages?.length
+    ? activeThread.messages.map((message: any) => `
+        <article class="cybercall-message ${message.isMine ? "mine" : ""} ${message.isEvent ? "event" : ""}">
+          <strong>${escapeHTML(message.senderName)}</strong>
+          <p>${escapeHTML(message.body)}</p>
+          <time>${escapeHTML(message.createdAtLabel ?? message.createdAt)}</time>
+        </article>
+      `).join("")
+    : '<div class="cybercall-messages-empty">Select a thread or send a new message.</div>';
+
+  return `
+    <section class="cybercall-messages ${data.isFoundryV13Plus ? "cybercall-modern-messages" : ""}" data-cybercall-active-thread="${escapeHTML(data.activeThreadId ?? "")}">
+      <nav class="cybercall-mode-tabs">
+        <button type="button" data-cybercall-message-action="open-calls" data-cybercall-mode-tab="calls">Calls</button>
+        <button type="button" class="active" data-cybercall-mode-tab="messages">Messages</button>
+      </nav>
+      <aside class="cybercall-thread-list">
+        <header>
+          <h2>Messages</h2>
+          <div class="cybercall-message-header-actions">
+            <button type="button" data-cybercall-message-action="new">New</button>
+            <button type="button" data-cybercall-message-action="refresh">Refresh</button>
+          </div>
+        </header>
+        ${threadMarkup}
+      </aside>
+      <main class="cybercall-conversation">
+        <header>
+          <div>
+            <div class="cybercall-contacts-kicker">${activeThread ? escapeHTML(activeThread.subtitle) : "Secure Channel"}</div>
+            <h3>${activeThread ? escapeHTML(activeThread.title) : "New Message"}</h3>
+          </div>
+          ${data.canDeleteThread ? '<button type="button" class="cybercall-delete-thread" data-cybercall-message-action="delete-thread">Delete Thread</button>' : ""}
+        </header>
+        <div class="cybercall-message-log">${messageMarkup}</div>
+        <form class="cybercall-message-form ${data.canReplyAs ? "has-reply-as" : ""} ${data.canSendAs ? "has-send-as" : ""}" data-cybercall-message-form>
+          ${toMarkup}
+          ${replyAsMarkup}
+          ${sendAsMarkup}
+          <textarea name="body" rows="3" placeholder="Type message..." required></textarea>
+          <button type="submit" ${contacts.length ? "" : "disabled"}>Send</button>
+        </form>
+      </main>
     </section>
   `;
 }

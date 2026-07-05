@@ -9,17 +9,26 @@ import {
 import {
   COMPOSER_TEMPLATE_PATH,
   CONTACTS_TEMPLATE_PATH,
+  MESSAGE_FLAG_KIND,
+  MESSAGES_TEMPLATE_PATH,
   MODULE_ID,
+  PHONE_TEMPLATE_PATH,
   RINGTONE_CHOICES,
   SOCKET_NAME,
   TEMPLATE_PATH
 } from "./constants";
 import { escapeHTML } from "./dom-utils";
+import { createThreadIdForContact, prepareThreads } from "./message-model";
+import { createMessageEvent, getStoredMessages, sendMessageToContact } from "./message-service";
 
 let activeCall = null;
+let activePhone = null;
 let activeComposer = null;
 let activeContacts = null;
+let activeMessages = null;
 let activeContactsTab = "personal";
+let activeMessageThreadId = "";
+let composingNewMessage = false;
 let ringingAudio = null;
 let groupContactsCache = null;
 
@@ -53,6 +62,22 @@ function getPlayerChoices() {
       id: user.id,
       name: user.name,
       active: user.active === true
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function getUserMessageContacts() {
+  return (game.users?.contents ?? [])
+    .filter((user) => user.id !== game.user?.id)
+    .map((user) => ({
+      id: `user-${user.id}`,
+      name: user.name,
+      number: `@${user.name}`,
+      image: user.avatar ?? user.character?.img ?? "",
+      userId: user.id,
+      userIds: [user.id],
+      isNpc: false,
+      managedByGM: false
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -95,6 +120,15 @@ function getGroupContacts() {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function getAllMessageContacts() {
+  const contactsByKey = new Map<string, any>();
+  for (const contact of [...getUserMessageContacts(), ...getGroupContacts(), ...getContacts()]) {
+    const key = contact.userId ? `user:${contact.userId}` : `number:${contact.number || contact.id}`;
+    if (!contactsByKey.has(key)) contactsByKey.set(key, contact);
+  }
+  return [...contactsByKey.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 async function saveContacts(contacts) {
   await game.settings.set(MODULE_ID, "contacts", {
     ...getContactsStore(),
@@ -111,11 +145,69 @@ async function saveGroupContacts(contacts) {
   });
 }
 
-async function addContact(name: any, number: any, scope = "personal", image: any = "") {
+function getMessageReadState() {
+  const state = game.settings.get(MODULE_ID, "messageReadState");
+  if (!state || typeof state !== "object" || Array.isArray(state)) return {};
+  return state;
+}
+
+function getMessageDeletedBeforeState() {
+  const state = game.settings.get(MODULE_ID, "messageDeletedBefore");
+  if (!state || typeof state !== "object" || Array.isArray(state)) return {};
+  return state;
+}
+
+function getVisibleStoredMessages() {
+  const deletedBefore = getMessageDeletedBeforeState();
+  return getStoredMessages().filter((message) => {
+    const deletedAt = deletedBefore[message.threadId];
+    return !deletedAt || message.createdAt > deletedAt;
+  });
+}
+
+function getUnreadMessageCount() {
+  return prepareThreads(getVisibleStoredMessages(), getAllMessageContacts(), "", getMessageReadState())
+    .reduce((total, thread) => total + Number(thread.unreadCount ?? 0), 0);
+}
+
+async function setThreadRead(threadId, timestamp = new Date().toISOString()) {
+  if (!threadId) return;
+  await game.settings.set(MODULE_ID, "messageReadState", {
+    ...getMessageReadState(),
+    [threadId]: timestamp
+  });
+}
+
+async function markActiveThreadRead() {
+  if (!activeMessageThreadId) return;
+  await setThreadRead(activeMessageThreadId);
+}
+
+async function deleteMessageThread(threadId) {
+  if (!threadId) return;
+  await game.settings.set(MODULE_ID, "messageDeletedBefore", {
+    ...getMessageDeletedBeforeState(),
+    [threadId]: new Date().toISOString()
+  });
+  if (activeMessageThreadId === threadId) {
+    activeMessageThreadId = "";
+    composingNewMessage = true;
+    if (activeMessages) activeMessages.contact = null;
+    if (activePhone?.mode === "messages") activePhone.contact = null;
+  }
+  await refreshMessages();
+  await refreshContacts();
+}
+
+async function addContact(name: any, number: any, scope = "personal", image: any = "", metadata: any = {}) {
+  const actor = metadata.actorId ? game.actors?.get(metadata.actorId) : null;
   const contact = normalizeContact({
-    name,
+    name: String(name ?? "").trim() || actor?.name,
     number,
-    image: canEditContactImages() ? image : ""
+    image: canEditContactImages() ? (String(image ?? "").trim() || actor?.img || "") : "",
+    actorId: canEditContactImages() ? metadata.actorId : "",
+    managedByGM: canEditContactImages() ? metadata.managedByGM === true : false,
+    isNpc: canEditContactImages() ? metadata.isNpc === true || metadata.managedByGM === true || Boolean(metadata.actorId) : false
   });
   if (!contact.name || !contact.number) {
     ui.notifications?.warn?.("Contact name and number are required.");
@@ -200,10 +292,10 @@ function bindCallControls(app: any, html: any = null) {
   element.classList.toggle("cybercall-connected", app.callData.accepted);
 
   element.querySelectorAll("[data-cybercall-action]").forEach((button) => {
-    button.addEventListener("click", (event) => {
+    button.addEventListener("click", async (event) => {
       const action = event.currentTarget.dataset.cybercallAction;
       if (action === "accept") {
-        acceptCallForEveryone(app.callData.id);
+        await acceptCallForEveryone(app.callData.id);
         return;
       }
 
@@ -217,7 +309,7 @@ function bindCallControls(app: any, html: any = null) {
       }
 
       if (action === "decline" || action === "end") {
-        endCallForEveryone(app.callData.id);
+        await endCallForEveryone(app.callData.id);
       }
     });
   });
@@ -327,6 +419,11 @@ function bindComposerControls(app: any, html: any = null) {
       if (action === "reset") {
         form.reset();
         updateComposerSignal(form);
+        return;
+      }
+
+      if (action === "open-messages") {
+        await openMessages();
       }
     });
   });
@@ -345,10 +442,22 @@ function bindContactsControls(app: any, html: any = null) {
     event.preventDefault();
     const formData = new FormData(form);
     const scope = String(formData.get("scope") ?? activeContactsTab);
-    await addContact(formData.get("name"), formData.get("number"), scope, formData.get("image"));
+    await addContact(formData.get("name"), formData.get("number"), scope, formData.get("image"), {
+      actorId: formData.get("actorId"),
+      managedByGM: formData.get("managedByGM") === "on",
+      isNpc: formData.get("managedByGM") === "on" || Boolean(formData.get("actorId"))
+    });
     form.reset();
     form.elements.scope.value = scope;
     form.elements.name?.focus();
+  });
+
+  form.elements.actorId?.addEventListener("change", () => {
+    const actor = game.actors?.get(form.elements.actorId.value);
+    if (!actor) return;
+    if (!form.elements.name.value) form.elements.name.value = actor.name;
+    if (form.elements.image && !form.elements.image.value) form.elements.image.value = actor.img ?? "";
+    if (form.elements.managedByGM) form.elements.managedByGM.checked = true;
   });
 
   element.querySelectorAll("[data-cybercall-contact-tab]").forEach((button) => {
@@ -387,22 +496,306 @@ function bindContactsControls(app: any, html: any = null) {
       if (action === "call" && contact) {
         const call = await requestCallToGM(contact);
         if (call && activeContacts === app) await app.close();
+        return;
+      }
+
+      if (action === "message" && contact) {
+        await openMessages(contact);
       }
     });
   });
+
+  element.querySelector("[data-cybercall-open-messages]")?.addEventListener("click", async () => {
+    await openMessages();
+  });
 }
 
-const { CyberCallApplication, CyberCallComposer, CyberCallContacts } = createCyberCallAppClasses({
+function formatMessageTimestamp(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+}
+
+function getMessageContext(contact = null) {
+  let allContacts = getAllMessageContacts();
+  const selectedContact = contact ?? allContacts[0] ?? null;
+  if (selectedContact && !allContacts.some((entry) => entry.id === selectedContact.id || entry.number === selectedContact.number)) {
+    allContacts = [...allContacts, normalizeContact(selectedContact)].sort((left, right) => left.name.localeCompare(right.name));
+  }
+  const contextActiveThreadId = composingNewMessage ? "" : activeMessageThreadId;
+  const threads = prepareThreads(getVisibleStoredMessages(), allContacts, contextActiveThreadId, getMessageReadState())
+    .map((thread) => ({
+      ...thread,
+      messages: thread.messages.map((message) => ({
+        ...message,
+        createdAtLabel: formatMessageTimestamp(message.createdAt)
+      }))
+    }));
+  const activeThread = composingNewMessage ? null : threads.find((thread) => thread.id === activeMessageThreadId) ?? null;
+  if (activeThread?.contact && !allContacts.some((entry) => entry.id === activeThread.contact.id || entry.number === activeThread.contact.number)) {
+    allContacts = [...allContacts, activeThread.contact].sort((left, right) => left.name.localeCompare(right.name));
+  }
+  const selectedContactId = activeThread?.contact?.id ?? selectedContact?.id ?? "";
+  const unreadCount = getUnreadMessageCount();
+  const activeThreadRecipientUserIds = getThreadRecipientUserIds(activeThread, { excludeGMs: false });
+  const replyAsChoices = getReplyAsChoices(activeThread);
+  const sendAsChoices = getSendAsChoices();
+  const canSendAs = game.user?.isGM === true && !activeThread && sendAsChoices.length > 1;
+
+  return {
+    threads,
+    hasThreads: threads.length > 0,
+    unreadCount,
+    hasUnreadMessages: unreadCount > 0,
+    activeThread,
+    activeThreadId: activeThread?.id ?? contextActiveThreadId,
+    allContacts: allContacts.map((entry) => ({
+      ...entry,
+      selected: entry.id === selectedContactId
+    })),
+    hasContacts: allContacts.length > 0,
+    selectedContactId,
+    isThreadReply: Boolean(activeThread),
+    isComposingNewMessage: !activeThread,
+    canDeleteThread: Boolean(activeThread),
+    threadReplyLabel: activeThread ? `${activeThread.title}${activeThread.subtitle ? ` (${activeThread.subtitle})` : ""}` : "",
+    canReplyAs: replyAsChoices.length > 1,
+    replyAsChoices,
+    canSendAs,
+    sendAsChoices,
+    activeThreadRecipientUserIds,
+    isFoundryV13Plus: Number(game.release?.generation ?? 0) >= 13
+  };
+}
+
+function getSelectedMessageContact(form, context = getMessageContext()) {
+  const contactId = String(new FormData(form).get("contactId") ?? "");
+  return context.allContacts.find((contact) => contact.id === contactId) ?? null;
+}
+
+function getThreadRecipientUserIds(thread, options: any = {}) {
+  if (!thread?.messages?.length) return [];
+  const currentUserId = String(game.user?.id ?? "");
+  const gmIds = new Set((game.users?.contents ?? []).filter((user) => user.isGM).map((user) => String(user.id)));
+  const ids = new Set<string>();
+  for (const message of thread.messages) {
+    if (message.senderUserId && message.senderUserId !== currentUserId && !(options.excludeGMs && gmIds.has(message.senderUserId))) {
+      ids.add(message.senderUserId);
+    }
+    for (const id of message.recipientUserIds ?? []) {
+      if (id && id !== currentUserId && !(options.excludeGMs && gmIds.has(id))) ids.add(id);
+    }
+  }
+  return [...ids];
+}
+
+function getGMUserIds() {
+  return (game.users?.contents ?? [])
+    .filter((user) => user.isGM)
+    .map((user) => String(user.id))
+    .filter(Boolean);
+}
+
+function getReplyAsChoices(thread) {
+  const contactReplyDefault = Boolean(game.user?.isGM && thread?.contact && !thread.contact.userId && (thread.contact.isNpc || thread.contact.managedByGM));
+  const choices = [{
+    id: "self",
+    label: game.user?.character?.name ?? game.user?.name ?? "Me",
+    selected: !contactReplyDefault
+  }];
+  if (!game.user?.isGM || !thread?.contact || thread.contact.userId) return choices;
+  choices.push({
+    id: "contact",
+    label: thread.contact.name,
+    selected: contactReplyDefault
+  });
+  return choices;
+}
+
+function getSendAsChoices() {
+  const choices = [{
+    id: "self",
+    label: game.user?.character?.name ?? game.user?.name ?? "Me",
+    selected: true,
+    contact: null
+  }];
+  if (!game.user?.isGM) return choices;
+
+  const seen = new Set<string>();
+  for (const contact of [...getGroupContacts(), ...getContacts()].map(normalizeContact)) {
+    if (!contact.name || contact.userId) continue;
+    if (!contact.managedByGM && !contact.actorId && !contact.isNpc) continue;
+    const key = contact.actorId || contact.number || contact.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    choices.push({
+      id: key,
+      label: contact.name,
+      selected: false,
+      contact
+    });
+  }
+
+  for (const actor of game.actors?.contents ?? []) {
+    const key = `actor-${actor.id}`;
+    if (seen.has(actor.id) || seen.has(key)) continue;
+    seen.add(key);
+    choices.push({
+      id: key,
+      label: actor.name,
+      selected: false,
+      contact: normalizeContact({
+        id: key,
+        name: actor.name,
+        number: `NPC:${actor.id}`,
+        image: actor.img ?? "",
+        actorId: actor.id,
+        managedByGM: true,
+        isNpc: true
+      })
+    });
+  }
+
+  return choices;
+}
+
+function getIdentityFromContact(contact) {
+  if (!contact) return {};
+  return {
+    senderName: contact.name,
+    senderNumber: contact.number,
+    senderActorId: contact.actorId,
+    contactName: contact.name,
+    contactImage: contact.image,
+    contactManagedByGM: true,
+    contactIsNpc: true
+  };
+}
+
+function getMessageIdentity(form, context) {
+  const formData = new FormData(form);
+  if (context.activeThread) {
+    const mode = String(formData.get("replyAs") ?? "self");
+    if (mode === "contact" && game.user?.isGM && context.activeThread.contact) {
+      return getIdentityFromContact(context.activeThread.contact);
+    }
+    return {};
+  }
+
+  const mode = String(formData.get("sendAs") ?? "self");
+  if (mode === "self" || !game.user?.isGM) return {};
+  const choice = getSendAsChoices().find((entry) => entry.id === mode);
+  return getIdentityFromContact(choice?.contact);
+}
+
+function bindMessagesControls(app: any, html: any = null) {
+  const element = getElement(app, html);
+  if (!element) return;
+
+  element.querySelectorAll("[data-cybercall-thread-id]").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      composingNewMessage = false;
+      activeMessageThreadId = event.currentTarget.dataset.cybercallThreadId;
+      await markActiveThreadRead();
+      await refreshMessages();
+    });
+  });
+
+  element.querySelectorAll("[data-cybercall-message-action]").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      const action = event.currentTarget.dataset.cybercallMessageAction;
+      if (action === "refresh") {
+        await refreshMessages();
+        return;
+      }
+      if (action === "open-calls") {
+        await openCallPanel();
+        return;
+      }
+      if (action === "new") {
+        composingNewMessage = true;
+        activeMessageThreadId = "";
+        if (activeMessages) activeMessages.contact = null;
+        await refreshMessages();
+        return;
+      }
+      if (action === "delete-thread") {
+        event.preventDefault();
+        event.stopPropagation();
+        const root = element.querySelector("[data-cybercall-active-thread]");
+        const threadId = activeMessageThreadId || root?.dataset?.cybercallActiveThread || "";
+        if (!threadId) return;
+        if (app._cybercallPendingDeleteThreadId !== threadId) {
+          app._cybercallPendingDeleteThreadId = threadId;
+          event.currentTarget.classList.add("confirming");
+          event.currentTarget.textContent = "Confirm Delete";
+          event.currentTarget.title = "Click again to delete this thread";
+          return;
+        }
+        app._cybercallPendingDeleteThreadId = "";
+        await deleteMessageThread(threadId);
+      }
+    });
+  });
+
+  const form = element.querySelector("form[data-cybercall-message-form]");
+  if (form) {
+    form.inert = false;
+    const textarea = form.elements.body;
+    if (textarea) {
+      textarea.disabled = false;
+      textarea.readOnly = false;
+      textarea.tabIndex = 0;
+    }
+  }
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const context = getMessageContext(app?.contact ?? (activePhone?.mode === "messages" ? activePhone.contact : null));
+    const activeThread = context.activeThread;
+    const contact = activeThread?.contact ?? getSelectedMessageContact(form, context);
+    const body = form.elements.body?.value ?? "";
+    const messageIdentity = getMessageIdentity(form, context);
+    const preserveGMs = Boolean(activeThread?.contact && !activeThread.contact.userId && (activeThread.contact.managedByGM || activeThread.contact.isNpc));
+    const recipientUserIds = activeThread
+      ? getThreadRecipientUserIds(activeThread, { excludeGMs: game.user?.isGM === true && !preserveGMs })
+      : null;
+    if (!contact) {
+      ui.notifications?.warn?.("Select a contact before sending a message.");
+      return;
+    }
+    const document = await sendMessageToContact(contact, body, {
+      ...messageIdentity,
+      threadId: activeThread ? activeThread.id : undefined,
+      recipientUserIds: recipientUserIds?.length ? recipientUserIds : undefined,
+      recipientNumbers: messageIdentity.senderNumber ? [] : undefined
+    });
+    if (!document) return;
+    activeMessageThreadId = activeThread ? activeThread.id : createThreadIdForContact(contact);
+    if (app) app.contact = contact;
+    if (activePhone?.mode === "messages") activePhone.contact = contact;
+    composingNewMessage = false;
+    form.elements.body.value = "";
+    await markActiveThreadRead();
+    await refreshMessages();
+  });
+
+  markActiveThreadRead();
+}
+
+const { CyberCallApplication, CyberCallComposer, CyberCallContacts, CyberCallMessages, CyberCallPhone } = createCyberCallAppClasses({
   moduleId: MODULE_ID,
   templatePath: TEMPLATE_PATH,
   composerTemplatePath: COMPOSER_TEMPLATE_PATH,
   contactsTemplatePath: CONTACTS_TEMPLATE_PATH,
+  messagesTemplatePath: MESSAGES_TEMPLATE_PATH,
+  phoneTemplatePath: PHONE_TEMPLATE_PATH,
   escapeHTML,
   getDefaultComposerData,
   getActorChoices,
   getPlayerChoices,
   getContacts,
   getGroupContacts,
+  getMessageContext,
   getRingtoneChoices,
   getSoundPath,
   getActiveContactsTab: () => activeContactsTab,
@@ -410,6 +803,7 @@ const { CyberCallApplication, CyberCallComposer, CyberCallContacts } = createCyb
   bindCallControls,
   bindComposerControls,
   bindContactsControls,
+  bindMessagesControls,
   stopRinging,
   clearActiveCall: (app) => {
     if (activeCall === app) activeCall = null;
@@ -419,6 +813,17 @@ const { CyberCallApplication, CyberCallComposer, CyberCallContacts } = createCyb
   },
   clearActiveContacts: (app) => {
     if (activeContacts === app) activeContacts = null;
+  },
+  clearActiveMessages: (app) => {
+    if (activeMessages === app) activeMessages = null;
+  },
+  clearActivePhone: (app) => {
+    if (activePhone === app) {
+      activePhone = null;
+      activeComposer = null;
+      activeContacts = null;
+      activeMessages = null;
+    }
   }
 });
 
@@ -462,13 +867,14 @@ async function acceptCall(callId) {
   await refreshActiveCall();
 }
 
-function acceptCallForEveryone(callId) {
+async function acceptCallForEveryone(callId) {
   if (!callId) return;
+  await recordCallHistoryEvent(activeCall?.callData, "connected");
   game.socket.emit(SOCKET_NAME, {
     action: "acceptCall",
     callId
   });
-  acceptCall(callId);
+  await acceptCall(callId);
 }
 
 async function endCall(callId) {
@@ -476,25 +882,94 @@ async function endCall(callId) {
   await closeCall();
 }
 
-function endCallForEveryone(callId) {
+async function endCallForEveryone(callId) {
+  await recordCallHistoryEvent(activeCall?.callData, activeCall?.callData?.accepted ? "ended" : "missed");
   game.socket.emit(SOCKET_NAME, {
     action: "endCall",
     callId
   });
-  endCall(callId);
+  await endCall(callId);
+}
+
+function getUserContact(userId, fallbackName = "Player") {
+  const user = game.users?.get?.(userId) ?? game.users?.contents?.find?.((entry) => entry.id === userId);
+  return {
+    id: `user-${userId}`,
+    name: user?.name ?? fallbackName,
+    number: `@${user?.name ?? fallbackName}`,
+    image: user?.avatar ?? user?.character?.img ?? "",
+    userId,
+    userIds: userId ? [userId] : []
+  };
+}
+
+function getCallHistoryContact(callData) {
+  if (!callData) return null;
+  if (callData.contactNumber) {
+    const contact = getAllMessageContacts().find((entry) => entry.number === callData.contactNumber);
+    return contact ?? {
+      id: `contact-${callData.contactNumber}`,
+      name: callData.contactName || callData.callerName,
+      number: callData.contactNumber,
+      image: callData.contactImage || callData.image,
+      actorId: callData.contactActorId ?? "",
+      managedByGM: true,
+      isNpc: true
+    };
+  }
+  if (game.user?.isGM && callData.callerUserId) {
+    return getUserContact(callData.callerUserId, callData.callerName);
+  }
+  return null;
+}
+
+function getCallHistoryRecipientUserIds(callData, contact) {
+  const ids = new Set<string>();
+  for (const id of contact?.userIds ?? []) ids.add(String(id));
+  if (contact?.userId) ids.add(String(contact.userId));
+  if (callData?.callerUserId) ids.add(String(callData.callerUserId));
+  if (!contact?.userId && (contact?.managedByGM || contact?.isNpc || callData?.contactNumber)) {
+    for (const id of getGMUserIds()) ids.add(id);
+  }
+  ids.delete(String(game.user?.id ?? ""));
+  return [...ids].filter(Boolean);
+}
+
+async function recordCallHistoryEvent(callData, eventType) {
+  const contact = getCallHistoryContact(callData);
+  if (!contact) return null;
+  const threadOwnerUserId = callData?.callerUserId || game.user?.id;
+  const labels = {
+    outgoing: `Outgoing call to ${contact.name}.`,
+    connected: `Call connected with ${contact.name}.`,
+    ended: `Call ended with ${contact.name}.`,
+    missed: `Call missed or declined with ${contact.name}.`
+  };
+  return createMessageEvent(contact, labels[eventType] ?? "Call event.", {
+    threadId: createThreadIdForContact(contact, threadOwnerUserId),
+    eventType,
+    senderName: "CyberCall",
+    senderNumber: contact.number,
+    senderActorId: contact.actorId,
+    recipientUserIds: getCallHistoryRecipientUserIds(callData, contact),
+    recipientNumbers: contact.userId ? [] : [contact.number]
+  });
 }
 
 async function requestCallToGM(contact) {
   if (game.user.isGM) {
-    return openCall({
+    const call = {
       callerName: contact.name,
       subtitle: `Comms ${contact.number}`,
       image: contact.image,
       message: `Opening channel ${contact.number}...`,
       signal: game.settings.get(MODULE_ID, "defaultSignal"),
       variant: "standard",
+      contactNumber: contact.number,
       ringing: false
-    });
+    };
+    await recordCallHistoryEvent(call, "outgoing");
+    return openCall(call);
   }
 
   if (!hasActiveGM()) {
@@ -512,7 +987,12 @@ async function requestCallToGM(contact) {
     accepted: false,
     allowBroadcast: false,
     callerUserId: game.user.id,
-    contactNumber: contact.number
+    contactNumber: contact.number,
+    contactName: contact.name,
+    contactImage: contact.image,
+    contactActorId: contact.actorId,
+    contactManagedByGM: contact.managedByGM === true,
+    contactIsNpc: contact.isNpc === true
   };
   const callerCall = normalizeCallData({
     ...baseCall,
@@ -540,6 +1020,7 @@ async function requestCallToGM(contact) {
     callData: gmCall
   });
 
+  await recordCallHistoryEvent(callerCall, "outgoing");
   return openCall(callerCall);
 }
 
@@ -548,15 +1029,7 @@ async function openComposer() {
     ui.notifications?.warn?.("Only the GM can open the CyberCall composer.");
     return null;
   }
-
-  if (activeComposer) {
-    activeComposer.bringToFront?.();
-    return activeComposer;
-  }
-
-  activeComposer = new CyberCallComposer();
-  await activeComposer.render(true);
-  return activeComposer;
+  return openPhone("calls");
 }
 
 async function openContacts() {
@@ -569,20 +1042,64 @@ async function openContacts() {
     activeCall.bringToFront?.();
     return activeCall;
   }
-
-  if (activeContacts) {
-    activeContacts.bringToFront?.();
-    return activeContacts;
-  }
-
-  activeContacts = new CyberCallContacts();
-  await activeContacts.render(true);
-  return activeContacts;
+  return openPhone("calls");
 }
 
 async function refreshContacts() {
   if (!activeContacts) return;
   await activeContacts.render(true);
+}
+
+async function openMessages(contact = null) {
+  if (!canUseCyberCall()) {
+    ui.notifications?.warn?.("You do not have permission to use CyberCall messages.");
+    return null;
+  }
+
+  if (contact) {
+    activeMessageThreadId = createThreadIdForContact(contact);
+    composingNewMessage = false;
+  } else if (!activeMessageThreadId) {
+    composingNewMessage = true;
+  }
+
+  const phone = await openPhone("messages", contact);
+  await markActiveThreadRead();
+  return phone;
+}
+
+async function openMessagesThread(threadId) {
+  if (threadId) {
+    activeMessageThreadId = String(threadId);
+    composingNewMessage = false;
+  }
+  return openMessages();
+}
+
+async function openCallPanel() {
+  return game.user?.isGM ? openComposer() : openContacts();
+}
+
+async function refreshMessages() {
+  if (!activePhone || activePhone.mode !== "messages") return;
+  await activePhone.render(true);
+}
+
+async function openPhone(mode = "calls", contact = null) {
+  if (activePhone) {
+    activePhone.mode = mode;
+    activePhone.contact = contact;
+    await activePhone.render(true);
+    activePhone.bringToFront?.();
+  } else {
+    activePhone = new CyberCallPhone(mode, contact);
+    await activePhone.render(true);
+  }
+
+  activeComposer = game.user?.isGM && mode === "calls" ? activePhone : null;
+  activeContacts = !game.user?.isGM && mode === "calls" ? activePhone : null;
+  activeMessages = mode === "messages" ? activePhone : null;
+  return activePhone;
 }
 
 async function broadcastCall(callData: any = {}) {
@@ -735,6 +1252,10 @@ function registerApi() {
     broadcastCall,
     openComposer,
     openContacts,
+    openMessages,
+    openMessagesThread,
+    openCallPanel,
+    getUnreadMessageCount,
     get activeCall() {
       return activeCall;
     },
@@ -743,6 +1264,9 @@ function registerApi() {
     },
     get activeContacts() {
       return activeContacts;
+    },
+    get activeMessages() {
+      return activeMessages;
     }
   };
 }
@@ -828,6 +1352,24 @@ function registerSettings() {
     type: Object,
     default: []
   });
+
+  game.settings.register(MODULE_ID, "messageReadState", {
+    name: "CyberCall Message Read State",
+    hint: "Tracks which message threads this client has read.",
+    scope: "client",
+    config: false,
+    type: Object,
+    default: {}
+  });
+
+  game.settings.register(MODULE_ID, "messageDeletedBefore", {
+    name: "CyberCall Deleted Message Threads",
+    hint: "Tracks locally deleted message threads for this client.",
+    scope: "client",
+    config: false,
+    type: Object,
+    default: {}
+  });
 }
 
 async function migrateLegacyContactsSetting() {
@@ -879,4 +1421,19 @@ Hooks.once("ready", async () => {
   registerWithHoloSuite();
   game.socket.on(SOCKET_NAME, handleSocketMessage);
   console.log(`${MODULE_ID} | Ready. Use game.modules.get("${MODULE_ID}").api.openCall({...})`);
+});
+
+Hooks.on("createChatMessage", async (message) => {
+  const flag = message?.flags?.[MODULE_ID];
+  if (flag?.kind !== MESSAGE_FLAG_KIND) return;
+  await refreshMessages();
+  await refreshContacts();
+});
+
+document.addEventListener("click", (event) => {
+  const target = event.target as Element | null;
+  const button = target?.closest?.("[data-cybercall-open-thread]") as HTMLElement | null;
+  if (!button) return;
+  event.preventDefault();
+  openMessagesThread(button.dataset.cybercallThreadId);
 });

@@ -10,7 +10,9 @@
 }
 
 .cybercall-composer-app,
-.cybercall-contacts-app {
+.cybercall-contacts-app,
+.cybercall-messages-app,
+.cybercall-phone-app {
   --cybercall-cyan: var(--hs-color-primary);
   --cybercall-blue: var(--hs-color-accent);
   --cybercall-text: var(--hs-text-primary);
@@ -27,6 +29,11 @@
   min-height: 460px;
 }
 
+.cybercall-messages-app,
+.cybercall-phone-app {
+  min-width: 720px;
+}
+
 .cybercall-app .window-content {
   display: grid;
   min-height: 0;
@@ -40,7 +47,11 @@
   display: none;
 }
 
-.cybercall-composer-app .window-content {
+.cybercall-composer-app .window-content,
+.cybercall-messages-app .window-content,
+.cybercall-phone-app .window-content {
+  display: grid;
+  align-items: stretch;
   min-height: 0;
   padding: 0;
   overflow: auto;
@@ -49,9 +60,20 @@
 }
 
 .cybercall-contacts-app .window-content {
+  display: grid;
+  align-items: stretch;
+  min-height: 0;
   padding: 0;
-  overflow: visible;
+  overflow: auto;
   background: transparent;
+  scrollbar-color: var(--cybercall-cyan) rgba(1, 8, 16, 0.72);
+}
+
+.cybercall-phone-shell {
+  display: grid;
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
 }
 
 .cybercall-app.cybercall-fullscreen .window-content {
@@ -71,7 +93,9 @@
 
 .cybercall-app .window-header,
 .cybercall-composer-app .window-header,
-.cybercall-contacts-app .window-header {
+.cybercall-contacts-app .window-header,
+.cybercall-messages-app .window-header,
+.cybercall-phone-app .window-header {
   border-bottom-color: rgba(94, 231, 255, 0.35);
   background: rgba(2, 13, 24, 0.92);
   color: var(--cybercall-text);
@@ -149,7 +173,7 @@
 .cybercall-emergency {
   --cybercall-cyan: var(--hs-color-danger);
   --cybercall-blue: var(--hs-color-danger);
-  --cybercall-line: color-mix(in srgb, var(--hs-color-danger) 52%, transparent);
+  --cybercall-line: rgba(255, 65, 93, 0.52);
   background:
     linear-gradient(135deg, rgba(255, 65, 93, 0.20), transparent 34%),
     linear-gradient(180deg, rgba(42, 4, 13, 0.78), rgba(18, 3, 9, 0.9));
@@ -161,7 +185,7 @@
 .cybercall-corrupted {
   --cybercall-cyan: var(--hs-color-success);
   --cybercall-blue: var(--hs-color-success);
-  --cybercall-line: color-mix(in srgb, var(--hs-color-success) 48%, transparent);
+  --cybercall-line: rgba(125, 255, 154, 0.48);
   --cybercall-text: var(--hs-text-primary);
   background:
     linear-gradient(135deg, rgba(125, 255, 154, 0.18), transparent 36%),
@@ -406,9 +430,10 @@
   border: 1px solid rgba(94, 231, 255, 0.5);
   border-radius: var(--hs-radius);
   background: rgba(0, 124, 190, 0.18);
-  color: var(--cybercall-text);
+  color: #b9f4ff;
   font-weight: 700;
   text-transform: uppercase;
+  text-shadow: none;
   box-shadow: inset 0 0 14px rgba(94, 231, 255, 0.12);
 }
 
@@ -421,6 +446,7 @@
 .cybercall-actions button:focus-visible {
   border-color: var(--cybercall-cyan);
   background: rgba(94, 231, 255, 0.22);
+  color: #d2f9ff;
   box-shadow: 0 0 14px rgba(94, 231, 255, 0.28);
 }
 
@@ -429,3 +455,20 @@
   border-color: rgba(255, 65, 93, 0.54);
 }
 
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+  .cybercall-emergency {
+    --cybercall-line: color-mix(in srgb, var(--hs-color-danger) 52%, transparent);
+  }
+
+  .cybercall-corrupted {
+    --cybercall-line: color-mix(in srgb, var(--hs-color-success) 48%, transparent);
+  }
+}
+
+@media (max-width: 720px) {
+  .cybercall-messages-app,
+  .cybercall-phone-app {
+    min-width: 0;
+    max-width: calc(100vw - 16px);
+  }
+}
