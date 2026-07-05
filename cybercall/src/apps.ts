@@ -528,7 +528,7 @@ export function createCyberCallAppClasses(deps: any) {
       static DEFAULT_OPTIONS = {
         id: "cybercall-phone",
         tag: "section",
-        classes: ["cybercall-phone-app", "cybercall-v2-app"],
+        classes: ["cybercall-phone-app"],
         window: {
           title: "CyberCall",
           resizable: true
@@ -588,7 +588,7 @@ export function createCyberCallAppClasses(deps: any) {
       static DEFAULT_OPTIONS = {
         id: "cybercall-messages",
         tag: "section",
-        classes: ["cybercall-messages-app", "cybercall-v2-app"],
+        classes: ["cybercall-messages-app"],
         window: {
           title: "CyberCall Messages",
           resizable: true

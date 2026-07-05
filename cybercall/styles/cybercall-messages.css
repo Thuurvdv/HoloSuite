@@ -202,8 +202,7 @@
   font-weight: 700;
 }
 
-.cybercall-modern-messages .cybercall-thread,
-.cybercall-v2-app .cybercall-thread {
+.cybercall-modern-messages .cybercall-thread {
   grid-template-columns: 44px minmax(0, 1fr) minmax(22px, auto);
   flex: 0 0 auto;
   min-height: 78px !important;
@@ -211,25 +210,21 @@
   padding: 12px;
 }
 
-.cybercall-modern-messages .cybercall-thread-initials,
-.cybercall-v2-app .cybercall-thread-initials {
+.cybercall-modern-messages .cybercall-thread-initials {
   width: 40px;
   min-width: 40px;
   height: 40px;
 }
 
-.cybercall-modern-messages .cybercall-thread-body,
-.cybercall-v2-app .cybercall-thread-body {
+.cybercall-modern-messages .cybercall-thread-body {
   align-self: center;
 }
 
-.cybercall-modern-messages .cybercall-thread-body strong,
-.cybercall-v2-app .cybercall-thread-body strong {
+.cybercall-modern-messages .cybercall-thread-body strong {
   line-height: 1.15;
 }
 
-.cybercall-modern-messages .cybercall-thread-body small,
-.cybercall-v2-app .cybercall-thread-body small {
+.cybercall-modern-messages .cybercall-thread-body small {
   margin-top: 4px;
   line-height: 1.25;
 }
@@ -365,19 +360,15 @@
   background: rgba(1, 8, 16, 0.72);
   color: #e5fbff;
   box-shadow: inset 0 0 12px rgba(94, 231, 255, 0.08);
-  pointer-events: auto;
   resize: vertical;
 }
 
-.cybercall-modern-messages .cybercall-message-form textarea,
-.cybercall-v2-app .cybercall-message-form textarea {
+.cybercall-modern-messages .cybercall-message-form textarea {
   min-height: 84px;
   height: auto !important;
-  pointer-events: auto;
 }
 
-.cybercall-modern-messages .cybercall-message-form select,
-.cybercall-v2-app .cybercall-message-form select {
+.cybercall-modern-messages .cybercall-message-form select {
   min-height: 34px;
   height: auto !important;
 }

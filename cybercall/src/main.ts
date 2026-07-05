@@ -739,18 +739,9 @@ function bindMessagesControls(app: any, html: any = null) {
   });
 
   const form = element.querySelector("form[data-cybercall-message-form]");
-  if (form) {
-    form.inert = false;
-    const textarea = form.elements.body;
-    if (textarea) {
-      textarea.disabled = false;
-      textarea.readOnly = false;
-      textarea.tabIndex = 0;
-    }
-  }
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const context = getMessageContext(app?.contact ?? (activePhone?.mode === "messages" ? activePhone.contact : null));
+    const context = getMessageContext();
     const activeThread = context.activeThread;
     const contact = activeThread?.contact ?? getSelectedMessageContact(form, context);
     const body = form.elements.body?.value ?? "";
