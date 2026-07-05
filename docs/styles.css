@@ -375,6 +375,10 @@ footer a:focus-visible,
   align-items: start;
 }
 
+.contact-section {
+  grid-template-columns: minmax(260px, 560px);
+}
+
 .install h2 {
   margin-bottom: 18px;
 }
