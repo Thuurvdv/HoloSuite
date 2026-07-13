@@ -42,6 +42,7 @@ interface CaptureLiveFrameOptions {
 
 export function createLiveFrameController(dependencies: LiveFrameDependencies) {
   const imageCache = new Map<string, Promise<any>>();
+  let broadcastProducer: any = null;
 
   function isCameraLive(camera: any) {
     const normalized = dependencies.normalizeCamera(camera);
@@ -422,38 +423,40 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     return frame;
   }
 
-  async function updateLocalLiveFrame(app: any) {
-    if (!isCameraLive(app?.camera)) return;
-    const frame = await captureLiveFrame(app.camera, {
+  async function updateLiveFrameTarget(target: any, options: { broadcast?: boolean; requireRendered?: boolean } = {}) {
+    if (!isCameraLive(target?.camera)) return;
+    const frame = await captureLiveFrame(target.camera, {
       preferDataUrl: Boolean(dependencies.broadcastLiveFrame)
     });
     if (!frame) return;
-    if (!canRefreshVisibleFrame(app)) return;
-    await app.updateLiveFrame?.(frame);
-    dependencies.broadcastLiveFrame?.(dependencies.normalizeCamera(app.camera), frame);
+    if (!canRefreshTarget(target, options)) return;
+    await target.updateLiveFrame?.(frame);
+    if (options.broadcast !== false) {
+      dependencies.broadcastLiveFrame?.(dependencies.normalizeCamera(target.camera), frame);
+    }
   }
 
-  function canRefreshVisibleFrame(app: any) {
+  function canRefreshTarget(target: any, options: { requireRendered?: boolean } = {}) {
     if (document.visibilityState === "hidden") return false;
-    if (app?.rendered === false) return false;
+    if (options.requireRendered && target?.rendered === false) return false;
     return true;
   }
 
-  function queueLocalLiveFrameUpdate(app: any) {
-    if (!canRefreshVisibleFrame(app) || app?.liveFrameRefreshPending) return;
-    app.liveFrameRefreshPending = true;
-    updateLocalLiveFrame(app).finally(() => {
-      app.liveFrameRefreshPending = false;
+  function queueLiveFrameUpdate(target: any, options: { broadcast?: boolean; requireRendered?: boolean } = {}) {
+    if (!canRefreshTarget(target, options) || target?.liveFrameRefreshPending) return;
+    target.liveFrameRefreshPending = true;
+    updateLiveFrameTarget(target, options).finally(() => {
+      target.liveFrameRefreshPending = false;
     });
   }
 
-  function stopLocalLiveRefresh(app: any) {
-    if (!app) return;
-    if (app.liveFrameTimer) window.clearInterval(app.liveFrameTimer);
-    if (app.liveFrameVisibilityHandler) document.removeEventListener("visibilitychange", app.liveFrameVisibilityHandler);
-    app.liveFrameTimer = null;
-    app.liveFrameVisibilityHandler = null;
-    app.liveFrameRefreshPending = false;
+  function stopRefreshTarget(target: any) {
+    if (!target) return;
+    if (target.liveFrameTimer) window.clearInterval(target.liveFrameTimer);
+    if (target.liveFrameVisibilityHandler) document.removeEventListener("visibilitychange", target.liveFrameVisibilityHandler);
+    target.liveFrameTimer = null;
+    target.liveFrameVisibilityHandler = null;
+    target.liveFrameRefreshPending = false;
   }
 
   function startLocalLiveRefresh(app: any) {
@@ -461,17 +464,56 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     if (!isCameraLive(app?.camera)) return;
     if (!dependencies.isFrameProducer()) return;
 
-    app.liveFrameVisibilityHandler = () => queueLocalLiveFrameUpdate(app);
+    app.liveFrameVisibilityHandler = () => queueLiveFrameUpdate(app, {
+      broadcast: false,
+      requireRendered: true
+    });
     document.addEventListener("visibilitychange", app.liveFrameVisibilityHandler);
-    queueLocalLiveFrameUpdate(app);
+    queueLiveFrameUpdate(app, {
+      broadcast: false,
+      requireRendered: true
+    });
     app.liveFrameTimer = window.setInterval(() => {
-      queueLocalLiveFrameUpdate(app);
+      queueLiveFrameUpdate(app, {
+        broadcast: false,
+        requireRendered: true
+      });
     }, LIVE_FRAME_INTERVAL_MS);
+  }
+
+  function stopLocalLiveRefresh(app: any) {
+    stopRefreshTarget(app);
+  }
+
+  function startBroadcastLiveRefresh(camera: any) {
+    stopBroadcastLiveRefresh();
+    if (!isCameraLive(camera)) return;
+    if (!dependencies.isFrameProducer()) return;
+
+    broadcastProducer = {
+      camera: dependencies.normalizeCamera(camera),
+      liveFrameRefreshPending: false,
+      liveFrameTimer: null,
+      liveFrameVisibilityHandler: null
+    };
+    broadcastProducer.liveFrameVisibilityHandler = () => queueLiveFrameUpdate(broadcastProducer);
+    document.addEventListener("visibilitychange", broadcastProducer.liveFrameVisibilityHandler);
+    queueLiveFrameUpdate(broadcastProducer);
+    broadcastProducer.liveFrameTimer = window.setInterval(() => {
+      queueLiveFrameUpdate(broadcastProducer);
+    }, LIVE_FRAME_INTERVAL_MS);
+  }
+
+  function stopBroadcastLiveRefresh() {
+    stopRefreshTarget(broadcastProducer);
+    broadcastProducer = null;
   }
 
   return {
     captureLiveFrame,
+    startBroadcastLiveRefresh,
     startLocalLiveRefresh,
+    stopBroadcastLiveRefresh,
     stopLocalLiveRefresh
   };
 }
