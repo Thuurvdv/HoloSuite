@@ -658,8 +658,36 @@ async function showFeed(cameraId) {
     camera,
     liveFrame
   });
+  liveFrameController.startBroadcastLiveRefresh(camera);
 
   return openLocalFeed(camera, { liveFrame });
+}
+
+async function openCameraFeed(cameraId, options: any = {}) {
+  const camera = getCamera(cameraId);
+  if (!camera) {
+    ui.notifications?.warn?.("Security camera not found.");
+    return null;
+  }
+  if (!hasCameraAccess(game.user?.id, cameraId)) {
+    ui.notifications?.warn?.("You do not have access to this camera feed.");
+    return null;
+  }
+
+  let liveFrame = String(options.liveFrame ?? "");
+  if (game.user?.isGM && !liveFrame) {
+    liveFrame = await liveFrameController.captureLiveFrame(camera, {
+      preferDataUrl: true
+    });
+  }
+  return openLocalFeed(camera, { liveFrame });
+}
+
+function hasCameraAccess(userId, cameraId) {
+  const camera = getCamera(cameraId);
+  if (!camera) return false;
+  if (game.user?.isGM || game.users?.get?.(userId)?.isGM) return true;
+  return camera.status !== "offline" && camera.status !== "restricted";
 }
 
 function closeFeedForEveryone() {
@@ -668,6 +696,7 @@ function closeFeedForEveryone() {
     action: "closeFeed",
     gmUserId: game.user.id
   });
+  liveFrameController.stopBroadcastLiveRefresh();
   closeLocalFeed();
 }
 
@@ -735,6 +764,9 @@ function registerApi() {
     deleteCamera,
     duplicateCamera,
     getCameras,
+    getCamera,
+    openCameraFeed,
+    hasCameraAccess,
     closeFeed: closeFeedForEveryone,
     get activeMonitor() {
       return activeMonitor;
