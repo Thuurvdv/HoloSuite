@@ -1,10 +1,17 @@
-import type { HoloSuiteAppRegistration } from "../../shared/src/index";
+import type {
+  HoloSuiteAppRegistration,
+  HoloSuiteWhatsNewEntry,
+  HoloSuiteWhatsNewRegistration,
+  HoloSuiteWhatsNewTier
+} from "../../shared/src/index";
 import { addSceneControlTool } from "./scene-controls";
 
 const MODULE_ID = "holosuite-core";
 const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
 const SETTING_THEME = "theme";
+const SETTING_WHATS_NEW_LAST_SEEN = "whatsNewLastSeen";
 const FOUNDRY_GENERATION_ATTRIBUTE = "data-holosuite-foundry-generation";
+const WHATS_NEW_CATALOG_PATH = `modules/${MODULE_ID}/data/whats-new.json`;
 
 const THEME_CHOICES = {
   default: "Default Cyan",
@@ -15,8 +22,12 @@ const THEME_CHOICES = {
 type HoloSuiteTheme = keyof typeof THEME_CHOICES;
 
 const registeredApps = new Map<string, HoloSuiteAppRegistration>();
+const registeredWhatsNew = new Map<string, HoloSuiteWhatsNewRegistration>();
 let launcherApp: HoloSuiteLauncher | null = null;
 let launcherObserver: MutationObserver | null = null;
+
+type LauncherView = "apps" | "whats-new";
+type WhatsNewFilter = "all" | HoloSuiteWhatsNewTier | "installed";
 
 function getLegacyApplicationBase(): any {
   const appv1 = (globalThis as any).foundry?.appv1?.api ?? foundry?.appv1?.api ?? null;
@@ -84,6 +95,84 @@ function getAppBadgeLabel(appId: string): string {
 
 function safeArray(value: unknown): any[] {
   return Array.isArray(value) ? value : [];
+}
+
+function normalizeWhatsNewEntry(entry: HoloSuiteWhatsNewEntry): HoloSuiteWhatsNewEntry | null {
+  const title = String(entry?.title ?? "").trim();
+  if (!title) return null;
+
+  const tags = safeArray(entry?.tags)
+    .map((tag) => String(tag ?? "").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  return {
+    title,
+    summary: String(entry?.summary ?? "").trim(),
+    tags
+  };
+}
+
+function normalizeWhatsNew(update: HoloSuiteWhatsNewRegistration): HoloSuiteWhatsNewRegistration | null {
+  const moduleId = String(update?.moduleId ?? "").trim();
+  const title = String(update?.title ?? "").trim();
+  const entries = safeArray(update?.entries)
+    .map((entry) => normalizeWhatsNewEntry(entry))
+    .filter((entry): entry is HoloSuiteWhatsNewEntry => Boolean(entry));
+
+  if (!moduleId || !title || entries.length === 0) {
+    console.warn(`${MODULE_ID} | Ignoring invalid what's new registration.`, update);
+    return null;
+  }
+
+  const tier = String(update?.tier ?? "free").toLowerCase() === "premium" ? "premium" : "free";
+  return {
+    moduleId,
+    title,
+    tier,
+    version: String(update?.version ?? "").trim(),
+    updated: String(update?.updated ?? "").trim(),
+    icon: String(update?.icon ?? "").trim(),
+    url: String(update?.url ?? "").trim(),
+    entries
+  };
+}
+
+function getUpdateTimestamp(update: HoloSuiteWhatsNewRegistration): number {
+  const timestamp = Date.parse(String(update.updated ?? ""));
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function sortWhatsNew(
+  left: HoloSuiteWhatsNewRegistration,
+  right: HoloSuiteWhatsNewRegistration
+): number {
+  return getUpdateTimestamp(right) - getUpdateTimestamp(left)
+    || left.title.localeCompare(right.title);
+}
+
+function isModuleInstalled(moduleId: string): boolean {
+  return game.modules?.has?.(moduleId) === true;
+}
+
+function getWhatsNewLastSeen(): number {
+  const value = Number(safeGetSetting(MODULE_ID, SETTING_WHATS_NEW_LAST_SEEN));
+  return Number.isFinite(value) ? value : 0;
+}
+
+function getUnseenWhatsNewCount(): number {
+  const lastSeen = getWhatsNewLastSeen();
+  return [...registeredWhatsNew.values()]
+    .filter((update) => getUpdateTimestamp(update) > lastSeen)
+    .reduce((count, update) => count + update.entries.length, 0);
+}
+
+function markWhatsNewSeen(): void {
+  try {
+    game.settings.set(MODULE_ID, SETTING_WHATS_NEW_LAST_SEEN, Date.now());
+  } catch (error) {
+    console.warn(`${MODULE_ID} | Could not update what's new read state.`, error);
+  }
 }
 
 function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration | null {
@@ -250,6 +339,15 @@ function registerSettings(): void {
     restricted: true
   });
 
+  game.settings.register(MODULE_ID, SETTING_WHATS_NEW_LAST_SEEN, {
+    name: "HoloSuite What's New Last Seen",
+    hint: "Tracks when this client last opened the HoloSuite What's New view.",
+    scope: "client",
+    config: false,
+    type: Number,
+    default: 0
+  });
+
   game.settings.registerMenu(MODULE_ID, "launcher", {
     name: "HoloSuite Command Deck",
     label: "Open HoloSuite",
@@ -324,7 +422,55 @@ async function openRegisteredApp(appId: string): Promise<unknown> {
   return app.open();
 }
 
-function renderLauncherHtml(): string {
+function registerWhatsNewInternal(
+  update: HoloSuiteWhatsNewRegistration,
+  options: { replace?: boolean } = {}
+): HoloSuiteWhatsNewRegistration | null {
+  const normalized = normalizeWhatsNew(update);
+  if (!normalized) return null;
+  if (options.replace === false && registeredWhatsNew.has(normalized.moduleId)) {
+    return registeredWhatsNew.get(normalized.moduleId) ?? null;
+  }
+  registeredWhatsNew.set(normalized.moduleId, normalized);
+  launcherApp?.render(false);
+  return normalized;
+}
+
+async function loadBundledWhatsNewCatalog(): Promise<void> {
+  try {
+    const response = await fetch(WHATS_NEW_CATALOG_PATH, { cache: "no-cache" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const catalog = await response.json();
+    const modules = safeArray(catalog?.modules);
+    for (const update of modules) {
+      registerWhatsNewInternal(update, { replace: false });
+    }
+  } catch (error) {
+    console.warn(`${MODULE_ID} | Could not load bundled what's new catalog.`, error);
+  }
+}
+
+function renderWhatsNewHeaderButton(view: LauncherView): string {
+  const unseenCount = getUnseenWhatsNewCount();
+  const badgeLabel = unseenCount > 0 ? `<span>${escapeHtml(unseenCount)}</span>` : "";
+  const action = view === "whats-new" ? "apps" : "whats-new";
+  const title = view === "whats-new" ? "Back to HoloSuite apps" : "What's New";
+  const icon = view === "whats-new" ? "fa-solid fa-arrow-left" : "fa-solid fa-star";
+  return `
+    <button
+      type="button"
+      class="holosuite-header-action ${view === "whats-new" ? "is-active" : ""}"
+      data-holosuite-action="${escapeHtml(action)}"
+      title="${escapeHtml(title)}"
+      aria-label="${escapeHtml(title)}"
+    >
+      <i class="${escapeHtml(icon)}"></i>
+      ${badgeLabel}
+    </button>
+  `;
+}
+
+function renderAppsView(): string {
   const isGM = game.user?.isGM === true;
   const apps = [...registeredApps.values()]
     .filter(isAppVisibleToCurrentUser)
@@ -346,8 +492,7 @@ function renderLauncherHtml(): string {
     </section>
   `;
 
-  const appCards = apps.length
-    ? apps.map((app) => {
+  const appCards = apps.map((app) => {
       const title = app.title;
       const description = isGM && app.description ? `<p>${escapeHtml(app.description)}</p>` : "";
       const badgeLabel = !isGM ? getAppBadgeLabel(app.id) : "";
@@ -359,26 +504,116 @@ function renderLauncherHtml(): string {
           ${badgeLabel ? `<span class="holosuite-app-count">${escapeHtml(badgeLabel)}</span>` : ""}
         </button>
       `;
-    }).join("")
-    : `<p class="holosuite-empty">${escapeHtml(emptyLabel)}</p>`;
+    }).join("");
 
+  return `
+    <div class="holosuite-screen-heading">
+      <div>
+        <span class="holosuite-kicker">${escapeHtml(deckLabel)}</span>
+        <h2>${escapeHtml(screenTitle)}</h2>
+      </div>
+    </div>
+    ${playerSummary}
+    <div class="holosuite-app-grid">
+      ${apps.length ? appCards : `<p class="holosuite-empty">${escapeHtml(emptyLabel)}</p>`}
+    </div>
+  `;
+}
+
+function renderWhatsNewFilters(activeFilter: WhatsNewFilter): string {
+  const filters: Array<{ id: WhatsNewFilter; label: string }> = [
+    { id: "all", label: "All" },
+    { id: "free", label: "Free" },
+    { id: "premium", label: "Premium" },
+    { id: "installed", label: "Installed" }
+  ];
+
+  return `
+    <nav class="holosuite-whats-new-filters" aria-label="What's New filters">
+      ${filters.map((filter) => `
+        <button
+          type="button"
+          class="${filter.id === activeFilter ? "is-active" : ""}"
+          data-holosuite-filter="${escapeHtml(filter.id)}"
+        >${escapeHtml(filter.label)}</button>
+      `).join("")}
+    </nav>
+  `;
+}
+
+function getFilteredWhatsNew(filter: WhatsNewFilter): HoloSuiteWhatsNewRegistration[] {
+  return [...registeredWhatsNew.values()]
+    .filter((update) => {
+      if (filter === "installed") return isModuleInstalled(update.moduleId);
+      if (filter === "free" || filter === "premium") return update.tier === filter;
+      return true;
+    })
+    .sort(sortWhatsNew);
+}
+
+function renderWhatsNewView(activeFilter: WhatsNewFilter): string {
+  const updates = getFilteredWhatsNew(activeFilter);
+  const updateCards = updates.length
+    ? updates.map((update) => {
+      const installed = isModuleInstalled(update.moduleId);
+      const tierLabel = update.tier === "premium" ? "Premium" : "Free";
+      const icon = update.icon || (update.tier === "premium" ? "fa-solid fa-gem" : "fa-solid fa-cube");
+      const entries = update.entries.map((entry) => `
+        <li>
+          <strong>${escapeHtml(entry.title)}</strong>
+          ${entry.summary ? `<span>${escapeHtml(entry.summary)}</span>` : ""}
+          ${entry.tags?.length ? `
+            <div class="holosuite-whats-new-tags">
+              ${entry.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}
+            </div>
+          ` : ""}
+        </li>
+      `).join("");
+
+      return `
+        <article class="holosuite-whats-new-card">
+          <header>
+            <span class="holosuite-whats-new-icon"><i class="${escapeHtml(icon)}"></i></span>
+            <div>
+              <h3>${escapeHtml(update.title)}</h3>
+              <p>
+                <span>${escapeHtml(tierLabel)}</span>
+                ${update.version ? `<span>v${escapeHtml(update.version)}</span>` : ""}
+                ${update.updated ? `<span>${escapeHtml(update.updated)}</span>` : ""}
+                <span>${installed ? "Installed" : "Not installed"}</span>
+              </p>
+            </div>
+          </header>
+          <ul>${entries}</ul>
+        </article>
+      `;
+    }).join("")
+    : `<p class="holosuite-empty">No updates match this filter yet.</p>`;
+
+  return `
+    <div class="holosuite-screen-heading">
+      <div>
+        <span class="holosuite-kicker">Release Feed</span>
+        <h2>What's New</h2>
+      </div>
+    </div>
+    ${renderWhatsNewFilters(activeFilter)}
+    <div class="holosuite-whats-new-list">
+      ${updateCards}
+    </div>
+  `;
+}
+
+function renderLauncherHtml(view: LauncherView = "apps", activeFilter: WhatsNewFilter = "all"): string {
   return `
     <section class="holosuite-phone">
       <div class="holosuite-phone-shell">
         <header class="holosuite-status-bar">
           <span>HoloSuite</span>
+          ${renderWhatsNewHeaderButton(view)}
         </header>
-        <main class="holosuite-screen">
-          <div class="holosuite-screen-heading">
-            <div>
-              <span class="holosuite-kicker">${escapeHtml(deckLabel)}</span>
-              <h2>${escapeHtml(screenTitle)}</h2>
-            </div>
-          </div>
-          ${playerSummary}
-          <div class="holosuite-app-grid">
-            ${appCards}
-          </div>
+        <main class="holosuite-screen ${view === "whats-new" ? "holosuite-screen--whats-new" : ""}">
+          ${view === "whats-new" ? renderWhatsNewView(activeFilter) : renderAppsView()}
         </main>
         <footer class="holosuite-dock">
           <button type="button" data-holosuite-action="close" title="Close"><i class="fa-solid fa-circle-xmark"></i></button>
@@ -395,12 +630,40 @@ function bindLauncherControls(root: HTMLElement | null): void {
       openRegisteredApp((event.currentTarget as HTMLElement).dataset.holosuiteApp ?? "");
     });
   });
+  root.querySelectorAll<HTMLElement>("[data-holosuite-action='whats-new']").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      launcherApp?.showWhatsNew();
+    });
+  });
+  root.querySelectorAll<HTMLElement>("[data-holosuite-action='apps']").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      launcherApp?.showApps();
+    });
+  });
+  root.querySelectorAll<HTMLElement>("[data-holosuite-filter]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const filter = (event.currentTarget as HTMLElement).dataset.holosuiteFilter;
+      launcherApp?.setWhatsNewFilter(normalizeWhatsNewFilter(filter));
+    });
+  });
   root.querySelectorAll<HTMLElement>("[data-holosuite-action='close']").forEach((button) => {
     button.addEventListener("click", () => launcherApp?.close());
   });
 }
 
+function normalizeWhatsNewFilter(value: unknown): WhatsNewFilter {
+  const filter = String(value ?? "");
+  return filter === "free" || filter === "premium" || filter === "installed" ? filter : "all";
+}
+
 class HoloSuiteLauncher extends LegacyApplication {
+  private currentView: LauncherView = "apps";
+  private whatsNewFilter: WhatsNewFilter = "all";
+
   static DEFAULT_OPTIONS = {
     id: "holosuite-launcher",
     tag: "section",
@@ -428,7 +691,7 @@ class HoloSuiteLauncher extends LegacyApplication {
   }
 
   async _renderInner() {
-    return $(renderLauncherHtml());
+    return $(renderLauncherHtml(this.currentView, this.whatsNewFilter));
   }
 
   activateListeners(html) {
@@ -438,18 +701,78 @@ class HoloSuiteLauncher extends LegacyApplication {
 
   async _renderHTML() {
     const wrapper = document.createElement("template");
-    wrapper.innerHTML = renderLauncherHtml().trim();
+    wrapper.innerHTML = renderLauncherHtml(this.currentView, this.whatsNewFilter).trim();
     return wrapper.content;
   }
 
-  _replaceHTML(result: DocumentFragment | HTMLElement, content: HTMLElement) {
-    content.replaceChildren(result);
-    bindLauncherControls(content);
+  _replaceHTML(result: unknown, content: unknown) {
+    const target = this.getRenderTarget(content);
+    if (!target) return;
+
+    const resultElement = result instanceof DocumentFragment || result instanceof HTMLElement
+      ? result
+      : unwrapHtmlElement(result);
+    if (resultElement) target.replaceChildren(resultElement);
+    else target.innerHTML = String(result ?? "");
+
+    bindLauncherControls(target);
   }
 
   async close(options = {}) {
     launcherApp = null;
     return super.close(options);
+  }
+
+  getLauncherRoot(): HTMLElement | null {
+    const element = unwrapHtmlElement((this as any).element);
+    return element?.querySelector<HTMLElement>(".holosuite-phone")
+      ?? element?.closest?.(".holosuite-phone")
+      ?? document.querySelector<HTMLElement>("#holosuite-launcher .holosuite-phone");
+  }
+
+  private getRenderTarget(content: unknown): HTMLElement | null {
+    const root = unwrapHtmlElement(content);
+    if (!root) return null;
+    return root.querySelector<HTMLElement>(".window-content")
+      ?? root.querySelector<HTMLElement>(".holosuite-launcher-window .window-content")
+      ?? root;
+  }
+
+  private updateRenderedView(): boolean {
+    const root = this.getLauncherRoot();
+    if (!root) return false;
+
+    const statusBar = root.querySelector<HTMLElement>(".holosuite-status-bar");
+    const screen = root.querySelector<HTMLElement>(".holosuite-screen");
+    if (!statusBar || !screen) return false;
+
+    statusBar.innerHTML = `
+      <span>HoloSuite</span>
+      ${renderWhatsNewHeaderButton(this.currentView)}
+    `;
+    screen.innerHTML = this.currentView === "whats-new"
+      ? renderWhatsNewView(this.whatsNewFilter)
+      : renderAppsView();
+    screen.classList.toggle("holosuite-screen--whats-new", this.currentView === "whats-new");
+    bindLauncherControls(root);
+    return true;
+  }
+
+  showApps(): void {
+    this.currentView = "apps";
+    if (!this.updateRenderedView()) this.render(false);
+  }
+
+  showWhatsNew(): void {
+    this.currentView = "whats-new";
+    markWhatsNewSeen();
+    if (!this.updateRenderedView()) this.render(false);
+  }
+
+  setWhatsNewFilter(filter: WhatsNewFilter): void {
+    this.currentView = "whats-new";
+    this.whatsNewFilter = filter;
+    if (!this.updateRenderedView()) this.render(false);
   }
 
   async _updateObject() {
@@ -473,9 +796,29 @@ const api = {
   getApps(): HoloSuiteAppRegistration[] {
     return [...registeredApps.values()];
   },
+  registerWhatsNew(update: HoloSuiteWhatsNewRegistration): HoloSuiteWhatsNewRegistration | null {
+    return registerWhatsNewInternal(update);
+  },
+  unregisterWhatsNew(moduleId: string): boolean {
+    const removed = registeredWhatsNew.delete(String(moduleId ?? ""));
+    if (removed) launcherApp?.render(false);
+    return removed;
+  },
+  getWhatsNew(): HoloSuiteWhatsNewRegistration[] {
+    return [...registeredWhatsNew.values()].sort(sortWhatsNew);
+  },
   async openLauncher(): Promise<HoloSuiteLauncher | null> {
+    if (launcherApp && (launcherApp as any).rendered && !launcherApp.getLauncherRoot()) {
+      launcherApp = null;
+    }
     if (!launcherApp) launcherApp = new HoloSuiteLauncher();
-    await launcherApp.render(true);
+    try {
+      await launcherApp.render(true);
+    } catch (error) {
+      console.warn(`${MODULE_ID} | Recreating launcher after render failure.`, error);
+      launcherApp = new HoloSuiteLauncher();
+      await launcherApp.render(true);
+    }
     return launcherApp;
   }
 };
@@ -512,5 +855,6 @@ Hooks.once("ready", () => {
   applyFoundryGenerationMarker();
   applySavedTheme();
   removeSidebarLaunchers();
+  loadBundledWhatsNewCatalog();
   console.log(`${MODULE_ID} | Ready. API available at game.modules.get("${MODULE_ID}").api`);
 });

@@ -9,6 +9,25 @@ export interface HoloSuiteAppRegistration {
   open: () => unknown | Promise<unknown>;
 }
 
+export type HoloSuiteWhatsNewTier = "free" | "premium";
+
+export interface HoloSuiteWhatsNewEntry {
+  title: string;
+  summary?: string;
+  tags?: string[];
+}
+
+export interface HoloSuiteWhatsNewRegistration {
+  moduleId: string;
+  title: string;
+  tier?: HoloSuiteWhatsNewTier;
+  version?: string;
+  updated?: string;
+  icon?: string;
+  url?: string;
+  entries: HoloSuiteWhatsNewEntry[];
+}
+
 export interface HoloSuiteLicenseResult {
   valid: boolean;
   allowedFeatureIds: string[];
@@ -20,6 +39,9 @@ export interface HoloSuiteApi {
   registerApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration | null;
   unregisterApp(id: string): boolean;
   getApps(): HoloSuiteAppRegistration[];
+  registerWhatsNew(update: HoloSuiteWhatsNewRegistration): HoloSuiteWhatsNewRegistration | null;
+  unregisterWhatsNew(moduleId: string): boolean;
+  getWhatsNew(): HoloSuiteWhatsNewRegistration[];
   openLauncher(): unknown | Promise<unknown>;
   checkLicense(force?: boolean): Promise<HoloSuiteLicenseResult>;
   isFeatureAllowed(featureId: string): boolean;

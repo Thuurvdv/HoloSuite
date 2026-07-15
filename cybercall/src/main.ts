@@ -1275,6 +1275,21 @@ function registerWithHoloSuite() {
     description: "Compose calls, contacts, and holographic broadcasts.",
     open: () => game.user?.isGM ? openComposer() : openContacts()
   });
+  api.registerWhatsNew?.({
+    moduleId: MODULE_ID,
+    title: "CyberCall",
+    tier: "free",
+    version: "1.0.5",
+    updated: "2026-07-14",
+    icon: "fa-solid fa-satellite-dish",
+    entries: [
+      {
+        title: "Messages in CyberCall",
+        summary: "CyberCall now includes message threads, contact-based conversations, unread tracking, and player-facing message access.",
+        tags: ["Messages", "Comms"]
+      }
+    ]
+  });
   return true;
 }
 
