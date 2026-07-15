@@ -232,9 +232,114 @@
   background: transparent !important;
   color: inherit !important;
   box-shadow: none !important;
-  font: inherit !important;
+  font-size: 13px !important;
+  font-weight: inherit !important;
   line-height: 1 !important;
   text-shadow: none !important;
+}
+
+.cybercall-app .window-header :where(button, a, .header-control):where(.fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-light, .fa-duotone, .fa-brands),
+.cybercall-composer-app .window-header :where(button, a, .header-control):where(.fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-light, .fa-duotone, .fa-brands),
+.cybercall-contacts-app .window-header :where(button, a, .header-control):where(.fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-light, .fa-duotone, .fa-brands),
+.cybercall-messages-app .window-header :where(button, a, .header-control):where(.fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-light, .fa-duotone, .fa-brands),
+.cybercall-phone-app .window-header :where(button, a, .header-control):where(.fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-light, .fa-duotone, .fa-brands) {
+  font-family: "Font Awesome 6 Pro", "Font Awesome 6 Free", "Font Awesome 5 Free" !important;
+  font-weight: 900 !important;
+}
+
+:is(
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .cybercall-messages-app,
+  .cybercall-phone-app
+) .window-header :where(button, a, .header-control):where(
+  .close,
+  [data-action="close"],
+  [aria-label="Close"],
+  [title="Close"]
+),
+:is(
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .cybercall-messages-app,
+  .cybercall-phone-app
+) .window-header :where(button, a, .header-control):where(
+  [data-action="toggleControls"],
+  [data-action="toggle-controls"],
+  [aria-label="Toggle Controls"],
+  [title="Toggle Controls"],
+  [data-tooltip="Toggle Controls"]
+) {
+  font-size: 0 !important;
+  height: 24px !important;
+  padding: 0 !important;
+  position: relative;
+  width: 24px !important;
+}
+
+:is(
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .cybercall-messages-app,
+  .cybercall-phone-app
+) .window-header :where(button, a, .header-control):where(
+  .close,
+  [data-action="close"],
+  [aria-label="Close"],
+  [title="Close"],
+  [data-action="toggleControls"],
+  [data-action="toggle-controls"],
+  [aria-label="Toggle Controls"],
+  [title="Toggle Controls"],
+  [data-tooltip="Toggle Controls"]
+) > :where(i, svg) {
+  display: none !important;
+}
+
+:is(
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .cybercall-messages-app,
+  .cybercall-phone-app
+) .window-header :where(button, a, .header-control):where(
+  .close,
+  [data-action="close"],
+  [aria-label="Close"],
+  [title="Close"]
+)::before {
+  content: "x";
+  display: block;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+:is(
+  .cybercall-app,
+  .cybercall-composer-app,
+  .cybercall-contacts-app,
+  .cybercall-messages-app,
+  .cybercall-phone-app
+) .window-header :where(button, a, .header-control):where(
+  [data-action="toggleControls"],
+  [data-action="toggle-controls"],
+  [aria-label="Toggle Controls"],
+  [title="Toggle Controls"],
+  [data-tooltip="Toggle Controls"]
+)::before {
+  background:
+    linear-gradient(currentColor 0 0) 50% 3px / 12px 2px no-repeat,
+    linear-gradient(currentColor 0 0) 50% 9px / 12px 2px no-repeat;
+  content: "";
+  display: block;
+  height: 12px;
+  width: 14px;
 }
 
 .cybercall-app .window-header button:hover,
