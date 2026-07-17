@@ -8,10 +8,16 @@ import { addSceneControlTool } from "./scene-controls";
 
 const MODULE_ID = "holosuite-core";
 const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
+const SETTING_DEVICE_STYLE = "deviceStyle";
 const SETTING_THEME = "theme";
 const SETTING_WHATS_NEW_LAST_SEEN = "whatsNewLastSeen";
 const FOUNDRY_GENERATION_ATTRIBUTE = "data-holosuite-foundry-generation";
 const WHATS_NEW_CATALOG_PATH = `modules/${MODULE_ID}/data/whats-new.json`;
+
+const DEVICE_STYLE_CHOICES = {
+  base: "Base",
+  "space-police": "Space Police"
+} as const;
 
 const THEME_CHOICES = {
   default: "Default Cyan",
@@ -19,6 +25,7 @@ const THEME_CHOICES = {
   violet: "Violet"
 } as const;
 
+type HoloSuiteDeviceStyle = keyof typeof DEVICE_STYLE_CHOICES;
 type HoloSuiteTheme = keyof typeof THEME_CHOICES;
 
 const registeredApps = new Map<string, HoloSuiteAppRegistration>();
@@ -317,6 +324,18 @@ function injectRenderedLauncherControl(html: unknown): void {
 }
 
 function registerSettings(): void {
+  game.settings.register(MODULE_ID, SETTING_DEVICE_STYLE, {
+    name: "HoloSuite Device Style",
+    hint: "Changes the launcher frame style without changing the launcher size.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: DEVICE_STYLE_CHOICES,
+    default: "base",
+    restricted: true,
+    onChange: (value: string) => applyDeviceStyle(value)
+  });
+
   game.settings.register(MODULE_ID, SETTING_THEME, {
     name: "HoloSuite Theme",
     hint: "Changes the shared color theme used by HoloSuite windows.",
@@ -358,8 +377,21 @@ function registerSettings(): void {
   });
 }
 
+function normalizeDeviceStyle(value: unknown): HoloSuiteDeviceStyle {
+  return Object.hasOwn(DEVICE_STYLE_CHOICES, String(value)) ? String(value) as HoloSuiteDeviceStyle : "base";
+}
+
 function normalizeTheme(value: unknown): HoloSuiteTheme {
   return Object.hasOwn(THEME_CHOICES, String(value)) ? String(value) as HoloSuiteTheme : "default";
+}
+
+function applyDeviceStyle(value: unknown): void {
+  const style = normalizeDeviceStyle(value);
+  const targets = [document.documentElement, document.body].filter(Boolean);
+  for (const target of targets) {
+    if (style === "base") target.removeAttribute("data-holosuite-device-style");
+    else target.setAttribute("data-holosuite-device-style", style);
+  }
 }
 
 function applyTheme(value: unknown): void {
@@ -369,6 +401,10 @@ function applyTheme(value: unknown): void {
     if (theme === "default") target.removeAttribute("data-holosuite-theme");
     else target.setAttribute("data-holosuite-theme", theme);
   }
+}
+
+function applySavedDeviceStyle(): void {
+  applyDeviceStyle(safeGetSetting(MODULE_ID, SETTING_DEVICE_STYLE));
 }
 
 function applySavedTheme(): void {
@@ -470,6 +506,14 @@ function renderWhatsNewHeaderButton(view: LauncherView): string {
   `;
 }
 
+function renderAppIcon(app: HoloSuiteAppRegistration): string {
+  return `
+    <span class="holosuite-app-icon" data-holosuite-app-icon="${escapeHtml(app.id)}">
+      <i class="${escapeHtml(app.icon)}"></i>
+    </span>
+  `;
+}
+
 function renderAppsView(): string {
   const isGM = game.user?.isGM === true;
   const apps = [...registeredApps.values()]
@@ -498,7 +542,7 @@ function renderAppsView(): string {
       const badgeLabel = !isGM ? getAppBadgeLabel(app.id) : "";
       return `
         <button type="button" class="holosuite-app-tile" data-holosuite-app="${escapeHtml(app.id)}">
-          <span class="holosuite-app-icon"><i class="${escapeHtml(app.icon)}"></i></span>
+          ${renderAppIcon(app)}
           <span class="holosuite-app-title">${escapeHtml(title)}</span>
           ${description}
           ${badgeLabel ? `<span class="holosuite-app-count">${escapeHtml(badgeLabel)}</span>` : ""}
@@ -853,6 +897,7 @@ Hooks.on("renderSidebarTab", removeSidebarLaunchers);
 Hooks.once("ready", () => {
   exposeApi();
   applyFoundryGenerationMarker();
+  applySavedDeviceStyle();
   applySavedTheme();
   removeSidebarLaunchers();
   loadBundledWhatsNewCatalog();
