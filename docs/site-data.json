@@ -1,0 +1,222 @@
+{
+  "stats": [
+    { "label": "Modules Released", "value": 11, "suffix": "+" },
+    { "label": "Free Modules", "value": 8, "suffix": "" },
+    { "label": "Premium Modules", "value": 3, "suffix": "" },
+    { "label": "Foundry Compatibility", "value": 13, "prefix": "v", "suffix": "+" },
+    { "label": "Active Development", "value": 2026, "suffix": "" }
+  ],
+  "experiences": [
+    {
+      "icon": "Scan",
+      "title": "Scan nearby lifeforms",
+      "description": "Reveal hidden targets and table-wide scan results.",
+      "moduleId": "pulse-scanner"
+    },
+    {
+      "icon": "Call",
+      "title": "Call your crew",
+      "description": "Trigger holographic calls, contacts, messages, and alerts.",
+      "moduleId": "cybercall"
+    },
+    {
+      "icon": "Cam",
+      "title": "Monitor security cameras",
+      "description": "Broadcast live-feeling camera feeds and restricted views.",
+      "moduleId": "security-cameras"
+    },
+    {
+      "icon": "Map",
+      "title": "Navigate the galaxy",
+      "description": "Plot star systems, routes, ship travel, and reveals.",
+      "moduleId": "galaxy-map"
+    },
+    {
+      "icon": "Case",
+      "title": "Investigate crime scenes",
+      "description": "Build evidence boards for suspects, timelines, and theories.",
+      "moduleId": "csi-toolkit"
+    },
+    {
+      "icon": "Job",
+      "title": "Accept bounties",
+      "description": "Post contracts, rewards, targets, and mission status.",
+      "moduleId": "bounty-board"
+    },
+    {
+      "icon": "Hack",
+      "title": "Hack futuristic systems",
+      "description": "Launch cyberpunk minigames shaped by Foundry rolls.",
+      "moduleId": "holosuite-hacking"
+    },
+    {
+      "icon": "File",
+      "title": "Open galactic records",
+      "description": "Maintain identities, dossiers, and campaign files.",
+      "moduleId": "police-file"
+    }
+  ],
+  "modules": [
+    {
+      "id": "holosuite-core",
+      "name": "HoloSuite Core",
+      "tier": "free",
+      "category": "Core app",
+      "image": "assets/HoloSuite.jpg",
+      "pitch": "The sci-fi launcher and registration layer that makes HoloSuite feel like one operating system.",
+      "compatibility": "Foundry v12-v13",
+      "features": ["GM-only command launcher", "Shared visual language", "Required by most HoloSuite apps"],
+      "docsUrl": "docs/module.html?id=holosuite-core",
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core"
+    },
+    {
+      "id": "cybercall",
+      "name": "CyberCall",
+      "tier": "free",
+      "category": "Comms",
+      "image": "assets/Cybercall.jpg",
+      "pitch": "Holographic calls, player-to-GM calling, contacts, ringtones, and private message threads.",
+      "compatibility": "Foundry v12-v13",
+      "features": ["Incoming call broadcasts", "Emergency and corrupted styles", "Persistent contacts and messages"],
+      "docsUrl": "docs/module.html?id=cybercall",
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall"
+    },
+    {
+      "id": "security-cameras",
+      "name": "Security Cameras",
+      "tier": "free",
+      "category": "Surveillance",
+      "image": "assets/CameraFeed.jpg",
+      "pitch": "Live-feeling and static camera feeds wrapped in cinematic cyberpunk overlays.",
+      "compatibility": "Foundry v12-v13",
+      "features": ["Online, offline, corrupted, and restricted states", "Window and picture-in-picture modes", "Scene Region framing"],
+      "docsUrl": "docs/module.html?id=security-cameras",
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/security-cameras"
+    },
+    {
+      "id": "csi-toolkit",
+      "name": "CSI Toolkit",
+      "tier": "free",
+      "category": "Investigation",
+      "image": "assets/CSI%20Board.jpg",
+      "pitch": "Collaborative case boards for evidence, suspects, locations, timelines, and theories.",
+      "compatibility": "Foundry v12-v13",
+      "features": ["Draggable cards and connection lines", "Database and noir board themes", "Case JSON import and export"],
+      "docsUrl": "docs/module.html?id=csi-toolkit",
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/csi-toolkit"
+    },
+    {
+      "id": "galaxy-map",
+      "name": "Galaxy Map",
+      "tier": "free",
+      "category": "Navigation",
+      "image": "assets/Galaxy%20Map%20Manager.png",
+      "pitch": "Cinematic star maps with clickable systems, travel routes, ship movement, and campaign reveals.",
+      "compatibility": "Foundry v12-v13",
+      "features": ["Reveal star systems over time", "Animated route movement", "Scene and journal linking"],
+      "docsUrl": "docs/module.html?id=galaxy-map",
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map"
+    },
+    {
+      "id": "bounty-board",
+      "name": "Bounty Board",
+      "tier": "free",
+      "category": "Contracts",
+      "image": "assets/BountyBoard.jpg",
+      "pitch": "A sci-fi contract terminal for creating, publishing, claiming, and resolving jobs.",
+      "compatibility": "Foundry v12-v13",
+      "features": ["Post campaign contracts", "Track rewards and target details", "Player browsing with GM management"],
+      "docsUrl": "docs/module.html?id=bounty-board",
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board"
+    },
+    {
+      "id": "holosuite-critical-cutin",
+      "name": "Critical Cut-In",
+      "tier": "free",
+      "category": "Combat",
+      "image": "assets/CriticalSucces.jpg",
+      "pitch": "Sci-fi critical hit animations triggered by qualifying natural d20 results.",
+      "compatibility": "Foundry v12-v13",
+      "features": ["Per-character images and sounds", "Critical success and failure support", "HoloSuite-compatible configuration"],
+      "docsUrl": "docs/module.html?id=holosuite-critical-cutin",
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-critical-cutin"
+    },
+    {
+      "id": "holosuite-hacking",
+      "name": "HoloSuite Hacking",
+      "tier": "free",
+      "category": "Minigames",
+      "image": "assets/NodeIntrustion_hacking.jpg",
+      "pitch": "Playable cyberpunk hacking minigames where skill checks shape puzzle difficulty.",
+      "compatibility": "Foundry v12-v13",
+      "features": ["Node Intrusion traversal", "Signal Alignment tuning", "Roll-based difficulty profiles"],
+      "docsUrl": "docs/module.html?id=holosuite-hacking",
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking"
+    },
+    {
+      "id": "pulse-scanner",
+      "name": "Pulse Scanner",
+      "tier": "premium",
+      "category": "Scanner",
+      "image": "assets/PulseScanner-preview.png",
+      "pitch": "Cinematic scanner pulses for GM-placed targets, hidden signatures, scan difficulty, and table-wide reveals.",
+      "compatibility": "Foundry v12-v14",
+      "features": ["Animated pulse scans", "Hidden and revealed target signatures", "Premium Patreon release"],
+      "docsUrl": "docs/module.html?id=pulse-scanner",
+      "moduleUrl": "https://github.com/Thuurvdv/pulse-scanner",
+      "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+    },
+    {
+      "id": "police-file",
+      "name": "Galactic Records",
+      "tier": "premium",
+      "category": "Records",
+      "image": "assets/HoloSuite.jpg",
+      "pitch": "A sci-fi bureaucracy and records database for dossiers, identities, and campaign files.",
+      "compatibility": "Foundry v12-v13",
+      "features": ["Campaign dossiers", "Record editing workflows", "Premium collection module"],
+      "docsUrl": "docs/module.html?id=police-file",
+      "moduleUrl": "https://patreon.com/MageTowerStudios",
+      "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+    },
+    {
+      "id": "holo-assistant",
+      "name": "Holo Assistant",
+      "tier": "premium",
+      "category": "Assistant",
+      "image": "assets/HoloSuite.jpg",
+      "pitch": "Local assistant profiles, portraits, triggers, and docked player-facing messages.",
+      "compatibility": "Planned",
+      "features": ["Assistant profiles", "Docked message delivery", "Premium collection roadmap"],
+      "docsUrl": "docs/module.html?id=holo-assistant",
+      "moduleUrl": "https://patreon.com/MageTowerStudios",
+      "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+    }
+  ],
+  "community": [
+    {
+      "name": "Patreon",
+      "icon": "PT",
+      "description": "Unlock the premium collection and follow release previews.",
+      "url": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+    },
+    {
+      "name": "GitHub",
+      "icon": "GH",
+      "description": "Browse free modules, source code, releases, and documentation.",
+      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules"
+    },
+    {
+      "name": "Discord",
+      "icon": "DC",
+      "description": "Community support and development discussion. Link coming soon.",
+      "url": ""
+    },
+    {
+      "name": "Reddit",
+      "icon": "RD",
+      "description": "Share releases and sci-fi FoundryVTT updates. Link coming soon.",
+      "url": ""
+    }
+  ]
+}
