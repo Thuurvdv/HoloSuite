@@ -1,59 +1,53 @@
 {
   "stats": [
-    { "label": "Modules Released", "value": 11, "suffix": "+" },
+    { "label": "Modules Released", "value": 9, "suffix": "+" },
     { "label": "Free Modules", "value": 8, "suffix": "" },
-    { "label": "Premium Modules", "value": 3, "suffix": "" },
-    { "label": "Foundry Compatibility", "value": 13, "prefix": "v", "suffix": "+" },
-    { "label": "Active Development", "value": 2026, "suffix": "" }
+    { "label": "Premium Modules", "value": 1, "suffix": "" },
+    { "label": "Foundry Compatibility", "value": 12, "prefix": "v", "suffix": "+" },
+    { "label": "Active Development", "value": 2026, "suffix": "", "format": "plain" }
   ],
   "experiences": [
     {
-      "icon": "Scan",
+      "icon": "BIO",
       "title": "Scan nearby lifeforms",
       "description": "Reveal hidden targets and table-wide scan results.",
       "moduleId": "pulse-scanner"
     },
     {
-      "icon": "Call",
+      "icon": "COM",
       "title": "Call your crew",
       "description": "Trigger holographic calls, contacts, messages, and alerts.",
       "moduleId": "cybercall"
     },
     {
-      "icon": "Cam",
+      "icon": "CAM",
       "title": "Monitor security cameras",
       "description": "Broadcast live-feeling camera feeds and restricted views.",
       "moduleId": "security-cameras"
     },
     {
-      "icon": "Map",
+      "icon": "NAV",
       "title": "Navigate the galaxy",
       "description": "Plot star systems, routes, ship travel, and reveals.",
       "moduleId": "galaxy-map"
     },
     {
-      "icon": "Case",
+      "icon": "CSI",
       "title": "Investigate crime scenes",
       "description": "Build evidence boards for suspects, timelines, and theories.",
       "moduleId": "csi-toolkit"
     },
     {
-      "icon": "Job",
+      "icon": "JOB",
       "title": "Accept bounties",
       "description": "Post contracts, rewards, targets, and mission status.",
       "moduleId": "bounty-board"
     },
     {
-      "icon": "Hack",
+      "icon": "NET",
       "title": "Hack futuristic systems",
       "description": "Launch cyberpunk minigames shaped by Foundry rolls.",
       "moduleId": "holosuite-hacking"
-    },
-    {
-      "icon": "File",
-      "title": "Open galactic records",
-      "description": "Maintain identities, dossiers, and campaign files.",
-      "moduleId": "police-file"
     }
   ],
   "modules": [
@@ -164,32 +158,6 @@
       "features": ["Animated pulse scans", "Hidden and revealed target signatures", "Premium Patreon release"],
       "docsUrl": "docs/module.html?id=pulse-scanner",
       "moduleUrl": "https://github.com/Thuurvdv/pulse-scanner",
-      "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
-    },
-    {
-      "id": "police-file",
-      "name": "Galactic Records",
-      "tier": "premium",
-      "category": "Records",
-      "image": "assets/HoloSuite.jpg",
-      "pitch": "A sci-fi bureaucracy and records database for dossiers, identities, and campaign files.",
-      "compatibility": "Foundry v12-v13",
-      "features": ["Campaign dossiers", "Record editing workflows", "Premium collection module"],
-      "docsUrl": "docs/module.html?id=police-file",
-      "moduleUrl": "https://patreon.com/MageTowerStudios",
-      "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
-    },
-    {
-      "id": "holo-assistant",
-      "name": "Holo Assistant",
-      "tier": "premium",
-      "category": "Assistant",
-      "image": "assets/HoloSuite.jpg",
-      "pitch": "Local assistant profiles, portraits, triggers, and docked player-facing messages.",
-      "compatibility": "Planned",
-      "features": ["Assistant profiles", "Docked message delivery", "Premium collection roadmap"],
-      "docsUrl": "docs/module.html?id=holo-assistant",
-      "moduleUrl": "https://patreon.com/MageTowerStudios",
       "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
     }
   ],
