@@ -1,0 +1,508 @@
+{
+  "modules": [
+    {
+      "id": "holosuite-core",
+      "name": "HoloSuite Core",
+      "tier": "free",
+      "category": "Core app",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/HoloSuite.jpg",
+      "summary": "The GM-facing launcher and registration layer that connects HoloSuite modules into one sci-fi command center.",
+      "overview": "HoloSuite Core is the foundation of the HoloSuite module family. It adds a phone-style launcher for GMs and gives installed HoloSuite modules a shared place to register as app tiles.",
+      "features": [
+        "GM-only phone-style app launcher.",
+        "Automatic app registration for installed HoloSuite modules.",
+        "Shared visual foundation for the wider HoloSuite ecosystem.",
+        "Macro access through game.holosuite.open()."
+      ],
+      "installation": [
+        "Install and enable HoloSuite Core before enabling other HoloSuite modules.",
+        "Enable the feature modules you want to use, such as CyberCall, Security Cameras, CSI Toolkit, or Galaxy Map.",
+        "Open the launcher from scene controls or by running game.holosuite.open() in a macro.",
+        "Click an app tile to open the relevant module window."
+      ],
+      "configuration": [
+        "Core has minimal setup by design.",
+        "Feature modules register themselves when active.",
+        "Keep Core active in worlds that use HoloSuite modules."
+      ],
+      "faq": [
+        {
+          "question": "Do players use the Core launcher directly?",
+          "answer": "The launcher is currently GM-only. Players interact with each module through its own player-facing interface."
+        },
+        {
+          "question": "Is HoloSuite Core required?",
+          "answer": "Most HoloSuite modules expect Core to be installed and active so they can register into the launcher."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Keep the launcher open on a second monitor during a sci-fi session.",
+        "Use a macro with game.holosuite.open() for quick access.",
+        "Treat every module as another in-world app installed inside the HoloSuite interface."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core"
+    },
+    {
+      "id": "cybercall",
+      "name": "CyberCall",
+      "tier": "free",
+      "category": "Comms",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/Cybercall.jpg",
+      "summary": "Holographic calls, contacts, ringtones, and private message threads for in-character sci-fi communication.",
+      "overview": "CyberCall lets the GM broadcast holographic transmissions to connected players and lets players call the GM through personal or group contacts. It supports dramatic call states, signal styles, and persistent private messages.",
+      "features": [
+        "GM-composed holographic calls with caller, faction, portrait, message, and signal strength.",
+        "Standard, emergency, and corrupted visual styles.",
+        "Ringing calls, accept/end states, and fullscreen broadcasts.",
+        "Personal and shared contact lists.",
+        "Persistent private message threads for players, GMs, contacts, and linked actors."
+      ],
+      "installation": [
+        "Enable HoloSuite Core and CyberCall in the Foundry world.",
+        "Open CyberCall from the HoloSuite launcher.",
+        "Use the composer to prepare a call or open contacts to manage call targets.",
+        "Broadcast calls to players or let players initiate calls to the GM."
+      ],
+      "configuration": [
+        "Choose caller name, faction, portrait, message, signal strength, and style for each broadcast.",
+        "Use fullscreen mode for table-wide dramatic broadcasts.",
+        "Pick a ringtone or silent mode from module settings.",
+        "Create personal contacts, group contacts, and GM-managed contact identities."
+      ],
+      "faq": [
+        {
+          "question": "Can players call the GM?",
+          "answer": "Yes. Players can call contacts from the CyberCall contacts interface, and the GM receives an incoming call prompt."
+        },
+        {
+          "question": "Are messages persistent?",
+          "answer": "CyberCall stores message history as private Foundry chat messages with module flags. Read state is saved locally per client."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Broadcast an emergency transmission from a ship captain during combat.",
+        "Let a player call a black-market contact through the group contacts list.",
+        "Use corrupted style and low signal strength for a damaged distress call."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall"
+    },
+    {
+      "id": "security-cameras",
+      "name": "Security Cameras",
+      "tier": "free",
+      "category": "Surveillance",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/CameraFeed.jpg",
+      "summary": "A sci-fi surveillance system for live-feeling camera feeds, static images, and player broadcasts.",
+      "overview": "Security Cameras gives GMs a full surveillance camera system for cyberpunk and sci-fi sessions. Cameras can show live canvas regions or static images, then broadcast feeds to players in cyberpunk-styled windows.",
+      "features": [
+        "Create, organize, and manage cameras across scenes.",
+        "Use live canvas regions or static image feeds.",
+        "Online, offline, corrupted, and restricted camera states.",
+        "Broadcast camera feeds to all players.",
+        "Window and picture-in-picture display modes.",
+        "Foundry v13 Scene Region framing for live views."
+      ],
+      "installation": [
+        "Enable HoloSuite Core and Security Cameras.",
+        "Open the Camera Manager from the HoloSuite launcher.",
+        "Create a camera and choose the current scene or a static image source.",
+        "Save the camera, then use Show to Players during a session."
+      ],
+      "configuration": [
+        "Set camera name, location, feed source, and display mode.",
+        "Link live cameras to Foundry Scene Regions where supported.",
+        "Change camera status mid-session to online, offline, corrupted, or restricted.",
+        "Use Close All Player Feeds to remove every active feed at once."
+      ],
+      "faq": [
+        {
+          "question": "Can players open cameras themselves?",
+          "answer": "No. The GM controls which feeds are shown and when they close."
+        },
+        {
+          "question": "Do live canvas feeds work across scenes?",
+          "answer": "Players generally need to be on the same scene for live canvas updates. Otherwise the feed may use a fallback display."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Show a lobby camera as players infiltrate a corporate facility.",
+        "Switch a feed to corrupted when an enemy jams the signal.",
+        "Use restricted status for cameras players have not hacked yet."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/security-cameras"
+    },
+    {
+      "id": "csi-toolkit",
+      "name": "CSI Toolkit",
+      "tier": "free",
+      "category": "Investigation",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/CSI%20Board.jpg",
+      "summary": "Interactive case boards for evidence, suspects, locations, timelines, and investigation theories.",
+      "overview": "CSI Toolkit is a system-agnostic investigation module for collaborative case management. GMs and players can organize cards, connections, timelines, and evidence on shared case boards.",
+      "features": [
+        "Create and manage investigation cases.",
+        "Add draggable cards for evidence, suspects, locations, and timeline entries.",
+        "Connect cards with labeled, styled relationship lines.",
+        "Share player-visible case boards.",
+        "Use database and noir corkboard themes.",
+        "Import and export cases as JSON."
+      ],
+      "installation": [
+        "Enable HoloSuite Core and CSI Toolkit.",
+        "Open the Case Manager from the HoloSuite launcher.",
+        "Create a case with title, subtitle, description, visibility, and board theme.",
+        "Add cards and connections as the investigation develops."
+      ],
+      "configuration": [
+        "Set case visibility to GM-only or player-visible.",
+        "Choose database or corkboard visual theme per case.",
+        "Use card status, images, descriptions, and notes to control reveal detail.",
+        "Export case JSON for backup or sharing."
+      ],
+      "faq": [
+        {
+          "question": "Can players edit the board?",
+          "answer": "Players can contribute to visible case boards, including dragging cards and adding connections depending on the board workflow."
+        },
+        {
+          "question": "Can cases be moved between worlds?",
+          "answer": "Yes. Use export and import to move case JSON between worlds."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Run a cyberpunk murder investigation with suspect and evidence cards.",
+        "Use connection labels like found at, last seen with, or encrypted by.",
+        "Dim card types to focus the table on evidence or timeline entries."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/csi-toolkit"
+    },
+    {
+      "id": "galaxy-map",
+      "name": "Galaxy Map",
+      "tier": "free",
+      "category": "Navigation",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/Galaxy%20Map%20Manager.png",
+      "summary": "Campaign-scale holographic star maps with systems, routes, travel, reveals, and JSON import/export.",
+      "overview": "Galaxy Map gives sci-fi campaigns a Foundry-native star map. GMs build systems and routes, control visibility, reveal discoveries, and let players request travel.",
+      "features": [
+        "Interactive star maps with clickable system nodes.",
+        "Custom icons, colors, sizes, pulse effects, descriptions, scenes, journals, and factions.",
+        "Routes with travel time, fuel cost, and route type.",
+        "GM-controlled visibility and discovery notifications.",
+        "Player travel requests and ship movement animations.",
+        "Zoom, pan, resize, import, and export."
+      ],
+      "installation": [
+        "Enable HoloSuite Core and Galaxy Map.",
+        "Open Map Manager from the HoloSuite launcher.",
+        "Create a new map or import existing JSON.",
+        "Open the map and start adding systems and routes."
+      ],
+      "configuration": [
+        "Right-click empty space to add systems.",
+        "Right-click systems to create routes, reveal content, edit, or delete.",
+        "Set systems and routes as player-visible or GM-only.",
+        "Link systems to scenes and journal entries where useful."
+      ],
+      "faq": [
+        {
+          "question": "Can players see hidden systems?",
+          "answer": "Players only see systems and routes the GM has made visible. Some systems can appear as unknown until revealed."
+        },
+        {
+          "question": "Can players move the party ship?",
+          "answer": "Players can request travel. The GM and active players can accept or decline depending on the workflow."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Reveal a hidden system after players decode a nav beacon.",
+        "Track the party ship location during a sector campaign.",
+        "Export a finished star map to reuse in another world."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map"
+    },
+    {
+      "id": "bounty-board",
+      "name": "Bounty Board",
+      "tier": "free",
+      "category": "Contracts",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/BountyBoard.jpg",
+      "summary": "A sci-fi contract terminal for posting, browsing, updating, and resolving bounty jobs.",
+      "overview": "Bounty Board gives GMs a modern or sci-fi job board where players can browse available contracts. It is built for bounty hunting, mercenary work, and mission-hub campaign structures.",
+      "features": [
+        "Create and manage bounty contracts.",
+        "Let players browse available jobs.",
+        "Track target details, rewards, descriptions, and conditions.",
+        "Update or remove bounties as the story changes."
+      ],
+      "installation": [
+        "Enable HoloSuite Core and Bounty Board.",
+        "Open Bounty Board from the HoloSuite launcher.",
+        "Create contracts with the details players need.",
+        "Post or update jobs as the campaign moves through hubs and factions."
+      ],
+      "configuration": [
+        "Define target name, reward, job description, and conditions.",
+        "Keep old jobs visible or remove them when completed.",
+        "Use the board as an in-world contract terminal."
+      ],
+      "faq": [
+        {
+          "question": "Who manages bounties?",
+          "answer": "The GM controls bounty creation, updates, and removal."
+        },
+        {
+          "question": "Can players browse jobs?",
+          "answer": "Yes. Players can browse available contracts when the board is available to them."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Create a bounty board in a space station hub.",
+        "Offer several faction contracts before a session.",
+        "Update a bounty after the target escapes or the reward changes."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board"
+    },
+    {
+      "id": "holosuite-critical-cutin",
+      "name": "Critical Cut-In",
+      "tier": "free",
+      "category": "Combat",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/CriticalSucces.jpg",
+      "summary": "Full-screen sci-fi critical roll animations with character portraits, sounds, labels, and accent colors.",
+      "overview": "Critical Cut-In watches d20 rolls and triggers cinematic full-screen overlays for qualifying natural results. It turns important rolls into memorable table moments without changing mechanics.",
+      "features": [
+        "Automatic d20 roll detection.",
+        "Global and per-character trigger thresholds.",
+        "Custom images, sounds, overlay labels, animation styles, and accent colors.",
+        "GM fallback configuration for non-player rolls.",
+        "Adjustable display duration."
+      ],
+      "installation": [
+        "Enable HoloSuite Core and HoloSuite Critical Cut-In.",
+        "Open Configure Settings and find the module settings.",
+        "Set the default trigger threshold.",
+        "Open Configure Player Cut-Ins to customize actors."
+      ],
+      "configuration": [
+        "Enable or disable cut-ins per character.",
+        "Set minimum roll thresholds globally or per actor.",
+        "Choose image, audio, overlay text, animation style, accent color, and duration.",
+        "Use actor portraits as fallback images where custom art is not set."
+      ],
+      "faq": [
+        {
+          "question": "Does this affect game mechanics?",
+          "answer": "No. The cut-in is visual and audio presentation only."
+        },
+        {
+          "question": "Can players configure their own cut-ins?",
+          "answer": "The GM controls module settings. Players should ask the GM to set custom art or labels."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Trigger only on natural 20s for rare cinematic moments.",
+        "Give a recurring villain a GM cut-in.",
+        "Use a custom catchphrase as the overlay label."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-critical-cutin"
+    },
+    {
+      "id": "holosuite-hacking",
+      "name": "HoloSuite Hacking",
+      "tier": "free",
+      "category": "Minigames",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/NodeIntrustion_hacking.jpg",
+      "summary": "Interactive hacking minigames where Foundry skill checks shape puzzle difficulty.",
+      "overview": "HoloSuite Hacking replaces single-roll hacking with timed minigames. The player's skill check determines the difficulty profile, creating a playable scene with risk and pressure.",
+      "features": [
+        "GM-launched hacking challenges for selected players.",
+        "Node Intrusion network traversal minigame.",
+        "Signal Alignment channel tuning minigame.",
+        "Difficulty profiles based on margin of success or failure.",
+        "Trace timers, hazards, assists, radar, and configurable profile tuning."
+      ],
+      "installation": [
+        "Enable HoloSuite Core and HoloSuite Hacking.",
+        "Open the hacking launcher from the HoloSuite launcher.",
+        "Choose minigame, actor, owning player, skill, and DC.",
+        "Send the challenge and let the player accept."
+      ],
+      "configuration": [
+        "Set the default hacking DC.",
+        "Adjust trace duration multiplier.",
+        "Override Node Intrusion takeover duration if desired.",
+        "Tune difficulty profiles for both minigames.",
+        "Let players choose visual glitch intensity client-side."
+      ],
+      "faq": [
+        {
+          "question": "Does a failed roll skip the minigame?",
+          "answer": "No. A poor roll makes the minigame harder, but the player still gets to attempt it."
+        },
+        {
+          "question": "What does a natural 20 do?",
+          "answer": "A natural 20 uses the critical success profile, typically giving better assists, more time, and clearer information."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Use Node Intrusion to bypass corporate security.",
+        "Use Signal Alignment to decrypt an unstable transmission.",
+        "Lower trace timers for high-pressure combat hacking."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking"
+    },
+    {
+      "id": "pulse-scanner",
+      "name": "Pulse Scanner",
+      "tier": "premium",
+      "category": "Scanner",
+      "compatibility": "Foundry v12-v14",
+      "image": "assets/PulseScanner-preview.png",
+      "summary": "Premium cinematic scene scanning with animated pulses, hidden signatures, signals, and scan target reveals.",
+      "overview": "Pulse Scanner lets GMs place hidden scan targets on Foundry Scene Regions. Player-owned tokens with scanner grants can emit animated pulses to detect nearby signatures.",
+      "features": [
+        "GM-managed scan targets linked to Foundry Scene Regions.",
+        "Structural, Arcane, Thermal, Forensic, Tech, and Biological signals.",
+        "Target types for walls, hidden passages, traps, residue, tech, evidence, loot, and custom signatures.",
+        "Reticle, icon, and region-outline ping styles.",
+        "Actor-based scanner grants with radius and charges.",
+        "Sanitized player scan results."
+      ],
+      "installation": [
+        "Install the premium/private Pulse Scanner module from the release manifest or ZIP provided to licensed users.",
+        "Enable HoloSuite Core and Pulse Scanner.",
+        "Use scenes with Foundry Scene Regions for linked scan targets.",
+        "Open Pulse Scanner from the HoloSuite launcher."
+      ],
+      "configuration": [
+        "Create scan targets linked to Scene Regions.",
+        "Set target signal, type, ping style, visibility, status, integrity, color, and description.",
+        "Grant scanners to actors from the Scanners tab.",
+        "Configure scanner name, signal, radius, max charges, and current charges.",
+        "Use max charges 0 for unlimited use."
+      ],
+      "faq": [
+        {
+          "question": "Is Pulse Scanner free?",
+          "answer": "No. Pulse Scanner is part of the HoloSuite Premium Collection."
+        },
+        {
+          "question": "Can players see hidden target data?",
+          "answer": "Player scan payloads are sanitized, but GMs should avoid placing campaign-critical secrets in client-side labels or descriptions."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Reveal biological traces in a crime scene.",
+        "Detect weak structural points in a derelict station.",
+        "Give a specialist actor a limited-charge thermal scanner."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/pulse-scanner",
+      "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+    },
+    {
+      "id": "police-file",
+      "name": "Galactic Records",
+      "tier": "premium",
+      "category": "Records",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/HoloSuite.jpg",
+      "summary": "Premium sci-fi records and dossier workflows for identities, case files, and campaign databases.",
+      "overview": "Galactic Records is positioned as a premium bureaucracy and records database for campaign dossiers, identities, and investigative files.",
+      "features": [
+        "Record and dossier workflows.",
+        "Campaign file presentation for sci-fi investigations.",
+        "Designed to fit the HoloSuite visual ecosystem."
+      ],
+      "installation": [
+        "Join the Mage Tower Studios Patreon for premium collection access.",
+        "Install the provided module package when released to your tier.",
+        "Enable HoloSuite Core and Galactic Records in the Foundry world."
+      ],
+      "configuration": [
+        "Create record categories that fit your campaign.",
+        "Use dossiers for suspects, factions, identities, or bureaucracy files.",
+        "Pair with CSI Toolkit for investigation-heavy campaigns."
+      ],
+      "faq": [
+        {
+          "question": "Is Galactic Records released publicly?",
+          "answer": "It is presented as part of the premium collection. Public documentation should be updated as release packaging and access details are finalized."
+        },
+        {
+          "question": "Does it require HoloSuite Core?",
+          "answer": "It is designed to fit the HoloSuite ecosystem and should be used with Core."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Create a criminal dossier for a recurring antagonist.",
+        "Store faction identity records for a cyberpunk police campaign.",
+        "Link records conceptually with investigation case boards."
+      ],
+      "moduleUrl": "https://patreon.com/MageTowerStudios",
+      "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+    },
+    {
+      "id": "holo-assistant",
+      "name": "Holo Assistant",
+      "tier": "premium",
+      "category": "Assistant",
+      "compatibility": "Planned",
+      "image": "assets/HoloSuite.jpg",
+      "summary": "Planned premium assistant profiles, portraits, triggers, and docked player-facing messages.",
+      "overview": "Holo Assistant is planned as a premium HoloSuite app for local assistant profiles, visual portraits, triggered messages, and docked player communication.",
+      "features": [
+        "Assistant profile concept.",
+        "Portrait-driven in-world helper presentation.",
+        "Docked player message workflow.",
+        "Premium collection roadmap module."
+      ],
+      "installation": [
+        "Follow Mage Tower Studios Patreon updates for availability.",
+        "Install the module package when released.",
+        "Enable HoloSuite Core and Holo Assistant in the Foundry world."
+      ],
+      "configuration": [
+        "Create assistant identities that fit the campaign.",
+        "Configure portraits and message behavior once released.",
+        "Use with other HoloSuite modules for in-world guidance."
+      ],
+      "faq": [
+        {
+          "question": "Is Holo Assistant available now?",
+          "answer": "It is currently presented as a planned premium collection module."
+        },
+        {
+          "question": "Will this replace CyberCall?",
+          "answer": "No. It is positioned as an assistant/messaging experience, while CyberCall focuses on calls, contacts, and communications."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Use an AI ship assistant to deliver mission prompts.",
+        "Create a station guide for players entering a new sector.",
+        "Dock recurring messages beside other HoloSuite workflows."
+      ],
+      "moduleUrl": "https://patreon.com/MageTowerStudios",
+      "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+    }
+  ]
+}
