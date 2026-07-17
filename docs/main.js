@@ -67,7 +67,7 @@ function moduleCards(modules) {
           <ul>${features}</ul>
           <div class="module-actions">
             <a class="primary-link" href="${escapeAttribute(module.docsUrl)}" rel="noopener">Documentation</a>
-            <a href="${escapeAttribute(module.moduleUrl)}" rel="noopener">${isPremium ? "Details" : "Foundry"}</a>
+            <a href="${escapeAttribute(module.moduleUrl)}" rel="noopener">${isPremium ? "Details" : "GitHub"}</a>
             ${patreonButton}
           </div>
         </div>
@@ -87,6 +87,7 @@ function renderStats(stats) {
         data-value="${escapeAttribute(String(stat.value))}"
         data-prefix="${escapeAttribute(stat.prefix || "")}"
         data-suffix="${escapeAttribute(stat.suffix || "")}"
+        data-format="${escapeAttribute(stat.format || "number")}"
       >${escapeHtml(`${stat.prefix || ""}0${stat.suffix || ""}`)}</strong>
       <span>${escapeHtml(stat.label)}</span>
     </article>
@@ -132,6 +133,7 @@ function startCounterObserver() {
     const target = Number(counter.dataset.value || 0);
     const prefix = counter.dataset.prefix || "";
     const suffix = counter.dataset.suffix || "";
+    const format = counter.dataset.format || "number";
     const duration = 900;
     const start = performance.now();
 
@@ -139,7 +141,8 @@ function startCounterObserver() {
       const progress = Math.min((now - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       const value = Math.round(target * eased);
-      counter.textContent = `${prefix}${value.toLocaleString()}${suffix}`;
+      const formatted = format === "plain" ? String(value) : value.toLocaleString();
+      counter.textContent = `${prefix}${formatted}${suffix}`;
       if (progress < 1) requestAnimationFrame(tick);
     };
 

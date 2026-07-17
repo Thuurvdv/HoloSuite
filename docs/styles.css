@@ -162,9 +162,9 @@ p {
 
 h1 {
   margin-bottom: 20px;
-  max-width: 920px;
-  font-size: clamp(3.5rem, 8vw, 7.2rem);
-  line-height: 0.9;
+  max-width: 820px;
+  font-size: clamp(3rem, 6.2vw, 5.7rem);
+  line-height: 0.94;
 }
 
 h2 {
@@ -196,6 +196,16 @@ h3 {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 28px;
+}
+
+.hero-stats {
+  max-width: 860px;
+  margin-top: 22px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(5, 9, 11, 0.58);
+  backdrop-filter: blur(12px);
 }
 
 .button {
@@ -363,12 +373,16 @@ h3 {
 .experience-icon {
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
+  width: 50px;
+  height: 42px;
   border: 1px solid rgba(246, 192, 79, 0.32);
   border-radius: 6px;
   color: var(--amber);
-  font-size: 1.34rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  overflow: hidden;
 }
 
 .experience-card strong {
@@ -627,18 +641,18 @@ h3 {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 14px;
+  gap: 8px;
 }
 
 .stat-card {
-  min-height: 132px;
-  padding: 20px;
+  min-height: 88px;
+  padding: 14px;
 }
 
 .stat-card strong {
   display: block;
   color: var(--amber);
-  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-size: clamp(1.55rem, 2.6vw, 2.35rem);
   line-height: 1;
 }
 
@@ -760,16 +774,23 @@ footer a:focus-visible,
   }
 
   h1 {
-    font-size: 3.25rem;
+    font-size: 2.85rem;
   }
 
   .trust-strip,
   .experience-grid,
   .module-grid,
-  .stats-grid,
   .community-grid,
   .premium-stack {
     grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-stats .stat-card:last-child {
+    grid-column: 1 / -1;
   }
 
   .section-heading.with-controls {
