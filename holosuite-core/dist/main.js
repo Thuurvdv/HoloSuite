@@ -489,7 +489,7 @@ class T extends ae {
       classes: ["holosuite-launcher-window"],
       popOut: !0,
       resizable: !1,
-      width: 420,
+      width: 483,
       height: "auto"
     });
   }
@@ -551,7 +551,7 @@ y(T, "DEFAULT_OPTIONS", {
     resizable: !1
   },
   position: {
-    width: 420,
+    width: 483,
     height: "auto"
   }
 });

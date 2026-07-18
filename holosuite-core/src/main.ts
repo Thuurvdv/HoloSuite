@@ -717,7 +717,7 @@ class HoloSuiteLauncher extends LegacyApplication {
       resizable: false
     },
     position: {
-      width: 420,
+      width: 483,
       height: "auto"
     }
   };
@@ -729,7 +729,7 @@ class HoloSuiteLauncher extends LegacyApplication {
       classes: ["holosuite-launcher-window"],
       popOut: true,
       resizable: false,
-      width: 420,
+      width: 483,
       height: "auto"
     });
   }
