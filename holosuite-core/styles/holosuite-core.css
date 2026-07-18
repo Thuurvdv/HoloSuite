@@ -878,16 +878,102 @@ body[data-holosuite-device-style="space-police"] :where(
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile {
-  border-color: rgba(255, 216, 77, 0.26);
+  --hs-app-accent: #64d8ff;
+  --hs-app-accent-rgb: 100, 216, 255;
+  background:
+    linear-gradient(180deg, rgba(15, 25, 34, 0.9), rgba(4, 8, 13, 0.98)) !important;
+  border-color: rgba(255, 216, 77, 0.22) !important;
   border-radius: 8px;
+  color: #dbe8ea !important;
   display: grid !important;
   gap: 8px;
   grid-template-columns: 38px minmax(0, 1fr);
   min-height: 78px;
+  overflow: hidden;
   padding: 10px;
+  position: relative;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
-    inset 0 0 20px rgba(255, 216, 77, 0.045);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+    inset 0 0 22px rgba(93, 190, 255, 0.055) !important;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile::before,
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile::before {
+  background: linear-gradient(90deg, transparent, rgba(var(--hs-app-accent-rgb), 0.92), transparent);
+  bottom: 0;
+  height: 2px;
+  left: 12px;
+  opacity: 0.42;
+  right: 12px;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile::after {
+  background: radial-gradient(circle at 20% 50%, rgba(var(--hs-app-accent-rgb), 0.28), transparent 64%);
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--hs-transition-fast);
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile > * {
+  position: relative;
+  z-index: 1;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="cybercall"] {
+  --hs-app-accent: #56c7ff;
+  --hs-app-accent-rgb: 86, 199, 255;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="bounty-board"] {
+  --hs-app-accent: #ff5d6c;
+  --hs-app-accent-rgb: 255, 93, 108;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="csi-toolkit"] {
+  --hs-app-accent: #55f0b5;
+  --hs-app-accent-rgb: 85, 240, 181;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="galaxy-map"] {
+  --hs-app-accent: #9ca8ff;
+  --hs-app-accent-rgb: 156, 168, 255;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-hacking"] {
+  --hs-app-accent: #74ff6a;
+  --hs-app-accent-rgb: 116, 255, 106;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="pulse-scanner"] {
+  --hs-app-accent: #35f3ff;
+  --hs-app-accent-rgb: 53, 243, 255;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="security-cameras"],
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="security-camera"] {
+  --hs-app-accent: #ff9b4a;
+  --hs-app-accent-rgb: 255, 155, 74;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-critical-cutin"] {
+  --hs-app-accent: #ff3f7d;
+  --hs-app-accent-rgb: 255, 63, 125;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holo-assistant"] {
+  --hs-app-accent: #74d6ff;
+  --hs-app-accent-rgb: 116, 214, 255;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="police-file"] {
+  --hs-app-accent: #d7e3ff;
+  --hs-app-accent-rgb: 215, 227, 255;
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile:has(.holosuite-app-count) {
@@ -900,20 +986,35 @@ body[data-holosuite-device-style="space-police"] :where(
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile:hover {
-  border-color: rgba(255, 216, 77, 0.86);
+  border-color: rgba(255, 216, 77, 0.86) !important;
   box-shadow:
     0 0 0 1px rgba(255, 216, 77, 0.2),
-    inset 0 0 28px rgba(255, 216, 77, 0.14);
+    0 0 16px rgba(var(--hs-app-accent-rgb), 0.22),
+    inset 0 0 28px rgba(var(--hs-app-accent-rgb), 0.14) !important;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile:hover::after {
+  opacity: 1;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile:where(.is-active, [aria-selected="true"], [data-selected="true"]) {
+  border-color: rgba(255, 216, 77, 0.92) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 216, 77, 0.28),
+    0 0 18px rgba(255, 216, 77, 0.12),
+    inset 0 0 26px rgba(var(--hs-app-accent-rgb), 0.12) !important;
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon {
   background:
-    linear-gradient(180deg, rgba(255, 216, 77, 0.16), rgba(255, 216, 77, 0.035)),
-    #060606;
-  border-color: rgba(255, 216, 77, 0.48);
+    linear-gradient(180deg, rgba(var(--hs-app-accent-rgb), 0.16), rgba(255, 255, 255, 0.02)),
+    #05080b;
+  border-color: rgba(var(--hs-app-accent-rgb), 0.42);
   border-radius: 10px;
-  box-shadow: inset 0 0 18px rgba(255, 216, 77, 0.08);
-  color: var(--hs-amber);
+  box-shadow:
+    0 0 13px rgba(var(--hs-app-accent-rgb), 0.14),
+    inset 0 0 18px rgba(var(--hs-app-accent-rgb), 0.12);
+  color: var(--hs-app-accent);
   font-family: var(--hs-font-mono);
   font-size: 10px;
   font-weight: 800;
@@ -957,7 +1058,7 @@ body[data-holosuite-device-style="space-police"] :where(
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon::after {
   background:
-    linear-gradient(90deg, transparent, rgba(255, 216, 77, 0.42), transparent);
+    linear-gradient(90deg, transparent, rgba(var(--hs-app-accent-rgb), 0.82), transparent);
   bottom: 6px;
   content: "";
   height: 1px;
@@ -968,13 +1069,16 @@ body[data-holosuite-device-style="space-police"] :where(
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-count {
   align-self: end;
-  border-top: 1px solid rgba(255, 216, 77, 0.24);
+  background: rgba(var(--hs-app-accent-rgb), 0.12);
+  border: 1px solid rgba(var(--hs-app-accent-rgb), 0.34);
+  border-radius: 999px;
   bottom: auto;
-  color: var(--hs-amber);
+  color: #f4fbff;
   font-size: 10px;
   grid-column: 2;
   left: auto;
-  padding-top: 5px;
+  justify-self: start;
+  padding: 4px 7px;
   position: static;
   right: auto;
 }
@@ -1021,8 +1125,8 @@ body[data-holosuite-device-style="space-police"] :where(
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-count {
-  border-top-color: rgba(255, 216, 77, 0.24);
-  color: var(--hs-amber);
+  border-color: rgba(var(--hs-app-accent-rgb), 0.34);
+  color: #f4fbff;
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-dock button[data-holosuite-action="close"] {
