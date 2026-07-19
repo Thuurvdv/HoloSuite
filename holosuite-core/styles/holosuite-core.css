@@ -1604,3 +1604,70 @@ body[data-holosuite-device-style="space-police"] :where(
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-dock button[data-holosuite-action="close"] {
   border-radius: 999px;
 }
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-header-action > i,
+body[data-holosuite-foundry-generation="12"] .holosuite-header-action > i {
+  display: grid !important;
+  height: 100%;
+  line-height: 1;
+  margin: 0 !important;
+  padding: 0 !important;
+  place-items: center;
+  text-align: center;
+  text-indent: 0;
+  width: 100%;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-header-action > i::before,
+body[data-holosuite-foundry-generation="12"] .holosuite-header-action > i::before {
+  display: block;
+  line-height: 1;
+  margin: 0 !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-header-action[data-holosuite-action="whats-new"] > i::before,
+body[data-holosuite-foundry-generation="12"] .holosuite-header-action[data-holosuite-action="whats-new"] > i::before {
+  transform: translateX(1px);
+}
+
+:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-phone,
+body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-phone {
+  --hs-control-min-height: 32px;
+}
+
+:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-header-action,
+body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-header-action {
+  height: 28px;
+  min-height: 28px;
+  min-width: 28px;
+  padding: 0 !important;
+  width: 28px;
+}
+
+:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-whats-new-filters button,
+body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-whats-new-filters button {
+  min-height: 32px;
+  padding-block: 0;
+}
+
+:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-dock button,
+:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-dock button[data-holosuite-action="close"],
+body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-dock button,
+body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-dock button[data-holosuite-action="close"] {
+  height: 34px;
+  min-height: 34px;
+  min-width: 34px;
+  width: 34px;
+}
+
+:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-app-tile,
+body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-app-tile {
+  min-height: 78px;
+  padding-block: 10px;
+}
+
+:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-app-tile:has(.holosuite-app-count),
+body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-app-tile:has(.holosuite-app-count) {
+  min-height: 78px;
+  padding-bottom: 10px;
+}
