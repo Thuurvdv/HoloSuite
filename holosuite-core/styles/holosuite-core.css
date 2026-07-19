@@ -1,8 +1,14 @@
 .holosuite-launcher-window .window-content {
-  background: var(--hs-surface-bg);
+  --hs-surface-bg: transparent;
+  --hs-surface-window: transparent;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
   display: flex;
+  height: var(--hs-launcher-height);
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
+  width: var(--hs-launcher-width);
 }
 
 .holosuite-sidebar-launcher {
@@ -48,30 +54,44 @@
 }
 
 .holosuite-phone {
+  --hs-device-frame-shell: url("../assets/device-styles/base/frame-shell.png");
+  --hs-device-top-hardware: url("../assets/device-styles/base/top-hardware.svg");
+  --hs-device-bottom-hardware: url("../assets/device-styles/base/bottom-hardware.svg");
+  --hs-device-side-button-left: url("../assets/device-styles/base/side-button-left.png");
+  --hs-device-side-button-right: url("../assets/device-styles/base/side-button-right.png");
+  --hs-device-mark: url("../assets/device-styles/base/mark.png");
+  --hs-device-frame-inset: -11px -10px;
+  --hs-device-frame-size: 100% 100%;
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/app.svg");
   --hs-launcher-height: 736px;
+  --hs-launcher-min-height: var(--hs-launcher-height);
   --hs-launcher-width: 483px;
   color: var(--hs-text);
   display: flex;
+  flex: 0 0 var(--hs-launcher-width);
   font-family: var(--hs-font-ui);
-  height: 100%;
+  height: var(--hs-launcher-height);
   min-height: var(--hs-launcher-min-height, var(--hs-launcher-height));
+  overflow: visible;
   position: relative;
-  width: 100%;
+  width: var(--hs-launcher-width);
 }
 
 .holosuite-phone-shell {
-  background:
-    radial-gradient(circle at 18% 8%, rgba(105, 232, 255, 0.16), transparent 28rem),
-    var(--hs-panel-bg);
-  border: 1px solid var(--hs-line-strong);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   box-sizing: border-box;
-  box-shadow: var(--hs-shadow-panel);
+  box-shadow: none;
   display: flex;
-  flex: 1;
+  flex: 0 0 var(--hs-launcher-width);
   flex-direction: column;
-  height: 100%;
+  height: var(--hs-launcher-height);
   min-height: var(--hs-launcher-min-height, var(--hs-launcher-height));
-  padding: 18px;
+  overflow: visible;
+  padding: 38px 36px 34px;
+  position: relative;
+  width: var(--hs-launcher-width);
 }
 
 .holosuite-status-bar,
@@ -496,6 +516,450 @@
   text-transform: uppercase;
 }
 
+.holosuite-launcher-window {
+  --hs-launcher-height: 736px;
+  --hs-launcher-width: 483px;
+  --hs-surface-bg: transparent;
+  --hs-surface-window: transparent;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: visible;
+}
+
+:where(
+  #holosuite-launcher,
+  .holosuite-launcher-window,
+  .holosuite-launcher-window.window-app,
+  .holosuite-launcher-window.application,
+  .holosuite-launcher-window.app
+) {
+  --hs-surface-bg: transparent;
+  --hs-surface-window: transparent;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+:where(
+  #holosuite-launcher,
+  .holosuite-launcher-window
+) :where(.window-content, .window-content.standard-form) {
+  --hs-surface-bg: transparent;
+  --hs-surface-window: transparent;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0;
+  overflow: visible;
+}
+
+.holosuite-launcher-window .window-header {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  height: 18px;
+  left: 50%;
+  min-height: 18px;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  top: 7px;
+  transform: translateX(-50%);
+  width: 132px;
+  z-index: 5;
+}
+
+.holosuite-launcher-window .window-header > * {
+  display: none !important;
+}
+
+.holosuite-phone::before,
+.holosuite-phone::after {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 3;
+}
+
+.holosuite-phone::before {
+  background-image: var(--hs-device-side-button-left);
+  height: 96px;
+  left: 1px;
+  top: 105px;
+  width: 8px;
+}
+
+.holosuite-phone::after {
+  background-image: var(--hs-device-side-button-right);
+  height: 72px;
+  right: 1px;
+  top: 124px;
+  width: 8px;
+}
+
+.holosuite-phone-shell::before,
+.holosuite-phone-shell::after,
+.holosuite-phone-shell > .holosuite-status-bar::before,
+.holosuite-phone-shell > .holosuite-dock::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+}
+
+.holosuite-phone-shell::before {
+  background: var(--hs-device-frame-shell) center / var(--hs-device-frame-size) no-repeat;
+  inset: var(--hs-device-frame-inset);
+  z-index: 2;
+}
+
+.holosuite-phone-shell::after {
+  background: none;
+  inset: 8px;
+  z-index: 1;
+}
+
+.holosuite-phone-shell > .holosuite-status-bar,
+.holosuite-phone-shell > .holosuite-screen,
+.holosuite-phone-shell > .holosuite-dock {
+  position: relative;
+  z-index: 3;
+}
+
+.holosuite-phone-shell > .holosuite-status-bar::before {
+  background: var(--hs-device-top-hardware) center / 100% 100% no-repeat;
+  height: 18px;
+  left: 50%;
+  top: -33px;
+  transform: translateX(-50%);
+  width: 132px;
+  z-index: 7;
+}
+
+.holosuite-phone-shell > .holosuite-dock::after {
+  background: var(--hs-device-bottom-hardware) center / 100% 100% no-repeat;
+  bottom: -23px;
+  height: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  z-index: 7;
+}
+
+.holosuite-status-bar > span {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+  transform: translate(5px, 2px);
+}
+
+.holosuite-status-bar > span::before {
+  background: currentColor;
+  content: "";
+  height: 14px;
+  mask-image: var(--hs-device-mark);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-image: var(--hs-device-mark);
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  width: 14px;
+}
+
+.holosuite-screen {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(105, 232, 255, 0.12), transparent 16rem),
+    linear-gradient(180deg, rgba(3, 12, 17, 0.98), rgba(1, 4, 7, 0.96));
+  background-clip: padding-box;
+  border-color: rgba(105, 232, 255, 0.46);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+    inset 0 0 30px rgba(105, 232, 255, 0.08);
+  flex: 1 1 auto;
+  margin-inline: 3px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.holosuite-screen--whats-new {
+  min-height: 0;
+}
+
+.holosuite-screen-heading {
+  margin-bottom: 12px;
+}
+
+.holosuite-screen h2 {
+  font-size: 24px;
+}
+
+.holosuite-app-grid {
+  gap: 8px;
+}
+
+.holosuite-app-tile {
+  --hs-app-accent: #64d8ff;
+  --hs-app-accent-rgb: 100, 216, 255;
+  background:
+    linear-gradient(180deg, rgba(15, 25, 34, 0.9), rgba(4, 8, 13, 0.98)) !important;
+  border-color: rgba(105, 232, 255, 0.24) !important;
+  border-radius: 8px;
+  color: #dbe8ea !important;
+  display: grid !important;
+  gap: 8px;
+  grid-template-columns: 38px minmax(0, 1fr);
+  min-height: 78px;
+  overflow: hidden;
+  padding: 10px;
+  position: relative;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+    inset 0 0 22px rgba(93, 190, 255, 0.055) !important;
+}
+
+.holosuite-app-tile::before,
+.holosuite-app-tile::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+}
+
+.holosuite-app-tile::before {
+  background: linear-gradient(90deg, transparent, rgba(var(--hs-app-accent-rgb), 0.92), transparent);
+  bottom: 0;
+  height: 2px;
+  left: 12px;
+  opacity: 0.42;
+  right: 12px;
+}
+
+.holosuite-app-tile::after {
+  background: radial-gradient(circle at 20% 50%, rgba(var(--hs-app-accent-rgb), 0.28), transparent 64%);
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--hs-transition-fast);
+}
+
+.holosuite-app-tile > * {
+  position: relative;
+  z-index: 1;
+}
+
+.holosuite-app-tile[data-holosuite-app="cybercall"] {
+  --hs-app-accent: #56c7ff;
+  --hs-app-accent-rgb: 86, 199, 255;
+}
+
+.holosuite-app-tile[data-holosuite-app="bounty-board"] {
+  --hs-app-accent: #ff5d6c;
+  --hs-app-accent-rgb: 255, 93, 108;
+}
+
+.holosuite-app-tile[data-holosuite-app="csi-toolkit"] {
+  --hs-app-accent: #55f0b5;
+  --hs-app-accent-rgb: 85, 240, 181;
+}
+
+.holosuite-app-tile[data-holosuite-app="galaxy-map"] {
+  --hs-app-accent: #9ca8ff;
+  --hs-app-accent-rgb: 156, 168, 255;
+}
+
+.holosuite-app-tile[data-holosuite-app="holosuite-hacking"] {
+  --hs-app-accent: #74ff6a;
+  --hs-app-accent-rgb: 116, 255, 106;
+}
+
+.holosuite-app-tile[data-holosuite-app="pulse-scanner"] {
+  --hs-app-accent: #35f3ff;
+  --hs-app-accent-rgb: 53, 243, 255;
+}
+
+.holosuite-app-tile[data-holosuite-app="security-cameras"],
+.holosuite-app-tile[data-holosuite-app="security-camera"] {
+  --hs-app-accent: #ff9b4a;
+  --hs-app-accent-rgb: 255, 155, 74;
+}
+
+.holosuite-app-tile[data-holosuite-app="holosuite-critical-cutin"] {
+  --hs-app-accent: #ff3f7d;
+  --hs-app-accent-rgb: 255, 63, 125;
+}
+
+.holosuite-app-tile[data-holosuite-app="holo-assistant"] {
+  --hs-app-accent: #74d6ff;
+  --hs-app-accent-rgb: 116, 214, 255;
+}
+
+.holosuite-app-tile[data-holosuite-app="police-file"] {
+  --hs-app-accent: #d7e3ff;
+  --hs-app-accent-rgb: 215, 227, 255;
+}
+
+.holosuite-app-tile:has(.holosuite-app-count) {
+  min-height: 78px;
+  padding-bottom: 10px;
+}
+
+.holosuite-app-tile p {
+  display: none;
+}
+
+.holosuite-app-tile:hover {
+  border-color: rgba(105, 232, 255, 0.86) !important;
+  box-shadow:
+    0 0 0 1px rgba(105, 232, 255, 0.2),
+    0 0 16px rgba(var(--hs-app-accent-rgb), 0.22),
+    inset 0 0 28px rgba(var(--hs-app-accent-rgb), 0.14) !important;
+}
+
+.holosuite-app-tile:hover::after {
+  opacity: 1;
+}
+
+.holosuite-app-tile:where(.is-active, [aria-selected="true"], [data-selected="true"]) {
+  border-color: rgba(105, 232, 255, 0.92) !important;
+  box-shadow:
+    0 0 0 1px rgba(105, 232, 255, 0.28),
+    0 0 18px rgba(105, 232, 255, 0.12),
+    inset 0 0 26px rgba(var(--hs-app-accent-rgb), 0.12) !important;
+}
+
+.holosuite-app-icon {
+  background:
+    linear-gradient(180deg, rgba(var(--hs-app-accent-rgb), 0.16), rgba(255, 255, 255, 0.02)),
+    #05080b;
+  border-color: rgba(var(--hs-app-accent-rgb), 0.42);
+  border-radius: 10px;
+  box-shadow:
+    0 0 13px rgba(var(--hs-app-accent-rgb), 0.14),
+    inset 0 0 18px rgba(var(--hs-app-accent-rgb), 0.12);
+  color: var(--hs-app-accent);
+  font-family: var(--hs-font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  width: 38px;
+  height: 38px;
+}
+
+.holosuite-app-title {
+  align-self: center;
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.holosuite-app-icon i {
+  display: none;
+}
+
+.holosuite-app-icon::before {
+  background: currentColor;
+  content: "";
+  display: block;
+  height: 23px;
+  mask-image: var(--hs-device-app-icon);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-image: var(--hs-device-app-icon);
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  position: relative;
+  width: 23px;
+  z-index: 1;
+}
+
+.holosuite-app-icon::after {
+  background:
+    linear-gradient(90deg, transparent, rgba(var(--hs-app-accent-rgb), 0.82), transparent);
+  bottom: 6px;
+  content: "";
+  height: 1px;
+  left: 9px;
+  position: absolute;
+  right: 9px;
+}
+
+.holosuite-app-count {
+  align-self: end;
+  background: rgba(var(--hs-app-accent-rgb), 0.12);
+  border: 1px solid rgba(var(--hs-app-accent-rgb), 0.34);
+  border-radius: 999px;
+  bottom: auto;
+  color: #f4fbff;
+  font-size: 10px;
+  grid-column: 2;
+  justify-self: start;
+  left: auto;
+  padding: 4px 7px;
+  position: static;
+  right: auto;
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="cybercall"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/cybercall.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="bounty-board"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/bounty-board.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="csi-toolkit"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/csi-toolkit.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="galaxy-map"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/galaxy-map.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="holosuite-hacking"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holosuite-hacking.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="pulse-scanner"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/pulse-scanner.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="security-cameras"]::before,
+.holosuite-app-icon[data-holosuite-app-icon="security-camera"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/security-cameras.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="holosuite-critical-cutin"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holosuite-critical-cutin.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="holo-assistant"]::before,
+.holosuite-app-icon[data-holosuite-app-icon="police-file"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/app.svg");
+}
+
+.holosuite-dock button[data-holosuite-action="close"] {
+  border-radius: 999px;
+}
+
+.holosuite-header-action {
+  transform: translate(-25px, 5px);
+}
+
 :root[data-holosuite-device-style="space-police"],
 body[data-holosuite-device-style="space-police"] {
   --hs-cyan: #fff15a;
@@ -543,6 +1007,8 @@ body[data-holosuite-device-style="space-police"] {
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone {
+  --hs-device-frame-inset: 0;
+  --hs-device-frame-size: 100% 100%;
   --hs-launcher-height: 736px;
   --hs-launcher-min-height: var(--hs-launcher-height);
   --hs-launcher-width: 483px;
@@ -727,6 +1193,11 @@ body[data-holosuite-device-style="space-police"] {
   align-items: center;
   display: inline-flex;
   gap: 7px;
+  transform: none;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-header-action {
+  transform: none;
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-status-bar > span::before {
@@ -853,6 +1324,7 @@ body[data-holosuite-device-style="space-police"] :where(
     inset 0 0 0 1px rgba(255, 255, 255, 0.035),
     inset 0 0 30px rgba(255, 241, 90, 0.07);
   flex: 1 1 auto;
+  margin-inline: 0;
   min-height: 0;
   overflow: auto;
 }
