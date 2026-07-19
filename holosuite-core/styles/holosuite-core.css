@@ -960,8 +960,7 @@
   transform: translate(-25px, 5px);
 }
 
-:root[data-holosuite-device-style="space-police"],
-body[data-holosuite-device-style="space-police"] {
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone {
   --hs-cyan: #fff15a;
   --hs-green: #9fffd1;
   --hs-amber: #fff15a;
@@ -1215,42 +1214,7 @@ body[data-holosuite-device-style="space-police"] {
   width: 14px;
 }
 
-:root[data-holosuite-device-style="space-police"] :where(
-  .bounty-board-window,
-  .bounty-editor-window,
-  .csi-toolkit,
-  .galaxy-map-framework,
-  .gmf-crud-dialog,
-  .cybercall-app,
-  .cybercall-composer-app,
-  .cybercall-contacts-app,
-  .holosuite-phone,
-  .hcci-config-window,
-  .holosuite-hacking-launcher,
-  .node-intrusion-shell,
-  .signal-alignment-shell,
-  .pulse-scanner,
-  .security-camera-manager,
-  .security-camera-feed
-) :where(button, .dialog-button),
-body[data-holosuite-device-style="space-police"] :where(
-  .bounty-board-window,
-  .bounty-editor-window,
-  .csi-toolkit,
-  .galaxy-map-framework,
-  .gmf-crud-dialog,
-  .cybercall-app,
-  .cybercall-composer-app,
-  .cybercall-contacts-app,
-  .holosuite-phone,
-  .hcci-config-window,
-  .holosuite-hacking-launcher,
-  .node-intrusion-shell,
-  .signal-alignment-shell,
-  .pulse-scanner,
-  .security-camera-manager,
-  .security-camera-feed
-) :where(button, .dialog-button) {
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone :where(button, .dialog-button) {
   background:
     linear-gradient(180deg, rgba(44, 45, 39, 0.96), rgba(8, 8, 7, 0.98)) !important;
   border-color: rgba(255, 241, 90, 0.3) !important;
@@ -1260,42 +1224,7 @@ body[data-holosuite-device-style="space-police"] :where(
     inset 0 -1px 0 rgba(255, 177, 61, 0.16) !important;
 }
 
-:root[data-holosuite-device-style="space-police"] :where(
-  .bounty-board-window,
-  .bounty-editor-window,
-  .csi-toolkit,
-  .galaxy-map-framework,
-  .gmf-crud-dialog,
-  .cybercall-app,
-  .cybercall-composer-app,
-  .cybercall-contacts-app,
-  .holosuite-phone,
-  .hcci-config-window,
-  .holosuite-hacking-launcher,
-  .node-intrusion-shell,
-  .signal-alignment-shell,
-  .pulse-scanner,
-  .security-camera-manager,
-  .security-camera-feed
-) :where(button, .dialog-button):where(:hover, :focus-visible),
-body[data-holosuite-device-style="space-police"] :where(
-  .bounty-board-window,
-  .bounty-editor-window,
-  .csi-toolkit,
-  .galaxy-map-framework,
-  .gmf-crud-dialog,
-  .cybercall-app,
-  .cybercall-composer-app,
-  .cybercall-contacts-app,
-  .holosuite-phone,
-  .hcci-config-window,
-  .holosuite-hacking-launcher,
-  .node-intrusion-shell,
-  .signal-alignment-shell,
-  .pulse-scanner,
-  .security-camera-manager,
-  .security-camera-feed
-) :where(button, .dialog-button):where(:hover, :focus-visible),
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone :where(button, .dialog-button):where(:hover, :focus-visible),
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-header-action.is-active,
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-whats-new-filters button.is-active {
   background:
