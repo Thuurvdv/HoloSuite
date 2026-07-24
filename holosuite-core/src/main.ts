@@ -30,10 +30,15 @@ type HoloSuiteTheme = keyof typeof THEME_CHOICES;
 
 const registeredApps = new Map<string, HoloSuiteAppRegistration>();
 const registeredWhatsNew = new Map<string, HoloSuiteWhatsNewRegistration>();
+const registeredReleases = new Map<string, HoloSuiteWhatsNewRegistration>();
 let launcherApp: HoloSuiteLauncher | null = null;
+let launcherOpenPromise: Promise<HoloSuiteLauncher | null> | null = null;
+let launcherCloseInProgress = false;
 let launcherObserver: MutationObserver | null = null;
+let launcherControlClickHandledAt = 0;
 
 type LauncherView = "apps" | "whats-new";
+type WhatsNewTab = "updates" | "releases";
 type WhatsNewFilter = "all" | HoloSuiteWhatsNewTier | "installed";
 
 function getLegacyApplicationBase(): any {
@@ -47,6 +52,13 @@ function getLegacyApplicationBase(): any {
 }
 
 const LegacyApplication = getLegacyApplicationBase();
+
+function isRenderableLauncher(app: HoloSuiteLauncher | null): app is HoloSuiteLauncher {
+  if (!app) return false;
+  if (app.getLauncherRoot({ includeDocumentFallback: false })) return true;
+  return false;
+}
+
 function escapeHtml(value: unknown): string {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
@@ -169,7 +181,7 @@ function getWhatsNewLastSeen(): number {
 
 function getUnseenWhatsNewCount(): number {
   const lastSeen = getWhatsNewLastSeen();
-  return [...registeredWhatsNew.values()]
+  return [...registeredWhatsNew.values(), ...registeredReleases.values()]
     .filter((update) => getUpdateTimestamp(update) > lastSeen)
     .reduce((count, update) => count + update.entries.length, 0);
 }
@@ -206,15 +218,14 @@ function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration |
 function renderOpenLauncherControl(controls: unknown): void {
   const isGM = game.user?.isGM === true;
   if (!isGM && isDisabledForPlayers()) return;
-  const openLauncher = () => api.openLauncher();
   const createTool = () => ({
     name: "holosuite-core-launcher",
     title: isGM ? "HoloSuite Command Deck" : "HoloSuite Player View",
     icon: getLauncherIconClass(),
     button: true,
     visible: true,
-    onClick: openLauncher,
-    onChange: openLauncher
+    onClick: handleLauncherControlClick,
+    onChange: handleLauncherControlChange
   });
 
   const addedToTiles = addSceneControlTool(controls, createTool(), ["tiles", "tile"]);
@@ -298,6 +309,57 @@ function unwrapHtmlElement(html: unknown): HTMLElement | null {
   return first instanceof HTMLElement ? first : null;
 }
 
+function removeDuplicateLauncherWindows(app: HoloSuiteLauncher | null): void {
+  const windows = new Set(document.querySelectorAll<HTMLElement>("#holosuite-launcher, .holosuite-launcher-window"));
+  if (windows.size <= 1) return;
+
+  const appElement = app ? unwrapHtmlElement((app as any).element) : null;
+  const currentWindow = appElement?.closest?.("#holosuite-launcher, .holosuite-launcher-window") as HTMLElement | null;
+  const keepWindow = currentWindow ?? [...windows].at(-1) ?? null;
+
+  for (const launcherWindow of windows) {
+    if (launcherWindow !== keepWindow) launcherWindow.remove();
+  }
+}
+
+function removeAllLauncherWindows(): void {
+  document.querySelectorAll<HTMLElement>("#holosuite-launcher, .holosuite-launcher-window").forEach((element) => {
+    element.remove();
+  });
+}
+
+function hasStaleLauncherWindow(): boolean {
+  return document.querySelector("#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone") !== null;
+}
+
+function resetLauncherState(): void {
+  launcherApp = null;
+  launcherOpenPromise = null;
+  launcherCloseInProgress = false;
+}
+
+function getBooleanArgument(args: unknown[]): boolean | null {
+  const value = args.find((arg) => typeof arg === "boolean");
+  return typeof value === "boolean" ? value : null;
+}
+
+function handleLauncherControlClick(): Promise<HoloSuiteLauncher | null> {
+  launcherControlClickHandledAt = Date.now();
+  return api.toggleLauncher();
+}
+
+function handleLauncherControlChange(...args: unknown[]): Promise<HoloSuiteLauncher | null> | null {
+  const active = getBooleanArgument(args);
+  if (active === false) {
+    void requestLauncherClose();
+    return null;
+  }
+  if (active === null && Date.now() - launcherControlClickHandledAt < 100) {
+    return null;
+  }
+  return api.openLauncher();
+}
+
 function injectRenderedLauncherControl(html: unknown): void {
   const isGM = game.user?.isGM === true;
   if (!isGM && isDisabledForPlayers()) return;
@@ -318,7 +380,7 @@ function injectRenderedLauncherControl(html: unknown): void {
   launcher.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    api.openLauncher();
+    handleLauncherControlClick();
   });
   controlsList.appendChild(launcher);
 }
@@ -472,6 +534,20 @@ function registerWhatsNewInternal(
   return normalized;
 }
 
+function registerReleaseInternal(
+  release: HoloSuiteWhatsNewRegistration,
+  options: { replace?: boolean } = {}
+): HoloSuiteWhatsNewRegistration | null {
+  const normalized = normalizeWhatsNew(release);
+  if (!normalized) return null;
+  if (options.replace === false && registeredReleases.has(normalized.moduleId)) {
+    return registeredReleases.get(normalized.moduleId) ?? null;
+  }
+  registeredReleases.set(normalized.moduleId, normalized);
+  launcherApp?.render(false);
+  return normalized;
+}
+
 async function loadBundledWhatsNewCatalog(): Promise<void> {
   try {
     const response = await fetch(WHATS_NEW_CATALOG_PATH, { cache: "no-cache" });
@@ -480,6 +556,10 @@ async function loadBundledWhatsNewCatalog(): Promise<void> {
     const modules = safeArray(catalog?.modules);
     for (const update of modules) {
       registerWhatsNewInternal(update, { replace: false });
+    }
+    const releases = safeArray(catalog?.releases);
+    for (const release of releases) {
+      registerReleaseInternal(release, { replace: false });
     }
   } catch (error) {
     console.warn(`${MODULE_ID} | Could not load bundled what's new catalog.`, error);
@@ -585,6 +665,28 @@ function renderWhatsNewFilters(activeFilter: WhatsNewFilter): string {
   `;
 }
 
+function renderWhatsNewTabs(activeTab: WhatsNewTab): string {
+  const tabs: Array<{ id: WhatsNewTab; label: string; count: number }> = [
+    { id: "updates", label: "Updates", count: registeredWhatsNew.size },
+    { id: "releases", label: "Releases", count: registeredReleases.size }
+  ];
+
+  return `
+    <nav class="holosuite-whats-new-tabs" aria-label="What's New tabs">
+      ${tabs.map((tab) => `
+        <button
+          type="button"
+          class="${tab.id === activeTab ? "is-active" : ""}"
+          data-holosuite-whats-new-tab="${escapeHtml(tab.id)}"
+        >
+          <span>${escapeHtml(tab.label)}</span>
+          <strong>${escapeHtml(tab.count)}</strong>
+        </button>
+      `).join("")}
+    </nav>
+  `;
+}
+
 function getFilteredWhatsNew(filter: WhatsNewFilter): HoloSuiteWhatsNewRegistration[] {
   return [...registeredWhatsNew.values()]
     .filter((update) => {
@@ -595,10 +697,19 @@ function getFilteredWhatsNew(filter: WhatsNewFilter): HoloSuiteWhatsNewRegistrat
     .sort(sortWhatsNew);
 }
 
-function renderWhatsNewView(activeFilter: WhatsNewFilter): string {
-  const updates = getFilteredWhatsNew(activeFilter);
-  const updateCards = updates.length
-    ? updates.map((update) => {
+function getFilteredReleases(filter: WhatsNewFilter): HoloSuiteWhatsNewRegistration[] {
+  return [...registeredReleases.values()]
+    .filter((release) => {
+      if (filter === "installed") return isModuleInstalled(release.moduleId);
+      if (filter === "free" || filter === "premium") return release.tier === filter;
+      return true;
+    })
+    .sort(sortWhatsNew);
+}
+
+function renderWhatsNewCards(items: HoloSuiteWhatsNewRegistration[], emptyLabel: string): string {
+  return items.length
+    ? items.map((update) => {
       const installed = isModuleInstalled(update.moduleId);
       const tierLabel = update.tier === "premium" ? "Premium" : "Free";
       const icon = update.icon || (update.tier === "premium" ? "fa-solid fa-gem" : "fa-solid fa-cube");
@@ -613,6 +724,14 @@ function renderWhatsNewView(activeFilter: WhatsNewFilter): string {
           ` : ""}
         </li>
       `).join("");
+      const releaseLink = update.url
+        ? `
+          <a class="holosuite-whats-new-link" href="${escapeHtml(update.url)}" target="_blank" rel="noreferrer">
+            <span>Find out more</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        `
+        : "";
 
       return `
         <article class="holosuite-whats-new-card">
@@ -629,10 +748,20 @@ function renderWhatsNewView(activeFilter: WhatsNewFilter): string {
             </div>
           </header>
           <ul>${entries}</ul>
+          ${releaseLink}
         </article>
       `;
     }).join("")
-    : `<p class="holosuite-empty">No updates match this filter yet.</p>`;
+    : `<p class="holosuite-empty">${escapeHtml(emptyLabel)}</p>`;
+}
+
+function renderWhatsNewView(activeFilter: WhatsNewFilter, activeTab: WhatsNewTab): string {
+  const updates = getFilteredWhatsNew(activeFilter);
+  const releases = getFilteredReleases(activeFilter);
+  const activeItems = activeTab === "releases" ? releases : updates;
+  const emptyLabel = activeTab === "releases"
+    ? "No releases match this filter yet."
+    : "No updates match this filter yet.";
 
   return `
     <div class="holosuite-screen-heading">
@@ -641,14 +770,19 @@ function renderWhatsNewView(activeFilter: WhatsNewFilter): string {
         <h2>What's New</h2>
       </div>
     </div>
+    ${renderWhatsNewTabs(activeTab)}
     ${renderWhatsNewFilters(activeFilter)}
     <div class="holosuite-whats-new-list">
-      ${updateCards}
+      ${renderWhatsNewCards(activeItems, emptyLabel)}
     </div>
   `;
 }
 
-function renderLauncherHtml(view: LauncherView = "apps", activeFilter: WhatsNewFilter = "all"): string {
+function renderLauncherHtml(
+  view: LauncherView = "apps",
+  activeFilter: WhatsNewFilter = "all",
+  activeWhatsNewTab: WhatsNewTab = "releases"
+): string {
   return `
     <section class="holosuite-phone">
       <div class="holosuite-phone-shell">
@@ -657,7 +791,7 @@ function renderLauncherHtml(view: LauncherView = "apps", activeFilter: WhatsNewF
           ${renderWhatsNewHeaderButton(view)}
         </header>
         <main class="holosuite-screen ${view === "whats-new" ? "holosuite-screen--whats-new" : ""}">
-          ${view === "whats-new" ? renderWhatsNewView(activeFilter) : renderAppsView()}
+          ${view === "whats-new" ? renderWhatsNewView(activeFilter, activeWhatsNewTab) : renderAppsView()}
         </main>
         <footer class="holosuite-dock">
           <button type="button" data-holosuite-action="close" title="Close"><i class="fa-solid fa-circle-xmark"></i></button>
@@ -694,8 +828,15 @@ function bindLauncherControls(root: HTMLElement | null): void {
       launcherApp?.setWhatsNewFilter(normalizeWhatsNewFilter(filter));
     });
   });
+  root.querySelectorAll<HTMLElement>("[data-holosuite-whats-new-tab]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const tab = (event.currentTarget as HTMLElement).dataset.holosuiteWhatsNewTab;
+      launcherApp?.setWhatsNewTab(normalizeWhatsNewTab(tab));
+    });
+  });
   root.querySelectorAll<HTMLElement>("[data-holosuite-action='close']").forEach((button) => {
-    button.addEventListener("click", () => launcherApp?.close());
+    button.addEventListener("pointerdown", handleLauncherCloseEvent, { capture: true });
+    button.addEventListener("click", handleLauncherCloseEvent, { capture: true });
   });
 }
 
@@ -704,9 +845,45 @@ function normalizeWhatsNewFilter(value: unknown): WhatsNewFilter {
   return filter === "free" || filter === "premium" || filter === "installed" ? filter : "all";
 }
 
+function normalizeWhatsNewTab(value: unknown): WhatsNewTab {
+  return String(value ?? "") === "releases" ? "releases" : "updates";
+}
+
+function handleLauncherCloseEvent(event: Event): void {
+  event.preventDefault();
+  event.stopPropagation();
+  (event as any).stopImmediatePropagation?.();
+  void requestLauncherClose();
+}
+
+async function requestLauncherClose(): Promise<void> {
+  if (launcherCloseInProgress) return;
+  launcherCloseInProgress = true;
+
+  const app = launcherApp;
+  const element = app ? unwrapHtmlElement((app as any).element) : document.querySelector<HTMLElement>("#holosuite-launcher");
+  const launcherElement = element?.closest?.("#holosuite-launcher, .holosuite-launcher-window") ?? element;
+  launcherApp = null;
+  launcherOpenPromise = null;
+
+  try {
+    await app?.close?.({ force: true });
+  } catch (error) {
+    console.warn(`${MODULE_ID} | Foundry did not close the launcher cleanly; removing stale launcher element.`, error);
+  } finally {
+    launcherCloseInProgress = false;
+  }
+
+  window.setTimeout(() => {
+    if (launcherElement?.isConnected) launcherElement.remove();
+    if (!launcherApp) removeAllLauncherWindows();
+  }, 0);
+}
+
 class HoloSuiteLauncher extends LegacyApplication {
   private currentView: LauncherView = "apps";
   private whatsNewFilter: WhatsNewFilter = "all";
+  private whatsNewTab: WhatsNewTab = "releases";
 
   static DEFAULT_OPTIONS = {
     id: "holosuite-launcher",
@@ -735,7 +912,7 @@ class HoloSuiteLauncher extends LegacyApplication {
   }
 
   async _renderInner() {
-    return $(renderLauncherHtml(this.currentView, this.whatsNewFilter));
+    return $(renderLauncherHtml(this.currentView, this.whatsNewFilter, this.whatsNewTab));
   }
 
   activateListeners(html) {
@@ -745,7 +922,7 @@ class HoloSuiteLauncher extends LegacyApplication {
 
   async _renderHTML() {
     const wrapper = document.createElement("template");
-    wrapper.innerHTML = renderLauncherHtml(this.currentView, this.whatsNewFilter).trim();
+    wrapper.innerHTML = renderLauncherHtml(this.currentView, this.whatsNewFilter, this.whatsNewTab).trim();
     return wrapper.content;
   }
 
@@ -767,11 +944,14 @@ class HoloSuiteLauncher extends LegacyApplication {
     return super.close(options);
   }
 
-  getLauncherRoot(): HTMLElement | null {
+  getLauncherRoot(options: { includeDocumentFallback?: boolean } = {}): HTMLElement | null {
     const element = unwrapHtmlElement((this as any).element);
-    return element?.querySelector<HTMLElement>(".holosuite-phone")
+    const appRoot = element?.querySelector<HTMLElement>(".holosuite-phone")
       ?? element?.closest?.(".holosuite-phone")
-      ?? document.querySelector<HTMLElement>("#holosuite-launcher .holosuite-phone");
+      ?? null;
+    if (appRoot?.isConnected) return appRoot;
+    if (options.includeDocumentFallback === false) return null;
+    return document.querySelector<HTMLElement>("#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone");
   }
 
   private getRenderTarget(content: unknown): HTMLElement | null {
@@ -795,7 +975,7 @@ class HoloSuiteLauncher extends LegacyApplication {
       ${renderWhatsNewHeaderButton(this.currentView)}
     `;
     screen.innerHTML = this.currentView === "whats-new"
-      ? renderWhatsNewView(this.whatsNewFilter)
+      ? renderWhatsNewView(this.whatsNewFilter, this.whatsNewTab)
       : renderAppsView();
     screen.classList.toggle("holosuite-screen--whats-new", this.currentView === "whats-new");
     bindLauncherControls(root);
@@ -816,6 +996,12 @@ class HoloSuiteLauncher extends LegacyApplication {
   setWhatsNewFilter(filter: WhatsNewFilter): void {
     this.currentView = "whats-new";
     this.whatsNewFilter = filter;
+    if (!this.updateRenderedView()) this.render(false);
+  }
+
+  setWhatsNewTab(tab: WhatsNewTab): void {
+    this.currentView = "whats-new";
+    this.whatsNewTab = tab;
     if (!this.updateRenderedView()) this.render(false);
   }
 
@@ -852,18 +1038,37 @@ const api = {
     return [...registeredWhatsNew.values()].sort(sortWhatsNew);
   },
   async openLauncher(): Promise<HoloSuiteLauncher | null> {
-    if (launcherApp && (launcherApp as any).rendered && !launcherApp.getLauncherRoot()) {
-      launcherApp = null;
+    if (launcherOpenPromise) return launcherOpenPromise;
+
+    launcherOpenPromise = (async () => {
+      if (!isRenderableLauncher(launcherApp)) launcherApp = null;
+      if (!launcherApp) launcherApp = new HoloSuiteLauncher();
+      try {
+        await launcherApp.render(true);
+      } catch (error) {
+        console.warn(`${MODULE_ID} | Recreating launcher after render failure.`, error);
+        launcherApp = new HoloSuiteLauncher();
+        await launcherApp.render(true);
+      }
+      removeDuplicateLauncherWindows(launcherApp);
+      return launcherApp;
+    })().finally(() => {
+      launcherOpenPromise = null;
+    });
+
+    return launcherOpenPromise;
+  },
+  async toggleLauncher(): Promise<HoloSuiteLauncher | null> {
+    if (launcherOpenPromise) return launcherOpenPromise;
+    if (isRenderableLauncher(launcherApp)) {
+      await requestLauncherClose();
+      return null;
     }
-    if (!launcherApp) launcherApp = new HoloSuiteLauncher();
-    try {
-      await launcherApp.render(true);
-    } catch (error) {
-      console.warn(`${MODULE_ID} | Recreating launcher after render failure.`, error);
-      launcherApp = new HoloSuiteLauncher();
-      await launcherApp.render(true);
+    if (hasStaleLauncherWindow()) {
+      removeAllLauncherWindows();
     }
-    return launcherApp;
+    resetLauncherState();
+    return api.openLauncher();
   }
 };
 

@@ -53,6 +53,144 @@
   color: var(--hs-amber);
 }
 
+.hs-application {
+  --hs-app-padding-block: 20px;
+  --hs-app-padding-inline: 24px;
+  --hs-frame-corner-size: 72px;
+  --hs-frame-edge-inset: 0px;
+  --hs-frame-edge-weight: 12px;
+  --hs-frame-side-width: var(--hs-frame-corner-size);
+  --hs-frame-header-width: 180px;
+  --hs-frame-header-height: 18px;
+  --hs-frame-color: var(--hs-border-strong);
+  --hs-frame-glow: color-mix(in srgb, var(--hs-color-primary) 36%, transparent);
+  position: relative;
+  isolation: isolate;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hs-background,
+.hs-frame,
+.hs-effects {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hs-background {
+  z-index: 0;
+}
+
+.hs-frame {
+  z-index: 2;
+}
+
+.hs-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 18px;
+  min-height: 0;
+  height: 100%;
+  padding: var(--hs-app-padding-block) var(--hs-app-padding-inline);
+}
+
+.hs-effects {
+  z-index: 3;
+  background:
+    linear-gradient(rgba(231, 250, 255, 0.026) 50%, rgba(0, 0, 0, 0.035) 50%) 0 0 / 100% 4px,
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--hs-color-primary) 8%, transparent), transparent);
+  mix-blend-mode: screen;
+  opacity: 0.42;
+}
+
+.hs-frame-piece {
+  position: absolute;
+  display: block;
+  color: var(--hs-frame-color);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 7px var(--hs-frame-glow));
+  overflow: visible;
+}
+
+.hs-frame-corner {
+  width: var(--hs-frame-corner-size);
+  height: var(--hs-frame-corner-size);
+}
+
+.hs-frame-corner--top-left {
+  top: 0;
+  left: 0;
+}
+
+.hs-frame-corner--top-right {
+  top: 0;
+  right: 0;
+}
+
+.hs-frame-corner--bottom-left {
+  bottom: 0;
+  left: 0;
+}
+
+.hs-frame-corner--bottom-right {
+  right: 0;
+  bottom: 0;
+}
+
+.hs-frame-edge--top,
+.hs-frame-edge--bottom {
+  left: var(--hs-frame-corner-size);
+  right: var(--hs-frame-corner-size);
+  height: var(--hs-frame-edge-weight);
+}
+
+.hs-frame-edge--top {
+  top: 4px;
+}
+
+.hs-frame-edge--bottom {
+  bottom: 4px;
+}
+
+.hs-frame-edge--left,
+.hs-frame-edge--right {
+  top: var(--hs-frame-corner-size);
+  width: var(--hs-frame-side-width);
+  height: calc(100% - (var(--hs-frame-corner-size) * 2));
+}
+
+.hs-frame-edge--left {
+  left: var(--hs-frame-edge-inset);
+}
+
+.hs-frame-edge--right {
+  right: var(--hs-frame-edge-inset);
+}
+
+.hs-frame-header {
+  top: 9px;
+  left: 50%;
+  width: min(var(--hs-frame-header-width), calc(100% - (var(--hs-frame-corner-size) * 2)));
+  height: var(--hs-frame-header-height);
+  transform: translateX(-50%);
+}
+
+img.hs-frame-header {
+  display: block;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  object-fit: contain;
+}
+
 .holosuite-phone {
   --hs-device-frame-shell: url("../assets/device-styles/base/frame-shell.png");
   --hs-device-top-hardware: url("../assets/device-styles/base/top-hardware.svg");
@@ -386,6 +524,58 @@
   padding: 20px;
 }
 
+.holosuite-whats-new-tabs {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 10px;
+}
+
+.holosuite-whats-new-tabs button {
+  align-items: center;
+  background: var(--hs-control-bg);
+  border: 1px solid var(--hs-line);
+  color: var(--hs-muted);
+  display: flex;
+  font-family: var(--hs-font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  justify-content: space-between;
+  min-height: 34px;
+  padding: 0 10px;
+  text-transform: uppercase;
+}
+
+.holosuite-whats-new-tabs button:hover,
+.holosuite-whats-new-tabs button:focus-visible,
+.holosuite-whats-new-tabs button.is-active {
+  border-color: var(--hs-amber);
+  color: var(--hs-text);
+}
+
+.holosuite-whats-new-tabs button.is-active {
+  background:
+    linear-gradient(180deg, rgba(255, 207, 106, 0.24), rgba(5, 14, 18, 0.96)),
+    var(--hs-control-bg);
+  box-shadow:
+    0 0 0 1px rgba(255, 207, 106, 0.22),
+    0 0 16px rgba(255, 207, 106, 0.16),
+    inset 0 -2px 0 rgba(255, 207, 106, 0.38);
+  color: var(--hs-amber);
+}
+
+.holosuite-whats-new-tabs strong {
+  align-items: center;
+  border: 1px solid rgba(105, 232, 255, 0.2);
+  color: var(--hs-amber);
+  display: inline-flex;
+  font-size: 10px;
+  justify-content: center;
+  line-height: 1;
+  min-width: 20px;
+  padding: 3px 5px;
+}
+
 .holosuite-whats-new-filters {
   display: grid;
   gap: 8px;
@@ -410,6 +600,17 @@
 .holosuite-whats-new-filters button.is-active {
   border-color: var(--hs-amber);
   color: var(--hs-text);
+}
+
+.holosuite-whats-new-filters button.is-active {
+  background:
+    linear-gradient(180deg, rgba(105, 232, 255, 0.2), rgba(5, 14, 18, 0.96)),
+    var(--hs-control-bg);
+  box-shadow:
+    0 0 0 1px rgba(105, 232, 255, 0.18),
+    0 0 14px rgba(105, 232, 255, 0.13),
+    inset 0 -2px 0 rgba(105, 232, 255, 0.32);
+  color: var(--hs-cyan);
 }
 
 .holosuite-whats-new-list {
@@ -514,6 +715,26 @@
   line-height: 1;
   padding: 4px 5px;
   text-transform: uppercase;
+}
+
+.holosuite-whats-new-link {
+  align-items: center;
+  border-top: 1px solid rgba(105, 232, 255, 0.16);
+  color: var(--hs-amber);
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 7px;
+  margin-top: 12px;
+  padding-top: 10px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.holosuite-whats-new-link:hover,
+.holosuite-whats-new-link:focus-visible {
+  color: var(--hs-text);
+  text-shadow: 0 0 8px rgba(255, 207, 106, 0.35);
 }
 
 .holosuite-launcher-window {
@@ -1226,6 +1447,7 @@
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone :where(button, .dialog-button):where(:hover, :focus-visible),
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-header-action.is-active,
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-whats-new-tabs button.is-active,
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-whats-new-filters button.is-active {
   background:
     linear-gradient(180deg, rgba(72, 61, 29, 0.98), rgba(18, 14, 7, 0.98)) !important;
@@ -1576,6 +1798,12 @@ body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) 
 :root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-whats-new-filters button,
 body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-whats-new-filters button {
   min-height: 32px;
+  padding-block: 0;
+}
+
+:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-whats-new-tabs button,
+body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-whats-new-tabs button {
+  min-height: 34px;
   padding-block: 0;
 }
 

@@ -1,4 +1,38 @@
 {
-  "updated": "2026-07-15",
-  "modules": []
+  "updated": "2026-07-22",
+  "modules": [],
+  "releases": [
+    {
+      "moduleId": "pulse-scanner",
+      "title": "Pulse Scanner",
+      "tier": "premium",
+      "version": "1.0.1",
+      "updated": "2026-07-22",
+      "icon": "fa-solid fa-wave-square",
+      "url": "https://patreon.com/MageTowerStudios",
+      "entries": [
+        {
+          "title": "Cinematic scanner pulses join HoloSuite",
+          "summary": "Reveal GM-placed scan targets with a table-ready scanner pulse, visibility controls, range handling, and system-agnostic target data.",
+          "tags": ["Scanner", "Targets", "Cinematic", "Foundry v12-v14"]
+        }
+      ]
+    },
+    {
+      "moduleId": "holodock",
+      "title": "HoloDock",
+      "tier": "free",
+      "version": "1.0.0",
+      "updated": "2026-07-22",
+      "icon": "fa-solid fa-shuttle-space",
+      "url": "https://patreon.com/MageTowerStudios",
+      "entries": [
+        {
+          "title": "Ship loadouts join HoloSuite",
+          "summary": "Create system-agnostic ship profiles with equipment slots, power allocation, damage tracking, ship-image pins, and player-facing install or activation permissions.",
+          "tags": ["Ships", "Loadouts", "Power", "Foundry v12-v14"]
+        }
+      ]
+    }
+  ]
 }
