@@ -369,6 +369,65 @@
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking"
     },
     {
+      "id": "holodock",
+      "name": "HoloDock",
+      "tier": "free",
+      "category": "Ships",
+      "compatibility": "Foundry v12-v14",
+      "image": "assets/HoloDockTeaser.png",
+      "summary": "A system-agnostic ship loadout, equipment, power, and damage console for sci-fi and vehicle-focused campaigns.",
+      "overview": "HoloDock gives HoloSuite worlds a dedicated ship console. GMs can create ship profiles, define custom stats, build categorized equipment slots, place pins on the ship image, and manage ship power or damage without tying the workflow to a specific game system.",
+      "features": [
+        "Create and manage multiple ship profiles.",
+        "Assign custom ship images or use the bundled default.",
+        "Track GM-defined ship statistics like speed, fuel, defense, cargo, crew, or campaign-specific values.",
+        "Create categorized equipment slots with descriptions and optional ship-image pins.",
+        "Drag Foundry Items onto slots to convert them into tracked ship equipment.",
+        "Display installed item names, icons, types, descriptions, power state, durability, and activation controls.",
+        "Manage ship power capacity, per-system allocation, online or offline state, and saved power presets.",
+        "Review dashboard pages for overview, systems, power grid, damage, speed, capacity, and additional stats.",
+        "Let players request equipment installation through chat when GM approval is needed.",
+        "Open HoloDock from the HoloSuite launcher."
+      ],
+      "installation": [
+        "Install HoloDock from the Foundry VTT module installer with https://github.com/Thuurvdv/holodock/releases/latest/download/module.json.",
+        "Enable HoloSuite Core and HoloDock in the Foundry world.",
+        "Open HoloDock from the HoloSuite launcher.",
+        "Create a ship profile, then add stats and equipment slots to match your campaign's vehicle rules."
+      ],
+      "configuration": [
+        "Create one or more ship profiles and choose whether players can see each profile.",
+        "Set a custom ship image if the default ship does not match the campaign.",
+        "Add custom statistics for anything your system needs to track.",
+        "Create equipment slot categories and decide which slots can receive player install requests.",
+        "Configure whether players may drag equipment into empty slots or activate ship systems.",
+        "Place equipment pins on the ship image when spatial layout matters.",
+        "Use power capacity, per-system allocation, durability, and presets to keep the ship dashboard table-ready."
+      ],
+      "faq": [
+        {
+          "question": "Is HoloDock tied to a specific game system?",
+          "answer": "No. HoloDock is system-agnostic and lets the GM define the ship statistics and equipment structure the campaign needs."
+        },
+        {
+          "question": "Can players modify ship equipment?",
+          "answer": "GMs control this per ship. Players can view visible ships, and GMs may allow player equipment drops, system activation, or chat-based install requests."
+        },
+        {
+          "question": "Does HoloDock require HoloSuite Core?",
+          "answer": "Yes. HoloDock opens from the HoloSuite launcher and requires HoloSuite Core."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Build a party ship with engines, shields, weapons, cargo, and crew systems.",
+        "Pin critical systems directly onto the ship image for a tactical damage overview.",
+        "Let an engineer player request a weapon upgrade while the GM approves the install from chat.",
+        "Save power presets for travel, stealth, combat, and emergency modes."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/holodock"
+    },
+    {
       "id": "pulse-scanner",
       "name": "Pulse Scanner",
       "tier": "premium",

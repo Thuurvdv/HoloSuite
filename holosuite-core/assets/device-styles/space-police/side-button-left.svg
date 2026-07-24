@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="8" height="96" viewBox="0 0 8 96">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ffee56;
+        stroke: #debe2a;
+        stroke-linejoin: round;
+        stroke-opacity: 0.75;
+        stroke-width: 1px;
+        filter: url(#filter);
+      }
+    </style>
+    <filter id="filter" x="1" y="2" width="6" height="92" filterUnits="userSpaceOnUse">
+      <feGaussianBlur result="blur" stdDeviation="1" in="SourceAlpha"/>
+      <feFlood result="flood" flood-color="#dcdad4" flood-opacity="0.52"/>
+      <feComposite result="composite-2" operator="out" in2="blur"/>
+      <feComposite result="composite" operator="in" in2="SourceAlpha"/>
+      <feBlend result="blend" mode="linearLight" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g style="fill: #ffee56; filter: url(#filter)">
+    <rect id="Rechthoek_1" data-name="Rechthoek 1" class="cls-1" x="1" y="2" width="6" height="92" rx="3" ry="3" style="stroke: inherit; filter: none; fill: inherit"/>
+  </g>
+  <use xlink:href="#Rechthoek_1" style="stroke: #debe2a; filter: none; fill: none"/>
+</svg>
