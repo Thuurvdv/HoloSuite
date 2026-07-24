@@ -1,7 +1,7 @@
 {
   "stats": [
-    { "label": "Modules Released", "value": 9, "suffix": "+" },
-    { "label": "Free Modules", "value": 8, "suffix": "" },
+    { "label": "Modules Released", "value": 10, "suffix": "+" },
+    { "label": "Free Modules", "value": 9, "suffix": "" },
     { "label": "Premium Modules", "value": 1, "suffix": "" },
     { "label": "Foundry Compatibility", "value": 12, "prefix": "v", "suffix": "+" },
     { "label": "Active Development", "value": 2026, "suffix": "", "format": "plain" }
@@ -42,6 +42,12 @@
       "title": "Accept bounties",
       "description": "Post contracts, rewards, targets, and mission status.",
       "moduleId": "bounty-board"
+    },
+    {
+      "icon": "SHP",
+      "title": "Manage ship loadouts",
+      "description": "Track profiles, equipment slots, power, damage, and ship-image pins.",
+      "moduleId": "holodock"
     },
     {
       "icon": "NET",
@@ -146,6 +152,18 @@
       "features": ["Node Intrusion traversal", "Signal Alignment tuning", "Roll-based difficulty profiles"],
       "docsUrl": "docs/module.html?id=holosuite-hacking",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking"
+    },
+    {
+      "id": "holodock",
+      "name": "HoloDock",
+      "tier": "free",
+      "category": "Ships",
+      "image": "assets/HoloDockTeaser.png",
+      "pitch": "A system-agnostic ship console for profiles, loadouts, equipment slots, power allocation, and damage tracking.",
+      "compatibility": "Foundry v12-v14",
+      "features": ["Multiple ship profiles", "Equipment slots with item drops and ship-image pins", "Power allocation, durability, presets, and activation controls"],
+      "docsUrl": "docs/module.html?id=holodock",
+      "moduleUrl": "https://github.com/Thuurvdv/holodock"
     },
     {
       "id": "pulse-scanner",

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="420" height="640" viewBox="0 0 420 640">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke: #000;
+        stroke-width: 8px;
+        fill: url(#linear-gradient);
+      }
+
+      .cls-1, .cls-2 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #ffda56;
+        stroke-width: 2px;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="210.5" y1="630" x2="210.5" y2="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0"/>
+      <stop offset="1" stop-color="#1e1e1e"/>
+    </linearGradient>
+  </defs>
+  <path id="Rechthoek_1" data-name="Rechthoek 1" class="cls-1" d="M41,9.986H379.992a30,30,0,0,1,30,30V600a30,30,0,0,1-30,30H41a30,30,0,0,1-30-30V39.986A30,30,0,0,1,41,9.986Z"/>
+  <path id="overlay" class="cls-2" d="M40.5,10.308H379.492a30,30,0,0,1,30,30V599.677a30,30,0,0,1-30,30H40.5a30,30,0,0,1-30-30V40.308A30,30,0,0,1,40.5,10.308Z"/>
+</svg>

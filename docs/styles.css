@@ -480,6 +480,7 @@ h3 {
 .node-d { right: 14%; bottom: 12%; }
 .node-e { bottom: 12%; left: 14%; }
 .node-f { top: 45%; left: 5%; }
+.node-g { left: 50%; bottom: 5%; transform: translateX(-50%); }
 
 .filters {
   display: inline-flex;
@@ -820,6 +821,7 @@ footer a:focus-visible,
   .node-d { right: 8%; bottom: 8%; }
   .node-e { bottom: 8%; left: 8%; }
   .node-f { top: 42%; left: 4%; }
+  .node-g { left: 50%; bottom: 2%; transform: translateX(-50%); }
 
   footer {
     flex-direction: column;
