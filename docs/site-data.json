@@ -62,9 +62,9 @@
       "name": "HoloSuite Core",
       "tier": "free",
       "category": "Core app",
-      "image": "assets/HoloSuite.jpg",
+      "image": "assets/HoloSuiteCorePng.png",
       "pitch": "The sci-fi launcher and registration layer that makes HoloSuite feel like one operating system.",
-      "compatibility": "Foundry v12-v13",
+      "compatibility": "Foundry v12-v14",
       "features": ["GM-only command launcher", "Shared visual language", "Required by most HoloSuite apps"],
       "docsUrl": "docs/module.html?id=holosuite-core",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core"
@@ -76,7 +76,7 @@
       "category": "Comms",
       "image": "assets/Cybercall.jpg",
       "pitch": "Holographic calls, player-to-GM calling, contacts, ringtones, and private message threads.",
-      "compatibility": "Foundry v12-v13",
+      "compatibility": "Foundry v12-v14",
       "features": ["Incoming call broadcasts", "Emergency and corrupted styles", "Persistent contacts and messages"],
       "docsUrl": "docs/module.html?id=cybercall",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall"
@@ -88,7 +88,7 @@
       "category": "Surveillance",
       "image": "assets/CameraFeed.jpg",
       "pitch": "Live-feeling and static camera feeds wrapped in cinematic cyberpunk overlays.",
-      "compatibility": "Foundry v12-v13",
+      "compatibility": "Foundry v12-v14",
       "features": ["Online, offline, corrupted, and restricted states", "Window and picture-in-picture modes", "Scene Region framing"],
       "docsUrl": "docs/module.html?id=security-cameras",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/security-cameras"
@@ -100,7 +100,7 @@
       "category": "Investigation",
       "image": "assets/CSI%20Board.jpg",
       "pitch": "Collaborative case boards for evidence, suspects, locations, timelines, and theories.",
-      "compatibility": "Foundry v12-v13",
+      "compatibility": "Foundry v12-v14",
       "features": ["Draggable cards and connection lines", "Database and noir board themes", "Case JSON import and export"],
       "docsUrl": "docs/module.html?id=csi-toolkit",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/csi-toolkit"
@@ -112,7 +112,7 @@
       "category": "Navigation",
       "image": "assets/Galaxy%20Map%20Manager.png",
       "pitch": "Cinematic star maps with clickable systems, travel routes, ship movement, and campaign reveals.",
-      "compatibility": "Foundry v12-v13",
+      "compatibility": "Foundry v12-v14",
       "features": ["Reveal star systems over time", "Animated route movement", "Scene and journal linking"],
       "docsUrl": "docs/module.html?id=galaxy-map",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map"
@@ -124,7 +124,7 @@
       "category": "Contracts",
       "image": "assets/BountyBoard.jpg",
       "pitch": "A sci-fi contract terminal for creating, publishing, claiming, and resolving jobs.",
-      "compatibility": "Foundry v12-v13",
+      "compatibility": "Foundry v12-v14",
       "features": ["Post campaign contracts", "Track rewards and target details", "Player browsing with GM management"],
       "docsUrl": "docs/module.html?id=bounty-board",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board"
@@ -148,7 +148,7 @@
       "category": "Minigames",
       "image": "assets/NodeIntrustion_hacking.jpg",
       "pitch": "Playable cyberpunk hacking minigames where skill checks shape puzzle difficulty.",
-      "compatibility": "Foundry v12-v13",
+      "compatibility": "Foundry v12-v14",
       "features": ["Node Intrusion traversal", "Signal Alignment tuning", "Roll-based difficulty profiles"],
       "docsUrl": "docs/module.html?id=holosuite-hacking",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking"
