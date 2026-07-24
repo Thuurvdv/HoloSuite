@@ -736,7 +736,7 @@ function renderWhatsNewCards(items: HoloSuiteWhatsNewRegistration[], emptyLabel:
       return `
         <article class="holosuite-whats-new-card">
           <header>
-            <span class="holosuite-whats-new-icon"><i class="${escapeHtml(icon)}"></i></span>
+            <span class="holosuite-whats-new-icon" data-holosuite-app-icon="${escapeHtml(update.moduleId)}"><i class="${escapeHtml(icon)}"></i></span>
             <div>
               <h3>${escapeHtml(update.title)}</h3>
               <p>

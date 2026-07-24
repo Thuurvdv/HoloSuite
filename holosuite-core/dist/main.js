@@ -471,7 +471,7 @@ function je(e, t) {
     return `
         <article class="holosuite-whats-new-card">
           <header>
-            <span class="holosuite-whats-new-icon"><i class="${a(s)}"></i></span>
+            <span class="holosuite-whats-new-icon" data-holosuite-app-icon="${a(n.moduleId)}"><i class="${a(s)}"></i></span>
             <div>
               <h3>${a(n.title)}</h3>
               <p>

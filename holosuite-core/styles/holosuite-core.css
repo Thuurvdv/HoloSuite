@@ -644,7 +644,23 @@ img.hs-frame-header {
   font-size: 18px;
   height: 42px;
   justify-content: center;
+  overflow: hidden;
+  position: relative;
   width: 42px;
+}
+
+.holosuite-whats-new-icon[data-holosuite-app-icon="holodock"] i {
+  display: none;
+}
+
+.holosuite-whats-new-icon[data-holosuite-app-icon="holodock"]::before {
+  background: currentColor;
+  content: "";
+  display: block;
+  height: 24px;
+  mask: url("../assets/device-styles/space-police/icons/holodock.svg") center / contain no-repeat;
+  -webkit-mask: url("../assets/device-styles/space-police/icons/holodock.svg") center / contain no-repeat;
+  width: 24px;
 }
 
 .holosuite-whats-new-card h3 {
@@ -1002,6 +1018,11 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 116, 255, 106;
 }
 
+.holosuite-app-tile[data-holosuite-app="holodock"] {
+  --hs-app-accent: #d7dee8;
+  --hs-app-accent-rgb: 215, 222, 232;
+}
+
 .holosuite-app-tile[data-holosuite-app="pulse-scanner"] {
   --hs-app-accent: #35f3ff;
   --hs-app-accent-rgb: 53, 243, 255;
@@ -1153,6 +1174,10 @@ img.hs-frame-header {
 
 .holosuite-app-icon[data-holosuite-app-icon="holosuite-hacking"]::before {
   --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holosuite-hacking.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="holodock"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holodock.svg");
 }
 
 .holosuite-app-icon[data-holosuite-app-icon="pulse-scanner"]::before {
@@ -1573,6 +1598,11 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 116, 255, 106;
 }
 
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holodock"] {
+  --hs-app-accent: #d7dee8;
+  --hs-app-accent-rgb: 215, 222, 232;
+}
+
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="pulse-scanner"] {
   --hs-app-accent: #35f3ff;
   --hs-app-accent-rgb: 53, 243, 255;
@@ -1724,6 +1754,10 @@ img.hs-frame-header {
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-hacking"]::before {
   --hs-space-police-icon: url("../assets/device-styles/space-police/icons/holosuite-hacking.svg");
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holodock"]::before {
+  --hs-space-police-icon: url("../assets/device-styles/space-police/icons/holodock.svg");
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="pulse-scanner"]::before {
