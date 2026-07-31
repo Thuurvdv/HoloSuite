@@ -373,9 +373,10 @@
   background: color-mix(in srgb, var(--hs-field) 42%, transparent);
 }
 
-.holosuite-hacking-launcher label {
-  color: var(--hs-muted);
+.hh-shell .holosuite-hacking-launcher .form-group > label {
+  color: var(--hs-text-secondary) !important;
   font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
 }
 

@@ -1,141 +1,141 @@
-var Ee = Object.defineProperty;
-var Be = (e, l, f) => l in e ? Ee(e, l, { enumerable: !0, configurable: !0, writable: !0, value: f }) : e[l] = f;
-var x = (e, l, f) => Be(e, typeof l != "symbol" ? l + "" : l, f);
-const Te = ["open", "cold", "solved", "classified"], Z = ["gm", "players"], Le = ["database", "noir"], ce = ["physical", "digital", "biological", "weapon", "document", "testimony", "other"], le = ["unknown", "relevant", "red_herring", "confirmed"], de = ["unknown", "cleared", "person_of_interest", "prime_suspect", "arrested", "dead"], ue = ["link", "supports", "contradicts", "location", "timeline", "identity"], me = ["solid", "dashed", "dotted"], fe = ["cyan", "green", "red", "amber", "violet", "orange", "white"], xe = ["evidence", "suspects", "locations", "timeline", "connections"], De = ["evidence", "suspects", "locations", "timeline", "connections"];
-function V(e = {}, { forceNewId: l = !1 } = {}) {
+var Pe = Object.defineProperty;
+var Be = (i, l, p) => l in i ? Pe(i, l, { enumerable: !0, configurable: !0, writable: !0, value: p }) : i[l] = p;
+var x = (i, l, p) => Be(i, typeof l != "symbol" ? l + "" : l, p);
+const Te = ["open", "cold", "solved", "classified"], Z = ["gm", "players"], Le = ["database", "noir"], ce = ["physical", "digital", "biological", "weapon", "document", "testimony", "other"], le = ["unknown", "relevant", "red_herring", "confirmed"], de = ["unknown", "cleared", "person_of_interest", "prime_suspect", "arrested", "dead"], ue = ["link", "supports", "contradicts", "location", "timeline", "identity"], me = ["solid", "dashed", "dotted"], fe = ["cyan", "green", "red", "amber", "violet", "orange", "white"], xe = ["evidence", "suspects", "locations", "timeline", "connections"], ke = ["evidence", "suspects", "locations", "timeline", "connections"];
+function G(i = {}, { forceNewId: l = !1 } = {}) {
   return {
-    id: l ? F() : e.id || F(),
-    title: String(e.title || "Untitled Case"),
-    subtitle: String(e.subtitle || ""),
-    status: H(e.status, Te, "open"),
-    description: String(e.description || ""),
-    image: String(e.image || ""),
-    visibility: H(e.visibility, Z, "players"),
-    evidence: ee(e.evidence, he),
-    suspects: ee(e.suspects, pe),
-    locations: ee(e.locations, ge),
-    timeline: ee(e.timeline, ye),
-    connections: ee(e.connections, ne),
-    boardLayout: W(e.boardLayout)
+    id: l ? Y() : i.id || Y(),
+    title: String(i.title || "Untitled Case"),
+    subtitle: String(i.subtitle || ""),
+    status: z(i.status, Te, "open"),
+    description: String(i.description || ""),
+    image: String(i.image || ""),
+    visibility: z(i.visibility, Z, "players"),
+    evidence: ee(i.evidence, pe),
+    suspects: ee(i.suspects, he),
+    locations: ee(i.locations, ge),
+    timeline: ee(i.timeline, ye),
+    connections: ee(i.connections, ne),
+    boardLayout: K(i.boardLayout)
   };
 }
-function he(e = {}) {
+function pe(i = {}) {
   return {
-    id: e.id || F(),
-    title: String(e.title || "Untitled Evidence"),
-    type: H(e.type, ce, "other"),
-    description: String(e.description || ""),
-    image: String(e.image || ""),
-    status: H(e.status, le, "unknown"),
-    visibility: H(e.visibility, Z, "players"),
-    hidden: !!e.hidden,
-    notes: String(e.notes || "")
+    id: i.id || Y(),
+    title: String(i.title || "Untitled Evidence"),
+    type: z(i.type, ce, "other"),
+    description: String(i.description || ""),
+    image: String(i.image || ""),
+    status: z(i.status, le, "unknown"),
+    visibility: z(i.visibility, Z, "players"),
+    hidden: !!i.hidden,
+    notes: String(i.notes || "")
   };
 }
-function pe(e = {}) {
+function he(i = {}) {
   return {
-    id: e.id || F(),
-    name: String(e.name || "Unknown Suspect"),
-    alias: String(e.alias || ""),
-    image: String(e.image || ""),
-    motive: String(e.motive || ""),
-    alibi: String(e.alibi || ""),
-    status: H(e.status, de, "unknown"),
-    visibility: H(e.visibility, Z, "players"),
-    hidden: !!e.hidden,
-    notes: String(e.notes || "")
+    id: i.id || Y(),
+    name: String(i.name || "Unknown Suspect"),
+    alias: String(i.alias || ""),
+    image: String(i.image || ""),
+    motive: String(i.motive || ""),
+    alibi: String(i.alibi || ""),
+    status: z(i.status, de, "unknown"),
+    visibility: z(i.visibility, Z, "players"),
+    hidden: !!i.hidden,
+    notes: String(i.notes || "")
   };
 }
-function ge(e = {}) {
+function ge(i = {}) {
   return {
-    id: e.id || F(),
-    name: String(e.name || "Unknown Location"),
-    sceneId: String(e.sceneId || ""),
-    image: String(e.image || ""),
-    description: String(e.description || ""),
-    visibility: H(e.visibility, Z, "players"),
-    hidden: !!e.hidden,
-    notes: String(e.notes || "")
+    id: i.id || Y(),
+    name: String(i.name || "Unknown Location"),
+    sceneId: String(i.sceneId || ""),
+    image: String(i.image || ""),
+    description: String(i.description || ""),
+    visibility: z(i.visibility, Z, "players"),
+    hidden: !!i.hidden,
+    notes: String(i.notes || "")
   };
 }
-function ye(e = {}) {
+function ye(i = {}) {
   return {
-    id: e.id || F(),
-    time: String(e.time || ""),
-    title: String(e.title || "Timeline Event"),
-    description: String(e.description || ""),
-    linkedItemIds: Array.isArray(e.linkedItemIds) ? e.linkedItemIds.map(String) : [],
-    visibility: H(e.visibility, Z, "players"),
-    hidden: !!e.hidden
+    id: i.id || Y(),
+    time: String(i.time || ""),
+    title: String(i.title || "Timeline Event"),
+    description: String(i.description || ""),
+    linkedItemIds: Array.isArray(i.linkedItemIds) ? i.linkedItemIds.map(String) : [],
+    visibility: z(i.visibility, Z, "players"),
+    hidden: !!i.hidden
   };
 }
-function ne(e = {}) {
+function ne(i = {}) {
   return {
-    id: e.id || F(),
-    fromId: String(e.fromId || ""),
-    toId: String(e.toId || ""),
-    label: String(e.label || ""),
-    type: H(e.type, ue, "link"),
-    style: H(e.style, me, "solid"),
-    color: H(e.color, fe, Oe(e.type)),
-    visibility: H(e.visibility, Z, "players")
+    id: i.id || Y(),
+    fromId: String(i.fromId || ""),
+    toId: String(i.toId || ""),
+    label: String(i.label || ""),
+    type: z(i.type, ue, "link"),
+    style: z(i.style, me, "solid"),
+    color: z(i.color, fe, Oe(i.type)),
+    visibility: z(i.visibility, Z, "players")
   };
 }
-function W(e = {}) {
-  var l, f, g;
+function K(i = {}) {
+  var l, p, b;
   return {
-    theme: H(e.theme, Le, "database"),
+    theme: z(i.theme, Le, "database"),
     view: {
-      x: Number((l = e.view) == null ? void 0 : l.x) || 0,
-      y: Number((f = e.view) == null ? void 0 : f.y) || 0,
-      scale: se(Number((g = e.view) == null ? void 0 : g.scale) || 1, 0.45, 1.8)
+      x: Number((l = i.view) == null ? void 0 : l.x) || 0,
+      y: Number((p = i.view) == null ? void 0 : p.y) || 0,
+      scale: se(Number((b = i.view) == null ? void 0 : b.scale) || 1, 0.45, 1.8)
     },
-    cards: Object.fromEntries(Object.entries(e.cards ?? {}).map(([m, I]) => [m, {
-      x: Number(I == null ? void 0 : I.x) || 0,
-      y: Number(I == null ? void 0 : I.y) || 0
+    cards: Object.fromEntries(Object.entries(i.cards ?? {}).map(([m, w]) => [m, {
+      x: Number(w == null ? void 0 : w.x) || 0,
+      y: Number(w == null ? void 0 : w.y) || 0
     }]))
   };
 }
-function Ne(e, l = "players", f = F()) {
-  return e === "evidence" ? he({ id: f, visibility: l }) : e === "suspects" ? pe({ id: f, visibility: l }) : e === "locations" ? ge({ id: f, visibility: l }) : e === "timeline" ? ye({ id: f, visibility: l }) : ne({ id: f, visibility: l });
+function Ne(i, l = "players", p = Y()) {
+  return i === "evidence" ? pe({ id: p, visibility: l }) : i === "suspects" ? he({ id: p, visibility: l }) : i === "locations" ? ge({ id: p, visibility: l }) : i === "timeline" ? ye({ id: p, visibility: l }) : ne({ id: p, visibility: l });
 }
-function ee(e, l) {
-  return Array.isArray(e) ? e.map((f) => l(f)) : [];
+function ee(i, l) {
+  return Array.isArray(i) ? i.map((p) => l(p)) : [];
 }
-function H(e, l, f) {
-  return l.includes(e) ? e : f;
+function z(i, l, p) {
+  return l.includes(i) ? i : p;
 }
-function F() {
-  var e;
-  return foundry.utils.randomID ? foundry.utils.randomID() : ((e = crypto.randomUUID) == null ? void 0 : e.call(crypto)) ?? Math.random().toString(36).slice(2, 12);
+function Y() {
+  var i;
+  return foundry.utils.randomID ? foundry.utils.randomID() : ((i = crypto.randomUUID) == null ? void 0 : i.call(crypto)) ?? Math.random().toString(36).slice(2, 12);
 }
-function Oe(e) {
-  return e === "supports" ? "green" : e === "contradicts" ? "red" : e === "location" ? "amber" : e === "timeline" ? "violet" : e === "identity" ? "orange" : "cyan";
+function Oe(i) {
+  return i === "supports" ? "green" : i === "contradicts" ? "red" : i === "location" ? "amber" : i === "timeline" ? "violet" : i === "identity" ? "orange" : "cyan";
 }
-function se(e, l, f) {
-  return Math.min(f, Math.max(l, e));
+function se(i, l, p) {
+  return Math.min(p, Math.max(l, i));
 }
-function Pe(e) {
+function Fe(i) {
   const {
     LegacyApplication: l,
-    moduleId: f,
-    moduleTitle: g,
+    moduleId: p,
+    moduleTitle: b,
     CSIBoardItemEditor: m,
-    getCase: I,
+    getCase: w,
     prepareBoardData: M,
-    openCaseManager: v,
-    canUserEditBoard: w,
-    publishSharedLayout: A,
-    requestLayoutPublish: G,
-    deleteBoardItem: U,
+    openCaseManager: T,
+    canUserEditBoard: v,
+    publishSharedLayout: E,
+    requestLayoutPublish: U,
+    deleteBoardItem: j,
     saveCase: X,
     defaultBoardPosition: Q,
-    getRectEdgeAnchor: h,
-    isFinitePoint: b,
-    clearBoardApp: p
-  } = e;
+    getRectEdgeAnchor: g,
+    isFinitePoint: C,
+    clearBoardApp: y
+  } = i;
   return class extends l {
-    constructor(s, a = {}) {
+    constructor(e, a = {}) {
       super(a);
       x(this, "caseId");
       x(this, "playerMode");
@@ -152,12 +152,12 @@ function Pe(e) {
       x(this, "_boundDragEnd");
       x(this, "_boundPanMove");
       x(this, "_boundPanEnd");
-      this.caseId = s, this.playerMode = !!a.playerMode, this._drag = null, this._pan = null, this._localLayout = null, this._layoutDraft = null, this._pendingConnection = null, this._contextBoardPosition = null, this._boundContextClose = null, this._dimmedKinds = /* @__PURE__ */ new Set(), this._saveTimer = null;
+      this.caseId = e, this.playerMode = !!a.playerMode, this._drag = null, this._pan = null, this._localLayout = null, this._layoutDraft = null, this._pendingConnection = null, this._contextBoardPosition = null, this._boundContextClose = null, this._dimmedKinds = /* @__PURE__ */ new Set(), this._saveTimer = null;
     }
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         title: "CSI Toolkit Case Board",
-        template: `modules/${f}/templates/case-board.hbs`,
+        template: `modules/${p}/templates/case-board.hbs`,
         classes: ["csi-toolkit", "csi-case-board-window"],
         width: 1220,
         height: 840,
@@ -168,258 +168,271 @@ function Pe(e) {
       return `csi-case-board-${this.caseId}-${this.playerMode ? "player" : "gm"}`;
     }
     get title() {
-      const s = I(this.caseId), a = this.playerMode ? "Player Board" : "GM Board";
-      return s ? `${s.title} - ${a}` : `CSI Toolkit - ${a}`;
+      const e = w(this.caseId), a = this.playerMode ? "Player Board" : "GM Board";
+      return e ? `${e.title} - ${a}` : `CSI Toolkit - ${a}`;
     }
     async getData() {
       return M(this.caseId, { playerMode: this.playerMode, layoutOverride: this._localLayout });
     }
-    activateListeners(s) {
-      super.activateListeners(s), s.find("[data-action='open-manager']").on("click", () => v()), s.find("[data-action='refresh-board']").on("click", () => this._reloadSharedBoard()), s.find("[data-action='publish-layout']").on("click", () => this._publishLayout()), s.find("[data-action='zoom-in']").on("click", () => this._zoomBy(0.1)), s.find("[data-action='zoom-out']").on("click", () => this._zoomBy(-0.1)), s.find("[data-action='context-add-board-item']").on("click", (c) => this._addBoardItemFromContext(c)), s.find("[data-action='edit-card']").on("click", (c) => this._editCard(c.currentTarget.dataset.collection, c.currentTarget.dataset.itemId)), s.find("[data-action='delete-board-item']").on("click", (c) => this._deleteBoardItem(c.currentTarget.dataset.collection, c.currentTarget.dataset.itemId)), s.find("[data-action='move-timeline-item']").on("click", (c) => this._moveTimelineItem(c.currentTarget.dataset.itemId, c.currentTarget.dataset.direction)), s.find("[data-csi-connection-hit]").on("dblclick", (c) => this._editCard("connections", c.currentTarget.dataset.connectionId)), s.find("[data-action='start-connection']").on("click", (c) => this._startConnection(c)), s.find("[data-csi-dim-kind]").on("change", (c) => this._toggleDimKind(c.currentTarget)), s.find("[data-csi-card-art]").on("dblclick", (c) => this._viewCardArt(c));
-      const a = s[0].querySelector("[data-csi-board-viewport]");
-      a && (a.addEventListener("wheel", (c) => this._onWheel(c), { passive: !1 }), a.addEventListener("mousedown", (c) => this._onViewportMouseDown(c)), a.addEventListener("contextmenu", (c) => this._openContextMenu(c))), s.find("[data-csi-board-card]").on("mousedown", (c) => this._onCardMouseDown(c)), s.find("[data-csi-board-card]").on("click", (c) => this._completeConnection(c)), s.find(".csi-card-image").on("load", () => this._queueConnectionLineUpdate()), this._syncDimControls(), this._applyDimmedKinds(), this._queueConnectionLineUpdate();
+    activateListeners(e) {
+      super.activateListeners(e), e.find("[data-action='open-manager']").on("click", () => T()), e.find("[data-action='refresh-board']").on("click", () => this._reloadSharedBoard()), e.find("[data-action='publish-layout']").on("click", () => this._publishLayout()), e.find("[data-action='zoom-in']").on("click", () => this._zoomBy(0.1)), e.find("[data-action='zoom-out']").on("click", () => this._zoomBy(-0.1)), e.find("[data-action='context-add-board-item']").on("click", (c) => this._addBoardItemFromContext(c)), e.find("[data-action='edit-card']").on("click", (c) => this._editCard(c.currentTarget.dataset.collection, c.currentTarget.dataset.itemId)), e.find("[data-action='delete-board-item']").on("click", (c) => this._deleteBoardItem(c.currentTarget.dataset.collection, c.currentTarget.dataset.itemId)), e.find("[data-action='move-timeline-item']").on("click", (c) => this._moveTimelineItem(c.currentTarget.dataset.itemId, c.currentTarget.dataset.direction)), e.find("[data-csi-connection-hit]").on("dblclick", (c) => this._editCard("connections", c.currentTarget.dataset.connectionId)), e.find("[data-action='start-connection']").on("click", (c) => this._startConnection(c)), e.find("[data-csi-dim-kind]").on("change", (c) => this._toggleDimKind(c.currentTarget)), e.find("[data-csi-card-art]").on("click", (c) => this._viewCardArt(c));
+      const a = e[0].querySelector("[data-csi-board-viewport]");
+      a && (a.addEventListener("wheel", (c) => this._onWheel(c), { passive: !1 }), a.addEventListener("mousedown", (c) => this._onViewportMouseDown(c)), a.addEventListener("contextmenu", (c) => this._openContextMenu(c))), e.find("[data-csi-board-card]").on("mousedown", (c) => this._onCardMouseDown(c)), e.find("[data-csi-board-card]").on("click", (c) => this._completeConnection(c)), e.find(".csi-card-image").on("load", () => this._queueConnectionLineUpdate()), this._syncDimControls(), this._applyDimmedKinds(), this._queueConnectionLineUpdate();
     }
-    _onCardMouseDown(s) {
-      if (!w(this.caseId) || s.button !== 0 || s.target.closest("button, [data-csi-card-art]")) return;
-      const a = s.currentTarget, c = this._getView(), y = this._getLayout(), _ = a.dataset.itemId, S = y.cards[_] ?? { x: Number(a.dataset.x) || 0, y: Number(a.dataset.y) || 0 };
-      s.preventDefault(), this._drag = {
-        itemId: _,
+    _onCardMouseDown(e) {
+      if (!v(this.caseId) || e.button !== 0 || e.target.closest("button, [data-csi-card-art]")) return;
+      const a = e.currentTarget, c = this._getView(), f = this._getLayout(), h = a.dataset.itemId, _ = f.cards[h] ?? { x: Number(a.dataset.x) || 0, y: Number(a.dataset.y) || 0 };
+      e.preventDefault(), this._drag = {
+        itemId: h,
         card: a,
-        startClientX: s.clientX,
-        startClientY: s.clientY,
-        startX: S.x,
-        startY: S.y,
+        startClientX: e.clientX,
+        startClientY: e.clientY,
+        startX: _.x,
+        startY: _.y,
         scale: c.scale,
-        x: S.x,
-        y: S.y,
+        x: _.x,
+        y: _.y,
         frame: null,
         cards: this._getBoardCardMap(),
-        connectionGroups: this._getConnectionGroupsForItem(_)
-      }, document.addEventListener("mousemove", this._boundDragMove = (z) => this._onCardDrag(z)), document.addEventListener("mouseup", this._boundDragEnd = () => this._endDrag());
+        connectionGroups: this._getConnectionGroupsForItem(h)
+      }, document.addEventListener("mousemove", this._boundDragMove = (k) => this._onCardDrag(k)), document.addEventListener("mouseup", this._boundDragEnd = () => this._endDrag());
     }
-    _onCardDrag(s) {
+    _onCardDrag(e) {
       if (!this._drag) return;
-      const a = Math.round(this._drag.startX + (s.clientX - this._drag.startClientX) / this._drag.scale), c = Math.round(this._drag.startY + (s.clientY - this._drag.startClientY) / this._drag.scale);
+      const a = Math.round(this._drag.startX + (e.clientX - this._drag.startClientX) / this._drag.scale), c = Math.round(this._drag.startY + (e.clientY - this._drag.startClientY) / this._drag.scale);
       this._drag.x = a, this._drag.y = c, !this._drag.frame && (this._drag.frame = globalThis.requestAnimationFrame ? globalThis.requestAnimationFrame(() => this._flushCardDrag()) : globalThis.setTimeout(() => this._flushCardDrag(), 0));
     }
     _flushCardDrag() {
       this._drag && (this._drag.frame = null, this._applyCardDragPosition(this._drag.x, this._drag.y), this._updateConnectionLines(this._drag.connectionGroups, this._drag.cards));
     }
-    _applyCardDragPosition(s, a) {
-      this._drag && (this._drag.card.style.left = `${s}px`, this._drag.card.style.top = `${a}px`, this._drag.card.dataset.x = s, this._drag.card.dataset.y = a);
+    _applyCardDragPosition(e, a) {
+      this._drag && (this._drag.card.style.left = `${e}px`, this._drag.card.style.top = `${a}px`, this._drag.card.dataset.x = e, this._drag.card.dataset.y = a);
     }
     _endDrag() {
       var a;
       if (!this._drag) return;
       document.removeEventListener("mousemove", this._boundDragMove), document.removeEventListener("mouseup", this._boundDragEnd), this._drag.frame && (globalThis.cancelAnimationFrame ? globalThis.cancelAnimationFrame(this._drag.frame) : (a = globalThis.clearTimeout) == null || a.call(globalThis, this._drag.frame), this._drag.frame = null), this._applyCardDragPosition(this._drag.x, this._drag.y), this._updateConnectionLines(this._drag.connectionGroups, this._drag.cards);
-      const s = this._getLayout();
-      s.cards[this._drag.itemId] = {
-        ...s.cards[this._drag.itemId] ?? {},
+      const e = this._getLayout();
+      e.cards[this._drag.itemId] = {
+        ...e.cards[this._drag.itemId] ?? {},
         x: Number(this._drag.card.dataset.x),
         y: Number(this._drag.card.dataset.y)
-      }, this._drag = null, this._saveLayout(s);
+      }, this._drag = null, this._saveLayout(e);
     }
-    _onViewportMouseDown(s) {
-      if (s.button !== 0 || s.target.closest("[data-csi-board-card], [data-csi-context-menu], [data-csi-connection-hit], button")) return;
+    _onViewportMouseDown(e) {
+      if (e.button !== 0 || e.target.closest("[data-csi-board-card], [data-csi-context-menu], [data-csi-connection-hit], button")) return;
       this._hideContextMenu();
       const a = this._getView();
-      s.preventDefault(), this._pan = {
-        startClientX: s.clientX,
-        startClientY: s.clientY,
+      e.preventDefault(), this._pan = {
+        startClientX: e.clientX,
+        startClientY: e.clientY,
         startX: a.x,
         startY: a.y
       }, document.addEventListener("mousemove", this._boundPanMove = (c) => this._onPan(c)), document.addEventListener("mouseup", this._boundPanEnd = () => this._endPan());
     }
-    _onPan(s) {
+    _onPan(e) {
       if (!this._pan) return;
       const a = this._getLayout();
-      a.view.x = Math.round(this._pan.startX + s.clientX - this._pan.startClientX), a.view.y = Math.round(this._pan.startY + s.clientY - this._pan.startClientY), this._layoutDraft = a, this._applyView(a.view);
+      a.view.x = Math.round(this._pan.startX + e.clientX - this._pan.startClientX), a.view.y = Math.round(this._pan.startY + e.clientY - this._pan.startClientY), this._layoutDraft = a, this._applyView(a.view);
     }
     _endPan() {
       if (!this._pan) return;
       document.removeEventListener("mousemove", this._boundPanMove), document.removeEventListener("mouseup", this._boundPanEnd);
-      const s = this._layoutDraft ?? this._getLayout();
-      this._pan = null, this._saveLayout(s), this._layoutDraft = null;
+      const e = this._layoutDraft ?? this._getLayout();
+      this._pan = null, this._saveLayout(e), this._layoutDraft = null;
     }
-    _onWheel(s) {
-      s.preventDefault(), this._hideContextMenu(), this._zoomBy(s.deltaY > 0 ? -0.08 : 0.08);
+    _onWheel(e) {
+      e.preventDefault(), this._hideContextMenu(), this._zoomBy(e.deltaY > 0 ? -0.08 : 0.08);
     }
-    _zoomBy(s) {
+    _zoomBy(e) {
       const a = this._getLayout();
-      a.view.scale = se(Number(a.view.scale) + s, 0.45, 1.8), this._applyView(a.view), this._saveLayout(a);
+      a.view.scale = se(Number(a.view.scale) + e, 0.45, 1.8), this._applyView(a.view), this._saveLayout(a);
     }
-    _applyView(s) {
-      var y, _;
-      const a = (y = this.element[0]) == null ? void 0 : y.querySelector("[data-csi-board-canvas]");
+    _applyView(e) {
+      var f, h;
+      const a = (f = this.element[0]) == null ? void 0 : f.querySelector("[data-csi-board-canvas]");
       if (!a) return;
-      a.style.transform = `translate(${s.x}px, ${s.y}px) scale(${s.scale})`;
-      const c = (_ = this.element[0]) == null ? void 0 : _.querySelector("[data-csi-zoom]");
-      c && (c.textContent = `${Math.round(s.scale * 100)}%`);
+      a.style.transform = `translate(${e.x}px, ${e.y}px) scale(${e.scale})`;
+      const c = (h = this.element[0]) == null ? void 0 : h.querySelector("[data-csi-zoom]");
+      c && (c.textContent = `${Math.round(e.scale * 100)}%`);
     }
     _getView() {
       return this._getLayout().view;
     }
     _getLayout() {
-      const s = I(this.caseId);
-      return W(this._layoutDraft ?? this._localLayout ?? (s == null ? void 0 : s.boardLayout));
+      const e = w(this.caseId);
+      return K(this._layoutDraft ?? this._localLayout ?? (e == null ? void 0 : e.boardLayout));
     }
-    async _saveLayout(s) {
-      this._localLayout = W(s);
+    async _saveLayout(e) {
+      this._localLayout = K(e);
     }
     async _publishLayout() {
       var a;
-      if (!w(this.caseId)) return;
-      const s = this._getLayout();
+      if (!v(this.caseId)) return;
+      const e = this._getLayout();
       if ((a = game.user) != null && a.isGM) {
-        await A(this.caseId, s);
+        await E(this.caseId, e);
         return;
       }
-      await G(this.caseId, s);
+      await U(this.caseId, e);
     }
     _reloadSharedBoard() {
       this._localLayout = null, this._layoutDraft = null, this.render(!0);
     }
     _getBoardCardMap() {
-      const s = this.element[0];
-      return s ? new Map(Array.from(s.querySelectorAll("[data-csi-board-card]")).map((a) => [a.dataset.itemId, a])) : /* @__PURE__ */ new Map();
+      const e = this.element[0];
+      return e ? new Map(Array.from(e.querySelectorAll("[data-csi-board-card]")).map((a) => [a.dataset.itemId, a])) : /* @__PURE__ */ new Map();
     }
-    _getConnectionGroupsForItem(s) {
+    _getConnectionGroupsForItem(e) {
       const a = this.element[0];
-      return !a || !s ? [] : Array.from(a.querySelectorAll("[data-csi-connection-group]")).filter((c) => c.dataset.fromId === s || c.dataset.toId === s);
+      return !a || !e ? [] : Array.from(a.querySelectorAll("[data-csi-connection-group]")).filter((c) => c.dataset.fromId === e || c.dataset.toId === e);
     }
-    _updateConnectionLines(s = null, a = null) {
+    _updateConnectionLines(e = null, a = null) {
       const c = this.element[0];
       if (!c) return;
-      const y = a ?? this._getBoardCardMap(), _ = s ?? Array.from(c.querySelectorAll("[data-csi-connection-group]"));
-      for (const S of _) {
-        const z = y.get(S.dataset.fromId), q = y.get(S.dataset.toId);
-        if (!z || !q) continue;
-        const Y = this._getCardBoardRect(z), J = this._getCardBoardRect(q), j = h(Y, J), O = h(J, Y);
-        if (!b(j) || !b(O)) continue;
-        for (const R of S.querySelectorAll("[data-csi-connection-line], [data-csi-connection-hit]"))
-          R.setAttribute("x1", j.x), R.setAttribute("y1", j.y), R.setAttribute("x2", O.x), R.setAttribute("y2", O.y);
-        const K = S.querySelector("[data-csi-connection-label]");
-        K && (K.setAttribute("x", Math.round((j.x + O.x) / 2)), K.setAttribute("y", Math.round((j.y + O.y) / 2 - 10)));
+      const f = a ?? this._getBoardCardMap(), h = e ?? Array.from(c.querySelectorAll("[data-csi-connection-group]"));
+      for (const _ of h) {
+        const k = f.get(_.dataset.fromId), B = f.get(_.dataset.toId);
+        if (!k || !B) continue;
+        const O = this._getCardBoardRect(k), V = this._getCardBoardRect(B), R = g(O, V), H = g(V, O);
+        if (!C(R) || !C(H)) continue;
+        for (const W of _.querySelectorAll("[data-csi-connection-line], [data-csi-connection-hit]"))
+          W.setAttribute("x1", R.x), W.setAttribute("y1", R.y), W.setAttribute("x2", H.x), W.setAttribute("y2", H.y);
+        const J = _.querySelector("[data-csi-connection-label]");
+        J && (J.setAttribute("x", Math.round((R.x + H.x) / 2)), J.setAttribute("y", Math.round((R.y + H.y) / 2 - 10)));
       }
     }
     _queueConnectionLineUpdate() {
-      const s = () => this._updateConnectionLines();
-      globalThis.requestAnimationFrame ? globalThis.requestAnimationFrame(s) : globalThis.setTimeout(s, 0);
+      const e = () => this._updateConnectionLines();
+      globalThis.requestAnimationFrame ? globalThis.requestAnimationFrame(e) : globalThis.setTimeout(e, 0);
     }
-    _getCardBoardRect(s) {
-      const a = Number(s.dataset.x) || Number.parseFloat(s.style.left) || 0, c = Number(s.dataset.y) || Number.parseFloat(s.style.top) || 0, y = s.offsetWidth || 220, _ = s.offsetHeight || 246;
+    _getCardBoardRect(e) {
+      const a = Number(e.dataset.x) || Number.parseFloat(e.style.left) || 0, c = Number(e.dataset.y) || Number.parseFloat(e.style.top) || 0, f = e.offsetWidth || 220, h = e.offsetHeight || 246;
       return {
         x: a,
         y: c,
-        width: y,
-        height: _,
-        centerX: a + y / 2,
-        centerY: c + _ / 2
+        width: f,
+        height: h,
+        centerX: a + f / 2,
+        centerY: c + h / 2
       };
     }
-    _editCard(s, a) {
-      w(this.caseId) && new m(this.caseId, s, a).render(!0);
+    _editCard(e, a) {
+      v(this.caseId) && new m(this.caseId, e, a).render(!0);
     }
-    _viewCardArt(s) {
-      var q, Y, J, j, O, K, R;
-      s.preventDefault(), s.stopPropagation();
-      const a = (Y = (q = s.currentTarget) == null ? void 0 : q.dataset) == null ? void 0 : Y.imageSrc;
+    _viewCardArt(e) {
+      var B, O, V, R;
+      e.preventDefault(), e.stopPropagation();
+      const a = (O = (B = e.currentTarget) == null ? void 0 : B.dataset) == null ? void 0 : O.imageSrc;
       if (!a) return;
-      const c = s.currentTarget.closest("[data-csi-board-card]"), y = ((j = (J = c == null ? void 0 : c.querySelector(".csi-card-body h3")) == null ? void 0 : J.textContent) == null ? void 0 : j.trim()) || "CSI Card Art", _ = globalThis.ImagePopout;
-      if (_) {
-        new _(a, { title: y }).render(!0);
+      const c = e.currentTarget.closest("[data-csi-board-card]"), f = ((R = (V = c == null ? void 0 : c.querySelector(".csi-card-body h3")) == null ? void 0 : V.textContent) == null ? void 0 : R.trim()) || "CSI Card Art", h = this.getImagePopoutClass();
+      if (h) {
+        new h(a, { title: f }).render(!0);
         return;
       }
-      const S = globalThis.Dialog ?? ((R = (K = (O = globalThis.foundry) == null ? void 0 : O.appv1) == null ? void 0 : K.api) == null ? void 0 : R.Dialog);
-      if (!S) return;
-      const z = String(a).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
-      new S({
-        title: y,
-        content: `<img class="csi-image-dialog" src="${z}" alt="" />`,
+      const _ = this.getDialogClass();
+      if (!_) return;
+      const k = String(a).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+      new _({
+        title: f,
+        content: `<img class="csi-image-dialog" src="${k}" alt="" />`,
         buttons: {
           close: { label: "Close" }
         }
       }, { classes: ["csi-toolkit"], width: 720 }).render(!0);
     }
-    async _deleteBoardItem(s, a) {
-      !w(this.caseId) || !xe.includes(s) || !a || await U(this.caseId, s, a);
+    _getFoundryGlobal() {
+      return globalThis.foundry ?? foundry;
     }
-    async _moveTimelineItem(s, a) {
-      var q;
-      if (!w(this.caseId) || !s) return;
-      const c = I(this.caseId), y = ((q = c == null ? void 0 : c.timeline) == null ? void 0 : q.findIndex((Y) => Y.id === s)) ?? -1, S = y + (a === "up" ? -1 : a === "down" ? 1 : 0);
-      if (!c || y < 0 || S < 0 || S >= c.timeline.length) return;
-      const [z] = c.timeline.splice(y, 1);
-      c.timeline.splice(S, 0, z), await X(c);
+    getImagePopoutClass() {
+      var a, c, f, h, _, k;
+      const e = this._getFoundryGlobal();
+      return (typeof ImagePopout < "u" ? ImagePopout : null) ?? globalThis.ImagePopout ?? ((c = (a = e == null ? void 0 : e.applications) == null ? void 0 : a.apps) == null ? void 0 : c.ImagePopout) ?? ((h = (f = e == null ? void 0 : e.applications) == null ? void 0 : f.api) == null ? void 0 : h.ImagePopout) ?? ((k = (_ = e == null ? void 0 : e.appv1) == null ? void 0 : _.api) == null ? void 0 : k.ImagePopout);
     }
-    _toggleDimKind(s) {
-      const a = s == null ? void 0 : s.value;
-      ["evidence", "suspects", "locations", "timeline"].includes(a) && (s.checked ? this._dimmedKinds.add(a) : this._dimmedKinds.delete(a), this._applyDimmedKinds());
+    getDialogClass() {
+      var a, c, f, h, _, k;
+      const e = this._getFoundryGlobal();
+      return (typeof Dialog < "u" ? Dialog : null) ?? globalThis.Dialog ?? ((c = (a = e == null ? void 0 : e.applications) == null ? void 0 : a.apps) == null ? void 0 : c.Dialog) ?? ((h = (f = e == null ? void 0 : e.applications) == null ? void 0 : f.api) == null ? void 0 : h.Dialog) ?? ((k = (_ = e == null ? void 0 : e.appv1) == null ? void 0 : _.api) == null ? void 0 : k.Dialog);
+    }
+    async _deleteBoardItem(e, a) {
+      !v(this.caseId) || !xe.includes(e) || !a || await j(this.caseId, e, a);
+    }
+    async _moveTimelineItem(e, a) {
+      var B;
+      if (!v(this.caseId) || !e) return;
+      const c = w(this.caseId), f = ((B = c == null ? void 0 : c.timeline) == null ? void 0 : B.findIndex((O) => O.id === e)) ?? -1, _ = f + (a === "up" ? -1 : a === "down" ? 1 : 0);
+      if (!c || f < 0 || _ < 0 || _ >= c.timeline.length) return;
+      const [k] = c.timeline.splice(f, 1);
+      c.timeline.splice(_, 0, k), await X(c);
+    }
+    _toggleDimKind(e) {
+      const a = e == null ? void 0 : e.value;
+      ["evidence", "suspects", "locations", "timeline"].includes(a) && (e.checked ? this._dimmedKinds.add(a) : this._dimmedKinds.delete(a), this._applyDimmedKinds());
     }
     _syncDimControls() {
-      var s;
-      for (const a of ((s = this.element[0]) == null ? void 0 : s.querySelectorAll("[data-csi-dim-kind]")) ?? [])
+      var e;
+      for (const a of ((e = this.element[0]) == null ? void 0 : e.querySelectorAll("[data-csi-dim-kind]")) ?? [])
         a.checked = this._dimmedKinds.has(a.value);
     }
     _applyDimmedKinds() {
-      const s = this.element[0];
-      if (s) {
-        for (const a of s.querySelectorAll("[data-csi-board-card]"))
+      const e = this.element[0];
+      if (e) {
+        for (const a of e.querySelectorAll("[data-csi-board-card]"))
           a.classList.toggle("is-type-dimmed", this._dimmedKinds.has(a.dataset.collection));
-        for (const a of s.querySelectorAll("[data-csi-timeline-row]"))
+        for (const a of e.querySelectorAll("[data-csi-timeline-row]"))
           a.classList.toggle("is-type-dimmed", this._dimmedKinds.has(a.dataset.collection));
       }
     }
-    _addBoardItemFromContext(s) {
-      s.preventDefault(), s.stopPropagation();
-      const a = s.currentTarget.dataset.collection;
+    _addBoardItemFromContext(e) {
+      e.preventDefault(), e.stopPropagation();
+      const a = e.currentTarget.dataset.collection;
       this._addBoardItem(a, this._contextBoardPosition), this._hideContextMenu();
     }
-    _addBoardItem(s = "evidence", a = null) {
-      w(this.caseId) && De.includes(s) && new m(this.caseId, s, null, { boardPosition: a }).render(!0);
+    _addBoardItem(e = "evidence", a = null) {
+      v(this.caseId) && ke.includes(e) && new m(this.caseId, e, null, { boardPosition: a }).render(!0);
     }
-    _openContextMenu(s) {
-      var q, Y;
-      if (!w(this.caseId) || s.target.closest("[data-csi-board-card], button, input, select, textarea")) return;
-      const a = (q = this.element[0]) == null ? void 0 : q.querySelector("[data-csi-context-menu]"), c = (Y = this.element[0]) == null ? void 0 : Y.querySelector("[data-csi-board-viewport]");
+    _openContextMenu(e) {
+      var B, O;
+      if (!v(this.caseId) || e.target.closest("[data-csi-board-card], button, input, select, textarea")) return;
+      const a = (B = this.element[0]) == null ? void 0 : B.querySelector("[data-csi-context-menu]"), c = (O = this.element[0]) == null ? void 0 : O.querySelector("[data-csi-board-viewport]");
       if (!a || !c) return;
-      s.preventDefault(), s.stopPropagation(), this._contextBoardPosition = this._clientToBoardPosition(s.clientX, s.clientY), a.hidden = !1;
-      const y = a.offsetWidth || 156, _ = a.offsetHeight || 180, S = Math.max(4, globalThis.innerWidth - y - 4), z = Math.max(4, globalThis.innerHeight - _ - 4);
-      a.style.left = `${se(s.clientX, 4, S)}px`, a.style.top = `${se(s.clientY, 4, z)}px`, this._boundContextClose && document.removeEventListener("click", this._boundContextClose), this._boundContextClose = () => this._hideContextMenu(), globalThis.setTimeout(() => document.addEventListener("click", this._boundContextClose, { once: !0 }), 0);
+      e.preventDefault(), e.stopPropagation(), this._contextBoardPosition = this._clientToBoardPosition(e.clientX, e.clientY), a.hidden = !1;
+      const f = a.offsetWidth || 156, h = a.offsetHeight || 180, _ = Math.max(4, globalThis.innerWidth - f - 4), k = Math.max(4, globalThis.innerHeight - h - 4);
+      a.style.left = `${se(e.clientX, 4, _)}px`, a.style.top = `${se(e.clientY, 4, k)}px`, this._boundContextClose && document.removeEventListener("click", this._boundContextClose), this._boundContextClose = () => this._hideContextMenu(), globalThis.setTimeout(() => document.addEventListener("click", this._boundContextClose, { once: !0 }), 0);
     }
     _hideContextMenu() {
       var a;
-      const s = (a = this.element[0]) == null ? void 0 : a.querySelector("[data-csi-context-menu]");
-      s && (s.hidden = !0), this._boundContextClose && document.removeEventListener("click", this._boundContextClose), this._boundContextClose = null;
+      const e = (a = this.element[0]) == null ? void 0 : a.querySelector("[data-csi-context-menu]");
+      e && (e.hidden = !0), this._boundContextClose && document.removeEventListener("click", this._boundContextClose), this._boundContextClose = null;
     }
-    _clientToBoardPosition(s, a) {
-      var S;
-      const c = (S = this.element[0]) == null ? void 0 : S.querySelector("[data-csi-board-viewport]"), y = c == null ? void 0 : c.getBoundingClientRect(), _ = this._getView();
-      return y ? {
-        x: Math.round((s - y.left - _.x) / _.scale - 220 / 2),
-        y: Math.round((a - y.top - _.y) / _.scale - 32)
+    _clientToBoardPosition(e, a) {
+      var _;
+      const c = (_ = this.element[0]) == null ? void 0 : _.querySelector("[data-csi-board-viewport]"), f = c == null ? void 0 : c.getBoundingClientRect(), h = this._getView();
+      return f ? {
+        x: Math.round((e - f.left - h.x) / h.scale - 220 / 2),
+        y: Math.round((a - f.top - h.y) / h.scale - 32)
       } : null;
     }
-    _startConnection(s) {
-      var y;
-      if (s.preventDefault(), s.stopPropagation(), !w(this.caseId)) return;
-      const c = s.currentTarget.dataset.itemId;
+    _startConnection(e) {
+      var f;
+      if (e.preventDefault(), e.stopPropagation(), !v(this.caseId)) return;
+      const c = e.currentTarget.dataset.itemId;
       if (c) {
         this._pendingConnection = { fromId: c };
-        for (const _ of this.element[0].querySelectorAll("[data-csi-board-card]")) _.classList.toggle("is-link-source", _.dataset.itemId === c);
-        (y = ui.notifications) == null || y.info(`${g}: Select another card to create a connection.`);
+        for (const h of this.element[0].querySelectorAll("[data-csi-board-card]")) h.classList.toggle("is-link-source", h.dataset.itemId === c);
+        (f = ui.notifications) == null || f.info(`${b}: Select another card to create a connection.`);
       }
     }
-    async _completeConnection(s) {
-      if (!this._pendingConnection || s.target.closest("button, input, select, textarea, [data-csi-card-art]") || !w(this.caseId)) return;
-      const a = s.currentTarget.dataset.itemId, c = this._pendingConnection.fromId;
+    async _completeConnection(e) {
+      if (!this._pendingConnection || e.target.closest("button, input, select, textarea, [data-csi-card-art]") || !v(this.caseId)) return;
+      const a = e.currentTarget.dataset.itemId, c = this._pendingConnection.fromId;
       this._pendingConnection = null;
-      for (const S of this.element[0].querySelectorAll("[data-csi-board-card]")) S.classList.remove("is-link-source");
+      for (const _ of this.element[0].querySelectorAll("[data-csi-board-card]")) _.classList.remove("is-link-source");
       if (!a || a === c) return;
-      const y = I(this.caseId);
-      if (!y) return;
-      const _ = ne({
-        id: F(),
+      const f = w(this.caseId);
+      if (!f) return;
+      const h = ne({
+        id: Y(),
         fromId: c,
         toId: a,
         label: "linked to",
@@ -428,44 +441,44 @@ function Pe(e) {
         color: "cyan",
         visibility: "players"
       });
-      y.connections.push(_), await X(y), new m(this.caseId, "connections", _.id).render(!0);
+      f.connections.push(h), await X(f), new m(this.caseId, "connections", h.id).render(!0);
     }
-    async close(s = {}) {
-      return this._hideContextMenu(), p(this), super.close(s);
+    async close(e = {}) {
+      return this._hideContextMenu(), y(this), super.close(e);
     }
   };
 }
-function He(e) {
+function He(i) {
   const {
     LegacyApplication: l,
-    moduleId: f,
-    moduleTitle: g,
+    moduleId: p,
+    moduleTitle: b,
     singularLabel: m,
-    getItemTitle: I,
+    getItemTitle: w,
     getCase: M,
-    buildItemChoices: v,
-    parseItemElement: w,
-    saveCase: A,
-    deleteBoardItem: G,
-    defaultBoardPosition: U
-  } = e;
+    buildItemChoices: T,
+    parseItemElement: v,
+    saveCase: E,
+    deleteBoardItem: U,
+    defaultBoardPosition: j
+  } = i;
   return class extends l {
-    constructor(h, b, p, L = {}) {
-      super(L);
+    constructor(g, C, y, S = {}) {
+      super(S);
       x(this, "caseId");
       x(this, "collection");
       x(this, "itemId");
       x(this, "isNew");
       x(this, "boardPosition");
-      this.caseId = h, this.collection = b, this.itemId = p || F(), this.isNew = !p, this.boardPosition = L.boardPosition ? {
-        x: Number(L.boardPosition.x) || 0,
-        y: Number(L.boardPosition.y) || 0
+      this.caseId = g, this.collection = C, this.itemId = y || Y(), this.isNew = !y, this.boardPosition = S.boardPosition ? {
+        x: Number(S.boardPosition.x) || 0,
+        y: Number(S.boardPosition.y) || 0
       } : null;
     }
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         title: "Edit CSI Board Card",
-        template: `modules/${f}/templates/board-item-editor.hbs`,
+        template: `modules/${p}/templates/board-item-editor.hbs`,
         classes: ["csi-toolkit", "csi-board-item-editor"],
         width: 560,
         height: 520,
@@ -473,18 +486,18 @@ function He(e) {
       });
     }
     get title() {
-      const h = this._getItem();
-      return this.isNew ? `Add ${m(this.collection)}` : h ? `Edit ${I(h, this.collection)}` : "Edit CSI Board Card";
+      const g = this._getItem();
+      return this.isNew ? `Add ${m(this.collection)}` : g ? `Edit ${w(g, this.collection)}` : "Edit CSI Board Card";
     }
     async getData() {
-      var p;
-      const h = M(this.caseId), b = this._getItem();
+      var y;
+      const g = M(this.caseId), C = this._getItem();
       return {
         caseId: this.caseId,
         collection: this.collection,
-        item: b,
+        item: C,
         isNew: this.isNew,
-        itemChoices: h ? v(h, !((p = game.user) != null && p.isGM)) : [],
+        itemChoices: g ? T(g, !((y = game.user) != null && y.isGM)) : [],
         isEvidence: this.collection === "evidence",
         isSuspect: this.collection === "suspects",
         isLocation: this.collection === "locations",
@@ -500,55 +513,62 @@ function He(e) {
         }
       };
     }
-    activateListeners(h) {
-      var L, E;
-      super.activateListeners(h);
-      const b = h[0], p = (L = b == null ? void 0 : b.matches) != null && L.call(b, "[data-csi-board-item-form]") ? b : (E = b == null ? void 0 : b.querySelector) == null ? void 0 : E.call(b, "[data-csi-board-item-form]");
-      p && p.addEventListener("submit", (s) => this._save(s)), h.find("[data-action='pick-image']").on("click", (s) => this._pickImage(s.currentTarget)), h.find("[data-action='delete-board-item']").on("click", (s) => this._delete(s));
+    activateListeners(g) {
+      var S, P;
+      super.activateListeners(g);
+      const C = g[0], y = (S = C == null ? void 0 : C.matches) != null && S.call(C, "[data-csi-board-item-form]") ? C : (P = C == null ? void 0 : C.querySelector) == null ? void 0 : P.call(C, "[data-csi-board-item-form]");
+      y && y.addEventListener("submit", (e) => this._save(e)), g.find("[data-action='pick-image']").on("click", (e) => this._pickImage(e.currentTarget)), g.find("[data-action='delete-board-item']").on("click", (e) => this._delete(e));
     }
     _getItem() {
-      var p;
-      const h = M(this.caseId), b = (p = h == null ? void 0 : h[this.collection]) == null ? void 0 : p.find((L) => L.id === this.itemId);
-      return b || (this.isNew ? Ne(this.collection, "players", this.itemId) : null);
+      var y;
+      const g = M(this.caseId), C = (y = g == null ? void 0 : g[this.collection]) == null ? void 0 : y.find((S) => S.id === this.itemId);
+      return C || (this.isNew ? Ne(this.collection, "players", this.itemId) : null);
     }
-    async _save(h) {
-      var s, a, c;
-      h.preventDefault(), h.stopPropagation(), (s = h.stopImmediatePropagation) == null || s.call(h);
-      const b = h.currentTarget, p = M(this.caseId);
-      if (!p)
-        return (a = ui.notifications) == null || a.warn(`${g}: The case could not be found.`), !1;
-      const L = p[this.collection].findIndex((y) => y.id === this.itemId);
-      if (L < 0 && !this.isNew)
-        return (c = ui.notifications) == null || c.warn(`${g}: The item could not be found.`), !1;
-      const E = w(this.collection, b);
-      return E.id = this.itemId, E.visibility = "players", E.hidden = L >= 0 ? !!p[this.collection][L].hidden : !1, L >= 0 ? p[this.collection][L] = E : p[this.collection].push(E), this.isNew && this.collection !== "connections" && (p.boardLayout.cards[this.itemId] = this.boardPosition ?? U(p.evidence.length + p.suspects.length + p.locations.length + p.timeline.length)), await A(p), this.close(), !1;
+    async _save(g) {
+      var e, a, c;
+      g.preventDefault(), g.stopPropagation(), (e = g.stopImmediatePropagation) == null || e.call(g);
+      const C = g.currentTarget, y = M(this.caseId);
+      if (!y)
+        return (a = ui.notifications) == null || a.warn(`${b}: The case could not be found.`), !1;
+      const S = y[this.collection].findIndex((f) => f.id === this.itemId);
+      if (S < 0 && !this.isNew)
+        return (c = ui.notifications) == null || c.warn(`${b}: The item could not be found.`), !1;
+      const P = v(this.collection, C);
+      return P.id = this.itemId, P.visibility = "players", P.hidden = S >= 0 ? !!y[this.collection][S].hidden : !1, S >= 0 ? y[this.collection][S] = P : y[this.collection].push(P), this.isNew && this.collection !== "connections" && (y.boardLayout.cards[this.itemId] = this.boardPosition ?? j(y.evidence.length + y.suspects.length + y.locations.length + y.timeline.length)), await E(y), this.close(), !1;
     }
-    async _delete(h) {
-      var p;
-      return h.preventDefault(), h.stopPropagation(), (p = h.stopImmediatePropagation) == null || p.call(h), this.isNew || await G(this.caseId, this.collection, this.itemId, { confirm: !0 }) && this.close(), !1;
+    async _delete(g) {
+      var y;
+      return g.preventDefault(), g.stopPropagation(), (y = g.stopImmediatePropagation) == null || y.call(g), this.isNew || await U(this.caseId, this.collection, this.itemId, { confirm: !0 }) && this.close(), !1;
     }
-    _pickImage(h) {
-      var L, E, s, a;
-      const b = (L = h.closest(".csi-image-field")) == null ? void 0 : L.querySelector("input"), p = globalThis.FilePicker ?? ((a = (s = (E = globalThis.foundry) == null ? void 0 : E.applications) == null ? void 0 : s.apps) == null ? void 0 : a.FilePicker);
-      !b || !p || new p({
+    _pickImage(g) {
+      var P, e, a, c, f, h, _, k, B, O, V, R, H;
+      const C = (P = g.closest(".csi-image-field")) == null ? void 0 : P.querySelector("input");
+      if (!C) return;
+      const y = (typeof FilePicker < "u" ? FilePicker : null) ?? globalThis.FilePicker ?? ((c = (a = (e = globalThis.foundry) == null ? void 0 : e.applications) == null ? void 0 : a.apps) == null ? void 0 : c.FilePicker) ?? ((_ = (h = (f = globalThis.foundry) == null ? void 0 : f.applications) == null ? void 0 : h.api) == null ? void 0 : _.FilePicker) ?? ((O = (B = (k = globalThis.foundry) == null ? void 0 : k.appv1) == null ? void 0 : B.api) == null ? void 0 : O.FilePicker);
+      if (!y) {
+        (R = (V = ui.notifications) == null ? void 0 : V.warn) == null || R.call(V, `${b}: Foundry FilePicker is unavailable.`);
+        return;
+      }
+      const S = new y({
         type: "image",
-        current: b.value,
-        callback: (c) => {
-          b.value = c, b.dispatchEvent(new Event("change", { bubbles: !0 }));
+        current: C.value,
+        callback: (J) => {
+          C.value = J, C.dispatchEvent(new Event("change", { bubbles: !0 }));
         }
-      }).render(!0);
+      });
+      typeof S.browse == "function" ? S.browse() : (H = S.render) == null || H.call(S, !0);
     }
   };
 }
-const B = "csi-toolkit", C = "CSI Toolkit", ie = `module.${B}`, Fe = [
-  `modules/${B}/templates/case-manager.hbs`,
-  `modules/${B}/templates/case-browser.hbs`,
-  `modules/${B}/templates/case-board.hbs`,
-  `modules/${B}/templates/item-card.hbs`,
-  `modules/${B}/templates/board-item-editor.hbs`
+const N = "csi-toolkit", I = "CSI Toolkit", ie = `module.${N}`, qe = [
+  `modules/${N}/templates/case-manager.hbs`,
+  `modules/${N}/templates/case-browser.hbs`,
+  `modules/${N}/templates/case-board.hbs`,
+  `modules/${N}/templates/item-card.hbs`,
+  `modules/${N}/templates/board-item-editor.hbs`
 ];
-function qe() {
-  game.settings.register(B, "cases", {
+function ze() {
+  game.settings.register(N, "cases", {
     name: "CSI Toolkit Cases",
     hint: "Stores all investigation cases for this world.",
     scope: "world",
@@ -557,56 +577,56 @@ function qe() {
     default: {}
   });
 }
-function re(e) {
-  return String(e || "").replace(/[-_]/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+function re(i) {
+  return String(i || "").replace(/[-_]/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 }
-function Ge(e) {
-  return String(e || "case").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "case";
+function Ye(i) {
+  return String(i || "case").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "case";
 }
-function ve(e) {
+function ve(i) {
   const l = document.createElement("div");
-  return l.textContent = String(e ?? ""), l.innerHTML;
-}
-function ze() {
-  Handlebars.registerHelper("csiEq", (e, l) => e === l), Handlebars.registerHelper("csiLabel", (e) => re(e)), Handlebars.registerHelper("csiCount", (e) => Array.isArray(e) ? e.length : 0), Handlebars.registerHelper("csiFallback", (e, l) => e || l), Handlebars.registerHelper("csiJoin", (e) => Array.isArray(e) ? e.join(", ") : ""), Handlebars.registerHelper("csiOption", (e, l) => e === l ? "selected" : ""), Handlebars.registerHelper("csiChecked", (e) => e === "players" ? "checked" : "");
-}
-function Ye() {
-  var e, l, f;
-  return ((l = (e = globalThis.foundry) == null ? void 0 : e.applications) == null ? void 0 : l.api) ?? ((f = foundry == null ? void 0 : foundry.applications) == null ? void 0 : f.api) ?? null;
+  return l.textContent = String(i ?? ""), l.innerHTML;
 }
 function Re() {
-  var e, l, f;
-  return ((l = (e = globalThis.foundry) == null ? void 0 : e.appv1) == null ? void 0 : l.api) ?? ((f = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : f.api) ?? null;
+  Handlebars.registerHelper("csiEq", (i, l) => i === l), Handlebars.registerHelper("csiLabel", (i) => re(i)), Handlebars.registerHelper("csiCount", (i) => Array.isArray(i) ? i.length : 0), Handlebars.registerHelper("csiFallback", (i, l) => i || l), Handlebars.registerHelper("csiJoin", (i) => Array.isArray(i) ? i.join(", ") : ""), Handlebars.registerHelper("csiOption", (i, l) => i === l ? "selected" : ""), Handlebars.registerHelper("csiChecked", (i) => i === "players" ? "checked" : "");
 }
-function Ue(e = {}, l = {}) {
-  var g, m, I;
-  const f = ((m = (g = globalThis.foundry) == null ? void 0 : g.utils) == null ? void 0 : m.mergeObject) ?? ((I = foundry == null ? void 0 : foundry.utils) == null ? void 0 : I.mergeObject);
-  return typeof f == "function" ? f(e, l, { inplace: !1 }) : { ...e, ...l };
+function Ue() {
+  var i, l, p;
+  return ((l = (i = globalThis.foundry) == null ? void 0 : i.applications) == null ? void 0 : l.api) ?? ((p = foundry == null ? void 0 : foundry.applications) == null ? void 0 : p.api) ?? null;
 }
 function Ve() {
-  var e, l, f, g, m;
-  return ((f = (l = (e = globalThis.foundry) == null ? void 0 : e.utils) == null ? void 0 : l.randomID) == null ? void 0 : f.call(l, 8)) ?? ((m = (g = foundry == null ? void 0 : foundry.utils) == null ? void 0 : g.randomID) == null ? void 0 : m.call(g, 8)) ?? Math.random().toString(36).slice(2, 10);
+  var i, l, p;
+  return ((l = (i = globalThis.foundry) == null ? void 0 : i.appv1) == null ? void 0 : l.api) ?? ((p = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : p.api) ?? null;
 }
-function Se(e = {}) {
+function je(i = {}, l = {}) {
+  var b, m, w;
+  const p = ((m = (b = globalThis.foundry) == null ? void 0 : b.utils) == null ? void 0 : m.mergeObject) ?? ((w = foundry == null ? void 0 : foundry.utils) == null ? void 0 : w.mergeObject);
+  return typeof p == "function" ? p(i, l, { inplace: !1 }) : { ...i, ...l };
+}
+function Ge() {
+  var i, l, p, b, m;
+  return ((p = (l = (i = globalThis.foundry) == null ? void 0 : i.utils) == null ? void 0 : l.randomID) == null ? void 0 : p.call(l, 8)) ?? ((m = (b = foundry == null ? void 0 : foundry.utils) == null ? void 0 : b.randomID) == null ? void 0 : m.call(b, 8)) ?? Math.random().toString(36).slice(2, 10);
+}
+function Se(i = {}) {
   return {
-    id: String(e.id ?? `legacy-application-${Ve()}`),
-    tag: e.tag ?? "section",
-    classes: Array.isArray(e.classes) ? e.classes : [],
+    id: String(i.id ?? `legacy-application-${Ge()}`),
+    tag: i.tag ?? "section",
+    classes: Array.isArray(i.classes) ? i.classes : [],
     window: {
-      title: e.title ?? "",
-      icon: e.icon,
-      resizable: e.resizable === !0
+      title: i.title ?? "",
+      icon: i.icon,
+      resizable: i.resizable === !0
     },
     position: {
-      width: Number(e.width ?? 600),
-      height: e.height === "auto" ? "auto" : Number(e.height ?? 600)
+      width: Number(i.width ?? 600),
+      height: i.height === "auto" ? "auto" : Number(i.height ?? 600)
     }
   };
 }
-function je(e) {
-  return class extends e {
-    constructor(g = {}) {
-      const m = Ue(new.target.defaultOptions ?? {}, g);
+function Xe(i) {
+  return class extends i {
+    constructor(b = {}) {
+      const m = je(new.target.defaultOptions ?? {}, b);
       super(Se(m));
       x(this, "_v1Options");
       this._v1Options = m;
@@ -617,295 +637,295 @@ function je(e) {
     static get DEFAULT_OPTIONS() {
       return Se(this.defaultOptions ?? {});
     }
-    activateListeners(g) {
+    activateListeners(b) {
     }
-    async _renderHTML(g, m) {
-      var A, G, U;
-      const I = typeof this.getData == "function" ? await this.getData() : {}, M = ((A = this._v1Options) == null ? void 0 : A.template) ?? ((G = this.options) == null ? void 0 : G.template) ?? ((U = this.constructor.defaultOptions) == null ? void 0 : U.template);
+    async _renderHTML(b, m) {
+      var E, U, j;
+      const w = typeof this.getData == "function" ? await this.getData() : {}, M = ((E = this._v1Options) == null ? void 0 : E.template) ?? ((U = this.options) == null ? void 0 : U.template) ?? ((j = this.constructor.defaultOptions) == null ? void 0 : j.template);
       if (!M) return document.createDocumentFragment();
-      const v = await globalThis.renderTemplate(M, I), w = document.createElement("template");
-      return w.innerHTML = v.trim(), w.content;
+      const T = await globalThis.renderTemplate(M, w), v = document.createElement("template");
+      return v.innerHTML = T.trim(), v.content;
     }
-    _activateV1Form(g) {
-      var I, M;
+    _activateV1Form(b) {
+      var w, M;
       if (typeof this._updateObject != "function") return;
-      const m = (I = g.matches) != null && I.call(g, "form") ? g : (M = g.querySelector) == null ? void 0 : M.call(g, "form");
-      m instanceof HTMLFormElement && m.addEventListener("submit", async (v) => {
-        var A;
-        v.preventDefault(), v.stopPropagation();
-        const w = new FormData(m);
-        await this._updateObject(v, w), ((A = this._v1Options) == null ? void 0 : A.closeOnSubmit) === !0 && await this.close();
+      const m = (w = b.matches) != null && w.call(b, "form") ? b : (M = b.querySelector) == null ? void 0 : M.call(b, "form");
+      m instanceof HTMLFormElement && m.addEventListener("submit", async (T) => {
+        var E;
+        T.preventDefault(), T.stopPropagation();
+        const v = new FormData(m);
+        await this._updateObject(T, v), ((E = this._v1Options) == null ? void 0 : E.closeOnSubmit) === !0 && await this.close();
       });
     }
-    _replaceHTML(g, m, I) {
-      var G, U, X, Q;
-      m.replaceChildren(g);
-      const M = globalThis.jQuery ?? globalThis.$, v = ((G = m.closest) == null ? void 0 : G.call(m, ".window-app, .app, .application")) ?? m, w = M ? M(v) : v;
+    _replaceHTML(b, m, w) {
+      var U, j, X, Q;
+      m.replaceChildren(b);
+      const M = globalThis.jQuery ?? globalThis.$, T = ((U = m.closest) == null ? void 0 : U.call(m, ".window-app, .app, .application")) ?? m, v = M ? M(T) : T;
       try {
         Object.defineProperty(this, "element", {
-          value: w,
+          value: v,
           configurable: !0,
           writable: !0
         });
       } catch {
         try {
-          this.element = w;
+          this.element = v;
         } catch {
         }
       }
-      const A = (U = this._v1Options) == null ? void 0 : U.classes;
-      Array.isArray(A) && A.length && (m.classList.add(...A), (Q = (X = m.closest) == null ? void 0 : X.call(m, ".window-app, .app, .application")) == null || Q.classList.add(...A)), this._activateV1Form(m), typeof this.activateListeners == "function" && this.activateListeners(M ? M(m) : m);
+      const E = (j = this._v1Options) == null ? void 0 : j.classes;
+      Array.isArray(E) && E.length && (m.classList.add(...E), (Q = (X = m.closest) == null ? void 0 : X.call(m, ".window-app, .app, .application")) == null || Q.classList.add(...E)), this._activateV1Form(m), typeof this.activateListeners == "function" && this.activateListeners(M ? M(m) : m);
     }
   };
 }
-function Xe() {
-  const e = Ye(), l = Re(), f = globalThis.Application ?? (l == null ? void 0 : l.Application) ?? (e == null ? void 0 : e.ApplicationV1) ?? globalThis.FormApplication ?? (l == null ? void 0 : l.FormApplication) ?? (e == null ? void 0 : e.FormApplication);
-  if (f) return f;
-  const g = e == null ? void 0 : e.ApplicationV2;
-  return g ? je(g) : null;
+function We() {
+  const i = Ue(), l = Ve(), p = globalThis.Application ?? (l == null ? void 0 : l.Application) ?? (i == null ? void 0 : i.ApplicationV1) ?? globalThis.FormApplication ?? (l == null ? void 0 : l.FormApplication) ?? (i == null ? void 0 : i.FormApplication);
+  if (p) return p;
+  const b = i == null ? void 0 : i.ApplicationV2;
+  return b ? Xe(b) : null;
 }
 (() => {
-  const e = Xe(), l = {
+  const i = We(), l = {
     manager: null,
     browser: null,
     boards: /* @__PURE__ */ new Map(),
     playerBoard: null
   };
   Hooks.once("init", async () => {
-    qe(), ze(), await loadTemplates(Fe), console.log(`${C} | Initialized`);
+    ze(), Re(), await loadTemplates(qe), console.log(`${I} | Initialized`);
   }), Hooks.once("ready", () => {
-    game.csiToolkit = f();
-    const t = game.modules.get(B);
-    t && (t.api = game.csiToolkit), g(), game.socket.on(ie, y), console.log(`${C} | API available at game.csiToolkit`);
+    game.csiToolkit = p();
+    const t = game.modules.get(N);
+    t && (t.api = game.csiToolkit), b(), game.socket.on(ie, f), console.log(`${I} | API available at game.csiToolkit`);
   });
-  function f() {
+  function p() {
     return {
-      openCaseBoard: (t, n = {}) => E(t, n),
-      openCaseManager: () => p(),
-      openCaseBrowser: () => L(),
-      createCase: (t) => G(t),
+      openCaseBoard: (t, n = {}) => P(t, n),
+      openCaseManager: () => y(),
+      openCaseBrowser: () => S(),
+      createCase: (t) => U(t),
       getCases: () => m(),
-      exportCase: (t) => b(t),
-      importCase: (t) => h(t)
+      exportCase: (t) => C(t),
+      importCase: (t) => g(t)
     };
   }
-  function g() {
+  function b() {
     const t = game.modules.get("holosuite-core"), n = t != null && t.active ? t.api : null;
     return n != null && n.registerApp ? (n.registerApp({
-      id: B,
+      id: N,
       title: "CSI Toolkit",
       icon: "fa-solid fa-fingerprint",
       premium: !1,
-      featureId: B,
+      featureId: N,
       description: "Open case files, evidence boards, and investigation tools.",
       open: () => {
-        var i;
-        return (i = game.user) != null && i.isGM ? p() : L();
+        var s;
+        return (s = game.user) != null && s.isGM ? y() : S();
       }
     }), !0) : !1;
   }
   function m() {
-    return Ce(game.settings.get(B, "cases") ?? {});
+    return Ce(game.settings.get(N, "cases") ?? {});
   }
-  async function I(t) {
-    return game.settings.set(B, "cases", t ?? {});
+  async function w(t) {
+    return game.settings.set(N, "cases", t ?? {});
   }
   function M() {
     var n;
-    return (((n = game.users) == null ? void 0 : n.contents) ?? Array.from(game.users ?? [])).some((i) => (i == null ? void 0 : i.isGM) && (i == null ? void 0 : i.active));
+    return (((n = game.users) == null ? void 0 : n.contents) ?? Array.from(game.users ?? [])).some((s) => (s == null ? void 0 : s.isGM) && (s == null ? void 0 : s.active));
   }
-  function v(t) {
+  function T(t) {
     const n = m();
-    return n[t] ? V(n[t]) : null;
+    return n[t] ? G(n[t]) : null;
   }
-  async function w(t, { notify: n = !0, render: i = !0, updateReason: o = null, userName: r = null } = {}) {
-    var T;
-    const u = V(t);
-    if (!((T = game.user) != null && T.isGM)) return A(u, { notify: n, render: i });
+  async function v(t, { notify: n = !0, render: s = !0, updateReason: r = null, userName: o = null } = {}) {
+    var L;
+    const u = G(t);
+    if (!((L = game.user) != null && L.isGM)) return E(u, { notify: n, render: s });
     const d = m();
-    return d[u.id] = u, await I(d), n && c(u.id, { reason: o, userName: r }), i && te(u.id), u;
+    return d[u.id] = u, await w(d), n && c(u.id, { reason: r, userName: o }), s && te(u.id), u;
   }
-  async function A(t, { render: n = !0, notify: i = !0 } = {}) {
-    var o, r, u, d, T, $;
-    return (o = game.socket) != null && o.emit ? M() ? (game.socket.emit(ie, {
+  async function E(t, { render: n = !0, notify: s = !0 } = {}) {
+    var r, o, u, d, L, A;
+    return (r = game.socket) != null && r.emit ? M() ? (game.socket.emit(ie, {
       type: "save-case-request",
       caseData: t,
       userId: (d = game.user) == null ? void 0 : d.id,
-      userName: (T = game.user) == null ? void 0 : T.name
-    }), i && (($ = ui.notifications) == null || $.info(`${C}: Board update sent to the GM.`)), t) : ((u = ui.notifications) == null || u.warn(`${C}: No active GM is connected to save board changes.`), t) : ((r = ui.notifications) == null || r.warn(`${C}: A GM must be connected to save board changes.`), t);
+      userName: (L = game.user) == null ? void 0 : L.name
+    }), s && ((A = ui.notifications) == null || A.info(`${I}: Board update sent to the GM.`)), t) : ((u = ui.notifications) == null || u.warn(`${I}: No active GM is connected to save board changes.`), t) : ((o = ui.notifications) == null || o.warn(`${I}: A GM must be connected to save board changes.`), t);
   }
-  async function G(t = {}) {
-    var o;
-    const n = V(t, { forceNewId: !t.id }), i = m();
-    return i[n.id] = n, await I(i), c(n.id), (o = ui.notifications) == null || o.info(`${C}: Created case "${n.title}".`), n;
+  async function U(t = {}) {
+    var r;
+    const n = G(t, { forceNewId: !t.id }), s = m();
+    return s[n.id] = n, await w(s), c(n.id), (r = ui.notifications) == null || r.info(`${I}: Created case "${n.title}".`), n;
   }
-  async function U(t) {
-    var o;
-    const n = m(), i = n[t];
-    return i ? (delete n[t], await I(n), Me(t), c(t), (o = ui.notifications) == null || o.info(`${C}: Deleted case "${i.title}".`), !0) : !1;
+  async function j(t) {
+    var r;
+    const n = m(), s = n[t];
+    return s ? (delete n[t], await w(n), Me(t), c(t), (r = ui.notifications) == null || r.info(`${I}: Deleted case "${s.title}".`), !0) : !1;
   }
-  async function X(t, n, i, { confirm: o = !0 } = {}) {
-    var T, $;
-    if (!xe.includes(n) || !i) return !1;
-    const r = v(t);
-    if (!r) return !1;
-    const u = (T = r[n]) == null ? void 0 : T.find((D) => D.id === i);
+  async function X(t, n, s, { confirm: r = !0 } = {}) {
+    var L, A;
+    if (!xe.includes(n) || !s) return !1;
+    const o = T(t);
+    if (!o) return !1;
+    const u = (L = o[n]) == null ? void 0 : L.find(($) => $.id === s);
     if (!u) return !1;
     const d = Ie(u, n);
-    return o && !await we({
+    return r && !await we({
       title: `Delete ${re(oe(n))}`,
       content: `<p>Delete <strong>${ve(d)}</strong>?${n === "connections" ? "" : " Any attached connections will also be deleted."}</p>`,
       yes: () => !0,
       no: () => !1,
       defaultYes: !1
-    }) ? !1 : (r[n] = r[n].filter((D) => D.id !== i), n !== "connections" && (r.connections = r.connections.filter((D) => D.fromId !== i && D.toId !== i), r.timeline = r.timeline.map((D) => ({
-      ...D,
-      linkedItemIds: (D.linkedItemIds ?? []).filter((k) => k !== i)
-    })), delete r.boardLayout.cards[i]), await w(r), ($ = ui.notifications) == null || $.info(`${C}: Deleted "${d}".`), !0);
+    }) ? !1 : (o[n] = o[n].filter(($) => $.id !== s), n !== "connections" && (o.connections = o.connections.filter(($) => $.fromId !== s && $.toId !== s), o.timeline = o.timeline.map(($) => ({
+      ...$,
+      linkedItemIds: ($.linkedItemIds ?? []).filter((D) => D !== s)
+    })), delete o.boardLayout.cards[s]), await v(o), (A = ui.notifications) == null || A.info(`${I}: Deleted "${d}".`), !0);
   }
   async function Q(t) {
-    var r;
-    const n = v(t);
-    if (!n) return null;
-    const i = V({
-      ...n,
-      id: F(),
-      title: `${n.title} Copy`
-    }), o = m();
-    return o[i.id] = i, await I(o), c(i.id), (r = ui.notifications) == null || r.info(`${C}: Duplicated case "${n.title}".`), i;
-  }
-  async function h(t) {
     var o;
-    const n = V({
+    const n = T(t);
+    if (!n) return null;
+    const s = G({
+      ...n,
+      id: Y(),
+      title: `${n.title} Copy`
+    }), r = m();
+    return r[s.id] = s, await w(r), c(s.id), (o = ui.notifications) == null || o.info(`${I}: Duplicated case "${n.title}".`), s;
+  }
+  async function g(t) {
+    var r;
+    const n = G({
       ...t,
-      id: t.id || F()
-    }), i = m();
-    return i[n.id] && (n.id = F()), i[n.id] = n, await I(i), c(n.id), (o = ui.notifications) == null || o.info(`${C}: Imported case "${n.title}".`), n;
+      id: t.id || Y()
+    }), s = m();
+    return s[n.id] && (n.id = Y()), s[n.id] = n, await w(s), c(n.id), (r = ui.notifications) == null || r.info(`${I}: Imported case "${n.title}".`), n;
   }
-  function b(t) {
-    const n = v(t);
+  function C(t) {
+    const n = T(t);
     if (!n) return !1;
-    const i = new Blob([JSON.stringify(n, null, 2)], { type: "application/json" }), o = URL.createObjectURL(i), r = document.createElement("a");
-    return r.href = o, r.download = `${Ge(n.title)}.json`, r.click(), URL.revokeObjectURL(o), !0;
+    const s = new Blob([JSON.stringify(n, null, 2)], { type: "application/json" }), r = URL.createObjectURL(s), o = document.createElement("a");
+    return o.href = r, o.download = `${Ye(n.title)}.json`, o.click(), URL.revokeObjectURL(r), !0;
   }
-  function p() {
+  function y() {
     var t;
-    return (t = game.user) != null && t.isGM ? (l.manager || (l.manager = new q()), l.manager.render(!0), l.manager) : L();
+    return (t = game.user) != null && t.isGM ? (l.manager || (l.manager = new B()), l.manager.render(!0), l.manager) : S();
   }
-  function L() {
-    return l.browser || (l.browser = new z()), l.browser.render(!0), l.browser;
+  function S() {
+    return l.browser || (l.browser = new k()), l.browser.render(!0), l.browser;
   }
-  function E(t, n = {}) {
-    var T, $, D;
+  function P(t, n = {}) {
+    var L, A, $;
     if (!t)
-      return (T = ui.notifications) == null || T.warn(`${C}: No case id provided.`), null;
-    if (!v(t))
-      return ($ = ui.notifications) == null || $.warn(`${C}: Case "${t}" was not found.`), null;
-    const o = n.playerMode ?? !((D = game.user) != null && D.isGM), r = `${t}:${o ? "player" : "gm"}`, u = l.boards.get(r);
+      return (L = ui.notifications) == null || L.warn(`${I}: No case id provided.`), null;
+    if (!T(t))
+      return (A = ui.notifications) == null || A.warn(`${I}: Case "${t}" was not found.`), null;
+    const r = n.playerMode ?? !(($ = game.user) != null && $.isGM), o = `${t}:${r ? "player" : "gm"}`, u = l.boards.get(o);
     if (u)
       return u.render(!0), u;
-    const d = new S(t, { playerMode: o });
-    return l.boards.set(r, d), d.render(!0), d;
+    const d = new _(t, { playerMode: r });
+    return l.boards.set(o, d), d.render(!0), d;
   }
-  async function s(t, n) {
-    var o, r, u, d, T, $;
-    const i = W(n);
-    return (o = game.socket) != null && o.emit ? M() ? (game.socket.emit(ie, {
+  async function e(t, n) {
+    var r, o, u, d, L, A;
+    const s = K(n);
+    return (r = game.socket) != null && r.emit ? M() ? (game.socket.emit(ie, {
       type: "publish-layout-request",
       caseId: t,
-      boardLayout: i,
+      boardLayout: s,
       userId: (d = game.user) == null ? void 0 : d.id,
-      userName: (T = game.user) == null ? void 0 : T.name
-    }), ($ = ui.notifications) == null || $.info(`${C}: Layout publish request sent to the GM.`), !0) : ((u = ui.notifications) == null || u.warn(`${C}: No active GM is connected to publish the board layout.`), !1) : ((r = ui.notifications) == null || r.warn(`${C}: A GM must be connected to publish the board layout.`), !1);
+      userName: (L = game.user) == null ? void 0 : L.name
+    }), (A = ui.notifications) == null || A.info(`${I}: Layout publish request sent to the GM.`), !0) : ((u = ui.notifications) == null || u.warn(`${I}: No active GM is connected to publish the board layout.`), !1) : ((o = ui.notifications) == null || o.warn(`${I}: A GM must be connected to publish the board layout.`), !1);
   }
-  async function a(t, n, { userId: i = ((r) => (r = game.user) == null ? void 0 : r.id)(), userName: o = ((u) => (u = game.user) == null ? void 0 : u.name)() } = {}) {
-    var D;
-    const d = v(t);
+  async function a(t, n, { userId: s = ((o) => (o = game.user) == null ? void 0 : o.id)(), userName: r = ((u) => (u = game.user) == null ? void 0 : u.name)() } = {}) {
+    var $;
+    const d = T(t);
     if (!d) return !1;
-    const T = W(d.boardLayout), $ = W(n);
-    return d.boardLayout = W({
-      ...T,
-      cards: $.cards
-    }), await w(d, {
+    const L = K(d.boardLayout), A = K(n);
+    return d.boardLayout = K({
+      ...L,
+      cards: A.cards
+    }), await v(d, {
       render: !1,
       updateReason: "layout-published",
-      userName: o
-    }), te(t, { resetLayout: !0 }), (D = ui.notifications) == null || D.info(`${C}: Published shared board layout${o ? ` from ${o}` : ""}.`), !0;
+      userName: r
+    }), te(t, { resetLayout: !0 }), ($ = ui.notifications) == null || $.info(`${I}: Published shared board layout${r ? ` from ${r}` : ""}.`), !0;
   }
-  function c(t, { reason: n = null, userName: i = null } = {}) {
-    var o, r;
-    (r = game.socket) == null || r.emit(ie, { type: "case-updated", caseId: t, reason: n, userName: i, userId: (o = game.user) == null ? void 0 : o.id });
+  function c(t, { reason: n = null, userName: s = null } = {}) {
+    var r, o;
+    (o = game.socket) == null || o.emit(ie, { type: "case-updated", caseId: t, reason: n, userName: s, userId: (r = game.user) == null ? void 0 : r.id });
   }
-  function y(t) {
-    var n, i, o, r;
+  function f(t) {
+    var n, s, r, o;
     if (t) {
       if (t.type === "save-case-request") {
         if (!((n = game.user) != null && n.isGM) || !t.caseData) return;
-        w(t.caseData, { render: !1 }).then((u) => {
+        v(t.caseData, { render: !1 }).then((u) => {
           var d;
-          u && (te(u.id), (d = ui.notifications) == null || d.info(`${C}: Saved player board update from ${t.userName ?? "a player"}.`));
+          u && (te(u.id), (d = ui.notifications) == null || d.info(`${I}: Saved player board update from ${t.userName ?? "a player"}.`));
         }).catch((u) => {
           var d;
-          console.error(`${C} | Could not save player board update`, u), (d = ui.notifications) == null || d.error(`${C}: Player board update could not be saved.`);
+          console.error(`${I} | Could not save player board update`, u), (d = ui.notifications) == null || d.error(`${I}: Player board update could not be saved.`);
         });
         return;
       }
       if (t.type === "publish-layout-request") {
-        if (!((i = game.user) != null && i.isGM) || !t.caseId || !t.boardLayout) return;
+        if (!((s = game.user) != null && s.isGM) || !t.caseId || !t.boardLayout) return;
         a(t.caseId, t.boardLayout, {
           userId: t.userId,
           userName: t.userName
         }).catch((u) => {
           var d;
-          console.error(`${C} | Could not publish player layout`, u), (d = ui.notifications) == null || d.error(`${C}: Player layout could not be published.`);
+          console.error(`${I} | Could not publish player layout`, u), (d = ui.notifications) == null || d.error(`${I}: Player layout could not be published.`);
         });
         return;
       }
       if (t.type === "case-updated" && t.caseId) {
-        if (t.userId && t.userId === ((o = game.user) == null ? void 0 : o.id)) return;
-        te(t.caseId, { resetLayout: t.reason === "layout-published" }), t.reason === "layout-published" && ((r = ui.notifications) == null || r.info(`${C}: ${t.userName ?? "Someone"} published a shared board layout.`));
+        if (t.userId && t.userId === ((r = game.user) == null ? void 0 : r.id)) return;
+        te(t.caseId, { resetLayout: t.reason === "layout-published" }), t.reason === "layout-published" && ((o = ui.notifications) == null || o.info(`${I}: ${t.userName ?? "Someone"} published a shared board layout.`));
         return;
       }
     }
   }
-  const _ = He({
-    LegacyApplication: e,
-    moduleId: B,
-    moduleTitle: C,
+  const h = He({
+    LegacyApplication: i,
+    moduleId: N,
+    moduleTitle: I,
     singularLabel: oe,
     getItemTitle: Ie,
-    getCase: v,
+    getCase: T,
     buildItemChoices: be,
-    parseItemElement: J,
-    saveCase: w,
+    parseItemElement: V,
+    saveCase: v,
     deleteBoardItem: X,
     defaultBoardPosition: ae
-  }), S = Pe({
-    LegacyApplication: e,
-    moduleId: B,
-    moduleTitle: C,
-    CSIBoardItemEditor: _,
-    getCase: v,
-    prepareBoardData: j,
-    openCaseManager: p,
+  }), _ = Fe({
+    LegacyApplication: i,
+    moduleId: N,
+    moduleTitle: I,
+    CSIBoardItemEditor: h,
+    getCase: T,
+    prepareBoardData: R,
+    openCaseManager: y,
     canUserEditBoard: _e,
     publishSharedLayout: a,
-    requestLayoutPublish: s,
+    requestLayoutPublish: e,
     deleteBoardItem: X,
-    saveCase: w,
+    saveCase: v,
     defaultBoardPosition: ae,
-    getRectEdgeAnchor: $e,
-    isFinitePoint: Ae,
+    getRectEdgeAnchor: Ae,
+    isFinitePoint: Ee,
     clearBoardApp: (t) => {
       l.boards.delete(`${t.caseId}:${t.playerMode ? "player" : "gm"}`), l.playerBoard === t && (l.playerBoard = null);
     }
   });
-  class z extends e {
+  class k extends i {
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         id: "csi-case-browser",
         title: "CSI Toolkit Case Files",
-        template: `modules/${B}/templates/case-browser.hbs`,
+        template: `modules/${N}/templates/case-browser.hbs`,
         classes: ["csi-toolkit", "csi-case-browser"],
         width: 520,
         height: 620,
@@ -913,24 +933,24 @@ function Xe() {
       });
     }
     async getData() {
-      var i;
+      var s;
       return {
-        cases: Object.values(m()).map((o) => V(o)).sort((o, r) => o.title.localeCompare(r.title)),
-        isGM: (i = game.user) == null ? void 0 : i.isGM,
-        canContribute: ke()
+        cases: Object.values(m()).map((r) => G(r)).sort((r, o) => r.title.localeCompare(o.title)),
+        isGM: (s = game.user) == null ? void 0 : s.isGM,
+        canContribute: De()
       };
     }
     activateListeners(n) {
-      super.activateListeners(n), n.find("[data-action='open-board']").on("click", (i) => {
-        var o;
-        E(i.currentTarget.dataset.caseId, { playerMode: !((o = game.user) != null && o.isGM) });
-      }), n.find("[data-action='open-manager']").on("click", () => p());
+      super.activateListeners(n), n.find("[data-action='open-board']").on("click", (s) => {
+        var r;
+        P(s.currentTarget.dataset.caseId, { playerMode: !((r = game.user) != null && r.isGM) });
+      }), n.find("[data-action='open-manager']").on("click", () => y());
     }
     async close(n = {}) {
       return l.browser = null, super.close(n);
     }
   }
-  class q extends e {
+  class B extends i {
     constructor(n = {}) {
       super(n), this.selectedCaseId = n.caseId ?? null;
     }
@@ -938,7 +958,7 @@ function Xe() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         id: "csi-case-manager",
         title: "CSI Toolkit Case Manager",
-        template: `modules/${B}/templates/case-manager.hbs`,
+        template: `modules/${N}/templates/case-manager.hbs`,
         classes: ["csi-toolkit", "csi-case-manager"],
         width: 1180,
         height: 820,
@@ -947,13 +967,13 @@ function Xe() {
     }
     async getData() {
       var u;
-      const n = m(), i = Object.values(n).map((d) => V(d)).sort((d, T) => d.title.localeCompare(T.title));
-      !this.selectedCaseId && i.length && (this.selectedCaseId = i[0].id), this.selectedCaseId && !n[this.selectedCaseId] && (this.selectedCaseId = ((u = i[0]) == null ? void 0 : u.id) ?? null);
-      const o = this.selectedCaseId ? V(n[this.selectedCaseId]) : null, r = o ? be(o) : [];
+      const n = m(), s = Object.values(n).map((d) => G(d)).sort((d, L) => d.title.localeCompare(L.title));
+      !this.selectedCaseId && s.length && (this.selectedCaseId = s[0].id), this.selectedCaseId && !n[this.selectedCaseId] && (this.selectedCaseId = ((u = s[0]) == null ? void 0 : u.id) ?? null);
+      const r = this.selectedCaseId ? G(n[this.selectedCaseId]) : null, o = r ? be(r) : [];
       return {
-        cases: i,
-        selected: o,
-        itemChoices: r,
+        cases: s,
+        selected: r,
+        itemChoices: o,
         options: {
           caseStatuses: Te,
           themes: Le,
@@ -967,19 +987,19 @@ function Xe() {
       };
     }
     activateListeners(n) {
-      super.activateListeners(n), n.find("[data-action='select-case']").on("click", (i) => {
-        this.selectedCaseId = i.currentTarget.dataset.caseId, this.render(!1);
-      }), n.find("[data-action='new-case']").on("click", () => this._createNewCase()), n.find("[data-csi-case-form]").on("submit", (i) => this._saveSelectedCase(i)), n.find("[data-action='save-case']").on("click", (i) => this._saveSelectedCase(i)), n.find("[data-action='delete-case']").on("click", () => this._deleteSelectedCase()), n.find("[data-action='duplicate-case']").on("click", () => this._duplicateSelectedCase()), n.find("[data-action='open-board']").on("click", () => E(this.selectedCaseId)), n.find("[data-action='pick-image']").on("click", (i) => this._pickImage(i.currentTarget)), n.find("[data-action='export-case']").on("click", () => b(this.selectedCaseId)), n.find("[data-action='import-case']").on("click", () => {
-        var i;
-        return (i = this.element[0].querySelector("[data-csi-import-file]")) == null ? void 0 : i.click();
-      }), n.find("[data-csi-import-file]").on("change", (i) => this._importFromFile(i.currentTarget));
+      super.activateListeners(n), n.find("[data-action='select-case']").on("click", (s) => {
+        this.selectedCaseId = s.currentTarget.dataset.caseId, this.render(!1);
+      }), n.find("[data-action='new-case']").on("click", () => this._createNewCase()), n.find("[data-csi-case-form]").on("submit", (s) => this._saveSelectedCase(s)), n.find("[data-action='save-case']").on("click", (s) => this._saveSelectedCase(s)), n.find("[data-action='delete-case']").on("click", () => this._deleteSelectedCase()), n.find("[data-action='duplicate-case']").on("click", () => this._duplicateSelectedCase()), n.find("[data-action='open-board']").on("click", () => P(this.selectedCaseId)), n.find("[data-action='pick-image']").on("click", (s) => this._pickImage(s.currentTarget)), n.find("[data-action='export-case']").on("click", () => C(this.selectedCaseId)), n.find("[data-action='import-case']").on("click", () => {
+        var s;
+        return (s = this.element[0].querySelector("[data-csi-import-file]")) == null ? void 0 : s.click();
+      }), n.find("[data-csi-import-file]").on("change", (s) => this._importFromFile(s.currentTarget));
     }
     _readCurrentCase() {
       const n = this.element[0].querySelector("[data-csi-case-form]");
-      return n ? Y(n, this.selectedCaseId) : v(this.selectedCaseId);
+      return n ? O(n, this.selectedCaseId) : T(this.selectedCaseId);
     }
     async _createNewCase() {
-      const n = await G({
+      const n = await U({
         title: "New Investigation",
         subtitle: "Unfiled case",
         description: "Describe the incident, victim, premise, or central mystery.",
@@ -988,25 +1008,25 @@ function Xe() {
       this.selectedCaseId = n.id, this.render(!1);
     }
     async _saveSelectedCase(n) {
-      var i, o;
+      var s, r;
       if (n.preventDefault(), !!this.selectedCaseId)
         try {
-          const r = this._readCurrentCase();
-          await w(r), this.selectedCaseId = r.id, (i = ui.notifications) == null || i.info(`${C}: Saved case "${r.title}".`), this.render(!1);
-        } catch (r) {
-          console.error(`${C} | Could not save case`, r), (o = ui.notifications) == null || o.error(`${C}: ${r.message}`);
+          const o = this._readCurrentCase();
+          await v(o), this.selectedCaseId = o.id, (s = ui.notifications) == null || s.info(`${I}: Saved case "${o.title}".`), this.render(!1);
+        } catch (o) {
+          console.error(`${I} | Could not save case`, o), (r = ui.notifications) == null || r.error(`${I}: ${o.message}`);
         }
     }
     async _deleteSelectedCase() {
       if (!this.selectedCaseId) return;
-      const n = v(this.selectedCaseId);
+      const n = T(this.selectedCaseId);
       !n || !await we({
         title: "Delete CSI Case",
         content: `<p>Delete <strong>${ve(n.title)}</strong>? This cannot be undone.</p>`,
         yes: () => !0,
         no: () => !1,
         defaultYes: !1
-      }) || (await U(this.selectedCaseId), this.selectedCaseId = null, this.render(!1));
+      }) || (await j(this.selectedCaseId), this.selectedCaseId = null, this.render(!1));
     }
     async _duplicateSelectedCase() {
       if (!this.selectedCaseId) return;
@@ -1014,31 +1034,32 @@ function Xe() {
       n && (this.selectedCaseId = n.id, this.render(!1));
     }
     _pickImage(n) {
-      var r, u, d, T, $;
-      const i = (r = n.closest(".csi-image-field")) == null ? void 0 : r.querySelector("input");
-      if (!i) return;
-      const o = globalThis.FilePicker ?? ((T = (d = (u = globalThis.foundry) == null ? void 0 : u.applications) == null ? void 0 : d.apps) == null ? void 0 : T.FilePicker);
-      if (!o) {
-        ($ = ui.notifications) == null || $.warn(`${C}: Foundry FilePicker is unavailable.`);
+      var u, d, L;
+      const s = (u = n.closest(".csi-image-field")) == null ? void 0 : u.querySelector("input");
+      if (!s) return;
+      const r = $e();
+      if (!r) {
+        (d = ui.notifications) == null || d.warn(`${I}: Foundry FilePicker is unavailable.`);
         return;
       }
-      new o({
+      const o = new r({
         type: "image",
-        current: i.value,
-        callback: (D) => {
-          i.value = D, i.dispatchEvent(new Event("change", { bubbles: !0 }));
+        current: s.value,
+        callback: (A) => {
+          s.value = A, s.dispatchEvent(new Event("change", { bubbles: !0 }));
         }
-      }).render(!0);
+      });
+      typeof o.browse == "function" ? o.browse() : (L = o.render) == null || L.call(o, !0);
     }
     async _importFromFile(n) {
-      var o, r;
-      const i = (o = n.files) == null ? void 0 : o[0];
-      if (i)
+      var r, o;
+      const s = (r = n.files) == null ? void 0 : r[0];
+      if (s)
         try {
-          const u = await i.text(), d = await h(JSON.parse(u));
+          const u = await s.text(), d = await g(JSON.parse(u));
           this.selectedCaseId = d.id, this.render(!1);
         } catch (u) {
-          console.error(`${C} | Import failed`, u), (r = ui.notifications) == null || r.error(`${C}: Import failed. ${u.message}`);
+          console.error(`${I} | Import failed`, u), (o = ui.notifications) == null || o.error(`${I}: Import failed. ${u.message}`);
         } finally {
           n.value = "";
         }
@@ -1047,148 +1068,148 @@ function Xe() {
       return l.manager = null, super.close(n);
     }
   }
-  function Y(t, n) {
-    const i = new FormData(t), o = v(n) ?? V({ id: n }), r = V({
+  function O(t, n) {
+    const s = new FormData(t), r = T(n) ?? G({ id: n }), o = G({
       id: n,
-      title: i.get("title"),
-      subtitle: i.get("subtitle"),
-      status: i.get("status"),
-      description: i.get("description"),
-      image: i.get("image"),
+      title: s.get("title"),
+      subtitle: s.get("subtitle"),
+      status: s.get("status"),
+      description: s.get("description"),
+      image: s.get("image"),
       visibility: "players",
-      evidence: o.evidence,
-      suspects: o.suspects,
-      locations: o.locations,
-      timeline: o.timeline,
-      connections: o.connections,
+      evidence: r.evidence,
+      suspects: r.suspects,
+      locations: r.locations,
+      timeline: r.timeline,
+      connections: r.connections,
       boardLayout: {
-        ...o.boardLayout,
-        theme: i.get("theme")
+        ...r.boardLayout,
+        theme: s.get("theme")
       }
     });
-    return V(r);
+    return G(o);
   }
-  function J(t, n) {
-    const i = (u) => {
+  function V(t, n) {
+    const s = (u) => {
       var d;
       return ((d = n.querySelector(`[name="${u}"]`)) == null ? void 0 : d.value) ?? "";
-    }, o = "players", r = { id: n.dataset.itemId || F(), visibility: o };
-    return t === "evidence" ? he({
-      ...r,
-      title: i("title"),
-      type: i("type"),
-      status: i("status"),
-      description: i("description"),
-      image: i("image"),
-      notes: i("notes")
-    }) : t === "suspects" ? pe({
-      ...r,
-      name: i("name"),
-      alias: i("alias"),
-      status: i("status"),
-      motive: i("motive"),
-      alibi: i("alibi"),
-      image: i("image"),
-      notes: i("notes")
+    }, r = "players", o = { id: n.dataset.itemId || Y(), visibility: r };
+    return t === "evidence" ? pe({
+      ...o,
+      title: s("title"),
+      type: s("type"),
+      status: s("status"),
+      description: s("description"),
+      image: s("image"),
+      notes: s("notes")
+    }) : t === "suspects" ? he({
+      ...o,
+      name: s("name"),
+      alias: s("alias"),
+      status: s("status"),
+      motive: s("motive"),
+      alibi: s("alibi"),
+      image: s("image"),
+      notes: s("notes")
     }) : t === "locations" ? ge({
-      ...r,
-      name: i("name"),
-      sceneId: i("sceneId"),
-      image: i("image"),
-      description: i("description"),
-      notes: i("notes")
+      ...o,
+      name: s("name"),
+      sceneId: s("sceneId"),
+      image: s("image"),
+      description: s("description"),
+      notes: s("notes")
     }) : t === "timeline" ? ye({
-      ...r,
-      time: i("time"),
-      title: i("title"),
-      description: i("description"),
-      linkedItemIds: i("linkedItemIds").split(",").map((u) => u.trim()).filter(Boolean)
+      ...o,
+      time: s("time"),
+      title: s("title"),
+      description: s("description"),
+      linkedItemIds: s("linkedItemIds").split(",").map((u) => u.trim()).filter(Boolean)
     }) : ne({
-      id: r.id,
-      visibility: o,
-      fromId: i("fromId"),
-      toId: i("toId"),
-      label: i("label"),
-      type: i("type"),
-      style: i("style"),
-      color: i("color")
+      id: o.id,
+      visibility: r,
+      fromId: s("fromId"),
+      toId: s("toId"),
+      label: s("label"),
+      type: s("type"),
+      style: s("style"),
+      color: s("color")
     });
   }
-  function j(t, { playerMode: n = !1, layoutOverride: i = null } = {}) {
-    var $, D;
-    const o = v(t);
-    if (!o) return { isMissing: !0, playerMode: n, isGM: ($ = game.user) == null ? void 0 : $.isGM };
-    const r = Ce(o);
-    i && (r.boardLayout = W(i)), r.evidence = O(r.evidence), r.suspects = O(r.suspects), r.locations = O(r.locations), r.timeline = O(r.timeline);
-    const u = K(r), d = new Map(u.map((k) => [k.id, k]));
-    r.timeline = r.timeline.map((k) => ({
-      ...k,
-      linkedLabels: (k.linkedItemIds ?? []).map((P) => {
-        var N;
-        return (N = d.get(P)) == null ? void 0 : N.label;
+  function R(t, { playerMode: n = !1, layoutOverride: s = null } = {}) {
+    var A, $;
+    const r = T(t);
+    if (!r) return { isMissing: !0, playerMode: n, isGM: (A = game.user) == null ? void 0 : A.isGM };
+    const o = Ce(r);
+    s && (o.boardLayout = K(s)), o.evidence = H(o.evidence), o.suspects = H(o.suspects), o.locations = H(o.locations), o.timeline = H(o.timeline);
+    const u = J(o), d = new Map(u.map((D) => [D.id, D]));
+    o.timeline = o.timeline.map((D) => ({
+      ...D,
+      linkedLabels: (D.linkedItemIds ?? []).map((q) => {
+        var F;
+        return (F = d.get(q)) == null ? void 0 : F.label;
       }).filter(Boolean)
     }));
-    const T = O(r.connections).map((k) => {
-      const P = d.get(k.fromId), N = d.get(k.toId);
+    const L = H(o.connections).map((D) => {
+      const q = d.get(D.fromId), F = d.get(D.toId);
       return {
-        ...k,
-        fromLabel: (P == null ? void 0 : P.label) ?? k.fromId,
-        toLabel: (N == null ? void 0 : N.label) ?? k.toId,
-        x1: P ? P.x + 220 / 2 : 0,
-        y1: P ? P.y + 94 : 0,
-        x2: N ? N.x + 220 / 2 : 0,
-        y2: N ? N.y + 94 : 0,
-        labelX: P && N ? Math.round((P.x + N.x + 220) / 2) : 0,
-        labelY: P && N ? Math.round((P.y + N.y) / 2 + 84) : 0,
-        typeClass: `csi-connection--${k.type}`,
-        styleClass: `csi-connection-line--${k.style}`,
-        colorClass: `csi-connection-color--${k.color}`,
-        hasVisibleEnds: !!(P && N)
+        ...D,
+        fromLabel: (q == null ? void 0 : q.label) ?? D.fromId,
+        toLabel: (F == null ? void 0 : F.label) ?? D.toId,
+        x1: q ? q.x + 220 / 2 : 0,
+        y1: q ? q.y + 94 : 0,
+        x2: F ? F.x + 220 / 2 : 0,
+        y2: F ? F.y + 94 : 0,
+        labelX: q && F ? Math.round((q.x + F.x + 220) / 2) : 0,
+        labelY: q && F ? Math.round((q.y + F.y) / 2 + 84) : 0,
+        typeClass: `csi-connection--${D.type}`,
+        styleClass: `csi-connection-line--${D.style}`,
+        colorClass: `csi-connection-color--${D.color}`,
+        hasVisibleEnds: !!(q && F)
       };
-    }).filter((k) => k.hasVisibleEnds);
+    }).filter((D) => D.hasVisibleEnds);
     return {
-      case: r,
+      case: o,
       cards: u,
-      connections: T,
+      connections: L,
       boardSize: { width: 5200, height: 3600 },
-      viewStyle: `transform: translate(${r.boardLayout.view.x}px, ${r.boardLayout.view.y}px) scale(${r.boardLayout.view.scale});`,
-      zoomPercent: Math.round(r.boardLayout.view.scale * 100),
-      themeClass: `csi-theme-${r.boardLayout.theme}`,
+      viewStyle: `transform: translate(${o.boardLayout.view.x}px, ${o.boardLayout.view.y}px) scale(${o.boardLayout.view.scale});`,
+      zoomPercent: Math.round(o.boardLayout.view.scale * 100),
+      themeClass: `csi-theme-${o.boardLayout.theme}`,
       playerMode: n,
-      isGM: (D = game.user) == null ? void 0 : D.isGM,
-      canEditBoard: _e(o),
-      addCollections: De.map((k) => ({
-        id: k,
-        label: re(oe(k))
+      isGM: ($ = game.user) == null ? void 0 : $.isGM,
+      canEditBoard: _e(r),
+      addCollections: ke.map((D) => ({
+        id: D,
+        label: re(oe(D))
       })),
       counts: {
-        evidence: r.evidence.length,
-        suspects: r.suspects.length,
-        locations: r.locations.length,
-        timeline: r.timeline.length,
-        connections: T.length
+        evidence: o.evidence.length,
+        suspects: o.suspects.length,
+        locations: o.locations.length,
+        timeline: o.timeline.length,
+        connections: L.length
       }
     };
   }
-  function O(t) {
+  function H(t) {
     return Array.isArray(t) ? t : [];
   }
-  function K(t) {
-    const n = W(t.boardLayout), i = [];
-    for (const o of t.evidence) i.push(R(o, "evidence", "Evidence", o.title, n, i.length));
-    for (const o of t.suspects) i.push(R(o, "suspects", "Suspect", o.name, n, i.length));
-    for (const o of t.locations) i.push(R(o, "locations", "Location", o.name, n, i.length));
-    for (const o of t.timeline) i.push(R(o, "timeline", "Timeline", o.title, n, i.length));
-    return i;
+  function J(t) {
+    const n = K(t.boardLayout), s = [];
+    for (const r of t.evidence) s.push(W(r, "evidence", "Evidence", r.title, n, s.length));
+    for (const r of t.suspects) s.push(W(r, "suspects", "Suspect", r.name, n, s.length));
+    for (const r of t.locations) s.push(W(r, "locations", "Location", r.name, n, s.length));
+    for (const r of t.timeline) s.push(W(r, "timeline", "Timeline", r.title, n, s.length));
+    return s;
   }
-  function R(t, n, i, o, r, u) {
-    const d = r.cards[t.id] ?? ae(u);
+  function W(t, n, s, r, o, u) {
+    const d = o.cards[t.id] ?? ae(u);
     return {
       ...t,
       collection: n,
       kind: n === "suspects" ? "suspect" : n === "locations" ? "location" : n === "timeline" ? "timeline" : "evidence",
-      kindLabel: i,
-      label: o,
+      kindLabel: s,
+      label: r,
       x: Number(d.x) || 0,
       y: Number(d.y) || 0,
       layer: "public",
@@ -1203,30 +1224,35 @@ function Xe() {
   }
   function be(t) {
     const n = [];
-    for (const i of t.evidence) n.push({ id: i.id, label: `Evidence: ${i.title}` });
-    for (const i of t.suspects) n.push({ id: i.id, label: `Suspect: ${i.name}` });
-    for (const i of t.locations) n.push({ id: i.id, label: `Location: ${i.name}` });
-    for (const i of t.timeline) n.push({ id: i.id, label: `Timeline: ${i.title}` });
+    for (const s of t.evidence) n.push({ id: s.id, label: `Evidence: ${s.title}` });
+    for (const s of t.suspects) n.push({ id: s.id, label: `Suspect: ${s.name}` });
+    for (const s of t.locations) n.push({ id: s.id, label: `Location: ${s.name}` });
+    for (const s of t.timeline) n.push({ id: s.id, label: `Timeline: ${s.title}` });
     return n;
   }
   function te(t, { resetLayout: n = !1 } = {}) {
-    var i;
-    (i = l.manager) != null && i.rendered && l.manager.render(!0);
-    for (const [o, r] of l.boards.entries())
-      n && o.startsWith(`${t}:`) && (r._localLayout = null), o.startsWith(`${t}:`) && r.rendered && r.render(!0);
+    var s;
+    (s = l.manager) != null && s.rendered && l.manager.render(!0);
+    for (const [r, o] of l.boards.entries())
+      n && r.startsWith(`${t}:`) && (o._localLayout = null), r.startsWith(`${t}:`) && o.rendered && o.render(!0);
   }
   function _e(t) {
-    return !!(typeof t == "string" ? v(t) : t);
+    return !!(typeof t == "string" ? T(t) : t);
   }
-  function ke() {
+  function De() {
     return !0;
   }
   function Me(t) {
-    for (const [n, i] of l.boards.entries())
-      n.startsWith(`${t}:`) && i.close();
+    for (const [n, s] of l.boards.entries())
+      n.startsWith(`${t}:`) && s.close();
   }
   function Ce(t) {
     return foundry.utils.deepClone ? foundry.utils.deepClone(t) : JSON.parse(JSON.stringify(t));
+  }
+  function $e() {
+    var n, s, r, o, u, d;
+    const t = globalThis.foundry ?? foundry;
+    return (typeof FilePicker < "u" ? FilePicker : null) ?? globalThis.FilePicker ?? ((s = (n = t == null ? void 0 : t.applications) == null ? void 0 : n.apps) == null ? void 0 : s.FilePicker) ?? ((o = (r = t == null ? void 0 : t.applications) == null ? void 0 : r.api) == null ? void 0 : o.FilePicker) ?? ((d = (u = t == null ? void 0 : t.appv1) == null ? void 0 : u.api) == null ? void 0 : d.FilePicker);
   }
   function oe(t) {
     return t === "suspects" ? "suspect" : t === "locations" ? "location" : t === "timeline" ? "timeline item" : t === "connections" ? "connection" : "evidence";
@@ -1234,21 +1260,21 @@ function Xe() {
   function Ie(t, n) {
     return n === "connections" ? t.label || `${t.fromId} -> ${t.toId}` : n === "suspects" || n === "locations" ? t.name : t.title;
   }
-  function $e(t, n) {
-    const i = n.centerX - t.centerX, o = n.centerY - t.centerY;
-    if (!i && !o) return { x: Math.round(t.centerX), y: Math.round(t.centerY) };
-    const r = i === 0 ? Number.POSITIVE_INFINITY : Math.abs(t.width / 2 / i), u = o === 0 ? Number.POSITIVE_INFINITY : Math.abs(t.height / 2 / o), d = Math.min(r, u);
+  function Ae(t, n) {
+    const s = n.centerX - t.centerX, r = n.centerY - t.centerY;
+    if (!s && !r) return { x: Math.round(t.centerX), y: Math.round(t.centerY) };
+    const o = s === 0 ? Number.POSITIVE_INFINITY : Math.abs(t.width / 2 / s), u = r === 0 ? Number.POSITIVE_INFINITY : Math.abs(t.height / 2 / r), d = Math.min(o, u);
     return !Number.isFinite(d) || d <= 0 ? { x: Math.round(t.centerX), y: Math.round(t.centerY) } : {
-      x: Math.round(t.centerX + i * d),
-      y: Math.round(t.centerY + o * d)
+      x: Math.round(t.centerX + s * d),
+      y: Math.round(t.centerY + r * d)
     };
   }
-  function Ae(t) {
+  function Ee(t) {
     return Number.isFinite(t == null ? void 0 : t.x) && Number.isFinite(t == null ? void 0 : t.y);
   }
   function we(t) {
-    var i, o, r, u, d;
-    const n = globalThis.Dialog ?? ((r = (o = (i = globalThis.foundry) == null ? void 0 : i.appv1) == null ? void 0 : o.api) == null ? void 0 : r.Dialog);
+    var s, r, o, u, d;
+    const n = globalThis.Dialog ?? ((o = (r = (s = globalThis.foundry) == null ? void 0 : s.appv1) == null ? void 0 : r.api) == null ? void 0 : o.Dialog);
     return n != null && n.confirm ? n.confirm(t) : Promise.resolve((d = globalThis.confirm) == null ? void 0 : d.call(globalThis, ((u = t.content) == null ? void 0 : u.replace(/<[^>]+>/g, "")) ?? t.title));
   }
 })();

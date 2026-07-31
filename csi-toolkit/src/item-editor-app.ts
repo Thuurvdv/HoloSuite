@@ -10,6 +10,7 @@ import {
 } from "./case-model";
 
 declare const foundry: any;
+declare const FilePicker: any;
 declare const game: any;
 declare const globalThis: any;
 declare const ui: any;
@@ -150,16 +151,29 @@ export function createCSIBoardItemEditorClass(deps: any) {
 
     _pickImage(button: any) {
       const field = button.closest(".csi-image-field")?.querySelector("input");
-      const Picker = globalThis.FilePicker ?? globalThis.foundry?.applications?.apps?.FilePicker;
-      if (!field || !Picker) return;
-      new Picker({
+      if (!field) return;
+
+      const Picker =
+        (typeof FilePicker !== "undefined" ? FilePicker : null)
+        ?? globalThis.FilePicker
+        ?? globalThis.foundry?.applications?.apps?.FilePicker
+        ?? globalThis.foundry?.applications?.api?.FilePicker
+        ?? globalThis.foundry?.appv1?.api?.FilePicker;
+      if (!Picker) {
+        ui.notifications?.warn?.(`${moduleTitle}: Foundry FilePicker is unavailable.`);
+        return;
+      }
+
+      const picker = new Picker({
         type: "image",
         current: field.value,
         callback: (path: string) => {
           field.value = path;
           field.dispatchEvent(new Event("change", { bubbles: true }));
         }
-      }).render(true);
+      });
+      if (typeof picker.browse === "function") picker.browse();
+      else picker.render?.(true);
     }
   };
 }

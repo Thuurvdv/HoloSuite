@@ -10,8 +10,10 @@ import {
 } from "./case-model";
 
 declare const foundry: any;
+declare const Dialog: any;
 declare const game: any;
 declare const globalThis: any;
+declare const ImagePopout: any;
 declare const ui: any;
 
 export function createCSICaseBoardClass(deps: any) {
@@ -105,7 +107,7 @@ export function createCSICaseBoardClass(deps: any) {
       html.find("[data-csi-connection-hit]").on("dblclick", (event: any) => this._editCard("connections", event.currentTarget.dataset.connectionId));
       html.find("[data-action='start-connection']").on("click", (event: any) => this._startConnection(event));
       html.find("[data-csi-dim-kind]").on("change", (event: any) => this._toggleDimKind(event.currentTarget));
-      html.find("[data-csi-card-art]").on("dblclick", (event: any) => this._viewCardArt(event));
+      html.find("[data-csi-card-art]").on("click", (event: any) => this._viewCardArt(event));
 
       const viewport = html[0].querySelector("[data-csi-board-viewport]");
       if (viewport) {
@@ -357,27 +359,49 @@ export function createCSICaseBoardClass(deps: any) {
       if (!image) return;
       const card = event.currentTarget.closest("[data-csi-board-card]");
       const title = card?.querySelector(".csi-card-body h3")?.textContent?.trim() || "CSI Card Art";
-      const ImagePopout = globalThis.ImagePopout;
-      if (ImagePopout) {
-        new ImagePopout(image, { title }).render(true);
+      const Popout = this.getImagePopoutClass();
+      if (Popout) {
+        new Popout(image, { title }).render(true);
         return;
       }
 
-      const Dialog = globalThis.Dialog ?? globalThis.foundry?.appv1?.api?.Dialog;
-      if (!Dialog) return;
+      const DialogClass = this.getDialogClass();
+      if (!DialogClass) return;
       const safeImage = String(image)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#39;");
-      new Dialog({
+      new DialogClass({
         title,
         content: `<img class="csi-image-dialog" src="${safeImage}" alt="" />`,
         buttons: {
           close: { label: "Close" }
         }
       }, { classes: ["csi-toolkit"], width: 720 }).render(true);
+    }
+
+    _getFoundryGlobal() {
+      return globalThis.foundry ?? foundry;
+    }
+
+    getImagePopoutClass() {
+      const foundryGlobal = this._getFoundryGlobal();
+      return (typeof ImagePopout !== "undefined" ? ImagePopout : null)
+        ?? globalThis.ImagePopout
+        ?? foundryGlobal?.applications?.apps?.ImagePopout
+        ?? foundryGlobal?.applications?.api?.ImagePopout
+        ?? foundryGlobal?.appv1?.api?.ImagePopout;
+    }
+
+    getDialogClass() {
+      const foundryGlobal = this._getFoundryGlobal();
+      return (typeof Dialog !== "undefined" ? Dialog : null)
+        ?? globalThis.Dialog
+        ?? foundryGlobal?.applications?.apps?.Dialog
+        ?? foundryGlobal?.applications?.api?.Dialog
+        ?? foundryGlobal?.appv1?.api?.Dialog;
     }
 
     async _deleteBoardItem(collection: string, itemId: string) {

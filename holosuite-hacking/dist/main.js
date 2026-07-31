@@ -1251,8 +1251,8 @@ class qt extends Et {
       classes: ["node-intrusion-window", "holosuite-hacking-window"],
       popOut: !0,
       resizable: !0,
-      width: 1120,
-      height: 880,
+      width: 980,
+      height: 760,
       template: Ht
     });
   }
@@ -1526,8 +1526,8 @@ class Bt extends Vt {
       classes: ["signal-alignment-window", "holosuite-hacking-window"],
       popOut: !0,
       resizable: !0,
-      width: 980,
-      height: 780,
+      width: 840,
+      height: 640,
       template: Ut
     });
   }

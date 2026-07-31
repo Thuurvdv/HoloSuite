@@ -620,12 +620,16 @@ img.hs-frame-header {
 }
 
 .holosuite-theme-preview {
+  align-self: center;
   border: 1px solid var(--hs-line);
   display: block;
+  grid-column: 1;
   grid-row: 1 / span 2;
   height: 56px;
+  justify-self: start;
   overflow: hidden;
   position: relative;
+  transform: none;
   width: 56px;
 }
 
