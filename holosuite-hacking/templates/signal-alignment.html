@@ -1,4 +1,22 @@
-<section class="signal-alignment-shell {{glitchClass}}" style="--glitch-intensity: {{profile.visualGlitchIntensity}}">
+<section class="hs-application hs-application--hacking hh-shell signal-alignment-shell {{glitchClass}}" style="--glitch-intensity: {{profile.visualGlitchIntensity}}">
+  <div class="hs-background" aria-hidden="true"></div>
+  <div class="hs-frame" aria-hidden="true">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header--space-police.svg?v=1" alt="">
+  </div>
+  <div class="hs-content">
   <header class="signal-alignment-header">
     <div>
       <p class="signal-alignment-kicker">HoloSuite / carrier layer</p>
@@ -43,7 +61,7 @@
 
       <dl class="signal-alignment-specs">
         <div><dt>Channels</dt><dd>{{profile.channelCount}}</dd></div>
-        <div><dt>Tolerance</dt><dd>±{{profile.tolerance}}</dd></div>
+        <div><dt>Tolerance</dt><dd>&plusmn;{{profile.tolerance}}</dd></div>
         <div><dt>Hold</dt><dd>{{profile.lockHoldSeconds}}s</dd></div>
       </dl>
 
@@ -79,4 +97,6 @@
       {{/if}}
     </main>
   </div>
+  </div>
+  <div class="hs-effects" aria-hidden="true"></div>
 </section>

@@ -24,8 +24,8 @@ export class HackingLauncherApp extends LegacyApplication {
       classes: ["holosuite-hacking-launcher-window"],
       popOut: true,
       resizable: true,
-      width: 460,
-      height: 440,
+      width: 560,
+      height: 620,
       template: TEMPLATE_PATH
     });
   }

@@ -1,8 +1,26 @@
-<form class="holosuite-profile-config" novalidate>
-  <header class="holosuite-profile-config-header">
-    <p>HoloSuite / hacking profiles</p>
-    <h2>Difficulty Profiles</h2>
-  </header>
+<section class="hs-application hs-application--hacking hh-shell hh-profile-shell">
+  <div class="hs-background" aria-hidden="true"></div>
+  <div class="hs-frame" aria-hidden="true">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header--space-police.svg?v=1" alt="">
+  </div>
+  <form class="hs-content holosuite-profile-config" novalidate>
+    <header class="holosuite-profile-config-header">
+      <p class="hh-kicker">HoloSuite / hacking profiles</p>
+      <h2>Difficulty Profiles</h2>
+    </header>
 
   <main class="holosuite-profile-config-body">
     {{#each profiles}}
@@ -134,8 +152,10 @@
     {{/each}}
   </main>
 
-  <footer class="holosuite-profile-config-actions">
-    <button type="button" data-action="reset-profiles"><i class="fa-solid fa-rotate-left"></i> Reset Defaults</button>
-    <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Save Profiles</button>
-  </footer>
-</form>
+    <footer class="holosuite-profile-config-actions">
+      <button type="button" data-action="reset-profiles"><i class="fa-solid fa-rotate-left"></i> Reset Defaults</button>
+      <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Save Profiles</button>
+    </footer>
+  </form>
+  <div class="hs-effects" aria-hidden="true"></div>
+</section>

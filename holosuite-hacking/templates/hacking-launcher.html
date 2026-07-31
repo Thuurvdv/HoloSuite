@@ -1,8 +1,27 @@
-<form class="holosuite-hacking-launcher">
-  <header class="holosuite-hacking-launcher-header">
-    <p>HoloSuite / hacking deck</p>
-    <h2>Launch Minigame</h2>
-  </header>
+<section class="hs-application hs-application--hacking hh-shell hh-launcher-shell">
+  <div class="hs-background" aria-hidden="true"></div>
+  <div class="hs-frame" aria-hidden="true">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header--space-police.svg?v=1" alt="">
+  </div>
+  <form class="hs-content holosuite-hacking-launcher">
+    <header class="holosuite-hacking-launcher-header">
+      <p class="hh-kicker">HoloSuite / hacking deck</p>
+      <h2>Launch Minigame</h2>
+      <span>Dispatch intrusion training to a player terminal.</span>
+    </header>
 
   <div class="form-group">
     <label>Minigame</label>
@@ -52,8 +71,10 @@
     <input type="number" name="testRollTotal" value="{{defaultTestRoll}}" step="1" />
   </div>
 
-  <footer class="holosuite-hacking-launcher-actions">
-    <button type="button" data-action="test-self"><i class="fa-solid fa-gamepad"></i> Test Yourself</button>
-    <button type="submit" data-action="start"><i class="fa-solid fa-paper-plane"></i> Send to Player</button>
-  </footer>
-</form>
+    <footer class="holosuite-hacking-launcher-actions">
+      <button type="button" data-action="test-self"><i class="fa-solid fa-gamepad"></i> Test Yourself</button>
+      <button type="submit" data-action="start"><i class="fa-solid fa-paper-plane"></i> Send to Player</button>
+    </footer>
+  </form>
+  <div class="hs-effects" aria-hidden="true"></div>
+</section>

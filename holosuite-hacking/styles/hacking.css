@@ -11,17 +11,333 @@
   padding: 0;
 }
 
-.holosuite-hacking-launcher {
-  display: grid;
-  gap: 14px;
-  box-sizing: border-box;
+.holosuite-hacking-window,
+.holosuite-hacking-launcher-window,
+.holosuite-hacking-profile-window,
+.holosuite-hacking-start-dialog {
+  background: var(--hs-surface-window) !important;
+  border: 1px solid color-mix(in srgb, var(--hs-color-primary) 28%, transparent) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--hs-color-primary) 18%, transparent),
+    0 18px 46px rgba(0, 0, 0, 0.48);
+  overflow: hidden;
+}
+
+.holosuite-hacking-window .window-header,
+.holosuite-hacking-launcher-window .window-header,
+.holosuite-hacking-profile-window .window-header,
+.holosuite-hacking-start-dialog .window-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 0 !important;
+  background:
+    linear-gradient(rgba(231, 250, 255, 0.035) 50%, rgba(0, 0, 0, 0.05) 50%) 0 0 / 100% 4px,
+    linear-gradient(90deg, rgba(2, 13, 24, 0.98), rgba(5, 19, 28, 0.94), rgba(2, 13, 24, 0.98)) !important;
+  color: var(--hs-text-primary) !important;
+  box-shadow:
+    inset 0 -1px 0 color-mix(in srgb, var(--hs-color-primary) 48%, transparent),
+    inset 0 -10px 20px color-mix(in srgb, var(--hs-color-primary) 8%, transparent);
+  font-family: var(--hs-font-ui) !important;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-hacking-window,
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-hacking-launcher-window,
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-hacking-profile-window,
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-hacking-start-dialog,
+:where(:root, body)[data-holosuite-device-style="space-police"] .hh-shell {
+  --hs-cyan: #fff15a;
+  --hs-amber: #fff15a;
+  --hs-line: rgba(255, 241, 90, 0.34);
+  --hs-line-strong: rgba(255, 241, 90, 0.72);
+  --hs-panel: linear-gradient(180deg, rgba(18, 18, 15, 0.98), rgba(2, 2, 2, 0.96));
+  --hs-field: #10100c;
+  --hs-surface-window: linear-gradient(180deg, rgba(10, 11, 10, 0.98), rgba(2, 2, 2, 0.97));
+  --hs-surface-panel: var(--hs-panel);
+  --hs-surface-card: linear-gradient(180deg, rgba(30, 28, 18, 0.94), rgba(6, 6, 5, 0.97));
+  --hs-surface-control: linear-gradient(180deg, rgba(38, 39, 34, 0.94), rgba(8, 8, 7, 0.98));
+  --hs-surface-control-hover: linear-gradient(180deg, rgba(66, 56, 28, 0.96), rgba(15, 13, 8, 0.98));
+  --hs-surface-active: linear-gradient(135deg, rgba(255, 241, 90, 0.22), rgba(255, 156, 64, 0.12));
+  --hs-border-subtle: var(--hs-line);
+  --hs-border-strong: var(--hs-line-strong);
+  --hs-color-accent: #ffb13d;
+  --hs-color-primary: #fff15a;
+  --hs-text-secondary: #c7c1a9;
+  --hs-glow-cyan: 0 0 18px rgba(255, 241, 90, 0.3);
+  --hs-focus-ring: 0 0 0 2px rgba(255, 177, 61, 0.2);
+  --hs-shadow-control:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    inset 0 -1px 0 rgba(255, 177, 61, 0.16);
+  --hs-shadow-panel:
+    0 20px 46px rgba(0, 0, 0, 0.48),
+    inset 0 0 32px rgba(255, 241, 90, 0.08);
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-hacking-window .window-header,
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-hacking-launcher-window .window-header,
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-hacking-profile-window .window-header,
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-hacking-start-dialog .window-header {
+  background:
+    linear-gradient(rgba(255, 247, 173, 0.028) 50%, rgba(0, 0, 0, 0.05) 50%) 0 0 / 100% 4px,
+    linear-gradient(90deg, rgba(10, 10, 8, 0.98), rgba(25, 22, 12, 0.94), rgba(10, 10, 8, 0.98)) !important;
+}
+
+.holosuite-hacking-window .window-header::before,
+.holosuite-hacking-window .window-header::after,
+.holosuite-hacking-launcher-window .window-header::before,
+.holosuite-hacking-launcher-window .window-header::after,
+.holosuite-hacking-profile-window .window-header::before,
+.holosuite-hacking-profile-window .window-header::after,
+.holosuite-hacking-start-dialog .window-header::before,
+.holosuite-hacking-start-dialog .window-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 108px;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--hs-color-primary));
+  opacity: 0.75;
+}
+
+.holosuite-hacking-window .window-header::before,
+.holosuite-hacking-launcher-window .window-header::before,
+.holosuite-hacking-profile-window .window-header::before,
+.holosuite-hacking-start-dialog .window-header::before {
+  left: 12px;
+}
+
+.holosuite-hacking-window .window-header::after,
+.holosuite-hacking-launcher-window .window-header::after,
+.holosuite-hacking-profile-window .window-header::after,
+.holosuite-hacking-start-dialog .window-header::after {
+  right: 12px;
+  transform: scaleX(-1);
+}
+
+.holosuite-hacking-window .window-title,
+.holosuite-hacking-launcher-window .window-title,
+.holosuite-hacking-profile-window .window-title,
+.holosuite-hacking-start-dialog .window-title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--hs-text-primary);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--hs-color-primary) 32%, transparent);
+  white-space: nowrap;
+}
+
+.hh-shell {
+  --hs-app-padding-block: 20px;
+  --hs-app-padding-inline: 24px;
+  --hs-frame-corner-size: 72px;
+  --hs-frame-edge-inset: 0px;
+  --hs-frame-side-width: var(--hs-frame-corner-size);
+  --hs-frame-header-width: 180px;
+  --hs-frame-header-height: 18px;
+  --hs-frame-color: var(--hs-border-strong);
+  --hs-frame-glow: color-mix(in srgb, var(--hs-color-primary) 36%, transparent);
+  position: relative;
+  isolation: isolate;
   min-height: 100%;
-  padding: 18px;
+  height: 100%;
+  overflow: hidden;
   background:
     var(--hs-grid-bg),
-    radial-gradient(circle at 72% 32%, rgba(255, 77, 125, 0.13), transparent 34%),
+    radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--hs-color-primary) 14%, transparent), transparent 30rem),
+    radial-gradient(circle at 86% 18%, rgba(255, 77, 125, 0.08), transparent 28rem),
     var(--hs-bg-deep);
-  background-size: 24px 24px;
+  background-size: 24px 24px, 24px 24px, auto, auto, auto;
+  color: var(--hs-text-primary);
+  color-scheme: dark;
+  font-family: var(--hs-font-ui);
+}
+
+.hh-shell * {
+  box-sizing: border-box;
+}
+
+.hh-shell .hs-background,
+.hh-shell .hs-frame,
+.hh-shell .hs-effects {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hh-shell .hs-background {
+  z-index: 0;
+}
+
+.hh-shell .hs-frame {
+  z-index: 2;
+}
+
+.hh-shell .hs-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  min-height: 0;
+  height: 100%;
+  padding: var(--hs-app-padding-block) var(--hs-app-padding-inline);
+}
+
+.hh-shell .hs-effects {
+  z-index: 3;
+  background:
+    linear-gradient(rgba(231, 250, 255, 0.026) 50%, rgba(0, 0, 0, 0.035) 50%) 0 0 / 100% 4px,
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--hs-color-primary) 8%, transparent), transparent);
+  mix-blend-mode: screen;
+  opacity: 0.42;
+}
+
+.hh-shell .hs-frame-piece {
+  position: absolute;
+  display: block;
+  color: var(--hs-frame-color);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 7px var(--hs-frame-glow));
+  overflow: visible;
+}
+
+.hh-shell img.hs-frame-piece {
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.hh-shell .hs-frame-corner {
+  width: var(--hs-frame-corner-size);
+  height: var(--hs-frame-corner-size);
+  object-fit: contain;
+}
+
+.hh-shell .hs-frame-corner--top-left {
+  top: 0;
+  left: 0;
+}
+
+.hh-shell .hs-frame-corner--top-right {
+  top: 0;
+  right: 0;
+}
+
+.hh-shell .hs-frame-corner--bottom-left {
+  bottom: 0;
+  left: 0;
+}
+
+.hh-shell .hs-frame-corner--bottom-right {
+  right: 0;
+  bottom: 0;
+}
+
+.hh-shell .hs-frame-edge--left,
+.hh-shell .hs-frame-edge--right {
+  top: var(--hs-frame-corner-size);
+  width: var(--hs-frame-side-width);
+  height: calc(100% - (var(--hs-frame-corner-size) * 2));
+  object-fit: fill;
+}
+
+.hh-shell .hs-frame-edge--left {
+  left: var(--hs-frame-edge-inset);
+}
+
+.hh-shell .hs-frame-edge--right {
+  right: var(--hs-frame-edge-inset);
+}
+
+.hh-shell .hs-frame-header {
+  top: 9px;
+  left: 50%;
+  width: min(var(--hs-frame-header-width), calc(100% - (var(--hs-frame-corner-size) * 2)));
+  height: var(--hs-frame-header-height);
+  transform: translateX(-50%);
+  object-fit: contain;
+}
+
+.hh-shell .hs-frame img.hs-frame-piece--space-police {
+  display: none;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .hh-shell .hs-frame img.hs-frame-piece--default {
+  display: none;
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .hh-shell .hs-frame img.hs-frame-piece--space-police {
+  display: block;
+}
+
+.hh-shell :where(input, select, textarea) {
+  min-height: 32px;
+  border: 1px solid var(--hs-border-subtle);
+  border-radius: var(--hs-radius);
+  background: var(--hs-field);
+  color: var(--hs-text-primary);
+  font-family: var(--hs-font-ui);
+}
+
+.hh-shell :where(input:focus, select:focus, textarea:focus) {
+  border-color: var(--hs-border-strong);
+  box-shadow: var(--hs-focus-ring), inset 0 0 12px rgba(105, 232, 255, 0.08);
+  outline: none;
+}
+
+.hh-shell :where(select, select option) {
+  background: var(--hs-field);
+  color: var(--hs-text-primary);
+}
+
+.hh-shell :where(button) {
+  min-height: 32px;
+  border: 1px solid var(--hs-border-subtle);
+  border-radius: var(--hs-radius);
+  background: var(--hs-surface-control);
+  color: var(--hs-text-primary);
+  box-shadow: var(--hs-shadow-control);
+  cursor: pointer;
+  font-family: var(--hs-font-ui);
+}
+
+.hh-shell :where(button:hover, button:focus-visible) {
+  border-color: var(--hs-border-strong);
+  background: var(--hs-surface-control-hover);
+  box-shadow: var(--hs-glow-cyan), var(--hs-shadow-control);
+  outline: none;
+}
+
+.hh-kicker {
+  color: var(--hs-color-primary) !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.holosuite-hacking-launcher {
+  grid-template-rows: auto repeat(6, auto) minmax(0, 1fr) auto !important;
+  align-content: start;
+  gap: 10px;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  padding: 16px 18px 18px;
+  background: transparent;
   font-family: var(--hs-font-ui);
 }
 
@@ -39,11 +355,22 @@
   text-shadow: var(--hs-glow-cyan);
 }
 
+.holosuite-hacking-launcher-header span {
+  display: block;
+  margin-top: 4px;
+  color: var(--hs-text-secondary);
+  font-size: 13px;
+}
+
 .holosuite-hacking-launcher .form-group {
   display: grid;
-  grid-template-columns: 120px minmax(0, 1fr);
+  grid-template-columns: minmax(118px, 0.42fr) minmax(0, 1fr);
   gap: 10px;
   align-items: center;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--hs-field) 42%, transparent);
 }
 
 .holosuite-hacking-launcher label {
@@ -68,8 +395,9 @@
 .holosuite-hacking-launcher-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   border-top: 1px solid var(--hs-line);
-  padding-top: 12px;
+  padding-top: 10px;
 }
 
 .holosuite-hacking-launcher-actions button {
@@ -384,5 +712,69 @@
 
   .holosuite-profile-grid label {
     grid-template-columns: minmax(0, 1fr) 90px;
+  }
+}
+
+.hh-profile-shell .holosuite-profile-config {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  height: 100%;
+  min-height: 0;
+  padding: var(--hs-app-padding-block) var(--hs-app-padding-inline);
+  background: transparent;
+}
+
+.hh-profile-shell .holosuite-profile-config-header {
+  padding: 0 4px 12px;
+}
+
+.hh-profile-shell .holosuite-profile-config-body {
+  min-height: 0;
+  padding: 2px 4px 8px;
+  scrollbar-color: var(--hs-color-primary) transparent;
+}
+
+.hh-profile-shell .holosuite-profile-section {
+  border-color: var(--hs-border-subtle);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--hs-field) 62%, transparent);
+  box-shadow:
+    inset 2px 0 0 color-mix(in srgb, var(--hs-color-primary) 46%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
+}
+
+.hh-profile-shell .holosuite-profile-fieldset {
+  border-top-color: color-mix(in srgb, var(--hs-border-subtle) 58%, transparent);
+}
+
+.hh-profile-shell .holosuite-profile-grid label {
+  min-width: 0;
+  padding: 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--hs-field) 44%, transparent);
+}
+
+.hh-profile-shell .holosuite-profile-toggles label {
+  min-height: 32px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--hs-field) 42%, transparent);
+}
+
+.hh-profile-shell .holosuite-profile-config-actions {
+  min-height: 0;
+  padding: 12px 4px 0;
+  background: transparent;
+}
+
+@media (max-width: 760px) {
+  .hh-shell {
+    --hs-app-padding-block: 16px;
+    --hs-app-padding-inline: 16px;
+    --hs-frame-corner-size: 54px;
+  }
+
+  .holosuite-hacking-launcher .form-group {
+    grid-template-columns: 1fr;
   }
 }
