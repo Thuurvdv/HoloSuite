@@ -14,9 +14,9 @@ import {
   getScaledOutputSize
 } from "./frame-crop";
 import {
+  getBoundsIntersection,
   getTokenData,
   getTokenSceneBounds as getTokenDocumentBounds,
-  intersectsBounds,
   projectBoundsToFrame
 } from "./token-projection";
 
@@ -29,6 +29,7 @@ const TOKEN_MARKER_MIN_SIZE = 18;
 interface LiveFrameDependencies {
   applyLinkedRegionBounds(camera: SecurityCamera): SecurityCamera;
   broadcastLiveFrame?(camera: SecurityCamera, liveFrame: string): void;
+  getRegionDocument?(regionId?: string, sceneId?: string): any;
   getSceneBackgroundPath(sceneId?: string): string;
   getSceneById(sceneId?: string): any;
   isFrameProducer(): boolean;
@@ -312,11 +313,12 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
 
     const gridSize = getSceneGridSize(scene);
     const sceneDimensions = getSceneDimensions(cameraWithRegion.sceneId);
-    for (const tokenDocument of getSceneTokenDocuments(scene)) {
+    for (const tokenDocument of getCameraTokenDocuments(scene, cameraWithRegion)) {
       if (!shouldDrawToken(tokenDocument)) continue;
       const bounds = getTokenDocumentBounds(tokenDocument, gridSize);
-      const visibleBounds = getVisibleTokenBounds(bounds, region, sceneDimensions);
-      if (!visibleBounds) continue;
+      const tokenVisibility = getVisibleTokenBounds(bounds, region, sceneDimensions);
+      if (!tokenVisibility) continue;
+      const { sourceBounds, visibleBounds } = tokenVisibility;
 
       const imagePath = getTokenImagePath(tokenDocument);
       const image = await loadImage(imagePath);
@@ -325,7 +327,8 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
       context.save();
       context.globalAlpha = normalizeNullableNumber(tokenDocument.alpha) ?? normalizeNullableNumber(getTokenData(tokenDocument)?.alpha) ?? 1;
       if (image?.naturalWidth && image?.naturalHeight) {
-        context.drawImage(image, dx, dy, dw, dh);
+        const sourceCrop = getTokenImageCrop(image, sourceBounds, visibleBounds);
+        context.drawImage(image, sourceCrop.sx, sourceCrop.sy, sourceCrop.sw, sourceCrop.sh, dx, dy, dw, dh);
       } else {
         drawTokenMarker(context, tokenDocument, dx, dy, dw, dh);
       }
@@ -333,9 +336,27 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     }
   }
 
+  function getCameraTokenDocuments(scene: any, camera: SecurityCamera) {
+    const region = dependencies.getRegionDocument?.(camera.regionId, camera.sceneId);
+    if (region && "tokens" in Object(region)) return normalizeTokenCollection(region.tokens);
+    return getSceneTokenDocuments(scene);
+  }
+
+  function getTokenImageCrop(image: any, bounds: any, visibleBounds: any) {
+    const scaleX = image.naturalWidth / bounds.width;
+    const scaleY = image.naturalHeight / bounds.height;
+    return {
+      sx: Math.max(0, (visibleBounds.x - bounds.x) * scaleX),
+      sy: Math.max(0, (visibleBounds.y - bounds.y) * scaleY),
+      sw: Math.min(image.naturalWidth, visibleBounds.width * scaleX),
+      sh: Math.min(image.naturalHeight, visibleBounds.height * scaleY)
+    };
+  }
+
   function getVisibleTokenBounds(bounds: any, region: any, sceneDimensions: any) {
     if (!bounds) return null;
-    if (intersectsBounds(bounds, region)) return bounds;
+    const visibleBounds = getBoundsIntersection(bounds, region);
+    if (visibleBounds) return { sourceBounds: bounds, visibleBounds };
 
     const offsetX = normalizeNullableNumber(sceneDimensions?.x) ?? 0;
     const offsetY = normalizeNullableNumber(sceneDimensions?.y) ?? 0;
@@ -346,14 +367,16 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
       x: bounds.x - offsetX,
       y: bounds.y - offsetY
     };
-    if (intersectsBounds(withoutOffset, region)) return withoutOffset;
+    const visibleWithoutOffset = getBoundsIntersection(withoutOffset, region);
+    if (visibleWithoutOffset) return { sourceBounds: withoutOffset, visibleBounds: visibleWithoutOffset };
 
     const withOffset = {
       ...bounds,
       x: bounds.x + offsetX,
       y: bounds.y + offsetY
     };
-    return intersectsBounds(withOffset, region) ? withOffset : null;
+    const visibleWithOffset = getBoundsIntersection(withOffset, region);
+    return visibleWithOffset ? { sourceBounds: withOffset, visibleBounds: visibleWithOffset } : null;
   }
 
   function drawTokenMarker(context: CanvasRenderingContext2D, tokenDocument: any, dx: number, dy: number, dw: number, dh: number) {

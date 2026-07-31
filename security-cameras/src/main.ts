@@ -29,6 +29,7 @@ let activeMonitor = null;
 let activeFeed = null;
 let selectedCameraId = "";
 let editingCameraId = "";
+const REMOTE_LIVE_FRAME_INTERVAL_MS = 1250;
 
 function normalizeCamera(cameraData = {}, options = {}) {
   return normalizeCameraModel(cameraData, { ...options, createId: createCameraId });
@@ -563,6 +564,7 @@ function bindFeedControls(app: any, html: any = null) {
   if (!element) return;
   applyFeedDisplayMode(app);
   liveFrameController.startLocalLiveRefresh(app);
+  startRemoteLiveRefresh(app);
 }
 
 const liveFrameController = createLiveFrameController({
@@ -576,6 +578,7 @@ const liveFrameController = createLiveFrameController({
       liveFrame
     });
   },
+  getRegionDocument,
   getSceneBackgroundPath,
   getSceneById,
   isFrameProducer: () => Boolean(game.user?.isGM),
@@ -637,6 +640,7 @@ async function closeLocalFeed() {
   if (!activeFeed) return;
   const feed = activeFeed;
   activeFeed = null;
+  stopRemoteLiveRefresh(feed);
   await feed.close();
 }
 
@@ -683,6 +687,33 @@ async function openCameraFeed(cameraId, options: any = {}) {
   return openLocalFeed(camera, { liveFrame });
 }
 
+function requestRemoteLiveFrame(cameraId) {
+  emitSocketMessage({
+    action: "requestLiveFrame",
+    userId: game.user?.id,
+    cameraId
+  });
+}
+
+function isRemoteLiveCamera(camera) {
+  return !game.user?.isGM && camera?.feedSource === "live" && camera.status !== "offline" && camera.status !== "restricted";
+}
+
+function startRemoteLiveRefresh(app) {
+  stopRemoteLiveRefresh(app);
+  if (!isRemoteLiveCamera(app?.camera)) return;
+  requestRemoteLiveFrame(app.camera.id);
+  app.remoteLiveFrameTimer = window.setInterval(() => {
+    requestRemoteLiveFrame(app.camera.id);
+  }, REMOTE_LIVE_FRAME_INTERVAL_MS);
+}
+
+function stopRemoteLiveRefresh(app) {
+  if (!app?.remoteLiveFrameTimer) return;
+  window.clearInterval(app.remoteLiveFrameTimer);
+  app.remoteLiveFrameTimer = null;
+}
+
 function hasCameraAccess(userId, cameraId) {
   const camera = getCamera(cameraId);
   if (!camera) return false;
@@ -709,6 +740,26 @@ async function handleSocketMessage(message) {
   if (!message || typeof message !== "object") return;
   const isGMSent = moduleSocket.isGMSender(message.gmUserId);
 
+  if (message.action === "requestLiveFrame") {
+    if (!game.user?.isGM) return;
+    const cameraId = String(message.cameraId ?? "");
+    const userId = String(message.userId ?? "");
+    const camera = getCamera(cameraId);
+    if (!camera || !userId || !hasCameraAccess(userId, cameraId)) return;
+    const liveFrame = await liveFrameController.captureLiveFrame(camera, {
+      preferDataUrl: true
+    });
+    if (!liveFrame) return;
+    emitSocketMessage({
+      action: "updateFeedFrame",
+      gmUserId: game.user.id,
+      cameraId,
+      recipientUserId: userId,
+      liveFrame
+    });
+    return;
+  }
+
   if (message.action === "showFeed") {
     if (game.user?.isGM) return;
     if (!isGMSent) {
@@ -729,6 +780,8 @@ async function handleSocketMessage(message) {
   if (message.action === "updateFeedFrame") {
     if (game.user?.isGM) return;
     if (!isGMSent) return;
+    const recipientUserId = String(message.recipientUserId ?? "");
+    if (recipientUserId && recipientUserId !== game.user?.id) return;
     const cameraId = String(message.cameraId ?? "");
     if (!cameraId || activeFeed?.camera?.id !== cameraId) return;
     if (typeof message.liveFrame !== "string" || !message.liveFrame) return;

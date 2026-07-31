@@ -53,6 +53,16 @@ export function intersectsBounds(a: Bounds, b: Bounds): boolean {
     && a.y + a.height > b.y;
 }
 
+export function getBoundsIntersection(a: Bounds, b: Bounds): Bounds | null {
+  const x = Math.max(a.x, b.x);
+  const y = Math.max(a.y, b.y);
+  const maxX = Math.min(a.x + a.width, b.x + b.width);
+  const maxY = Math.min(a.y + a.height, b.y + b.height);
+  const width = maxX - x;
+  const height = maxY - y;
+  return width > 0 && height > 0 ? { x, y, width, height } : null;
+}
+
 export function projectBoundsToFrame(bounds: Bounds, region: Bounds, frame: Size): TokenDrawRect {
   return {
     dx: ((bounds.x - region.x) / region.width) * frame.width,
