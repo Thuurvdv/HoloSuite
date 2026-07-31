@@ -9,12 +9,19 @@ import { addSceneControlTool } from "./scene-controls";
 const MODULE_ID = "holosuite-core";
 const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
 const SETTING_DEVICE_STYLE = "deviceStyle";
+const SETTING_FORCE_DEVICE_STYLE = "forceDeviceStyle";
 const SETTING_THEME = "theme";
 const SETTING_WHATS_NEW_LAST_SEEN = "whatsNewLastSeen";
 const FOUNDRY_GENERATION_ATTRIBUTE = "data-holosuite-foundry-generation";
 const WHATS_NEW_CATALOG_PATH = `modules/${MODULE_ID}/data/whats-new.json`;
 
 const DEVICE_STYLE_CHOICES = {
+  base: "Base",
+  "space-police": "Space Police"
+} as const;
+
+const FORCED_DEVICE_STYLE_CHOICES = {
+  "": "Allow User Choice",
   base: "Base",
   "space-police": "Space Police"
 } as const;
@@ -37,7 +44,7 @@ let launcherCloseInProgress = false;
 let launcherObserver: MutationObserver | null = null;
 let launcherControlClickHandledAt = 0;
 
-type LauncherView = "apps" | "whats-new";
+type LauncherView = "apps" | "whats-new" | "settings";
 type WhatsNewTab = "updates" | "releases";
 type WhatsNewFilter = "all" | HoloSuiteWhatsNewTier | "installed";
 
@@ -387,19 +394,37 @@ function injectRenderedLauncherControl(html: unknown): void {
 
 function registerSettings(): void {
   game.settings.register(MODULE_ID, SETTING_DEVICE_STYLE, {
-    name: "HoloSuite Device Style",
-    hint: "Changes the launcher frame style without changing the launcher size.",
-    scope: "world",
+    name: "HoloSuite Theme",
+    hint: "Choose the HoloSuite launcher theme for this user.",
+    scope: "client",
     config: true,
     type: String,
     choices: DEVICE_STYLE_CHOICES,
     default: "base",
+    restricted: false,
+    onChange: () => {
+      applySavedDeviceStyle();
+      launcherApp?.refreshCurrentView();
+    }
+  });
+
+  game.settings.register(MODULE_ID, SETTING_FORCE_DEVICE_STYLE, {
+    name: "Force HoloSuite Theme",
+    hint: "When set, every user sees this HoloSuite launcher theme instead of their personal choice.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: FORCED_DEVICE_STYLE_CHOICES,
+    default: "",
     restricted: true,
-    onChange: (value: string) => applyDeviceStyle(value)
+    onChange: () => {
+      applySavedDeviceStyle();
+      launcherApp?.refreshCurrentView();
+    }
   });
 
   game.settings.register(MODULE_ID, SETTING_THEME, {
-    name: "HoloSuite Theme",
+    name: "HoloSuite Color Theme",
     hint: "Changes the shared color theme used by HoloSuite windows.",
     scope: "world",
     config: true,
@@ -443,6 +468,19 @@ function normalizeDeviceStyle(value: unknown): HoloSuiteDeviceStyle {
   return Object.hasOwn(DEVICE_STYLE_CHOICES, String(value)) ? String(value) as HoloSuiteDeviceStyle : "base";
 }
 
+function getForcedDeviceStyle(): HoloSuiteDeviceStyle | null {
+  const value = String(safeGetSetting(MODULE_ID, SETTING_FORCE_DEVICE_STYLE) ?? "");
+  return Object.hasOwn(DEVICE_STYLE_CHOICES, value) ? value as HoloSuiteDeviceStyle : null;
+}
+
+function getUserDeviceStyle(): HoloSuiteDeviceStyle {
+  return normalizeDeviceStyle(safeGetSetting(MODULE_ID, SETTING_DEVICE_STYLE));
+}
+
+function getEffectiveDeviceStyle(): HoloSuiteDeviceStyle {
+  return getForcedDeviceStyle() ?? getUserDeviceStyle();
+}
+
 function normalizeTheme(value: unknown): HoloSuiteTheme {
   return Object.hasOwn(THEME_CHOICES, String(value)) ? String(value) as HoloSuiteTheme : "default";
 }
@@ -466,7 +504,7 @@ function applyTheme(value: unknown): void {
 }
 
 function applySavedDeviceStyle(): void {
-  applyDeviceStyle(safeGetSetting(MODULE_ID, SETTING_DEVICE_STYLE));
+  applyDeviceStyle(getEffectiveDeviceStyle());
 }
 
 function applySavedTheme(): void {
@@ -566,23 +604,44 @@ async function loadBundledWhatsNewCatalog(): Promise<void> {
   }
 }
 
-function renderWhatsNewHeaderButton(view: LauncherView): string {
+function renderHeaderActions(view: LauncherView): string {
   const unseenCount = getUnseenWhatsNewCount();
   const badgeLabel = unseenCount > 0 ? `<span>${escapeHtml(unseenCount)}</span>` : "";
-  const action = view === "whats-new" ? "apps" : "whats-new";
-  const title = view === "whats-new" ? "Back to HoloSuite apps" : "What's New";
-  const icon = view === "whats-new" ? "fa-solid fa-arrow-left" : "fa-solid fa-star";
-  return `
+  const backButton = view === "apps" ? "" : `
     <button
       type="button"
-      class="holosuite-header-action ${view === "whats-new" ? "is-active" : ""}"
-      data-holosuite-action="${escapeHtml(action)}"
-      title="${escapeHtml(title)}"
-      aria-label="${escapeHtml(title)}"
+      class="holosuite-header-action"
+      data-holosuite-action="apps"
+      title="Back to HoloSuite apps"
+      aria-label="Back to HoloSuite apps"
     >
-      <i class="${escapeHtml(icon)}"></i>
-      ${badgeLabel}
+      <i class="fa-solid fa-arrow-left"></i>
     </button>
+  `;
+
+  return `
+    <div class="holosuite-header-actions">
+      ${backButton}
+      <button
+        type="button"
+        class="holosuite-header-action ${view === "settings" ? "is-active" : ""}"
+        data-holosuite-action="settings"
+        title="HoloSuite Settings"
+        aria-label="HoloSuite Settings"
+      >
+        <i class="fa-solid fa-gear"></i>
+      </button>
+      <button
+        type="button"
+        class="holosuite-header-action ${view === "whats-new" ? "is-active" : ""}"
+        data-holosuite-action="whats-new"
+        title="What's New"
+        aria-label="What's New"
+      >
+        <i class="fa-solid fa-star"></i>
+        ${badgeLabel}
+      </button>
+    </div>
   `;
 }
 
@@ -778,20 +837,74 @@ function renderWhatsNewView(activeFilter: WhatsNewFilter, activeTab: WhatsNewTab
   `;
 }
 
+function renderSettingsView(): string {
+  const forcedStyle = getForcedDeviceStyle();
+  const userStyle = getUserDeviceStyle();
+  const effectiveStyle = forcedStyle ?? userStyle;
+  const overrideNotice = forcedStyle ? `
+    <div class="holosuite-settings-notice">
+      <i class="fa-solid fa-lock"></i>
+      <span>The GM is overriding the HoloSuite theme for this world. Your personal choice is paused until the override is removed.</span>
+    </div>
+  ` : "";
+
+  const options = Object.entries(DEVICE_STYLE_CHOICES).map(([id, label]) => `
+    <button
+      type="button"
+      class="holosuite-theme-choice ${id === effectiveStyle ? "is-active" : ""}"
+      data-holosuite-device-style="${escapeHtml(id)}"
+      ${forcedStyle ? "disabled" : ""}
+      aria-pressed="${id === effectiveStyle ? "true" : "false"}"
+    >
+      <span class="holosuite-theme-preview holosuite-theme-preview--${escapeHtml(id)}"></span>
+      <strong>${escapeHtml(label)}</strong>
+      <span>${id === "base" ? "Classic HoloSuite cyan interface." : "Space Police tactical hardware and amber controls."}</span>
+    </button>
+  `).join("");
+
+  return `
+    <div class="holosuite-screen-heading">
+      <div>
+        <span class="holosuite-kicker">Personal Console</span>
+        <h2>Settings</h2>
+      </div>
+    </div>
+    <section class="holosuite-settings-panel">
+      ${overrideNotice}
+      <div class="holosuite-settings-field">
+        <div>
+          <span class="holosuite-kicker">Theme</span>
+          <strong>${escapeHtml(DEVICE_STYLE_CHOICES[effectiveStyle])}</strong>
+        </div>
+      </div>
+      <div class="holosuite-theme-choices">
+        ${options}
+      </div>
+    </section>
+  `;
+}
+
 function renderLauncherHtml(
   view: LauncherView = "apps",
   activeFilter: WhatsNewFilter = "all",
   activeWhatsNewTab: WhatsNewTab = "releases"
 ): string {
+  const screenClass = view === "whats-new" ? "holosuite-screen--whats-new" : view === "settings" ? "holosuite-screen--settings" : "";
+  const screenContent = view === "whats-new"
+    ? renderWhatsNewView(activeFilter, activeWhatsNewTab)
+    : view === "settings"
+      ? renderSettingsView()
+      : renderAppsView();
+
   return `
     <section class="holosuite-phone">
       <div class="holosuite-phone-shell">
         <header class="holosuite-status-bar">
           <span>HoloSuite</span>
-          ${renderWhatsNewHeaderButton(view)}
+          ${renderHeaderActions(view)}
         </header>
-        <main class="holosuite-screen ${view === "whats-new" ? "holosuite-screen--whats-new" : ""}">
-          ${view === "whats-new" ? renderWhatsNewView(activeFilter, activeWhatsNewTab) : renderAppsView()}
+        <main class="holosuite-screen ${screenClass}">
+          ${screenContent}
         </main>
         <footer class="holosuite-dock">
           <button type="button" data-holosuite-action="close" title="Close"><i class="fa-solid fa-circle-xmark"></i></button>
@@ -820,6 +933,19 @@ function bindLauncherControls(root: HTMLElement | null): void {
       event.preventDefault();
       event.stopPropagation();
       launcherApp?.showApps();
+    });
+  });
+  root.querySelectorAll<HTMLElement>("[data-holosuite-action='settings']").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      launcherApp?.showSettings();
+    });
+  });
+  root.querySelectorAll<HTMLElement>("[data-holosuite-device-style]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const style = (event.currentTarget as HTMLElement).dataset.holosuiteDeviceStyle;
+      launcherApp?.setDeviceStyle(normalizeDeviceStyle(style));
     });
   });
   root.querySelectorAll<HTMLElement>("[data-holosuite-filter]").forEach((button) => {
@@ -972,12 +1098,15 @@ class HoloSuiteLauncher extends LegacyApplication {
 
     statusBar.innerHTML = `
       <span>HoloSuite</span>
-      ${renderWhatsNewHeaderButton(this.currentView)}
+      ${renderHeaderActions(this.currentView)}
     `;
     screen.innerHTML = this.currentView === "whats-new"
       ? renderWhatsNewView(this.whatsNewFilter, this.whatsNewTab)
-      : renderAppsView();
+      : this.currentView === "settings"
+        ? renderSettingsView()
+        : renderAppsView();
     screen.classList.toggle("holosuite-screen--whats-new", this.currentView === "whats-new");
+    screen.classList.toggle("holosuite-screen--settings", this.currentView === "settings");
     bindLauncherControls(root);
     return true;
   }
@@ -990,6 +1119,23 @@ class HoloSuiteLauncher extends LegacyApplication {
   showWhatsNew(): void {
     this.currentView = "whats-new";
     markWhatsNewSeen();
+    if (!this.updateRenderedView()) this.render(false);
+  }
+
+  showSettings(): void {
+    this.currentView = "settings";
+    if (!this.updateRenderedView()) this.render(false);
+  }
+
+  async setDeviceStyle(style: HoloSuiteDeviceStyle): Promise<void> {
+    if (getForcedDeviceStyle()) return;
+    await game.settings.set(MODULE_ID, SETTING_DEVICE_STYLE, style);
+    this.currentView = "settings";
+    applySavedDeviceStyle();
+    this.refreshCurrentView();
+  }
+
+  refreshCurrentView(): void {
     if (!this.updateRenderedView()) this.render(false);
   }
 
