@@ -25,7 +25,7 @@
   </div>
 
   {{#if item.image}}
-    <img class="csi-card-image" src="{{item.image}}" alt="" />
+    <img class="csi-card-image" src="{{item.image}}" alt="" data-csi-card-art data-image-src="{{item.image}}" title="Double-click to view art" />
   {{else}}
     <div class="csi-card-image csi-card-image--placeholder">
       {{#if (csiEq kind "suspect")}}<i class="fas fa-user-secret"></i>{{else}}<i class="fas fa-fingerprint"></i>{{/if}}

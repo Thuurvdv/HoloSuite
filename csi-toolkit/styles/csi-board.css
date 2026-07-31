@@ -516,9 +516,21 @@
   font-size: 34px;
 }
 
+.csi-card-image[data-csi-card-art] {
+  cursor: zoom-in;
+}
+
 .csi-card--suspect .csi-card-image {
   height: 130px;
   filter: grayscale(0.45) contrast(1.08);
+}
+
+.csi-image-dialog {
+  display: block;
+  width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: var(--hs-radius);
 }
 
 .csi-card-body {

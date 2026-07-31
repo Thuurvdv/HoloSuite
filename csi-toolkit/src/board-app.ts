@@ -105,6 +105,7 @@ export function createCSICaseBoardClass(deps: any) {
       html.find("[data-csi-connection-hit]").on("dblclick", (event: any) => this._editCard("connections", event.currentTarget.dataset.connectionId));
       html.find("[data-action='start-connection']").on("click", (event: any) => this._startConnection(event));
       html.find("[data-csi-dim-kind]").on("change", (event: any) => this._toggleDimKind(event.currentTarget));
+      html.find("[data-csi-card-art]").on("dblclick", (event: any) => this._viewCardArt(event));
 
       const viewport = html[0].querySelector("[data-csi-board-viewport]");
       if (viewport) {
@@ -122,7 +123,7 @@ export function createCSICaseBoardClass(deps: any) {
     }
 
     _onCardMouseDown(event: any) {
-      if (!canUserEditBoard(this.caseId) || event.button !== 0 || event.target.closest("button")) return;
+      if (!canUserEditBoard(this.caseId) || event.button !== 0 || event.target.closest("button, [data-csi-card-art]")) return;
       const card = event.currentTarget;
       const view = this._getView();
       const layout = this._getLayout();
@@ -349,6 +350,36 @@ export function createCSICaseBoardClass(deps: any) {
       new CSIBoardItemEditor(this.caseId, collection, itemId).render(true);
     }
 
+    _viewCardArt(event: any) {
+      event.preventDefault();
+      event.stopPropagation();
+      const image = event.currentTarget?.dataset?.imageSrc;
+      if (!image) return;
+      const card = event.currentTarget.closest("[data-csi-board-card]");
+      const title = card?.querySelector(".csi-card-body h3")?.textContent?.trim() || "CSI Card Art";
+      const ImagePopout = globalThis.ImagePopout;
+      if (ImagePopout) {
+        new ImagePopout(image, { title }).render(true);
+        return;
+      }
+
+      const Dialog = globalThis.Dialog ?? globalThis.foundry?.appv1?.api?.Dialog;
+      if (!Dialog) return;
+      const safeImage = String(image)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+      new Dialog({
+        title,
+        content: `<img class="csi-image-dialog" src="${safeImage}" alt="" />`,
+        buttons: {
+          close: { label: "Close" }
+        }
+      }, { classes: ["csi-toolkit"], width: 720 }).render(true);
+    }
+
     async _deleteBoardItem(collection: string, itemId: string) {
       if (!canUserEditBoard(this.caseId) || !COLLECTIONS.includes(collection) || !itemId) return;
       await deleteBoardItem(this.caseId, collection, itemId);
@@ -462,7 +493,7 @@ export function createCSICaseBoardClass(deps: any) {
     }
 
     async _completeConnection(event: any) {
-      if (!this._pendingConnection || event.target.closest("button, input, select, textarea")) return;
+      if (!this._pendingConnection || event.target.closest("button, input, select, textarea, [data-csi-card-art]")) return;
       if (!canUserEditBoard(this.caseId)) return;
 
       const toId = event.currentTarget.dataset.itemId;
