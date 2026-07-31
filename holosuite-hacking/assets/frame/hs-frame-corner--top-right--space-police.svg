@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff15a;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="Lijn_3" data-name="Lijn 3" class="cls-1" d="M17,4V2H39V4H17Z"/>
+  <path id="Lijn_4" data-name="Lijn 4" class="cls-1" d="M68,7V5h2V7H68Z"/>
+  <path id="Lijn_4-2" data-name="Lijn 4" class="cls-1" d="M64,3V1h2V3H64Z"/>
+  <path id="Lijn_4-3" data-name="Lijn 4" class="cls-1" d="M68,3V1h2V3H68Z"/>
+  <path id="Lijn_1" data-name="Lijn 1" class="cls-1" d="M59,1V2H17V1H59Z"/>
+  <path id="Lijn_2" data-name="Lijn 2" class="cls-1" d="M70,66H69V12h1V66Z"/>
+  <path id="Lijn_2-2" data-name="Lijn 2" class="cls-1" d="M67,57H66V21h1V57Z"/>
+</svg>

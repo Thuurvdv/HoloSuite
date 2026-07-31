@@ -609,3 +609,54 @@
     padding: 0 0 14px;
   }
 }
+
+.node-intrusion-shell.hh-shell {
+  min-height: 100%;
+  height: 100%;
+  background:
+    var(--hs-grid-bg, linear-gradient(rgba(83, 235, 255, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(83, 235, 255, 0.05) 1px, transparent 1px)),
+    radial-gradient(circle at 22% 18%, color-mix(in srgb, var(--hs-color-success, #62ffb6) 15%, transparent), transparent 30%),
+    radial-gradient(circle at 78% 72%, rgba(255, 77, 125, 0.14), transparent 34%),
+    var(--hs-bg-deep, #05070d);
+  background-size: 28px 28px, 28px 28px, auto, auto, auto;
+}
+
+.node-intrusion-shell.hh-shell .hs-content {
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+}
+
+.node-intrusion-shell.hh-shell .node-intrusion-header {
+  padding: 0 4px 10px;
+}
+
+.node-intrusion-shell.hh-shell .node-intrusion-grid {
+  min-height: 0;
+  height: 100%;
+  gap: 14px;
+  padding: 0 4px 2px;
+}
+
+.node-intrusion-shell.hh-shell .node-intrusion-panel {
+  padding: 0 14px 0 0;
+}
+
+.node-intrusion-shell.hh-shell .node-intrusion-standby,
+.node-intrusion-shell.hh-shell .node-intrusion-objective,
+.node-intrusion-shell.hh-shell .node-intrusion-specs,
+.node-intrusion-shell.hh-shell .node-intrusion-legend {
+  margin-block: 10px;
+}
+
+.node-intrusion-shell.hh-shell .node-intrusion-map {
+  min-height: 0;
+  height: 100%;
+  border-radius: 6px;
+}
+
+.node-intrusion-shell.hh-shell .node-intrusion-result-screen {
+  min-height: 0;
+  height: 100%;
+  margin: 0 4px 4px;
+  border-radius: 8px;
+}

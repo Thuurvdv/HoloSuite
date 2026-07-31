@@ -555,8 +555,8 @@ class pt extends mt {
       classes: ["holosuite-hacking-launcher-window"],
       popOut: !0,
       resizable: !0,
-      width: 460,
-      height: 440,
+      width: 560,
+      height: 620,
       template: gt
     });
   }
@@ -788,8 +788,8 @@ class Nt extends St {
       title: "HoloSuite Hacking Difficulty Profiles",
       classes: ["holosuite-hacking-window", "holosuite-hacking-profile-window"],
       template: yt,
-      width: 720,
-      height: 760,
+      width: 820,
+      height: 780,
       resizable: !0,
       closeOnSubmit: !0,
       submitOnChange: !1,

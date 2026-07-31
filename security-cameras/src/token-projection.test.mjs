@@ -50,6 +50,17 @@ test("intersectsBounds detects overlap without treating touching edges as overla
   assert.equal(projection.intersectsBounds({ x: 50, y: 50, width: 10, height: 10 }, region), false);
 });
 
+test("getBoundsIntersection clips token bounds to the camera region", () => {
+  const region = { x: 100, y: 100, width: 200, height: 100 };
+  assert.deepEqual(projection.getBoundsIntersection({ x: 50, y: 120, width: 80, height: 20 }, region), {
+    x: 100,
+    y: 120,
+    width: 30,
+    height: 20
+  });
+  assert.equal(projection.getBoundsIntersection({ x: 300, y: 120, width: 20, height: 20 }, region), null);
+});
+
 test("projectBoundsToFrame maps scene-space bounds into frame-space draw rects", () => {
   assert.deepEqual(projection.projectBoundsToFrame(
     { x: 150, y: 125, width: 50, height: 25 },

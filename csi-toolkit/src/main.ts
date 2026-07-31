@@ -32,6 +32,7 @@ import { escapeHtml, labelize, slugify } from "./text-utils";
 import { getLegacyApplicationBase } from "../../shared/src/application-base";
 
 declare const foundry: any;
+declare const FilePicker: any;
 declare const game: any;
 declare const Hooks: any;
 declare const Handlebars: any;
@@ -585,20 +586,22 @@ declare const ui: any;
       const field = button.closest(".csi-image-field")?.querySelector("input");
       if (!field) return;
 
-      const Picker = (globalThis as any).FilePicker ?? (globalThis as any).foundry?.applications?.apps?.FilePicker;
+      const Picker = getFilePickerClass();
       if (!Picker) {
         ui.notifications?.warn(`${MODULE_TITLE}: Foundry FilePicker is unavailable.`);
         return;
       }
 
-      new Picker({
+      const picker = new Picker({
         type: "image",
         current: field.value,
         callback: path => {
           field.value = path;
           field.dispatchEvent(new Event("change", { bubbles: true }));
         }
-      }).render(true);
+      });
+      if (typeof picker.browse === "function") picker.browse();
+      else picker.render?.(true);
     }
 
     async _importFromFile(input) {
@@ -853,6 +856,15 @@ declare const ui: any;
   function duplicateData(value) {
     if (foundry.utils.deepClone) return foundry.utils.deepClone(value);
     return JSON.parse(JSON.stringify(value));
+  }
+
+  function getFilePickerClass() {
+    const foundryGlobal = (globalThis as any).foundry ?? foundry;
+    return (typeof FilePicker !== "undefined" ? FilePicker : null)
+      ?? (globalThis as any).FilePicker
+      ?? foundryGlobal?.applications?.apps?.FilePicker
+      ?? foundryGlobal?.applications?.api?.FilePicker
+      ?? foundryGlobal?.appv1?.api?.FilePicker;
   }
 
   function singularLabel(collection) {
