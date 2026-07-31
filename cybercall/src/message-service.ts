@@ -27,6 +27,22 @@ function uniqueStrings(values: any[]) {
   return [...new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean))];
 }
 
+function getChatWhisperUserIds(document: any) {
+  const whisper = Array.isArray(document?.whisper) ? document.whisper : [];
+  return uniqueStrings(whisper.map((entry: any) => entry?.id ?? entry));
+}
+
+function canCurrentUserReadMessage(message: CyberCallMessage, document: any) {
+  const currentUserId = String(game.user?.id ?? "").trim();
+  if (!currentUserId) return false;
+  if (game.user?.isGM === true) return true;
+
+  const whisperUserIds = getChatWhisperUserIds(document);
+  if (whisperUserIds.length && !whisperUserIds.includes(currentUserId)) return false;
+
+  return message.senderUserId === currentUserId || message.recipientUserIds.includes(currentUserId);
+}
+
 function getRecipientUserIds(contact: any) {
   const explicit = Array.isArray(contact?.userIds)
     ? contact.userIds
@@ -62,11 +78,12 @@ export function getStoredMessages(): CyberCallMessage[] {
     .map((document: any) => {
       const flag = getMessageFlag(document);
       if (!flag) return null;
-      return normalizeMessage({
+      const message = normalizeMessage({
         ...flag,
         chatMessageId: document.id,
         createdAt: flag.createdAt || getChatCreatedAt(document)
       });
+      return canCurrentUserReadMessage(message, document) ? message : null;
     })
     .filter(Boolean);
 }
