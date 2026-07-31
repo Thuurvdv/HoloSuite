@@ -1,6 +1,87 @@
 {
-  "updated": "2026-07-22",
-  "modules": [],
+  "updated": "2026-08-01",
+  "modules": [
+    {
+      "moduleId": "holosuite-hacking",
+      "title": "HoloSuite Hacking",
+      "tier": "free",
+      "version": "1.1.8",
+      "updated": "2026-08-01",
+      "icon": "fa-solid fa-terminal",
+      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking",
+      "entries": [
+        {
+          "title": "Hacking apps adopt the HoloSuite v2 frame",
+          "summary": "Node Intrusion, Signal Alignment, the launcher, and difficulty profiles now use the refreshed HoloSuite frame treatment with Space Police variants and tighter responsive layouts.",
+          "tags": ["Hacking", "Styling", "Frames", "Foundry v12-v14"]
+        }
+      ]
+    },
+    {
+      "moduleId": "security-cameras",
+      "title": "Security Cameras",
+      "tier": "free",
+      "version": "1.0.6",
+      "updated": "2026-08-01",
+      "icon": "fa-solid fa-video",
+      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/security-cameras",
+      "entries": [
+        {
+          "title": "Phantom token projections cleaned up",
+          "summary": "Camera feeds now filter token projections more reliably, preventing stale or hidden phantom tokens from appearing in live security views.",
+          "tags": ["Cameras", "Tokens", "Bug Fix", "Foundry v12-v14"]
+        }
+      ]
+    },
+    {
+      "moduleId": "cybercall",
+      "title": "CyberCall",
+      "tier": "free",
+      "version": "1.0.6",
+      "updated": "2026-08-01",
+      "icon": "fa-solid fa-phone-volume",
+      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall",
+      "entries": [
+        {
+          "title": "Call privacy tightened",
+          "summary": "Private CyberCall messages now respect their intended audience more consistently, reducing unwanted visibility for players outside the call.",
+          "tags": ["CyberCall", "Privacy", "Bug Fix", "Foundry v12-v14"]
+        }
+      ]
+    },
+    {
+      "moduleId": "csi-toolkit",
+      "title": "Crime Scene Investigation Toolkit",
+      "tier": "free",
+      "version": "1.0.5",
+      "updated": "2026-08-01",
+      "icon": "fa-solid fa-fingerprint",
+      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/csi-toolkit",
+      "entries": [
+        {
+          "title": "Evidence images open from item cards",
+          "summary": "Evidence image controls now open their full image previews from CSI item cards, making case-board evidence easier to inspect at the table.",
+          "tags": ["CSI", "Evidence", "Images", "Foundry v12-v14"]
+        }
+      ]
+    },
+    {
+      "moduleId": "holosuite-core",
+      "title": "HoloSuite Core",
+      "tier": "free",
+      "version": "1.0.5",
+      "updated": "2026-08-01",
+      "icon": "fa-solid fa-mobile-screen",
+      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
+      "entries": [
+        {
+          "title": "Launcher settings and What's New polish",
+          "summary": "The core launcher now includes new settings support alongside refreshed What's New presentation and Foundry v12 compatibility fixes.",
+          "tags": ["Core", "Settings", "What's New", "Foundry v12-v14"]
+        }
+      ]
+    }
+  ],
   "releases": [
     {
       "moduleId": "pulse-scanner",
