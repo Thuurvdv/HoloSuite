@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="140" height="18" viewBox="0 0 140 18">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #ffee56;
+        fill-rule: evenodd;
+      }
+
+      .cls-1 {
+        filter: url(#filter);
+      }
+
+      .cls-2 {
+        opacity: 0.8;
+      }
+    </style>
+    <filter id="filter" x="0" y="6" width="140" height="5" filterUnits="userSpaceOnUse">
+      <feGaussianBlur result="blur" stdDeviation="1" in="SourceAlpha"/>
+      <feFlood result="flood" flood-color="#dcdad4" flood-opacity="0.52"/>
+      <feComposite result="composite-2" operator="out" in2="blur"/>
+      <feComposite result="composite" operator="in" in2="SourceAlpha"/>
+      <feBlend result="blend" mode="linearLight" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <path id="Rechthoek_1" data-name="Rechthoek 1" class="cls-1" d="M2.5,6h135a2.5,2.5,0,0,1,0,4.995H2.5A2.5,2.5,0,1,1,2.5,6Z"/>
+  <path id="Rechthoek_2" data-name="Rechthoek 2" class="cls-2" d="M24.059,3H118a4.5,4.5,0,0,1,4.5,4.5V9.488a4.5,4.5,0,0,1-4.5,4.5H24.059a4.5,4.5,0,0,1-4.5-4.5V7.5A4.5,4.5,0,0,1,24.059,3Z"/>
+</svg>

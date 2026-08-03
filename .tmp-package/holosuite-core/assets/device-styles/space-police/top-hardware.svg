@@ -1,0 +1,71 @@
+<svg id="Groep_1" data-name="Groep 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="132" height="18" viewBox="0 0 132 18">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke: #d8ad3a;
+        stroke-linejoin: round;
+        stroke-width: 2px;
+      }
+
+      .cls-2, .cls-3, .cls-4 {
+        fill: #ffda56;
+      }
+
+      .cls-3 {
+        filter: url(#filter);
+      }
+
+      .cls-4 {
+        filter: url(#filter-2);
+      }
+
+      .cls-5 {
+        fill: #d8ad3a;
+      }
+
+      .cls-5, .cls-7 {
+        fill-rule: evenodd;
+      }
+
+      .cls-6 {
+        filter: url(#filter-3);
+      }
+
+      .cls-7 {
+        fill: #2d2d2d;
+        opacity: 0.34;
+      }
+    </style>
+    <filter id="filter" x="115" y="1" width="16" height="16" filterUnits="userSpaceOnUse">
+      <feGaussianBlur result="blur" stdDeviation="12.667" in="SourceAlpha"/>
+      <feFlood result="flood" flood-color="#d8ad3a" flood-opacity="0.45"/>
+      <feComposite result="composite-2" operator="out" in2="blur"/>
+      <feComposite result="composite" operator="in" in2="SourceAlpha"/>
+      <feBlend result="blend" in2="SourceGraphic"/>
+    </filter>
+    <filter id="filter-2" x="1" y="1" width="16" height="16" filterUnits="userSpaceOnUse">
+      <feGaussianBlur result="blur" stdDeviation="12.667" in="SourceAlpha"/>
+      <feFlood result="flood" flood-color="#d8ad3a" flood-opacity="0.45"/>
+      <feComposite result="composite-2" operator="out" in2="blur"/>
+      <feComposite result="composite" operator="in" in2="SourceAlpha"/>
+      <feBlend result="blend" in2="SourceGraphic"/>
+    </filter>
+    <filter id="filter-3" filterUnits="userSpaceOnUse">
+      <feGaussianBlur result="blur" in="SourceAlpha"/>
+      <feFlood result="flood" flood-color="#dcdad4" flood-opacity="0.76"/>
+      <feComposite result="composite-2" operator="out" in2="blur"/>
+      <feComposite result="composite" operator="in" in2="SourceAlpha"/>
+      <feBlend result="blend" mode="pinLight" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <rect id="Rechthoek_1" data-name="Rechthoek 1" class="cls-2" x="19" y="2" width="94" height="15" rx="7.5" ry="7.5"/>
+  <circle id="Ovaal_1" data-name="Ovaal 1" class="cls-3" cx="123" cy="9" r="8"/>
+  <circle id="Ovaal_1-2" data-name="Ovaal 1" class="cls-4" cx="9" cy="9" r="8"/>
+  <path id="Lijn_1" data-name="Lijn 1" class="cls-5" d="M25,9V8h82V9H25Z"/>
+  <path id="Lijn_1-2" data-name="Lijn 1" class="cls-5" d="M45,12V11H85v1H45Z"/>
+  <g id="Groep_2" data-name="Groep 2" class="cls-6">
+    <circle id="Ovaal_2" data-name="Ovaal 2" cx="9" cy="9" r="4"/>
+    <circle id="Ovaal_2-2" data-name="Ovaal 2" cx="123" cy="9" r="4"/>
+  </g>
+  <path id="Lijn_2" data-name="Lijn 2" class="cls-7" d="M31,4h1V15H31V4Zm9,0h1V15H40V4ZM37,4h1V15H37V4ZM34,4h1V15H34V4Zm9,0h1V15H43V4Zm9,0h1V15H52V4ZM49,4h1V15H49V4ZM46,4h1V15H46V4Zm9,0h1V15H55V4Zm9,0h1V15H64V4ZM61,4h1V15H61V4ZM58,4h1V15H58V4Zm9,0h1V15H67V4Zm9,0h1V15H76V4ZM73,4h1V15H73V4ZM70,4h1V15H70V4Zm9,0h1V15H79V4Zm9,0h1V15H88V4ZM85,4h1V15H85V4ZM82,4h1V15H82V4Zm9,0h1V15H91V4Zm9,0h1V15h-1V4ZM97,4h1V15H97V4ZM94,4h1V15H94V4Z"/>
+</svg>
