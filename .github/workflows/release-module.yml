@@ -68,7 +68,7 @@ jobs:
 
           cp -r "$MODULE_ID/dist" "staging/$MODULE_ID/dist"
 
-          for dir in styles templates audio samples; do
+          for dir in styles templates assets audio data languages packs samples; do
             [ -d "$MODULE_ID/$dir" ] && cp -r "$MODULE_ID/$dir" "staging/$MODULE_ID/$dir"
           done
 

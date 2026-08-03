@@ -12,6 +12,7 @@ const SETTING_DEVICE_STYLE = "deviceStyle";
 const SETTING_FORCE_DEVICE_STYLE = "forceDeviceStyle";
 const SETTING_THEME = "theme";
 const SETTING_WHATS_NEW_LAST_SEEN = "whatsNewLastSeen";
+const KEYBINDING_OPEN_LAUNCHER = "openLauncher";
 const FOUNDRY_GENERATION_ATTRIBUTE = "data-holosuite-foundry-generation";
 const WHATS_NEW_CATALOG_PATH = `modules/${MODULE_ID}/data/whats-new.json`;
 
@@ -461,6 +462,23 @@ function registerSettings(): void {
     icon: "fas fa-terminal",
     type: HoloSuiteLauncher,
     restricted: true
+  });
+}
+
+function registerKeybindings(): void {
+  game.keybindings?.register?.(MODULE_ID, KEYBINDING_OPEN_LAUNCHER, {
+    name: "Open HoloSuite",
+    hint: "Open the HoloSuite launcher and registered app deck.",
+    editable: [],
+    restricted: false,
+    onDown: () => {
+      if (!canOpenLauncher()) {
+        ui.notifications?.warn?.("HoloSuite is disabled for players in this world.");
+        return false;
+      }
+      void api.toggleLauncher();
+      return true;
+    }
   });
 }
 
@@ -1237,6 +1255,7 @@ function exposeApi(): void {
 Hooks.once("init", () => {
   applyFoundryGenerationMarker();
   registerSettings();
+  registerKeybindings();
   exposeApi();
 });
 

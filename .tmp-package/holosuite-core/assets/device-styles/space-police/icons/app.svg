@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #000;
+        stroke-width: 8px;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="Rechthoek_1" data-name="Rechthoek 1" class="cls-1" d="M56,56H8V8H56V56Z"/>
+  <rect id="Rechthoek_2" data-name="Rechthoek 2" x="14" y="16" width="33" height="7"/>
+  <rect id="Rechthoek_2-2" data-name="Rechthoek 2" x="14" y="29" width="17" height="7"/>
+  <rect id="Rechthoek_2-3" data-name="Rechthoek 2" x="14" y="41" width="33" height="7"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="18" viewBox="0 0 140 18">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #081c2e;
+        stroke: #355254;
+        stroke-width: 2px;
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        fill: #5ad9fc;
+      }
+    </style>
+  </defs>
+  <path id="Rechthoek_1" data-name="Rechthoek 1" class="cls-1" d="M7,3H133a6,6,0,0,1,0,12H7A6,6,0,0,1,7,3Z"/>
+  <rect id="Rechthoek_2" data-name="Rechthoek 2" class="cls-2" x="47" y="7" width="46" height="4" rx="2" ry="2"/>
+</svg>

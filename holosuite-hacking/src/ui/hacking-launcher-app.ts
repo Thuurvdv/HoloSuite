@@ -9,6 +9,15 @@ const MODULE_ID = "holosuite-hacking";
 const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/hacking-launcher.html`;
 const LegacyApplication = getLegacyApplicationBase();
 
+function getModuleAssetPath(path: string) {
+  const modulePath = `modules/${MODULE_ID}/${path.replace(/^\/+/, "")}`;
+  const getRoute = foundry?.utils?.getRoute;
+  if (typeof getRoute === "function") return getRoute(modulePath);
+
+  const routePrefix = String((globalThis as any).ROUTE_PREFIX ?? game?.data?.options?.routePrefix ?? "").replace(/^\/?/, "/").replace(/\/$/, "");
+  return `${routePrefix}/${modulePath}`;
+}
+
 export class HackingLauncherApp extends LegacyApplication {
   api: any;
 
@@ -37,6 +46,7 @@ export class HackingLauncherApp extends LegacyApplication {
     const actorOptions = getPlayerActorOptions(firstUser?.id);
     const firstActor = actorOptions.length ? getActorById(actorOptions[0].id) : null;
     return {
+      frameAssetBase: getModuleAssetPath("assets/frame"),
       defaultDc,
       defaultTestRoll: defaultDc,
       minigames: this.api.getMinigames(),
