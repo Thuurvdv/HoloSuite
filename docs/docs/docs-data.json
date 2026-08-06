@@ -36,7 +36,12 @@
           "answer": "Most HoloSuite modules expect Core to be installed and active so they can register into the launcher."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/HoloSuite-clip.mp4",
+          "title": "HoloSuite Core overview"
+        }
+      ],
       "examples": [
         "Keep the launcher open on a second monitor during a sci-fi session.",
         "Use a macro with game.holosuite.open() for quick access.",
@@ -82,7 +87,12 @@
           "answer": "CyberCall stores message history as private Foundry chat messages with module flags. Read state is saved locally per client."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/cybercall-clip.mp4",
+          "title": "CyberCall overview"
+        }
+      ],
       "examples": [
         "Broadcast an emergency transmission from a ship captain during combat.",
         "Let a player call a black-market contact through the group contacts list.",
@@ -129,7 +139,12 @@
           "answer": "Players generally need to be on the same scene for live canvas updates. Otherwise the feed may use a fallback display."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/cameras-clip.mp4",
+          "title": "Security Cameras overview"
+        }
+      ],
       "examples": [
         "Show a lobby camera as players infiltrate a corporate facility.",
         "Switch a feed to corrupted when an enemy jams the signal.",
@@ -176,7 +191,12 @@
           "answer": "Yes. Use export and import to move case JSON between worlds."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/Csi-clip.mp4",
+          "title": "CSI Toolkit overview"
+        }
+      ],
       "examples": [
         "Run a cyberpunk murder investigation with suspect and evidence cards.",
         "Use connection labels like found at, last seen with, or encrypted by.",
@@ -223,7 +243,12 @@
           "answer": "Players can request travel. The GM and active players can accept or decline depending on the workflow."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/galaxymap-clip.mp4",
+          "title": "Galaxy Map overview"
+        }
+      ],
       "examples": [
         "Reveal a hidden system after players decode a nav beacon.",
         "Track the party ship location during a sector campaign.",
@@ -267,7 +292,12 @@
           "answer": "Yes. Players can browse available contracts when the board is available to them."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/BountyBoard-clip.mp4",
+          "title": "Bounty Board overview"
+        }
+      ],
       "examples": [
         "Create a bounty board in a space station hub.",
         "Offer several faction contracts before a session.",
@@ -313,7 +343,12 @@
           "answer": "The GM controls module settings. Players should ask the GM to set custom art or labels."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/criticalcutin-clip.mp4",
+          "title": "Critical Cut-In overview"
+        }
+      ],
       "examples": [
         "Trigger only on natural 20s for rare cinematic moments.",
         "Give a recurring villain a GM cut-in.",
@@ -360,7 +395,12 @@
           "answer": "A natural 20 uses the critical success profile, typically giving better assists, more time, and clearer information."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/hacking-clip.mp4",
+          "title": "HoloSuite Hacking overview"
+        }
+      ],
       "examples": [
         "Use Node Intrusion to bypass corporate security.",
         "Use Signal Alignment to decrypt an unstable transmission.",
@@ -418,7 +458,12 @@
           "answer": "Yes. HoloDock opens from the HoloSuite launcher and requires HoloSuite Core."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/holodock-clip.mp4",
+          "title": "HoloDock overview"
+        }
+      ],
       "examples": [
         "Build a party ship with engines, shields, weapons, cargo, and crew systems.",
         "Pin critical systems directly onto the ship image for a tactical damage overview.",
@@ -467,7 +512,12 @@
           "answer": "Player scan payloads are sanitized, but GMs should avoid placing campaign-critical secrets in client-side labels or descriptions."
         }
       ],
-      "videos": [],
+      "videos": [
+        {
+          "src": "assets/videos/pulsescanner-clip.mp4",
+          "title": "Pulse Scanner overview"
+        }
+      ],
       "examples": [
         "Reveal biological traces in a crime scene.",
         "Detect weak structural points in a derelict station.",
