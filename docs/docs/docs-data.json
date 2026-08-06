@@ -38,7 +38,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/HoloSuite-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/HoloSuite-clip.mp4",
           "title": "HoloSuite Core overview"
         }
       ],
@@ -89,7 +89,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/cybercall-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/cybercall-clip.mp4",
           "title": "CyberCall overview"
         }
       ],
@@ -141,7 +141,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/cameras-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/cameras-clip.mp4",
           "title": "Security Cameras overview"
         }
       ],
@@ -193,7 +193,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/Csi-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/Csi-clip.mp4",
           "title": "CSI Toolkit overview"
         }
       ],
@@ -245,7 +245,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/galaxymap-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/galaxymap-clip.mp4",
           "title": "Galaxy Map overview"
         }
       ],
@@ -294,7 +294,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/BountyBoard-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/BountyBoard-clip.mp4",
           "title": "Bounty Board overview"
         }
       ],
@@ -345,7 +345,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/criticalcutin-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/criticalcutin-clip.mp4",
           "title": "Critical Cut-In overview"
         }
       ],
@@ -397,7 +397,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/hacking-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/hacking-clip.mp4",
           "title": "HoloSuite Hacking overview"
         }
       ],
@@ -460,7 +460,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/holodock-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/holodock-clip.mp4",
           "title": "HoloDock overview"
         }
       ],
@@ -514,7 +514,7 @@
       ],
       "videos": [
         {
-          "src": "assets/videos/pulsescanner-clip.mp4",
+          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/pulsescanner-clip.mp4",
           "title": "Pulse Scanner overview"
         }
       ],
