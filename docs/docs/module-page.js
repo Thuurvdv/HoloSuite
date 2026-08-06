@@ -108,10 +108,11 @@ function videos(items, moduleName) {
   return `<div class="doc-video-list">${items.map((item) => {
     const video = typeof item === "string" ? { src: item } : item;
     const title = video.title || `${moduleName} demonstration`;
+    const src = /^https?:\/\//i.test(video.src) ? video.src : `../${video.src}`;
     return `
       <figure class="doc-video">
         <video controls playsinline preload="metadata" aria-label="${escapeAttribute(title)}">
-          <source src="../${escapeAttribute(video.src)}" type="video/mp4">
+          <source src="${escapeAttribute(src)}" type="video/mp4">
           Your browser does not support embedded video.
         </video>
         <figcaption>${escapeHtml(title)}</figcaption>
