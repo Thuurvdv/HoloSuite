@@ -709,6 +709,51 @@ footer a:focus-visible,
   outline: none;
 }
 
+.privacy-page {
+  width: min(100%, 900px);
+  min-height: calc(100svh - 72px);
+  margin: 0 auto;
+  padding: clamp(52px, 8vw, 92px) clamp(18px, 5vw, 56px);
+}
+
+.privacy-page h1 {
+  max-width: none;
+  font-size: clamp(2.6rem, 6vw, 4.8rem);
+}
+
+.privacy-summary {
+  margin: 28px 0 42px;
+  padding: 22px 24px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: rgba(69, 217, 208, 0.08);
+  color: #d8e7e4;
+  font-size: 1.08rem;
+}
+
+.privacy-page section {
+  margin-top: 36px;
+}
+
+.privacy-page h2 {
+  margin-bottom: 14px;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.privacy-page p,
+.privacy-page li {
+  color: #d8e7e4;
+}
+
+.privacy-page a {
+  color: var(--cyan);
+}
+
+.privacy-page a:hover,
+.privacy-page a:focus-visible {
+  color: var(--text);
+}
+
 @media (max-width: 1080px) {
   .hero-grid,
   .ecosystem,

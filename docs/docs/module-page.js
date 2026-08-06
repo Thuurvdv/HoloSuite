@@ -53,11 +53,11 @@ function renderModule(module) {
   if (!content) return;
   content.innerHTML = `
     ${section("overview", "Overview", paragraphs([module.overview]))}
+    ${section("videos", "Video", videos(module.videos, module.name))}
     ${section("features", "Features", list(module.features))}
     ${section("installation", "Installation", orderedList(module.installation))}
     ${section("configuration", "Configuration", list(module.configuration))}
     ${faqSection(module.faq)}
-    ${section("videos", "Videos", videos(module.videos))}
     ${section("examples", "Examples", list(module.examples))}
   `;
 }
@@ -101,11 +101,23 @@ function faqSection(items) {
   `);
 }
 
-function videos(items) {
+function videos(items, moduleName) {
   if (!items?.length) {
     return `<div class="video-placeholder">Demo videos are planned for this module. Current documentation uses screenshots and workflow examples until short loops are available.</div>`;
   }
-  return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+  return `<div class="doc-video-list">${items.map((item) => {
+    const video = typeof item === "string" ? { src: item } : item;
+    const title = video.title || `${moduleName} demonstration`;
+    return `
+      <figure class="doc-video">
+        <video controls playsinline preload="metadata" aria-label="${escapeAttribute(title)}">
+          <source src="../${escapeAttribute(video.src)}" type="video/mp4">
+          Your browser does not support embedded video.
+        </video>
+        <figcaption>${escapeHtml(title)}</figcaption>
+      </figure>
+    `;
+  }).join("")}</div>`;
 }
 
 function setText(selector, value) {

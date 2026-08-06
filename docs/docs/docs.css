@@ -217,6 +217,31 @@
   color: var(--muted);
 }
 
+.doc-video-list {
+  display: grid;
+  gap: 18px;
+}
+
+.doc-video {
+  margin: 0;
+}
+
+.doc-video video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: #05090b;
+  object-fit: contain;
+}
+
+.doc-video figcaption {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 @media (max-width: 960px) {
   .docs-layout,
   .doc-module-hero,
