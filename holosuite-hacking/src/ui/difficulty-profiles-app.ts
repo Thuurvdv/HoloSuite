@@ -128,6 +128,44 @@ function normalizeSignalAlignmentProfile(formData: FormData, prefix: string, bas
   };
 }
 
+function normalizePacketSwitchboardProfile(formData: FormData, prefix: string, base: any) {
+  const packet = base.packetSwitchboard ?? {};
+  const laneCount = clamp(Math.round(numberValue(formData, `${prefix}packetLaneCount`, packet.laneCount ?? 4)), 3, 6);
+  return {
+    traceDurationSeconds: clamp(Math.round(numberValue(formData, `${prefix}packetTraceDurationSeconds`, packet.traceDurationSeconds ?? base.traceDurationSeconds ?? 60)), 5, 300),
+    laneCount,
+    columnCount: clamp(Math.round(numberValue(formData, `${prefix}packetColumnCount`, packet.columnCount ?? 6)), laneCount - 1, 8),
+    deliveryGoal: clamp(Math.round(numberValue(formData, `${prefix}packetDeliveryGoal`, packet.deliveryGoal ?? 7)), 3, 20),
+    packetIntervalSeconds: clamp(numberValue(formData, `${prefix}packetIntervalSeconds`, packet.packetIntervalSeconds ?? 2), 0.35, 10),
+    packetStepSeconds: clamp(numberValue(formData, `${prefix}packetStepSeconds`, packet.packetStepSeconds ?? 0.8), 0.25, 5),
+    previewCount: clamp(Math.round(numberValue(formData, `${prefix}packetPreviewCount`, packet.previewCount ?? 2)), 0, 6),
+    misroutePenaltySeconds: clamp(numberValue(formData, `${prefix}packetMisroutePenaltySeconds`, packet.misroutePenaltySeconds ?? 5), 0, 60),
+    maxActivePackets: clamp(Math.round(numberValue(formData, `${prefix}packetMaxActivePackets`, packet.maxActivePackets ?? 2)), 1, 6),
+    entryHoldSeconds: clamp(numberValue(formData, `${prefix}packetEntryHoldSeconds`, packet.entryHoldSeconds ?? 1.5), 0, 10)
+  };
+}
+
+function normalizePrismLockProfile(formData: FormData, prefix: string, base: any) {
+  const prism = base.prismLock ?? {};
+  const ringCount = clamp(Math.round(numberValue(formData, `${prefix}prismRingCount`, prism.ringCount ?? 3)), 2, 4);
+  const slotCount = clamp(Math.round(numberValue(formData, `${prefix}prismSlotCount`, prism.slotCount ?? 10)), 8, 16);
+  const receiverCount = clamp(Math.round(numberValue(formData, `${prefix}prismReceiverCount`, prism.receiverCount ?? 4)), 2, Math.min(8, slotCount));
+  const switchableRingCount = clamp(Math.round(numberValue(formData, `${prefix}prismSwitchableRingCount`, prism.switchableRingCount ?? 0)), 0, ringCount - 1);
+  const maxIceReceivers = Math.min(4, slotCount - receiverCount);
+  const minimumIceReceivers = switchableRingCount > 0 && maxIceReceivers > 0 ? 1 : 0;
+  return {
+    traceDurationSeconds: clamp(Math.round(numberValue(formData, `${prefix}prismTraceDurationSeconds`, prism.traceDurationSeconds ?? base.traceDurationSeconds ?? 60)), 5, 300),
+    ringCount,
+    slotCount,
+    receiverCount,
+    blockersPerRing: clamp(Math.round(numberValue(formData, `${prefix}prismBlockersPerRing`, prism.blockersPerRing ?? 0)), 0, 3),
+    iceReceiverCount: clamp(Math.round(numberValue(formData, `${prefix}prismIceReceiverCount`, prism.iceReceiverCount ?? 0)), minimumIceReceivers, maxIceReceivers),
+    switchableRingCount,
+    scrambleSteps: clamp(Math.round(numberValue(formData, `${prefix}prismScrambleSteps`, prism.scrambleSteps ?? 3)), 1, Math.floor(slotCount / 2)),
+    icePenaltySeconds: clamp(numberValue(formData, `${prefix}prismIcePenaltySeconds`, prism.icePenaltySeconds ?? 5), 0, 60)
+  };
+}
+
 function getDefaultProfileView(id: string) {
   const base = (DIFFICULTY_PROFILES as any)[id];
   const constraints = getProfileConstraints(
@@ -162,11 +200,36 @@ function getDefaultProfileView(id: string) {
       lockHoldSeconds: Number(base.signalAlignment.lockHoldSeconds ?? 4),
       targetRevealRadius: Number(base.signalAlignment.targetRevealRadius ?? 100),
       destabilizationPenaltySeconds: Number(base.signalAlignment.destabilizationPenaltySeconds ?? 0)
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: Number(base.packetSwitchboard?.traceDurationSeconds ?? base.traceDurationSeconds ?? 60),
+      laneCount: Number(base.packetSwitchboard?.laneCount ?? 4),
+      columnCount: Number(base.packetSwitchboard?.columnCount ?? 6),
+      deliveryGoal: Number(base.packetSwitchboard?.deliveryGoal ?? 7),
+      packetIntervalSeconds: Number(base.packetSwitchboard?.packetIntervalSeconds ?? 2),
+      packetStepSeconds: Number(base.packetSwitchboard?.packetStepSeconds ?? 0.8),
+      previewCount: Number(base.packetSwitchboard?.previewCount ?? 2),
+      misroutePenaltySeconds: Number(base.packetSwitchboard?.misroutePenaltySeconds ?? 5),
+      maxActivePackets: Number(base.packetSwitchboard?.maxActivePackets ?? 2),
+      entryHoldSeconds: Number(base.packetSwitchboard?.entryHoldSeconds ?? 1.5)
+    },
+    prismLock: {
+      traceDurationSeconds: Number(base.prismLock?.traceDurationSeconds ?? base.traceDurationSeconds ?? 60),
+      ringCount: Number(base.prismLock?.ringCount ?? 3),
+      slotCount: Number(base.prismLock?.slotCount ?? 10),
+      receiverCount: Number(base.prismLock?.receiverCount ?? 4),
+      blockersPerRing: Number(base.prismLock?.blockersPerRing ?? 0),
+      iceReceiverCount: Number(base.prismLock?.iceReceiverCount ?? 0),
+      switchableRingCount: Number(base.prismLock?.switchableRingCount ?? 0),
+      scrambleSteps: Number(base.prismLock?.scrambleSteps ?? 3),
+      icePenaltySeconds: Number(base.prismLock?.icePenaltySeconds ?? 5)
     }
   };
 }
 
 export class DifficultyProfilesApp extends LegacyFormApplication {
+  activeProfileTab = "general";
+
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "holosuite-hacking-difficulty-profiles",
@@ -221,6 +284,29 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
           targetRevealRadius: Number(profile.signalAlignment?.targetRevealRadius ?? 100),
           destabilizationPenaltySeconds: Number(profile.signalAlignment?.destabilizationPenaltySeconds ?? 0)
         },
+        packetSwitchboard: {
+          traceDurationSeconds: Number(profile.packetSwitchboard?.traceDurationSeconds ?? profile.traceDurationSeconds ?? 60),
+          laneCount: Number(profile.packetSwitchboard?.laneCount ?? 4),
+          columnCount: Number(profile.packetSwitchboard?.columnCount ?? 6),
+          deliveryGoal: Number(profile.packetSwitchboard?.deliveryGoal ?? 7),
+          packetIntervalSeconds: Number(profile.packetSwitchboard?.packetIntervalSeconds ?? 2),
+          packetStepSeconds: Number(profile.packetSwitchboard?.packetStepSeconds ?? 0.8),
+          previewCount: Number(profile.packetSwitchboard?.previewCount ?? 2),
+          misroutePenaltySeconds: Number(profile.packetSwitchboard?.misroutePenaltySeconds ?? 5),
+          maxActivePackets: Number(profile.packetSwitchboard?.maxActivePackets ?? 2),
+          entryHoldSeconds: Number(profile.packetSwitchboard?.entryHoldSeconds ?? 1.5)
+        },
+        prismLock: {
+          traceDurationSeconds: Number(profile.prismLock?.traceDurationSeconds ?? profile.traceDurationSeconds ?? 60),
+          ringCount: Number(profile.prismLock?.ringCount ?? 3),
+          slotCount: Number(profile.prismLock?.slotCount ?? 10),
+          receiverCount: Number(profile.prismLock?.receiverCount ?? 4),
+          blockersPerRing: Number(profile.prismLock?.blockersPerRing ?? 0),
+          iceReceiverCount: Number(profile.prismLock?.iceReceiverCount ?? 0),
+          switchableRingCount: Number(profile.prismLock?.switchableRingCount ?? 0),
+          scrambleSteps: Number(profile.prismLock?.scrambleSteps ?? 3),
+          icePenaltySeconds: Number(profile.prismLock?.icePenaltySeconds ?? 5)
+        },
         constraints
       };
     });
@@ -233,7 +319,23 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
 
   activateListeners(html: any) {
     super.activateListeners(html);
+    this.setProfileTab(html, this.activeProfileTab, false);
     this.syncConstraints(html);
+    html.find("[data-profile-tab]").on("click", (event: Event) => {
+      event.preventDefault();
+      const target = event.currentTarget as HTMLElement | null;
+      const tabId = target?.dataset.profileTab ?? "general";
+      this.setProfileTab(target?.closest(".holosuite-profile-config") ?? html, tabId, true);
+    });
+    html.find("[data-action='toggle-profile']").on("click", (event: Event) => {
+      event.preventDefault();
+      const button = event.currentTarget as HTMLButtonElement | null;
+      const section = button?.closest<HTMLElement>("[data-profile-section]");
+      if (!button || !section) return;
+      const open = !section.classList.contains("is-open");
+      section.classList.toggle("is-open", open);
+      button.setAttribute("aria-expanded", String(open));
+    });
     html.find("input[type='number']").on("change", (event: Event) => {
       clampNumberInput(event.currentTarget as HTMLInputElement);
     });
@@ -243,6 +345,7 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
     });
     html.find("[data-action='reset-profile']").on("click", (event: Event) => {
       event.preventDefault();
+      event.stopPropagation();
       const section = (event.currentTarget as HTMLElement | null)?.closest("[data-profile-section]");
       if (section) this.resetProfileSection(section as HTMLElement);
     });
@@ -252,6 +355,40 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
       ui.notifications?.info?.("HoloSuite Hacking difficulty profiles reset to defaults.");
       this.render(false);
     });
+  }
+
+  setProfileTab(html: any, requestedTabId: string, collapseProfiles: boolean) {
+    // HTMLFormElement exposes its controls through numeric properties, so using
+    // `html[0]` unconditionally resolves to the first tab button in Foundry v12.
+    // Only unwrap jQuery-like collections; preserve a direct element as-is.
+    const candidate = (html instanceof HTMLElement ? html : html?.[0]) as HTMLElement | undefined;
+    const root = candidate?.matches?.(".holosuite-profile-config")
+      ? candidate
+      : candidate?.querySelector?.(".holosuite-profile-config") as HTMLElement | null
+        ?? (this.form as HTMLElement | undefined);
+    if (!root) return;
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-profile-tab]"));
+    const tabId = tabs.some((tab) => tab.dataset.profileTab === requestedTabId) ? requestedTabId : "general";
+    const changed = tabId !== this.activeProfileTab;
+    this.activeProfileTab = tabId;
+    root.dataset.activeProfileTab = tabId;
+
+    tabs.forEach((tab) => {
+      const active = tab.dataset.profileTab === tabId;
+      tab.classList.toggle("is-active", active);
+      tab.setAttribute("aria-selected", String(active));
+      tab.tabIndex = active ? 0 : -1;
+    });
+    root.querySelectorAll<HTMLElement>("[data-profile-panel]").forEach((panel) => {
+      const active = panel.dataset.profilePanel === tabId;
+      panel.classList.toggle("is-active", active);
+    });
+    if (collapseProfiles && changed) {
+      root.querySelectorAll<HTMLElement>("[data-profile-section]").forEach((section) => {
+        section.classList.remove("is-open");
+        section.querySelector<HTMLElement>("[data-action='toggle-profile']")?.setAttribute("aria-expanded", "false");
+      });
+    }
   }
 
   syncConstraints(html: any) {
@@ -271,27 +408,63 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
     const routeInput = getInput("routeCount");
     const firewallInput = getInput("firewallCount");
     const allowInput = getInput("allowFirewallOnMainPath");
-    if (!nodeInput || !decoyInput || !routeInput || !firewallInput) return;
+    if (nodeInput && decoyInput && routeInput && firewallInput) {
+      const constraints = getProfileConstraints(
+        Number(nodeInput.value),
+        Number(decoyInput.value),
+        Number(routeInput.value),
+        Boolean(allowInput?.checked)
+      );
 
-    const constraints = getProfileConstraints(
-      Number(nodeInput.value),
-      Number(decoyInput.value),
-      Number(routeInput.value),
-      Boolean(allowInput?.checked)
-    );
+      nodeInput.value = String(constraints.nodeCount);
+      decoyInput.max = String(constraints.maxDecoys);
+      decoyInput.value = String(constraints.decoyCount);
+      routeInput.max = String(constraints.maxRoutes);
+      routeInput.value = String(constraints.routeCount);
+      firewallInput.max = String(constraints.maxFirewalls);
+      firewallInput.value = String(clamp(Math.round(Number(firewallInput.value) || 0), 0, constraints.maxFirewalls));
 
-    nodeInput.value = String(constraints.nodeCount);
-    decoyInput.max = String(constraints.maxDecoys);
-    decoyInput.value = String(constraints.decoyCount);
-    routeInput.max = String(constraints.maxRoutes);
-    routeInput.value = String(constraints.routeCount);
-    firewallInput.max = String(constraints.maxFirewalls);
-    firewallInput.value = String(clamp(Math.round(Number(firewallInput.value) || 0), 0, constraints.maxFirewalls));
+      section.querySelectorAll<HTMLElement>("[data-constraint]").forEach((element) => {
+        const key = element.dataset.constraint as keyof typeof constraints;
+        if (key && constraints[key] !== undefined) element.textContent = String(constraints[key]);
+      });
+    }
 
-    section.querySelectorAll<HTMLElement>("[data-constraint]").forEach((element) => {
-      const key = element.dataset.constraint as keyof typeof constraints;
-      if (key && constraints[key] !== undefined) element.textContent = String(constraints[key]);
-    });
+    const packetLaneInput = getInput("packetLaneCount");
+    const packetColumnInput = getInput("packetColumnCount");
+    if (packetLaneInput && packetColumnInput) {
+      const laneCount = clamp(Math.round(Number(packetLaneInput.value) || 4), 3, 6);
+      const minimumColumns = laneCount - 1;
+      packetLaneInput.value = String(laneCount);
+      packetColumnInput.min = String(minimumColumns);
+      packetColumnInput.value = String(clamp(Math.round(Number(packetColumnInput.value) || 6), minimumColumns, 8));
+    }
+
+    const prismRingInput = getInput("prismRingCount");
+    const prismSlotInput = getInput("prismSlotCount");
+    const prismReceiverInput = getInput("prismReceiverCount");
+    const prismIceInput = getInput("prismIceReceiverCount");
+    const prismSwitchableInput = getInput("prismSwitchableRingCount");
+    const prismScrambleInput = getInput("prismScrambleSteps");
+    if (prismRingInput && prismSlotInput && prismReceiverInput && prismIceInput && prismSwitchableInput && prismScrambleInput) {
+      const ringCount = clamp(Math.round(Number(prismRingInput.value) || 3), 2, 4);
+      const slotCount = clamp(Math.round(Number(prismSlotInput.value) || 10), 8, 16);
+      const receiverCount = clamp(Math.round(Number(prismReceiverInput.value) || 4), 2, Math.min(8, slotCount));
+      const switchableRingCount = clamp(Math.round(Number(prismSwitchableInput.value) || 0), 0, ringCount - 1);
+      const maxIceReceivers = Math.min(4, slotCount - receiverCount);
+      prismRingInput.value = String(ringCount);
+      prismSlotInput.value = String(slotCount);
+      prismReceiverInput.max = String(Math.min(8, slotCount));
+      prismReceiverInput.value = String(receiverCount);
+      prismSwitchableInput.max = String(ringCount - 1);
+      prismSwitchableInput.value = String(switchableRingCount);
+      prismIceInput.max = String(maxIceReceivers);
+      prismIceInput.min = String(switchableRingCount > 0 && maxIceReceivers > 0 ? 1 : 0);
+      prismIceInput.value = String(clamp(Math.round(Number(prismIceInput.value) || 0), Number(prismIceInput.min), maxIceReceivers));
+      prismScrambleInput.max = String(Math.floor(slotCount / 2));
+      prismScrambleInput.value = String(clamp(Math.round(Number(prismScrambleInput.value) || 3), 1, Math.floor(slotCount / 2)));
+    }
+
   }
 
   resetProfileSection(section: HTMLElement) {
@@ -316,7 +489,26 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
       signalNoiseLevel: defaults.signalAlignment.noiseLevel,
       signalLockHoldSeconds: defaults.signalAlignment.lockHoldSeconds,
       signalTargetRevealRadius: defaults.signalAlignment.targetRevealRadius,
-      signalDestabilizationPenaltySeconds: defaults.signalAlignment.destabilizationPenaltySeconds
+      signalDestabilizationPenaltySeconds: defaults.signalAlignment.destabilizationPenaltySeconds,
+      packetTraceDurationSeconds: defaults.packetSwitchboard.traceDurationSeconds,
+      packetLaneCount: defaults.packetSwitchboard.laneCount,
+      packetColumnCount: defaults.packetSwitchboard.columnCount,
+      packetDeliveryGoal: defaults.packetSwitchboard.deliveryGoal,
+      packetIntervalSeconds: defaults.packetSwitchboard.packetIntervalSeconds,
+      packetStepSeconds: defaults.packetSwitchboard.packetStepSeconds,
+      packetPreviewCount: defaults.packetSwitchboard.previewCount,
+      packetMisroutePenaltySeconds: defaults.packetSwitchboard.misroutePenaltySeconds,
+      packetMaxActivePackets: defaults.packetSwitchboard.maxActivePackets,
+      packetEntryHoldSeconds: defaults.packetSwitchboard.entryHoldSeconds,
+      prismTraceDurationSeconds: defaults.prismLock.traceDurationSeconds,
+      prismRingCount: defaults.prismLock.ringCount,
+      prismSlotCount: defaults.prismLock.slotCount,
+      prismReceiverCount: defaults.prismLock.receiverCount,
+      prismBlockersPerRing: defaults.prismLock.blockersPerRing,
+      prismIceReceiverCount: defaults.prismLock.iceReceiverCount,
+      prismSwitchableRingCount: defaults.prismLock.switchableRingCount,
+      prismScrambleSteps: defaults.prismLock.scrambleSteps,
+      prismIcePenaltySeconds: defaults.prismLock.icePenaltySeconds
     };
     for (const [field, value] of Object.entries(values)) {
       const input = section.querySelector<HTMLInputElement>(`[name="${profileId}.${field}"]`);
@@ -348,7 +540,9 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
         hintsEnabled: checkboxValue(formData, `${prefix}hintsEnabled`),
         visualGlitchIntensity: clamp(numberValue(formData, `${prefix}visualGlitchIntensity`, base.visualGlitchIntensity), 0, 1),
         nodeIntrusion: normalizeNodeIntrusionProfile(formData, prefix, base),
-        signalAlignment: normalizeSignalAlignmentProfile(formData, prefix, base)
+        signalAlignment: normalizeSignalAlignmentProfile(formData, prefix, base),
+        packetSwitchboard: normalizePacketSwitchboardProfile(formData, prefix, base),
+        prismLock: normalizePrismLockProfile(formData, prefix, base)
       };
     }
 

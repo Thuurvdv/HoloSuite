@@ -2,8 +2,9 @@
   background: var(--hs-surface-bg, #05070d);
   box-sizing: border-box;
   color: var(--hs-text, #d9fbff);
-  height: 100%;
-  min-height: 100%;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
   overflow: hidden;
   padding: 0;
 }

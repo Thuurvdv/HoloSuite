@@ -68,20 +68,14 @@
       {{/unless}}
 
       {{#unless system.obscured}}
-        <div class="gmf-link-actions">
-          {{#if system.sceneId}}
-            <button type="button" data-action="open-scene">
-              <i class="fa-solid fa-image"></i>
-              Scene
-            </button>
-          {{/if}}
-          {{#if system.journalId}}
+        {{#if system.journalId}}
+          <div class="gmf-link-actions">
             <button type="button" data-action="open-journal">
               <i class="fa-solid fa-book-open"></i>
               Journal
             </button>
-          {{/if}}
-        </div>
+          </div>
+        {{/if}}
       {{/unless}}
 
       {{#if system.canTravel}}

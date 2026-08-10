@@ -23,6 +23,7 @@ declare const Application: any;
 declare const game: any;
 declare const Dialog: any;
 declare const ImagePopout: any;
+declare const renderTemplate: any;
 
 const ApplicationV2 = foundry.applications?.api?.ApplicationV2 ?? Application;
 const HandlebarsApplicationMixin = foundry.applications?.api?.HandlebarsApplicationMixin;
@@ -40,6 +41,11 @@ let boardApp: BountyBoardApp | null = null;
 
 function getBountyIdFromEvent(event: Event) {
   return (event.target as Element | null)?.closest("[data-bounty-id]")?.getAttribute("data-bounty-id") ?? "";
+}
+
+function formatLocalized(key: string, data: Record<string, string | number>, fallback: string) {
+  const localized = game.i18n?.format?.(key, data);
+  return localized && localized !== key ? localized : fallback;
 }
 
 export class BountyBoardApp extends BaseApplication {
@@ -108,6 +114,10 @@ export class BountyBoardApp extends BaseApplication {
       .map((bounty) => ({ ...bounty, expanded: this.expanded.has(bounty.id) }));
     const structuralFilters = { ...this.filters, search: "" };
     const filteredBounties = boardHiddenForPlayers ? [] : filterBounties(bounties, structuralFilters);
+    const visibleCount = boardHiddenForPlayers ? 0 : filterBounties(bounties, this.filters).length;
+    const activeCount = bounties.filter((bounty) => [BOUNTY_STATUSES.AVAILABLE, BOUNTY_STATUSES.CLAIMED].includes(bounty.status as any)).length;
+    const hasActiveFilters = Object.values(this.filters).some((value) => value.trim().length > 0);
+    const activeCountLabel = String(activeCount).padStart(2, "0");
 
     return {
       isGM,
@@ -117,7 +127,11 @@ export class BountyBoardApp extends BaseApplication {
       options: getFilterOptions(),
       bounties: filteredBounties,
       totalCount: bounties.length,
-      visibleCount: filteredBounties.length
+      visibleCount,
+      activeCount,
+      contractSummary: hasActiveFilters
+        ? formatLocalized("BOUNTYBOARD.Header.ShowingContracts", { visible: visibleCount, total: bounties.length }, `Showing ${visibleCount} of ${bounties.length} contracts`)
+        : formatLocalized("BOUNTYBOARD.Header.ActiveContracts", { count: activeCountLabel }, `${activeCountLabel} active contracts`)
     };
   }
 
@@ -139,14 +153,86 @@ export class BountyBoardApp extends BaseApplication {
       }
     });
     this.#applySearchFilter();
-    html.querySelectorAll("[data-bounty-toggle]").forEach((button: HTMLElement) => {
+    this._bindBountyToggles(html);
+  }
+
+  _bindBountyToggles(root: ParentNode) {
+    root.querySelectorAll("[data-bounty-toggle]").forEach((button: HTMLElement) => {
       button.addEventListener("click", () => {
         const id = button.dataset.bountyToggle ?? "";
-        if (this.expanded.has(id)) this.expanded.delete(id);
-        else this.expanded.add(id);
-        this.render({ force: true });
+        const expanded = !this.expanded.has(id);
+        if (expanded) this.expanded.add(id);
+        else this.expanded.delete(id);
+
+        const card = button.closest<HTMLElement>("[data-bounty-id]");
+        card?.classList.toggle("is-expanded", expanded);
+        card?.classList.toggle("is-collapsed", !expanded);
+        const details = card?.querySelector<HTMLElement>(".bb-card-details");
+        if (details) details.hidden = !expanded;
+
+        button.setAttribute("aria-expanded", String(expanded));
+        button.title = expanded ? button.dataset.expandedTitle ?? "" : button.dataset.collapsedTitle ?? "";
+        const visibleLabel = button.querySelector<HTMLElement>(".bb-expand-label");
+        if (visibleLabel) visibleLabel.textContent = expanded ? button.dataset.expandedLabel ?? "" : button.dataset.collapsedLabel ?? "";
+        const accessibleLabel = button.querySelector<HTMLElement>(".bb-visually-hidden");
+        if (accessibleLabel) accessibleLabel.textContent = button.title;
+        const icon = button.querySelector<HTMLElement>("i");
+        icon?.classList.toggle("fa-chevron-up", expanded);
+        icon?.classList.toggle("fa-chevron-down", !expanded);
       });
     });
+  }
+
+  _findBountyCard(bountyId: string) {
+    const cards = Array.from(this.element?.querySelectorAll?.("[data-bounty-id]") ?? []) as HTMLElement[];
+    return cards.find((card) => card.dataset.bountyId === bountyId) ?? null;
+  }
+
+  _syncCountData() {
+    const bounties = getAllBounties({ includeHidden: game.user?.isGM === true });
+    const activeCount = bounties.filter((bounty) => [BOUNTY_STATUSES.AVAILABLE, BOUNTY_STATUSES.CLAIMED].includes(bounty.status as any)).length;
+    const subtitle = this.element?.querySelector?.(".bb-subtitle") as HTMLElement | null;
+    if (!subtitle) return;
+    subtitle.dataset.totalCount = String(bounties.length);
+    subtitle.dataset.activeCount = String(activeCount);
+  }
+
+  async _refreshBountyCard(bountyId: string, source: any) {
+    const currentCard = this._findBountyCard(bountyId);
+    if (!currentCard || !source) return;
+
+    const bounty = {
+      ...prepareBountyForDisplay(source),
+      expanded: this.expanded.has(bountyId)
+    };
+    const structuralFilters = { ...this.filters, search: "" };
+    const remainsVisible = filterBounties([bounty], structuralFilters).length > 0;
+
+    if (!remainsVisible) {
+      currentCard.remove();
+    } else {
+      const markup = await renderTemplate(`${TEMPLATE_ROOT}/bounty-card.hbs`, {
+        bounty,
+        isGM: game.user?.isGM === true
+      });
+      const fragment = document.createElement("template");
+      fragment.innerHTML = String(markup).trim();
+      const replacement = fragment.content.firstElementChild as HTMLElement | null;
+      if (replacement) {
+        currentCard.replaceWith(replacement);
+        this._bindBountyToggles(replacement);
+      }
+    }
+
+    this._syncCountData();
+    this.#applySearchFilter();
+  }
+
+  _removeBountyCard(bountyId: string) {
+    this._findBountyCard(bountyId)?.remove();
+    this.expanded.delete(bountyId);
+    this._syncCountData();
+    this.#applySearchFilter();
   }
 
   #updateFilter(input: HTMLInputElement | HTMLSelectElement, { immediate = false } = {}) {
@@ -161,17 +247,28 @@ export class BountyBoardApp extends BaseApplication {
     const cards = Array.from(this.element?.querySelectorAll?.("[data-bounty-id]") ?? []) as HTMLElement[];
     let visibleCount = 0;
     for (const card of cards) {
-      const matches = !search || String(card.textContent ?? "").toLowerCase().includes(search);
+      const matches = !search || String(card.dataset.searchText ?? "").includes(search);
       card.hidden = !matches;
       if (matches) visibleCount += 1;
     }
 
     const subtitle = this.element?.querySelector?.(".bb-subtitle");
-    const totalCount = Number(subtitle?.textContent?.match(/of\s+(\d+)/i)?.[1] ?? cards.length);
-    if (subtitle) subtitle.textContent = `${visibleCount} of ${totalCount} contracts displayed`;
+    const totalCount = Number(subtitle?.dataset?.totalCount ?? cards.length);
+    const activeCount = Number(subtitle?.dataset?.activeCount ?? cards.length);
+    if (subtitle) {
+      subtitle.textContent = this.#hasActiveFilters()
+        ? formatLocalized("BOUNTYBOARD.Header.ShowingContracts", { visible: visibleCount, total: totalCount }, `Showing ${visibleCount} of ${totalCount} contracts`)
+        : formatLocalized("BOUNTYBOARD.Header.ActiveContracts", { count: String(activeCount).padStart(2, "0") }, `${String(activeCount).padStart(2, "0")} active contracts`);
+    }
     this.element?.querySelectorAll?.("[data-action='showFiltered'], [data-action='hideFiltered']").forEach((button: HTMLButtonElement) => {
       button.disabled = visibleCount === 0;
     });
+    const searchEmpty = this.element?.querySelector?.(".bb-search-empty") as HTMLElement | null;
+    if (searchEmpty) searchEmpty.hidden = visibleCount > 0;
+  }
+
+  #hasActiveFilters() {
+    return Object.values(this.filters).some((value) => value.trim().length > 0);
   }
 
   async close(options: any = {}) {
@@ -188,65 +285,65 @@ export class BountyBoardApp extends BaseApplication {
     if (bountyId) new BountyEditorApp({ bountyId }).render({ force: true });
   }
 
-  static async #onDeleteBounty(event: Event) {
+  static async #onDeleteBounty(this: BountyBoardApp, event: Event) {
     const bountyId = getBountyIdFromEvent(event);
-    if (bountyId && await deleteBounty(bountyId)) this.render({ force: true });
+    if (bountyId && await deleteBounty(bountyId)) this._removeBountyCard(bountyId);
   }
 
-  static async #onPublishBounty(event: Event) {
+  static async #onPublishBounty(this: BountyBoardApp, event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
-      await publishBounty(bountyId, true);
-      this.render({ force: true });
+      const updated = await publishBounty(bountyId, true);
+      if (updated) await this._refreshBountyCard(bountyId, updated);
     }
   }
 
-  static async #onUnpublishBounty(event: Event) {
+  static async #onUnpublishBounty(this: BountyBoardApp, event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
-      await publishBounty(bountyId, false);
-      this.render({ force: true });
+      const updated = await publishBounty(bountyId, false);
+      if (updated) await this._refreshBountyCard(bountyId, updated);
     }
   }
 
-  static async #onArchiveBounty(event: Event) {
+  static async #onArchiveBounty(this: BountyBoardApp, event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
-      await archiveBounty(bountyId);
-      this.render({ force: true });
+      const updated = await archiveBounty(bountyId);
+      if (updated) await this._refreshBountyCard(bountyId, updated);
     }
   }
 
-  static async #onCompleteBounty(event: Event) {
+  static async #onCompleteBounty(this: BountyBoardApp, event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
-      await markBountyCompleted(bountyId, false);
-      this.render({ force: true });
+      const updated = await markBountyCompleted(bountyId, false);
+      if (updated) await this._refreshBountyCard(bountyId, updated);
     }
   }
 
-  static async #onFailBounty(event: Event) {
+  static async #onFailBounty(this: BountyBoardApp, event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
-      await markBountyCompleted(bountyId, true);
-      this.render({ force: true });
+      const updated = await markBountyCompleted(bountyId, true);
+      if (updated) await this._refreshBountyCard(bountyId, updated);
     }
   }
 
-  static async #onHideBounty(event: Event) {
+  static async #onHideBounty(this: BountyBoardApp, event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) {
-      await updateBountyState(bountyId, { status: BOUNTY_STATUSES.HIDDEN, published: false });
-      this.render({ force: true });
+      const updated = await updateBountyState(bountyId, { status: BOUNTY_STATUSES.HIDDEN, published: false });
+      if (updated) await this._refreshBountyCard(bountyId, updated);
     }
   }
 
-  static async #onClaimBounty(event: Event) {
+  static async #onClaimBounty(this: BountyBoardApp, event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     const claimedBy = (event.target as Element | null)?.closest("[data-bounty-id]")?.querySelector<HTMLInputElement>("[data-claimed-by]")?.value ?? "";
     if (bountyId) {
-      await claimBounty(bountyId, claimedBy);
-      this.render({ force: true });
+      const updated = await claimBounty(bountyId, claimedBy);
+      if (updated) await this._refreshBountyCard(bountyId, updated);
     }
   }
 
@@ -312,6 +409,11 @@ export function openBountyBoard() {
   return boardApp;
 }
 
-export function refreshBountyBoard() {
-  boardApp?.render({ force: true });
+export async function refreshBountyBoard(bounty: any = null) {
+  if (!boardApp) return;
+  if (bounty?.id && boardApp._findBountyCard(bounty.id)) {
+    await boardApp._refreshBountyCard(bounty.id, bounty);
+    return;
+  }
+  boardApp.render({ force: true });
 }

@@ -250,19 +250,47 @@
 
       <aside class="cybercall-thread-list">
         <header>
-          <h2>Messages</h2>
+          <h2>
+            Messages
+            {{#if gmViewPlayerMessagesEnabled}}
+              <span class="cybercall-gm-visibility" title="GM visibility is enabled: GMs can view player conversations." aria-label="GM visibility is enabled: GMs can view player conversations." tabindex="0">
+                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              </span>
+            {{/if}}
+          </h2>
           <div class="cybercall-message-header-actions">
             <button type="button" data-cybercall-message-action="new">New</button>
+            <button type="button" data-cybercall-message-action="new-group">New Group</button>
             <button type="button" data-cybercall-message-action="refresh">Refresh</button>
           </div>
         </header>
 
         {{#if hasThreads}}
           {{#each threads}}
-            <button type="button" class="cybercall-thread {{#if active}}active{{/if}}" data-cybercall-thread-id="{{id}}">
-              <span class="cybercall-thread-initials">{{initials}}</span>
+            <button type="button" class="cybercall-thread {{#if active}}active{{/if}} {{#if hasRouteLabel}}routed{{/if}} {{#if hasNpcBinding}}npc-linked{{/if}}" data-cybercall-thread-id="{{id}}" {{#if canLinkNpc}}data-cybercall-npc-link-drop data-cybercall-npc-thread-id="{{id}}"{{/if}}>
+              <span class="cybercall-thread-avatar {{avatarTone}} {{#if isGroup}}group{{/if}}">
+                {{#if image}}
+                  <img src="{{image}}" alt="">
+                {{else}}
+                  {{#if isGroup}}<i class="fa-solid fa-user-group" aria-hidden="true"></i>{{else}}{{initials}}{{/if}}
+                {{/if}}
+              </span>
               <span class="cybercall-thread-body">
                 <strong>{{title}}</strong>
+                {{#if hasRouteLabel}}
+                  <span class="cybercall-thread-route-row">
+                    <span class="cybercall-thread-route">{{routeLabel}}</span>
+                    {{#if canLinkNpc}}
+                      <span class="cybercall-thread-npc-state {{#if hasNpcBinding}}linked{{else}}unlinked{{/if}}" title="{{npcBindingStatusLabel}}">
+                        {{#if hasNpcBinding}}
+                          {{#if npcBindingImage}}<img src="{{npcBindingImage}}" alt="">{{else}}<i class="fa-solid fa-link" aria-hidden="true"></i>{{/if}}
+                        {{else}}
+                          <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
+                        {{/if}}
+                      </span>
+                    {{/if}}
+                  </span>
+                {{/if}}
                 <small>{{lastPreview}}</small>
               </span>
               {{#if unread}}<span class="cybercall-thread-unread">{{unreadCount}}</span>{{/if}}
@@ -273,24 +301,86 @@
         {{/if}}
       </aside>
 
-      <main class="cybercall-conversation">
+      <main class="cybercall-conversation {{#if activeThread.showNpcLinkPanel}}has-npc-link{{/if}}">
         <header>
-          <div>
-            <div class="cybercall-contacts-kicker">{{#if activeThread}}{{activeThread.subtitle}}{{else}}Secure Channel{{/if}}</div>
-            <h3>{{#if activeThread}}{{activeThread.title}}{{else}}New Message{{/if}}</h3>
+          <div class="cybercall-conversation-identity">
+            {{#if activeThread}}
+              <span class="cybercall-conversation-avatar {{activeThread.avatarTone}} {{#if activeThread.isGroup}}group{{/if}}">
+                {{#if activeThread.image}}
+                  <img src="{{activeThread.image}}" alt="">
+                {{else}}
+                  {{#if activeThread.isGroup}}<i class="fa-solid fa-user-group" aria-hidden="true"></i>{{else}}{{activeThread.initials}}{{/if}}
+                {{/if}}
+              </span>
+            {{/if}}
+            <div>
+              <div class="cybercall-contacts-kicker">{{#if activeThread}}{{activeThread.subtitle}}{{else}}{{#if isComposingNewGroup}}Private Player Channel{{else}}Secure Channel{{/if}}{{/if}}</div>
+              <h3>{{#if activeThread}}{{activeThread.title}}{{else}}{{#if isComposingNewGroup}}Create Group Chat{{else}}New Message{{/if}}{{/if}}</h3>
+            </div>
           </div>
           {{#if canDeleteThread}}
             <button type="button" class="cybercall-delete-thread" data-cybercall-message-action="delete-thread">Delete Thread</button>
           {{/if}}
         </header>
 
-        <div class="cybercall-message-log">
+        {{#if activeThread.showNpcLinkPanel}}
+          <section class="cybercall-npc-link-panel {{#if activeThread.hasNpcBinding}}linked{{else}}unlinked{{/if}}" data-cybercall-npc-link-drop data-cybercall-npc-thread-id="{{activeThread.id}}">
+            <span class="cybercall-npc-link-avatar">
+              {{#if activeThread.npcBindingImage}}
+                <img src="{{activeThread.npcBindingImage}}" alt="">
+              {{else}}
+                <span>{{activeThread.npcBindingInitials}}</span>
+              {{/if}}
+            </span>
+            <span class="cybercall-npc-link-copy">
+              <small>NPC Identity</small>
+              <strong>{{activeThread.npcBindingStatusLabel}}</strong>
+              {{#if activeThread.hasNpcBinding}}
+                <em>{{#if activeThread.npcPortraitRevealed}}Portrait shared with player{{else}}Portrait visible to GM only{{/if}}</em>
+              {{else}}
+                <em>Drop an Actor or Actor-backed Token here to link it.</em>
+              {{/if}}
+            </span>
+            {{#if activeThread.hasNpcBinding}}
+              <span class="cybercall-npc-link-actions">
+                <button type="button" data-cybercall-npc-action="toggle-reveal" data-cybercall-npc-thread-id="{{activeThread.id}}">{{#if activeThread.npcPortraitRevealed}}Hide Portrait{{else}}Share Portrait{{/if}}</button>
+                <button type="button" data-cybercall-npc-action="change" data-cybercall-npc-thread-id="{{activeThread.id}}">Change</button>
+                <button type="button" data-cybercall-npc-action="unlink" data-cybercall-npc-thread-id="{{activeThread.id}}">Unlink</button>
+              </span>
+            {{/if}}
+          </section>
+        {{/if}}
+
+        {{#if isComposingNewGroup}}
+          <form class="cybercall-group-form" data-cybercall-group-form>
+            <label class="cybercall-group-name">
+              <span>Group Name</span>
+              <input type="text" name="groupName" maxlength="80" autocomplete="off" placeholder="Night City Crew" required>
+            </label>
+            <fieldset>
+              <legend>Players</legend>
+              <div class="cybercall-group-members">
+                {{#each groupMemberChoices}}
+                  <label>
+                    <input type="checkbox" name="memberUserIds" value="{{id}}">
+                    <span>{{name}}{{#unless active}} (offline){{/unless}}</span>
+                  </label>
+                {{else}}
+                  <p>No other player users are available.</p>
+                {{/each}}
+              </div>
+            </fieldset>
+            <p class="cybercall-group-hint">Members can read the full conversation and every reply is sent privately to the whole group.</p>
+            <button type="submit" {{#unless hasGroupMemberChoices}}disabled{{/unless}}>Create Group</button>
+          </form>
+        {{else}}
+          <div class="cybercall-message-log">
           {{#if activeThread}}
             {{#each activeThread.messages}}
               <article class="cybercall-message {{#if isMine}}mine{{/if}} {{#if isEvent}}event{{/if}}">
                 <strong>{{senderName}}</strong>
                 <p>{{body}}</p>
-                <time>{{createdAtLabel}}</time>
+                {{#if ../showMessageTimestamps}}<time>{{createdAtLabel}}</time>{{/if}}
               </article>
             {{/each}}
           {{else}}
@@ -336,7 +426,8 @@
           {{/if}}
           <textarea name="body" rows="3" placeholder="Type message..." required></textarea>
           <button type="submit" {{#unless hasContacts}}disabled{{/unless}}>Send</button>
-        </form>
+          </form>
+        {{/if}}
       </main>
     </section>
   {{/if}}

@@ -491,6 +491,58 @@
   resize: both;
 }
 
+.gmf-scene-picker {
+  min-width: 0;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid rgba(88, 216, 255, 0.24);
+  border-radius: var(--hs-radius);
+}
+
+.gmf-scene-picker legend {
+  padding: 0 4px;
+  color: var(--gmf-muted);
+  font-size: 12px;
+}
+
+.gmf-scene-picker__hint,
+.gmf-scene-picker__empty {
+  margin: 0 0 7px;
+  color: var(--gmf-muted);
+  font-size: 11px;
+}
+
+.gmf-scene-picker__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 10px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.gmf-crud-form .gmf-scene-picker__option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--gmf-text);
+}
+
+.gmf-crud-form .gmf-scene-picker__option input {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.gmf-scene-picker__option span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gmf-scene-picker__option.is-missing span {
+  color: var(--gmf-warning, #ffc65c);
+}
+
 .gmf-path-field {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

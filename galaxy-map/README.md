@@ -7,7 +7,7 @@ Galaxy Map is a system-agnostic Foundry VTT module for campaign-scale star maps.
 ## What Does It Do?
 
 - Provides an interactive star map that the GM builds and the players explore over time.
-- Star systems are clickable nodes with custom icons, colors, sizes, and pulse effects. Each system can hold a description, linked Foundry scene, linked journal entry, and faction affiliation.
+- Star systems are clickable nodes with custom icons, colors, sizes, and pulse effects. Each system can hold a description, multiple tagged Foundry scenes, a linked journal entry, and faction affiliation.
 - Routes connect systems and display travel time, fuel cost, and route type. Players can travel along routes with a ship animation.
 - The GM controls which systems and routes are visible to players. Hidden systems can be revealed one at a time for dramatic discovery moments, complete with a "New System Discovered" notification.
 - Players can request travel to a system, prompting the GM and other players to accept or decline.
@@ -59,7 +59,7 @@ Galaxy Map is a system-agnostic Foundry VTT module for campaign-scale star maps.
 
 1. Open **Galaxy Map** from the HoloSuite launcher.
 2. A map chooser opens showing all maps the GM has shared with players. Pick one to view.
-3. Click on any visible star system to see its details: name, description, faction, and links to scenes or journal entries.
+3. Click on any visible star system to see its details: name, description, faction, and linked journal entry.
 4. Click on route lines between systems to see travel details like travel time and fuel cost.
 5. Use the scroll wheel to zoom in and out. Click and drag on empty space to pan around the map.
 
@@ -76,4 +76,11 @@ Galaxy Map is a system-agnostic Foundry VTT module for campaign-scale star maps.
 - You can only see systems and routes the GM has revealed. Hidden content does not appear on your map.
 - Some systems may show as "???" until the GM reveals their details.
 - You cannot add, edit, or move systems and routes. Map building is a GM tool.
-- If linked scenes or journal entries are available for a system, buttons for those appear in the system details panel.
+- Scene associations are organizational tags for the GM and are not buttons in the system details panel.
+
+## Scene Tag API
+
+Normalized system data stores scene associations in `system.sceneIds` as an array of Foundry scene IDs. Existing maps that used the older `system.sceneId` field are converted automatically when read or saved.
+
+- `game.galaxyMap.getSceneIdsForSystem(mapId, systemId)` returns the scene ID array for one system.
+- `game.galaxyMap.getSystemsForScene(sceneId)` returns every matching `{ mapId, mapTitle, system }` association across galaxy maps.

@@ -1,7 +1,7 @@
 import { MESSAGE_FLAG_KIND, MESSAGE_SCHEMA_VERSION, MODULE_ID } from "./constants";
 import { escapeHTML } from "./dom-utils";
 import { createThreadIdForContact, CyberCallMessage, normalizeMessage } from "./message-model";
-import { normalizeContact } from "./call-model";
+import { getUserTokenImage, normalizeContact } from "./call-model";
 
 declare const ChatMessage: any;
 declare const game: any;
@@ -35,12 +35,17 @@ function getChatWhisperUserIds(document: any) {
 function canCurrentUserReadMessage(message: CyberCallMessage, document: any) {
   const currentUserId = String(game.user?.id ?? "").trim();
   if (!currentUserId) return false;
-  if (game.user?.isGM === true) return true;
+  const isParticipant = message.senderUserId === currentUserId || message.recipientUserIds.includes(currentUserId);
+  if (isParticipant) return true;
+  if (game.user?.isGM === true) {
+    if (!message.contactUserId && (message.contactManagedByGM || message.contactIsNpc)) return true;
+    return game.settings.get(MODULE_ID, "gmViewPlayerMessages") === true;
+  }
 
   const whisperUserIds = getChatWhisperUserIds(document);
   if (whisperUserIds.length && !whisperUserIds.includes(currentUserId)) return false;
 
-  return message.senderUserId === currentUserId || message.recipientUserIds.includes(currentUserId);
+  return false;
 }
 
 function getRecipientUserIds(contact: any) {
@@ -108,6 +113,7 @@ export async function sendMessageToContact(contactSource: any, bodySource: any, 
     senderActorId,
     senderName,
     senderNumber,
+    senderImage: String(options.senderImage ?? getUserTokenImage(senderUser)).trim(),
     recipientUserIds,
     recipientActorIds: contact.actorId ? [contact.actorId] : [],
     recipientNumbers: options.recipientNumbers ?? (contact.number ? [contact.number] : []),
@@ -119,6 +125,11 @@ export async function sendMessageToContact(contactSource: any, bodySource: any, 
     body,
     messageType: String(options.messageType ?? "text"),
     eventType: String(options.eventType ?? ""),
+    conversationType: String(options.conversationType ?? "direct"),
+    groupId: String(options.groupId ?? ""),
+    groupName: String(options.groupName ?? ""),
+    groupMemberUserIds: options.groupMemberUserIds ?? [],
+    groupMemberNames: options.groupMemberNames ?? [],
     schemaVersion: MESSAGE_SCHEMA_VERSION
   });
   const whisper = [...new Set([senderUser?.id, ...recipientUserIds].filter(Boolean))];

@@ -170,6 +170,7 @@ export class NodeIntrusionApp extends LegacyApplication {
     html.find("[data-node-id]").on("click", (event) => this.handleNodeClick(event.currentTarget.dataset.nodeId));
     html.find("[data-action='start']").on("click", () => this.startRun());
     html.find("[data-action='abort']").on("click", () => this.abort());
+    html.find("[data-action='close']").on("click", () => this.close());
     this.syncDom();
   }
 

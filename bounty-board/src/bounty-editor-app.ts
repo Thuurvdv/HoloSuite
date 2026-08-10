@@ -20,6 +20,7 @@ function parseForm(form: HTMLFormElement): Record<string, any> {
   const formData = new FormData(form);
   return {
     id: String(formData.get("id") ?? ""),
+    contractId: String(formData.get("contractId") ?? ""),
     title: String(formData.get("title") ?? ""),
     targetName: String(formData.get("targetName") ?? ""),
     description: String(formData.get("description") ?? ""),
@@ -106,7 +107,7 @@ export class BountyEditorApp extends BaseApplication {
       return;
     }
     const bounty = await upsertBounty(parseForm(form));
-    if (bounty) refreshBountyBoard();
+    if (bounty) await refreshBountyBoard(bounty);
   }
 
   static #onBrowseImage(event: Event) {

@@ -1,0 +1,112 @@
+<section class="hs-application hs-application--hacking hh-shell packet-switchboard-shell {{glitchClass}}" style="--glitch-intensity: {{profile.visualGlitchIntensity}}">
+  <div class="hs-background" aria-hidden="true"></div>
+  <div class="hs-frame" aria-hidden="true">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header--space-police.svg?v=1" alt="">
+  </div>
+
+  <div class="hs-content">
+    <header class="packet-switchboard-header">
+      <div>
+        <p class="packet-switchboard-kicker">HoloSuite / packet layer</p>
+        <h2>Packet Switchboard</h2>
+      </div>
+      <div class="packet-switchboard-status">
+        <span>{{profile.label}}</span>
+        <span>Roll {{rollTotal}} / DC {{dc}}</span>
+      </div>
+    </header>
+
+    <div class="packet-switchboard-layout">
+      <aside class="packet-switchboard-panel">
+        {{#unless state.hasStarted}}
+          <div class="packet-switchboard-standby">
+            <span>Routing matrix ready</span>
+            <strong>Click any junction to cycle it, or hover one and press Up, Right, or Down to set it directly. Connection lines show exactly where every arrow leads.</strong>
+            <button type="button" data-action="start"><i class="fa-solid fa-play"></i> Start trace</button>
+          </div>
+        {{/unless}}
+
+        <div class="packet-switchboard-readout"><span>Trace</span><strong data-trace-text>{{state.traceProgress}}%</strong></div>
+        <div class="packet-switchboard-meter trace"><div data-trace-fill style="width: {{state.traceProgress}}%"></div></div>
+        <div class="packet-switchboard-readout"><span>Delivered</span><strong data-delivery-text>{{state.delivered}} / {{board.deliveryGoal}}</strong></div>
+        <div class="packet-switchboard-meter delivery"><div data-delivery-fill style="width: {{deliveryPercent}}%"></div></div>
+
+        <dl class="packet-switchboard-specs">
+          <div><dt>Active</dt><dd data-active-text>{{state.activePackets.length}} / {{tuning.maxActivePackets}}</dd></div>
+          <div><dt>Corrupted</dt><dd data-corrupted-text>{{state.corrupted}}</dd></div>
+          <div><dt>Lanes</dt><dd>{{board.laneCount}}</dd></div>
+          <div><dt>Junctions</dt><dd>{{board.columnCount}}</dd></div>
+        </dl>
+
+        <div class="packet-switchboard-preview">
+          <span>Incoming queue</span>
+          <div data-packet-preview>
+            {{#each nextPackets}}
+              <span class="packet-preview-chip" style="--packet-color: {{color}}">{{sourcePort}} &rarr; {{port}} / {{label}}</span>
+            {{else}}
+              <span class="packet-preview-hidden">Encrypted</span>
+            {{/each}}
+          </div>
+        </div>
+
+        <button class="packet-switchboard-abort" type="button" data-action="abort"><i class="fa-solid fa-power-off"></i> Abort</button>
+      </aside>
+
+      <main class="packet-switchboard-board {{#unless state.hasStarted}}is-standby{{/unless}}" style="{{gridStyle}}" aria-label="Packet routing matrix">
+        <div class="packet-switchboard-inputs" aria-hidden="true">
+          {{#each board.lanes}}
+            <span data-input-row="{{row}}" style="--packet-color: {{color}}">{{inputPort}}</span>
+          {{/each}}
+        </div>
+
+        <div class="packet-switchboard-matrix">
+          <svg class="packet-switchboard-connections" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            {{#each board.lanes}}
+              <line class="packet-connection is-input" data-input-connection-row="{{row}}"></line>
+            {{/each}}
+            {{#each board.junctions}}
+              <line class="packet-connection" data-connection-id="{{id}}"></line>
+            {{/each}}
+          </svg>
+          <div class="packet-switchboard-grid">
+            {{#each board.junctions}}
+              <button type="button" class="packet-junction" data-junction-id="{{id}}" data-direction="{{directionLabel}}" style="grid-row: {{gridRow}}; grid-column: {{gridColumn}};" aria-label="Junction lane {{gridRow}}, column {{gridColumn}}: {{directionLabel}}" title="Route {{directionLabel}}. Click to cycle, or hover and use Up, Right, or Down.">
+                <span aria-hidden="true"></span>
+              </button>
+            {{/each}}
+          </div>
+          <div class="packet-switchboard-packets" data-packet-layer aria-live="polite"></div>
+        </div>
+
+        <div class="packet-switchboard-outputs">
+          {{#each board.lanes}}
+            <span data-output-row="{{row}}" style="--packet-color: {{color}}"><b>{{port}}</b><i>{{label}}</i></span>
+          {{/each}}
+        </div>
+      </main>
+    </div>
+
+    {{#if state.result}}
+      <div class="packet-switchboard-result {{state.result}}">
+        <span>{{resultTitle}}</span>
+        <strong>{{resultDetail}}</strong>
+        <small>{{state.delivered}} delivered / {{state.corrupted}} corrupted</small>
+        <button class="hh-result-close" type="button" data-action="close"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    {{/if}}
+  </div>
+  <div class="hs-effects" aria-hidden="true"></div>
+</section>

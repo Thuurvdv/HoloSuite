@@ -2,7 +2,7 @@
   "id": "holosuite-hacking",
   "title": "HoloSuite Hacking",
   "description": "Reusable cyberpunk hacking minigames for Foundry VTT.",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "socket": true,
   "authors": [
     {
@@ -21,7 +21,9 @@
     "styles/holosuite-tokens.css",
     "styles/hacking.css",
     "styles/node-intrusion.css",
-    "styles/signal-alignment.css"
+    "styles/signal-alignment.css",
+    "styles/packet-switchboard.css",
+    "styles/prism-lock.css"
   ],
   "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking",
   "manifest": "",

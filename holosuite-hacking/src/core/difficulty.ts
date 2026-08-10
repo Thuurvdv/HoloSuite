@@ -29,6 +29,29 @@ export const DIFFICULTY_PROFILES = {
       lockHoldSeconds: 2.5,
       targetRevealRadius: 100,
       destabilizationPenaltySeconds: 0
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 95,
+      laneCount: 3,
+      columnCount: 5,
+      deliveryGoal: 5,
+      packetIntervalSeconds: 3.2,
+      packetStepSeconds: 1.2,
+      previewCount: 4,
+      misroutePenaltySeconds: 2,
+      maxActivePackets: 1,
+      entryHoldSeconds: 2.5
+    },
+    prismLock: {
+      traceDurationSeconds: 95,
+      ringCount: 2,
+      slotCount: 8,
+      receiverCount: 3,
+      blockersPerRing: 0,
+      iceReceiverCount: 0,
+      switchableRingCount: 0,
+      scrambleSteps: 2,
+      icePenaltySeconds: 0
     }
   },
   strong_success: {
@@ -61,6 +84,29 @@ export const DIFFICULTY_PROFILES = {
       lockHoldSeconds: 3,
       targetRevealRadius: 30,
       destabilizationPenaltySeconds: 2
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 75,
+      laneCount: 4,
+      columnCount: 5,
+      deliveryGoal: 6,
+      packetIntervalSeconds: 2.6,
+      packetStepSeconds: 0.95,
+      previewCount: 3,
+      misroutePenaltySeconds: 3,
+      maxActivePackets: 1,
+      entryHoldSeconds: 2
+    },
+    prismLock: {
+      traceDurationSeconds: 75,
+      ringCount: 3,
+      slotCount: 8,
+      receiverCount: 4,
+      blockersPerRing: 0,
+      iceReceiverCount: 0,
+      switchableRingCount: 0,
+      scrambleSteps: 3,
+      icePenaltySeconds: 2
     }
   },
   success: {
@@ -93,6 +139,29 @@ export const DIFFICULTY_PROFILES = {
       lockHoldSeconds: 4,
       targetRevealRadius: 20,
       destabilizationPenaltySeconds: 4
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 60,
+      laneCount: 4,
+      columnCount: 6,
+      deliveryGoal: 6,
+      packetIntervalSeconds: 2.75,
+      packetStepSeconds: 1,
+      previewCount: 3,
+      misroutePenaltySeconds: 3,
+      maxActivePackets: 2,
+      entryHoldSeconds: 1.5
+    },
+    prismLock: {
+      traceDurationSeconds: 60,
+      ringCount: 3,
+      slotCount: 10,
+      receiverCount: 4,
+      blockersPerRing: 1,
+      iceReceiverCount: 1,
+      switchableRingCount: 0,
+      scrambleSteps: 3,
+      icePenaltySeconds: 4
     }
   },
   failure_but_playable: {
@@ -125,6 +194,29 @@ export const DIFFICULTY_PROFILES = {
       lockHoldSeconds: 5,
       targetRevealRadius: 12,
       destabilizationPenaltySeconds: 6
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 45,
+      laneCount: 5,
+      columnCount: 6,
+      deliveryGoal: 8,
+      packetIntervalSeconds: 1.55,
+      packetStepSeconds: 0.68,
+      previewCount: 1,
+      misroutePenaltySeconds: 7,
+      maxActivePackets: 3,
+      entryHoldSeconds: 1
+    },
+    prismLock: {
+      traceDurationSeconds: 45,
+      ringCount: 4,
+      slotCount: 12,
+      receiverCount: 5,
+      blockersPerRing: 1,
+      iceReceiverCount: 2,
+      switchableRingCount: 1,
+      scrambleSteps: 4,
+      icePenaltySeconds: 6
     }
   },
   critical_failure: {
@@ -157,6 +249,29 @@ export const DIFFICULTY_PROFILES = {
       lockHoldSeconds: 6.5,
       targetRevealRadius: 0,
       destabilizationPenaltySeconds: 8
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 24,
+      laneCount: 6,
+      columnCount: 7,
+      deliveryGoal: 9,
+      packetIntervalSeconds: 1.1,
+      packetStepSeconds: 0.55,
+      previewCount: 1,
+      misroutePenaltySeconds: 10,
+      maxActivePackets: 4,
+      entryHoldSeconds: 0.5
+    },
+    prismLock: {
+      traceDurationSeconds: 24,
+      ringCount: 4,
+      slotCount: 12,
+      receiverCount: 6,
+      blockersPerRing: 2,
+      iceReceiverCount: 3,
+      switchableRingCount: 1,
+      scrambleSteps: 5,
+      icePenaltySeconds: 8
     }
   }
 };
@@ -166,6 +281,8 @@ function flattenProfile(profile: any) {
     ...profile,
     ...profile.nodeIntrusion,
     ...profile.signalAlignment,
+    ...profile.packetSwitchboard,
+    ...profile.prismLock,
     allowMainPathFirewalls: profile.nodeIntrusion.allowFirewallOnMainPath
   };
 }

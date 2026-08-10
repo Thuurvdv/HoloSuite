@@ -23,6 +23,7 @@ declare const ChatMessage: any;
 
 export type BountyData = {
   id: string;
+  contractId: string;
   title: string;
   targetName: string;
   description: string;
@@ -129,15 +130,23 @@ export function getRewardLabel(bounty: Partial<BountyData>) {
   return `${amount.toLocaleString()} ${currency}`;
 }
 
+function getDisplayId(id: string) {
+  let hash = 0;
+  for (const character of id) hash = ((hash * 31) + character.charCodeAt(0)) % 10000;
+  return `BH-${String(hash).padStart(4, "0")}`;
+}
+
 export function normalizeBounty(source: Partial<BountyData> & Record<string, any> = {}): BountyData {
   const timestamp = now();
   const id = normalizeString(source.id) || `bounty-${foundry.utils.randomID(12)}`;
+  const contractId = normalizeString(source.contractId) || getDisplayId(id);
   const createdAt = normalizeString(source.createdAt) || timestamp;
   const status = normalizeStatus(source.status);
 
   return {
     ...clone(EMPTY_BOUNTY),
     id,
+    contractId,
     title: normalizeString(source.title, "Untitled Bounty"),
     targetName: normalizeString(source.targetName),
     description: normalizeString(source.description),
@@ -169,8 +178,22 @@ export function prepareBountyForDisplay(bounty: Partial<BountyData>) {
 
   return {
     ...normalized,
+    displayId: normalized.contractId,
     statusLabel: getStatusLabel(normalized.status),
     rewardLabel: getRewardLabel(normalized),
+    rewardAmountLabel: normalized.rewardAmount.toLocaleString(),
+    rewardCurrencyLabel: normalized.rewardCurrency,
+    threatClass: normalized.threatLevel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    searchText: [
+      normalized.title,
+      normalized.contractId,
+      normalized.targetName,
+      normalized.description,
+      normalized.longDescription,
+      normalized.faction,
+      normalized.location,
+      normalized.tags.join(" ")
+    ].join(" ").toLowerCase(),
     tagsText: normalized.tags.join(", "),
     hasImage: Boolean(normalized.image),
     isClaimed: normalized.status === BOUNTY_STATUSES.CLAIMED,

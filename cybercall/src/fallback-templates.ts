@@ -194,10 +194,26 @@ export function renderMessagesFallbackTemplate(data: any, escapeHTML: EscapeHTML
   const contacts = data.allContacts ?? [];
   const threadMarkup = threads.length
     ? threads.map((thread: any) => `
-        <button type="button" class="cybercall-thread ${thread.active ? "active" : ""}" data-cybercall-thread-id="${escapeHTML(thread.id)}">
-          <span class="cybercall-thread-initials">${escapeHTML(thread.initials)}</span>
+        <button type="button" class="cybercall-thread ${thread.active ? "active" : ""} ${thread.hasRouteLabel ? "routed" : ""} ${thread.hasNpcBinding ? "npc-linked" : ""}" data-cybercall-thread-id="${escapeHTML(thread.id)}" ${thread.canLinkNpc ? `data-cybercall-npc-link-drop data-cybercall-npc-thread-id="${escapeHTML(thread.id)}"` : ""}>
+          <span class="cybercall-thread-avatar ${escapeHTML(thread.avatarTone)} ${thread.isGroup ? "group" : ""}">
+            ${thread.image
+              ? `<img src="${escapeHTML(thread.image)}" alt="">`
+              : thread.isGroup ? '<i class="fa-solid fa-user-group" aria-hidden="true"></i>' : escapeHTML(thread.initials)}
+          </span>
           <span class="cybercall-thread-body">
             <strong>${escapeHTML(thread.title)}</strong>
+            ${thread.hasRouteLabel ? `
+              <span class="cybercall-thread-route-row">
+                <span class="cybercall-thread-route">${escapeHTML(thread.routeLabel)}</span>
+                ${thread.canLinkNpc ? `
+                  <span class="cybercall-thread-npc-state ${thread.hasNpcBinding ? "linked" : "unlinked"}" title="${escapeHTML(thread.npcBindingStatusLabel)}">
+                    ${thread.hasNpcBinding
+                      ? thread.npcBindingImage ? `<img src="${escapeHTML(thread.npcBindingImage)}" alt="">` : '<i class="fa-solid fa-link" aria-hidden="true"></i>'
+                      : '<i class="fa-solid fa-link-slash" aria-hidden="true"></i>'}
+                  </span>
+                ` : ""}
+              </span>
+            ` : ""}
             <small>${escapeHTML(thread.lastPreview)}</small>
           </span>
           ${thread.unread ? `<span class="cybercall-thread-unread">${thread.unreadCount}</span>` : ""}
@@ -251,10 +267,55 @@ export function renderMessagesFallbackTemplate(data: any, escapeHTML: EscapeHTML
         <article class="cybercall-message ${message.isMine ? "mine" : ""} ${message.isEvent ? "event" : ""}">
           <strong>${escapeHTML(message.senderName)}</strong>
           <p>${escapeHTML(message.body)}</p>
-          <time>${escapeHTML(message.createdAtLabel ?? message.createdAt)}</time>
+          ${data.showMessageTimestamps ? `<time>${escapeHTML(message.createdAtLabel ?? message.createdAt)}</time>` : ""}
         </article>
       `).join("")
     : '<div class="cybercall-messages-empty">Select a thread or send a new message.</div>';
+  const groupMemberMarkup = (data.groupMemberChoices ?? []).length
+    ? (data.groupMemberChoices ?? []).map((member: any) => `
+        <label>
+          <input type="checkbox" name="memberUserIds" value="${escapeHTML(member.id)}">
+          <span>${escapeHTML(member.name)}${member.active ? "" : " (offline)"}</span>
+        </label>
+      `).join("")
+    : "<p>No other player users are available.</p>";
+  const groupFormMarkup = `
+    <form class="cybercall-group-form" data-cybercall-group-form>
+      <label class="cybercall-group-name">
+        <span>Group Name</span>
+        <input type="text" name="groupName" maxlength="80" autocomplete="off" placeholder="Night City Crew" required>
+      </label>
+      <fieldset>
+        <legend>Players</legend>
+        <div class="cybercall-group-members">${groupMemberMarkup}</div>
+      </fieldset>
+      <p class="cybercall-group-hint">Members can read the full conversation and every reply is sent privately to the whole group.</p>
+      <button type="submit" ${data.hasGroupMemberChoices ? "" : "disabled"}>Create Group</button>
+    </form>
+  `;
+  const npcLinkPanelMarkup = activeThread?.showNpcLinkPanel ? `
+    <section class="cybercall-npc-link-panel ${activeThread.hasNpcBinding ? "linked" : "unlinked"}" data-cybercall-npc-link-drop data-cybercall-npc-thread-id="${escapeHTML(activeThread.id)}">
+      <span class="cybercall-npc-link-avatar">
+        ${activeThread.npcBindingImage
+          ? `<img src="${escapeHTML(activeThread.npcBindingImage)}" alt="">`
+          : `<span>${escapeHTML(activeThread.npcBindingInitials)}</span>`}
+      </span>
+      <span class="cybercall-npc-link-copy">
+        <small>NPC Identity</small>
+        <strong>${escapeHTML(activeThread.npcBindingStatusLabel)}</strong>
+        <em>${activeThread.hasNpcBinding
+          ? activeThread.npcPortraitRevealed ? "Portrait shared with player" : "Portrait visible to GM only"
+          : "Drop an Actor or Actor-backed Token here to link it."}</em>
+      </span>
+      ${activeThread.hasNpcBinding ? `
+        <span class="cybercall-npc-link-actions">
+          <button type="button" data-cybercall-npc-action="toggle-reveal" data-cybercall-npc-thread-id="${escapeHTML(activeThread.id)}">${activeThread.npcPortraitRevealed ? "Hide Portrait" : "Share Portrait"}</button>
+          <button type="button" data-cybercall-npc-action="change" data-cybercall-npc-thread-id="${escapeHTML(activeThread.id)}">Change</button>
+          <button type="button" data-cybercall-npc-action="unlink" data-cybercall-npc-thread-id="${escapeHTML(activeThread.id)}">Unlink</button>
+        </span>
+      ` : ""}
+    </section>
+  ` : "";
 
   return `
     <section class="cybercall-messages ${data.isFoundryV13Plus ? "cybercall-modern-messages" : ""}" data-cybercall-active-thread="${escapeHTML(data.activeThreadId ?? "")}">
@@ -264,30 +325,50 @@ export function renderMessagesFallbackTemplate(data: any, escapeHTML: EscapeHTML
       </nav>
       <aside class="cybercall-thread-list">
         <header>
-          <h2>Messages</h2>
+          <h2>
+            Messages
+            ${data.gmViewPlayerMessagesEnabled ? `
+              <span class="cybercall-gm-visibility" title="GM visibility is enabled: GMs can view player conversations." aria-label="GM visibility is enabled: GMs can view player conversations." tabindex="0">
+                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              </span>
+            ` : ""}
+          </h2>
           <div class="cybercall-message-header-actions">
             <button type="button" data-cybercall-message-action="new">New</button>
+            <button type="button" data-cybercall-message-action="new-group">New Group</button>
             <button type="button" data-cybercall-message-action="refresh">Refresh</button>
           </div>
         </header>
         ${threadMarkup}
       </aside>
-      <main class="cybercall-conversation">
+      <main class="cybercall-conversation ${activeThread?.showNpcLinkPanel ? "has-npc-link" : ""}">
         <header>
-          <div>
-            <div class="cybercall-contacts-kicker">${activeThread ? escapeHTML(activeThread.subtitle) : "Secure Channel"}</div>
-            <h3>${activeThread ? escapeHTML(activeThread.title) : "New Message"}</h3>
+          <div class="cybercall-conversation-identity">
+            ${activeThread ? `
+              <span class="cybercall-conversation-avatar ${escapeHTML(activeThread.avatarTone)} ${activeThread.isGroup ? "group" : ""}">
+                ${activeThread.image
+                  ? `<img src="${escapeHTML(activeThread.image)}" alt="">`
+                  : activeThread.isGroup ? '<i class="fa-solid fa-user-group" aria-hidden="true"></i>' : escapeHTML(activeThread.initials)}
+              </span>
+            ` : ""}
+            <div>
+              <div class="cybercall-contacts-kicker">${activeThread ? escapeHTML(activeThread.subtitle) : data.isComposingNewGroup ? "Private Player Channel" : "Secure Channel"}</div>
+              <h3>${activeThread ? escapeHTML(activeThread.title) : data.isComposingNewGroup ? "Create Group Chat" : "New Message"}</h3>
+            </div>
           </div>
           ${data.canDeleteThread ? '<button type="button" class="cybercall-delete-thread" data-cybercall-message-action="delete-thread">Delete Thread</button>' : ""}
         </header>
-        <div class="cybercall-message-log">${messageMarkup}</div>
-        <form class="cybercall-message-form ${data.canReplyAs ? "has-reply-as" : ""} ${data.canSendAs ? "has-send-as" : ""}" data-cybercall-message-form>
-          ${toMarkup}
-          ${replyAsMarkup}
-          ${sendAsMarkup}
-          <textarea name="body" rows="3" placeholder="Type message..." required></textarea>
-          <button type="submit" ${contacts.length ? "" : "disabled"}>Send</button>
-        </form>
+        ${npcLinkPanelMarkup}
+        ${data.isComposingNewGroup ? groupFormMarkup : `
+          <div class="cybercall-message-log">${messageMarkup}</div>
+          <form class="cybercall-message-form ${data.canReplyAs ? "has-reply-as" : ""} ${data.canSendAs ? "has-send-as" : ""}" data-cybercall-message-form>
+            ${toMarkup}
+            ${replyAsMarkup}
+            ${sendAsMarkup}
+            <textarea name="body" rows="3" placeholder="Type message..." required></textarea>
+            <button type="submit" ${contacts.length ? "" : "disabled"}>Send</button>
+          </form>
+        `}
       </main>
     </section>
   `;

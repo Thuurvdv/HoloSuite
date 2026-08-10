@@ -17,6 +17,8 @@ import { HackingLauncherApp } from "./ui/hacking-launcher-app";
 import { DifficultyProfilesApp } from "./ui/difficulty-profiles-app";
 import { NodeIntrusionApp } from "./minigames/node-intrusion/node-intrusion-app";
 import { SignalAlignmentApp } from "./minigames/signal-alignment/signal-alignment-app";
+import { PacketSwitchboardApp } from "./minigames/packet-switchboard/packet-switchboard-app";
+import { PrismLockApp } from "./minigames/prism-lock/prism-lock-app";
 
 declare const foundry: any;
 declare const game: any;
@@ -65,7 +67,7 @@ function registerSettings() {
   game.settings.registerMenu(MODULE_ID, "difficultyProfilesMenu", {
     name: "Difficulty Profiles",
     label: "Configure Profiles",
-    hint: "Tune Node Intrusion maps and Signal Alignment channels, drift, reveal radius, hold time, and trace pressure.",
+    hint: "Tune Node Intrusion, Signal Alignment, Packet Switchboard, and Prism Lock difficulty settings.",
     icon: "fas fa-sliders",
     type: DifficultyProfilesApp,
     restricted: true
@@ -117,6 +119,20 @@ function registerMinigames() {
     title: "Signal Alignment",
     icon: "fa-solid fa-wave-square",
     create: (options: any) => new SignalAlignmentApp(options)
+  });
+
+  registerMinigame({
+    id: "packet-switchboard",
+    title: "Packet Switchboard",
+    icon: "fa-solid fa-shuffle",
+    create: (options: any) => new PacketSwitchboardApp(options)
+  });
+
+  registerMinigame({
+    id: "prism-lock",
+    title: "Prism Lock",
+    icon: "fa-solid fa-bullseye",
+    create: (options: any) => new PrismLockApp(options)
   });
 }
 
@@ -253,8 +269,7 @@ async function startPlayerHack(payload: any) {
 
 
 
-  if (payload.minigameType === "signal-alignment") return api.startSignalAlignment(options);
-  return api.startNodeIntrusion(options);
+  return api.startHack({ ...options, type: payload.minigameType });
 }
 
 async function rollFallbackSkill(payload: any) {
