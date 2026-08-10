@@ -5,7 +5,7 @@
       "moduleId": "holosuite-hacking",
       "title": "HoloSuite Hacking",
       "tier": "free",
-      "version": "1.1.9",
+      "version": "1.1.10",
       "updated": "2026-08-10",
       "icon": "fa-solid fa-terminal",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking",
@@ -14,6 +14,22 @@
           "title": "Two new hacking minigames",
           "summary": "Packet Switchboard and Prism Lock join the HoloSuite Hacking lineup, adding new packet-routing and optical-ring challenges with configurable difficulty profiles.",
           "tags": ["Hacking", "Minigames", "Packet Switchboard", "Prism Lock"]
+        }
+      ]
+    },
+    {
+      "moduleId": "galaxy-map",
+      "title": "Galaxy Map",
+      "tier": "free",
+      "version": "1.0.5",
+      "updated": "2026-08-10",
+      "icon": "fa-solid fa-galaxy",
+      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map",
+      "entries": [
+        {
+          "title": "Multiple scenes per star system",
+          "summary": "Galaxy Map systems can now link to multiple Foundry scenes, making it easier to organize and navigate locations across a campaign.",
+          "tags": ["Galaxy Map", "Scenes", "Navigation", "Campaigns"]
         }
       ]
     },
@@ -37,7 +53,7 @@
       "moduleId": "cybercall",
       "title": "CyberCall",
       "tier": "free",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "updated": "2026-08-10",
       "icon": "fa-solid fa-phone-volume",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall",
@@ -53,7 +69,7 @@
       "moduleId": "bounty-board",
       "title": "Bounty Board",
       "tier": "free",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "updated": "2026-08-10",
       "icon": "fa-solid fa-crosshairs",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board",
@@ -85,15 +101,15 @@
       "moduleId": "holosuite-core",
       "title": "HoloSuite Core",
       "tier": "free",
-      "version": "1.0.5",
-      "updated": "2026-08-01",
+      "version": "1.0.7",
+      "updated": "2026-08-10",
       "icon": "fa-solid fa-mobile-screen",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
       "entries": [
         {
-          "title": "Launcher settings and What's New polish",
-          "summary": "The core launcher now includes new settings support alongside refreshed What's New presentation and Foundry v12 compatibility fixes.",
-          "tags": ["Core", "Settings", "What's New", "Foundry v12-v14"]
+          "title": "Expanded launcher integration",
+          "summary": "HoloSuite Core adds launcher support for HoloSuite Terminal and keeps the Updates feed focused on the latest module improvements.",
+          "tags": ["Core", "Launcher", "Terminal", "What's New"]
         }
       ]
     }
