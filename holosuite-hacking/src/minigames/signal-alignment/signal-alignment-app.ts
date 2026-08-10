@@ -110,6 +110,7 @@ export class SignalAlignmentApp extends LegacyApplication {
     html.find("[data-channel-slider]").on("input", (event) => this.handleSlider(event.currentTarget));
     html.find("[data-action='start']").on("click", () => this.startRun());
     html.find("[data-action='abort']").on("click", () => this.abort());
+    html.find("[data-action='close']").on("click", () => this.close());
     this.syncDom();
   }
 

@@ -1,0 +1,138 @@
+<section class="hs-application hs-application--hacking hh-shell prism-lock-shell {{glitchClass}}" style="--glitch-intensity: {{profile.visualGlitchIntensity}}">
+  <div class="hs-background" aria-hidden="true"></div>
+  <div class="hs-frame" aria-hidden="true">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-right" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--bottom-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--left" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header--space-police.svg?v=1" alt="">
+  </div>
+
+  <div class="hs-content">
+    <header class="prism-lock-header">
+      <div>
+        <p class="prism-lock-kicker">HoloSuite / optical cipher</p>
+        <h2>Prism Lock</h2>
+      </div>
+      <div class="prism-lock-status">
+        <span>{{profile.label}}</span>
+        <span>Roll {{rollTotal}} / DC {{dc}}</span>
+      </div>
+    </header>
+
+    <div class="prism-lock-layout">
+      <aside class="prism-lock-panel">
+        {{#unless state.hasStarted}}
+          <div class="prism-lock-standby">
+            <span>Optical cipher detected</span>
+            <strong>Rotate the rings until every white receptor is illuminated. Avoid energizing red ICE receptors.</strong>
+            <button type="button" data-action="start"><i class="fa-solid fa-play"></i> Start trace</button>
+          </div>
+        {{/unless}}
+
+        <div class="prism-lock-readout"><span>Trace</span><strong data-trace-text>{{state.traceProgress}}%</strong></div>
+        <div class="prism-lock-meter trace"><div data-trace-fill style="width: {{state.traceProgress}}%"></div></div>
+        <div class="prism-lock-readout"><span>Receptors</span><strong>{{evaluation.litReceiverCount}} / {{board.receiverCount}}</strong></div>
+        <div class="prism-lock-meter receptors"><div style="width: {{receiverPercent}}%"></div></div>
+
+        <dl class="prism-lock-specs">
+          <div><dt>Moves</dt><dd>{{state.moves}}</dd></div>
+          <div><dt>Rings</dt><dd>{{board.ringCount}}</dd></div>
+          <div><dt>ICE active</dt><dd>{{evaluation.activeIceSlots.length}}</dd></div>
+          <div><dt>Trace spikes</dt><dd>{{state.tracePenaltySeconds}}s</dd></div>
+        </dl>
+
+        <div class="prism-lock-legend">
+          <span><i class="receiver"></i> Authorization receptor</span>
+          <span><i class="ice"></i> ICE receptor</span>
+          <span><i class="blocker"></i> Beam blocker</span>
+        </div>
+
+        <button class="prism-lock-abort" type="button" data-action="abort"><i class="fa-solid fa-power-off"></i> Abort</button>
+      </aside>
+
+      <main class="prism-lock-workspace {{#unless state.hasStarted}}is-standby{{/unless}}">
+        <div class="prism-lock-display">
+          <svg class="prism-lock-svg" viewBox="0 0 100 100" role="img" aria-label="Concentric optical lock with laser beams and receptors">
+            <defs>
+              <filter id="prism-glow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="0.7" result="blur"></feGaussianBlur>
+                <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+              </filter>
+            </defs>
+
+            <circle class="prism-lock-outer" cx="50" cy="50" r="48"></circle>
+            {{#each board.ticks}}
+              <circle class="prism-lock-tick" cx="{{x}}" cy="{{y}}" r="0.45"></circle>
+            {{/each}}
+            {{#each rings}}
+              <circle class="prism-lock-ring {{#unless enabled}}is-disabled{{/unless}}" cx="50" cy="50" r="{{radius}}" style="--ring-color: {{color}}"></circle>
+            {{/each}}
+
+            <g class="prism-lock-beams" filter="url(#prism-glow)">
+              {{#each evaluation.beams}}
+                <line class="prism-beam {{#if blocked}}is-blocked{{/if}}" x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}" style="--beam-color: {{color}}"></line>
+              {{/each}}
+            </g>
+            <g class="prism-lock-blockers">
+              {{#each evaluation.blockers}}
+                <circle class="prism-blocker" cx="{{x}}" cy="{{y}}" r="2" style="--ring-color: {{color}}"></circle>
+              {{/each}}
+            </g>
+            <g class="prism-lock-emitters" filter="url(#prism-glow)">
+              {{#each evaluation.emitters}}
+                <circle class="prism-emitter" cx="{{x}}" cy="{{y}}" r="1.5" style="--ring-color: {{color}}"></circle>
+              {{/each}}
+            </g>
+            <g class="prism-lock-receptors">
+              {{#each evaluation.receivers}}
+                <circle class="prism-receptor {{#if lit}}is-lit{{/if}}" cx="{{x}}" cy="{{y}}" r="2.1"></circle>
+              {{/each}}
+              {{#each evaluation.iceReceivers}}
+                <rect class="prism-receptor is-ice {{#if lit}}is-lit{{/if}}" x="{{rectX}}" y="{{rectY}}" width="4.4" height="4.4"></rect>
+              {{/each}}
+            </g>
+            <circle class="prism-lock-core" cx="50" cy="50" r="6"></circle>
+            <path class="prism-lock-core-mark" d="M47 50 L50 46 L53 50 L50 54 Z"></path>
+          </svg>
+        </div>
+
+        <div class="prism-lock-controls">
+          {{#each rings}}
+            <section class="prism-ring-control {{#unless enabled}}is-disabled{{/unless}}" style="--ring-color: {{color}}">
+              <div>
+                <strong>{{label}}</strong>
+                <span>{{statusLabel}}</span>
+              </div>
+              <button type="button" data-action="rotate-ring" data-ring-id="{{id}}" data-direction="-1" aria-label="Rotate {{label}} counter-clockwise" {{#unless ../state.isRunning}}disabled{{/unless}}><i class="fa-solid fa-rotate-left"></i></button>
+              <span class="prism-ring-control-gap" aria-hidden="true"></span>
+              <button type="button" data-action="rotate-ring" data-ring-id="{{id}}" data-direction="1" aria-label="Rotate {{label}} clockwise" {{#unless ../state.isRunning}}disabled{{/unless}}><i class="fa-solid fa-rotate-right"></i></button>
+              {{#if switchable}}
+                <button class="prism-ring-power" type="button" data-action="toggle-ring" data-ring-id="{{id}}" aria-label="Toggle {{label}}" {{#unless ../state.isRunning}}disabled{{/unless}}><i class="fa-solid fa-power-off"></i></button>
+              {{/if}}
+            </section>
+          {{/each}}
+        </div>
+      </main>
+    </div>
+
+    {{#if state.result}}
+      <div class="prism-lock-result {{state.result}}">
+        <span>{{resultTitle}}</span>
+        <strong>{{resultDetail}}</strong>
+        <small>{{state.moves}} ring operations / {{evaluation.litReceiverCount}} receptors illuminated</small>
+        <button class="hh-result-close" type="button" data-action="close"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    {{/if}}
+  </div>
+  <div class="hs-effects" aria-hidden="true"></div>
+</section>

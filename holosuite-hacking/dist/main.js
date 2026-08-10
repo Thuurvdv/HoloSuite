@@ -1,6 +1,6 @@
-var Ze = Object.defineProperty;
-var et = (t, n, e) => n in t ? Ze(t, n, { enumerable: !0, configurable: !0, writable: !0, value: e }) : t[n] = e;
-var p = (t, n, e) => et(t, typeof n != "symbol" ? n + "" : n, e);
+var $e = Object.defineProperty;
+var De = (e, r, t) => r in e ? $e(e, r, { enumerable: !0, configurable: !0, writable: !0, value: t }) : e[r] = t;
+var g = (e, r, t) => De(e, typeof r != "symbol" ? r + "" : r, t);
 const O = {
   critical_success: {
     profileId: "critical_success",
@@ -32,6 +32,29 @@ const O = {
       lockHoldSeconds: 2.5,
       targetRevealRadius: 100,
       destabilizationPenaltySeconds: 0
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 95,
+      laneCount: 3,
+      columnCount: 5,
+      deliveryGoal: 5,
+      packetIntervalSeconds: 3.2,
+      packetStepSeconds: 1.2,
+      previewCount: 4,
+      misroutePenaltySeconds: 2,
+      maxActivePackets: 1,
+      entryHoldSeconds: 2.5
+    },
+    prismLock: {
+      traceDurationSeconds: 95,
+      ringCount: 2,
+      slotCount: 8,
+      receiverCount: 3,
+      blockersPerRing: 0,
+      iceReceiverCount: 0,
+      switchableRingCount: 0,
+      scrambleSteps: 2,
+      icePenaltySeconds: 0
     }
   },
   strong_success: {
@@ -64,6 +87,29 @@ const O = {
       lockHoldSeconds: 3,
       targetRevealRadius: 30,
       destabilizationPenaltySeconds: 2
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 75,
+      laneCount: 4,
+      columnCount: 5,
+      deliveryGoal: 6,
+      packetIntervalSeconds: 2.6,
+      packetStepSeconds: 0.95,
+      previewCount: 3,
+      misroutePenaltySeconds: 3,
+      maxActivePackets: 1,
+      entryHoldSeconds: 2
+    },
+    prismLock: {
+      traceDurationSeconds: 75,
+      ringCount: 3,
+      slotCount: 8,
+      receiverCount: 4,
+      blockersPerRing: 0,
+      iceReceiverCount: 0,
+      switchableRingCount: 0,
+      scrambleSteps: 3,
+      icePenaltySeconds: 2
     }
   },
   success: {
@@ -96,6 +142,29 @@ const O = {
       lockHoldSeconds: 4,
       targetRevealRadius: 20,
       destabilizationPenaltySeconds: 4
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 60,
+      laneCount: 4,
+      columnCount: 6,
+      deliveryGoal: 6,
+      packetIntervalSeconds: 2.75,
+      packetStepSeconds: 1,
+      previewCount: 3,
+      misroutePenaltySeconds: 3,
+      maxActivePackets: 2,
+      entryHoldSeconds: 1.5
+    },
+    prismLock: {
+      traceDurationSeconds: 60,
+      ringCount: 3,
+      slotCount: 10,
+      receiverCount: 4,
+      blockersPerRing: 1,
+      iceReceiverCount: 1,
+      switchableRingCount: 0,
+      scrambleSteps: 3,
+      icePenaltySeconds: 4
     }
   },
   failure_but_playable: {
@@ -128,6 +197,29 @@ const O = {
       lockHoldSeconds: 5,
       targetRevealRadius: 12,
       destabilizationPenaltySeconds: 6
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 45,
+      laneCount: 5,
+      columnCount: 6,
+      deliveryGoal: 8,
+      packetIntervalSeconds: 1.55,
+      packetStepSeconds: 0.68,
+      previewCount: 1,
+      misroutePenaltySeconds: 7,
+      maxActivePackets: 3,
+      entryHoldSeconds: 1
+    },
+    prismLock: {
+      traceDurationSeconds: 45,
+      ringCount: 4,
+      slotCount: 12,
+      receiverCount: 5,
+      blockersPerRing: 1,
+      iceReceiverCount: 2,
+      switchableRingCount: 1,
+      scrambleSteps: 4,
+      icePenaltySeconds: 6
     }
   },
   critical_failure: {
@@ -160,115 +252,144 @@ const O = {
       lockHoldSeconds: 6.5,
       targetRevealRadius: 0,
       destabilizationPenaltySeconds: 8
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: 24,
+      laneCount: 6,
+      columnCount: 7,
+      deliveryGoal: 9,
+      packetIntervalSeconds: 1.1,
+      packetStepSeconds: 0.55,
+      previewCount: 1,
+      misroutePenaltySeconds: 10,
+      maxActivePackets: 4,
+      entryHoldSeconds: 0.5
+    },
+    prismLock: {
+      traceDurationSeconds: 24,
+      ringCount: 4,
+      slotCount: 12,
+      receiverCount: 6,
+      blockersPerRing: 2,
+      iceReceiverCount: 3,
+      switchableRingCount: 1,
+      scrambleSteps: 5,
+      icePenaltySeconds: 8
     }
   }
 };
-function H(t) {
+function G(e) {
   return {
-    ...t,
-    ...t.nodeIntrusion,
-    ...t.signalAlignment,
-    allowMainPathFirewalls: t.nodeIntrusion.allowFirewallOnMainPath
+    ...e,
+    ...e.nodeIntrusion,
+    ...e.signalAlignment,
+    ...e.packetSwitchboard,
+    ...e.prismLock,
+    allowMainPathFirewalls: e.nodeIntrusion.allowFirewallOnMainPath
   };
 }
-function se(t = 0, n = 10, e = null) {
-  const i = Number(t) || 0, r = Number(n) || 10, s = Number(e);
-  return s === 1 ? H(O.critical_failure) : s === 20 ? H(O.critical_success) : i <= r - 10 ? H(O.critical_failure) : i >= r + 10 ? H(O.critical_success) : i >= r + 5 ? H(O.strong_success) : i >= r ? H(O.success) : H(O.failure_but_playable);
+function W(e = 0, r = 10, t = null) {
+  const n = Number(e) || 0, i = Number(r) || 10, s = Number(t);
+  return s === 1 ? G(O.critical_failure) : s === 20 ? G(O.critical_success) : n <= i - 10 ? G(O.critical_failure) : n >= i + 10 ? G(O.critical_success) : n >= i + 5 ? G(O.strong_success) : n >= i ? G(O.success) : G(O.failure_but_playable);
 }
-const ye = /* @__PURE__ */ new Map(), z = /* @__PURE__ */ new Map();
-function Pe(t) {
-  const n = String((t == null ? void 0 : t.id) ?? "").trim();
-  if (!n || typeof (t == null ? void 0 : t.create) != "function")
+const Tt = /* @__PURE__ */ new Map(), tt = /* @__PURE__ */ new Map();
+function ot(e) {
+  const r = String((e == null ? void 0 : e.id) ?? "").trim();
+  if (!r || typeof (e == null ? void 0 : e.create) != "function")
     throw new Error("HoloSuite Hacking minigames require an id and create(options) function.");
-  ye.set(n, {
-    title: String(t.title ?? n),
-    icon: String(t.icon ?? "fa-solid fa-terminal"),
-    ...t,
-    id: n
+  Tt.set(r, {
+    title: String(e.title ?? r),
+    icon: String(e.icon ?? "fa-solid fa-terminal"),
+    ...e,
+    id: r
   });
 }
-function tt(t) {
-  return ye.get(String(t ?? ""));
+function xe(e) {
+  return Tt.get(String(e ?? ""));
 }
-function nt() {
-  return [...ye.values()];
+function Le() {
+  return [...Tt.values()];
 }
-function it(t, n = {}) {
-  var s, a, o, l;
-  const e = tt(t);
-  if (!e)
-    return (a = (s = ui.notifications) == null ? void 0 : s.warn) == null || a.call(s, `Unknown HoloSuite hacking minigame: ${t}`), null;
-  (l = (o = z.get(e.id)) == null ? void 0 : o.close) == null || l.call(o);
-  const i = e.create(n), r = i.close.bind(i);
-  return i.close = async (...c) => (z.delete(e.id), r(...c)), z.set(e.id, i), i.render(!0), i;
+function Oe(e, r = {}) {
+  var s, o, c, a;
+  const t = xe(e);
+  if (!t)
+    return (o = (s = ui.notifications) == null ? void 0 : s.warn) == null || o.call(s, `Unknown HoloSuite hacking minigame: ${e}`), null;
+  (a = (c = tt.get(t.id)) == null ? void 0 : c.close) == null || a.call(c);
+  const n = t.create(r), i = n.close.bind(n);
+  return n.close = async (...l) => (tt.delete(t.id), i(...l)), tt.set(t.id, n), n.render(!0), n;
 }
-function rt(t) {
-  return t ? z.get(String(t)) ?? null : [...z.values()].at(-1) ?? null;
+function He(e) {
+  return e ? tt.get(String(e)) ?? null : [...tt.values()].at(-1) ?? null;
 }
-function ne(t) {
-  return !!t && typeof t == "object" && !Array.isArray(t);
+function ft(e) {
+  return !!e && typeof e == "object" && !Array.isArray(e);
 }
-function Le(t, n) {
-  if (!ne(n)) return t;
-  const e = { ...t };
-  for (const [i, r] of Object.entries(n))
-    e[i] = ne(r) && ne(e[i]) ? Le(e[i], r) : r;
-  return e;
+function fe(e, r) {
+  if (!ft(r)) return e;
+  const t = { ...e };
+  for (const [n, i] of Object.entries(r))
+    t[n] = ft(i) && ft(t[n]) ? fe(t[n], i) : i;
+  return t;
 }
-function st(t) {
-  var n;
+function Fe(e) {
+  var r;
   return {
-    ...t,
-    ...t.nodeIntrusion ?? {},
-    ...t.signalAlignment ?? {},
-    allowMainPathFirewalls: ((n = t.nodeIntrusion) == null ? void 0 : n.allowFirewallOnMainPath) ?? t.allowMainPathFirewalls
+    ...e,
+    ...e.nodeIntrusion ?? {},
+    ...e.signalAlignment ?? {},
+    ...e.packetSwitchboard ?? {},
+    ...e.prismLock ?? {},
+    allowMainPathFirewalls: ((r = e.nodeIntrusion) == null ? void 0 : r.allowFirewallOnMainPath) ?? e.allowMainPathFirewalls
   };
 }
-function at(t) {
-  var e, i;
-  const n = String(game.settings.get(t, "difficultyProfileOverrides") ?? "").trim();
-  if (!n) return {};
+function Ee(e) {
+  var t, n;
+  const r = String(game.settings.get(e, "difficultyProfileOverrides") ?? "").trim();
+  if (!r) return {};
   try {
-    const r = JSON.parse(n);
-    return ne(r) ? r : {};
-  } catch (r) {
-    return console.warn(`${t} | Difficulty profile overrides must be valid JSON.`, r), (i = (e = ui.notifications) == null ? void 0 : e.warn) == null || i.call(e, "HoloSuite Hacking difficulty profile overrides contain invalid JSON."), {};
+    const i = JSON.parse(r);
+    return ft(i) ? i : {};
+  } catch (i) {
+    return console.warn(`${e} | Difficulty profile overrides must be valid JSON.`, i), (n = (t = ui.notifications) == null ? void 0 : t.warn) == null || n.call(t, "HoloSuite Hacking difficulty profile overrides contain invalid JSON."), {};
   }
 }
-function ot({ moduleId: t, openLauncher: n }) {
-  function e(o) {
-    const l = String(o.profileId ?? o.id ?? ""), u = at(t)[l], d = st(Le(o, u)), f = Number(game.settings.get(t, "nodeTakeoverDurationSeconds") ?? 0);
-    return Number.isFinite(f) && f > 0 ? {
+function _e({ moduleId: e, openLauncher: r }) {
+  function t(c) {
+    const a = String(c.profileId ?? c.id ?? ""), u = Ee(e)[a], d = Fe(fe(c, u)), h = Number(game.settings.get(e, "nodeTakeoverDurationSeconds") ?? 0);
+    return Number.isFinite(h) && h > 0 ? {
       ...d,
       nodeIntrusion: {
         ...d.nodeIntrusion ?? {},
-        claimDurationSeconds: f
+        claimDurationSeconds: h
       },
-      claimDurationSeconds: f
+      claimDurationSeconds: h
     } : d;
   }
-  function i(o) {
-    const l = String(game.settings.get(t, "visualGlitchIntensity") ?? "medium"), c = Number(o.visualGlitchIntensity ?? 0.4), u = l === "low" ? Math.min(c, 0.25) : l === "high" ? Math.min(1, c + 0.2) : c;
-    return { ...o, visualGlitchIntensity: u };
+  function n(c) {
+    const a = String(game.settings.get(e, "visualGlitchIntensity") ?? "medium"), l = Number(c.visualGlitchIntensity ?? 0.4), u = a === "low" ? Math.min(l, 0.25) : a === "high" ? Math.min(1, l + 0.2) : l;
+    return { ...c, visualGlitchIntensity: u };
   }
-  function r(o = {}) {
-    const l = Number(game.settings.get(t, "defaultDc") ?? 15), c = Number(o.dc ?? l), u = Number(o.rollTotal ?? c), d = o.naturalRoll === null || o.naturalRoll === void 0 ? null : Number(o.naturalRoll), f = i(e(o.profile ?? se(u, c, d)));
-    return { ...o, dc: c, rollTotal: u, profile: f };
+  function i(c = {}) {
+    const a = Number(game.settings.get(e, "defaultDc") ?? 15), l = Number(c.dc ?? a), u = Number(c.rollTotal ?? l), d = c.naturalRoll === null || c.naturalRoll === void 0 ? null : Number(c.naturalRoll), h = n(t(c.profile ?? W(u, l, d)));
+    return { ...c, dc: l, rollTotal: u, profile: h };
   }
-  function s(o = {}) {
-    const l = String(o.type ?? "node-intrusion");
-    return it(l, r(o));
+  function s(c = {}) {
+    const a = String(c.type ?? "node-intrusion");
+    return Oe(a, i(c));
   }
-  const a = {
+  const o = {
     startHack: s,
-    startNodeIntrusion: (o = {}) => s({ ...o, type: "node-intrusion" }),
-    startSignalAlignment: (o = {}) => s({ ...o, type: "signal-alignment" }),
-    openLauncher: n,
-    getDifficultyProfile: (o = 0, l = 10, c = null) => i(e(se(o, l, c))),
+    startNodeIntrusion: (c = {}) => s({ ...c, type: "node-intrusion" }),
+    startSignalAlignment: (c = {}) => s({ ...c, type: "signal-alignment" }),
+    startPacketSwitchboard: (c = {}) => s({ ...c, type: "packet-switchboard" }),
+    startPrismLock: (c = {}) => s({ ...c, type: "prism-lock" }),
+    openLauncher: r,
+    getDifficultyProfile: (c = 0, a = 10, l = null) => n(t(W(c, a, l))),
     difficultyProfiles: O,
-    getMinigames: nt,
-    getActiveApp: rt,
-    testNodeIntrusion: () => a.startNodeIntrusion({
+    getMinigames: Le,
+    getActiveApp: He,
+    testNodeIntrusion: () => o.startNodeIntrusion({
       rollTotal: 17,
       dc: 15,
       onSuccess: () => {
@@ -276,7 +397,23 @@ function ot({ moduleId: t, openLauncher: n }) {
       onFailure: () => {
       }
     }),
-    testSignalAlignment: () => a.startSignalAlignment({
+    testSignalAlignment: () => o.startSignalAlignment({
+      rollTotal: 17,
+      dc: 15,
+      onSuccess: () => {
+      },
+      onFailure: () => {
+      }
+    }),
+    testPacketSwitchboard: () => o.startPacketSwitchboard({
+      rollTotal: 17,
+      dc: 15,
+      onSuccess: () => {
+      },
+      onFailure: () => {
+      }
+    }),
+    testPrismLock: () => o.startPrismLock({
       rollTotal: 17,
       dc: 15,
       onSuccess: () => {
@@ -285,61 +422,61 @@ function ot({ moduleId: t, openLauncher: n }) {
       }
     })
   };
-  return a;
+  return o;
 }
-function R(t) {
-  const n = document.createElement("div");
-  return n.textContent = String(t ?? ""), n.innerHTML;
+function H(e) {
+  const r = document.createElement("div");
+  return r.textContent = String(e ?? ""), r.innerHTML;
 }
-function ge() {
-  return Se().filter((n) => !n.isGM);
+function It() {
+  return At().filter((r) => !r.isGM);
 }
-function Se() {
-  var t;
-  return Array.isArray(game.users) ? game.users : ((t = game.users) == null ? void 0 : t.contents) ?? [...game.users ?? []];
+function At() {
+  var e;
+  return Array.isArray(game.users) ? game.users : ((e = game.users) == null ? void 0 : e.contents) ?? [...game.users ?? []];
 }
-function be(t) {
-  var e, i;
-  const n = String(t ?? "");
-  return ((i = (e = game.users) == null ? void 0 : e.get) == null ? void 0 : i.call(e, n)) ?? Se().find((r) => r.id === n) ?? null;
+function Rt(e) {
+  var t, n;
+  const r = String(e ?? "");
+  return ((n = (t = game.users) == null ? void 0 : t.get) == null ? void 0 : n.call(t, r)) ?? At().find((i) => i.id === r) ?? null;
 }
-function we() {
-  var t;
-  return Array.isArray(game.actors) ? game.actors : ((t = game.actors) == null ? void 0 : t.contents) ?? [...game.actors ?? []];
+function $t() {
+  var e;
+  return Array.isArray(game.actors) ? game.actors : ((e = game.actors) == null ? void 0 : e.contents) ?? [...game.actors ?? []];
 }
-function _(t) {
-  var e, i;
-  const n = String(t ?? "");
-  return ((i = (e = game.actors) == null ? void 0 : e.get) == null ? void 0 : i.call(e, n)) ?? we().find((r) => r.id === n || r.uuid === n) ?? null;
+function K(e) {
+  var t, n;
+  const r = String(e ?? "");
+  return ((n = (t = game.actors) == null ? void 0 : t.get) == null ? void 0 : n.call(t, r)) ?? $t().find((i) => i.id === r || i.uuid === r) ?? null;
 }
-function V(t) {
-  const n = t == null ? void 0 : t.character;
-  return n ? typeof n == "string" ? _(n) : n : null;
+function nt(e) {
+  const r = e == null ? void 0 : e.character;
+  return r ? typeof r == "string" ? K(r) : r : null;
 }
-function B(t, n) {
-  var r, s, a, o;
-  if (!t || !n) return !1;
-  if (t === V(n) || (r = t.testUserPermission) != null && r.call(t, n, "OWNER")) return !0;
-  const e = ((a = (s = globalThis.CONST) == null ? void 0 : s.DOCUMENT_OWNERSHIP_LEVELS) == null ? void 0 : a.OWNER) ?? 3, i = t.ownership ?? ((o = t.data) == null ? void 0 : o.permission) ?? {};
-  return Number(i[n.id] ?? i.default ?? 0) >= e;
+function it(e, r) {
+  var i, s, o, c;
+  if (!e || !r) return !1;
+  if (e === nt(r) || (i = e.testUserPermission) != null && i.call(e, r, "OWNER")) return !0;
+  const t = ((o = (s = globalThis.CONST) == null ? void 0 : s.DOCUMENT_OWNERSHIP_LEVELS) == null ? void 0 : o.OWNER) ?? 3, n = e.ownership ?? ((c = e.data) == null ? void 0 : c.permission) ?? {};
+  return Number(n[r.id] ?? n.default ?? 0) >= t;
 }
-function lt() {
-  var t, n, e;
-  return ((e = (n = (t = canvas == null ? void 0 : canvas.tokens) == null ? void 0 : t.controlled) == null ? void 0 : n[0]) == null ? void 0 : e.actor) ?? null;
+function qe() {
+  var e, r, t;
+  return ((t = (r = (e = canvas == null ? void 0 : canvas.tokens) == null ? void 0 : e.controlled) == null ? void 0 : r[0]) == null ? void 0 : t.actor) ?? null;
 }
-function Ie(t) {
-  const n = V(t) ? [V(t)] : [], e = we().filter((r) => B(r, t));
-  return [...new Map([...n, ...e].filter(Boolean).map((r) => [r.id, r])).values()].sort((r, s) => r.name.localeCompare(s.name));
+function Dt(e) {
+  const r = nt(e) ? [nt(e)] : [], t = $t().filter((i) => it(i, e));
+  return [...new Map([...r, ...t].filter(Boolean).map((i) => [i.id, i])).values()].sort((i, s) => i.name.localeCompare(s.name));
 }
-function Te(t = "") {
-  const n = ge(), e = n.find((r) => r.id === t);
-  return (e ? Ie(e) : we()).filter((r) => !e || B(r, e)).map((r) => ({
-    id: r.id,
-    name: r.name,
-    owners: n.filter((s) => B(r, s))
-  })).sort((r, s) => r.name.localeCompare(s.name));
+function ee(e = "") {
+  const r = It(), t = r.find((i) => i.id === e);
+  return (t ? Dt(t) : $t()).filter((i) => !t || it(i, t)).map((i) => ({
+    id: i.id,
+    name: i.name,
+    owners: r.filter((s) => it(i, s))
+  })).sort((i, s) => i.name.localeCompare(s.name));
 }
-const ct = {
+const Ge = {
   acr: "Acrobatics",
   ani: "Animal Handling",
   arc: "Arcana",
@@ -371,17 +508,17 @@ const ct = {
   tech: "Technology",
   technology: "Technology"
 };
-function Ae(t) {
-  var e;
-  const n = (e = t == null ? void 0 : t.system) == null ? void 0 : e.skills;
-  if (n && typeof n == "object") {
-    const i = Object.entries(n).map(([r, s]) => ({
-      id: r,
-      name: ce(r, s),
-      label: ut(r, s),
-      modifier: ve(s)
+function ne(e) {
+  var t;
+  const r = (t = e == null ? void 0 : e.system) == null ? void 0 : t.skills;
+  if (r && typeof r == "object") {
+    const n = Object.entries(r).map(([i, s]) => ({
+      id: i,
+      name: bt(i, s),
+      label: je(i, s),
+      modifier: xt(s)
     }));
-    if (i.length) return i.sort((r, s) => r.label.localeCompare(s.label));
+    if (n.length) return n.sort((i, s) => i.label.localeCompare(s.label));
   }
   return [
     { id: "hacking", name: "Hacking", label: "Hacking (+0)", modifier: 0 },
@@ -390,168 +527,168 @@ function Ae(t) {
     { id: "intelligence", name: "Intelligence", label: "Intelligence (+0)", modifier: 0 }
   ];
 }
-function He(t, n) {
-  var e, i;
-  return ((i = (e = t == null ? void 0 : t.system) == null ? void 0 : e.skills) == null ? void 0 : i[n]) ?? null;
+function me(e, r) {
+  var t, n;
+  return ((n = (t = e == null ? void 0 : e.system) == null ? void 0 : t.skills) == null ? void 0 : n[r]) ?? null;
 }
-function ce(t, n) {
-  const e = String((n == null ? void 0 : n.label) ?? (n == null ? void 0 : n.name) ?? (n == null ? void 0 : n.localizedName) ?? t ?? "Skill").trim(), i = e.toLowerCase().replace(/[^a-z0-9]/g, "");
-  return String(ct[i] ?? e).replace(/[_-]/g, " ").replace(/\b\w/g, (r) => r.toUpperCase());
+function bt(e, r) {
+  const t = String((r == null ? void 0 : r.label) ?? (r == null ? void 0 : r.name) ?? (r == null ? void 0 : r.localizedName) ?? e ?? "Skill").trim(), n = t.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return String(Ge[n] ?? t).replace(/[_-]/g, " ").replace(/\b\w/g, (i) => i.toUpperCase());
 }
-function ve(t) {
-  var r, s, a, o, l, c, u, d, f, h;
-  if (typeof t == "number") return t;
-  if (!t || typeof t != "object") return 0;
-  const e = [
-    t == null ? void 0 : t.mod,
-    (r = t == null ? void 0 : t.mod) == null ? void 0 : r.value,
-    t == null ? void 0 : t.modifier,
-    (s = t == null ? void 0 : t.modifier) == null ? void 0 : s.value,
-    t == null ? void 0 : t.total,
-    (a = t == null ? void 0 : t.total) == null ? void 0 : a.value,
-    t == null ? void 0 : t.value,
-    (o = t == null ? void 0 : t.value) == null ? void 0 : o.value,
-    t == null ? void 0 : t.bonus,
-    (l = t == null ? void 0 : t.bonus) == null ? void 0 : l.value,
-    t == null ? void 0 : t.check,
-    (c = t == null ? void 0 : t.check) == null ? void 0 : c.mod,
-    (u = t == null ? void 0 : t.check) == null ? void 0 : u.total,
-    t == null ? void 0 : t.roll,
-    (d = t == null ? void 0 : t.roll) == null ? void 0 : d.mod,
-    (f = t == null ? void 0 : t.roll) == null ? void 0 : f.total,
-    t == null ? void 0 : t.rank,
-    t == null ? void 0 : t.ranks
+function xt(e) {
+  var i, s, o, c, a, l, u, d, h, f;
+  if (typeof e == "number") return e;
+  if (!e || typeof e != "object") return 0;
+  const t = [
+    e == null ? void 0 : e.mod,
+    (i = e == null ? void 0 : e.mod) == null ? void 0 : i.value,
+    e == null ? void 0 : e.modifier,
+    (s = e == null ? void 0 : e.modifier) == null ? void 0 : s.value,
+    e == null ? void 0 : e.total,
+    (o = e == null ? void 0 : e.total) == null ? void 0 : o.value,
+    e == null ? void 0 : e.value,
+    (c = e == null ? void 0 : e.value) == null ? void 0 : c.value,
+    e == null ? void 0 : e.bonus,
+    (a = e == null ? void 0 : e.bonus) == null ? void 0 : a.value,
+    e == null ? void 0 : e.check,
+    (l = e == null ? void 0 : e.check) == null ? void 0 : l.mod,
+    (u = e == null ? void 0 : e.check) == null ? void 0 : u.total,
+    e == null ? void 0 : e.roll,
+    (d = e == null ? void 0 : e.roll) == null ? void 0 : d.mod,
+    (h = e == null ? void 0 : e.roll) == null ? void 0 : h.total,
+    e == null ? void 0 : e.rank,
+    e == null ? void 0 : e.ranks
   ].find((m) => Number.isFinite(Number(m)));
-  if (e !== void 0) return Number(e);
-  const i = [];
-  return Ee(t, i, 0), i.sort((m, I) => I.score - m.score), Number(((h = i[0]) == null ? void 0 : h.value) ?? 0);
+  if (t !== void 0) return Number(t);
+  const n = [];
+  return ge(e, n, 0), n.sort((m, w) => w.score - m.score), Number(((f = n[0]) == null ? void 0 : f.value) ?? 0);
 }
-function ut(t, n) {
-  const e = ce(t, n), i = ve(n), r = i >= 0 ? "+" : "-";
-  return `${e} (${r}${Math.abs(i)})`;
+function je(e, r) {
+  const t = bt(e, r), n = xt(r), i = n >= 0 ? "+" : "-";
+  return `${t} (${i}${Math.abs(n)})`;
 }
-function Ee(t, n, e, i = "") {
-  if (!(!t || typeof t != "object" || e > 4))
-    for (const [r, s] of Object.entries(t)) {
-      const a = i ? `${i}.${r}` : r, o = Number(s);
-      if (Number.isFinite(o)) {
-        const l = a.toLowerCase();
-        let c = 1;
-        /(total|mod|modifier|bonus|check|roll|value)$/.test(l) && (c += 6), /(dc|rank|ranks|proficient|prof|trained|ability|base|label|name)/.test(l) && (c -= 4), Math.abs(o) > 30 && (c -= 5), n.push({ value: o, score: c, path: a });
-      } else s && typeof s == "object" && Ee(s, n, e + 1, a);
+function ge(e, r, t, n = "") {
+  if (!(!e || typeof e != "object" || t > 4))
+    for (const [i, s] of Object.entries(e)) {
+      const o = n ? `${n}.${i}` : i, c = Number(s);
+      if (Number.isFinite(c)) {
+        const a = o.toLowerCase();
+        let l = 1;
+        /(total|mod|modifier|bonus|check|roll|value)$/.test(a) && (l += 6), /(dc|rank|ranks|proficient|prof|trained|ability|base|label|name)/.test(a) && (l -= 4), Math.abs(c) > 30 && (l -= 5), r.push({ value: c, score: l, path: o });
+      } else s && typeof s == "object" && ge(s, r, t + 1, o);
     }
 }
-function _e() {
-  var t, n, e;
-  return ((n = (t = globalThis.foundry) == null ? void 0 : t.applications) == null ? void 0 : n.api) ?? ((e = foundry == null ? void 0 : foundry.applications) == null ? void 0 : e.api) ?? null;
+function pe() {
+  var e, r, t;
+  return ((r = (e = globalThis.foundry) == null ? void 0 : e.applications) == null ? void 0 : r.api) ?? ((t = foundry == null ? void 0 : foundry.applications) == null ? void 0 : t.api) ?? null;
 }
-function qe() {
-  var t, n, e;
-  return ((n = (t = globalThis.foundry) == null ? void 0 : t.appv1) == null ? void 0 : n.api) ?? ((e = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : e.api) ?? null;
+function Se() {
+  var e, r, t;
+  return ((r = (e = globalThis.foundry) == null ? void 0 : e.appv1) == null ? void 0 : r.api) ?? ((t = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : t.api) ?? null;
 }
-function dt(t = {}, n = {}) {
-  var i, r, s;
-  const e = ((r = (i = globalThis.foundry) == null ? void 0 : i.utils) == null ? void 0 : r.mergeObject) ?? ((s = foundry == null ? void 0 : foundry.utils) == null ? void 0 : s.mergeObject);
-  return typeof e == "function" ? e(t, n, { inplace: !1 }) : { ...t, ...n };
+function Ue(e = {}, r = {}) {
+  var n, i, s;
+  const t = ((i = (n = globalThis.foundry) == null ? void 0 : n.utils) == null ? void 0 : i.mergeObject) ?? ((s = foundry == null ? void 0 : foundry.utils) == null ? void 0 : s.mergeObject);
+  return typeof t == "function" ? t(e, r, { inplace: !1 }) : { ...e, ...r };
 }
-function ft() {
-  var t, n, e, i, r;
-  return ((e = (n = (t = globalThis.foundry) == null ? void 0 : t.utils) == null ? void 0 : n.randomID) == null ? void 0 : e.call(n, 8)) ?? ((r = (i = foundry == null ? void 0 : foundry.utils) == null ? void 0 : i.randomID) == null ? void 0 : r.call(i, 8)) ?? Math.random().toString(36).slice(2, 10);
+function ze() {
+  var e, r, t, n, i;
+  return ((t = (r = (e = globalThis.foundry) == null ? void 0 : e.utils) == null ? void 0 : r.randomID) == null ? void 0 : t.call(r, 8)) ?? ((i = (n = foundry == null ? void 0 : foundry.utils) == null ? void 0 : n.randomID) == null ? void 0 : i.call(n, 8)) ?? Math.random().toString(36).slice(2, 10);
 }
-function De(t = {}) {
+function ie(e = {}) {
   return {
-    id: String(t.id ?? `legacy-application-${ft()}`),
-    tag: t.tag ?? "section",
-    classes: Array.isArray(t.classes) ? t.classes : [],
+    id: String(e.id ?? `legacy-application-${ze()}`),
+    tag: e.tag ?? "section",
+    classes: Array.isArray(e.classes) ? e.classes : [],
     window: {
-      title: t.title ?? "",
-      icon: t.icon,
-      resizable: t.resizable === !0
+      title: e.title ?? "",
+      icon: e.icon,
+      resizable: e.resizable === !0
     },
     position: {
-      width: Number(t.width ?? 600),
-      height: t.height === "auto" ? "auto" : Number(t.height ?? 600)
+      width: Number(e.width ?? 600),
+      height: e.height === "auto" ? "auto" : Number(e.height ?? 600)
     }
   };
 }
-function Ge(t) {
-  return class extends t {
-    constructor(i = {}) {
-      const r = dt(new.target.defaultOptions ?? {}, i);
-      super(De(r));
-      p(this, "_v1Options");
-      this._v1Options = r;
+function ye(e) {
+  return class extends e {
+    constructor(n = {}) {
+      const i = Ue(new.target.defaultOptions ?? {}, n);
+      super(ie(i));
+      g(this, "_v1Options");
+      this._v1Options = i;
     }
     static get defaultOptions() {
       return {};
     }
     static get DEFAULT_OPTIONS() {
-      return De(this.defaultOptions ?? {});
+      return ie(this.defaultOptions ?? {});
     }
-    activateListeners(i) {
+    activateListeners(n) {
     }
-    async _renderHTML(i, r) {
-      var c, u, d;
-      const s = typeof this.getData == "function" ? await this.getData() : {}, a = ((c = this._v1Options) == null ? void 0 : c.template) ?? ((u = this.options) == null ? void 0 : u.template) ?? ((d = this.constructor.defaultOptions) == null ? void 0 : d.template);
-      if (!a) return document.createDocumentFragment();
-      const o = await globalThis.renderTemplate(a, s), l = document.createElement("template");
-      return l.innerHTML = o.trim(), l.content;
+    async _renderHTML(n, i) {
+      var l, u, d;
+      const s = typeof this.getData == "function" ? await this.getData() : {}, o = ((l = this._v1Options) == null ? void 0 : l.template) ?? ((u = this.options) == null ? void 0 : u.template) ?? ((d = this.constructor.defaultOptions) == null ? void 0 : d.template);
+      if (!o) return document.createDocumentFragment();
+      const c = await globalThis.renderTemplate(o, s), a = document.createElement("template");
+      return a.innerHTML = c.trim(), a.content;
     }
-    _activateV1Form(i) {
-      var s, a;
+    _activateV1Form(n) {
+      var s, o;
       if (typeof this._updateObject != "function") return;
-      const r = (s = i.matches) != null && s.call(i, "form") ? i : (a = i.querySelector) == null ? void 0 : a.call(i, "form");
-      r instanceof HTMLFormElement && r.addEventListener("submit", async (o) => {
-        var c;
-        o.preventDefault(), o.stopPropagation();
-        const l = new FormData(r);
-        await this._updateObject(o, l), ((c = this._v1Options) == null ? void 0 : c.closeOnSubmit) === !0 && await this.close();
+      const i = (s = n.matches) != null && s.call(n, "form") ? n : (o = n.querySelector) == null ? void 0 : o.call(n, "form");
+      i instanceof HTMLFormElement && i.addEventListener("submit", async (c) => {
+        var l;
+        c.preventDefault(), c.stopPropagation();
+        const a = new FormData(i);
+        await this._updateObject(c, a), ((l = this._v1Options) == null ? void 0 : l.closeOnSubmit) === !0 && await this.close();
       });
     }
-    _replaceHTML(i, r, s) {
-      var u, d, f, h;
-      r.replaceChildren(i);
-      const a = globalThis.jQuery ?? globalThis.$, o = ((u = r.closest) == null ? void 0 : u.call(r, ".window-app, .app, .application")) ?? r, l = a ? a(o) : o;
+    _replaceHTML(n, i, s) {
+      var u, d, h, f;
+      i.replaceChildren(n);
+      const o = globalThis.jQuery ?? globalThis.$, c = ((u = i.closest) == null ? void 0 : u.call(i, ".window-app, .app, .application")) ?? i, a = o ? o(c) : c;
       try {
         Object.defineProperty(this, "element", {
-          value: l,
+          value: a,
           configurable: !0,
           writable: !0
         });
       } catch {
         try {
-          this.element = l;
+          this.element = a;
         } catch {
         }
       }
-      const c = (d = this._v1Options) == null ? void 0 : d.classes;
-      Array.isArray(c) && c.length && (r.classList.add(...c), (h = (f = r.closest) == null ? void 0 : f.call(r, ".window-app, .app, .application")) == null || h.classList.add(...c)), this._activateV1Form(r), typeof this.activateListeners == "function" && this.activateListeners(a ? a(r) : r);
+      const l = (d = this._v1Options) == null ? void 0 : d.classes;
+      Array.isArray(l) && l.length && (i.classList.add(...l), (f = (h = i.closest) == null ? void 0 : h.call(i, ".window-app, .app, .application")) == null || f.classList.add(...l)), this._activateV1Form(i), typeof this.activateListeners == "function" && this.activateListeners(o ? o(i) : i);
     }
   };
 }
-function ue() {
-  const t = _e(), n = qe(), e = globalThis.Application ?? (n == null ? void 0 : n.Application) ?? (t == null ? void 0 : t.ApplicationV1) ?? globalThis.FormApplication ?? (n == null ? void 0 : n.FormApplication) ?? (t == null ? void 0 : t.FormApplication);
-  if (e) return e;
-  const i = t == null ? void 0 : t.ApplicationV2;
-  return i ? Ge(i) : null;
+function Y() {
+  const e = pe(), r = Se(), t = globalThis.Application ?? (r == null ? void 0 : r.Application) ?? (e == null ? void 0 : e.ApplicationV1) ?? globalThis.FormApplication ?? (r == null ? void 0 : r.FormApplication) ?? (e == null ? void 0 : e.FormApplication);
+  if (t) return t;
+  const n = e == null ? void 0 : e.ApplicationV2;
+  return n ? ye(n) : null;
 }
-function ht() {
-  const t = _e(), n = qe(), e = globalThis.FormApplication ?? (n == null ? void 0 : n.FormApplication) ?? (t == null ? void 0 : t.FormApplication) ?? globalThis.Application ?? (n == null ? void 0 : n.Application) ?? (t == null ? void 0 : t.ApplicationV1);
-  if (e) return e;
-  const i = t == null ? void 0 : t.ApplicationV2;
-  return i ? Ge(i) : ue();
+function Be() {
+  const e = pe(), r = Se(), t = globalThis.FormApplication ?? (r == null ? void 0 : r.FormApplication) ?? (e == null ? void 0 : e.FormApplication) ?? globalThis.Application ?? (r == null ? void 0 : r.Application) ?? (e == null ? void 0 : e.ApplicationV1);
+  if (t) return t;
+  const n = e == null ? void 0 : e.ApplicationV2;
+  return n ? ye(n) : Y();
 }
-const U = "holosuite-hacking", gt = `modules/${U}/templates/hacking-launcher.html`, mt = ue();
-function pt(t) {
-  var r, s, a;
-  const n = `modules/${U}/${t.replace(/^\/+/, "")}`, e = (r = foundry == null ? void 0 : foundry.utils) == null ? void 0 : r.getRoute;
-  return typeof e == "function" ? e(n) : `${String(globalThis.ROUTE_PREFIX ?? ((a = (s = game == null ? void 0 : game.data) == null ? void 0 : s.options) == null ? void 0 : a.routePrefix) ?? "").replace(/^\/?/, "/").replace(/\/$/, "")}/${n}`;
+const et = "holosuite-hacking", Ve = `modules/${et}/templates/hacking-launcher.html`, Je = Y();
+function Ke(e) {
+  var i, s, o;
+  const r = `modules/${et}/${e.replace(/^\/+/, "")}`, t = (i = foundry == null ? void 0 : foundry.utils) == null ? void 0 : i.getRoute;
+  return typeof t == "function" ? t(r) : `${String(globalThis.ROUTE_PREFIX ?? ((o = (s = game == null ? void 0 : game.data) == null ? void 0 : s.options) == null ? void 0 : o.routePrefix) ?? "").replace(/^\/?/, "/").replace(/\/$/, "")}/${r}`;
 }
-class yt extends mt {
-  constructor(e = {}) {
-    super(e);
-    p(this, "api");
-    this.api = e.api;
+class Xe extends Je {
+  constructor(t = {}) {
+    super(t);
+    g(this, "api");
+    this.api = t.api;
   }
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -562,238 +699,295 @@ class yt extends mt {
       resizable: !0,
       width: 560,
       height: 620,
-      template: gt
+      template: Ve
     });
   }
   getData() {
-    const e = Number(game.settings.get(U, "defaultDc") ?? 15), i = ge(), r = i[0] ?? null, s = Te(r == null ? void 0 : r.id), a = s.length ? _(s[0].id) : null;
+    const t = Number(game.settings.get(et, "defaultDc") ?? 15), n = It(), i = n[0] ?? null, s = ee(i == null ? void 0 : i.id), o = s.length ? K(s[0].id) : null;
     return {
-      frameAssetBase: pt("assets/frame"),
-      defaultDc: e,
-      defaultTestRoll: e,
+      frameAssetBase: Ke("assets/frame"),
+      defaultDc: t,
+      defaultTestRoll: t,
       minigames: this.api.getMinigames(),
-      actors: s.map((o) => ({
-        id: o.id,
-        name: o.name,
-        ownerNames: o.owners.map((l) => l.name).join(", ") || "No active owner"
+      actors: s.map((c) => ({
+        id: c.id,
+        name: c.name,
+        ownerNames: c.owners.map((a) => a.name).join(", ") || "No active owner"
       })),
-      users: i.map((o) => ({
-        id: o.id,
-        name: o.name
+      users: n.map((c) => ({
+        id: c.id,
+        name: c.name
       })),
-      skills: Ae(a)
+      skills: ne(o)
     };
   }
-  activateListeners(e) {
-    super.activateListeners(e);
-    const i = e.is("form") ? e[0] : e.find("form")[0];
-    e.find("[data-action='start']").on("click", (s) => {
-      s.preventDefault(), this.submit(i);
-    }), e.find("[data-action='test-self']").on("click", (s) => {
-      s.preventDefault(), this.testSelf(i);
-    }), (e.is("form") ? e : e.find("form")).on("submit", (s) => {
+  activateListeners(t) {
+    super.activateListeners(t);
+    const n = t.is("form") ? t[0] : t.find("form")[0];
+    t.find("[data-action='start']").on("click", (s) => {
+      s.preventDefault(), this.submit(n);
+    }), t.find("[data-action='test-self']").on("click", (s) => {
+      s.preventDefault(), this.testSelf(n);
+    }), (t.is("form") ? t : t.find("form")).on("submit", (s) => {
       s.preventDefault(), this.submit(s.currentTarget);
-    }), e.find("[name='actorId']").on("change", (s) => {
-      this.syncUserToActor(e, s.currentTarget.value), this.syncSkillOptions(e, s.currentTarget.value);
-    }), e.find("[name='userId']").on("change", (s) => {
-      this.syncActorsForUser(e, s.currentTarget.value);
-    }), this.syncSkillOptions(e, e.find("[name='actorId']").val());
+    }), t.find("[name='actorId']").on("change", (s) => {
+      this.syncUserToActor(t, s.currentTarget.value), this.syncSkillOptions(t, s.currentTarget.value);
+    }), t.find("[name='userId']").on("change", (s) => {
+      this.syncActorsForUser(t, s.currentTarget.value);
+    }), this.syncSkillOptions(t, t.find("[name='actorId']").val());
   }
-  submit(e) {
-    var S, v, M, P, L, g;
-    if (!((S = game.user) != null && S.isGM)) {
-      (M = (v = ui.notifications) == null ? void 0 : v.warn) == null || M.call(v, "Only the GM can open the HoloSuite Hacking launcher.");
+  submit(t) {
+    var I, b, C, k, A, p;
+    if (!((I = game.user) != null && I.isGM)) {
+      (C = (b = ui.notifications) == null ? void 0 : b.warn) == null || C.call(b, "Only the GM can open the HoloSuite Hacking launcher.");
       return;
     }
-    if (!e) {
-      (L = (P = ui.notifications) == null ? void 0 : P.error) == null || L.call(P, "HoloSuite Hacking launcher form was not found."), console.error(`${U} | Launcher form was not found.`);
+    if (!t) {
+      (A = (k = ui.notifications) == null ? void 0 : k.error) == null || A.call(k, "HoloSuite Hacking launcher form was not found."), console.error(`${et} | Launcher form was not found.`);
       return;
     }
-    const i = e.querySelector("[name='minigameType']"), r = e.querySelector("[name='actorId']"), s = e.querySelector("[name='userId']"), a = e.querySelector("[name='skillId']"), o = e.querySelector("[name='dc']"), l = ((g = a == null ? void 0 : a.selectedOptions) == null ? void 0 : g[0]) ?? null, c = String((i == null ? void 0 : i.value) || "node-intrusion"), u = String((r == null ? void 0 : r.value) || ""), d = String((s == null ? void 0 : s.value) || ""), f = String((a == null ? void 0 : a.value) || ""), h = String((l == null ? void 0 : l.dataset.skillLabel) || (l == null ? void 0 : l.textContent) || f || "Skill"), m = Number((l == null ? void 0 : l.dataset.skillModifier) ?? 0), I = Number((o == null ? void 0 : o.value) ?? 15);
+    const n = t.querySelector("[name='minigameType']"), i = t.querySelector("[name='actorId']"), s = t.querySelector("[name='userId']"), o = t.querySelector("[name='skillId']"), c = t.querySelector("[name='dc']"), a = ((p = o == null ? void 0 : o.selectedOptions) == null ? void 0 : p[0]) ?? null, l = String((n == null ? void 0 : n.value) || "node-intrusion"), u = String((i == null ? void 0 : i.value) || ""), d = String((s == null ? void 0 : s.value) || ""), h = String((o == null ? void 0 : o.value) || ""), f = String((a == null ? void 0 : a.dataset.skillLabel) || (a == null ? void 0 : a.textContent) || h || "Skill"), m = Number((a == null ? void 0 : a.dataset.skillModifier) ?? 0), w = Number((c == null ? void 0 : c.value) ?? 15);
     this.api.sendHackToPlayer({
-      minigameType: c,
+      minigameType: l,
       actorId: u,
       userId: d,
-      skillId: f,
-      skillLabel: h,
+      skillId: h,
+      skillLabel: f,
       skillModifier: m,
-      dc: I,
+      dc: w,
       onSuccess: () => {
       },
       onFailure: () => {
       }
     }) && this.close();
   }
-  testSelf(e) {
-    var l, c, u, d, f, h, m, I, A, S, v, M, P;
-    if (!((l = game.user) != null && l.isGM)) {
-      (u = (c = ui.notifications) == null ? void 0 : c.warn) == null || u.call(c, "Only the GM can test HoloSuite Hacking minigames.");
+  testSelf(t) {
+    var a, l, u, d, h, f, m, w, P, I, b, C, k;
+    if (!((a = game.user) != null && a.isGM)) {
+      (u = (l = ui.notifications) == null ? void 0 : l.warn) == null || u.call(l, "Only the GM can test HoloSuite Hacking minigames.");
       return;
     }
-    if (!e) {
-      (f = (d = ui.notifications) == null ? void 0 : d.error) == null || f.call(d, "HoloSuite Hacking launcher form was not found.");
+    if (!t) {
+      (h = (d = ui.notifications) == null ? void 0 : d.error) == null || h.call(d, "HoloSuite Hacking launcher form was not found.");
       return;
     }
-    const i = String(((h = e.querySelector("[name='minigameType']")) == null ? void 0 : h.value) || "node-intrusion"), r = String(((m = e.querySelector("[name='actorId']")) == null ? void 0 : m.value) || ""), s = Number(((I = e.querySelector("[name='dc']")) == null ? void 0 : I.value) ?? game.settings.get(U, "defaultDc") ?? 15), a = Number(((A = e.querySelector("[name='testRollTotal']")) == null ? void 0 : A.value) ?? s);
-    if (!Number.isFinite(a)) {
-      (v = (S = ui.notifications) == null ? void 0 : S.warn) == null || v.call(S, "Enter a fake roll result before testing the minigame.");
+    const n = String(((f = t.querySelector("[name='minigameType']")) == null ? void 0 : f.value) || "node-intrusion"), i = String(((m = t.querySelector("[name='actorId']")) == null ? void 0 : m.value) || ""), s = Number(((w = t.querySelector("[name='dc']")) == null ? void 0 : w.value) ?? game.settings.get(et, "defaultDc") ?? 15), o = Number(((P = t.querySelector("[name='testRollTotal']")) == null ? void 0 : P.value) ?? s);
+    if (!Number.isFinite(o)) {
+      (b = (I = ui.notifications) == null ? void 0 : I.warn) == null || b.call(I, "Enter a fake roll result before testing the minigame.");
       return;
     }
-    const o = _(r);
+    const c = K(i);
     this.api.startHack({
-      type: i,
+      type: n,
       dc: s,
-      rollTotal: a,
-      actorName: (o == null ? void 0 : o.name) ?? ((M = game.user) == null ? void 0 : M.name) ?? "GM",
-      userId: ((P = game.user) == null ? void 0 : P.id) ?? "",
+      rollTotal: o,
+      actorName: (c == null ? void 0 : c.name) ?? ((C = game.user) == null ? void 0 : C.name) ?? "GM",
+      userId: ((k = game.user) == null ? void 0 : k.id) ?? "",
       onSuccess: () => {
       },
       onFailure: () => {
       }
     }), this.close();
   }
-  syncUserToActor(e, i) {
-    const r = _(i), s = ge().find((a) => r == null ? void 0 : r.testUserPermission(a, "OWNER"));
-    s && e.find("[name='userId']").val(s.id);
+  syncUserToActor(t, n) {
+    const i = K(n), s = It().find((o) => i == null ? void 0 : i.testUserPermission(o, "OWNER"));
+    s && t.find("[name='userId']").val(s.id);
   }
-  syncSkillOptions(e, i) {
-    const r = _(i), s = Ae(r);
-    e.find("[name='skillId']").html(s.map((a) => `<option value="${R(a.id)}" data-skill-label="${R(a.name ?? a.label)}" data-skill-modifier="${Number(a.modifier ?? 0)}">${R(a.label)}</option>`).join(""));
+  syncSkillOptions(t, n) {
+    const i = K(n), s = ne(i);
+    t.find("[name='skillId']").html(s.map((o) => `<option value="${H(o.id)}" data-skill-label="${H(o.name ?? o.label)}" data-skill-modifier="${Number(o.modifier ?? 0)}">${H(o.label)}</option>`).join(""));
   }
-  syncActorsForUser(e, i) {
-    const r = Te(i), s = r.length ? r.map((a) => `<option value="${R(a.id)}">${R(a.name)} (${R(a.owners.map((o) => o.name).join(", ") || "No owner")})</option>`).join("") : '<option value="">Use assigned character</option>';
-    e.find("[name='actorId']").html(s), this.syncSkillOptions(e, e.find("[name='actorId']").val());
+  syncActorsForUser(t, n) {
+    const i = ee(n), s = i.length ? i.map((o) => `<option value="${H(o.id)}">${H(o.name)} (${H(o.owners.map((c) => c.name).join(", ") || "No owner")})</option>`).join("") : '<option value="">Use assigned character</option>';
+    t.find("[name='actorId']").html(s), this.syncSkillOptions(t, t.find("[name='actorId']").val());
   }
 }
-const W = "holosuite-hacking", St = `modules/${W}/templates/difficulty-profiles.html`, bt = ht(), fe = [
+const rt = "holosuite-hacking", We = `modules/${rt}/templates/difficulty-profiles.html`, Ye = Be(), Ct = [
   "critical_success",
   "strong_success",
   "success",
   "failure_but_playable",
   "critical_failure"
 ];
-function ie(t) {
-  return !!t && typeof t == "object" && !Array.isArray(t);
+function mt(e) {
+  return !!e && typeof e == "object" && !Array.isArray(e);
 }
-function je(t, n) {
-  if (!ie(n)) return t;
-  const e = { ...t };
-  for (const [i, r] of Object.entries(n))
-    e[i] = ie(r) && ie(e[i]) ? je(e[i], r) : r;
-  return e;
+function be(e, r) {
+  if (!mt(r)) return e;
+  const t = { ...e };
+  for (const [n, i] of Object.entries(r))
+    t[n] = mt(i) && mt(t[n]) ? be(t[n], i) : i;
+  return t;
 }
-function wt() {
-  const t = String(game.settings.get(W, "difficultyProfileOverrides") ?? "").trim();
-  if (!t) return {};
+function Qe() {
+  const e = String(game.settings.get(rt, "difficultyProfileOverrides") ?? "").trim();
+  if (!e) return {};
   try {
-    const n = JSON.parse(t);
-    return ie(n) ? n : {};
-  } catch (n) {
-    return console.warn(`${W} | Difficulty profile overrides must be valid JSON.`, n), {};
+    const r = JSON.parse(e);
+    return mt(r) ? r : {};
+  } catch (r) {
+    return console.warn(`${rt} | Difficulty profile overrides must be valid JSON.`, r), {};
   }
 }
-function b(t, n, e) {
-  const i = Number(t.get(n));
-  return Number.isFinite(i) ? i : e;
+function v(e, r, t) {
+  const n = Number(e.get(r));
+  return Number.isFinite(n) ? n : t;
 }
-function y(t, n, e) {
-  return Math.min(e, Math.max(n, t));
+function S(e, r, t) {
+  return Math.min(t, Math.max(r, e));
 }
-function re(t, n) {
-  return t.get(n) === "on";
+function gt(e, r) {
+  return e.get(r) === "on";
 }
-function $e(t) {
-  if (t.type !== "number" || t.value === "") return;
-  const n = Number(t.value);
-  if (!Number.isFinite(n)) return;
-  const e = t.min === "" ? -1 / 0 : Number(t.min), i = t.max === "" ? 1 / 0 : Number(t.max), r = y(n, e, i);
-  r !== n && (t.value = String(r));
+function re(e) {
+  if (e.type !== "number" || e.value === "") return;
+  const r = Number(e.value);
+  if (!Number.isFinite(r)) return;
+  const t = e.min === "" ? -1 / 0 : Number(e.min), n = e.max === "" ? 1 / 0 : Number(e.max), i = S(r, t, n);
+  i !== r && (e.value = String(i));
 }
-function ae(t, n, e, i) {
-  const r = y(Math.round(t), 6, 40), s = Math.max(0, r - 4), a = y(Math.round(n), 0, s), o = Math.max(0, r - a), l = y(Math.round(o * 0.48), Math.min(6, o), o), c = l >= 5 ? 3 : 1, u = y(Math.round(e), 1, c), d = l + Math.max(0, u - 1), f = i ? Math.max(0, r - a - 2) : Math.max(0, r - a - d);
+function pt(e, r, t, n) {
+  const i = S(Math.round(e), 6, 40), s = Math.max(0, i - 4), o = S(Math.round(r), 0, s), c = Math.max(0, i - o), a = S(Math.round(c * 0.48), Math.min(6, c), c), l = a >= 5 ? 3 : 1, u = S(Math.round(t), 1, l), d = a + Math.max(0, u - 1), h = n ? Math.max(0, i - o - 2) : Math.max(0, i - o - d);
   return {
-    nodeCount: r,
+    nodeCount: i,
     maxDecoys: s,
-    decoyCount: a,
-    mainPathLength: l,
-    maxRoutes: c,
+    decoyCount: o,
+    mainPathLength: a,
+    maxRoutes: l,
     routeCount: u,
     protectedNodes: d,
-    maxFirewalls: f
+    maxFirewalls: h
   };
 }
-function It(t, n, e) {
-  const i = b(t, `${n}nodeCount`, e.nodeIntrusion.nodeCount), r = b(t, `${n}decoyCount`, e.nodeIntrusion.decoyCount), s = b(t, `${n}routeCount`, e.nodeIntrusion.routeCount ?? 2), a = re(t, `${n}allowFirewallOnMainPath`), o = ae(i, r, s, a);
+function Ze(e, r, t) {
+  const n = v(e, `${r}nodeCount`, t.nodeIntrusion.nodeCount), i = v(e, `${r}decoyCount`, t.nodeIntrusion.decoyCount), s = v(e, `${r}routeCount`, t.nodeIntrusion.routeCount ?? 2), o = gt(e, `${r}allowFirewallOnMainPath`), c = pt(n, i, s, o);
   return {
-    traceDurationSeconds: y(Math.round(b(t, `${n}nodeTraceDurationSeconds`, e.nodeIntrusion.traceDurationSeconds ?? e.traceDurationSeconds ?? 60)), 5, 300),
-    nodeCount: o.nodeCount,
-    firewallCount: y(Math.round(b(t, `${n}firewallCount`, e.nodeIntrusion.firewallCount)), 0, o.maxFirewalls),
-    decoyCount: o.decoyCount,
-    routeCount: o.routeCount,
-    radarEnabled: re(t, `${n}radarEnabled`),
-    claimDurationSeconds: y(b(t, `${n}claimDurationSeconds`, e.nodeIntrusion.claimDurationSeconds ?? 0.5), 0.1, 5),
-    firewallClaimMultiplier: y(b(t, `${n}firewallClaimMultiplier`, e.nodeIntrusion.firewallClaimMultiplier ?? 1.75), 1, 5),
-    firewallPenaltySeconds: y(Math.round(b(t, `${n}firewallPenaltySeconds`, e.nodeIntrusion.firewallPenaltySeconds ?? 6)), 0, 60),
-    decoyPenaltySeconds: y(Math.round(b(t, `${n}decoyPenaltySeconds`, e.nodeIntrusion.decoyPenaltySeconds ?? 4)), 0, 60),
-    showTarget: re(t, `${n}showTarget`),
-    allowFirewallOnMainPath: a
+    traceDurationSeconds: S(Math.round(v(e, `${r}nodeTraceDurationSeconds`, t.nodeIntrusion.traceDurationSeconds ?? t.traceDurationSeconds ?? 60)), 5, 300),
+    nodeCount: c.nodeCount,
+    firewallCount: S(Math.round(v(e, `${r}firewallCount`, t.nodeIntrusion.firewallCount)), 0, c.maxFirewalls),
+    decoyCount: c.decoyCount,
+    routeCount: c.routeCount,
+    radarEnabled: gt(e, `${r}radarEnabled`),
+    claimDurationSeconds: S(v(e, `${r}claimDurationSeconds`, t.nodeIntrusion.claimDurationSeconds ?? 0.5), 0.1, 5),
+    firewallClaimMultiplier: S(v(e, `${r}firewallClaimMultiplier`, t.nodeIntrusion.firewallClaimMultiplier ?? 1.75), 1, 5),
+    firewallPenaltySeconds: S(Math.round(v(e, `${r}firewallPenaltySeconds`, t.nodeIntrusion.firewallPenaltySeconds ?? 6)), 0, 60),
+    decoyPenaltySeconds: S(Math.round(v(e, `${r}decoyPenaltySeconds`, t.nodeIntrusion.decoyPenaltySeconds ?? 4)), 0, 60),
+    showTarget: gt(e, `${r}showTarget`),
+    allowFirewallOnMainPath: o
   };
 }
-function vt(t, n, e) {
+function tn(e, r, t) {
   return {
-    traceDurationSeconds: y(Math.round(b(t, `${n}signalTraceDurationSeconds`, e.signalAlignment.traceDurationSeconds ?? e.traceDurationSeconds ?? 60)), 5, 300),
-    channelCount: y(Math.round(b(t, `${n}signalChannelCount`, e.signalAlignment.channelCount ?? 3)), 2, 5),
-    tolerance: y(b(t, `${n}signalTolerance`, e.signalAlignment.tolerance ?? 5), 0.5, 20),
-    signalDriftSpeed: y(b(t, `${n}signalDriftSpeed`, e.signalAlignment.signalDriftSpeed ?? 0), 0, 5),
-    noiseLevel: y(b(t, `${n}signalNoiseLevel`, e.signalAlignment.noiseLevel ?? 0), 0, 1),
-    lockHoldSeconds: y(b(t, `${n}signalLockHoldSeconds`, e.signalAlignment.lockHoldSeconds ?? 4), 0.5, 30),
-    targetRevealRadius: y(b(t, `${n}signalTargetRevealRadius`, e.signalAlignment.targetRevealRadius ?? 100), 0, 100),
-    destabilizationPenaltySeconds: y(b(t, `${n}signalDestabilizationPenaltySeconds`, e.signalAlignment.destabilizationPenaltySeconds ?? 0), 0, 60)
+    traceDurationSeconds: S(Math.round(v(e, `${r}signalTraceDurationSeconds`, t.signalAlignment.traceDurationSeconds ?? t.traceDurationSeconds ?? 60)), 5, 300),
+    channelCount: S(Math.round(v(e, `${r}signalChannelCount`, t.signalAlignment.channelCount ?? 3)), 2, 5),
+    tolerance: S(v(e, `${r}signalTolerance`, t.signalAlignment.tolerance ?? 5), 0.5, 20),
+    signalDriftSpeed: S(v(e, `${r}signalDriftSpeed`, t.signalAlignment.signalDriftSpeed ?? 0), 0, 5),
+    noiseLevel: S(v(e, `${r}signalNoiseLevel`, t.signalAlignment.noiseLevel ?? 0), 0, 1),
+    lockHoldSeconds: S(v(e, `${r}signalLockHoldSeconds`, t.signalAlignment.lockHoldSeconds ?? 4), 0.5, 30),
+    targetRevealRadius: S(v(e, `${r}signalTargetRevealRadius`, t.signalAlignment.targetRevealRadius ?? 100), 0, 100),
+    destabilizationPenaltySeconds: S(v(e, `${r}signalDestabilizationPenaltySeconds`, t.signalAlignment.destabilizationPenaltySeconds ?? 0), 0, 60)
   };
 }
-function Nt(t) {
-  const n = O[t], e = ae(
-    Number(n.nodeIntrusion.nodeCount),
-    Number(n.nodeIntrusion.decoyCount),
-    Number(n.nodeIntrusion.routeCount ?? 2),
-    !!n.nodeIntrusion.allowFirewallOnMainPath
+function en(e, r, t) {
+  const n = t.packetSwitchboard ?? {}, i = S(Math.round(v(e, `${r}packetLaneCount`, n.laneCount ?? 4)), 3, 6);
+  return {
+    traceDurationSeconds: S(Math.round(v(e, `${r}packetTraceDurationSeconds`, n.traceDurationSeconds ?? t.traceDurationSeconds ?? 60)), 5, 300),
+    laneCount: i,
+    columnCount: S(Math.round(v(e, `${r}packetColumnCount`, n.columnCount ?? 6)), i - 1, 8),
+    deliveryGoal: S(Math.round(v(e, `${r}packetDeliveryGoal`, n.deliveryGoal ?? 7)), 3, 20),
+    packetIntervalSeconds: S(v(e, `${r}packetIntervalSeconds`, n.packetIntervalSeconds ?? 2), 0.35, 10),
+    packetStepSeconds: S(v(e, `${r}packetStepSeconds`, n.packetStepSeconds ?? 0.8), 0.25, 5),
+    previewCount: S(Math.round(v(e, `${r}packetPreviewCount`, n.previewCount ?? 2)), 0, 6),
+    misroutePenaltySeconds: S(v(e, `${r}packetMisroutePenaltySeconds`, n.misroutePenaltySeconds ?? 5), 0, 60),
+    maxActivePackets: S(Math.round(v(e, `${r}packetMaxActivePackets`, n.maxActivePackets ?? 2)), 1, 6),
+    entryHoldSeconds: S(v(e, `${r}packetEntryHoldSeconds`, n.entryHoldSeconds ?? 1.5), 0, 10)
+  };
+}
+function nn(e, r, t) {
+  const n = t.prismLock ?? {}, i = S(Math.round(v(e, `${r}prismRingCount`, n.ringCount ?? 3)), 2, 4), s = S(Math.round(v(e, `${r}prismSlotCount`, n.slotCount ?? 10)), 8, 16), o = S(Math.round(v(e, `${r}prismReceiverCount`, n.receiverCount ?? 4)), 2, Math.min(8, s)), c = S(Math.round(v(e, `${r}prismSwitchableRingCount`, n.switchableRingCount ?? 0)), 0, i - 1), a = Math.min(4, s - o), l = c > 0 && a > 0 ? 1 : 0;
+  return {
+    traceDurationSeconds: S(Math.round(v(e, `${r}prismTraceDurationSeconds`, n.traceDurationSeconds ?? t.traceDurationSeconds ?? 60)), 5, 300),
+    ringCount: i,
+    slotCount: s,
+    receiverCount: o,
+    blockersPerRing: S(Math.round(v(e, `${r}prismBlockersPerRing`, n.blockersPerRing ?? 0)), 0, 3),
+    iceReceiverCount: S(Math.round(v(e, `${r}prismIceReceiverCount`, n.iceReceiverCount ?? 0)), l, a),
+    switchableRingCount: c,
+    scrambleSteps: S(Math.round(v(e, `${r}prismScrambleSteps`, n.scrambleSteps ?? 3)), 1, Math.floor(s / 2)),
+    icePenaltySeconds: S(v(e, `${r}prismIcePenaltySeconds`, n.icePenaltySeconds ?? 5), 0, 60)
+  };
+}
+function rn(e) {
+  var n, i, s, o, c, a, l, u, d, h, f, m, w, P, I, b, C, k, A;
+  const r = O[e], t = pt(
+    Number(r.nodeIntrusion.nodeCount),
+    Number(r.nodeIntrusion.decoyCount),
+    Number(r.nodeIntrusion.routeCount ?? 2),
+    !!r.nodeIntrusion.allowFirewallOnMainPath
   );
   return {
-    hintsEnabled: !!n.hintsEnabled,
-    visualGlitchIntensity: Number(n.visualGlitchIntensity ?? 0.4),
+    hintsEnabled: !!r.hintsEnabled,
+    visualGlitchIntensity: Number(r.visualGlitchIntensity ?? 0.4),
     nodeIntrusion: {
-      traceDurationSeconds: Number(n.nodeIntrusion.traceDurationSeconds ?? n.traceDurationSeconds ?? 60),
-      nodeCount: e.nodeCount,
-      firewallCount: y(Number(n.nodeIntrusion.firewallCount ?? 0), 0, e.maxFirewalls),
-      decoyCount: e.decoyCount,
-      routeCount: e.routeCount,
-      radarEnabled: !!(n.nodeIntrusion.radarEnabled ?? Number(n.nodeIntrusion.radarRange ?? 0) > 0),
-      claimDurationSeconds: Number(n.nodeIntrusion.claimDurationSeconds ?? 0.5),
-      firewallClaimMultiplier: Number(n.nodeIntrusion.firewallClaimMultiplier ?? 1.75),
-      firewallPenaltySeconds: Number(n.nodeIntrusion.firewallPenaltySeconds ?? 6),
-      decoyPenaltySeconds: Number(n.nodeIntrusion.decoyPenaltySeconds ?? 4),
-      showTarget: !!n.nodeIntrusion.showTarget,
-      allowFirewallOnMainPath: !!n.nodeIntrusion.allowFirewallOnMainPath
+      traceDurationSeconds: Number(r.nodeIntrusion.traceDurationSeconds ?? r.traceDurationSeconds ?? 60),
+      nodeCount: t.nodeCount,
+      firewallCount: S(Number(r.nodeIntrusion.firewallCount ?? 0), 0, t.maxFirewalls),
+      decoyCount: t.decoyCount,
+      routeCount: t.routeCount,
+      radarEnabled: !!(r.nodeIntrusion.radarEnabled ?? Number(r.nodeIntrusion.radarRange ?? 0) > 0),
+      claimDurationSeconds: Number(r.nodeIntrusion.claimDurationSeconds ?? 0.5),
+      firewallClaimMultiplier: Number(r.nodeIntrusion.firewallClaimMultiplier ?? 1.75),
+      firewallPenaltySeconds: Number(r.nodeIntrusion.firewallPenaltySeconds ?? 6),
+      decoyPenaltySeconds: Number(r.nodeIntrusion.decoyPenaltySeconds ?? 4),
+      showTarget: !!r.nodeIntrusion.showTarget,
+      allowFirewallOnMainPath: !!r.nodeIntrusion.allowFirewallOnMainPath
     },
     signalAlignment: {
-      traceDurationSeconds: Number(n.signalAlignment.traceDurationSeconds ?? n.traceDurationSeconds ?? 60),
-      channelCount: Number(n.signalAlignment.channelCount ?? 3),
-      tolerance: Number(n.signalAlignment.tolerance ?? 5),
-      signalDriftSpeed: Number(n.signalAlignment.signalDriftSpeed ?? 0),
-      noiseLevel: Number(n.signalAlignment.noiseLevel ?? 0),
-      lockHoldSeconds: Number(n.signalAlignment.lockHoldSeconds ?? 4),
-      targetRevealRadius: Number(n.signalAlignment.targetRevealRadius ?? 100),
-      destabilizationPenaltySeconds: Number(n.signalAlignment.destabilizationPenaltySeconds ?? 0)
+      traceDurationSeconds: Number(r.signalAlignment.traceDurationSeconds ?? r.traceDurationSeconds ?? 60),
+      channelCount: Number(r.signalAlignment.channelCount ?? 3),
+      tolerance: Number(r.signalAlignment.tolerance ?? 5),
+      signalDriftSpeed: Number(r.signalAlignment.signalDriftSpeed ?? 0),
+      noiseLevel: Number(r.signalAlignment.noiseLevel ?? 0),
+      lockHoldSeconds: Number(r.signalAlignment.lockHoldSeconds ?? 4),
+      targetRevealRadius: Number(r.signalAlignment.targetRevealRadius ?? 100),
+      destabilizationPenaltySeconds: Number(r.signalAlignment.destabilizationPenaltySeconds ?? 0)
+    },
+    packetSwitchboard: {
+      traceDurationSeconds: Number(((n = r.packetSwitchboard) == null ? void 0 : n.traceDurationSeconds) ?? r.traceDurationSeconds ?? 60),
+      laneCount: Number(((i = r.packetSwitchboard) == null ? void 0 : i.laneCount) ?? 4),
+      columnCount: Number(((s = r.packetSwitchboard) == null ? void 0 : s.columnCount) ?? 6),
+      deliveryGoal: Number(((o = r.packetSwitchboard) == null ? void 0 : o.deliveryGoal) ?? 7),
+      packetIntervalSeconds: Number(((c = r.packetSwitchboard) == null ? void 0 : c.packetIntervalSeconds) ?? 2),
+      packetStepSeconds: Number(((a = r.packetSwitchboard) == null ? void 0 : a.packetStepSeconds) ?? 0.8),
+      previewCount: Number(((l = r.packetSwitchboard) == null ? void 0 : l.previewCount) ?? 2),
+      misroutePenaltySeconds: Number(((u = r.packetSwitchboard) == null ? void 0 : u.misroutePenaltySeconds) ?? 5),
+      maxActivePackets: Number(((d = r.packetSwitchboard) == null ? void 0 : d.maxActivePackets) ?? 2),
+      entryHoldSeconds: Number(((h = r.packetSwitchboard) == null ? void 0 : h.entryHoldSeconds) ?? 1.5)
+    },
+    prismLock: {
+      traceDurationSeconds: Number(((f = r.prismLock) == null ? void 0 : f.traceDurationSeconds) ?? r.traceDurationSeconds ?? 60),
+      ringCount: Number(((m = r.prismLock) == null ? void 0 : m.ringCount) ?? 3),
+      slotCount: Number(((w = r.prismLock) == null ? void 0 : w.slotCount) ?? 10),
+      receiverCount: Number(((P = r.prismLock) == null ? void 0 : P.receiverCount) ?? 4),
+      blockersPerRing: Number(((I = r.prismLock) == null ? void 0 : I.blockersPerRing) ?? 0),
+      iceReceiverCount: Number(((b = r.prismLock) == null ? void 0 : b.iceReceiverCount) ?? 0),
+      switchableRingCount: Number(((C = r.prismLock) == null ? void 0 : C.switchableRingCount) ?? 0),
+      scrambleSteps: Number(((k = r.prismLock) == null ? void 0 : k.scrambleSteps) ?? 3),
+      icePenaltySeconds: Number(((A = r.prismLock) == null ? void 0 : A.icePenaltySeconds) ?? 5)
     }
   };
 }
-class Mt extends bt {
+class sn extends Ye {
+  constructor() {
+    super(...arguments);
+    g(this, "activeProfileTab", "general");
+  }
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "holosuite-hacking-difficulty-profiles",
       title: "HoloSuite Hacking Difficulty Profiles",
       classes: ["holosuite-hacking-window", "holosuite-hacking-profile-window"],
-      template: St,
+      template: We,
       width: 820,
       height: 780,
       resizable: !0,
@@ -803,89 +997,149 @@ class Mt extends bt {
     });
   }
   getData() {
-    const n = wt();
+    const t = Qe();
     return {
-      profiles: fe.map((i) => {
-        var d, f, h, m, I, A, S, v, M, P, L, g, C, D, F, $, x, q, X, K, G;
-        const r = O[i], s = je(r, n[i]), a = Number(((d = s.nodeIntrusion) == null ? void 0 : d.nodeCount) ?? 12), o = Number(((f = s.nodeIntrusion) == null ? void 0 : f.decoyCount) ?? 0), l = Number(((h = s.nodeIntrusion) == null ? void 0 : h.routeCount) ?? 2), c = !!((m = s.nodeIntrusion) != null && m.allowFirewallOnMainPath), u = ae(a, o, l, c);
+      profiles: Ct.map((i) => {
+        var h, f, m, w, P, I, b, C, k, A, p, y, M, R, N, D, q, B, V, $, F, st, Ft, Et, _t, qt, Gt, jt, Ut, zt, Bt, Vt, Jt, Kt, Xt, Wt, Yt, Qt, Zt, te;
+        const s = O[i], o = be(s, t[i]), c = Number(((h = o.nodeIntrusion) == null ? void 0 : h.nodeCount) ?? 12), a = Number(((f = o.nodeIntrusion) == null ? void 0 : f.decoyCount) ?? 0), l = Number(((m = o.nodeIntrusion) == null ? void 0 : m.routeCount) ?? 2), u = !!((w = o.nodeIntrusion) != null && w.allowFirewallOnMainPath), d = pt(c, a, l, u);
         return {
           id: i,
-          label: s.label,
-          hintsEnabled: !!s.hintsEnabled,
-          visualGlitchIntensity: Number(s.visualGlitchIntensity ?? 0.4),
+          label: o.label,
+          hintsEnabled: !!o.hintsEnabled,
+          visualGlitchIntensity: Number(o.visualGlitchIntensity ?? 0.4),
           nodeIntrusion: {
-            traceDurationSeconds: Number(((I = s.nodeIntrusion) == null ? void 0 : I.traceDurationSeconds) ?? s.traceDurationSeconds ?? 60),
-            nodeCount: u.nodeCount,
-            firewallCount: y(Number(((A = s.nodeIntrusion) == null ? void 0 : A.firewallCount) ?? 0), 0, u.maxFirewalls),
-            decoyCount: u.decoyCount,
-            routeCount: u.routeCount,
-            radarEnabled: !!(((S = s.nodeIntrusion) == null ? void 0 : S.radarEnabled) ?? Number(((v = s.nodeIntrusion) == null ? void 0 : v.radarRange) ?? 0) > 0),
-            claimDurationSeconds: Number(((M = s.nodeIntrusion) == null ? void 0 : M.claimDurationSeconds) ?? 0.5),
-            firewallClaimMultiplier: Number(((P = s.nodeIntrusion) == null ? void 0 : P.firewallClaimMultiplier) ?? 1.75),
-            firewallPenaltySeconds: Number(((L = s.nodeIntrusion) == null ? void 0 : L.firewallPenaltySeconds) ?? 6),
-            decoyPenaltySeconds: Number(((g = s.nodeIntrusion) == null ? void 0 : g.decoyPenaltySeconds) ?? 4),
-            showTarget: !!((C = s.nodeIntrusion) != null && C.showTarget),
-            allowFirewallOnMainPath: c
+            traceDurationSeconds: Number(((P = o.nodeIntrusion) == null ? void 0 : P.traceDurationSeconds) ?? o.traceDurationSeconds ?? 60),
+            nodeCount: d.nodeCount,
+            firewallCount: S(Number(((I = o.nodeIntrusion) == null ? void 0 : I.firewallCount) ?? 0), 0, d.maxFirewalls),
+            decoyCount: d.decoyCount,
+            routeCount: d.routeCount,
+            radarEnabled: !!(((b = o.nodeIntrusion) == null ? void 0 : b.radarEnabled) ?? Number(((C = o.nodeIntrusion) == null ? void 0 : C.radarRange) ?? 0) > 0),
+            claimDurationSeconds: Number(((k = o.nodeIntrusion) == null ? void 0 : k.claimDurationSeconds) ?? 0.5),
+            firewallClaimMultiplier: Number(((A = o.nodeIntrusion) == null ? void 0 : A.firewallClaimMultiplier) ?? 1.75),
+            firewallPenaltySeconds: Number(((p = o.nodeIntrusion) == null ? void 0 : p.firewallPenaltySeconds) ?? 6),
+            decoyPenaltySeconds: Number(((y = o.nodeIntrusion) == null ? void 0 : y.decoyPenaltySeconds) ?? 4),
+            showTarget: !!((M = o.nodeIntrusion) != null && M.showTarget),
+            allowFirewallOnMainPath: u
           },
           signalAlignment: {
-            traceDurationSeconds: Number(((D = s.signalAlignment) == null ? void 0 : D.traceDurationSeconds) ?? s.traceDurationSeconds ?? 60),
-            channelCount: Number(((F = s.signalAlignment) == null ? void 0 : F.channelCount) ?? 3),
-            tolerance: Number((($ = s.signalAlignment) == null ? void 0 : $.tolerance) ?? 5),
-            signalDriftSpeed: Number(((x = s.signalAlignment) == null ? void 0 : x.signalDriftSpeed) ?? 0),
-            noiseLevel: Number(((q = s.signalAlignment) == null ? void 0 : q.noiseLevel) ?? 0),
-            lockHoldSeconds: Number(((X = s.signalAlignment) == null ? void 0 : X.lockHoldSeconds) ?? 4),
-            targetRevealRadius: Number(((K = s.signalAlignment) == null ? void 0 : K.targetRevealRadius) ?? 100),
-            destabilizationPenaltySeconds: Number(((G = s.signalAlignment) == null ? void 0 : G.destabilizationPenaltySeconds) ?? 0)
+            traceDurationSeconds: Number(((R = o.signalAlignment) == null ? void 0 : R.traceDurationSeconds) ?? o.traceDurationSeconds ?? 60),
+            channelCount: Number(((N = o.signalAlignment) == null ? void 0 : N.channelCount) ?? 3),
+            tolerance: Number(((D = o.signalAlignment) == null ? void 0 : D.tolerance) ?? 5),
+            signalDriftSpeed: Number(((q = o.signalAlignment) == null ? void 0 : q.signalDriftSpeed) ?? 0),
+            noiseLevel: Number(((B = o.signalAlignment) == null ? void 0 : B.noiseLevel) ?? 0),
+            lockHoldSeconds: Number(((V = o.signalAlignment) == null ? void 0 : V.lockHoldSeconds) ?? 4),
+            targetRevealRadius: Number((($ = o.signalAlignment) == null ? void 0 : $.targetRevealRadius) ?? 100),
+            destabilizationPenaltySeconds: Number(((F = o.signalAlignment) == null ? void 0 : F.destabilizationPenaltySeconds) ?? 0)
           },
-          constraints: u
+          packetSwitchboard: {
+            traceDurationSeconds: Number(((st = o.packetSwitchboard) == null ? void 0 : st.traceDurationSeconds) ?? o.traceDurationSeconds ?? 60),
+            laneCount: Number(((Ft = o.packetSwitchboard) == null ? void 0 : Ft.laneCount) ?? 4),
+            columnCount: Number(((Et = o.packetSwitchboard) == null ? void 0 : Et.columnCount) ?? 6),
+            deliveryGoal: Number(((_t = o.packetSwitchboard) == null ? void 0 : _t.deliveryGoal) ?? 7),
+            packetIntervalSeconds: Number(((qt = o.packetSwitchboard) == null ? void 0 : qt.packetIntervalSeconds) ?? 2),
+            packetStepSeconds: Number(((Gt = o.packetSwitchboard) == null ? void 0 : Gt.packetStepSeconds) ?? 0.8),
+            previewCount: Number(((jt = o.packetSwitchboard) == null ? void 0 : jt.previewCount) ?? 2),
+            misroutePenaltySeconds: Number(((Ut = o.packetSwitchboard) == null ? void 0 : Ut.misroutePenaltySeconds) ?? 5),
+            maxActivePackets: Number(((zt = o.packetSwitchboard) == null ? void 0 : zt.maxActivePackets) ?? 2),
+            entryHoldSeconds: Number(((Bt = o.packetSwitchboard) == null ? void 0 : Bt.entryHoldSeconds) ?? 1.5)
+          },
+          prismLock: {
+            traceDurationSeconds: Number(((Vt = o.prismLock) == null ? void 0 : Vt.traceDurationSeconds) ?? o.traceDurationSeconds ?? 60),
+            ringCount: Number(((Jt = o.prismLock) == null ? void 0 : Jt.ringCount) ?? 3),
+            slotCount: Number(((Kt = o.prismLock) == null ? void 0 : Kt.slotCount) ?? 10),
+            receiverCount: Number(((Xt = o.prismLock) == null ? void 0 : Xt.receiverCount) ?? 4),
+            blockersPerRing: Number(((Wt = o.prismLock) == null ? void 0 : Wt.blockersPerRing) ?? 0),
+            iceReceiverCount: Number(((Yt = o.prismLock) == null ? void 0 : Yt.iceReceiverCount) ?? 0),
+            switchableRingCount: Number(((Qt = o.prismLock) == null ? void 0 : Qt.switchableRingCount) ?? 0),
+            scrambleSteps: Number(((Zt = o.prismLock) == null ? void 0 : Zt.scrambleSteps) ?? 3),
+            icePenaltySeconds: Number(((te = o.prismLock) == null ? void 0 : te.icePenaltySeconds) ?? 5)
+          },
+          constraints: d
         };
       }),
-      hasOverrides: Object.keys(n).length > 0
+      hasOverrides: Object.keys(t).length > 0
     };
   }
-  activateListeners(n) {
-    super.activateListeners(n), this.syncConstraints(n), n.find("input[type='number']").on("change", (e) => {
-      $e(e.currentTarget);
-    }), n.find("[data-profile-section] input").on("input change", (e) => {
-      var r;
-      const i = (r = e.currentTarget) == null ? void 0 : r.closest("[data-profile-section]");
+  activateListeners(t) {
+    super.activateListeners(t), this.setProfileTab(t, this.activeProfileTab, !1), this.syncConstraints(t), t.find("[data-profile-tab]").on("click", (n) => {
+      n.preventDefault();
+      const i = n.currentTarget, s = (i == null ? void 0 : i.dataset.profileTab) ?? "general";
+      this.setProfileTab((i == null ? void 0 : i.closest(".holosuite-profile-config")) ?? t, s, !0);
+    }), t.find("[data-action='toggle-profile']").on("click", (n) => {
+      n.preventDefault();
+      const i = n.currentTarget, s = i == null ? void 0 : i.closest("[data-profile-section]");
+      if (!i || !s) return;
+      const o = !s.classList.contains("is-open");
+      s.classList.toggle("is-open", o), i.setAttribute("aria-expanded", String(o));
+    }), t.find("input[type='number']").on("change", (n) => {
+      re(n.currentTarget);
+    }), t.find("[data-profile-section] input").on("input change", (n) => {
+      var s;
+      const i = (s = n.currentTarget) == null ? void 0 : s.closest("[data-profile-section]");
       i && this.syncProfileConstraints(i);
-    }), n.find("[data-action='reset-profile']").on("click", (e) => {
-      var r;
-      e.preventDefault();
-      const i = (r = e.currentTarget) == null ? void 0 : r.closest("[data-profile-section]");
+    }), t.find("[data-action='reset-profile']").on("click", (n) => {
+      var s;
+      n.preventDefault(), n.stopPropagation();
+      const i = (s = n.currentTarget) == null ? void 0 : s.closest("[data-profile-section]");
       i && this.resetProfileSection(i);
-    }), n.find("[data-action='reset-profiles']").on("click", async (e) => {
-      var i, r;
-      e.preventDefault(), await game.settings.set(W, "difficultyProfileOverrides", ""), (r = (i = ui.notifications) == null ? void 0 : i.info) == null || r.call(i, "HoloSuite Hacking difficulty profiles reset to defaults."), this.render(!1);
+    }), t.find("[data-action='reset-profiles']").on("click", async (n) => {
+      var i, s;
+      n.preventDefault(), await game.settings.set(rt, "difficultyProfileOverrides", ""), (s = (i = ui.notifications) == null ? void 0 : i.info) == null || s.call(i, "HoloSuite Hacking difficulty profiles reset to defaults."), this.render(!1);
     });
   }
-  syncConstraints(n) {
-    n.find("[data-profile-section]").each((e, i) => this.syncProfileConstraints(i));
+  setProfileTab(t, n, i) {
+    var u, d;
+    const s = t instanceof HTMLElement ? t : t == null ? void 0 : t[0], o = (u = s == null ? void 0 : s.matches) != null && u.call(s, ".holosuite-profile-config") ? s : ((d = s == null ? void 0 : s.querySelector) == null ? void 0 : d.call(s, ".holosuite-profile-config")) ?? this.form;
+    if (!o) return;
+    const c = Array.from(o.querySelectorAll("[data-profile-tab]")), a = c.some((h) => h.dataset.profileTab === n) ? n : "general", l = a !== this.activeProfileTab;
+    this.activeProfileTab = a, o.dataset.activeProfileTab = a, c.forEach((h) => {
+      const f = h.dataset.profileTab === a;
+      h.classList.toggle("is-active", f), h.setAttribute("aria-selected", String(f)), h.tabIndex = f ? 0 : -1;
+    }), o.querySelectorAll("[data-profile-panel]").forEach((h) => {
+      const f = h.dataset.profilePanel === a;
+      h.classList.toggle("is-active", f);
+    }), i && l && o.querySelectorAll("[data-profile-section]").forEach((h) => {
+      var f;
+      h.classList.remove("is-open"), (f = h.querySelector("[data-action='toggle-profile']")) == null || f.setAttribute("aria-expanded", "false");
+    });
+  }
+  syncConstraints(t) {
+    t.find("[data-profile-section]").each((n, i) => this.syncProfileConstraints(i));
   }
   clampNumberInputs() {
-    var e;
-    const n = (e = this.element) == null ? void 0 : e[0];
-    n == null || n.querySelectorAll("input[type='number']").forEach((i) => $e(i));
+    var n;
+    const t = (n = this.element) == null ? void 0 : n[0];
+    t == null || t.querySelectorAll("input[type='number']").forEach((i) => re(i));
   }
-  syncProfileConstraints(n) {
-    const e = n.dataset.profileId ?? "", i = (u) => n.querySelector(`[name="${e}.${u}"]`), r = i("nodeCount"), s = i("decoyCount"), a = i("routeCount"), o = i("firewallCount"), l = i("allowFirewallOnMainPath");
-    if (!r || !s || !a || !o) return;
-    const c = ae(
-      Number(r.value),
-      Number(s.value),
-      Number(a.value),
-      !!(l != null && l.checked)
-    );
-    r.value = String(c.nodeCount), s.max = String(c.maxDecoys), s.value = String(c.decoyCount), a.max = String(c.maxRoutes), a.value = String(c.routeCount), o.max = String(c.maxFirewalls), o.value = String(y(Math.round(Number(o.value) || 0), 0, c.maxFirewalls)), n.querySelectorAll("[data-constraint]").forEach((u) => {
-      const d = u.dataset.constraint;
-      d && c[d] !== void 0 && (u.textContent = String(c[d]));
-    });
+  syncProfileConstraints(t) {
+    const n = t.dataset.profileId ?? "", i = (b) => t.querySelector(`[name="${n}.${b}"]`), s = i("nodeCount"), o = i("decoyCount"), c = i("routeCount"), a = i("firewallCount"), l = i("allowFirewallOnMainPath");
+    if (s && o && c && a) {
+      const b = pt(
+        Number(s.value),
+        Number(o.value),
+        Number(c.value),
+        !!(l != null && l.checked)
+      );
+      s.value = String(b.nodeCount), o.max = String(b.maxDecoys), o.value = String(b.decoyCount), c.max = String(b.maxRoutes), c.value = String(b.routeCount), a.max = String(b.maxFirewalls), a.value = String(S(Math.round(Number(a.value) || 0), 0, b.maxFirewalls)), t.querySelectorAll("[data-constraint]").forEach((C) => {
+        const k = C.dataset.constraint;
+        k && b[k] !== void 0 && (C.textContent = String(b[k]));
+      });
+    }
+    const u = i("packetLaneCount"), d = i("packetColumnCount");
+    if (u && d) {
+      const b = S(Math.round(Number(u.value) || 4), 3, 6), C = b - 1;
+      u.value = String(b), d.min = String(C), d.value = String(S(Math.round(Number(d.value) || 6), C, 8));
+    }
+    const h = i("prismRingCount"), f = i("prismSlotCount"), m = i("prismReceiverCount"), w = i("prismIceReceiverCount"), P = i("prismSwitchableRingCount"), I = i("prismScrambleSteps");
+    if (h && f && m && w && P && I) {
+      const b = S(Math.round(Number(h.value) || 3), 2, 4), C = S(Math.round(Number(f.value) || 10), 8, 16), k = S(Math.round(Number(m.value) || 4), 2, Math.min(8, C)), A = S(Math.round(Number(P.value) || 0), 0, b - 1), p = Math.min(4, C - k);
+      h.value = String(b), f.value = String(C), m.max = String(Math.min(8, C)), m.value = String(k), P.max = String(b - 1), P.value = String(A), w.max = String(p), w.min = String(A > 0 && p > 0 ? 1 : 0), w.value = String(S(Math.round(Number(w.value) || 0), Number(w.min), p)), I.max = String(Math.floor(C / 2)), I.value = String(S(Math.round(Number(I.value) || 3), 1, Math.floor(C / 2)));
+    }
   }
-  resetProfileSection(n) {
-    const e = n.dataset.profileId ?? "";
-    if (!fe.includes(e)) return;
-    const i = Nt(e), r = {
+  resetProfileSection(t) {
+    const n = t.dataset.profileId ?? "";
+    if (!Ct.includes(n)) return;
+    const i = rn(n), s = {
       visualGlitchIntensity: i.visualGlitchIntensity,
       nodeTraceDurationSeconds: i.nodeIntrusion.traceDurationSeconds,
       nodeCount: i.nodeIntrusion.nodeCount,
@@ -903,46 +1157,67 @@ class Mt extends bt {
       signalNoiseLevel: i.signalAlignment.noiseLevel,
       signalLockHoldSeconds: i.signalAlignment.lockHoldSeconds,
       signalTargetRevealRadius: i.signalAlignment.targetRevealRadius,
-      signalDestabilizationPenaltySeconds: i.signalAlignment.destabilizationPenaltySeconds
+      signalDestabilizationPenaltySeconds: i.signalAlignment.destabilizationPenaltySeconds,
+      packetTraceDurationSeconds: i.packetSwitchboard.traceDurationSeconds,
+      packetLaneCount: i.packetSwitchboard.laneCount,
+      packetColumnCount: i.packetSwitchboard.columnCount,
+      packetDeliveryGoal: i.packetSwitchboard.deliveryGoal,
+      packetIntervalSeconds: i.packetSwitchboard.packetIntervalSeconds,
+      packetStepSeconds: i.packetSwitchboard.packetStepSeconds,
+      packetPreviewCount: i.packetSwitchboard.previewCount,
+      packetMisroutePenaltySeconds: i.packetSwitchboard.misroutePenaltySeconds,
+      packetMaxActivePackets: i.packetSwitchboard.maxActivePackets,
+      packetEntryHoldSeconds: i.packetSwitchboard.entryHoldSeconds,
+      prismTraceDurationSeconds: i.prismLock.traceDurationSeconds,
+      prismRingCount: i.prismLock.ringCount,
+      prismSlotCount: i.prismLock.slotCount,
+      prismReceiverCount: i.prismLock.receiverCount,
+      prismBlockersPerRing: i.prismLock.blockersPerRing,
+      prismIceReceiverCount: i.prismLock.iceReceiverCount,
+      prismSwitchableRingCount: i.prismLock.switchableRingCount,
+      prismScrambleSteps: i.prismLock.scrambleSteps,
+      prismIcePenaltySeconds: i.prismLock.icePenaltySeconds
     };
-    for (const [a, o] of Object.entries(r)) {
-      const l = n.querySelector(`[name="${e}.${a}"]`);
-      l && (l.value = String(o));
+    for (const [c, a] of Object.entries(s)) {
+      const l = t.querySelector(`[name="${n}.${c}"]`);
+      l && (l.value = String(a));
     }
-    const s = {
+    const o = {
       hintsEnabled: i.hintsEnabled,
       radarEnabled: i.nodeIntrusion.radarEnabled,
       showTarget: i.nodeIntrusion.showTarget,
       allowFirewallOnMainPath: i.nodeIntrusion.allowFirewallOnMainPath
     };
-    for (const [a, o] of Object.entries(s)) {
-      const l = n.querySelector(`[name="${e}.${a}"]`);
-      l && (l.checked = o);
+    for (const [c, a] of Object.entries(o)) {
+      const l = t.querySelector(`[name="${n}.${c}"]`);
+      l && (l.checked = a);
     }
-    this.syncProfileConstraints(n);
+    this.syncProfileConstraints(t);
   }
-  async _updateObject(n, e) {
-    var s, a;
+  async _updateObject(t, n) {
+    var o, c;
     this.clampNumberInputs();
-    const i = new FormData(this.form), r = {};
-    for (const o of fe) {
-      const l = O[o], c = `${o}.`;
-      r[o] = {
-        traceDurationSeconds: y(Math.round(b(i, `${c}nodeTraceDurationSeconds`, l.traceDurationSeconds)), 5, 300),
-        hintsEnabled: re(i, `${c}hintsEnabled`),
-        visualGlitchIntensity: y(b(i, `${c}visualGlitchIntensity`, l.visualGlitchIntensity), 0, 1),
-        nodeIntrusion: It(i, c, l),
-        signalAlignment: vt(i, c, l)
+    const i = new FormData(this.form), s = {};
+    for (const a of Ct) {
+      const l = O[a], u = `${a}.`;
+      s[a] = {
+        traceDurationSeconds: S(Math.round(v(i, `${u}nodeTraceDurationSeconds`, l.traceDurationSeconds)), 5, 300),
+        hintsEnabled: gt(i, `${u}hintsEnabled`),
+        visualGlitchIntensity: S(v(i, `${u}visualGlitchIntensity`, l.visualGlitchIntensity), 0, 1),
+        nodeIntrusion: Ze(i, u, l),
+        signalAlignment: tn(i, u, l),
+        packetSwitchboard: en(i, u, l),
+        prismLock: nn(i, u, l)
       };
     }
-    await game.settings.set(W, "difficultyProfileOverrides", JSON.stringify(r)), (a = (s = ui.notifications) == null ? void 0 : s.info) == null || a.call(s, "HoloSuite Hacking difficulty profiles saved.");
+    await game.settings.set(rt, "difficultyProfileOverrides", JSON.stringify(s)), (c = (o = ui.notifications) == null ? void 0 : o.info) == null || c.call(o, "HoloSuite Hacking difficulty profiles saved.");
   }
 }
-async function ze({ title: t, result: n, actorName: e, message: i, rollTotal: r, dc: s }) {
-  const a = n === "success", o = a ? "#38f28f" : "#ff477e", l = a ? "HACK SUCCESS" : "HACK FAILED", c = i || (a ? "Objective completed." : "Trace or countermeasure completed."), u = Number.isFinite(Number(r)) && Number.isFinite(Number(s)) ? `<p style="margin: 4px 0 0; color: #bdeff6;">Roll ${Number(r)} vs DC ${Number(s)}</p>` : "", d = `
-    <div class="holosuite-hacking-chat-result" style="border-left: 4px solid ${o}; padding: 8px 10px; background: rgba(5, 8, 14, 0.88); color: ${o};">
-      <strong>${J(l)} // ${J(t)} // ${J(e || "Hacker")}</strong>
-      <p style="margin: 6px 0 0; color: ${o};">${J(c)}</p>
+async function wt({ title: e, result: r, actorName: t, message: n, rollTotal: i, dc: s }) {
+  const o = r === "success", c = o ? "#38f28f" : "#ff477e", a = o ? "HACK SUCCESS" : "HACK FAILED", l = n || (o ? "Objective completed." : "Trace or countermeasure completed."), u = Number.isFinite(Number(i)) && Number.isFinite(Number(s)) ? `<p style="margin: 4px 0 0; color: #bdeff6;">Roll ${Number(i)} vs DC ${Number(s)}</p>` : "", d = `
+    <div class="holosuite-hacking-chat-result" style="border-left: 4px solid ${c}; padding: 8px 10px; background: rgba(5, 8, 14, 0.88); color: ${c};">
+      <strong>${at(a)} // ${at(e)} // ${at(t || "Hacker")}</strong>
+      <p style="margin: 6px 0 0; color: ${c};">${at(l)}</p>
       ${u}
     </div>
   `;
@@ -951,290 +1226,290 @@ async function ze({ title: t, result: n, actorName: e, message: i, rollTotal: r,
     content: d
   });
 }
-function J(t) {
-  const n = document.createElement("div");
-  return n.textContent = String(t ?? ""), n.innerHTML;
+function at(e) {
+  const r = document.createElement("div");
+  return r.textContent = String(e ?? ""), r.innerHTML;
 }
-function T(t, n, e) {
-  return Math.min(e, Math.max(n, t));
+function L(e, r, t) {
+  return Math.min(t, Math.max(r, e));
 }
-function Ct(t) {
-  const n = String(t ?? "node-intrusion");
-  let e = 2166136261;
-  for (let i = 0; i < n.length; i += 1)
-    e ^= n.charCodeAt(i), e = Math.imul(e, 16777619);
-  return e >>> 0;
+function on(e) {
+  const r = String(e ?? "node-intrusion");
+  let t = 2166136261;
+  for (let n = 0; n < r.length; n += 1)
+    t ^= r.charCodeAt(n), t = Math.imul(t, 16777619);
+  return t >>> 0;
 }
-function Pt(t) {
-  let n = Ct(t);
+function an(e) {
+  let r = on(e);
   return () => {
-    n += 1831565813;
-    let e = n;
-    return e = Math.imul(e ^ e >>> 15, e | 1), e ^= e + Math.imul(e ^ e >>> 7, e | 61), ((e ^ e >>> 14) >>> 0) / 4294967296;
+    r += 1831565813;
+    let t = r;
+    return t = Math.imul(t ^ t >>> 15, t | 1), t ^= t + Math.imul(t ^ t >>> 7, t | 61), ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
 }
-function he(t, n) {
-  return t.length ? t[Math.floor(n() * t.length)] : null;
+function Pt(e, r) {
+  return e.length ? e[Math.floor(r() * e.length)] : null;
 }
-function Tt(t, n) {
-  const e = [...t];
-  for (let i = e.length - 1; i > 0; i -= 1) {
-    const r = Math.floor(n() * (i + 1));
-    [e[i], e[r]] = [e[r], e[i]];
+function cn(e, r) {
+  const t = [...e];
+  for (let n = t.length - 1; n > 0; n -= 1) {
+    const i = Math.floor(r() * (n + 1));
+    [t[n], t[i]] = [t[i], t[n]];
   }
-  return e;
+  return t;
 }
-function E(t, n, e) {
-  const i = t.find((s) => s.id === n), r = t.find((s) => s.id === e);
-  !i || !r || (i.connected.includes(e) || i.connected.push(e), r.connected.includes(n) || r.connected.push(n));
+function z(e, r, t) {
+  const n = e.find((s) => s.id === r), i = e.find((s) => s.id === t);
+  !n || !i || (n.connected.includes(t) || n.connected.push(t), i.connected.includes(r) || i.connected.push(r));
 }
-function j(t, n) {
-  return [t, n].sort().join("--");
+function Q(e, r) {
+  return [e, r].sort().join("--");
 }
-function oe(t, n, e, i) {
+function St(e, r, t, n) {
   return {
-    id: t,
-    x: T(Math.round(e), 6, 94),
-    y: T(Math.round(i), 10, 90),
-    type: n,
+    id: e,
+    x: L(Math.round(t), 6, 94),
+    y: L(Math.round(n), 10, 90),
+    type: r,
     connected: [],
-    revealed: n === "start",
+    revealed: r === "start",
     visited: !1
   };
 }
-function Ne(t) {
-  return t.flatMap((n) => n.connected.filter((e) => n.id < e).map((e) => ({ from: n.id, to: e })));
+function Lt(e) {
+  return e.flatMap((r) => r.connected.filter((t) => r.id < t).map((t) => ({ from: r.id, to: t })));
 }
-function k(t, n) {
-  return t.find((e) => e.id === n);
+function E(e, r) {
+  return e.find((t) => t.id === r);
 }
-function Y(t, n, e) {
-  return Math.sign((n.y - t.y) * (e.x - n.x) - (n.x - t.x) * (e.y - n.y));
+function ct(e, r, t) {
+  return Math.sign((r.y - e.y) * (t.x - r.x) - (r.x - e.x) * (t.y - r.y));
 }
-function At(t, n, e, i) {
-  const r = Y(t, n, e), s = Y(t, n, i), a = Y(e, i, t), o = Y(e, i, n);
-  return r !== s && a !== o;
+function ln(e, r, t, n) {
+  const i = ct(e, r, t), s = ct(e, r, n), o = ct(t, n, e), c = ct(t, n, r);
+  return i !== s && o !== c;
 }
-function Dt(t, n, e) {
-  if (n.from === e.from || n.from === e.to || n.to === e.from || n.to === e.to) return !1;
-  const i = k(t, n.from), r = k(t, n.to), s = k(t, e.from), a = k(t, e.to);
-  return !i || !r || !s || !a ? !1 : At(i, r, s, a);
+function un(e, r, t) {
+  if (r.from === t.from || r.from === t.to || r.to === t.from || r.to === t.to) return !1;
+  const n = E(e, r.from), i = E(e, r.to), s = E(e, t.from), o = E(e, t.to);
+  return !n || !i || !s || !o ? !1 : ln(n, i, s, o);
 }
-function $t(t, n, e) {
-  const i = e.x - n.x, r = e.y - n.y, s = i * i + r * r;
+function dn(e, r, t) {
+  const n = t.x - r.x, i = t.y - r.y, s = n * n + i * i;
   if (!s) {
-    const u = t.x - n.x, d = t.y - n.y;
+    const u = e.x - r.x, d = e.y - r.y;
     return Math.sqrt(u * u + d * d);
   }
-  const a = T(((t.x - n.x) * i + (t.y - n.y) * r) / s, 0, 1), o = {
-    x: n.x + a * i,
-    y: n.y + a * r
-  }, l = t.x - o.x, c = t.y - o.y;
-  return Math.sqrt(l * l + c * c);
+  const o = L(((e.x - r.x) * n + (e.y - r.y) * i) / s, 0, 1), c = {
+    x: r.x + o * n,
+    y: r.y + o * i
+  }, a = e.x - c.x, l = e.y - c.y;
+  return Math.sqrt(a * a + l * l);
 }
-function xt(t, n = Ne(t)) {
-  let e = 0;
-  for (let i = 0; i < n.length; i += 1)
-    for (let r = i + 1; r < n.length; r += 1)
-      Dt(t, n[i], n[r]) && (e += 1);
-  return e;
+function hn(e, r = Lt(e)) {
+  let t = 0;
+  for (let n = 0; n < r.length; n += 1)
+    for (let i = n + 1; i < r.length; i += 1)
+      un(e, r[n], r[i]) && (t += 1);
+  return t;
 }
-function Ue(t) {
-  const n = Ne(t);
-  let e = xt(t, n) * 900;
-  for (let i = 0; i < t.length; i += 1)
-    for (let r = i + 1; r < t.length; r += 1) {
-      const s = t[i], a = t[r], o = a.x - s.x, l = a.y - s.y, c = Math.sqrt(o * o + l * l) || 1;
-      c < 13 && (e += (13 - c) * 30), c < 18 && (e += (18 - c) * 6);
+function we(e) {
+  const r = Lt(e);
+  let t = hn(e, r) * 900;
+  for (let n = 0; n < e.length; n += 1)
+    for (let i = n + 1; i < e.length; i += 1) {
+      const s = e[n], o = e[i], c = o.x - s.x, a = o.y - s.y, l = Math.sqrt(c * c + a * a) || 1;
+      l < 13 && (t += (13 - l) * 30), l < 18 && (t += (18 - l) * 6);
     }
-  for (const i of t)
-    for (const r of n) {
-      if (r.from === i.id || r.to === i.id) continue;
-      const s = k(t, r.from), a = k(t, r.to);
-      if (!s || !a) continue;
-      const o = $t(i, s, a);
-      o < 8 && (e += (8 - o) * 18);
+  for (const n of e)
+    for (const i of r) {
+      if (i.from === n.id || i.to === n.id) continue;
+      const s = E(e, i.from), o = E(e, i.to);
+      if (!s || !o) continue;
+      const c = dn(n, s, o);
+      c < 8 && (t += (8 - c) * 18);
     }
-  return e;
+  return t;
 }
-function Ot(t, n, e) {
-  const i = t.map((r) => ({ ...r, connected: [...r.connected] }));
-  i.push({ ...n, connected: [] });
-  for (const r of e) E(i, n.id, r);
-  return Ue(i);
+function fn(e, r, t) {
+  const n = e.map((i) => ({ ...i, connected: [...i.connected] }));
+  n.push({ ...r, connected: [] });
+  for (const i of t) z(n, r.id, i);
+  return we(n);
 }
-function xe(t, n, e, i, r, s, a = {}) {
+function se(e, r, t, n, i, s, o = {}) {
   const {
-    radiusMin: o = 17,
-    radiusMax: l = 34,
-    biasX: c = 5,
+    radiusMin: c = 17,
+    radiusMax: a = 34,
+    biasX: l = 5,
     ySpread: u = 1
-  } = a;
-  let d = null, f = 1 / 0;
-  for (let h = 0; h < 16; h += 1) {
-    const m = r() * Math.PI * 2 - Math.PI * 0.2, I = o + r() * (l - o), A = i.x + Math.cos(m) * I + c, S = i.y + Math.sin(m) * I * u, v = oe(n, e, A, S), M = Ot(t, v, s);
-    M < f && (d = v, f = M);
+  } = o;
+  let d = null, h = 1 / 0;
+  for (let f = 0; f < 16; f += 1) {
+    const m = i() * Math.PI * 2 - Math.PI * 0.2, w = c + i() * (a - c), P = n.x + Math.cos(m) * w + l, I = n.y + Math.sin(m) * w * u, b = St(r, t, P, I), C = fn(e, b, s);
+    C < h && (d = b, h = C);
   }
-  return d ?? oe(n, e, i.x + c, i.y);
+  return d ?? St(r, t, n.x + l, n.y);
 }
-function Rt(t) {
-  for (let n = 0; n < 24; n += 1)
-    for (let e = 0; e < t.length; e += 1)
-      for (let i = e + 1; i < t.length; i += 1) {
-        const r = t[e], s = t[i], a = s.x - r.x, o = s.y - r.y, l = Math.sqrt(a * a + o * o) || 1;
-        if (l >= 13) continue;
-        const c = (13 - l) * 0.35, u = a / l * c, d = o / l * c;
-        r.type !== "start" && r.type !== "target" && (r.x = T(r.x - u, 6, 94), r.y = T(r.y - d, 10, 90)), s.type !== "start" && s.type !== "target" && (s.x = T(s.x + u, 6, 94), s.y = T(s.y + d, 10, 90));
+function mn(e) {
+  for (let r = 0; r < 24; r += 1)
+    for (let t = 0; t < e.length; t += 1)
+      for (let n = t + 1; n < e.length; n += 1) {
+        const i = e[t], s = e[n], o = s.x - i.x, c = s.y - i.y, a = Math.sqrt(o * o + c * c) || 1;
+        if (a >= 13) continue;
+        const l = (13 - a) * 0.35, u = o / a * l, d = c / a * l;
+        i.type !== "start" && i.type !== "target" && (i.x = L(i.x - u, 6, 94), i.y = L(i.y - d, 10, 90)), s.type !== "start" && s.type !== "target" && (s.x = L(s.x + u, 6, 94), s.y = L(s.y + d, 10, 90));
       }
 }
-function Q(t) {
-  const n = Math.floor(t() * 4);
-  return n === 0 ? { x: 8 + t() * 22, y: 12 + t() * 76 } : n === 1 ? { x: 70 + t() * 22, y: 12 + t() * 76 } : n === 2 ? { x: 12 + t() * 76, y: 10 + t() * 20 } : { x: 12 + t() * 76, y: 70 + t() * 20 };
+function lt(e) {
+  const r = Math.floor(e() * 4);
+  return r === 0 ? { x: 8 + e() * 22, y: 12 + e() * 76 } : r === 1 ? { x: 70 + e() * 22, y: 12 + e() * 76 } : r === 2 ? { x: 12 + e() * 76, y: 10 + e() * 20 } : { x: 12 + e() * 76, y: 70 + e() * 20 };
 }
-function Ft(t) {
-  let n = Q(t), e = Q(t), i = { start: n, target: e, distance: 0 };
-  for (let r = 0; r < 24; r += 1) {
-    n = Q(t), e = Q(t);
-    const s = e.x - n.x, a = e.y - n.y, o = Math.sqrt(s * s + a * a);
-    if (o > i.distance && (i = { start: n, target: e, distance: o }), o >= 58) return { start: n, target: e };
+function gn(e) {
+  let r = lt(e), t = lt(e), n = { start: r, target: t, distance: 0 };
+  for (let i = 0; i < 24; i += 1) {
+    r = lt(e), t = lt(e);
+    const s = t.x - r.x, o = t.y - r.y, c = Math.sqrt(s * s + o * o);
+    if (c > n.distance && (n = { start: r, target: t, distance: c }), c >= 58) return { start: r, target: t };
   }
-  return { start: i.start, target: i.target };
+  return { start: n.start, target: n.target };
 }
-function Oe(t, n, e, i = /* @__PURE__ */ new Set()) {
-  const r = [n], s = /* @__PURE__ */ new Map([[n, null]]);
-  for (let l = 0; l < r.length; l += 1) {
-    const c = k(t, r[l]);
-    if (c) {
-      if (c.id === e) break;
-      for (const u of c.connected) {
+function oe(e, r, t, n = /* @__PURE__ */ new Set()) {
+  const i = [r], s = /* @__PURE__ */ new Map([[r, null]]);
+  for (let a = 0; a < i.length; a += 1) {
+    const l = E(e, i[a]);
+    if (l) {
+      if (l.id === t) break;
+      for (const u of l.connected) {
         if (s.has(u)) continue;
-        const d = k(t, u);
-        !d || i.has(d.type) || (s.set(u, c.id), r.push(u));
+        const d = E(e, u);
+        !d || n.has(d.type) || (s.set(u, l.id), i.push(u));
       }
     }
   }
-  if (!s.has(e)) return [];
-  const a = [];
-  let o = e;
-  for (; o; )
-    a.unshift(o), o = s.get(o) ?? null;
-  return a;
+  if (!s.has(t)) return [];
+  const o = [];
+  let c = t;
+  for (; c; )
+    o.unshift(c), c = s.get(c) ?? null;
+  return o;
 }
-function kt(t, n, e) {
-  const i = Oe(t, n, e, /* @__PURE__ */ new Set(["firewall", "decoy"]));
-  if (!i.length) return 0;
-  const r = /* @__PURE__ */ new Set([n, e]), s = t.map((a) => ({
-    ...a,
-    connected: r.has(a.id) || !i.includes(a.id) ? [...a.connected] : []
+function pn(e, r, t) {
+  const n = oe(e, r, t, /* @__PURE__ */ new Set(["firewall", "decoy"]));
+  if (!n.length) return 0;
+  const i = /* @__PURE__ */ new Set([r, t]), s = e.map((o) => ({
+    ...o,
+    connected: i.has(o.id) || !n.includes(o.id) ? [...o.connected] : []
   }));
-  return 1 + (Oe(s, n, e, /* @__PURE__ */ new Set(["firewall", "decoy"])).length ? 1 : 0);
+  return 1 + (oe(s, r, t, /* @__PURE__ */ new Set(["firewall", "decoy"])).length ? 1 : 0);
 }
-function Lt(t, n, e, i) {
-  let r = t.length + 1;
+function Sn(e, r, t, n) {
+  let i = e.length + 1;
   const s = [];
-  for (let a = 1; a < i && !(n.length < 5); a += 1) {
-    const o = 1 + Math.floor(e() * Math.max(1, n.length - 4)), l = T(o + 2 + Math.floor(e() * 3), o + 2, n.length - 2), c = k(t, n[o]), u = k(t, n[l]);
-    if (!c || !u) continue;
-    const d = `node-${r}`;
-    r += 1;
-    const f = oe(
+  for (let o = 1; o < n && !(r.length < 5); o += 1) {
+    const c = 1 + Math.floor(t() * Math.max(1, r.length - 4)), a = L(c + 2 + Math.floor(t() * 3), c + 2, r.length - 2), l = E(e, r[c]), u = E(e, r[a]);
+    if (!l || !u) continue;
+    const d = `node-${i}`;
+    i += 1;
+    const h = St(
       d,
       "normal",
-      (c.x + u.x) / 2 + (e() - 0.5) * 34,
-      (c.y + u.y) / 2 + (e() - 0.5) * 34
+      (l.x + u.x) / 2 + (t() - 0.5) * 34,
+      (l.y + u.y) / 2 + (t() - 0.5) * 34
     );
-    t.push(f), s.push(c.id, f.id, u.id), E(t, c.id, f.id), E(t, f.id, u.id);
+    e.push(h), s.push(l.id, h.id, u.id), z(e, l.id, h.id), z(e, h.id, u.id);
   }
   return s;
 }
-function Re(t, n = Date.now()) {
-  var S, v, M, P, L;
-  const e = Pt(n), i = Math.max(6, Number(t.nodeCount ?? ((S = t.nodeIntrusion) == null ? void 0 : S.nodeCount)) || 10), r = T(Number(t.decoyCount ?? ((v = t.nodeIntrusion) == null ? void 0 : v.decoyCount)) || 0, 0, i - 4), s = Math.max(0, i - r), a = T(Math.round(s * 0.48), 6, s), o = T(Number(t.routeCount ?? ((M = t.nodeIntrusion) == null ? void 0 : M.routeCount)) || 2, 1, 3), l = Ft(e), c = [], u = [];
-  for (let g = 0; g < a; g += 1) {
-    const C = g === 0 ? "start" : g === a - 1 ? "target" : `node-${g}`, D = g === 0 ? "start" : g === a - 1 ? "target" : "normal", F = g / Math.max(1, a - 1), $ = l.target.x - l.start.x, x = l.target.y - l.start.y, q = Math.sqrt($ * $ + x * x) || 1, X = -x / q, K = $ / q, G = Math.sin(F * Math.PI * (1.15 + e() * 0.6)) * (10 + e() * 8), Ye = g === 0 || g === a - 1 ? 0 : (e() - 0.5) * 5, Qe = g === 0 || g === a - 1 ? 0 : (e() - 0.5) * 12;
-    c.push(oe(
-      C,
-      D,
-      l.start.x + $ * F + X * G + Ye,
-      l.start.y + x * F + K * G + Qe
-    )), u.push(C), g > 0 && E(c, u[g - 1], C);
+function ae(e, r = Date.now()) {
+  var I, b, C, k, A;
+  const t = an(r), n = Math.max(6, Number(e.nodeCount ?? ((I = e.nodeIntrusion) == null ? void 0 : I.nodeCount)) || 10), i = L(Number(e.decoyCount ?? ((b = e.nodeIntrusion) == null ? void 0 : b.decoyCount)) || 0, 0, n - 4), s = Math.max(0, n - i), o = L(Math.round(s * 0.48), 6, s), c = L(Number(e.routeCount ?? ((C = e.nodeIntrusion) == null ? void 0 : C.routeCount)) || 2, 1, 3), a = gn(t), l = [], u = [];
+  for (let p = 0; p < o; p += 1) {
+    const y = p === 0 ? "start" : p === o - 1 ? "target" : `node-${p}`, M = p === 0 ? "start" : p === o - 1 ? "target" : "normal", R = p / Math.max(1, o - 1), N = a.target.x - a.start.x, D = a.target.y - a.start.y, q = Math.sqrt(N * N + D * D) || 1, B = -D / q, V = N / q, $ = Math.sin(R * Math.PI * (1.15 + t() * 0.6)) * (10 + t() * 8), F = p === 0 || p === o - 1 ? 0 : (t() - 0.5) * 5, st = p === 0 || p === o - 1 ? 0 : (t() - 0.5) * 12;
+    l.push(St(
+      y,
+      M,
+      a.start.x + N * R + B * $ + F,
+      a.start.y + D * R + V * $ + st
+    )), u.push(y), p > 0 && z(l, u[p - 1], y);
   }
-  const d = /* @__PURE__ */ new Set([...u, ...Lt(c, u, e, o)]);
-  let f = c.length + 1;
-  for (; c.length < i - r; ) {
-    const g = he(c.filter((x) => x.type !== "target"), e) ?? c[0], C = `node-${f}`;
-    f += 1;
-    const D = e() > 0.45 ? he(c.filter((x) => x.id !== g.id && x.type !== "start"), e) : null, F = D ? [g.id, D.id] : [g.id], $ = xe(c, C, "normal", g, e, F, {
+  const d = /* @__PURE__ */ new Set([...u, ...Sn(l, u, t, c)]);
+  let h = l.length + 1;
+  for (; l.length < n - i; ) {
+    const p = Pt(l.filter((D) => D.type !== "target"), t) ?? l[0], y = `node-${h}`;
+    h += 1;
+    const M = t() > 0.45 ? Pt(l.filter((D) => D.id !== p.id && D.type !== "start"), t) : null, R = M ? [p.id, M.id] : [p.id], N = se(l, y, "normal", p, t, R, {
       radiusMin: 16,
       radiusMax: 31,
-      biasX: e() > 0.35 ? 5 : -4,
+      biasX: t() > 0.35 ? 5 : -4,
       ySpread: 1.15
     });
-    c.push($), E(c, g.id, C), D && E(c, C, D.id);
+    l.push(N), z(l, p.id, y), M && z(l, y, M.id);
   }
-  for (let g = 0; g < r; g += 1) {
-    const C = he(c.filter(($) => $.type !== "target" && $.type !== "decoy"), e) ?? c[0], D = `decoy-${g + 1}`, F = xe(c, D, "decoy", C, e, [C.id], {
+  for (let p = 0; p < i; p += 1) {
+    const y = Pt(l.filter((N) => N.type !== "target" && N.type !== "decoy"), t) ?? l[0], M = `decoy-${p + 1}`, R = se(l, M, "decoy", y, t, [y.id], {
       radiusMin: 18,
       radiusMax: 34,
-      biasX: e() > 0.5 ? -6 : 6,
+      biasX: t() > 0.5 ? -6 : 6,
       ySpread: 1.25
     });
-    c.push(F), E(c, C.id, D);
+    l.push(R), z(l, y.id, M);
   }
-  const h = !!(t.allowFirewallOnMainPath ?? t.allowMainPathFirewalls ?? ((P = t.nodeIntrusion) == null ? void 0 : P.allowFirewallOnMainPath)), m = c.filter((g) => g.type === "start" || g.type === "target" || g.type === "decoy" ? !1 : h || !d.has(g.id)), I = T(Number(t.firewallCount ?? ((L = t.nodeIntrusion) == null ? void 0 : L.firewallCount)) || 0, 0, m.length);
-  for (const g of Tt(m, e).slice(0, I))
-    g.type = "firewall";
-  Rt(c);
-  const A = kt(c, "start", "target");
+  const f = !!(e.allowFirewallOnMainPath ?? e.allowMainPathFirewalls ?? ((k = e.nodeIntrusion) == null ? void 0 : k.allowFirewallOnMainPath)), m = l.filter((p) => p.type === "start" || p.type === "target" || p.type === "decoy" ? !1 : f || !d.has(p.id)), w = L(Number(e.firewallCount ?? ((A = e.nodeIntrusion) == null ? void 0 : A.firewallCount)) || 0, 0, m.length);
+  for (const p of cn(m, t).slice(0, w))
+    p.type = "firewall";
+  mn(l);
+  const P = pn(l, "start", "target");
   return {
-    nodes: c,
-    edges: Ne(c),
+    nodes: l,
+    edges: Lt(l),
     startNodeId: "start",
     targetNodeId: "target",
     mainPathIds: u,
-    safeRoutes: A,
-    layoutScore: Ue(c)
+    safeRoutes: P,
+    layoutScore: we(l)
   };
 }
-function Ht(t, n = Date.now()) {
-  var r;
-  const e = T(Math.ceil(Number(t.nodeCount ?? ((r = t.nodeIntrusion) == null ? void 0 : r.nodeCount)) || 10), 7, 14);
-  let i = null;
-  for (let s = 0; s < e; s += 1) {
-    const a = Re(t, `${n}:${s}`);
-    if ((!i || a.layoutScore < i.layoutScore) && (i = a), a.layoutScore < 1 && a.safeRoutes > 1) break;
+function yn(e, r = Date.now()) {
+  var i;
+  const t = L(Math.ceil(Number(e.nodeCount ?? ((i = e.nodeIntrusion) == null ? void 0 : i.nodeCount)) || 10), 7, 14);
+  let n = null;
+  for (let s = 0; s < t; s += 1) {
+    const o = ae(e, `${r}:${s}`);
+    if ((!n || o.layoutScore < n.layoutScore) && (n = o), o.layoutScore < 1 && o.safeRoutes > 1) break;
   }
-  return i ?? Re(t, n);
+  return n ?? ae(e, r);
 }
-const Ve = "holosuite-hacking", Et = `modules/${Ve}/templates/node-intrusion.html`, _t = ue();
-function Z(t, n, e) {
-  return Math.min(e, Math.max(n, t));
+const ve = "holosuite-hacking", bn = `modules/${ve}/templates/node-intrusion.html`, wn = Y();
+function ut(e, r, t) {
+  return Math.min(t, Math.max(r, e));
 }
-function Fe(t) {
-  return t === "start" ? "entry" : t === "target" ? "target" : t === "firewall" ? "firewall" : t === "decoy" ? "decoy" : "relay";
+function ce(e) {
+  return e === "start" ? "entry" : e === "target" ? "target" : e === "firewall" ? "firewall" : e === "decoy" ? "decoy" : "relay";
 }
-function qt(t, n, e) {
-  const i = globalThis.crypto, r = typeof (i == null ? void 0 : i.randomUUID) == "function" ? i.randomUUID() : `${Date.now()}:${performance.now()}:${Math.random()}`;
-  return `${t}:${n}:${e.profileId ?? e.id}:${r}`;
+function vn(e, r, t) {
+  const n = globalThis.crypto, i = typeof (n == null ? void 0 : n.randomUUID) == "function" ? n.randomUUID() : `${Date.now()}:${performance.now()}:${Math.random()}`;
+  return `${e}:${r}:${t.profileId ?? t.id}:${i}`;
 }
-class Gt extends _t {
-  constructor(e = {}) {
-    super(e);
-    p(this, "rollTotal");
-    p(this, "dc");
-    p(this, "profile");
-    p(this, "seed");
-    p(this, "onSuccess");
-    p(this, "onFailure");
-    p(this, "actorName");
-    p(this, "chatOnResult");
-    p(this, "graph");
-    p(this, "state");
-    p(this, "startedAt");
-    p(this, "timer");
-    p(this, "claimTimer");
-    p(this, "resultMessage");
-    this.rollTotal = Number(e.rollTotal ?? 15), this.dc = Number(e.dc ?? 15), this.profile = e.profile ? { ...e.profile } : se(this.rollTotal, this.dc), this.seed = e.seed ?? qt(this.rollTotal, this.dc, this.profile), this.onSuccess = typeof e.onSuccess == "function" ? e.onSuccess : null, this.onFailure = typeof e.onFailure == "function" ? e.onFailure : null, this.actorName = String(e.actorName ?? "Hacker"), this.chatOnResult = e.chatOnResult !== !1, this.graph = Ht(this.profile, this.seed), this.state = {
+class Cn extends wn {
+  constructor(t = {}) {
+    super(t);
+    g(this, "rollTotal");
+    g(this, "dc");
+    g(this, "profile");
+    g(this, "seed");
+    g(this, "onSuccess");
+    g(this, "onFailure");
+    g(this, "actorName");
+    g(this, "chatOnResult");
+    g(this, "graph");
+    g(this, "state");
+    g(this, "startedAt");
+    g(this, "timer");
+    g(this, "claimTimer");
+    g(this, "resultMessage");
+    this.rollTotal = Number(t.rollTotal ?? 15), this.dc = Number(t.dc ?? 15), this.profile = t.profile ? { ...t.profile } : W(this.rollTotal, this.dc), this.seed = t.seed ?? vn(this.rollTotal, this.dc, this.profile), this.onSuccess = typeof t.onSuccess == "function" ? t.onSuccess : null, this.onFailure = typeof t.onFailure == "function" ? t.onFailure : null, this.actorName = String(t.actorName ?? "Hacker"), this.chatOnResult = t.chatOnResult !== !1, this.graph = yn(this.profile, this.seed), this.state = {
       currentNodeId: this.graph.startNodeId,
       visitedNodeIds: /* @__PURE__ */ new Set([this.graph.startNodeId]),
       traversedEdgeIds: /* @__PURE__ */ new Set(),
@@ -1259,26 +1534,26 @@ class Gt extends _t {
       resizable: !0,
       width: 980,
       height: 760,
-      template: Et
+      template: bn
     });
   }
   getData() {
-    var a, o;
-    const e = this.getCurrentNode(), i = e.connected, r = !!(this.profile.radarEnabled ?? ((a = this.profile.nodeIntrusion) == null ? void 0 : a.radarEnabled) ?? Number(this.profile.radarRange ?? ((o = this.profile.nodeIntrusion) == null ? void 0 : o.radarRange)) > 0), s = this.graph.nodes.map((l) => {
-      const c = l.id === this.state.currentNodeId, u = this.state.visitedNodeIds.has(l.id), d = l.id === this.state.claimingNodeId, f = l.type === "target" && (u || this.profile.showTarget || this.profile.hintsEnabled), h = l.type !== "target" && (this.profile.hintsEnabled || l.revealed || u || l.type === "start"), m = f || h ? Fe(l.type) : "unknown", A = r && (c || u || i.includes(l.id)) && l.type !== "start" && l.type !== "target" ? this.countAdjacentBadNodes(l.id) : 0, S = Z(A, 0, 2);
+    var o, c;
+    const t = this.getCurrentNode(), n = t.connected, i = !!(this.profile.radarEnabled ?? ((o = this.profile.nodeIntrusion) == null ? void 0 : o.radarEnabled) ?? Number(this.profile.radarRange ?? ((c = this.profile.nodeIntrusion) == null ? void 0 : c.radarRange)) > 0), s = this.graph.nodes.map((a) => {
+      const l = a.id === this.state.currentNodeId, u = this.state.visitedNodeIds.has(a.id), d = a.id === this.state.claimingNodeId, h = a.type === "target" && (u || this.profile.showTarget || this.profile.hintsEnabled), f = a.type !== "target" && (this.profile.hintsEnabled || a.revealed || u || a.type === "start"), m = h || f ? ce(a.type) : "unknown", P = i && (l || u || n.includes(a.id)) && a.type !== "start" && a.type !== "target" ? this.countAdjacentBadNodes(a.id) : 0, I = ut(P, 0, 2);
       return {
-        ...l,
-        visualType: f ? "target" : l.type === "target" ? "normal" : l.type,
-        isTargetVisible: f,
-        isCurrent: c,
+        ...a,
+        visualType: h ? "target" : a.type === "target" ? "normal" : a.type,
+        isTargetVisible: h,
+        isCurrent: l,
         isVisited: u,
         isClaiming: d,
-        isNeighbor: i.includes(l.id),
-        canMove: i.includes(l.id) && !this.state.claimingNodeId && !this.state.blockedEdgeIds.has(j(e.id, l.id)) && !this.state.deadNodeIds.has(l.id),
-        isDangerVisible: l.type !== "target" && (this.profile.hintsEnabled || l.revealed || u),
-        dangerSignal: S,
+        isNeighbor: n.includes(a.id),
+        canMove: n.includes(a.id) && !this.state.claimingNodeId && !this.state.blockedEdgeIds.has(Q(t.id, a.id)) && !this.state.deadNodeIds.has(a.id),
+        isDangerVisible: a.type !== "target" && (this.profile.hintsEnabled || a.revealed || u),
+        dangerSignal: I,
         displayType: m,
-        title: `${l.id} - ${m}${S ? ` / signal ${S}` : ""}`
+        title: `${a.id} - ${m}${I ? ` / signal ${I}` : ""}`
       };
     });
     return {
@@ -1286,23 +1561,23 @@ class Gt extends _t {
       dc: this.dc,
       profile: this.profile,
       nodes: s,
-      edges: this.graph.edges.map((l) => {
-        const c = s.find((f) => f.id === l.from), u = s.find((f) => f.id === l.to), d = this.state.blockedEdgeIds.get(j(l.from, l.to));
+      edges: this.graph.edges.map((a) => {
+        const l = s.find((h) => h.id === a.from), u = s.find((h) => h.id === a.to), d = this.state.blockedEdgeIds.get(Q(a.from, a.to));
         return {
-          ...l,
-          from: c,
+          ...a,
+          from: l,
           to: u,
-          isVisitedPath: this.state.traversedEdgeIds.has(j(l.from, l.to)),
-          isAvailable: !d && (i.includes(l.from) || i.includes(l.to)),
+          isVisitedPath: this.state.traversedEdgeIds.has(Q(a.from, a.to)),
+          isAvailable: !d && (n.includes(a.from) || n.includes(a.to)),
           isFirewallPath: d === "firewall",
           isDecoyPath: d === "decoy"
         };
       }),
       movement: this.state.movement,
       currentNode: {
-        id: e.id,
-        label: Fe(e.type),
-        availableRoutes: s.filter((l) => l.canMove).length
+        id: t.id,
+        label: ce(t.type),
+        availableRoutes: s.filter((a) => a.canMove).length
       },
       state: {
         ...this.state,
@@ -1316,106 +1591,106 @@ class Gt extends _t {
       glitchClass: this.profile.visualGlitchIntensity > 0.7 ? "glitch-high" : this.profile.visualGlitchIntensity > 0.35 ? "glitch-medium" : "glitch-low"
     };
   }
-  activateListeners(e) {
-    super.activateListeners(e), e.find("[data-node-id]").on("click", (i) => this.handleNodeClick(i.currentTarget.dataset.nodeId)), e.find("[data-action='start']").on("click", () => this.startRun()), e.find("[data-action='abort']").on("click", () => this.abort()), this.syncDom();
+  activateListeners(t) {
+    super.activateListeners(t), t.find("[data-node-id]").on("click", (n) => this.handleNodeClick(n.currentTarget.dataset.nodeId)), t.find("[data-action='start']").on("click", () => this.startRun()), t.find("[data-action='abort']").on("click", () => this.abort()), t.find("[data-action='close']").on("click", () => this.close()), this.syncDom();
   }
-  async render(e, i) {
-    const r = await super.render(e, i);
-    return this.state.hasStarted && this.state.isRunning && this.startTimer(), r;
+  async render(t, n) {
+    const i = await super.render(t, n);
+    return this.state.hasStarted && this.state.isRunning && this.startTimer(), i;
   }
-  async close(e = {}) {
-    return this.stopTimer(), this.claimTimer && window.clearTimeout(this.claimTimer), this.claimTimer = null, super.close(e);
+  async close(t = {}) {
+    return this.stopTimer(), this.claimTimer && window.clearTimeout(this.claimTimer), this.claimTimer = null, super.close(t);
   }
   getCurrentNode() {
-    return this.graph.nodes.find((e) => e.id === this.state.currentNodeId) ?? this.graph.nodes[0];
+    return this.graph.nodes.find((t) => t.id === this.state.currentNodeId) ?? this.graph.nodes[0];
   }
   getTraceDuration() {
-    var r;
-    const e = Number(game.settings.get(Ve, "traceDurationMultiplier") ?? 1) || 1, i = Number(((r = this.profile.nodeIntrusion) == null ? void 0 : r.traceDurationSeconds) ?? this.profile.traceDurationSeconds ?? 60);
-    return Math.max(5, i * e);
+    var i;
+    const t = Number(game.settings.get(ve, "traceDurationMultiplier") ?? 1) || 1, n = Number(((i = this.profile.nodeIntrusion) == null ? void 0 : i.traceDurationSeconds) ?? this.profile.traceDurationSeconds ?? 60);
+    return Math.max(5, n * t);
   }
-  countAdjacentBadNodes(e) {
-    const i = this.graph.nodes.find((r) => r.id === e);
-    return i ? i.connected.reduce((r, s) => {
-      const a = this.graph.nodes.find((o) => o.id === s);
-      return (a == null ? void 0 : a.type) === "firewall" || (a == null ? void 0 : a.type) === "decoy" ? r + 1 : r;
+  countAdjacentBadNodes(t) {
+    const n = this.graph.nodes.find((i) => i.id === t);
+    return n ? n.connected.reduce((i, s) => {
+      const o = this.graph.nodes.find((c) => c.id === s);
+      return (o == null ? void 0 : o.type) === "firewall" || (o == null ? void 0 : o.type) === "decoy" ? i + 1 : i;
     }, 0) : 0;
   }
   firewallsArePassable() {
-    var e;
-    return !!(this.profile.allowFirewallOnMainPath ?? this.profile.allowMainPathFirewalls ?? ((e = this.profile.nodeIntrusion) == null ? void 0 : e.allowFirewallOnMainPath));
+    var t;
+    return !!(this.profile.allowFirewallOnMainPath ?? this.profile.allowMainPathFirewalls ?? ((t = this.profile.nodeIntrusion) == null ? void 0 : t.allowFirewallOnMainPath));
   }
   startRun() {
     this.state.hasStarted || this.state.result || (this.state.hasStarted = !0, this.state.isRunning = !0, this.startedAt = performance.now(), this.startTimer(), this.render(!1));
   }
-  handleNodeClick(e) {
-    var c, u, d, f;
+  handleNodeClick(t) {
+    var l, u, d, h;
     if (!this.state.hasStarted || !this.state.isRunning || this.state.claimingNodeId) return;
-    const i = this.getCurrentNode(), r = this.graph.nodes.find((h) => h.id === e);
-    if (!r) return;
-    if (!i.connected.includes(e)) {
-      (c = this.element) == null || c.find(".node-intrusion-shell").addClass("invalid-pulse"), window.setTimeout(() => {
-        var h;
-        return (h = this.element) == null ? void 0 : h.find(".node-intrusion-shell").removeClass("invalid-pulse");
+    const n = this.getCurrentNode(), i = this.graph.nodes.find((f) => f.id === t);
+    if (!i) return;
+    if (!n.connected.includes(t)) {
+      (l = this.element) == null || l.find(".node-intrusion-shell").addClass("invalid-pulse"), window.setTimeout(() => {
+        var f;
+        return (f = this.element) == null ? void 0 : f.find(".node-intrusion-shell").removeClass("invalid-pulse");
       }, 280);
       return;
     }
-    const s = j(i.id, e);
-    if (this.state.blockedEdgeIds.has(s) || this.state.deadNodeIds.has(e)) {
+    const s = Q(n.id, t);
+    if (this.state.blockedEdgeIds.has(s) || this.state.deadNodeIds.has(t)) {
       (u = this.element) == null || u.find(".node-intrusion-shell").addClass("invalid-pulse"), window.setTimeout(() => {
-        var h;
-        return (h = this.element) == null ? void 0 : h.find(".node-intrusion-shell").removeClass("invalid-pulse");
+        var f;
+        return (f = this.element) == null ? void 0 : f.find(".node-intrusion-shell").removeClass("invalid-pulse");
       }, 280);
       return;
     }
     this.state.movement = {
-      fromX: i.x,
-      fromY: i.y,
-      toX: r.x,
-      toY: r.y,
-      path: `M ${i.x} ${i.y} L ${r.x} ${r.y}`
-    }, this.state.claimingNodeId = e, this.render(!1);
-    const a = Math.max(0.1, Number(this.profile.claimDurationSeconds ?? ((d = this.profile.nodeIntrusion) == null ? void 0 : d.claimDurationSeconds)) || 0.5), o = Math.max(1, Number(this.profile.firewallClaimMultiplier ?? ((f = this.profile.nodeIntrusion) == null ? void 0 : f.firewallClaimMultiplier)) || 1), l = r.type === "firewall" ? a * o : a;
+      fromX: n.x,
+      fromY: n.y,
+      toX: i.x,
+      toY: i.y,
+      path: `M ${n.x} ${n.y} L ${i.x} ${i.y}`
+    }, this.state.claimingNodeId = t, this.render(!1);
+    const o = Math.max(0.1, Number(this.profile.claimDurationSeconds ?? ((d = this.profile.nodeIntrusion) == null ? void 0 : d.claimDurationSeconds)) || 0.5), c = Math.max(1, Number(this.profile.firewallClaimMultiplier ?? ((h = this.profile.nodeIntrusion) == null ? void 0 : h.firewallClaimMultiplier)) || 1), a = i.type === "firewall" ? o * c : o;
     this.claimTimer = window.setTimeout(() => {
-      this.claimTimer = null, this.completeNodeClaim(i.id, e);
-    }, l * 1e3);
+      this.claimTimer = null, this.completeNodeClaim(n.id, t);
+    }, a * 1e3);
   }
-  completeNodeClaim(e, i) {
-    var o, l, c, u, d, f;
+  completeNodeClaim(t, n) {
+    var c, a, l, u, d, h;
     if (!this.state.hasStarted || !this.state.isRunning) return;
-    const r = this.graph.nodes.find((h) => h.id === e), s = this.graph.nodes.find((h) => h.id === i);
-    if (!r || !s) return;
-    const a = j(r.id, i);
-    if (this.state.claimingNodeId = null, this.state.visitedNodeIds.add(i), this.state.traversedEdgeIds.add(a), s.visited = !0, s.revealed = !0, s.type === "firewall") {
+    const i = this.graph.nodes.find((f) => f.id === t), s = this.graph.nodes.find((f) => f.id === n);
+    if (!i || !s) return;
+    const o = Q(i.id, n);
+    if (this.state.claimingNodeId = null, this.state.visitedNodeIds.add(n), this.state.traversedEdgeIds.add(o), s.visited = !0, s.revealed = !0, s.type === "firewall") {
       this.state.mistakes += 1;
-      const h = Number(this.profile.firewallPenaltySeconds ?? ((o = this.profile.nodeIntrusion) == null ? void 0 : o.firewallPenaltySeconds)) || 6;
-      if (this.addTracePenalty(h), (c = (l = ui.notifications) == null ? void 0 : l.warn) == null || c.call(l, `Firewall surge: trace accelerated by ${h}s.`), this.state.result) return;
-      this.firewallsArePassable() ? this.state.currentNodeId = i : (this.state.blockedEdgeIds.set(a, "firewall"), this.state.deadNodeIds.add(i)), this.render(!1);
+      const f = Number(this.profile.firewallPenaltySeconds ?? ((c = this.profile.nodeIntrusion) == null ? void 0 : c.firewallPenaltySeconds)) || 6;
+      if (this.addTracePenalty(f), (l = (a = ui.notifications) == null ? void 0 : a.warn) == null || l.call(a, `Firewall surge: trace accelerated by ${f}s.`), this.state.result) return;
+      this.firewallsArePassable() ? this.state.currentNodeId = n : (this.state.blockedEdgeIds.set(o, "firewall"), this.state.deadNodeIds.add(n)), this.render(!1);
       return;
     }
     if (s.type === "decoy") {
-      this.state.mistakes += 1, this.state.blockedEdgeIds.set(a, "decoy"), this.state.deadNodeIds.add(i);
-      const h = Number(this.profile.decoyPenaltySeconds ?? ((u = this.profile.nodeIntrusion) == null ? void 0 : u.decoyPenaltySeconds)) || 4;
-      this.addTracePenalty(h), (f = (d = ui.notifications) == null ? void 0 : d.warn) == null || f.call(d, `Decoy sink: trace accelerated by ${h}s.`), this.render(!1);
+      this.state.mistakes += 1, this.state.blockedEdgeIds.set(o, "decoy"), this.state.deadNodeIds.add(n);
+      const f = Number(this.profile.decoyPenaltySeconds ?? ((u = this.profile.nodeIntrusion) == null ? void 0 : u.decoyPenaltySeconds)) || 4;
+      this.addTracePenalty(f), (h = (d = ui.notifications) == null ? void 0 : d.warn) == null || h.call(d, `Decoy sink: trace accelerated by ${f}s.`), this.render(!1);
       return;
     }
-    if (this.state.currentNodeId = i, s.type === "target") {
+    if (this.state.currentNodeId = n, s.type === "target") {
       this.finish("success", "Target node breached");
       return;
     }
     this.render(!1);
   }
-  addTracePenalty(e) {
-    const i = Math.max(0, e) / this.getTraceDuration() * 100;
-    this.state.tracePenaltyProgress = Z(this.state.tracePenaltyProgress + i, 0, 100), this.state.traceProgress = Z(this.state.traceProgress + i, 0, 100), this.syncDom(), this.state.traceProgress >= 100 && this.finish("failure", "Trace complete");
+  addTracePenalty(t) {
+    const n = Math.max(0, t) / this.getTraceDuration() * 100;
+    this.state.tracePenaltyProgress = ut(this.state.tracePenaltyProgress + n, 0, 100), this.state.traceProgress = ut(this.state.traceProgress + n, 0, 100), this.syncDom(), this.state.traceProgress >= 100 && this.finish("failure", "Trace complete");
   }
   startTimer() {
     if (this.timer || !this.state.hasStarted || !this.startedAt) return;
-    const e = this.getTraceDuration();
+    const t = this.getTraceDuration();
     this.timer = window.setInterval(() => {
       if (!this.state.hasStarted || !this.state.isRunning) return;
-      const i = (performance.now() - this.startedAt) / 1e3;
-      this.state.traceProgress = Z(i / e * 100 + this.state.tracePenaltyProgress, 0, 100), this.syncDom(), this.state.traceProgress >= 100 && this.finish("failure", "Trace complete");
+      const n = (performance.now() - this.startedAt) / 1e3;
+      this.state.traceProgress = ut(n / t * 100 + this.state.tracePenaltyProgress, 0, 100), this.syncDom(), this.state.traceProgress >= 100 && this.finish("failure", "Trace complete");
     }, 120);
   }
   stopTimer() {
@@ -1424,14 +1699,14 @@ class Gt extends _t {
   async abort() {
     await this.finish("failure", "Manual disconnect", { close: !0 });
   }
-  async finish(e, i, { close: r = !1 } = {}) {
-    var a, o;
+  async finish(t, n, { close: i = !1 } = {}) {
+    var o, c;
     if (this.state.result) return;
-    this.state.isRunning = !1, this.state.result = e, this.stopTimer(), this.resultMessage = i, this.syncDom(), await this.render(!1);
+    this.state.isRunning = !1, this.state.result = t, this.stopTimer(), this.resultMessage = n, this.syncDom(), await this.render(!1);
     const s = {
       type: "node-intrusion",
-      result: e,
-      message: i,
+      result: t,
+      message: n,
       rollTotal: this.rollTotal,
       dc: this.dc,
       profile: this.profile,
@@ -1440,82 +1715,82 @@ class Gt extends _t {
       traceProgress: this.state.traceProgress,
       visitedNodeIds: [...this.state.visitedNodeIds]
     };
-    this.chatOnResult && await ze({
+    this.chatOnResult && await wt({
       title: "Node Intrusion",
-      result: e,
+      result: t,
       actorName: this.actorName,
-      message: i,
+      message: n,
       rollTotal: this.rollTotal,
       dc: this.dc
-    }), e === "success" ? (a = this.onSuccess) == null || a.call(this, s) : (o = this.onFailure) == null || o.call(this, s), r && await this.close();
+    }), t === "success" ? (o = this.onSuccess) == null || o.call(this, s) : (c = this.onFailure) == null || c.call(this, s), i && await this.close();
   }
   syncDom() {
-    var a;
-    const e = (a = this.element) == null ? void 0 : a[0];
-    if (!e) return;
-    const i = e.querySelector("[data-trace-fill]"), r = e.querySelector("[data-trace-text]"), s = e.querySelector("[data-penalty-text]");
-    i && (i.style.width = `${this.state.traceProgress}%`), r && (r.textContent = `${Math.round(this.state.traceProgress)}%`), s && (s.textContent = `${Math.round(this.state.tracePenaltyProgress)}%`);
+    var o;
+    const t = (o = this.element) == null ? void 0 : o[0];
+    if (!t) return;
+    const n = t.querySelector("[data-trace-fill]"), i = t.querySelector("[data-trace-text]"), s = t.querySelector("[data-penalty-text]");
+    n && (n.style.width = `${this.state.traceProgress}%`), i && (i.textContent = `${Math.round(this.state.traceProgress)}%`), s && (s.textContent = `${Math.round(this.state.tracePenaltyProgress)}%`);
   }
 }
-function Be(t, n, e) {
-  return Math.min(e, Math.max(n, t));
+function Ce(e, r, t) {
+  return Math.min(t, Math.max(r, e));
 }
-function jt(t) {
-  const n = String(t ?? "signal-alignment");
-  let e = 2166136261;
-  for (let i = 0; i < n.length; i += 1)
-    e ^= n.charCodeAt(i), e = Math.imul(e, 16777619);
-  return e >>> 0;
+function Pn(e) {
+  const r = String(e ?? "signal-alignment");
+  let t = 2166136261;
+  for (let n = 0; n < r.length; n += 1)
+    t ^= r.charCodeAt(n), t = Math.imul(t, 16777619);
+  return t >>> 0;
 }
-function zt(t) {
-  let n = jt(t);
+function In(e) {
+  let r = Pn(e);
   return () => {
-    n += 1831565813;
-    let e = n;
-    return e = Math.imul(e ^ e >>> 15, e | 1), e ^= e + Math.imul(e ^ e >>> 7, e | 61), ((e ^ e >>> 14) >>> 0) / 4294967296;
+    r += 1831565813;
+    let t = r;
+    return t = Math.imul(t ^ t >>> 15, t | 1), t ^= t + Math.imul(t ^ t >>> 7, t | 61), ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
 }
-function me(t) {
-  return Be(Number(t) || 0, 0, 100);
+function kt(e) {
+  return Ce(Number(e) || 0, 0, 100);
 }
-function Ut(t, n = Date.now()) {
-  var s, a;
-  const e = zt(n), i = Be(Number(t.channelCount ?? ((s = t.signalAlignment) == null ? void 0 : s.channelCount)) || 3, 2, 5), r = Number(t.tolerance ?? ((a = t.signalAlignment) == null ? void 0 : a.tolerance) ?? 5);
-  return Array.from({ length: i }, (o, l) => {
-    const c = Math.round(18 + e() * 64), u = e() > 0.5 ? 1 : -1, d = r + 8 + Math.round(e() * 18), f = e() > 0.5 ? 1 : -1;
+function kn(e, r = Date.now()) {
+  var s, o;
+  const t = In(r), n = Ce(Number(e.channelCount ?? ((s = e.signalAlignment) == null ? void 0 : s.channelCount)) || 3, 2, 5), i = Number(e.tolerance ?? ((o = e.signalAlignment) == null ? void 0 : o.tolerance) ?? 5);
+  return Array.from({ length: n }, (c, a) => {
+    const l = Math.round(18 + t() * 64), u = t() > 0.5 ? 1 : -1, d = i + 8 + Math.round(t() * 18), h = t() > 0.5 ? 1 : -1;
     return {
-      id: `channel-${l + 1}`,
-      label: `CH-${String(l + 1).padStart(2, "0")}`,
-      value: me(c + u * d),
-      target: c,
-      tolerance: r,
-      driftDirection: f
+      id: `channel-${a + 1}`,
+      label: `CH-${String(a + 1).padStart(2, "0")}`,
+      value: kt(l + u * d),
+      target: l,
+      tolerance: i,
+      driftDirection: h
     };
   });
 }
-const We = "holosuite-hacking", Vt = `modules/${We}/templates/signal-alignment.html`, Bt = ue();
-function ee(t, n, e) {
-  return Math.min(e, Math.max(n, t));
+const Pe = "holosuite-hacking", Mn = `modules/${Pe}/templates/signal-alignment.html`, Nn = Y();
+function dt(e, r, t) {
+  return Math.min(t, Math.max(r, e));
 }
-class Wt extends Bt {
-  constructor(e = {}) {
-    super(e);
-    p(this, "rollTotal");
-    p(this, "dc");
-    p(this, "profile");
-    p(this, "seed");
-    p(this, "onSuccess");
-    p(this, "onFailure");
-    p(this, "actorName");
-    p(this, "chatOnResult");
-    p(this, "channels");
-    p(this, "state");
-    p(this, "startedAt");
-    p(this, "lastTickAt");
-    p(this, "timer");
-    p(this, "wasAligned");
-    p(this, "resultMessage");
-    this.rollTotal = Number(e.rollTotal ?? 15), this.dc = Number(e.dc ?? 15), this.profile = e.profile ? { ...e.profile } : se(this.rollTotal, this.dc), this.seed = e.seed ?? `${this.rollTotal}:${this.dc}:${this.profile.profileId ?? this.profile.id}:signal`, this.onSuccess = typeof e.onSuccess == "function" ? e.onSuccess : null, this.onFailure = typeof e.onFailure == "function" ? e.onFailure : null, this.actorName = String(e.actorName ?? "Hacker"), this.chatOnResult = e.chatOnResult !== !1, this.channels = Ut(this.profile, this.seed), this.state = {
+class Tn extends Nn {
+  constructor(t = {}) {
+    super(t);
+    g(this, "rollTotal");
+    g(this, "dc");
+    g(this, "profile");
+    g(this, "seed");
+    g(this, "onSuccess");
+    g(this, "onFailure");
+    g(this, "actorName");
+    g(this, "chatOnResult");
+    g(this, "channels");
+    g(this, "state");
+    g(this, "startedAt");
+    g(this, "lastTickAt");
+    g(this, "timer");
+    g(this, "wasAligned");
+    g(this, "resultMessage");
+    this.rollTotal = Number(t.rollTotal ?? 15), this.dc = Number(t.dc ?? 15), this.profile = t.profile ? { ...t.profile } : W(this.rollTotal, this.dc), this.seed = t.seed ?? `${this.rollTotal}:${this.dc}:${this.profile.profileId ?? this.profile.id}:signal`, this.onSuccess = typeof t.onSuccess == "function" ? t.onSuccess : null, this.onFailure = typeof t.onFailure == "function" ? t.onFailure : null, this.actorName = String(t.actorName ?? "Hacker"), this.chatOnResult = t.chatOnResult !== !1, this.channels = kn(this.profile, this.seed), this.state = {
       traceProgress: 0,
       mistakes: 0,
       lockProgress: 0,
@@ -1534,31 +1809,31 @@ class Wt extends Bt {
       resizable: !0,
       width: 840,
       height: 640,
-      template: Vt
+      template: Mn
     });
   }
   getData() {
-    const e = this.channels.map((i) => {
-      const r = Math.abs(i.value - i.target), s = r <= i.tolerance, a = this.isTargetVisible(i);
+    const t = this.channels.map((n) => {
+      const i = Math.abs(n.value - n.target), s = i <= n.tolerance, o = this.isTargetVisible(n);
       return {
-        ...i,
-        valueLabel: i.value.toFixed(1),
+        ...n,
+        valueLabel: n.value.toFixed(1),
         aligned: s,
-        targetVisible: a,
-        targetLabel: a ? i.target : "??",
-        deltaRevealLabel: a ? r.toFixed(1) : "--",
-        targetStateLabel: s ? "locked" : a ? "signal found" : "searching",
+        targetVisible: o,
+        targetLabel: o ? n.target : "??",
+        deltaRevealLabel: o ? i.toFixed(1) : "--",
+        targetStateLabel: s ? "locked" : o ? "signal found" : "searching",
         waveDurationSeconds: Math.max(1.2, 3.2 - Number(this.profile.noiseLevel ?? 0) * 2),
-        targetLeft: i.target,
-        toleranceLeft: ee(i.target - i.tolerance, 0, 100),
-        toleranceWidth: ee(i.tolerance * 2, 1, 100)
+        targetLeft: n.target,
+        toleranceLeft: dt(n.target - n.tolerance, 0, 100),
+        toleranceWidth: dt(n.tolerance * 2, 1, 100)
       };
     });
     return {
       rollTotal: this.rollTotal,
       dc: this.dc,
       profile: this.profile,
-      channels: e,
+      channels: t,
       state: this.state,
       allAligned: this.areAllChannelsAligned(),
       lockPercent: Math.round(this.state.lockProgress * 100),
@@ -1567,62 +1842,62 @@ class Wt extends Bt {
       glitchClass: this.profile.visualGlitchIntensity > 0.7 ? "glitch-high" : this.profile.visualGlitchIntensity > 0.35 ? "glitch-medium" : "glitch-low"
     };
   }
-  activateListeners(e) {
-    super.activateListeners(e), e.find("[data-channel-slider]").on("input", (i) => this.handleSlider(i.currentTarget)), e.find("[data-action='start']").on("click", () => this.startRun()), e.find("[data-action='abort']").on("click", () => this.abort()), this.syncDom();
+  activateListeners(t) {
+    super.activateListeners(t), t.find("[data-channel-slider]").on("input", (n) => this.handleSlider(n.currentTarget)), t.find("[data-action='start']").on("click", () => this.startRun()), t.find("[data-action='abort']").on("click", () => this.abort()), t.find("[data-action='close']").on("click", () => this.close()), this.syncDom();
   }
-  async render(e, i) {
-    const r = await super.render(e, i);
-    return this.state.hasStarted && this.state.isRunning && this.startTimer(), r;
+  async render(t, n) {
+    const i = await super.render(t, n);
+    return this.state.hasStarted && this.state.isRunning && this.startTimer(), i;
   }
-  async close(e = {}) {
-    return this.stopTimer(), super.close(e);
+  async close(t = {}) {
+    return this.stopTimer(), super.close(t);
   }
   startRun() {
     this.state.hasStarted || this.state.result || (this.state.hasStarted = !0, this.state.isRunning = !0, this.startedAt = performance.now(), this.lastTickAt = this.startedAt, this.startTimer(), this.render(!1));
   }
-  handleSlider(e) {
+  handleSlider(t) {
     if (!this.state.hasStarted || !this.state.isRunning) return;
-    const i = this.channels.find((r) => r.id === e.dataset.channelSlider);
-    i && (i.value = me(e.value), this.checkDestabilization(), this.syncDom());
+    const n = this.channels.find((i) => i.id === t.dataset.channelSlider);
+    n && (n.value = kt(t.value), this.checkDestabilization(), this.syncDom());
   }
   areAllChannelsAligned() {
-    return this.channels.every((e) => Math.abs(e.value - e.target) <= e.tolerance);
+    return this.channels.every((t) => Math.abs(t.value - t.target) <= t.tolerance);
   }
-  isTargetVisible(e) {
+  isTargetVisible(t) {
     var s;
-    const i = Math.abs(e.value - e.target), r = Number(this.profile.targetRevealRadius ?? ((s = this.profile.signalAlignment) == null ? void 0 : s.targetRevealRadius) ?? 100);
-    return r >= 100 || i <= e.tolerance ? !0 : i <= r;
+    const n = Math.abs(t.value - t.target), i = Number(this.profile.targetRevealRadius ?? ((s = this.profile.signalAlignment) == null ? void 0 : s.targetRevealRadius) ?? 100);
+    return i >= 100 || n <= t.tolerance ? !0 : n <= i;
   }
-  updateAlignmentState(e = this.areAllChannelsAligned()) {
-    this.wasAligned && !e && this.recordTraceSpike(), this.wasAligned = e;
+  updateAlignmentState(t = this.areAllChannelsAligned()) {
+    this.wasAligned && !t && this.recordTraceSpike(), this.wasAligned = t;
   }
   checkDestabilization() {
     this.updateAlignmentState();
   }
   recordTraceSpike() {
-    var i, r;
-    const e = Math.max(0, Number(this.profile.destabilizationPenaltySeconds ?? 0));
-    this.state.mistakes += 1, this.state.tracePenaltySeconds += e, e > 0 && ((r = (i = ui.notifications) == null ? void 0 : i.warn) == null || r.call(i, `Signal destabilized. Trace jumped by ${e}s.`));
+    var n, i;
+    const t = Math.max(0, Number(this.profile.destabilizationPenaltySeconds ?? 0));
+    this.state.mistakes += 1, this.state.tracePenaltySeconds += t, t > 0 && ((i = (n = ui.notifications) == null ? void 0 : n.warn) == null || i.call(n, `Signal destabilized. Trace jumped by ${t}s.`));
   }
   startTimer() {
     var s;
     if (this.timer || !this.state.hasStarted || !this.startedAt || !this.lastTickAt) return;
-    const e = Number(game.settings.get(We, "traceDurationMultiplier") ?? 1) || 1, i = Number(((s = this.profile.signalAlignment) == null ? void 0 : s.traceDurationSeconds) ?? this.profile.traceDurationSeconds ?? 60), r = Math.max(5, i * e);
+    const t = Number(game.settings.get(Pe, "traceDurationMultiplier") ?? 1) || 1, n = Number(((s = this.profile.signalAlignment) == null ? void 0 : s.traceDurationSeconds) ?? this.profile.traceDurationSeconds ?? 60), i = Math.max(5, n * t);
     this.timer = window.setInterval(() => {
       if (!this.state.hasStarted || !this.state.isRunning) return;
-      const a = performance.now(), o = Math.min(0.5, (a - this.lastTickAt) / 1e3);
-      this.lastTickAt = a, this.applyDrift(o);
-      const l = this.areAllChannelsAligned();
-      this.state.lockProgress = l ? ee(this.state.lockProgress + o / this.profile.lockHoldSeconds, 0, 1) : 0, this.updateAlignmentState(l);
-      const c = (a - this.startedAt) / 1e3 + this.state.tracePenaltySeconds;
-      this.state.traceProgress = ee(c / r * 100, 0, 100), this.syncDom(), this.state.lockProgress >= 1 ? this.finish("success", "Transmission Decrypted") : this.state.traceProgress >= 100 && this.finish("failure", "Trace Complete");
+      const o = performance.now(), c = Math.min(0.5, (o - this.lastTickAt) / 1e3);
+      this.lastTickAt = o, this.applyDrift(c);
+      const a = this.areAllChannelsAligned();
+      this.state.lockProgress = a ? dt(this.state.lockProgress + c / this.profile.lockHoldSeconds, 0, 1) : 0, this.updateAlignmentState(a);
+      const l = (o - this.startedAt) / 1e3 + this.state.tracePenaltySeconds;
+      this.state.traceProgress = dt(l / i * 100, 0, 100), this.syncDom(), this.state.lockProgress >= 1 ? this.finish("success", "Transmission Decrypted") : this.state.traceProgress >= 100 && this.finish("failure", "Trace Complete");
     }, 120);
   }
-  applyDrift(e) {
-    const i = Number(this.profile.signalDriftSpeed ?? 0);
-    if (!(i <= 0))
-      for (const r of this.channels)
-        r.value = me(r.value + r.driftDirection * i * e), (r.value <= 0 || r.value >= 100) && (r.driftDirection *= -1);
+  applyDrift(t) {
+    const n = Number(this.profile.signalDriftSpeed ?? 0);
+    if (!(n <= 0))
+      for (const i of this.channels)
+        i.value = kt(i.value + i.driftDirection * n * t), (i.value <= 0 || i.value >= 100) && (i.driftDirection *= -1);
   }
   stopTimer() {
     this.timer && (window.clearInterval(this.timer), this.timer = null);
@@ -1630,14 +1905,14 @@ class Wt extends Bt {
   async abort() {
     await this.finish("failure", "Manual disconnect", { close: !0 });
   }
-  async finish(e, i, { close: r = !1 } = {}) {
-    var a, o;
+  async finish(t, n, { close: i = !1 } = {}) {
+    var o, c;
     if (this.state.result) return;
-    this.state.isRunning = !1, this.state.result = e, this.stopTimer(), this.resultMessage = i, this.syncDom(), await this.render(!1);
+    this.state.isRunning = !1, this.state.result = t, this.stopTimer(), this.resultMessage = n, this.syncDom(), await this.render(!1);
     const s = {
       type: "signal-alignment",
-      result: e,
-      message: i,
+      result: t,
+      message: n,
       rollTotal: this.rollTotal,
       dc: this.dc,
       profile: this.profile,
@@ -1645,82 +1920,825 @@ class Wt extends Bt {
       tracePenaltySeconds: this.state.tracePenaltySeconds,
       traceProgress: this.state.traceProgress,
       lockProgress: this.state.lockProgress,
-      channels: this.channels.map((l) => ({ ...l }))
+      channels: this.channels.map((a) => ({ ...a }))
     };
-    this.chatOnResult && await ze({
+    this.chatOnResult && await wt({
       title: "Signal Alignment",
-      result: e,
+      result: t,
       actorName: this.actorName,
-      message: i,
+      message: n,
       rollTotal: this.rollTotal,
       dc: this.dc
-    }), e === "success" ? (a = this.onSuccess) == null || a.call(this, s) : (o = this.onFailure) == null || o.call(this, s), r && await this.close();
+    }), t === "success" ? (o = this.onSuccess) == null || o.call(this, s) : (c = this.onFailure) == null || c.call(this, s), i && await this.close();
   }
   syncDom() {
-    var l;
-    const e = (l = this.element) == null ? void 0 : l[0];
-    if (!e) return;
-    const i = e.querySelector("[data-trace-fill]"), r = e.querySelector("[data-trace-text]"), s = e.querySelector("[data-mistake-text]"), a = e.querySelector("[data-lock-fill]"), o = e.querySelector("[data-lock-text]");
-    i && (i.style.width = `${this.state.traceProgress}%`), r && (r.textContent = `${Math.round(this.state.traceProgress)}%`), s && (s.textContent = `${this.state.tracePenaltySeconds.toFixed(0)}s`), a && (a.style.width = `${Math.round(this.state.lockProgress * 100)}%`), o && (o.textContent = `${Math.round(this.state.lockProgress * 100)}%`);
-    for (const c of this.channels) {
-      const u = e.querySelector(`[data-channel-row="${c.id}"]`);
+    var a;
+    const t = (a = this.element) == null ? void 0 : a[0];
+    if (!t) return;
+    const n = t.querySelector("[data-trace-fill]"), i = t.querySelector("[data-trace-text]"), s = t.querySelector("[data-mistake-text]"), o = t.querySelector("[data-lock-fill]"), c = t.querySelector("[data-lock-text]");
+    n && (n.style.width = `${this.state.traceProgress}%`), i && (i.textContent = `${Math.round(this.state.traceProgress)}%`), s && (s.textContent = `${this.state.tracePenaltySeconds.toFixed(0)}s`), o && (o.style.width = `${Math.round(this.state.lockProgress * 100)}%`), c && (c.textContent = `${Math.round(this.state.lockProgress * 100)}%`);
+    for (const l of this.channels) {
+      const u = t.querySelector(`[data-channel-row="${l.id}"]`);
       if (!u) continue;
-      const d = Math.abs(c.value - c.target) <= c.tolerance, f = this.isTargetVisible(c);
-      u.classList.toggle("is-aligned", d), u.classList.toggle("is-target-visible", f), u.querySelector("[data-channel-value]").textContent = c.value.toFixed(1), u.querySelector("[data-channel-target]").textContent = f ? String(c.target) : "??", u.querySelector("[data-channel-delta]").textContent = f ? Math.abs(c.value - c.target).toFixed(1) : "--", u.querySelector("[data-channel-state]").textContent = d ? "locked" : f ? "signal found" : "searching";
-      const h = u.querySelector("[data-channel-slider]");
-      h && document.activeElement !== h && (h.value = c.value);
+      const d = Math.abs(l.value - l.target) <= l.tolerance, h = this.isTargetVisible(l);
+      u.classList.toggle("is-aligned", d), u.classList.toggle("is-target-visible", h), u.querySelector("[data-channel-value]").textContent = l.value.toFixed(1), u.querySelector("[data-channel-target]").textContent = h ? String(l.target) : "??", u.querySelector("[data-channel-delta]").textContent = h ? Math.abs(l.value - l.target).toFixed(1) : "--", u.querySelector("[data-channel-state]").textContent = d ? "locked" : h ? "signal found" : "searching";
+      const f = u.querySelector("[data-channel-slider]");
+      f && document.activeElement !== f && (f.value = l.value);
       const m = u.querySelector("[data-wave-fill]");
-      m && (m.style.width = `${c.value}%`, m.style.setProperty("--wave-duration", `${Math.max(1.2, 3.2 - Number(this.profile.noiseLevel ?? 0) * 2)}s`));
+      m && (m.style.width = `${l.value}%`, m.style.setProperty("--wave-duration", `${Math.max(1.2, 3.2 - Number(this.profile.noiseLevel ?? 0) * 2)}s`));
     }
   }
 }
-const w = "holosuite-hacking", Me = `module.${w}`, Xt = 10 * 60 * 1e3;
-let N = null, te = null;
-const le = /* @__PURE__ */ new Map();
-function Kt() {
-  game.settings.register(w, "defaultDc", {
+const le = [
+  { id: "cyan", label: "CYAN", color: "#4df6ff" },
+  { id: "magenta", label: "MAGENTA", color: "#ff4fd8" },
+  { id: "amber", label: "AMBER", color: "#ffc857" },
+  { id: "lime", label: "LIME", color: "#8dff69" },
+  { id: "violet", label: "VIOLET", color: "#a98cff" },
+  { id: "red", label: "RED", color: "#ff6577" }
+];
+function X(e, r, t) {
+  return Math.min(t, Math.max(r, e));
+}
+function An(e) {
+  const r = String(e ?? "packet-switchboard");
+  let t = 2166136261;
+  for (let n = 0; n < r.length; n += 1)
+    t ^= r.charCodeAt(n), t = Math.imul(t, 16777619);
+  return t >>> 0;
+}
+function Rn(e) {
+  let r = An(e);
+  return () => {
+    r += 1831565813;
+    let t = r;
+    return t = Math.imul(t ^ t >>> 15, t | 1), t ^= t + Math.imul(t ^ t >>> 7, t | 61), ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function Ie(e) {
+  return e < 0 ? "up" : e > 0 ? "down" : "straight";
+}
+function ke(e, r) {
+  const t = [0];
+  return e > 0 && t.unshift(-1), e < r - 1 && t.push(1), t;
+}
+function $n(e, r, t) {
+  const n = ke(r, t), i = n.indexOf(Number(e));
+  return n[(i + 1) % n.length];
+}
+function Mt(e, r, t) {
+  const n = Math.sign(Number(e) || 0);
+  return ke(r, t).includes(n) ? n : 0;
+}
+function Dn(e, r, t = 0, n = (r == null ? void 0 : r.sourceRow) ?? 0) {
+  let i = X(Math.round(Number(n) || 0), 0, e.laneCount - 1);
+  const s = [];
+  for (let o = Math.max(0, Math.round(Number(t) || 0)); o < e.columnCount; o += 1) {
+    const c = e.junctions.find((a) => a.row === i && a.column === o);
+    c && (s.push(c.id), i = X(i + Mt(c.direction, i, e.laneCount), 0, e.laneCount - 1));
+  }
+  return {
+    junctionIds: s,
+    finalRow: i,
+    targetRow: Number((r == null ? void 0 : r.targetRow) ?? i),
+    reachesTarget: i === Number((r == null ? void 0 : r.targetRow) ?? i)
+  };
+}
+function xn(e, r = Date.now()) {
+  const t = e.packetSwitchboard ?? e, n = X(Math.round(Number(t.laneCount) || 4), 3, le.length), i = X(Math.round(Number(t.columnCount) || 6), n - 1, 8), s = X(Math.round(Number(t.deliveryGoal) || 7), 3, 20), o = X(Math.round(Number(t.previewCount) || 2), 0, 6), c = Rn(r), a = le.slice(0, n).map((f, m) => ({
+    ...f,
+    row: m,
+    inputPort: `IN-${String(m + 1).padStart(2, "0")}`,
+    port: `OUT-${String(m + 1).padStart(2, "0")}`
+  })), l = [];
+  for (let f = 0; f < n; f += 1)
+    for (let m = 0; m < i; m += 1)
+      l.push({
+        id: `junction-${f}-${m}`,
+        row: f,
+        column: m,
+        gridRow: f + 1,
+        gridColumn: m + 1,
+        direction: 0,
+        directionLabel: Ie(0)
+      });
+  const u = [], d = Math.max(s * 4, s + 12);
+  let h = -1;
+  for (let f = 0; f < d; f += 1) {
+    let m = Math.floor(c() * n);
+    m === h && n > 1 && (m = (m + 1 + Math.floor(c() * (n - 1))) % n), h = m;
+    let w = Math.floor(c() * n);
+    w === m && c() > 0.2 && (w = (w + 1 + Math.floor(c() * (n - 1))) % n);
+    const P = a[m], I = a[w];
+    u.push({
+      id: `packet-${f + 1}`,
+      sequence: f + 1,
+      sourceRow: w,
+      sourcePort: I.inputPort,
+      targetRow: m,
+      colorId: P.id,
+      color: P.color,
+      label: P.label,
+      port: P.port
+    });
+  }
+  return {
+    laneCount: n,
+    columnCount: i,
+    deliveryGoal: s,
+    previewCount: o,
+    lanes: a,
+    junctions: l,
+    packetPlan: u
+  };
+}
+function Ln(e) {
+  return Ie(e);
+}
+const Me = "holosuite-hacking", On = `modules/${Me}/templates/packet-switchboard.html`, Hn = Y();
+function Z(e, r, t) {
+  return Math.min(t, Math.max(r, e));
+}
+function Fn(e, r, t) {
+  var i;
+  const n = typeof ((i = globalThis.crypto) == null ? void 0 : i.randomUUID) == "function" ? globalThis.crypto.randomUUID() : `${Date.now()}:${performance.now()}:${Math.random()}`;
+  return `${e}:${r}:${t.profileId ?? t.id}:switchboard:${n}`;
+}
+class En extends Hn {
+  constructor(t = {}) {
+    super(t);
+    g(this, "rollTotal");
+    g(this, "dc");
+    g(this, "profile");
+    g(this, "tuning");
+    g(this, "seed");
+    g(this, "actorName");
+    g(this, "onSuccess");
+    g(this, "onFailure");
+    g(this, "chatOnResult");
+    g(this, "board");
+    g(this, "state");
+    g(this, "startedAt");
+    g(this, "nextSpawnAt");
+    g(this, "timer");
+    g(this, "hoveredJunctionId");
+    g(this, "boundHoveredKeydown");
+    g(this, "resultMessage");
+    this.rollTotal = Number(t.rollTotal ?? 15), this.dc = Number(t.dc ?? 15), this.profile = t.profile ? { ...t.profile } : W(this.rollTotal, this.dc), this.tuning = this.profile.packetSwitchboard ?? {}, this.seed = t.seed ?? Fn(this.rollTotal, this.dc, this.profile), this.actorName = String(t.actorName ?? "Hacker"), this.onSuccess = typeof t.onSuccess == "function" ? t.onSuccess : null, this.onFailure = typeof t.onFailure == "function" ? t.onFailure : null, this.chatOnResult = t.chatOnResult !== !1, this.board = xn(this.profile, this.seed), this.state = {
+      hasStarted: !1,
+      isRunning: !1,
+      result: null,
+      traceProgress: 0,
+      tracePenaltySeconds: 0,
+      delivered: 0,
+      corrupted: 0,
+      nextPacketIndex: 0,
+      activePackets: []
+    }, this.startedAt = null, this.nextSpawnAt = null, this.timer = null, this.hoveredJunctionId = null, this.boundHoveredKeydown = (n) => this.handleHoveredJunctionKeydown(n);
+  }
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "holosuite-packet-switchboard-app",
+      title: "Packet Switchboard",
+      classes: ["packet-switchboard-window", "holosuite-hacking-window"],
+      popOut: !0,
+      resizable: !0,
+      width: 980,
+      height: 760,
+      template: On
+    });
+  }
+  getData() {
+    return {
+      rollTotal: this.rollTotal,
+      dc: this.dc,
+      profile: this.profile,
+      tuning: this.tuning,
+      board: this.board,
+      state: this.state,
+      deliveryPercent: Math.round(this.state.delivered / this.board.deliveryGoal * 100),
+      nextPackets: this.getUpcomingPackets(),
+      gridStyle: `--lane-count: ${this.board.laneCount}; --column-count: ${this.board.columnCount};`,
+      resultTitle: this.state.result === "success" ? "Payload Delivered" : "Routing Compromised",
+      resultDetail: this.resultMessage ?? (this.state.result === "success" ? "All priority packets reached their ports." : "Trace completed before delivery."),
+      glitchClass: this.profile.visualGlitchIntensity > 0.7 ? "glitch-high" : this.profile.visualGlitchIntensity > 0.35 ? "glitch-medium" : "glitch-low"
+    };
+  }
+  activateListeners(t) {
+    super.activateListeners(t), this.hoveredJunctionId = null, t.find("[data-junction-id]").on("click", (n) => this.cycleJunction(n.currentTarget.dataset.junctionId)), t.find("[data-junction-id]").on("mouseenter", (n) => this.setHoveredJunction(n.currentTarget.dataset.junctionId, n.currentTarget)), t.find("[data-junction-id]").on("mouseleave", (n) => this.clearHoveredJunction(n.currentTarget.dataset.junctionId, n.currentTarget)), t.find("[data-action='start']").on("click", () => this.startRun()), t.find("[data-action='abort']").on("click", () => this.abort()), t.find("[data-action='close']").on("click", () => this.close()), window.removeEventListener("keydown", this.boundHoveredKeydown), window.addEventListener("keydown", this.boundHoveredKeydown), this.syncDom();
+  }
+  async render(t, n) {
+    const i = await super.render(t, n);
+    return this.state.hasStarted && this.state.isRunning && this.startTimer(), i;
+  }
+  async close(t = {}) {
+    return this.stopTimer(), window.removeEventListener("keydown", this.boundHoveredKeydown), super.close(t);
+  }
+  getTraceDuration() {
+    const t = Number(game.settings.get(Me, "traceDurationMultiplier") ?? 1) || 1;
+    return Math.max(5, Number(this.tuning.traceDurationSeconds ?? this.profile.traceDurationSeconds ?? 60) * t);
+  }
+  getUpcomingPackets() {
+    const t = Math.max(0, Number(this.tuning.previewCount ?? this.board.previewCount) || 0);
+    return this.board.packetPlan.slice(this.state.nextPacketIndex, this.state.nextPacketIndex + t);
+  }
+  getMaxActivePackets() {
+    return Z(Math.round(Number(this.tuning.maxActivePackets) || 2), 1, 6);
+  }
+  startRun() {
+    this.state.hasStarted || this.state.result || (this.state.hasStarted = !0, this.state.isRunning = !0, this.startedAt = performance.now(), this.nextSpawnAt = this.startedAt, this.render(!1));
+  }
+  setHoveredJunction(t, n) {
+    this.hoveredJunctionId = t, n == null || n.classList.add("is-keyboard-target");
+  }
+  clearHoveredJunction(t, n) {
+    n == null || n.classList.remove("is-keyboard-target"), this.hoveredJunctionId === t && (this.hoveredJunctionId = null);
+  }
+  handleHoveredJunctionKeydown(t) {
+    if (!this.hoveredJunctionId || t.altKey || t.ctrlKey || t.metaKey) return;
+    const n = {
+      ArrowUp: -1,
+      ArrowRight: 0,
+      ArrowDown: 1
+    };
+    t.key in n && (t.preventDefault(), t.stopPropagation(), this.setJunctionDirection(this.hoveredJunctionId, n[t.key]));
+  }
+  cycleJunction(t) {
+    if (this.state.result) return;
+    const n = this.board.junctions.find((i) => i.id === t);
+    n && this.setJunctionDirection(t, $n(n.direction, n.row, this.board.laneCount));
+  }
+  setJunctionDirection(t, n) {
+    var o, c;
+    if (this.state.result) return;
+    const i = this.board.junctions.find((a) => a.id === t);
+    if (!i) return;
+    i.direction = Mt(n, i.row, this.board.laneCount), i.directionLabel = Ln(i.direction);
+    const s = (c = (o = this.element) == null ? void 0 : o[0]) == null ? void 0 : c.querySelector(`[data-junction-id="${i.id}"]`);
+    s && (s.dataset.direction = i.directionLabel, s.setAttribute("aria-label", `Junction lane ${i.row + 1}, column ${i.column + 1}: ${i.directionLabel}`), s.setAttribute("title", `Route ${i.directionLabel}. Click to change direction.`)), this.syncRoutePreview();
+  }
+  startTimer() {
+    this.timer || !this.state.hasStarted || !this.startedAt || (this.timer = window.setInterval(() => this.tick(performance.now()), 80));
+  }
+  stopTimer() {
+    this.timer && (window.clearInterval(this.timer), this.timer = null);
+  }
+  tick(t) {
+    if (!this.state.isRunning || !this.startedAt || this.nextSpawnAt === null) return;
+    const n = Math.max(350, Number(this.tuning.packetIntervalSeconds ?? 2) * 1e3);
+    for (; t >= this.nextSpawnAt && this.state.isRunning && !(this.state.activePackets.length >= this.getMaxActivePackets()); )
+      this.spawnPacket(t), this.nextSpawnAt += n;
+    const i = Math.max(250, Number(this.tuning.packetStepSeconds ?? 0.8) * 1e3);
+    for (const o of [...this.state.activePackets])
+      for (; this.state.isRunning && t >= o.nextMoveAt && (this.advancePacket(o), o.nextMoveAt += i, !!this.state.activePackets.includes(o)); )
+        ;
+    const s = (t - this.startedAt) / 1e3 + this.state.tracePenaltySeconds;
+    this.state.traceProgress = Z(s / this.getTraceDuration() * 100, 0, 100), this.syncDom(), this.state.traceProgress >= 100 && this.finish("failure", "Trace complete");
+  }
+  spawnPacket(t) {
+    const n = this.board.packetPlan[this.state.nextPacketIndex % this.board.packetPlan.length];
+    this.state.nextPacketIndex += 1, this.state.activePackets.push({
+      ...n,
+      runtimeId: `${n.id}-${this.state.nextPacketIndex}`,
+      row: n.sourceRow,
+      column: -1,
+      nextMoveAt: t + Math.max(0, Number(this.tuning.entryHoldSeconds ?? 1.5) * 1e3)
+    }), this.syncPreview();
+  }
+  advancePacket(t) {
+    if (t.column < 0) {
+      t.column = 0;
+      return;
+    }
+    const n = this.board.junctions.find((i) => i.row === t.row && i.column === t.column);
+    t.row = Z(t.row + Number((n == null ? void 0 : n.direction) ?? 0), 0, this.board.laneCount - 1), t.column += 1, t.column >= this.board.columnCount && this.resolvePacket(t);
+  }
+  resolvePacket(t) {
+    var i, s;
+    if (this.state.activePackets = this.state.activePackets.filter((o) => o.runtimeId !== t.runtimeId), t.row === t.targetRow) {
+      this.state.delivered += 1, this.flashBoard("delivery-pulse"), this.state.delivered >= this.board.deliveryGoal && this.finish("success", "Priority payload delivered");
+      return;
+    }
+    this.state.corrupted += 1;
+    const n = Math.max(0, Number(this.tuning.misroutePenaltySeconds ?? 5));
+    this.state.tracePenaltySeconds += n, this.flashBoard("misroute-pulse"), n > 0 && ((s = (i = ui.notifications) == null ? void 0 : i.warn) == null || s.call(i, `Packet misrouted. Trace jumped by ${n}s.`));
+  }
+  flashBoard(t) {
+    var i, s, o;
+    const n = (s = (i = this.element) == null ? void 0 : i.find) == null ? void 0 : s.call(i, ".packet-switchboard-shell");
+    (o = n == null ? void 0 : n.addClass) == null || o.call(n, t), window.setTimeout(() => {
+      var c;
+      return (c = n == null ? void 0 : n.removeClass) == null ? void 0 : c.call(n, t);
+    }, 320);
+  }
+  syncPreview() {
+    var n, i;
+    const t = (i = (n = this.element) == null ? void 0 : n[0]) == null ? void 0 : i.querySelector("[data-packet-preview]");
+    if (t) {
+      if (t.replaceChildren(...this.getUpcomingPackets().map((s) => {
+        const o = document.createElement("span");
+        return o.className = "packet-preview-chip", o.style.setProperty("--packet-color", s.color), o.textContent = `${s.sourcePort} -> ${s.port} / ${s.label}`, o;
+      })), !t.childElementCount) {
+        const s = document.createElement("span");
+        s.className = "packet-preview-hidden", s.textContent = "Encrypted", t.appendChild(s);
+      }
+      this.syncRoutePreview();
+    }
+  }
+  syncRoutePreview() {
+    var a, l, u;
+    const t = (a = this.element) == null ? void 0 : a[0];
+    if (!t) return;
+    t.querySelectorAll(".packet-junction.is-route-preview, .packet-junction.is-route-danger").forEach((d) => {
+      d.classList.remove("is-route-preview", "is-route-danger");
+    }), t.querySelectorAll(".packet-switchboard-inputs .is-preview-source, .packet-switchboard-outputs .is-preview-target").forEach((d) => {
+      d.classList.remove("is-preview-source", "is-preview-target");
+    });
+    const n = this.state.activePackets[0] ?? null, i = n ?? this.getUpcomingPackets()[0] ?? null;
+    if (!i) {
+      this.syncConnectionLines();
+      return;
+    }
+    const s = n ? Math.max(0, Number(n.column) || 0) : 0, o = n ? n.row : i.sourceRow, c = Dn(this.board, i, s, o);
+    for (const d of c.junctionIds) {
+      const h = t.querySelector(`[data-junction-id="${d}"]`);
+      h == null || h.classList.add("is-route-preview"), c.reachesTarget || h == null || h.classList.add("is-route-danger");
+    }
+    (l = t.querySelector(`[data-input-row="${i.sourceRow}"]`)) == null || l.classList.add("is-preview-source"), (u = t.querySelector(`[data-output-row="${i.targetRow}"]`)) == null || u.classList.add("is-preview-target"), this.syncConnectionLines();
+  }
+  syncConnectionLines() {
+    var i;
+    const t = (i = this.element) == null ? void 0 : i[0];
+    if (!t) return;
+    const n = 0.5 / this.board.columnCount * 100;
+    for (const s of this.board.lanes) {
+      const o = t.querySelector(`[data-input-connection-row="${s.row}"]`);
+      if (!o) continue;
+      const c = (s.row + 0.5) / this.board.laneCount * 100;
+      o.setAttribute("x1", "0"), o.setAttribute("y1", String(c)), o.setAttribute("x2", String(n)), o.setAttribute("y2", String(c));
+      const a = t.querySelector(`[data-input-row="${s.row}"]`), l = t.querySelector(".packet-junction.is-route-preview"), u = !!(a != null && a.classList.contains("is-preview-source"));
+      o.classList.toggle("is-route-preview", u), o.classList.toggle("is-route-danger", u && !!(l != null && l.classList.contains("is-route-danger")));
+    }
+    for (const s of this.board.junctions) {
+      const o = t.querySelector(`[data-connection-id="${s.id}"]`);
+      if (!o) continue;
+      const c = Mt(s.direction, s.row, this.board.laneCount), a = Z(s.row + c, 0, this.board.laneCount - 1), l = (s.column + 0.5) / this.board.columnCount * 100, u = s.column >= this.board.columnCount - 1 ? 100 : (s.column + 1.5) / this.board.columnCount * 100, d = (s.row + 0.5) / this.board.laneCount * 100, h = (a + 0.5) / this.board.laneCount * 100;
+      o.setAttribute("x1", String(l)), o.setAttribute("y1", String(d)), o.setAttribute("x2", String(u)), o.setAttribute("y2", String(h));
+      const f = t.querySelector(`[data-junction-id="${s.id}"]`);
+      o.classList.toggle("is-route-preview", !!(f != null && f.classList.contains("is-route-preview"))), o.classList.toggle("is-route-danger", !!(f != null && f.classList.contains("is-route-danger")));
+    }
+  }
+  syncPackets() {
+    var i, s;
+    const t = (s = (i = this.element) == null ? void 0 : i[0]) == null ? void 0 : s.querySelector("[data-packet-layer]");
+    if (!t) return;
+    const n = new Set(this.state.activePackets.map((o) => o.runtimeId));
+    t.querySelectorAll("[data-runtime-packet]").forEach((o) => {
+      const c = o;
+      n.has(c.dataset.runtimePacket) || c.remove();
+    });
+    for (const o of this.state.activePackets) {
+      let c = t.querySelector(`[data-runtime-packet="${o.runtimeId}"]`);
+      if (!c) {
+        c = document.createElement("div"), c.className = "switchboard-packet", c.dataset.runtimePacket = o.runtimeId, c.style.setProperty("--packet-color", o.color);
+        const u = document.createElement("span");
+        u.textContent = String(o.targetRow + 1), c.appendChild(u), c.title = `${o.label} packet to ${o.port}`, t.appendChild(c);
+      }
+      const a = o.column < 0 ? 0 : (o.column + 0.5) / this.board.columnCount * 100, l = (o.row + 0.5) / this.board.laneCount * 100;
+      c.style.left = `${Z(a, 0, 100)}%`, c.style.top = `${l}%`;
+    }
+  }
+  syncDom() {
+    var o;
+    const t = (o = this.element) == null ? void 0 : o[0];
+    if (!t) return;
+    const n = t.querySelector("[data-trace-fill]"), i = t.querySelector("[data-delivery-fill]");
+    n && (n.style.width = `${this.state.traceProgress}%`), i && (i.style.width = `${Math.min(100, this.state.delivered / this.board.deliveryGoal * 100)}%`);
+    const s = {
+      "[data-trace-text]": `${Math.round(this.state.traceProgress)}%`,
+      "[data-delivery-text]": `${this.state.delivered} / ${this.board.deliveryGoal}`,
+      "[data-corrupted-text]": String(this.state.corrupted),
+      "[data-active-text]": `${this.state.activePackets.length} / ${this.getMaxActivePackets()}`
+    };
+    for (const [c, a] of Object.entries(s)) {
+      const l = t.querySelector(c);
+      l && (l.textContent = a);
+    }
+    this.syncPackets(), this.syncRoutePreview();
+  }
+  async abort() {
+    await this.finish("failure", "Manual disconnect", { close: !0 });
+  }
+  async finish(t, n, { close: i = !1 } = {}) {
+    var o, c;
+    if (this.state.result) return;
+    this.state.isRunning = !1, this.state.result = t, this.stopTimer(), this.resultMessage = n, await this.render(!1);
+    const s = {
+      type: "packet-switchboard",
+      result: t,
+      message: n,
+      rollTotal: this.rollTotal,
+      dc: this.dc,
+      profile: this.profile,
+      delivered: this.state.delivered,
+      corrupted: this.state.corrupted,
+      tracePenaltySeconds: this.state.tracePenaltySeconds,
+      traceProgress: this.state.traceProgress
+    };
+    this.chatOnResult && await wt({
+      title: "Packet Switchboard",
+      result: t,
+      actorName: this.actorName,
+      message: n,
+      rollTotal: this.rollTotal,
+      dc: this.dc
+    }), t === "success" ? (o = this.onSuccess) == null || o.call(this, s) : (c = this.onFailure) == null || c.call(this, s), i && await this.close();
+  }
+}
+const _n = ["#57f3ff", "#b779ff", "#ffcd57", "#66ffad"];
+function j(e, r, t) {
+  return Math.min(t, Math.max(r, e));
+}
+function _(e, r) {
+  return (Math.round(e) % r + r) % r;
+}
+function qn(e) {
+  const r = String(e ?? "prism-lock");
+  let t = 2166136261;
+  for (let n = 0; n < r.length; n += 1)
+    t ^= r.charCodeAt(n), t = Math.imul(t, 16777619);
+  return t >>> 0;
+}
+function Gn(e) {
+  let r = qn(e);
+  return () => {
+    r += 1831565813;
+    let t = r;
+    return t = Math.imul(t ^ t >>> 15, t | 1), t ^= t + Math.imul(t ^ t >>> 7, t | 61), ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function ue(e, r) {
+  const t = [...e];
+  for (let n = t.length - 1; n > 0; n -= 1) {
+    const i = Math.floor(r() * (n + 1));
+    [t[n], t[i]] = [t[i], t[n]];
+  }
+  return t;
+}
+function J(e, r, t) {
+  const n = _(e, t) / t * Math.PI * 2 - Math.PI / 2;
+  return {
+    x: 50 + Math.cos(n) * r,
+    y: 50 + Math.sin(n) * r
+  };
+}
+function de(e, r) {
+  return e.find((t) => t.id === r.id) ?? {
+    id: r.id,
+    rotation: r.initialRotation ?? 0,
+    enabled: r.initialEnabled !== !1
+  };
+}
+function U(e, r) {
+  const t = /* @__PURE__ */ new Set(), n = [], i = [], s = [];
+  for (const a of e.rings) {
+    const l = de(r, a);
+    if (l.enabled)
+      for (const u of a.blockers) {
+        const d = _(u.baseSlot + l.rotation, e.slotCount);
+        s.push({
+          id: u.id,
+          ringId: a.id,
+          ringIndex: a.index,
+          slot: d,
+          color: a.color,
+          ...J(d, a.radius, e.slotCount)
+        });
+      }
+  }
+  for (const a of e.rings) {
+    const l = de(r, a);
+    if (l.enabled)
+      for (const u of a.emitters) {
+        const d = _(u.baseSlot + l.rotation, e.slotCount), h = J(d, a.radius, e.slotCount), f = s.filter((P) => P.ringIndex > a.index && P.slot === d).sort((P, I) => P.ringIndex - I.ringIndex)[0] ?? null, m = f ? Math.max(a.radius + 1, e.rings[f.ringIndex].radius - 2.2) : e.receiverRadius, w = J(d, m, e.slotCount);
+        f || t.add(d), i.push({
+          id: u.id,
+          ringId: a.id,
+          slot: d,
+          color: a.color,
+          x: h.x,
+          y: h.y
+        }), n.push({
+          id: `${u.id}-beam`,
+          ringId: a.id,
+          slot: d,
+          color: a.color,
+          x1: h.x,
+          y1: h.y,
+          x2: w.x,
+          y2: w.y,
+          blocked: !!f
+        });
+      }
+  }
+  const o = e.receivers.map((a) => ({
+    ...a,
+    lit: t.has(a.slot),
+    ...J(a.slot, e.receiverRadius, e.slotCount)
+  })), c = e.iceReceivers.map((a) => {
+    const l = J(a.slot, e.receiverRadius, e.slotCount);
+    return {
+      ...a,
+      lit: t.has(a.slot),
+      ...l,
+      rectX: l.x - 2.2,
+      rectY: l.y - 2.2
+    };
+  });
+  return {
+    beams: n,
+    emitters: i,
+    blockers: s,
+    receivers: o,
+    iceReceivers: c,
+    litSlots: [...t],
+    activeIceSlots: c.filter((a) => a.lit).map((a) => a.slot),
+    litReceiverCount: o.filter((a) => a.lit).length,
+    solved: o.every((a) => a.lit) && c.every((a) => !a.lit)
+  };
+}
+function jn(e, r, t, n) {
+  return e.map((i) => i.id === r ? { ...i, rotation: _(i.rotation + Math.sign(t), n) } : { ...i });
+}
+function Un(e, r = Date.now()) {
+  var A;
+  const t = e.prismLock ?? e, n = Gn(r), i = j(Math.round(Number(t.ringCount) || 3), 2, 4), s = j(Math.round(Number(t.slotCount) || 10), 8, 16), o = j(Math.round(Number(t.receiverCount) || 4), 2, Math.min(8, s - 2)), c = j(Math.round(Number(t.switchableRingCount) || 0), 0, i - 1), a = Math.min(4, s - o), l = c > 0 && a > 0 ? 1 : 0, u = j(Math.round(Number(t.iceReceiverCount) || 0), l, a), d = i - c, h = j(Math.round(Number(t.blockersPerRing) || 0), 0, 3), f = j(Math.round(Number(t.scrambleSteps) || 3), 1, Math.floor(s / 2)), m = ue(Array.from({ length: s }, (p, y) => y), n), w = m.slice(0, o), P = m.slice(o, o + u), I = Array.from({ length: i }, () => Math.floor(n() * s)), b = w.map((p, y) => ({
+    slot: p,
+    ringIndex: y % d
+  })), C = Array.from({ length: i }, (p, y) => {
+    const M = I[y], R = y >= d, N = b.filter(($) => $.ringIndex === y).map(($) => $.slot), D = R ? [P[(y - d) % Math.max(1, P.length)] ?? m.at(-1) ?? 0] : N, q = /* @__PURE__ */ new Set([...w, ...P]), B = ue(
+      Array.from({ length: s }, ($, F) => F).filter(($) => !q.has($)),
+      n
+    ).slice(0, h), V = 1 + Math.floor(n() * f);
+    return {
+      id: `ring-${y + 1}`,
+      index: y,
+      label: `RING ${String(y + 1).padStart(2, "0")}`,
+      color: _n[y],
+      radius: 14 + y * 8,
+      switchable: R,
+      solvedRotation: M,
+      solvedEnabled: !R,
+      initialRotation: _(M + V, s),
+      initialEnabled: !0,
+      emitters: D.map(($, F) => ({
+        id: `ring-${y + 1}-emitter-${F + 1}`,
+        baseSlot: _($ - M, s)
+      })),
+      blockers: B.map(($, F) => ({
+        id: `ring-${y + 1}-blocker-${F + 1}`,
+        baseSlot: _($ - M, s)
+      }))
+    };
+  }), k = {
+    ringCount: i,
+    slotCount: s,
+    receiverCount: o,
+    receiverRadius: 46,
+    rings: C,
+    receivers: w.map((p, y) => ({ id: `receiver-${y + 1}`, slot: p })),
+    iceReceivers: P.map((p, y) => ({ id: `ice-${y + 1}`, slot: p })),
+    ticks: Array.from({ length: s }, (p, y) => ({
+      slot: y,
+      ...J(y, 42.5, s)
+    })),
+    solutionStates: C.map((p) => ({ id: p.id, rotation: p.solvedRotation, enabled: p.solvedEnabled })),
+    initialStates: C.map((p) => ({ id: p.id, rotation: p.initialRotation, enabled: p.initialEnabled }))
+  };
+  if (U(k, k.initialStates).solved) {
+    let p = k.initialStates;
+    t: for (const y of C)
+      for (let M = 1; M < s; M += 1) {
+        const R = k.initialStates.map((N) => N.id === y.id ? { ...N, rotation: _(N.rotation + M, s) } : { ...N });
+        if (!U(k, R).solved) {
+          p = R;
+          break t;
+        }
+      }
+    k.initialStates = p;
+    for (const y of C)
+      y.initialRotation = ((A = k.initialStates.find((M) => M.id === y.id)) == null ? void 0 : A.rotation) ?? y.initialRotation;
+  }
+  return k;
+}
+const Ne = "holosuite-hacking", zn = `modules/${Ne}/templates/prism-lock.html`, Bn = Y();
+function Vn(e, r, t) {
+  return Math.min(t, Math.max(r, e));
+}
+function Jn(e, r, t) {
+  var i;
+  const n = typeof ((i = globalThis.crypto) == null ? void 0 : i.randomUUID) == "function" ? globalThis.crypto.randomUUID() : `${Date.now()}:${performance.now()}:${Math.random()}`;
+  return `${e}:${r}:${t.profileId ?? t.id}:prism:${n}`;
+}
+class Kn extends Bn {
+  constructor(t = {}) {
+    super(t);
+    g(this, "rollTotal");
+    g(this, "dc");
+    g(this, "profile");
+    g(this, "tuning");
+    g(this, "seed");
+    g(this, "actorName");
+    g(this, "onSuccess");
+    g(this, "onFailure");
+    g(this, "chatOnResult");
+    g(this, "board");
+    g(this, "state");
+    g(this, "startedAt");
+    g(this, "timer");
+    g(this, "previousIceSlots");
+    g(this, "resultMessage");
+    this.rollTotal = Number(t.rollTotal ?? 15), this.dc = Number(t.dc ?? 15), this.profile = t.profile ? { ...t.profile } : W(this.rollTotal, this.dc), this.tuning = this.profile.prismLock ?? {}, this.seed = t.seed ?? Jn(this.rollTotal, this.dc, this.profile), this.actorName = String(t.actorName ?? "Hacker"), this.onSuccess = typeof t.onSuccess == "function" ? t.onSuccess : null, this.onFailure = typeof t.onFailure == "function" ? t.onFailure : null, this.chatOnResult = t.chatOnResult !== !1, this.board = Un(this.profile, this.seed), this.state = {
+      rings: this.board.initialStates.map((n) => ({ ...n })),
+      hasStarted: !1,
+      isRunning: !1,
+      result: null,
+      traceProgress: 0,
+      tracePenaltySeconds: 0,
+      moves: 0
+    }, this.startedAt = null, this.timer = null, this.previousIceSlots = new Set(U(this.board, this.state.rings).activeIceSlots);
+  }
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "holosuite-prism-lock-app",
+      title: "Prism Lock",
+      classes: ["prism-lock-window", "holosuite-hacking-window"],
+      popOut: !0,
+      resizable: !0,
+      width: 940,
+      height: 760,
+      template: zn
+    });
+  }
+  getData() {
+    const t = U(this.board, this.state.rings), n = this.board.rings.map((i) => {
+      const s = this.state.rings.find((o) => o.id === i.id) ?? {};
+      return {
+        ...i,
+        rotation: s.rotation ?? 0,
+        enabled: s.enabled !== !1,
+        statusLabel: s.enabled === !1 ? "phased out" : "active"
+      };
+    });
+    return {
+      rollTotal: this.rollTotal,
+      dc: this.dc,
+      profile: this.profile,
+      tuning: this.tuning,
+      board: this.board,
+      rings: n,
+      evaluation: t,
+      state: this.state,
+      receiverPercent: Math.round(t.litReceiverCount / this.board.receiverCount * 100),
+      resultTitle: this.state.result === "success" ? "Lattice Resolved" : "Prism Lock Rejected",
+      resultDetail: this.resultMessage ?? (this.state.result === "success" ? "All authorization receptors illuminated." : "Trace completed before alignment."),
+      glitchClass: this.profile.visualGlitchIntensity > 0.7 ? "glitch-high" : this.profile.visualGlitchIntensity > 0.35 ? "glitch-medium" : "glitch-low"
+    };
+  }
+  activateListeners(t) {
+    super.activateListeners(t), t.find("[data-action='rotate-ring']").on("click", (n) => {
+      this.rotateRing(n.currentTarget.dataset.ringId, Number(n.currentTarget.dataset.direction));
+    }), t.find("[data-action='toggle-ring']").on("click", (n) => this.toggleRing(n.currentTarget.dataset.ringId)), t.find("[data-action='start']").on("click", () => this.startRun()), t.find("[data-action='abort']").on("click", () => this.abort()), t.find("[data-action='close']").on("click", () => this.close()), this.syncDom();
+  }
+  async render(t, n) {
+    const i = await super.render(t, n);
+    return this.state.hasStarted && this.state.isRunning && this.startTimer(), i;
+  }
+  async close(t = {}) {
+    return this.stopTimer(), super.close(t);
+  }
+  getTraceDuration() {
+    const t = Number(game.settings.get(Ne, "traceDurationMultiplier") ?? 1) || 1;
+    return Math.max(5, Number(this.tuning.traceDurationSeconds ?? this.profile.traceDurationSeconds ?? 60) * t);
+  }
+  startRun() {
+    this.state.hasStarted || this.state.result || (this.state.hasStarted = !0, this.state.isRunning = !0, this.startedAt = performance.now(), this.previousIceSlots = new Set(U(this.board, this.state.rings).activeIceSlots), this.render(!1));
+  }
+  rotateRing(t, n) {
+    !this.state.isRunning || !n || (this.state.rings = jn(this.state.rings, t, n, this.board.slotCount), this.state.moves += 1, this.evaluateMove());
+  }
+  toggleRing(t) {
+    if (!this.state.isRunning) return;
+    const n = this.board.rings.find((i) => i.id === t);
+    n != null && n.switchable && (this.state.rings = this.state.rings.map((i) => i.id === t ? { ...i, enabled: !i.enabled } : { ...i }), this.state.moves += 1, this.evaluateMove());
+  }
+  evaluateMove() {
+    var i, s;
+    const t = U(this.board, this.state.rings), n = t.activeIceSlots.filter((o) => !this.previousIceSlots.has(o));
+    if (this.previousIceSlots = new Set(t.activeIceSlots), n.length) {
+      const o = Math.max(0, Number(this.tuning.icePenaltySeconds ?? 5)) * n.length;
+      this.state.tracePenaltySeconds += o, o > 0 && ((s = (i = ui.notifications) == null ? void 0 : i.warn) == null || s.call(i, `ICE receptor energized. Trace jumped by ${o}s.`));
+    }
+    if (t.solved) {
+      this.finish("success", "Authorization lattice resolved");
+      return;
+    }
+    this.render(!1);
+  }
+  startTimer() {
+    this.timer || !this.state.hasStarted || !this.startedAt || (this.timer = window.setInterval(() => {
+      if (!this.state.isRunning || !this.startedAt) return;
+      const t = (performance.now() - this.startedAt) / 1e3 + this.state.tracePenaltySeconds;
+      this.state.traceProgress = Vn(t / this.getTraceDuration() * 100, 0, 100), this.syncDom(), this.state.traceProgress >= 100 && this.finish("failure", "Trace complete");
+    }, 120));
+  }
+  stopTimer() {
+    this.timer && (window.clearInterval(this.timer), this.timer = null);
+  }
+  syncDom() {
+    var s;
+    const t = (s = this.element) == null ? void 0 : s[0];
+    if (!t) return;
+    const n = t.querySelector("[data-trace-fill]"), i = t.querySelector("[data-trace-text]");
+    n && (n.style.width = `${this.state.traceProgress}%`), i && (i.textContent = `${Math.round(this.state.traceProgress)}%`);
+  }
+  async abort() {
+    await this.finish("failure", "Manual disconnect", { close: !0 });
+  }
+  async finish(t, n, { close: i = !1 } = {}) {
+    var c, a;
+    if (this.state.result) return;
+    this.state.isRunning = !1, this.state.result = t, this.stopTimer(), this.resultMessage = n, await this.render(!1);
+    const s = U(this.board, this.state.rings), o = {
+      type: "prism-lock",
+      result: t,
+      message: n,
+      rollTotal: this.rollTotal,
+      dc: this.dc,
+      profile: this.profile,
+      moves: this.state.moves,
+      litReceiverCount: s.litReceiverCount,
+      activeIceSlots: s.activeIceSlots,
+      tracePenaltySeconds: this.state.tracePenaltySeconds,
+      traceProgress: this.state.traceProgress
+    };
+    this.chatOnResult && await wt({
+      title: "Prism Lock",
+      result: t,
+      actorName: this.actorName,
+      message: n,
+      rollTotal: this.rollTotal,
+      dc: this.dc
+    }), t === "success" ? (c = this.onSuccess) == null || c.call(this, o) : (a = this.onFailure) == null || a.call(this, o), i && await this.close();
+  }
+}
+const T = "holosuite-hacking", Ot = `module.${T}`, Xn = 10 * 60 * 1e3;
+let x = null, ht = null;
+const yt = /* @__PURE__ */ new Map();
+function Wn() {
+  game.settings.register(T, "defaultDc", {
     name: "Default Hacking DC",
     hint: "Used by the GM launcher and API calls that omit a DC.",
     scope: "world",
     config: !0,
     type: Number,
     default: 15
-  }), game.settings.register(w, "traceDurationMultiplier", {
+  }), game.settings.register(T, "traceDurationMultiplier", {
     name: "Default Trace Duration Multiplier",
     hint: "Multiplies trace timers for all HoloSuite hacking minigames.",
     scope: "world",
     config: !0,
     type: Number,
     default: 1
-  }), game.settings.register(w, "nodeTakeoverDurationSeconds", {
+  }), game.settings.register(T, "nodeTakeoverDurationSeconds", {
     name: "Node Takeover Duration Override",
     hint: "Optional fixed seconds for claiming a Node Intrusion node. Set to 0 to use the selected difficulty profile.",
     scope: "world",
     config: !0,
     type: Number,
     default: 0
-  }), game.settings.registerMenu(w, "difficultyProfilesMenu", {
+  }), game.settings.registerMenu(T, "difficultyProfilesMenu", {
     name: "Difficulty Profiles",
     label: "Configure Profiles",
-    hint: "Tune Node Intrusion maps and Signal Alignment channels, drift, reveal radius, hold time, and trace pressure.",
+    hint: "Tune Node Intrusion, Signal Alignment, Packet Switchboard, and Prism Lock difficulty settings.",
     icon: "fas fa-sliders",
-    type: Mt,
+    type: sn,
     restricted: !0
-  }), game.settings.register(w, "difficultyProfileOverrides", {
+  }), game.settings.register(T, "difficultyProfileOverrides", {
     name: "Difficulty Profile Data",
     hint: "Internal storage for the Difficulty Profiles configuration menu.",
     scope: "world",
     config: !1,
     type: String,
     default: ""
-  }), game.settings.register(w, "allowPlayerInteraction", {
+  }), game.settings.register(T, "allowPlayerInteraction", {
     name: "Allow Players To Interact Directly",
     hint: "Reserved for future player-targeted play. The GM launcher remains GM-only for now.",
     scope: "world",
     config: !0,
     type: Boolean,
     default: !1
-  }), game.settings.register(w, "visualGlitchIntensity", {
+  }), game.settings.register(T, "visualGlitchIntensity", {
     name: "Visual Glitch Intensity",
     hint: "Global visual preference. Difficulty profiles still apply their own gameplay tuning.",
     scope: "client",
@@ -1734,82 +2752,92 @@ function Kt() {
     default: "medium"
   });
 }
-function Jt() {
-  Pe({
+function Yn() {
+  ot({
     id: "node-intrusion",
     title: "Node Intrusion",
     icon: "fa-solid fa-network-wired",
-    create: (t) => new Gt(t)
-  }), Pe({
+    create: (e) => new Cn(e)
+  }), ot({
     id: "signal-alignment",
     title: "Signal Alignment",
     icon: "fa-solid fa-wave-square",
-    create: (t) => new Wt(t)
+    create: (e) => new Tn(e)
+  }), ot({
+    id: "packet-switchboard",
+    title: "Packet Switchboard",
+    icon: "fa-solid fa-shuffle",
+    create: (e) => new En(e)
+  }), ot({
+    id: "prism-lock",
+    title: "Prism Lock",
+    icon: "fa-solid fa-bullseye",
+    create: (e) => new Kn(e)
   });
 }
-function Xe() {
-  var t, n, e;
-  return (t = game.user) != null && t.isGM ? (te = te ?? new yt({ api: N }), te.render(!0), te) : ((e = (n = ui.notifications) == null ? void 0 : n.warn) == null || e.call(n, "Only the GM can open HoloSuite Hacking."), null);
+function Te() {
+  var e, r, t;
+  return (e = game.user) != null && e.isGM ? (ht = ht ?? new Xe({ api: x }), ht.render(!0), ht) : ((t = (r = ui.notifications) == null ? void 0 : r.warn) == null || t.call(r, "Only the GM can open HoloSuite Hacking."), null);
 }
-function Ke() {
-  N = N ?? ot({ moduleId: w, openLauncher: Xe }), N.sendHackToPlayer = Yt, N.registerWithHoloSuite = pe;
-  const t = game.modules.get(w);
-  return t && (t.api = N), game.holosuiteHacking = N, N;
+function Ae() {
+  x = x ?? _e({ moduleId: T, openLauncher: Te }), x.sendHackToPlayer = Qn, x.registerWithHoloSuite = Nt;
+  const e = game.modules.get(T);
+  return e && (e.api = x), game.holosuiteHacking = x, x;
 }
-function Yt(t = {}) {
-  var o, l, c, u, d, f, h;
-  if (!((o = game.user) != null && o.isGM))
-    return (c = (l = ui.notifications) == null ? void 0 : l.warn) == null || c.call(l, "Only the GM can send HoloSuite hacking challenges."), !1;
+function Qn(e = {}) {
+  var c, a, l, u, d, h, f;
+  if (!((c = game.user) != null && c.isGM))
+    return (l = (a = ui.notifications) == null ? void 0 : a.warn) == null || l.call(a, "Only the GM can send HoloSuite hacking challenges."), !1;
   if (!game.socket)
     return (d = (u = ui.notifications) == null ? void 0 : u.error) == null || d.call(u, "Foundry sockets are not available."), !1;
-  const n = Je(t), e = be(n.userId), i = Ce(n.actorId, e);
-  i ? e && !B(i, e) && console.warn(`${w} | ${e.name} does not appear to own ${i.name}; sending fallback roll data anyway.`) : console.warn(`${w} | Could not resolve hacker actor.`, {
-    actorId: n.actorId,
-    userId: n.userId,
-    availableUsers: Se().map((m) => ({ id: m.id, name: m.name, isGM: m.isGM })),
-    userCharacter: V(e),
-    ownedActors: Ie(e).map((m) => ({ id: m.id, name: m.name }))
+  const r = Re(e), t = Rt(r.userId), n = Ht(r.actorId, t);
+  n ? t && !it(n, t) && console.warn(`${T} | ${t.name} does not appear to own ${n.name}; sending fallback roll data anyway.`) : console.warn(`${T} | Could not resolve hacker actor.`, {
+    actorId: r.actorId,
+    userId: r.userId,
+    availableUsers: At().map((m) => ({ id: m.id, name: m.name, isGM: m.isGM })),
+    userCharacter: nt(t),
+    ownedActors: Dt(t).map((m) => ({ id: m.id, name: m.name }))
   });
-  const r = He(i, n.skillId), s = n.skillLabel || ce(n.skillId, r), a = Number.isFinite(Number(n.skillModifier)) && Number(n.skillModifier) !== 0 ? Number(n.skillModifier) : ve(r);
-  if (typeof t.onSuccess == "function" || typeof t.onFailure == "function") {
-    const m = window.setTimeout(() => le.delete(n.requestId), Xt);
-    le.set(n.requestId, {
-      onSuccess: typeof t.onSuccess == "function" ? t.onSuccess : null,
-      onFailure: typeof t.onFailure == "function" ? t.onFailure : null,
+  const i = me(n, r.skillId), s = r.skillLabel || bt(r.skillId, i), o = Number.isFinite(Number(r.skillModifier)) && Number(r.skillModifier) !== 0 ? Number(r.skillModifier) : xt(i);
+  if (typeof e.onSuccess == "function" || typeof e.onFailure == "function") {
+    const m = window.setTimeout(() => yt.delete(r.requestId), Xn);
+    yt.set(r.requestId, {
+      onSuccess: typeof e.onSuccess == "function" ? e.onSuccess : null,
+      onFailure: typeof e.onFailure == "function" ? e.onFailure : null,
       timeoutId: m
     });
   }
-  return game.socket.emit(Me, {
+  return game.socket.emit(Ot, {
     type: "launch-request",
     payload: {
-      ...n,
-      actorId: (i == null ? void 0 : i.id) ?? "",
-      actorName: (i == null ? void 0 : i.name) ?? (e == null ? void 0 : e.name) ?? "Hacker",
+      ...r,
+      actorId: (n == null ? void 0 : n.id) ?? "",
+      actorName: (n == null ? void 0 : n.name) ?? (t == null ? void 0 : t.name) ?? "Hacker",
       skillLabel: s,
-      skillModifier: a,
+      skillModifier: o,
       gmUserId: game.user.id
     }
-  }), (h = (f = ui.notifications) == null ? void 0 : f.info) == null || h.call(f, `${de(n.minigameType)} sent${e ? ` to ${e.name}` : " to players"}.`), !0;
+  }), (f = (h = ui.notifications) == null ? void 0 : h.info) == null || f.call(h, `${vt(r.minigameType)} sent${t ? ` to ${t.name}` : " to players"}.`), !0;
 }
-function Qt(t) {
-  var n, e, i, r;
+function Zn(e) {
+  var r, t, n, i;
   try {
-    if ((t == null ? void 0 : t.type) === "result-report") {
-      nn(t.payload ?? {});
+    if ((e == null ? void 0 : e.type) === "result-report") {
+      ii(e.payload ?? {});
       return;
     }
-    if ((t == null ? void 0 : t.type) !== "launch-request") return;
-    const s = Je(t.payload ?? {});
-    if (s.userId && s.userId !== ((n = game.user) == null ? void 0 : n.id) || !s.userId && ((e = game.user) != null && e.isGM)) return;
-    const a = Ce(s.actorId, be(s.userId) ?? game.user), o = s.actorName || (a == null ? void 0 : a.name) || "Intruder", l = s.skillLabel || ce(s.skillId, He(a, s.skillId));
+    if ((e == null ? void 0 : e.type) !== "launch-request") return;
+    const s = Re(e.payload ?? {});
+    if (s.userId && s.userId !== ((r = game.user) == null ? void 0 : r.id) || !s.userId && ((t = game.user) != null && t.isGM)) return;
+    const o = Ht(s.actorId, Rt(s.userId) ?? game.user), c = s.actorName || (o == null ? void 0 : o.name) || "Intruder", a = s.skillLabel || bt(s.skillId, me(o, s.skillId));
     new Dialog({
-      title: de(s.minigameType),
-      content: rn(s, o, l),
+      title: vt(s.minigameType),
+      content: ri(s, c, a),
       buttons: {
         start: {
           icon: '<i class="fa-solid fa-terminal"></i>',
           label: "Accept and roll",
-          callback: async () => Zt(s)
+          callback: async () => ti(s)
         }
       },
       default: "start"
@@ -1820,121 +2848,121 @@ function Qt(t) {
       resizable: !0
     }).render(!0);
   } catch (s) {
-    console.error(`${w} | Failed to handle hacking launch request.`, s), (r = (i = ui.notifications) == null ? void 0 : i.error) == null || r.call(i, "HoloSuite Hacking launch failed. See console for details.");
+    console.error(`${T} | Failed to handle hacking launch request.`, s), (i = (n = ui.notifications) == null ? void 0 : n.error) == null || i.call(n, "HoloSuite Hacking launch failed. See console for details.");
   }
 }
-async function Zt(t) {
-  const n = Ce(t.actorId, be(t.userId) ?? game.user), e = await en(t);
-  if (!Number.isFinite(e == null ? void 0 : e.total)) return null;
-  const i = {
-    rollTotal: e.total,
-    naturalRoll: e.naturalRoll,
-    dc: t.dc,
-    actorId: t.actorId,
-    actorName: (n == null ? void 0 : n.name) ?? t.actorName ?? "Hacker",
-    userId: t.userId,
-    skillId: t.skillId,
-    onSuccess: (r) => ke(t, r),
-    onFailure: (r) => ke(t, r)
+async function ti(e) {
+  const r = Ht(e.actorId, Rt(e.userId) ?? game.user), t = await ei(e);
+  if (!Number.isFinite(t == null ? void 0 : t.total)) return null;
+  const n = {
+    rollTotal: t.total,
+    naturalRoll: t.naturalRoll,
+    dc: e.dc,
+    actorId: e.actorId,
+    actorName: (r == null ? void 0 : r.name) ?? e.actorName ?? "Hacker",
+    userId: e.userId,
+    skillId: e.skillId,
+    onSuccess: (i) => he(e, i),
+    onFailure: (i) => he(e, i)
   };
-  return t.minigameType === "signal-alignment" ? N.startSignalAlignment(i) : N.startNodeIntrusion(i);
+  return x.startHack({ ...n, type: e.minigameType });
 }
-async function en(t) {
-  var n, e;
+async function ei(e) {
+  var r, t;
   try {
-    const i = Number(t.skillModifier ?? 0), r = `1d20 ${i >= 0 ? "+" : "-"} ${Math.abs(i)}`, s = await new Roll(r).evaluate({ async: !0 });
+    const n = Number(e.skillModifier ?? 0), i = `1d20 ${n >= 0 ? "+" : "-"} ${Math.abs(n)}`, s = await new Roll(i).evaluate({ async: !0 });
     return await s.toMessage({
       speaker: ChatMessage.getSpeaker(),
-      flavor: `${R(de(t.minigameType))}: ${R(t.skillLabel || t.skillId || "Skill")} vs DC ${Number(t.dc)}`
+      flavor: `${H(vt(e.minigameType))}: ${H(e.skillLabel || e.skillId || "Skill")} vs DC ${Number(e.dc)}`
     }), {
       total: Number(s.total),
-      naturalRoll: tn(s),
+      naturalRoll: ni(s),
       roll: s
     };
-  } catch (i) {
-    return console.error(`${w} | Fallback skill roll failed.`, i), (e = (n = ui.notifications) == null ? void 0 : n.warn) == null || e.call(n, "HoloSuite Hacking skill check failed."), null;
+  } catch (n) {
+    return console.error(`${T} | Fallback skill roll failed.`, n), (t = (r = ui.notifications) == null ? void 0 : r.warn) == null || t.call(r, "HoloSuite Hacking skill check failed."), null;
   }
 }
-function tn(t) {
-  var s, a, o, l, c;
-  const e = ((t == null ? void 0 : t.dice) ?? ((a = (s = t == null ? void 0 : t.terms) == null ? void 0 : s.filter) == null ? void 0 : a.call(s, (u) => (u == null ? void 0 : u.faces) === 20)) ?? []).find((u) => Number(u == null ? void 0 : u.faces) === 20), i = (c = (l = (o = e == null ? void 0 : e.results) == null ? void 0 : o.find) == null ? void 0 : l.call(o, (u) => !u.discarded && !u.rerolled)) == null ? void 0 : c.result, r = Number(i);
-  return Number.isFinite(r) ? r : null;
+function ni(e) {
+  var s, o, c, a, l;
+  const t = ((e == null ? void 0 : e.dice) ?? ((o = (s = e == null ? void 0 : e.terms) == null ? void 0 : s.filter) == null ? void 0 : o.call(s, (u) => (u == null ? void 0 : u.faces) === 20)) ?? []).find((u) => Number(u == null ? void 0 : u.faces) === 20), n = (l = (a = (c = t == null ? void 0 : t.results) == null ? void 0 : c.find) == null ? void 0 : a.call(c, (u) => !u.discarded && !u.rerolled)) == null ? void 0 : l.result, i = Number(n);
+  return Number.isFinite(i) ? i : null;
 }
-function ke(t, n) {
-  var e, i;
-  (i = (e = game.socket) == null ? void 0 : e.emit) == null || i.call(e, Me, {
+function he(e, r) {
+  var t, n;
+  (n = (t = game.socket) == null ? void 0 : t.emit) == null || n.call(t, Ot, {
     type: "result-report",
     payload: {
-      requestId: t.requestId,
-      gmUserId: t.gmUserId,
-      result: n
+      requestId: e.requestId,
+      gmUserId: e.gmUserId,
+      result: r
     }
   });
 }
-function nn(t = {}) {
-  var i, r, s;
-  if (!((i = game.user) != null && i.isGM) || t.gmUserId !== game.user.id) return;
-  const n = le.get(t.requestId);
-  le.delete(t.requestId), n != null && n.timeoutId && window.clearTimeout(n.timeoutId);
-  const e = t.result ?? {};
-  e.result === "success" ? (r = n == null ? void 0 : n.onSuccess) == null || r.call(n, e) : (s = n == null ? void 0 : n.onFailure) == null || s.call(n, e);
+function ii(e = {}) {
+  var n, i, s;
+  if (!((n = game.user) != null && n.isGM) || e.gmUserId !== game.user.id) return;
+  const r = yt.get(e.requestId);
+  yt.delete(e.requestId), r != null && r.timeoutId && window.clearTimeout(r.timeoutId);
+  const t = e.result ?? {};
+  t.result === "success" ? (i = r == null ? void 0 : r.onSuccess) == null || i.call(r, t) : (s = r == null ? void 0 : r.onFailure) == null || s.call(r, t);
 }
-function rn(t, n, e) {
+function ri(e, r, t) {
   return `
     <section class="holosuite-hacking-start-prompt">
       <p>Incoming hacking challenge</p>
-      <h2>${R(de(t.minigameType))}</h2>
-      <div>${R(n)} rolls ${R(e)} vs DC ${Number(t.dc)}</div>
+      <h2>${H(vt(e.minigameType))}</h2>
+      <div>${H(r)} rolls ${H(t)} vs DC ${Number(e.dc)}</div>
     </section>
   `;
 }
-function Je(t = {}) {
-  const n = Number(game.settings.get(w, "defaultDc") ?? 15);
+function Re(e = {}) {
+  const r = Number(game.settings.get(T, "defaultDc") ?? 15);
   return {
-    requestId: String(t.requestId ?? foundry.utils.randomID()),
-    minigameType: String(t.minigameType ?? t.type ?? "node-intrusion"),
-    userId: String(t.userId ?? ""),
-    actorId: String(t.actorId ?? ""),
-    actorName: String(t.actorName ?? ""),
-    skillId: String(t.skillId ?? ""),
-    skillLabel: String(t.skillLabel ?? ""),
-    skillModifier: Number(t.skillModifier ?? 0),
-    dc: Number(t.dc ?? n),
-    gmUserId: String(t.gmUserId ?? "")
+    requestId: String(e.requestId ?? foundry.utils.randomID()),
+    minigameType: String(e.minigameType ?? e.type ?? "node-intrusion"),
+    userId: String(e.userId ?? ""),
+    actorId: String(e.actorId ?? ""),
+    actorName: String(e.actorName ?? ""),
+    skillId: String(e.skillId ?? ""),
+    skillLabel: String(e.skillLabel ?? ""),
+    skillModifier: Number(e.skillModifier ?? 0),
+    dc: Number(e.dc ?? r),
+    gmUserId: String(e.gmUserId ?? "")
   };
 }
-function Ce(t, n) {
-  const e = _(t);
-  if (e) return e;
-  const i = V(n);
-  if (i) return i;
-  const r = Ie(n);
-  if (r.length === 1) return r[0];
-  const s = lt();
-  return s && B(s, n) ? s : null;
+function Ht(e, r) {
+  const t = K(e);
+  if (t) return t;
+  const n = nt(r);
+  if (n) return n;
+  const i = Dt(r);
+  if (i.length === 1) return i[0];
+  const s = qe();
+  return s && it(s, r) ? s : null;
 }
-function de(t) {
-  var n, e;
-  return ((e = (n = N == null ? void 0 : N.getMinigames) == null ? void 0 : n.call(N).find((i) => i.id === t)) == null ? void 0 : e.title) ?? String(t ?? "Hacking");
+function vt(e) {
+  var r, t;
+  return ((t = (r = x == null ? void 0 : x.getMinigames) == null ? void 0 : r.call(x).find((n) => n.id === e)) == null ? void 0 : t.title) ?? String(e ?? "Hacking");
 }
-function pe() {
-  var n, e;
-  const t = ((n = game.modules.get("holosuite-core")) == null ? void 0 : n.api) ?? game.holosuite;
-  return typeof (t == null ? void 0 : t.registerApp) != "function" ? !1 : ((e = t.unregisterApp) == null || e.call(t, "node-intrusion"), t.registerApp({
-    id: w,
+function Nt() {
+  var r, t;
+  const e = ((r = game.modules.get("holosuite-core")) == null ? void 0 : r.api) ?? game.holosuite;
+  return typeof (e == null ? void 0 : e.registerApp) != "function" ? !1 : ((t = e.unregisterApp) == null || t.call(e, "node-intrusion"), e.registerApp({
+    id: T,
     title: "HoloSuite Hacking",
     icon: "fa-solid fa-terminal",
     premium: !1,
-    featureId: w,
+    featureId: T,
     playerVisible: !1,
     description: "Reusable hacking minigames for terminals, traces, and signal puzzles.",
-    open: () => Xe()
+    open: () => Te()
   }), !0);
 }
 Hooks.once("init", () => {
-  Kt(), Jt(), Ke();
+  Wn(), Yn(), Ae();
 });
 Hooks.once("ready", () => {
-  var t, n;
-  Ke(), (n = (t = game.socket) == null ? void 0 : t.on) == null || n.call(t, Me, Qt), pe(), window.setTimeout(() => pe(), 500), console.log(`${w} | Ready. API available at game.modules.get("${w}").api`);
+  var e, r;
+  Ae(), (r = (e = game.socket) == null ? void 0 : e.on) == null || r.call(e, Ot, Zn), Nt(), window.setTimeout(() => Nt(), 500), console.log(`${T} | Ready. API available at game.modules.get("${T}").api`);
 });

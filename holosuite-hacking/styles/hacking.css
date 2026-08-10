@@ -5,8 +5,9 @@
   background: var(--hs-surface-bg);
   box-sizing: border-box;
   color: var(--hs-text);
-  height: 100%;
-  min-height: 100%;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
   overflow: hidden;
   padding: 0;
 }
@@ -142,12 +143,14 @@
   --hs-frame-side-width: var(--hs-frame-corner-size);
   --hs-frame-header-width: 180px;
   --hs-frame-header-height: 18px;
+  --hs-frame-safe-inset: 3px;
   --hs-frame-color: var(--hs-border-strong);
   --hs-frame-glow: color-mix(in srgb, var(--hs-color-primary) 36%, transparent);
   position: relative;
   isolation: isolate;
   min-height: 100%;
   height: 100%;
+  width: 100%;
   overflow: hidden;
   background:
     var(--hs-grid-bg),
@@ -178,6 +181,17 @@
 
 .hh-shell .hs-frame {
   z-index: 2;
+}
+
+.hh-shell .hs-frame::after {
+  content: "";
+  position: absolute;
+  right: 55px;
+  bottom: calc(var(--hs-frame-safe-inset) + 1px);
+  left: 55px;
+  height: 1px;
+  background: var(--hs-frame-color);
+  box-shadow: 0 0 7px var(--hs-frame-glow);
 }
 
 .hh-shell .hs-content {
@@ -237,13 +251,13 @@
 }
 
 .hh-shell .hs-frame-corner--bottom-left {
-  bottom: 0;
+  bottom: var(--hs-frame-safe-inset);
   left: 0;
 }
 
 .hh-shell .hs-frame-corner--bottom-right {
   right: 0;
-  bottom: 0;
+  bottom: var(--hs-frame-safe-inset);
 }
 
 .hh-shell .hs-frame-edge--left,
@@ -319,6 +333,19 @@
   background: var(--hs-surface-control-hover);
   box-shadow: var(--hs-glow-cyan), var(--hs-shadow-control);
   outline: none;
+}
+
+.hh-shell .hh-result-close {
+  justify-self: center;
+  min-width: 132px;
+  margin-top: 8px;
+  padding: 8px 18px;
+  border-color: color-mix(in srgb, currentColor 58%, transparent);
+  color: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .hh-kicker {
@@ -470,7 +497,8 @@
 .holosuite-hacking-profile-window .window-content {
   background: var(--hs-surface-bg) !important;
   color: var(--hs-text) !important;
-  height: 100%;
+  flex: 1 1 auto;
+  height: auto;
   min-height: 0;
   overflow: hidden;
   padding: 0;
@@ -478,7 +506,7 @@
 
 .holosuite-profile-config {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   box-sizing: border-box;
   height: 100%;
   min-height: 0;
@@ -542,56 +570,144 @@
   text-shadow: var(--hs-glow-cyan);
 }
 
+.holosuite-profile-tabs {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0 2px 2px;
+  scrollbar-color: var(--hs-color-primary) transparent;
+}
+
+.holosuite-profile-tabs button {
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 8px 6px;
+  color: var(--hs-text-secondary) !important;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.holosuite-profile-tabs button.is-active {
+  border-color: var(--hs-border-strong) !important;
+  background: var(--hs-surface-active) !important;
+  color: var(--hs-color-primary) !important;
+  box-shadow: var(--hs-glow-cyan), inset 0 -2px 0 var(--hs-color-primary) !important;
+}
+
 .holosuite-profile-config-body {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 14px;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 16px 18px 20px;
+  scrollbar-gutter: stable;
 }
 
 .holosuite-profile-section {
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  max-height: none;
   border: 1px solid rgba(105, 232, 255, 0.2);
   background: rgba(4, 18, 27, 0.72);
-  padding: 12px;
+  overflow: hidden;
+  padding: 0;
 }
 
 .holosuite-profile-section-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 28px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid rgba(105, 232, 255, 0.15);
-  padding-bottom: 8px;
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 12px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  text-align: left;
+  user-select: none;
 }
 
-.holosuite-profile-section-header div {
+.holosuite-profile-section-heading {
+  display: grid;
+  gap: 3px;
   min-width: 0;
 }
 
-.holosuite-profile-section-header h3 {
-  margin: 0;
+.holosuite-profile-section-heading strong {
   color: var(--hs-text);
   font-size: 18px;
+  line-height: 1.1;
   overflow-wrap: anywhere;
 }
 
-.holosuite-profile-section-header span {
+.holosuite-profile-section-heading small {
   color: var(--hs-muted);
   font-size: 11px;
+  font-weight: 400;
   text-transform: uppercase;
 }
 
-.holosuite-profile-section-header button {
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(255, 209, 102, 0.32);
-  background: rgba(255, 209, 102, 0.07);
-  color: var(--hs-amber);
-  padding: 0;
+.holosuite-profile-section-header > i {
+  color: var(--hs-color-primary);
   font-size: 12px;
-  line-height: 1;
+  transition: transform 140ms ease;
+}
+
+.holosuite-profile-section.is-open > .holosuite-profile-section-header {
+  border-bottom: 1px solid rgba(105, 232, 255, 0.15);
+  background: color-mix(in srgb, var(--hs-color-primary) 7%, transparent) !important;
+}
+
+.holosuite-profile-section.is-open > .holosuite-profile-section-header > i {
+  transform: rotate(180deg);
+}
+
+.holosuite-profile-section-content {
+  display: none;
+  position: static;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  padding: 12px;
+}
+
+.holosuite-profile-section.is-open > .holosuite-profile-section-content {
+  display: block;
+}
+
+.holosuite-profile-section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.holosuite-profile-section-actions button {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 28px;
+  padding: 5px 9px;
+  color: var(--hs-amber) !important;
+  font-size: 11px;
+  text-transform: uppercase;
 }
 
 .holosuite-profile-fieldset {
@@ -606,6 +722,21 @@
   margin-top: 0;
   border-top: 0;
   padding-top: 0;
+}
+
+.holosuite-profile-fieldset[data-profile-panel] {
+  display: none;
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.holosuite-profile-config[data-active-profile-tab="general"] [data-profile-panel="general"],
+.holosuite-profile-config[data-active-profile-tab="node-intrusion"] [data-profile-panel="node-intrusion"],
+.holosuite-profile-config[data-active-profile-tab="signal-alignment"] [data-profile-panel="signal-alignment"],
+.holosuite-profile-config[data-active-profile-tab="packet-switchboard"] [data-profile-panel="packet-switchboard"],
+.holosuite-profile-config[data-active-profile-tab="prism-lock"] [data-profile-panel="prism-lock"] {
+  display: grid !important;
 }
 
 .holosuite-profile-fieldset h4 {
@@ -717,7 +848,7 @@
 }
 
 .hh-profile-shell .holosuite-profile-config {
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 14px;
   height: 100%;
   min-height: 0;

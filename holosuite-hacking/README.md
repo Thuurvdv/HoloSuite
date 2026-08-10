@@ -1,6 +1,6 @@
 # HoloSuite Hacking
 
-HoloSuite Hacking brings interactive hacking minigames to your Foundry VTT sessions. Instead of resolving a hack with a single dice roll, this module puts the player in a timed puzzle where their roll determines the difficulty. It currently includes two minigames, with more planned.
+HoloSuite Hacking brings interactive hacking minigames to your Foundry VTT sessions. Instead of resolving a hack with a single dice roll, this module puts the player in a timed puzzle where their roll determines the difficulty. It currently includes four minigames, with more planned.
 
 ![Node Intrusion](../images/NodeIntrustion_hacking.jpg)
 
@@ -11,6 +11,8 @@ HoloSuite Hacking brings interactive hacking minigames to your Foundry VTT sessi
 - Adds playable hacking minigames that the GM can launch for any player during a session.
 - **Node Intrusion**: The player navigates through a randomized network of nodes, reading local radar warnings, managing firewall and decoy risks, and trying to reach the target before a trace timer runs out.
 - **Signal Alignment**: The player hunts for unstable signal targets, tunes channels into their target range, and holds them steady until a transmission decrypts.
+- **Packet Switchboard**: The player directly sets routing junctions while colored packets cross the board, guiding each packet into its matching output before the trace completes.
+- **Prism Lock**: The player rotates concentric optical rings to illuminate authorization receptors while avoiding blockers, dangerous ICE receptors, and decoy rings.
 - Difficulty scales with the player's skill check. A good roll gives more time and clearer assists; a bad roll makes routes riskier or Signal Alignment targets harder to find and hold.
 - The GM picks the minigame, selects a player and their character's hacking skill, sets a DC, and sends the challenge. The player's client rolls the skill check and launches the minigame based on the result.
 
@@ -31,7 +33,7 @@ When the GM sends a hacking challenge, the player's skill check is compared to t
 1. Enable **HoloSuite Hacking** & **Holosuite-core** in your Foundry world.
 2. Open the hacking launcher from the HoloSuite launcher.
 3. In the launcher, choose:
-   - The **minigame** (Node Intrusion or Signal Alignment).
+   - The **minigame** (Node Intrusion, Signal Alignment, Packet Switchboard, or Prism Lock).
    - The **actor** who is doing the hacking.
    - The **player** who owns that actor.
    - The **skill** to roll (this comes from the actor's sheet).
@@ -49,7 +51,7 @@ When the GM sends a hacking challenge, the player's skill check is compared to t
 - **Default Hacking DC**: Sets the default DC in the launcher so you do not have to type it every time.
 - **Default Trace Duration Multiplier**: Scales all trace timers up or down. Increase this to give players more breathing room, or decrease it for a faster pace.
 - **Node Takeover Duration Override**: Optionally forces one global node takeover time for Node Intrusion. Set it to 0 to use each difficulty profile's own timing.
-- **Difficulty Profiles**: Opens a profile editor for Node Intrusion and Signal Alignment tuning. Each profile can adjust per-minigame trace time, node count, safe routes, hazards, radar, takeover timing, signal channels, tolerance, drift, target reveal radius, hold time, and trace spike penalties.
+- **Difficulty Profiles**: Opens a profile editor for all four minigames. Prism Lock profiles control ring and receptor counts, angular positions, blockers, ICE hazards, switchable rings, scrambling, and trace penalties.
 - **Visual Glitch Intensity**: A client-side setting (low, medium, or high) that controls how much visual noise the minigame displays. Players can set this to their own preference.
 
 The difficulty profile editor applies logical limits while you edit. Decoys are capped by node count, firewalls are capped by available non-protected nodes unless protected-route firewalls are enabled, and route counts are capped by what the generated map can support. Each profile also has its own reset button to return only that profile to the module default.
@@ -77,6 +79,21 @@ The difficulty profile editor applies logical limits while you edit. Decoys are 
 2. Use the controls to hunt for each channel's target range. Harder profiles only reveal the target when you are close.
 3. Hold all channels within their targets at the same time until the transmission decrypts.
 4. If the signal destabilizes after lock, the trace jumps forward.
+
+### Playing Packet Switchboard
+
+1. Each colored packet must travel from its listed input to the matching output port.
+2. Click anywhere on a junction cell to cycle its arrow direction. Alternatively, hover a junction and press Up, Right, or Down to directly select that direction without clicking it first.
+3. Every junction draws a connection line toward the node or output it currently targets. The highlighted line previews the oldest active packet's complete route: green reaches the correct output, while red currently ends at the wrong output.
+4. Watch the full `IN → OUT` queue and prepare routes during the packet's staging pause. Difficulty profiles cap how many packets can be active simultaneously.
+5. Correct deliveries fill the payload meter. A packet sent to the wrong output is corrupted and adds trace pressure.
+
+### Playing Prism Lock
+
+1. Rotate each optical ring one position at a time and watch how its emitters and blockers redirect the laser lattice.
+2. Illuminate every white authorization receptor around the outside of the lock at the same time.
+3. Avoid illuminating red ICE receptors. Newly energized ICE adds trace pressure.
+4. Harder locks include switchable decoy rings. Phase those rings out when their emitters interfere with a valid solution.
 
 ### Things to Know
 

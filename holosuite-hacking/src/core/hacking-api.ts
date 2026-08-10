@@ -24,6 +24,8 @@ function flattenProfileTuning(profile: any) {
     ...profile,
     ...(profile.nodeIntrusion ?? {}),
     ...(profile.signalAlignment ?? {}),
+    ...(profile.packetSwitchboard ?? {}),
+    ...(profile.prismLock ?? {}),
     allowMainPathFirewalls: profile.nodeIntrusion?.allowFirewallOnMainPath ?? profile.allowMainPathFirewalls
   };
 }
@@ -93,6 +95,8 @@ export function createHackingApi({ moduleId, openLauncher }: any) {
     startHack,
     startNodeIntrusion: (options = {}) => startHack({ ...options, type: "node-intrusion" }),
     startSignalAlignment: (options = {}) => startHack({ ...options, type: "signal-alignment" }),
+    startPacketSwitchboard: (options = {}) => startHack({ ...options, type: "packet-switchboard" }),
+    startPrismLock: (options = {}) => startHack({ ...options, type: "prism-lock" }),
     openLauncher,
     getDifficultyProfile: (rollTotal = 0, dc = 10, naturalRoll = null) => applyVisualGlitchSetting(applyProfileSettings(getDifficultyProfile(rollTotal, dc, naturalRoll))),
     difficultyProfiles: DIFFICULTY_PROFILES,
@@ -105,6 +109,18 @@ export function createHackingApi({ moduleId, openLauncher }: any) {
       onFailure: () => {}
     }),
     testSignalAlignment: () => api.startSignalAlignment({
+      rollTotal: 17,
+      dc: 15,
+      onSuccess: () => {},
+      onFailure: () => {}
+    }),
+    testPacketSwitchboard: () => api.startPacketSwitchboard({
+      rollTotal: 17,
+      dc: 15,
+      onSuccess: () => {},
+      onFailure: () => {}
+    }),
+    testPrismLock: () => api.startPrismLock({
       rollTotal: 17,
       dc: 15,
       onSuccess: () => {},

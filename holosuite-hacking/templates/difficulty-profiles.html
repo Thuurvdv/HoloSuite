@@ -16,24 +16,37 @@
     <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--right" src="modules/holosuite-hacking/assets/frame/hs-frame-edge--right--space-police.svg?v=1" alt="">
     <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-header" src="modules/holosuite-hacking/assets/frame/hs-frame-header--space-police.svg?v=1" alt="">
   </div>
-  <form class="hs-content holosuite-profile-config" novalidate>
+  <form class="hs-content holosuite-profile-config" data-active-profile-tab="general" novalidate>
     <header class="holosuite-profile-config-header">
       <p class="hh-kicker">HoloSuite / hacking profiles</p>
       <h2>Difficulty Profiles</h2>
     </header>
 
+    <nav class="holosuite-profile-tabs" role="tablist" aria-label="Minigame profile settings">
+      <button type="button" role="tab" class="is-active" data-profile-tab="general" aria-selected="true"><i class="fa-solid fa-sliders"></i><span>General</span></button>
+      <button type="button" role="tab" data-profile-tab="node-intrusion" aria-selected="false" tabindex="-1"><i class="fa-solid fa-diagram-project"></i><span>Node Intrusion</span></button>
+      <button type="button" role="tab" data-profile-tab="signal-alignment" aria-selected="false" tabindex="-1"><i class="fa-solid fa-wave-square"></i><span>Signal Alignment</span></button>
+      <button type="button" role="tab" data-profile-tab="packet-switchboard" aria-selected="false" tabindex="-1"><i class="fa-solid fa-shuffle"></i><span>Packet Switchboard</span></button>
+      <button type="button" role="tab" data-profile-tab="prism-lock" aria-selected="false" tabindex="-1"><i class="fa-solid fa-circle-nodes"></i><span>Prism Lock</span></button>
+    </nav>
+
   <main class="holosuite-profile-config-body">
     {{#each profiles}}
       <section class="holosuite-profile-section" data-profile-section data-profile-id="{{id}}">
-        <header class="holosuite-profile-section-header">
-          <div>
-            <h3>{{label}}</h3>
-            <span>{{id}}</span>
-          </div>
-          <button type="button" data-action="reset-profile" title="Reset this profile" aria-label="Reset {{label}}"><i class="fa-solid fa-rotate-left"></i></button>
-        </header>
+        <button class="holosuite-profile-section-header" type="button" data-action="toggle-profile" aria-expanded="false">
+          <span class="holosuite-profile-section-heading">
+            <strong>{{label}}</strong>
+            <small>{{id}}</small>
+          </span>
+          <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+        </button>
 
-        <div class="holosuite-profile-fieldset">
+        <div class="holosuite-profile-section-content">
+          <div class="holosuite-profile-section-actions">
+            <button type="button" data-action="reset-profile" title="Reset this difficulty to its defaults" aria-label="Reset {{label}}"><i class="fa-solid fa-rotate-left"></i> Reset {{label}}</button>
+          </div>
+
+        <div class="holosuite-profile-fieldset" data-profile-panel="general">
           <h4>Shared</h4>
           <div class="holosuite-profile-grid">
           <label>
@@ -41,9 +54,15 @@
             <input type="number" name="{{id}}.visualGlitchIntensity" value="{{visualGlitchIntensity}}" min="0" max="1" step="0.01" />
           </label>
           </div>
+          <div class="holosuite-profile-toggles">
+            <label>
+              <input type="checkbox" name="{{id}}.hintsEnabled" {{#if hintsEnabled}}checked{{/if}} />
+              <span title="Shows extra guidance in minigames that support it.">Gameplay hints</span>
+            </label>
+          </div>
         </div>
 
-        <div class="holosuite-profile-fieldset">
+        <div class="holosuite-profile-fieldset" data-profile-panel="node-intrusion">
           <h4>Node Intrusion</h4>
           <div class="holosuite-profile-grid">
           <label>
@@ -93,10 +112,6 @@
 
           <div class="holosuite-profile-toggles">
             <label>
-              <input type="checkbox" name="{{id}}.hintsEnabled" {{#if hintsEnabled}}checked{{/if}} />
-              <span title="Shows firewall and decoy node types when they are in view.">Reveal hazard types</span>
-            </label>
-            <label>
               <input type="checkbox" name="{{id}}.radarEnabled" {{#if nodeIntrusion.radarEnabled}}checked{{/if}} />
               <span title="Shows adjacent danger signals on current, visited, and reachable nodes without revealing exact hazard locations.">Radar</span>
             </label>
@@ -111,7 +126,7 @@
           </div>
         </div>
 
-        <div class="holosuite-profile-fieldset">
+        <div class="holosuite-profile-fieldset" data-profile-panel="signal-alignment">
           <h4>Signal Alignment</h4>
           <div class="holosuite-profile-grid">
           <label>
@@ -147,6 +162,95 @@
             <input type="number" name="{{id}}.signalDestabilizationPenaltySeconds" value="{{signalAlignment.destabilizationPenaltySeconds}}" min="0" max="60" step="0.01" />
           </label>
           </div>
+        </div>
+
+        <div class="holosuite-profile-fieldset" data-profile-panel="packet-switchboard">
+          <h4>Packet Switchboard</h4>
+          <div class="holosuite-profile-grid">
+          <label>
+            <span title="How long Packet Switchboard has before the trace reaches 100%.">Packet trace seconds</span>
+            <input type="number" name="{{id}}.packetTraceDurationSeconds" value="{{packetSwitchboard.traceDurationSeconds}}" min="5" max="300" step="1" />
+          </label>
+          <label>
+            <span title="Number of colored input and output lanes.">Packet lanes</span>
+            <input type="number" name="{{id}}.packetLaneCount" value="{{packetSwitchboard.laneCount}}" min="3" max="6" step="1" />
+          </label>
+          <label>
+            <span title="Number of routing junction columns. Must be high enough to cross the full board.">Junction columns</span>
+            <input type="number" name="{{id}}.packetColumnCount" value="{{packetSwitchboard.columnCount}}" min="2" max="8" step="1" />
+          </label>
+          <label>
+            <span title="Correct packets required to complete the hack.">Delivery goal</span>
+            <input type="number" name="{{id}}.packetDeliveryGoal" value="{{packetSwitchboard.deliveryGoal}}" min="3" max="20" step="1" />
+          </label>
+          <label>
+            <span title="Seconds between new packets entering the board.">Spawn interval</span>
+            <input type="number" name="{{id}}.packetIntervalSeconds" value="{{packetSwitchboard.packetIntervalSeconds}}" min="0.35" max="10" step="0.01" />
+          </label>
+          <label>
+            <span title="Seconds a packet takes to cross one junction.">Junction step</span>
+            <input type="number" name="{{id}}.packetStepSeconds" value="{{packetSwitchboard.packetStepSeconds}}" min="0.25" max="5" step="0.01" />
+          </label>
+          <label>
+            <span title="How many incoming packet destinations are shown in advance. Zero hides the queue.">Queue preview</span>
+            <input type="number" name="{{id}}.packetPreviewCount" value="{{packetSwitchboard.previewCount}}" min="0" max="6" step="1" />
+          </label>
+          <label>
+            <span title="Seconds added to trace pressure when a packet reaches the wrong output.">Misroute penalty</span>
+            <input type="number" name="{{id}}.packetMisroutePenaltySeconds" value="{{packetSwitchboard.misroutePenaltySeconds}}" min="0" max="60" step="0.01" />
+          </label>
+          <label>
+            <span title="Maximum packets allowed on the board at once. New packets wait at the input while this limit is reached.">Maximum active</span>
+            <input type="number" name="{{id}}.packetMaxActivePackets" value="{{packetSwitchboard.maxActivePackets}}" min="1" max="6" step="1" />
+          </label>
+          <label>
+            <span title="Seconds each packet waits visibly at its input before crossing the first junction.">Input staging pause</span>
+            <input type="number" name="{{id}}.packetEntryHoldSeconds" value="{{packetSwitchboard.entryHoldSeconds}}" min="0" max="10" step="0.01" />
+          </label>
+          </div>
+        </div>
+
+        <div class="holosuite-profile-fieldset" data-profile-panel="prism-lock">
+          <h4>Prism Lock</h4>
+          <div class="holosuite-profile-grid">
+          <label>
+            <span title="How long Prism Lock has before the trace reaches 100%.">Prism trace seconds</span>
+            <input type="number" name="{{id}}.prismTraceDurationSeconds" value="{{prismLock.traceDurationSeconds}}" min="5" max="300" step="1" />
+          </label>
+          <label>
+            <span title="Number of independently rotating optical rings.">Prism rings</span>
+            <input type="number" name="{{id}}.prismRingCount" value="{{prismLock.ringCount}}" min="2" max="4" step="1" />
+          </label>
+          <label>
+            <span title="Number of discrete angular positions around every ring.">Ring positions</span>
+            <input type="number" name="{{id}}.prismSlotCount" value="{{prismLock.slotCount}}" min="8" max="16" step="1" />
+          </label>
+          <label>
+            <span title="Authorization receptors that must all be illuminated.">Receptors</span>
+            <input type="number" name="{{id}}.prismReceiverCount" value="{{prismLock.receiverCount}}" min="2" max="8" step="1" />
+          </label>
+          <label>
+            <span title="Beam-blocking nodes placed on each ring.">Blockers per ring</span>
+            <input type="number" name="{{id}}.prismBlockersPerRing" value="{{prismLock.blockersPerRing}}" min="0" max="3" step="1" />
+          </label>
+          <label>
+            <span title="Dangerous red receptors that add trace pressure when illuminated.">ICE receptors</span>
+            <input type="number" name="{{id}}.prismIceReceiverCount" value="{{prismLock.iceReceiverCount}}" min="0" max="4" step="1" />
+          </label>
+          <label>
+            <span title="Decoy rings that can be phased out. At least one ordinary ring always remains.">Switchable rings</span>
+            <input type="number" name="{{id}}.prismSwitchableRingCount" value="{{prismLock.switchableRingCount}}" min="0" max="3" step="1" />
+          </label>
+          <label>
+            <span title="Maximum number of positions used to scramble each ring from its solved phase.">Scramble distance</span>
+            <input type="number" name="{{id}}.prismScrambleSteps" value="{{prismLock.scrambleSteps}}" min="1" max="8" step="1" />
+          </label>
+          <label>
+            <span title="Seconds added to trace pressure when a newly energized beam reaches ICE.">ICE penalty</span>
+            <input type="number" name="{{id}}.prismIcePenaltySeconds" value="{{prismLock.icePenaltySeconds}}" min="0" max="60" step="0.01" />
+          </label>
+          </div>
+        </div>
         </div>
       </section>
     {{/each}}

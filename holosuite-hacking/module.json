@@ -21,7 +21,9 @@
     "styles/holosuite-tokens.css",
     "styles/hacking.css",
     "styles/node-intrusion.css",
-    "styles/signal-alignment.css"
+    "styles/signal-alignment.css",
+    "styles/packet-switchboard.css",
+    "styles/prism-lock.css"
   ],
   "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking",
   "manifest": "",
