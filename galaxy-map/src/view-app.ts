@@ -184,7 +184,6 @@ export function createGalaxyMapViewClass(deps: any) {
         this.panY = 0;
         this._applyViewportTransform(html);
       });
-      html.querySelector("[data-action='open-scene']")?.addEventListener("click", () => this._openLinkedScene());
       html.querySelector("[data-action='open-journal']")?.addEventListener("click", () => this._openLinkedJournal());
       html.querySelector("[data-action='edit-system']")?.addEventListener("click", () => {
         if (this.selectedSystemId) openSystemDialog(this.mapId, this.selectedSystemId);
@@ -535,17 +534,6 @@ export function createGalaxyMapViewClass(deps: any) {
         });
         globalThis.setTimeout(finish, TRAVEL_ANIMATION_MS);
       });
-    }
-
-    _openLinkedScene() {
-      const system = this._getSelectedRawSystem();
-      if (!system?.sceneId) return;
-      const scene = game.scenes?.get(system.sceneId);
-      if (!scene) {
-        notifyError(`Scene "${system.sceneId}" was not found.`);
-        return;
-      }
-      scene.view();
     }
 
     _openLinkedJournal() {

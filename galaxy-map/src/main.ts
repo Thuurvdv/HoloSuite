@@ -17,7 +17,7 @@ import {
 import { createGalaxyMapManagerClass } from "./manager-app";
 import { createGalaxyMapViewClass } from "./view-app";
 import { MODULE_ID, SETTING_MAPS, SOCKET_NAME, TEMPLATE_ROOT } from "./constants";
-import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, slugify } from "./dom-utils";
+import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, slugify } from "./dom-utils";
 
 (() => {
   "use strict";
@@ -589,10 +589,14 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
             <button type="button" data-browse-target="image"><i class="fa-solid fa-folder-open"></i> Browse</button>
           </div>
         </label>
-        <div class="gmf-form-grid">
-          <label>Scene <select name="sceneId">${documentOptions(game.scenes, data.sceneId)}</select></label>
-          <label>Journal <select name="journalId">${documentOptions(game.journal, data.journalId)}</select></label>
-        </div>
+        <fieldset class="gmf-scene-picker">
+          <legend>System Scenes</legend>
+          <p class="gmf-scene-picker__hint">Tag every Foundry scene that belongs to this system.</p>
+          <div class="gmf-scene-picker__options">
+            ${documentCheckboxes(game.scenes, data.sceneIds, "sceneIds")}
+          </div>
+        </fieldset>
+        <label>Journal <select name="journalId">${documentOptions(game.journal, data.journalId)}</select></label>
         <label>GM Notes <textarea name="notes">${escapeHtml(data.notes)}</textarea></label>
       </form>
     `;
@@ -679,7 +683,11 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
       title: system ? "Edit Star System" : "Create Star System",
       content: getSystemDialogContent(mapId, system ?? { id: randomId("system"), name: "New System" }, defaults),
       submitLabel: system ? "Save System" : "Create System",
-      onSubmit: (values) => upsertSystem(mapId, { ...values, pulse: values.pulse === "true" })
+      onSubmit: (values) => upsertSystem(mapId, {
+        ...values,
+        sceneIds: values.sceneIds ?? [],
+        pulse: values.pulse === "true"
+      })
     });
   }
 
@@ -789,6 +797,25 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
 
   function getMaps() {
     return Object.values(getMapStore()).map(normalizeMap);
+  }
+
+  function getSceneIdsForSystem(mapId, systemId) {
+    const rawMap = getRawMap(mapId);
+    if (!rawMap) return [];
+    const system = normalizeMap(rawMap).systems.find((candidate) => candidate.id === String(systemId));
+    return system ? [...system.sceneIds] : [];
+  }
+
+  function getSystemsForScene(sceneId) {
+    const targetSceneId = String(sceneId || "");
+    if (!targetSceneId) return [];
+    return getMaps().flatMap((map: any) => map.systems
+      .filter((system: any) => system.sceneIds.includes(targetSceneId))
+      .map((system: any) => ({
+        mapId: map.id,
+        mapTitle: map.title,
+        system: clone(system)
+      })));
   }
 
   function refreshOpenApps(mapId = null) {
@@ -1298,6 +1325,8 @@ import { documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElemen
       openPlayerMapChooser,
       createMap,
       getMaps,
+      getSceneIdsForSystem,
+      getSystemsForScene,
       showMapToPlayers,
       closePlayerMap,
       updateMap,

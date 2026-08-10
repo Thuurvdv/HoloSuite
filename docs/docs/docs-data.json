@@ -215,7 +215,7 @@
       "overview": "Galaxy Map gives sci-fi campaigns a Foundry-native star map. GMs build systems and routes, control visibility, reveal discoveries, and let players request travel.",
       "features": [
         "Interactive star maps with clickable system nodes.",
-        "Custom icons, colors, sizes, pulse effects, descriptions, scenes, journals, and factions.",
+        "Custom icons, colors, sizes, pulse effects, descriptions, multi-scene tags, journals, and factions.",
         "Routes with travel time, fuel cost, and route type.",
         "GM-controlled visibility and discovery notifications.",
         "Player travel requests and ship movement animations.",
@@ -231,7 +231,7 @@
         "Right-click empty space to add systems.",
         "Right-click systems to create routes, reveal content, edit, or delete.",
         "Set systems and routes as player-visible or GM-only.",
-        "Link systems to scenes and journal entries where useful."
+        "Tag systems with any number of scenes and link journal entries where useful."
       ],
       "faq": [
         {

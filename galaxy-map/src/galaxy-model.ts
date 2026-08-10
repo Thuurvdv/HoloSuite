@@ -30,11 +30,19 @@ export function normalizeNumber(value: unknown, fallback = 0) {
   return Number.isFinite(numeric) ? numeric : fallback;
 }
 
+export function normalizeIdList(value: unknown) {
+  const values = Array.isArray(value) ? value : value ? [value] : [];
+  return [...new Set(values.map((id) => String(id).trim()).filter(Boolean))];
+}
+
 export function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
 export function normalizeSystem(system: any = {}) {
+  // `sceneId` was the pre-1.1 single-scene field. Treat it as migration input
+  // only when the canonical array is absent, so an explicit [] can clear tags.
+  const sceneIds = normalizeIdList(system.sceneIds === undefined ? system.sceneId : system.sceneIds);
   return {
     id: String(system.id || randomId("system")),
     name: String(system.name || "Unnamed System"),
@@ -45,7 +53,7 @@ export function normalizeSystem(system: any = {}) {
     status: SYSTEM_STATUSES.includes(system.status) ? system.status : "known",
     description: String(system.description || ""),
     image: String(system.image || ""),
-    sceneId: String(system.sceneId || ""),
+    sceneIds,
     journalId: String(system.journalId || ""),
     visibility: normalizeVisibility(system.visibility, "players"),
     notes: String(system.notes || ""),
