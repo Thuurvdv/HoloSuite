@@ -6,6 +6,10 @@
 
     <div class="bb-editor-grid">
       <label>
+        <span>{{localize "BOUNTYBOARD.Editor.ContractId"}}</span>
+        <input class="bb-contract-id-input" type="text" name="contractId" value="{{bounty.contractId}}" maxlength="32" autocomplete="off" spellcheck="false" required />
+      </label>
+      <label>
         <span>Title</span>
         <input type="text" name="title" value="{{bounty.title}}" required />
       </label>

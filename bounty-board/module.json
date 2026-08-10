@@ -21,7 +21,13 @@
     "styles/bounty-board.css"
   ],
   "packs": [],
-  "languages": [],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    }
+  ],
   "socket": false,
   "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board",
   "manifest": "",

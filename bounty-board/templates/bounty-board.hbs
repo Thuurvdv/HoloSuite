@@ -1,107 +1,144 @@
-<section class="bb-terminal">
+<section class="hs-application hs-application--bounty-board bb-shell bb-terminal holosuite-bounty-board">
+  <div class="hs-background" aria-hidden="true"></div>
+  <div class="hs-frame" aria-hidden="true">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-left" src="modules/bounty-board/assets/frame/hs-frame-corner--top-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-right" src="modules/bounty-board/assets/frame/hs-frame-corner--top-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-left" src="modules/bounty-board/assets/frame/hs-frame-corner--bottom-left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--bottom-right" src="modules/bounty-board/assets/frame/hs-frame-corner--bottom-right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--left" src="modules/bounty-board/assets/frame/hs-frame-edge--left.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-edge hs-frame-edge--right" src="modules/bounty-board/assets/frame/hs-frame-edge--right.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--default hs-frame-header" src="modules/bounty-board/assets/frame/hs-frame-header.svg?v=1" alt="">
+
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-left" src="modules/bounty-board/assets/frame/hs-frame-corner--top-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--top-right" src="modules/bounty-board/assets/frame/hs-frame-corner--top-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-left" src="modules/bounty-board/assets/frame/hs-frame-corner--bottom-left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-corner hs-frame-corner--bottom-right" src="modules/bounty-board/assets/frame/hs-frame-corner--bottom-right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--left" src="modules/bounty-board/assets/frame/hs-frame-edge--left--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-edge hs-frame-edge--right" src="modules/bounty-board/assets/frame/hs-frame-edge--right--space-police.svg?v=1" alt="">
+    <img class="hs-frame-piece hs-frame-piece--space-police hs-frame-header" src="modules/bounty-board/assets/frame/hs-frame-header--space-police.svg?v=1" alt="">
+  </div>
+
+  <div class="hs-content">
   <header class="bb-header">
-    <div>
-      <p class="bb-kicker">Contract Terminal</p>
-      <h2>Bounty Board</h2>
-      <p class="bb-subtitle">{{visibleCount}} of {{totalCount}} contracts displayed</p>
+    <div class="bb-heading">
+      <p class="bb-kicker">{{localize "BOUNTYBOARD.Header.ContractTerminal"}}</p>
+      <h2>{{localize "BOUNTYBOARD.Header.Title"}}</h2>
+      <p class="bb-subtitle" data-total-count="{{totalCount}}" data-active-count="{{activeCount}}">{{contractSummary}}</p>
     </div>
+
     {{#if isGM}}
       <div class="bb-header-actions">
         <button type="button" class="bb-primary" data-action="createBounty">
-          <i class="fa-solid fa-plus"></i>
-          New Contract
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+          <span>{{localize "BOUNTYBOARD.Header.NewContract"}}</span>
         </button>
-        <button type="button" data-action="showFiltered" {{#unless visibleCount}}disabled{{/unless}}>
-          <i class="fa-solid fa-eye"></i>
-          Show Filtered
-        </button>
-        <button type="button" data-action="hideFiltered" {{#unless visibleCount}}disabled{{/unless}}>
-          <i class="fa-solid fa-eye-slash"></i>
-          Hide Filtered
-        </button>
-        <button type="button" data-action="toggleBoardVisibility">
-          {{#if boardVisibleToPlayers}}
-            <i class="fa-solid fa-lock"></i>
-            Hide Board
-          {{else}}
-            <i class="fa-solid fa-unlock"></i>
-            Show Board
-          {{/if}}
-        </button>
+        <details class="bb-terminal-options">
+          <summary title="{{localize "BOUNTYBOARD.Header.TerminalOptions"}}">
+            <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+            <span class="bb-visually-hidden">{{localize "BOUNTYBOARD.Header.TerminalOptions"}}</span>
+          </summary>
+          <div class="bb-terminal-options-menu">
+            <button type="button" data-action="showFiltered" {{#unless visibleCount}}disabled{{/unless}}>
+              <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              {{localize "BOUNTYBOARD.Header.ShowFiltered"}}
+            </button>
+            <button type="button" data-action="hideFiltered" {{#unless visibleCount}}disabled{{/unless}}>
+              <i class="fa-solid fa-eye-slash" aria-hidden="true"></i>
+              {{localize "BOUNTYBOARD.Header.HideFiltered"}}
+            </button>
+            <button type="button" data-action="toggleBoardVisibility">
+              {{#if boardVisibleToPlayers}}
+                <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                {{localize "BOUNTYBOARD.Header.HideBoard"}}
+              {{else}}
+                <i class="fa-solid fa-lock-open" aria-hidden="true"></i>
+                {{localize "BOUNTYBOARD.Header.ShowBoard"}}
+              {{/if}}
+            </button>
+          </div>
+        </details>
       </div>
     {{/if}}
   </header>
 
   {{#if boardHiddenForPlayers}}
     <div class="bb-empty">
-      <i class="fa-solid fa-lock"></i>
-      <p>The bounty board is currently unavailable.</p>
+      <i class="fa-solid fa-lock" aria-hidden="true"></i>
+      <p>{{localize "BOUNTYBOARD.Empty.Unavailable"}}</p>
     </div>
   {{else}}
-  <form class="bb-filters" autocomplete="off">
-    <label>
-      <span>Status</span>
-      <select data-filter="status" name="status">
-        <option value="">All Statuses</option>
-        {{#each options.statuses as |status|}}
-          <option value="{{status.value}}" {{#if (bbEq ../filters.status status.value)}}selected{{/if}}>{{status.label}}</option>
-        {{/each}}
-      </select>
-    </label>
-    <label>
-      <span>Threat</span>
-      <select data-filter="threatLevel" name="threatLevel">
-        <option value="">All Threats</option>
-        {{#each options.threatLevels as |threat|}}
-          <option value="{{threat}}" {{#if (bbEq ../filters.threatLevel threat)}}selected{{/if}}>{{threat}}</option>
-        {{/each}}
-      </select>
-    </label>
-    <label>
-      <span>Faction</span>
-      <select data-filter="faction" name="faction">
-        <option value="">All Factions</option>
-        {{#each options.factions as |faction|}}
-          <option value="{{faction}}" {{#if (bbEq ../filters.faction faction)}}selected{{/if}}>{{faction}}</option>
-        {{/each}}
-      </select>
-    </label>
-    <label class="bb-tag-filter">
-      <span>Tag</span>
-      <span class="bb-tag-filter-row">
-        <select data-filter="tag" name="tag">
-          <option value="">All Tags</option>
-          {{#each options.tags as |tag|}}
-            <option value="{{tag}}" {{#if (bbEq ../filters.tag tag)}}selected{{/if}}>{{tag}}</option>
+    <form class="bb-filters" autocomplete="off">
+      <label class="bb-filter-field">
+        <span>{{localize "BOUNTYBOARD.Filter.Status"}}</span>
+        <select data-filter="status" name="status">
+          <option value="">{{localize "BOUNTYBOARD.Filter.AllStatuses"}}</option>
+          {{#each options.statuses as |status|}}
+            <option value="{{status.value}}" {{#if (bbEq ../filters.status status.value)}}selected{{/if}}>{{status.label}}</option>
           {{/each}}
         </select>
-        {{#if isGM}}
-          <button type="button" class="bb-icon-button" data-action="removeTag" title="Remove selected tag" {{#unless filters.tag}}disabled{{/unless}}>
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        {{/if}}
-      </span>
-    </label>
-    <label class="bb-search">
-      <span>Search</span>
-      <input type="search" data-filter="search" name="search" value="{{filters.search}}" placeholder="Target, faction, location..." />
-    </label>
-    <button type="button" class="bb-icon-button" data-action="clearFilters" title="Clear filters">
-      <i class="fa-solid fa-filter-circle-xmark"></i>
-    </button>
-  </form>
+      </label>
+      <label class="bb-filter-field">
+        <span>{{localize "BOUNTYBOARD.Filter.Threat"}}</span>
+        <select data-filter="threatLevel" name="threatLevel">
+          <option value="">{{localize "BOUNTYBOARD.Filter.AllThreats"}}</option>
+          {{#each options.threatLevels as |threat|}}
+            <option value="{{threat}}" {{#if (bbEq ../filters.threatLevel threat)}}selected{{/if}}>{{threat}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label class="bb-filter-field">
+        <span>{{localize "BOUNTYBOARD.Filter.Faction"}}</span>
+        <select data-filter="faction" name="faction">
+          <option value="">{{localize "BOUNTYBOARD.Filter.AllFactions"}}</option>
+          {{#each options.factions as |faction|}}
+            <option value="{{faction}}" {{#if (bbEq ../filters.faction faction)}}selected{{/if}}>{{faction}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label class="bb-filter-field bb-tag-filter">
+        <span>{{localize "BOUNTYBOARD.Filter.Tag"}}</span>
+        <span class="bb-tag-filter-row">
+          <select data-filter="tag" name="tag">
+            <option value="">{{localize "BOUNTYBOARD.Filter.AllTags"}}</option>
+            {{#each options.tags as |tag|}}
+              <option value="{{tag}}" {{#if (bbEq ../filters.tag tag)}}selected{{/if}}>{{tag}}</option>
+            {{/each}}
+          </select>
+          {{#if isGM}}
+            <button type="button" class="bb-icon-button bb-remove-tag" data-action="removeTag" title="{{localize "BOUNTYBOARD.Filter.RemoveTag"}}" {{#unless filters.tag}}disabled{{/unless}}>
+              <i class="fa-solid fa-trash" aria-hidden="true"></i>
+              <span class="bb-visually-hidden">{{localize "BOUNTYBOARD.Filter.RemoveTag"}}</span>
+            </button>
+          {{/if}}
+        </span>
+      </label>
+      <label class="bb-filter-field bb-search">
+        <span>{{localize "BOUNTYBOARD.Filter.Search"}}</span>
+        <input type="search" data-filter="search" name="search" value="{{filters.search}}" placeholder="{{localize "BOUNTYBOARD.Filter.SearchPlaceholder"}}" />
+      </label>
+      <button type="button" class="bb-icon-button bb-clear-filters" data-action="clearFilters" title="{{localize "BOUNTYBOARD.Filter.Clear"}}">
+        <i class="fa-solid fa-filter-circle-xmark" aria-hidden="true"></i>
+        <span class="bb-visually-hidden">{{localize "BOUNTYBOARD.Filter.Clear"}}</span>
+      </button>
+    </form>
 
-  {{#if bounties.length}}
-    <div class="bb-card-grid">
-      {{#each bounties as |bounty|}}
-        {{> "modules/bounty-board/templates/bounty-card.hbs" bounty=bounty isGM=../isGM}}
-      {{/each}}
-    </div>
-  {{else}}
-    <div class="bb-empty">
-      <i class="fa-solid fa-satellite-dish"></i>
-      <p>No contracts match the current filters.</p>
-    </div>
+    {{#if bounties.length}}
+      <div class="bb-card-grid">
+        {{#each bounties as |bounty|}}
+          {{> "modules/bounty-board/templates/bounty-card.hbs" bounty=bounty isGM=../isGM}}
+        {{/each}}
+      </div>
+      <div class="bb-empty bb-search-empty" {{#if visibleCount}}hidden{{/if}}>
+        <i class="fa-solid fa-satellite-dish" aria-hidden="true"></i>
+        <p>{{localize "BOUNTYBOARD.Empty.NoMatches"}}</p>
+      </div>
+    {{else}}
+      <div class="bb-empty">
+        <i class="fa-solid fa-satellite-dish" aria-hidden="true"></i>
+        <p>{{localize "BOUNTYBOARD.Empty.NoMatches"}}</p>
+      </div>
+    {{/if}}
   {{/if}}
-  {{/if}}
+  </div>
+  <div class="hs-effects" aria-hidden="true"></div>
 </section>

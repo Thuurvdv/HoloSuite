@@ -42,6 +42,7 @@ export const DEFAULT_TAGS = Object.freeze([
 
 export const EMPTY_BOUNTY = Object.freeze({
   id: "",
+  contractId: "",
   title: "",
   targetName: "",
   description: "",

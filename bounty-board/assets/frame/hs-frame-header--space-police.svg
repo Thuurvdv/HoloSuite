@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="18" viewBox="0 0 180 18">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff15a;
+        stroke: #000;
+        stroke-width: 1px;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="Driehoek_1" data-name="Driehoek 1" class="cls-1" d="M135.5,8l3.5,6h-7Z"/>
+  <path id="Driehoek_1-2" data-name="Driehoek 1" class="cls-1" d="M44.5,8L48,14H41Z"/>
+  <path id="Lijn_1" data-name="Lijn 1" class="cls-1" d="M45.008,8.014V6.019l90-.014V8Z"/>
+  <path id="Lijn_2" data-name="Lijn 2" class="cls-1" d="M0,17V13H180v4H0ZM92,8l3.464,6H88.536Z"/>
+</svg>
