@@ -3,6 +3,8 @@ import {
   DEFAULT_CALL,
   clampSignal,
   createCallId,
+  getInitials,
+  getUserTokenImage,
   normalizeCallData,
   normalizeContact
 } from "./call-model";
@@ -18,7 +20,7 @@ import {
   TEMPLATE_PATH
 } from "./constants";
 import { escapeHTML } from "./dom-utils";
-import { createThreadIdForContact, prepareThreads } from "./message-model";
+import { createGroupThreadId, createThreadIdForContact, getAvatarTone, prepareThreads } from "./message-model";
 import { createMessageEvent, getStoredMessages, sendMessageToContact } from "./message-service";
 
 let activeCall = null;
@@ -29,6 +31,7 @@ let activeMessages = null;
 let activeContactsTab = "personal";
 let activeMessageThreadId = "";
 let composingNewMessage = false;
+let composingNewGroup = false;
 let ringingAudio = null;
 let groupContactsCache = null;
 
@@ -66,6 +69,17 @@ function getPlayerChoices() {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function getGroupMessageMemberChoices() {
+  return (game.users?.contents ?? [])
+    .filter((user) => !user.isGM && user.id !== game.user?.id)
+    .map((user) => ({
+      id: String(user.id),
+      name: String(user.name ?? "Unknown Player"),
+      active: user.active === true
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name));
+}
+
 function getUserMessageContacts() {
   return (game.users?.contents ?? [])
     .filter((user) => user.id !== game.user?.id)
@@ -73,7 +87,7 @@ function getUserMessageContacts() {
       id: `user-${user.id}`,
       name: user.name,
       number: `@${user.name}`,
-      image: user.avatar ?? user.character?.img ?? "",
+      image: getUserTokenImage(user),
       userId: user.id,
       userIds: [user.id],
       isNpc: false,
@@ -157,6 +171,20 @@ function getMessageDeletedBeforeState() {
   return state;
 }
 
+function getNpcThreadBindings() {
+  const bindings = game.settings.get(MODULE_ID, "npcThreadBindings");
+  if (!bindings || typeof bindings !== "object" || Array.isArray(bindings)) return {};
+  return bindings;
+}
+
+async function updateNpcThreadBinding(threadId, update) {
+  if (!game.user?.isGM || !threadId) return;
+  const bindings = { ...getNpcThreadBindings() };
+  if (update === null) delete bindings[threadId];
+  else bindings[threadId] = { ...(bindings[threadId] ?? {}), ...update };
+  await game.settings.set(MODULE_ID, "npcThreadBindings", bindings);
+}
+
 function getVisibleStoredMessages() {
   const deletedBefore = getMessageDeletedBeforeState();
   return getStoredMessages().filter((message) => {
@@ -192,6 +220,7 @@ async function deleteMessageThread(threadId) {
   if (activeMessageThreadId === threadId) {
     activeMessageThreadId = "";
     composingNewMessage = true;
+    composingNewGroup = false;
     if (activeMessages) activeMessages.contact = null;
     if (activePhone?.mode === "messages") activePhone.contact = null;
   }
@@ -516,22 +545,59 @@ function formatMessageTimestamp(value) {
   return date.toLocaleString();
 }
 
+function decorateThreadNpcBinding(thread) {
+  const binding = getNpcThreadBindings()[thread.id] ?? null;
+  const isGm = game.user?.isGM === true;
+  const isNpcRoute = Boolean(
+    !thread.isGroup
+    && thread.contact
+    && !thread.contact.userId
+    && (thread.contact.isNpc || thread.contact.managedByGM || thread.isNpcRouted)
+  );
+  const actor = binding?.actorId ? game.actors?.get?.(binding.actorId) : null;
+  const actorName = String(actor?.name ?? binding?.actorName ?? "").trim();
+  const bindingImage = String(binding?.image ?? actor?.prototypeToken?.texture?.src ?? actor?.img ?? "").trim();
+  const portraitRevealed = binding?.revealPortrait === true;
+  const controlsRoutedPortrait = thread.isNpcRouted === true;
+  const contact = binding || controlsRoutedPortrait ? {
+    ...thread.contact,
+    actorId: binding && isGm ? String(binding.actorId ?? thread.contact.actorId ?? "") : thread.contact.actorId,
+    image: binding && portraitRevealed ? bindingImage : ""
+  } : thread.contact;
+
+  return {
+    ...thread,
+    contact,
+    image: !isGm && controlsRoutedPortrait
+      ? binding && portraitRevealed ? bindingImage : ""
+      : thread.image,
+    canLinkNpc: isGm && isNpcRoute,
+    showNpcLinkPanel: isGm && (isNpcRoute || Boolean(binding)),
+    hasNpcBinding: Boolean(binding),
+    npcBindingName: actorName || thread.contact?.name || "Linked NPC",
+    npcBindingImage: bindingImage,
+    npcBindingInitials: getInitials(actorName || thread.contact?.name || "NPC"),
+    npcPortraitRevealed: portraitRevealed,
+    npcBindingStatusLabel: binding ? `Linked to ${actorName || "Actor"}` : "Unlinked NPC contact"
+  };
+}
+
 function getMessageContext(contact = null) {
   let allContacts = getAllMessageContacts();
   const selectedContact = contact ?? allContacts[0] ?? null;
   if (selectedContact && !allContacts.some((entry) => entry.id === selectedContact.id || entry.number === selectedContact.number)) {
     allContacts = [...allContacts, normalizeContact(selectedContact)].sort((left, right) => left.name.localeCompare(right.name));
   }
-  const contextActiveThreadId = composingNewMessage ? "" : activeMessageThreadId;
+  const contextActiveThreadId = composingNewMessage || composingNewGroup ? "" : activeMessageThreadId;
   const threads = prepareThreads(getVisibleStoredMessages(), allContacts, contextActiveThreadId, getMessageReadState())
     .map((thread) => ({
-      ...thread,
+      ...decorateThreadNpcBinding(thread),
       messages: thread.messages.map((message) => ({
         ...message,
         createdAtLabel: formatMessageTimestamp(message.createdAt)
       }))
     }));
-  const activeThread = composingNewMessage ? null : threads.find((thread) => thread.id === activeMessageThreadId) ?? null;
+  const activeThread = composingNewMessage || composingNewGroup ? null : threads.find((thread) => thread.id === activeMessageThreadId) ?? null;
   if (activeThread?.contact && !allContacts.some((entry) => entry.id === activeThread.contact.id || entry.number === activeThread.contact.number)) {
     allContacts = [...allContacts, activeThread.contact].sort((left, right) => left.name.localeCompare(right.name));
   }
@@ -541,6 +607,7 @@ function getMessageContext(contact = null) {
   const replyAsChoices = getReplyAsChoices(activeThread);
   const sendAsChoices = getSendAsChoices();
   const canSendAs = game.user?.isGM === true && !activeThread && sendAsChoices.length > 1;
+  const groupMemberChoices = getGroupMessageMemberChoices();
 
   return {
     threads,
@@ -556,7 +623,10 @@ function getMessageContext(contact = null) {
     hasContacts: allContacts.length > 0,
     selectedContactId,
     isThreadReply: Boolean(activeThread),
-    isComposingNewMessage: !activeThread,
+    isComposingNewMessage: !activeThread && !composingNewGroup,
+    isComposingNewGroup: composingNewGroup,
+    groupMemberChoices,
+    hasGroupMemberChoices: groupMemberChoices.length > 0,
     canDeleteThread: Boolean(activeThread),
     threadReplyLabel: activeThread ? `${activeThread.title}${activeThread.subtitle ? ` (${activeThread.subtitle})` : ""}` : "",
     canReplyAs: replyAsChoices.length > 1,
@@ -564,6 +634,8 @@ function getMessageContext(contact = null) {
     canSendAs,
     sendAsChoices,
     activeThreadRecipientUserIds,
+    showMessageTimestamps: game.settings.get(MODULE_ID, "showMessageTimestamps") === true,
+    gmViewPlayerMessagesEnabled: game.settings.get(MODULE_ID, "gmViewPlayerMessages") === true,
     isFoundryV13Plus: Number(game.release?.generation ?? 0) >= 13
   };
 }
@@ -665,6 +737,7 @@ function getIdentityFromContact(contact) {
     senderName: contact.name,
     senderNumber: contact.number,
     senderActorId: contact.actorId,
+    senderImage: contact.image,
     contactName: contact.name,
     contactImage: contact.image,
     contactManagedByGM: true,
@@ -688,13 +761,177 @@ function getMessageIdentity(form, context) {
   return getIdentityFromContact(choice?.contact);
 }
 
+function getCyberCallDropData(event) {
+  const TextEditorClass = (globalThis as any).TextEditor ?? (globalThis as any).foundry?.applications?.ux?.TextEditor;
+  try {
+    const data = TextEditorClass?.getDragEventData?.(event);
+    if (data && Object.keys(data).length) return data;
+  } catch (_error) {
+    // Fall through to the raw transfer payload used by older Foundry versions.
+  }
+  try {
+    return JSON.parse(event.dataTransfer?.getData("text/plain") || "{}");
+  } catch (_error) {
+    return {};
+  }
+}
+
+function getDocumentImage(document) {
+  const source = String(
+    document?.getTextureSrc?.()
+    || document?.texture?.src
+    || document?.document?.texture?.src
+    || document?.prototypeToken?.texture?.src
+    || document?.img
+    || ""
+  ).trim();
+  return source.includes("*") ? String(document?.img ?? "").trim() : source;
+}
+
+async function resolveDroppedNpcIdentity(event) {
+  const data = getCyberCallDropData(event);
+  const fromUuidFunction = (globalThis as any).fromUuid;
+  let document = data.uuid && fromUuidFunction ? await fromUuidFunction(data.uuid) : null;
+  if (!document && data.sceneId && data.tokenId) {
+    document = game.scenes?.get?.(data.sceneId)?.tokens?.get?.(data.tokenId) ?? null;
+  }
+  const actorId = String(
+    document?.actor?.id
+    || document?.actorId
+    || (document?.documentName === "Actor" ? document.id : "")
+    || data.actorId
+    || (data.type === "Actor" ? data.id : "")
+    || ""
+  ).trim();
+  const actor = document?.documentName === "Actor"
+    ? document
+    : document?.actor ?? (actorId ? game.actors?.get?.(actorId) : null);
+  if (!actor) return null;
+  return {
+    actorId: String(actor.id ?? actorId),
+    actorUuid: String(actor.uuid ?? `Actor.${actor.id ?? actorId}`),
+    actorName: String(actor.name ?? "Linked NPC"),
+    image: getDocumentImage(document) || getDocumentImage(actor),
+    revealPortrait: false,
+    linkedAt: new Date().toISOString()
+  };
+}
+
+async function linkNpcThreadFromDrop(event, threadId) {
+  if (!game.user?.isGM || !threadId) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const binding = await resolveDroppedNpcIdentity(event);
+  if (!binding) {
+    ui.notifications?.warn?.("Drop an Actor or an Actor-backed Token to link this NPC contact.");
+    return;
+  }
+  await updateNpcThreadBinding(threadId, binding);
+  ui.notifications?.info?.(`Linked this NPC conversation to ${binding.actorName}.`);
+  await refreshMessages();
+}
+
+async function createPlayerGroup(form, app) {
+  const formData = new FormData(form);
+  const groupName = String(formData.get("groupName") ?? "").trim();
+  const selectedUserIds = [...new Set(formData.getAll("memberUserIds").map((id) => String(id)).filter(Boolean))];
+  if (!groupName) {
+    ui.notifications?.warn?.("Enter a name for the group chat.");
+    return;
+  }
+  if (!selectedUserIds.length) {
+    ui.notifications?.warn?.("Select at least one other player for the group chat.");
+    return;
+  }
+
+  const senderUserId = String(game.user?.id ?? "");
+  const groupMemberUserIds = [...new Set([senderUserId, ...selectedUserIds].filter(Boolean))];
+  const groupMemberNames = groupMemberUserIds
+    .map((id) => String(game.users?.get?.(id)?.name ?? "").trim())
+    .filter(Boolean);
+  const groupId = createCallId();
+  const threadId = createGroupThreadId(groupId);
+  const creatorName = String(game.user?.character?.name ?? game.user?.name ?? "A player").trim();
+  const groupContact = {
+    id: `group-${groupId}`,
+    name: groupName,
+    number: `${groupMemberUserIds.length} members`,
+    userIds: selectedUserIds,
+    isGroup: true
+  };
+  const document = await sendMessageToContact(groupContact, `${creatorName} created the group.`, {
+    threadId,
+    recipientUserIds: selectedUserIds,
+    recipientNumbers: [],
+    messageType: "event",
+    eventType: "group-created",
+    conversationType: "group",
+    groupId,
+    groupName,
+    groupMemberUserIds,
+    groupMemberNames
+  });
+  if (!document) return;
+
+  activeMessageThreadId = threadId;
+  composingNewMessage = false;
+  composingNewGroup = false;
+  if (app) app.contact = groupContact;
+  if (activePhone?.mode === "messages") activePhone.contact = groupContact;
+  await markActiveThreadRead();
+  await refreshMessages();
+}
+
 function bindMessagesControls(app: any, html: any = null) {
   const element = getElement(app, html);
   if (!element) return;
 
+  element.querySelectorAll("[data-cybercall-npc-link-drop]").forEach((dropTarget) => {
+    dropTarget.addEventListener("dragover", (event) => {
+      if (!game.user?.isGM) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "link";
+      dropTarget.classList.add("drag-over");
+    });
+    dropTarget.addEventListener("dragleave", () => dropTarget.classList.remove("drag-over"));
+    dropTarget.addEventListener("drop", async (event) => {
+      dropTarget.classList.remove("drag-over");
+      const threadId = dropTarget.dataset.cybercallNpcThreadId
+        || dropTarget.dataset.cybercallThreadId
+        || activeMessageThreadId;
+      await linkNpcThreadFromDrop(event, threadId);
+    });
+  });
+
+  element.querySelectorAll("[data-cybercall-npc-action]").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const action = event.currentTarget.dataset.cybercallNpcAction;
+      const threadId = event.currentTarget.dataset.cybercallNpcThreadId || activeMessageThreadId;
+      const binding = getNpcThreadBindings()[threadId];
+      if (action === "toggle-reveal" && binding) {
+        await updateNpcThreadBinding(threadId, { revealPortrait: binding.revealPortrait !== true });
+        await refreshMessages();
+        return;
+      }
+      if (action === "unlink" && binding) {
+        await updateNpcThreadBinding(threadId, null);
+        ui.notifications?.info?.("NPC identity link removed.");
+        await refreshMessages();
+        return;
+      }
+      if (action === "change") {
+        event.currentTarget.closest("[data-cybercall-npc-link-drop]")?.classList.add("awaiting-drop");
+        ui.notifications?.info?.("Drag a different Actor or Token onto the NPC identity panel.");
+      }
+    });
+  });
+
   element.querySelectorAll("[data-cybercall-thread-id]").forEach((button) => {
     button.addEventListener("click", async (event) => {
       composingNewMessage = false;
+      composingNewGroup = false;
       activeMessageThreadId = event.currentTarget.dataset.cybercallThreadId;
       await markActiveThreadRead();
       await refreshMessages();
@@ -714,8 +951,18 @@ function bindMessagesControls(app: any, html: any = null) {
       }
       if (action === "new") {
         composingNewMessage = true;
+        composingNewGroup = false;
         activeMessageThreadId = "";
         if (activeMessages) activeMessages.contact = null;
+        await refreshMessages();
+        return;
+      }
+      if (action === "new-group") {
+        composingNewMessage = false;
+        composingNewGroup = true;
+        activeMessageThreadId = "";
+        if (activeMessages) activeMessages.contact = null;
+        if (activePhone?.mode === "messages") activePhone.contact = null;
         await refreshMessages();
         return;
       }
@@ -738,6 +985,12 @@ function bindMessagesControls(app: any, html: any = null) {
     });
   });
 
+  const groupForm = element.querySelector("form[data-cybercall-group-form]");
+  groupForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await createPlayerGroup(groupForm, app);
+  });
+
   const form = element.querySelector("form[data-cybercall-message-form]");
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -758,13 +1011,19 @@ function bindMessagesControls(app: any, html: any = null) {
       ...messageIdentity,
       threadId: activeThread ? activeThread.id : undefined,
       recipientUserIds: recipientUserIds?.length ? recipientUserIds : undefined,
-      recipientNumbers: messageIdentity.senderNumber ? [] : undefined
+      recipientNumbers: messageIdentity.senderNumber ? [] : undefined,
+      conversationType: activeThread?.isGroup ? "group" : "direct",
+      groupId: activeThread?.groupId ?? "",
+      groupName: activeThread?.groupName ?? "",
+      groupMemberUserIds: activeThread?.groupMemberUserIds ?? [],
+      groupMemberNames: activeThread?.groupMemberNames ?? []
     });
     if (!document) return;
     activeMessageThreadId = activeThread ? activeThread.id : createThreadIdForContact(contact);
     if (app) app.contact = contact;
     if (activePhone?.mode === "messages") activePhone.contact = contact;
     composingNewMessage = false;
+    composingNewGroup = false;
     form.elements.body.value = "";
     await markActiveThreadRead();
     await refreshMessages();
@@ -888,7 +1147,7 @@ function getUserContact(userId, fallbackName = "Player") {
     id: `user-${userId}`,
     name: user?.name ?? fallbackName,
     number: `@${user?.name ?? fallbackName}`,
-    image: user?.avatar ?? user?.character?.img ?? "",
+    image: getUserTokenImage(user),
     userId,
     userIds: userId ? [userId] : []
   };
@@ -969,7 +1228,7 @@ async function requestCallToGM(contact) {
   }
 
   const callId = createCallId();
-  const callerImage = String(game.user?.avatar ?? game.user?.character?.img ?? "").trim();
+  const callerImage = getUserTokenImage(game.user);
   const baseCall = {
     id: callId,
     signal: game.settings.get(MODULE_ID, "defaultSignal"),
@@ -1050,8 +1309,9 @@ async function openMessages(contact = null) {
   if (contact) {
     activeMessageThreadId = createThreadIdForContact(contact);
     composingNewMessage = false;
+    composingNewGroup = false;
   } else if (!activeMessageThreadId) {
-    composingNewMessage = true;
+    if (!composingNewGroup) composingNewMessage = true;
   }
 
   const phone = await openPhone("messages", contact);
@@ -1063,6 +1323,7 @@ async function openMessagesThread(threadId) {
   if (threadId) {
     activeMessageThreadId = String(threadId);
     composingNewMessage = false;
+    composingNewGroup = false;
   }
   return openMessages();
 }
@@ -1233,6 +1494,135 @@ function playRinging(callData) {
   }
 }
 
+function playIncomingMessageSound() {
+  const AudioContextClass = (globalThis as any).AudioContext ?? (globalThis as any).webkitAudioContext;
+  if (!AudioContextClass) return;
+
+  const context = new AudioContextClass();
+  const interfaceVolume = Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5);
+  const peakVolume = Math.max(0.0001, Math.min(0.18, 0.18 * interfaceVolume));
+  const playTone = (frequency, startOffset, duration) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const startsAt = context.currentTime + startOffset;
+    const endsAt = startsAt + duration;
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, startsAt);
+    oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.18, endsAt);
+    gain.gain.setValueAtTime(0.0001, startsAt);
+    gain.gain.exponentialRampToValueAtTime(peakVolume, startsAt + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, endsAt);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(startsAt);
+    oscillator.stop(endsAt);
+  };
+
+  const start = async () => {
+    if (context.state === "suspended") await context.resume();
+    playTone(620, 0, 0.16);
+    playTone(930, 0.11, 0.2);
+    window.setTimeout(() => context.close?.(), 500);
+  };
+  start().catch(() => context.close?.());
+}
+
+function getIncomingMessagePortrait(flag) {
+  if (flag.senderImage) return String(flag.senderImage);
+  if (flag.contactIsNpc && flag.senderNumber) return "";
+  const sender = game.users?.get?.(flag.senderUserId)
+    ?? game.users?.contents?.find?.((user) => user.id === flag.senderUserId);
+  if (sender?.isGM === true) return "";
+  return getUserTokenImage(sender);
+}
+
+function dismissIncomingMessageNotification(notification) {
+  if (!notification?.isConnected) return;
+  notification.classList.add("leaving");
+  window.setTimeout(() => notification.remove(), 220);
+}
+
+function showIncomingMessageNotification(flag) {
+  let container = document.querySelector("[data-cybercall-message-notifications]") as HTMLElement | null;
+  if (!container) {
+    container = document.createElement("div");
+    container.className = "cybercall-message-notifications";
+    container.dataset.cybercallMessageNotifications = "";
+    container.setAttribute("aria-live", "polite");
+    document.body.append(container);
+  }
+
+  const senderName = String(flag.senderName || "New message").trim();
+  const groupName = String(flag.groupName || "").trim();
+  const notification = document.createElement("button");
+  notification.type = "button";
+  notification.className = "cybercall-incoming-message";
+  notification.title = "Open CyberCall conversation";
+
+  const avatar = document.createElement("span");
+  avatar.className = `cybercall-incoming-avatar ${getAvatarTone(flag.senderUserId || senderName)}`;
+  const portrait = getIncomingMessagePortrait(flag);
+  if (portrait) {
+    const image = document.createElement("img");
+    image.src = portrait;
+    image.alt = "";
+    avatar.append(image);
+  } else {
+    avatar.textContent = getInitials(senderName);
+  }
+  const badge = document.createElement("i");
+  badge.className = "fa-solid fa-message cybercall-incoming-badge";
+  badge.setAttribute("aria-hidden", "true");
+  avatar.append(badge);
+
+  const copy = document.createElement("span");
+  copy.className = "cybercall-incoming-copy";
+  const title = document.createElement("strong");
+  title.textContent = groupName ? `${senderName} · ${groupName}` : senderName;
+  const preview = document.createElement("small");
+  preview.textContent = String(flag.body || "New CyberCall message").trim();
+  copy.append(title, preview);
+  notification.append(avatar, copy);
+
+  notification.addEventListener("click", () => {
+    dismissIncomingMessageNotification(notification);
+    openMessagesThread(String(flag.threadId || ""));
+  });
+  container.append(notification);
+  playIncomingMessageSound();
+  window.setTimeout(() => dismissIncomingMessageNotification(notification), 4200);
+}
+
+function getCyberCallMessageFlag(message) {
+  const flag = message?.flags?.[MODULE_ID] ?? message?.getFlag?.(MODULE_ID, "message");
+  if (flag?.kind === MESSAGE_FLAG_KIND) return flag;
+  if (flag?.message?.kind === MESSAGE_FLAG_KIND) return flag.message;
+  return null;
+}
+
+function setChatCardElementVisibility(element, visible) {
+  if (!element) return;
+  const messageElement = element.matches?.(".chat-message")
+    ? element
+    : element.closest?.(".chat-message") ?? element.querySelector?.(".chat-message") ?? element;
+  messageElement.classList?.toggle?.("cybercall-chat-message-hidden", !visible);
+  if (visible) messageElement.removeAttribute?.("aria-hidden");
+  else messageElement.setAttribute?.("aria-hidden", "true");
+}
+
+function applyCyberCallChatCardVisibility(message, html) {
+  if (!getCyberCallMessageFlag(message)) return;
+  const element = html instanceof HTMLElement ? html : html?.[0] ?? html?.element ?? null;
+  setChatCardElementVisibility(element, game.settings.get(MODULE_ID, "showChatCards") === true);
+}
+
+function refreshRenderedCyberCallChatCards() {
+  const visible = game.settings.get(MODULE_ID, "showChatCards") === true;
+  document.querySelectorAll(".cybercall-chat-card").forEach((card) => {
+    setChatCardElementVisibility(card, visible);
+  });
+}
+
 function registerApi() {
   const module = game.modules.get(MODULE_ID);
   if (!module) return;
@@ -1359,6 +1749,60 @@ function registerSettings() {
     default: []
   });
 
+  game.settings.register(MODULE_ID, "npcThreadBindings", {
+    name: "CyberCall NPC Conversation Links",
+    hint: "Stores GM-managed links between pseudo-NPC conversations and Foundry Actors.",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: {},
+    onChange: () => {
+      refreshMessages();
+      refreshContacts();
+    }
+  });
+
+  game.settings.register(MODULE_ID, "messageNotifications", {
+    name: "Incoming Message Alerts",
+    hint: "Show a brief sender notification and play a short tone when a new CyberCall message arrives.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, "showChatCards", {
+    name: "Show CyberCall Chat Cards",
+    hint: "Show CyberCall message cards in Foundry's standard chat log. Disabled by default because CyberCall has its own inbox and notifications.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: () => refreshRenderedCyberCallChatCards()
+  });
+
+  game.settings.register(MODULE_ID, "showMessageTimestamps", {
+    name: "Show Message Timestamps",
+    hint: "Display the sent date and time beneath messages in CyberCall conversations.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false
+  });
+
+  game.settings.register(MODULE_ID, "gmViewPlayerMessages", {
+    name: "GM: View Player Conversations",
+    hint: "Allow GMs to see private CyberCall conversations where no GM or GM-managed NPC is a participant. Disabled by default.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: () => {
+      refreshMessages();
+      refreshContacts();
+    }
+  });
+
   game.settings.register(MODULE_ID, "messageReadState", {
     name: "CyberCall Message Read State",
     hint: "Tracks which message threads this client has read.",
@@ -1426,12 +1870,34 @@ Hooks.once("ready", async () => {
   registerApi();
   registerWithHoloSuite();
   game.socket.on(SOCKET_NAME, handleSocketMessage);
+  refreshRenderedCyberCallChatCards();
   console.log(`${MODULE_ID} | Ready. Use game.modules.get("${MODULE_ID}").api.openCall({...})`);
+});
+
+Hooks.on("renderChatMessage", (message, html) => {
+  applyCyberCallChatCardVisibility(message, html);
+});
+
+Hooks.on("renderChatMessageHTML", (message, html) => {
+  applyCyberCallChatCardVisibility(message, html);
 });
 
 Hooks.on("createChatMessage", async (message) => {
   const flag = message?.flags?.[MODULE_ID];
   if (flag?.kind !== MESSAGE_FLAG_KIND) return;
+  const currentUserId = String(game.user?.id ?? "");
+  const recipientUserIds = Array.isArray(flag.recipientUserIds)
+    ? flag.recipientUserIds.map((id) => String(id))
+    : [];
+  const routesToNpcManager = game.user?.isGM === true
+    && !String(flag.contactUserId ?? "")
+    && (flag.contactManagedByGM === true || flag.contactIsNpc === true);
+  const isIncoming = String(flag.senderUserId ?? "") !== currentUserId
+    && (recipientUserIds.includes(currentUserId) || routesToNpcManager);
+  const isMessageAlert = String(flag.messageType ?? "text") === "text" || flag.eventType === "group-created";
+  if (isIncoming && isMessageAlert && game.settings.get(MODULE_ID, "messageNotifications") !== false) {
+    showIncomingMessageNotification(flag);
+  }
   await refreshMessages();
   await refreshContacts();
 });

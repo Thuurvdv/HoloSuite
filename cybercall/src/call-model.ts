@@ -98,3 +98,63 @@ export function normalizeContact(contact: any = {}) {
     initials: getInitials(contact.name)
   };
 }
+
+function getTokenImage(token: any) {
+  const document = token?.document ?? token;
+  const source = String(
+    document?.getTextureSrc?.()
+    || document?.texture?.src
+    || document?.img
+    || token?.texture?.src
+    || ""
+  ).trim();
+  return source.includes("*") ? "" : source;
+}
+
+function isDefaultIdentityImage(source: string) {
+  return !source || /(?:^|\/)mystery-man(?:-[^/.]+)?\.svg(?:$|\?)/i.test(source);
+}
+
+export function getUserTokenImage(user: any) {
+  if (!user) return "";
+  const globalGame = (globalThis as any).game;
+  const globalCanvas = (globalThis as any).canvas;
+  const userAvatar = String(user.avatar ?? user._source?.avatar ?? "").trim();
+  if (user.isGM === true) return isDefaultIdentityImage(userAvatar) ? "" : userAvatar;
+  const characterReference = user.character ?? user.characterId ?? user._source?.character;
+  const characterId = typeof characterReference === "string"
+    ? characterReference
+    : String(characterReference?.id ?? characterReference?._id ?? "");
+  const actor = (characterId ? globalGame?.actors?.get?.(characterId) : null)
+    ?? (typeof characterReference === "object" ? characterReference : null);
+  const placeables = Array.isArray(globalCanvas?.tokens?.placeables) ? globalCanvas.tokens.placeables : [];
+  const controlled = String(globalGame?.user?.id ?? "") === String(user.id ?? "")
+    ? (globalCanvas?.tokens?.controlled ?? [])
+    : [];
+  const activeTokens = actor?.getActiveTokens?.(true, true) ?? [];
+  const actorToken = placeables.find((token: any) => {
+    const tokenActorId = String(token?.actor?.id ?? token?.document?.actorId ?? token?.actorId ?? "");
+    return characterId && tokenActorId === characterId;
+  });
+  const ownedToken = placeables.find((token: any) => {
+    const tokenActor = token?.actor ?? token?.document?.actor;
+    return Number(tokenActor?.ownership?.[user.id] ?? 0) >= 3;
+  });
+  const tokenImage = [...controlled, ...activeTokens, actorToken, ownedToken]
+    .filter(Boolean)
+    .map(getTokenImage)
+    .find(Boolean) ?? "";
+  if (tokenImage) return tokenImage;
+
+  const prototypeTokenImage = String(
+    actor?.prototypeToken?.texture?.src
+    || actor?._source?.prototypeToken?.texture?.src
+    || ""
+  ).trim();
+  if (prototypeTokenImage && !prototypeTokenImage.includes("*") && !isDefaultIdentityImage(prototypeTokenImage)) {
+    return prototypeTokenImage;
+  }
+  const actorImage = String(actor?.img ?? actor?._source?.img ?? "").trim();
+  if (!isDefaultIdentityImage(actorImage)) return actorImage;
+  return isDefaultIdentityImage(userAvatar) ? "" : userAvatar;
+}

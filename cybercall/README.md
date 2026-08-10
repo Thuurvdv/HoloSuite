@@ -16,7 +16,16 @@ Players can also call the GM using a built-in contacts directory, making two-way
 - Fullscreen mode turns a call into a dramatic table-wide broadcast.
 - Players can keep a personal contacts list for each world and a shared group contacts list, and place calls to the GM from those contacts.
 - Players can send persistent private CyberCall messages to other players or to contacts handled by the GM.
+- Players can create named private group chats, invite other player users, and message every member in one thread.
+- Incoming messages briefly show the sender's portrait and message preview with a short notification tone; each user can disable these alerts in CyberCall settings.
+- CyberCall cards are hidden from Foundry's standard chat log by default and can be restored per client with **Show CyberCall Chat Cards**.
+- Message timestamps are hidden by default and can be enabled per client with the **Show Message Timestamps** CyberCall setting.
 - GMs can link contacts to Actors and reply in message threads as that NPC/contact.
+- In the GM message list, player messages routed to a managed NPC show a compact **TO: NPC NAME** destination label.
+- GMs can drag an Actor or Actor-backed Token onto an NPC conversation to link that specific player route to a canonical NPC without merging private threads.
+- Linked NPC conversations support changing or removing the link and optionally sharing the linked token portrait with that player; portraits remain GM-only by default.
+- Private player-to-player conversations are hidden from GMs by default. A GM can opt in for the world with **GM: View Player Conversations** in CyberCall settings.
+- When GM player-conversation visibility is enabled, everyone sees an eye indicator beside the Messages heading with an explanatory tooltip.
 - Direct calls now leave lightweight history events in the related message thread.
 
 ## Tutorial: Using CyberCall as a DM
@@ -73,9 +82,11 @@ Players can also call the GM using a built-in contacts directory, making two-way
 - Open **CyberCall Contacts** and click **Messages** to open the message console.
 - Use the **Calls** and **Messages** tabs to switch between call/contact tools and message threads.
 - Click **New** in the message console to start a new conversation.
+- Click **New Group**, enter a group name, select the players to invite, and click **Create Group**. Offline players can be included and will see the thread when they return.
 - Use the **To** dropdown to message another player, GM, personal contact, or group contact directly, or click **Message** beside a saved contact.
 - Messages to saved contacts without a linked player are whispered to the GM users, so the GM can answer in character.
 - When a GM opens an NPC/contact thread, the **Reply As** dropdown can send the reply under the contact identity instead of the GM name.
+- NPC threads show an identity panel to the GM. Drop an Actor or token onto the thread row or panel to link it, then use **Share Portrait**, **Change**, or **Unlink** as needed.
 - When a GM starts a new conversation, **Send As** can send from a GM-managed contact or Actor/NPC identity.
 - Replies inside an existing thread automatically go back to the current conversation partner; the **To** picker is only used for starting a new thread.
 - CyberCall message history is stored as private Foundry chat messages with CyberCall flags. Read state is saved locally per client.
