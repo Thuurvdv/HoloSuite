@@ -1,19 +1,19 @@
 {
-  "updated": "2026-08-01",
+  "updated": "2026-08-10",
   "modules": [
     {
       "moduleId": "holosuite-hacking",
       "title": "HoloSuite Hacking",
       "tier": "free",
-      "version": "1.1.8",
-      "updated": "2026-08-01",
+      "version": "1.1.9",
+      "updated": "2026-08-10",
       "icon": "fa-solid fa-terminal",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking",
       "entries": [
         {
-          "title": "Hacking apps adopt the HoloSuite v2 frame",
-          "summary": "Node Intrusion, Signal Alignment, the launcher, and difficulty profiles now use the refreshed HoloSuite frame treatment with Space Police variants and tighter responsive layouts.",
-          "tags": ["Hacking", "Styling", "Frames", "Foundry v12-v14"]
+          "title": "Two new hacking minigames",
+          "summary": "Packet Switchboard and Prism Lock join the HoloSuite Hacking lineup, adding new packet-routing and optical-ring challenges with configurable difficulty profiles.",
+          "tags": ["Hacking", "Minigames", "Packet Switchboard", "Prism Lock"]
         }
       ]
     },
@@ -38,14 +38,30 @@
       "title": "CyberCall",
       "tier": "free",
       "version": "1.0.6",
-      "updated": "2026-08-01",
+      "updated": "2026-08-10",
       "icon": "fa-solid fa-phone-volume",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall",
       "entries": [
         {
-          "title": "Call privacy tightened",
-          "summary": "Private CyberCall messages now respect their intended audience more consistently, reducing unwanted visibility for players outside the call.",
-          "tags": ["CyberCall", "Privacy", "Bug Fix", "Foundry v12-v14"]
+          "title": "Richer messages and notifications",
+          "summary": "CyberCall messaging now features clearer incoming notifications and improved image support, making conversations easier to follow and character identities more visually distinct.",
+          "tags": ["CyberCall", "Messages", "Notifications", "Images"]
+        }
+      ]
+    },
+    {
+      "moduleId": "bounty-board",
+      "title": "Bounty Board",
+      "tier": "free",
+      "version": "1.0.4",
+      "updated": "2026-08-10",
+      "icon": "fa-solid fa-crosshairs",
+      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board",
+      "entries": [
+        {
+          "title": "Bounty Board adopts HoloSuite styling",
+          "summary": "Bounty Board is now integrated with HoloSuite's shared visual system, delivering a more cohesive look and feel across the suite.",
+          "tags": ["Bounties", "HoloSuite", "Styling", "Integration"]
         }
       ]
     },
@@ -83,6 +99,22 @@
     }
   ],
   "releases": [
+    {
+      "moduleId": "holosuite-terminal",
+      "title": "HoloSuite Terminal",
+      "tier": "premium",
+      "version": "1.0.0",
+      "updated": "2026-08-10",
+      "icon": "fa-solid fa-terminal",
+      "url": "https://patreon.com/MageTowerStudios",
+      "entries": [
+        {
+          "title": "Interactive sci-fi terminals join HoloSuite",
+          "summary": "Turn terminals into playable locations with configurable mail, files, camera feeds, utilities, authentication, hacking, permissions, encounter-driven downloads, and distinct visual themes.",
+          "tags": ["Terminals", "Hacking", "Files", "Foundry v12-v14"]
+        }
+      ]
+    },
     {
       "moduleId": "pulse-scanner",
       "title": "Pulse Scanner",

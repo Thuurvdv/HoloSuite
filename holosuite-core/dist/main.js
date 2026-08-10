@@ -1,23 +1,23 @@
 var we = Object.defineProperty;
 var pe = (e, t, n) => t in e ? we(e, t, { enumerable: !0, configurable: !0, writable: !0, value: n }) : e[t] = n;
 var y = (e, t, n) => pe(e, typeof t != "symbol" ? t + "" : t, n);
-function L(e) {
+function T(e) {
   return e !== null && typeof e == "object" && !Array.isArray(e);
 }
 function q(e, t) {
-  return L(e) ? t.includes(String(e.name ?? "")) : !1;
+  return T(e) ? t.includes(String(e.name ?? "")) : !1;
 }
 function j(e) {
-  if (!L(e) || !("tools" in e)) return !1;
+  if (!T(e) || !("tools" in e)) return !1;
   const t = String(e.name ?? "");
   return !["measure", "templates", "walls", "lighting", "sounds", "notes", "tiles", "drawings"].includes(t);
 }
 function be(e, t, n) {
   if (Array.isArray(e))
     return e.find((s) => q(s, t)) ?? (n ? e.find(j) : null) ?? null;
-  if (!L(e)) return null;
+  if (!T(e)) return null;
   for (const s of t)
-    if (L(e[s])) return e[s];
+    if (T(e[s])) return e[s];
   return Object.values(e).find((s) => q(s, t)) ?? (n ? Object.values(e).find(j) : null) ?? null;
 }
 function Se(e) {
@@ -28,9 +28,9 @@ function z(e, t, n = ["tokens", "token"], s = {}) {
   const o = be(e, n, s.allowFallback === !0);
   if (!o) return !1;
   const i = o.tools;
-  return Array.isArray(i) ? i.some((u) => (u == null ? void 0 : u.name) === t.name) ? !1 : (i.push(t), !0) : !L(i) || i[t.name] ? !1 : (i[t.name] = { ...t, order: t.order ?? Se(i) }, !0);
+  return Array.isArray(i) ? i.some((u) => (u == null ? void 0 : u.name) === t.name) ? !1 : (i.push(t), !0) : !T(i) || i[t.name] ? !1 : (i[t.name] = { ...t, order: t.order ?? Se(i) }, !0);
 }
-const l = "holosuite-core", J = "disableForPlayers", V = "deviceStyle", Q = "forceDeviceStyle", X = "theme", O = "whatsNewLastSeen", ye = "openLauncher", U = "data-holosuite-foundry-generation", ve = `modules/${l}/data/whats-new.json`, T = {
+const l = "holosuite-core", J = "disableForPlayers", V = "deviceStyle", Q = "forceDeviceStyle", X = "theme", O = "whatsNewLastSeen", ye = "openLauncher", U = "data-holosuite-foundry-generation", ve = `modules/${l}/data/whats-new.json`, Te = Date.UTC(2026, 7, 1), L = {
   base: "Base",
   "space-police": "Space Police"
 }, $e = {
@@ -48,7 +48,7 @@ function Le() {
   const e = ((s = (n = globalThis.foundry) == null ? void 0 : n.appv1) == null ? void 0 : s.api) ?? ((o = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : o.api) ?? null, t = ((u = (i = globalThis.foundry) == null ? void 0 : i.applications) == null ? void 0 : u.api) ?? ((h = foundry == null ? void 0 : foundry.applications) == null ? void 0 : h.api) ?? null;
   return globalThis.FormApplication ?? (e == null ? void 0 : e.FormApplication) ?? globalThis.Application ?? (e == null ? void 0 : e.Application) ?? (t == null ? void 0 : t.ApplicationV2);
 }
-const Te = Le();
+const Ne = Le();
 function x(e) {
   return e ? !!e.getLauncherRoot({ includeDocumentFallback: !1 }) : !1;
 }
@@ -66,30 +66,30 @@ function S(e, t) {
     return null;
   }
 }
-function W(e) {
+function I(e) {
   var t;
   return ((t = game.modules.get(e)) == null ? void 0 : t.api) ?? null;
 }
-function Ne() {
+function Ce() {
   var e, t, n;
   return String(((t = (e = game.user) == null ? void 0 : e.character) == null ? void 0 : t.name) ?? ((n = game.user) == null ? void 0 : n.name) ?? "Player");
 }
-function Ce(e) {
+function Ee(e) {
   var t, n, s, o, i, u;
   if (e === "cybercall") {
     const h = f(S("cybercall", "contacts")), c = f(S("cybercall", "groupContacts"));
     return N(h.length + c.length, "link");
   }
   if (e === "bounty-board") {
-    const h = f((n = (t = W("bounty-board")) == null ? void 0 : t.getAllBounties) == null ? void 0 : n.call(t, { includeHidden: !1 }));
+    const h = f((n = (t = I("bounty-board")) == null ? void 0 : t.getAllBounties) == null ? void 0 : n.call(t, { includeHidden: !1 }));
     return N(h.length, "contract");
   }
   if (e === "csi-toolkit") {
-    const h = Object.values(((o = (s = W("csi-toolkit")) == null ? void 0 : s.getCases) == null ? void 0 : o.call(s)) ?? {}).filter((c) => (c == null ? void 0 : c.visibility) !== "gm");
+    const h = Object.values(((o = (s = I("csi-toolkit")) == null ? void 0 : s.getCases) == null ? void 0 : o.call(s)) ?? {}).filter((c) => (c == null ? void 0 : c.visibility) !== "gm");
     return N(h.length, "case");
   }
   if (e === "galaxy-map") {
-    const h = f((u = (i = W("galaxy-map")) == null ? void 0 : i.getMaps) == null ? void 0 : u.call(i)).filter((c) => (c == null ? void 0 : c.visibility) === "players");
+    const h = f((u = (i = I("galaxy-map")) == null ? void 0 : i.getMaps) == null ? void 0 : u.call(i)).filter((c) => (c == null ? void 0 : c.visibility) === "players");
     return N(h.length, "chart");
   }
   return "";
@@ -97,7 +97,7 @@ function Ce(e) {
 function f(e) {
   return Array.isArray(e) ? e : [];
 }
-function Ee(e) {
+function He(e) {
   const t = String((e == null ? void 0 : e.title) ?? "").trim();
   if (!t) return null;
   const n = f(e == null ? void 0 : e.tags).map((s) => String(s ?? "").trim()).filter(Boolean).slice(0, 4);
@@ -108,7 +108,7 @@ function Ee(e) {
   };
 }
 function te(e) {
-  const t = String((e == null ? void 0 : e.moduleId) ?? "").trim(), n = String((e == null ? void 0 : e.title) ?? "").trim(), s = f(e == null ? void 0 : e.entries).map((i) => Ee(i)).filter((i) => !!i);
+  const t = String((e == null ? void 0 : e.moduleId) ?? "").trim(), n = String((e == null ? void 0 : e.title) ?? "").trim(), s = f(e == null ? void 0 : e.entries).map((i) => He(i)).filter((i) => !!i);
   if (!t || !n || s.length === 0)
     return console.warn(`${l} | Ignoring invalid what's new registration.`, e), null;
   const o = String((e == null ? void 0 : e.tier) ?? "free").toLowerCase() === "premium" ? "premium" : "free";
@@ -123,33 +123,33 @@ function te(e) {
     entries: s
   };
 }
-function D(e) {
+function E(e) {
   const t = Date.parse(String(e.updated ?? ""));
   return Number.isFinite(t) ? t : 0;
 }
 function F(e, t) {
-  return D(t) - D(e) || e.title.localeCompare(t.title);
+  return E(t) - E(e) || e.title.localeCompare(t.title);
 }
-function M(e) {
+function _(e) {
   var t, n;
   return ((n = (t = game.modules) == null ? void 0 : t.has) == null ? void 0 : n.call(t, e)) === !0;
 }
-function He() {
+function ke() {
   const e = Number(S(l, O));
   return Number.isFinite(e) ? e : 0;
 }
-function ke() {
-  const e = He();
-  return [...m.values(), ...b.values()].filter((t) => D(t) > e).reduce((t, n) => t + n.entries.length, 0);
-}
 function Ae() {
+  const e = ke();
+  return [...m.values(), ...b.values()].filter((t) => E(t) > e).reduce((t, n) => t + n.entries.length, 0);
+}
+function We() {
   try {
     game.settings.set(l, O, Date.now());
   } catch (e) {
     console.warn(`${l} | Could not update what's new read state.`, e);
   }
 }
-function We(e) {
+function Ie(e) {
   const t = String((e == null ? void 0 : e.id) ?? "").trim(), n = String((e == null ? void 0 : e.title) ?? "").trim(), s = String((e == null ? void 0 : e.icon) ?? "").trim();
   return !t || !n || !s || typeof (e == null ? void 0 : e.open) != "function" ? (console.warn(`${l} | Ignoring invalid app registration.`, e), null) : {
     id: t,
@@ -162,10 +162,10 @@ function We(e) {
     open: e.open
   };
 }
-function Ie(e) {
+function De(e) {
   var o;
   const t = ((o = game.user) == null ? void 0 : o.isGM) === !0;
-  if (!t && k()) return;
+  if (!t && A()) return;
   const n = () => ({
     name: "holosuite-core-launcher",
     title: t ? "HoloSuite Command Deck" : "HoloSuite Player View",
@@ -173,15 +173,15 @@ function Ie(e) {
     button: !0,
     visible: !0,
     onClick: se,
-    onChange: _e
+    onChange: Pe
   }), s = z(e, n(), ["tiles", "tile"]);
   z(e, n(), ["tokens", "token"], { allowFallback: !s });
 }
-function De() {
+function Ve() {
   var e;
-  return ((e = game.user) == null ? void 0 : e.isGM) === !0 || !k();
+  return ((e = game.user) == null ? void 0 : e.isGM) === !0 || !A();
 }
-function _() {
+function M() {
   document.querySelectorAll(".holosuite-sidebar-launcher, .holosuite-floating-launcher").forEach((e) => e.remove());
 }
 function w(e) {
@@ -191,7 +191,7 @@ function w(e) {
   const t = e, n = ((s = t == null ? void 0 : t.get) == null ? void 0 : s.call(t, 0)) ?? (t == null ? void 0 : t[0]);
   return n instanceof HTMLElement ? n : null;
 }
-function Ve(e) {
+function Oe(e) {
   var i;
   const t = new Set(document.querySelectorAll("#holosuite-launcher, .holosuite-launcher-window"));
   if (t.size <= 1) return;
@@ -204,10 +204,10 @@ function ne() {
     e.remove();
   });
 }
-function Oe() {
+function Fe() {
   return document.querySelector("#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone") !== null;
 }
-function Fe() {
+function _e() {
   r = null, d = null, C = !1;
 }
 function Me(e) {
@@ -217,14 +217,14 @@ function Me(e) {
 function se() {
   return ee = Date.now(), g.toggleLauncher();
 }
-function _e(...e) {
+function Pe(...e) {
   const t = Me(e);
   return t === !1 ? (B(), null) : t === null && Date.now() - ee < 100 ? null : g.openLauncher();
 }
 function Re(e) {
   var i;
   const t = ((i = game.user) == null ? void 0 : i.isGM) === !0;
-  if (!t && k()) return;
+  if (!t && A()) return;
   const n = w(e) ?? document.querySelector("#controls, #scene-controls");
   if (!n || n.querySelector("[data-tool='holosuite-core-launcher']")) return;
   const s = n.querySelector(
@@ -236,18 +236,18 @@ function Re(e) {
     u.preventDefault(), u.stopPropagation(), se();
   }), s.appendChild(o);
 }
-function Pe() {
+function Be() {
   game.settings.register(l, V, {
     name: "HoloSuite Theme",
     hint: "Choose the HoloSuite launcher theme for this user.",
     scope: "client",
     config: !0,
     type: String,
-    choices: T,
+    choices: L,
     default: "base",
     restricted: !1,
     onChange: () => {
-      E(), r == null || r.refreshCurrentView();
+      H(), r == null || r.refreshCurrentView();
     }
   }), game.settings.register(l, Q, {
     name: "Force HoloSuite Theme",
@@ -259,7 +259,7 @@ function Pe() {
     default: "",
     restricted: !0,
     onChange: () => {
-      E(), r == null || r.refreshCurrentView();
+      H(), r == null || r.refreshCurrentView();
     }
   }), game.settings.register(l, X, {
     name: "HoloSuite Color Theme",
@@ -291,11 +291,11 @@ function Pe() {
     label: "Open HoloSuite",
     hint: "Open the HoloSuite launcher and registered app deck.",
     icon: "fas fa-terminal",
-    type: H,
+    type: k,
     restricted: !0
   });
 }
-function Be() {
+function Ge() {
   var e, t;
   (t = (e = game.keybindings) == null ? void 0 : e.register) == null || t.call(e, l, ye, {
     name: "Open HoloSuite",
@@ -304,40 +304,40 @@ function Be() {
     restricted: !1,
     onDown: () => {
       var n, s;
-      return De() ? (g.toggleLauncher(), !0) : ((s = (n = ui.notifications) == null ? void 0 : n.warn) == null || s.call(n, "HoloSuite is disabled for players in this world."), !1);
+      return Ve() ? (g.toggleLauncher(), !0) : ((s = (n = ui.notifications) == null ? void 0 : n.warn) == null || s.call(n, "HoloSuite is disabled for players in this world."), !1);
     }
   });
 }
-function R(e) {
-  return Object.hasOwn(T, String(e)) ? String(e) : "base";
+function P(e) {
+  return Object.hasOwn(L, String(e)) ? String(e) : "base";
 }
-function P() {
+function R() {
   const e = String(S(l, Q) ?? "");
-  return Object.hasOwn(T, e) ? e : null;
+  return Object.hasOwn(L, e) ? e : null;
 }
 function oe() {
-  return R(S(l, V));
+  return P(S(l, V));
 }
-function Ge() {
-  return P() ?? oe();
-}
-function qe(e) {
-  return Object.hasOwn(Z, String(e)) ? String(e) : "default";
+function qe() {
+  return R() ?? oe();
 }
 function je(e) {
-  const t = R(e), n = [document.documentElement, document.body].filter(Boolean);
+  return Object.hasOwn(Z, String(e)) ? String(e) : "default";
+}
+function ze(e) {
+  const t = P(e), n = [document.documentElement, document.body].filter(Boolean);
   for (const s of n)
     t === "base" ? s.removeAttribute("data-holosuite-device-style") : s.setAttribute("data-holosuite-device-style", t);
 }
 function re(e) {
-  const t = qe(e), n = [document.documentElement, document.body].filter(Boolean);
+  const t = je(e), n = [document.documentElement, document.body].filter(Boolean);
   for (const s of n)
     t === "default" ? s.removeAttribute("data-holosuite-theme") : s.setAttribute("data-holosuite-theme", t);
 }
-function E() {
-  je(Ge());
+function H() {
+  ze(qe());
 }
-function ze() {
+function Ue() {
   re(S(l, X));
 }
 function ie() {
@@ -353,7 +353,7 @@ function ae() {
 function le() {
   return ie() === 12 ? "fa-solid fa-terminal" : "fa-solid fa-mobile-screen-button";
 }
-function k() {
+function A() {
   try {
     return game.settings.get(l, J) === !0;
   } catch {
@@ -362,22 +362,22 @@ function k() {
 }
 function ce(e) {
   var t;
-  return ((t = game.user) == null ? void 0 : t.isGM) === !0 ? !0 : k() ? !1 : e.playerVisible !== !1;
+  return ((t = game.user) == null ? void 0 : t.isGM) === !0 ? !0 : A() ? !1 : e.playerVisible !== !1;
 }
-async function Ue(e) {
+async function xe(e) {
   var n, s, o, i;
   const t = v.get(e);
   return t ? ce(t) ? t.open() : ((i = (o = ui.notifications) == null ? void 0 : o.warn) == null || i.call(o, `${t.title} is not available from the player view.`), null) : ((s = (n = ui.notifications) == null ? void 0 : n.warn) == null || s.call(n, `HoloSuite app "${e}" is not registered.`), null);
 }
 function ue(e, t = {}) {
   const n = te(e);
-  return n ? t.replace === !1 && m.has(n.moduleId) ? m.get(n.moduleId) ?? null : (m.set(n.moduleId, n), r == null || r.render(!1), n) : null;
+  return !n || E(n) < Te ? null : t.replace === !1 && m.has(n.moduleId) ? m.get(n.moduleId) ?? null : (m.set(n.moduleId, n), r == null || r.render(!1), n);
 }
-function xe(e, t = {}) {
+function Ye(e, t = {}) {
   const n = te(e);
   return n ? t.replace === !1 && b.has(n.moduleId) ? b.get(n.moduleId) ?? null : (b.set(n.moduleId, n), r == null || r.render(!1), n) : null;
 }
-async function Ye() {
+async function Ke() {
   try {
     const e = await fetch(ve, { cache: "no-cache" });
     if (!e.ok) throw new Error(`HTTP ${e.status}`);
@@ -386,13 +386,13 @@ async function Ye() {
       ue(o, { replace: !1 });
     const s = f(t == null ? void 0 : t.releases);
     for (const o of s)
-      xe(o, { replace: !1 });
+      Ye(o, { replace: !1 });
   } catch (e) {
     console.warn(`${l} | Could not load bundled what's new catalog.`, e);
   }
 }
 function he(e) {
-  const t = ke(), n = t > 0 ? `<span>${a(t)}</span>` : "";
+  const t = Ae(), n = t > 0 ? `<span>${a(t)}</span>` : "";
   return `
     <div class="holosuite-header-actions">
       ${e === "apps" ? "" : `
@@ -428,7 +428,7 @@ function he(e) {
     </div>
   `;
 }
-function Ke(e) {
+function Je(e) {
   return `
     <span class="holosuite-app-icon" data-holosuite-app-icon="${a(e.id)}">
       <i class="${a(e.icon)}"></i>
@@ -441,19 +441,19 @@ function de() {
     <section class="holosuite-player-home">
       <div>
         <span class="holosuite-kicker">Active User</span>
-        <strong>${a(Ne())}</strong>
+        <strong>${a(Ce())}</strong>
       </div>
       <div class="holosuite-player-status">
         <span>LINK STABLE</span>
       </div>
     </section>
   `, u = t.map((c) => {
-    const p = c.title, A = e && c.description ? `<p>${a(c.description)}</p>` : "", G = e ? "" : Ce(c.id);
+    const p = c.title, W = e && c.description ? `<p>${a(c.description)}</p>` : "", G = e ? "" : Ee(c.id);
     return `
         <button type="button" class="holosuite-app-tile" data-holosuite-app="${a(c.id)}">
-          ${Ke(c)}
+          ${Je(c)}
           <span class="holosuite-app-title">${a(p)}</span>
-          ${A}
+          ${W}
           ${G ? `<span class="holosuite-app-count">${a(G)}</span>` : ""}
         </button>
       `;
@@ -471,7 +471,7 @@ function de() {
     </div>
   `;
 }
-function Je(e) {
+function Qe(e) {
   return `
     <nav class="holosuite-whats-new-filters" aria-label="What's New filters">
       ${[
@@ -489,7 +489,7 @@ function Je(e) {
     </nav>
   `;
 }
-function Qe(e) {
+function Xe(e) {
   return `
     <nav class="holosuite-whats-new-tabs" aria-label="What's New tabs">
       ${[
@@ -508,15 +508,15 @@ function Qe(e) {
     </nav>
   `;
 }
-function Xe(e) {
-  return [...m.values()].filter((t) => e === "installed" ? M(t.moduleId) : e === "free" || e === "premium" ? t.tier === e : !0).sort(F);
-}
 function Ze(e) {
-  return [...b.values()].filter((t) => e === "installed" ? M(t.moduleId) : e === "free" || e === "premium" ? t.tier === e : !0).sort(F);
+  return [...m.values()].filter((t) => e === "installed" ? _(t.moduleId) : e === "free" || e === "premium" ? t.tier === e : !0).sort(F);
 }
-function et(e, t) {
+function et(e) {
+  return [...b.values()].filter((t) => e === "installed" ? _(t.moduleId) : e === "free" || e === "premium" ? t.tier === e : !0).sort(F);
+}
+function tt(e, t) {
   return e.length ? e.map((n) => {
-    const s = M(n.moduleId), o = n.tier === "premium" ? "Premium" : "Free", i = n.icon || (n.tier === "premium" ? "fa-solid fa-gem" : "fa-solid fa-cube"), u = n.entries.map((c) => {
+    const s = _(n.moduleId), o = n.tier === "premium" ? "Premium" : "Free", i = n.icon || (n.tier === "premium" ? "fa-solid fa-gem" : "fa-solid fa-cube"), u = n.entries.map((c) => {
       var p;
       return `
         <li>
@@ -524,7 +524,7 @@ function et(e, t) {
           ${c.summary ? `<span>${a(c.summary)}</span>` : ""}
           ${(p = c.tags) != null && p.length ? `
             <div class="holosuite-whats-new-tags">
-              ${c.tags.map((A) => `<span>${a(A)}</span>`).join("")}
+              ${c.tags.map((W) => `<span>${a(W)}</span>`).join("")}
             </div>
           ` : ""}
         </li>
@@ -556,7 +556,7 @@ function et(e, t) {
   }).join("") : `<p class="holosuite-empty">${a(t)}</p>`;
 }
 function fe(e, t) {
-  const n = Xe(e), s = Ze(e), o = t === "releases" ? s : n, i = t === "releases" ? "No releases match this filter yet." : "No updates match this filter yet.";
+  const n = Ze(e), s = et(e), o = t === "releases" ? s : n, i = t === "releases" ? "No releases match this filter yet." : "No updates match this filter yet.";
   return `
     <div class="holosuite-screen-heading">
       <div>
@@ -564,20 +564,20 @@ function fe(e, t) {
         <h2>What's New</h2>
       </div>
     </div>
-    ${Qe(t)}
-    ${Je(e)}
+    ${Xe(t)}
+    ${Qe(e)}
     <div class="holosuite-whats-new-list">
-      ${et(o, i)}
+      ${tt(o, i)}
     </div>
   `;
 }
 function ge() {
-  const e = P(), t = oe(), n = e ?? t, s = e ? `
+  const e = R(), t = oe(), n = e ?? t, s = e ? `
     <div class="holosuite-settings-notice">
       <i class="fa-solid fa-lock"></i>
       <span>The GM is overriding the HoloSuite theme for this world. Your personal choice is paused until the override is removed.</span>
     </div>
-  ` : "", o = Object.entries(T).map(([i, u]) => `
+  ` : "", o = Object.entries(L).map(([i, u]) => `
     <button
       type="button"
       class="holosuite-theme-choice ${i === n ? "is-active" : ""}"
@@ -602,7 +602,7 @@ function ge() {
       <div class="holosuite-settings-field">
         <div>
           <span class="holosuite-kicker">Theme</span>
-          <strong>${a(T[n])}</strong>
+          <strong>${a(L[n])}</strong>
         </div>
       </div>
       <div class="holosuite-theme-choices">
@@ -630,10 +630,10 @@ function Y(e = "apps", t = "all", n = "releases") {
     </section>
   `;
 }
-function I(e) {
+function D(e) {
   e && (e.querySelectorAll("[data-holosuite-app]").forEach((t) => {
     t.addEventListener("click", (n) => {
-      Ue(n.currentTarget.dataset.holosuiteApp ?? "");
+      xe(n.currentTarget.dataset.holosuiteApp ?? "");
     });
   }), e.querySelectorAll("[data-holosuite-action='whats-new']").forEach((t) => {
     t.addEventListener("click", (n) => {
@@ -650,27 +650,27 @@ function I(e) {
   }), e.querySelectorAll("[data-holosuite-device-style]").forEach((t) => {
     t.addEventListener("click", (n) => {
       const s = n.currentTarget.dataset.holosuiteDeviceStyle;
-      r == null || r.setDeviceStyle(R(s));
+      r == null || r.setDeviceStyle(P(s));
     });
   }), e.querySelectorAll("[data-holosuite-filter]").forEach((t) => {
     t.addEventListener("click", (n) => {
       const s = n.currentTarget.dataset.holosuiteFilter;
-      r == null || r.setWhatsNewFilter(tt(s));
+      r == null || r.setWhatsNewFilter(nt(s));
     });
   }), e.querySelectorAll("[data-holosuite-whats-new-tab]").forEach((t) => {
     t.addEventListener("click", (n) => {
       const s = n.currentTarget.dataset.holosuiteWhatsNewTab;
-      r == null || r.setWhatsNewTab(nt(s));
+      r == null || r.setWhatsNewTab(st(s));
     });
   }), e.querySelectorAll("[data-holosuite-action='close']").forEach((t) => {
     t.addEventListener("pointerdown", K, { capture: !0 }), t.addEventListener("click", K, { capture: !0 });
   }));
 }
-function tt(e) {
+function nt(e) {
   const t = String(e ?? "");
   return t === "free" || t === "premium" || t === "installed" ? t : "all";
 }
-function nt(e) {
+function st(e) {
   return String(e ?? "") === "releases" ? "releases" : "updates";
 }
 function K(e) {
@@ -694,7 +694,7 @@ async function B() {
     n != null && n.isConnected && n.remove(), r || ne();
   }, 0);
 }
-class H extends Te {
+class k extends Ne {
   constructor() {
     super(...arguments);
     y(this, "currentView", "apps");
@@ -716,7 +716,7 @@ class H extends Te {
     return $(Y(this.currentView, this.whatsNewFilter, this.whatsNewTab));
   }
   activateListeners(n) {
-    super.activateListeners(n), I(w(n));
+    super.activateListeners(n), D(w(n));
   }
   async _renderHTML() {
     const n = document.createElement("template");
@@ -726,7 +726,7 @@ class H extends Te {
     const o = this.getRenderTarget(s);
     if (!o) return;
     const i = n instanceof DocumentFragment || n instanceof HTMLElement ? n : w(n);
-    i ? o.replaceChildren(i) : o.innerHTML = String(n ?? ""), I(o);
+    i ? o.replaceChildren(i) : o.innerHTML = String(n ?? ""), D(o);
   }
   async close(n = {}) {
     return r = null, super.close(n);
@@ -747,19 +747,19 @@ class H extends Te {
     return !s || !o ? !1 : (s.innerHTML = `
       <span>HoloSuite</span>
       ${he(this.currentView)}
-    `, o.innerHTML = this.currentView === "whats-new" ? fe(this.whatsNewFilter, this.whatsNewTab) : this.currentView === "settings" ? ge() : de(), o.classList.toggle("holosuite-screen--whats-new", this.currentView === "whats-new"), o.classList.toggle("holosuite-screen--settings", this.currentView === "settings"), I(n), !0);
+    `, o.innerHTML = this.currentView === "whats-new" ? fe(this.whatsNewFilter, this.whatsNewTab) : this.currentView === "settings" ? ge() : de(), o.classList.toggle("holosuite-screen--whats-new", this.currentView === "whats-new"), o.classList.toggle("holosuite-screen--settings", this.currentView === "settings"), D(n), !0);
   }
   showApps() {
     this.currentView = "apps", this.updateRenderedView() || this.render(!1);
   }
   showWhatsNew() {
-    this.currentView = "whats-new", Ae(), this.updateRenderedView() || this.render(!1);
+    this.currentView = "whats-new", We(), this.updateRenderedView() || this.render(!1);
   }
   showSettings() {
     this.currentView = "settings", this.updateRenderedView() || this.render(!1);
   }
   async setDeviceStyle(n) {
-    P() || (await game.settings.set(l, V, n), this.currentView = "settings", E(), this.refreshCurrentView());
+    R() || (await game.settings.set(l, V, n), this.currentView = "settings", H(), this.refreshCurrentView());
   }
   refreshCurrentView() {
     this.updateRenderedView() || this.render(!1);
@@ -773,7 +773,7 @@ class H extends Te {
   async _updateObject() {
   }
 }
-y(H, "DEFAULT_OPTIONS", {
+y(k, "DEFAULT_OPTIONS", {
   id: "holosuite-launcher",
   tag: "section",
   classes: ["holosuite-launcher-window"],
@@ -788,7 +788,7 @@ y(H, "DEFAULT_OPTIONS", {
 });
 const g = {
   registerApp(e) {
-    const t = We(e);
+    const t = Ie(e);
     return t ? (v.set(t.id, t), r == null || r.render(!1), t) : null;
   },
   unregisterApp(e) {
@@ -810,19 +810,19 @@ const g = {
   },
   async openLauncher() {
     return d || (d = (async () => {
-      x(r) || (r = null), r || (r = new H());
+      x(r) || (r = null), r || (r = new k());
       try {
         await r.render(!0);
       } catch (e) {
-        console.warn(`${l} | Recreating launcher after render failure.`, e), r = new H(), await r.render(!0);
+        console.warn(`${l} | Recreating launcher after render failure.`, e), r = new k(), await r.render(!0);
       }
-      return Ve(r), r;
+      return Oe(r), r;
     })().finally(() => {
       d = null;
     }), d);
   },
   async toggleLauncher() {
-    return d || (x(r) ? (await B(), null) : (Oe() && ne(), Fe(), g.openLauncher()));
+    return d || (x(r) ? (await B(), null) : (Fe() && ne(), _e(), g.openLauncher()));
   }
 };
 function me() {
@@ -836,12 +836,12 @@ function me() {
   Hooks.callAll(`${l}.apiReady`, g);
 }
 Hooks.once("init", () => {
-  ae(), Pe(), Be(), me();
+  ae(), Be(), Ge(), me();
 });
-Hooks.on("getSceneControlButtons", Ie);
+Hooks.on("getSceneControlButtons", De);
 Hooks.on("renderSceneControls", (e, t) => Re(t));
-Hooks.on("renderSidebar", _);
-Hooks.on("renderSidebarTab", _);
+Hooks.on("renderSidebar", M);
+Hooks.on("renderSidebarTab", M);
 Hooks.once("ready", () => {
-  me(), ae(), E(), ze(), _(), Ye(), console.log(`${l} | Ready. API available at game.modules.get("${l}").api`);
+  me(), ae(), H(), Ue(), M(), Ke(), console.log(`${l} | Ready. API available at game.modules.get("${l}").api`);
 });

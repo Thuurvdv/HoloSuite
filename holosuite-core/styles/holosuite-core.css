@@ -805,18 +805,32 @@ img.hs-frame-header {
   width: 42px;
 }
 
-.holosuite-whats-new-icon[data-holosuite-app-icon="holodock"] i {
+.holosuite-whats-new-icon[data-holosuite-app-icon="holodock"] i,
+.holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-terminal"] i {
   display: none;
 }
 
-.holosuite-whats-new-icon[data-holosuite-app-icon="holodock"]::before {
+.holosuite-whats-new-icon[data-holosuite-app-icon="holodock"]::before,
+.holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-terminal"]::before {
   background: currentColor;
   content: "";
   display: block;
   height: 24px;
+  width: 24px;
+}
+
+.holosuite-whats-new-icon[data-holosuite-app-icon="holodock"]::before {
   mask: url("../assets/device-styles/space-police/icons/holodock.svg") center / contain no-repeat;
   -webkit-mask: url("../assets/device-styles/space-police/icons/holodock.svg") center / contain no-repeat;
-  width: 24px;
+}
+
+.holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-terminal"] {
+  color: #ffe45c;
+}
+
+.holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-terminal"]::before {
+  mask: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg") center / contain no-repeat;
+  -webkit-mask: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg") center / contain no-repeat;
 }
 
 .holosuite-whats-new-card h3 {
@@ -1174,6 +1188,11 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 116, 255, 106;
 }
 
+.holosuite-app-tile[data-holosuite-app="holosuite-terminal"] {
+  --hs-app-accent: #ffe45c;
+  --hs-app-accent-rgb: 255, 228, 92;
+}
+
 .holosuite-app-tile[data-holosuite-app="holodock"] {
   --hs-app-accent: #d7dee8;
   --hs-app-accent-rgb: 215, 222, 232;
@@ -1340,6 +1359,12 @@ img.hs-frame-header {
   --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holosuite-hacking.svg");
   mask-image: url("../assets/device-styles/space-police/icons/holosuite-hacking.svg");
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-hacking.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
 }
 
 .holosuite-app-icon[data-holosuite-app-icon="holodock"]::before {
@@ -1784,6 +1809,11 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 116, 255, 106;
 }
 
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-terminal"] {
+  --hs-app-accent: #ffe45c;
+  --hs-app-accent-rgb: 255, 228, 92;
+}
+
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holodock"] {
   --hs-app-accent: #d7dee8;
   --hs-app-accent-rgb: 215, 222, 232;
@@ -1952,6 +1982,12 @@ img.hs-frame-header {
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-hacking.svg");
 }
 
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"]::before {
+  --hs-space-police-icon: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
+}
+
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holodock"]::before {
   --hs-space-police-icon: url("../assets/device-styles/space-police/icons/holodock.svg");
   mask-image: url("../assets/device-styles/space-police/icons/holodock.svg");
@@ -2079,4 +2115,30 @@ body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) 
 body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-app-tile:has(.holosuite-app-count) {
   min-height: 78px;
   padding-bottom: 10px;
+}
+
+/* Foundry v12 can retain its generic button/icon presentation after the
+   launcher is rendered through ApplicationV1. Keep Terminal's identity
+   explicit in that path instead of relying on the generic mask fallback. */
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-terminal"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-terminal"] {
+  --hs-app-accent: #ffe45c !important;
+  --hs-app-accent-rgb: 255, 228, 92 !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"] {
+  color: #ffe45c !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"] i,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"] i {
+  display: none !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"]::before,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"]::before {
+  display: block !important;
+  mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg") !important;
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg") !important;
 }

@@ -79,6 +79,43 @@ jobs:
           cd staging
           zip -r "../$MODULE_ID.zip" "$MODULE_ID"
 
+      - name: Verify packaged files
+        shell: bash
+        run: |
+          MODULE_ID="${{ steps.meta.outputs.module_id }}"
+          ZIP_PATH="$MODULE_ID.zip"
+          ZIP_LIST="$(mktemp)"
+
+          unzip -Z1 "$ZIP_PATH" > "$ZIP_LIST"
+
+          # Check every runtime file from the module source, including SVGs and
+          # other static assets, rather than only checking the entry bundle.
+          MISSING=0
+          for dir in dist styles templates assets audio data languages packs samples; do
+            [ -d "$MODULE_ID/$dir" ] || continue
+
+            while IFS= read -r -d '' FILE; do
+              EXPECTED="$MODULE_ID/${FILE#"$MODULE_ID/"}"
+              if ! grep -Fxq "$EXPECTED" "$ZIP_LIST"; then
+                echo "::error::Missing from release ZIP: $EXPECTED"
+                MISSING=1
+              fi
+            done < <(find "$MODULE_ID/$dir" -type f -print0)
+          done
+
+          for REQUIRED in \
+            "$MODULE_ID/module.json" \
+            "$MODULE_ID/dist/main.js"; do
+            if ! grep -Fxq "$REQUIRED" "$ZIP_LIST"; then
+              echo "::error::Required package file missing: $REQUIRED"
+              MISSING=1
+            fi
+          done
+
+          if [ "$MISSING" -ne 0 ]; then
+            exit 1
+          fi
+
       # ── Public modules: GitHub Release ──────────────────────────────
 
       - name: Create GitHub release

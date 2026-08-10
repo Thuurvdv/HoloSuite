@@ -15,6 +15,7 @@ const SETTING_WHATS_NEW_LAST_SEEN = "whatsNewLastSeen";
 const KEYBINDING_OPEN_LAUNCHER = "openLauncher";
 const FOUNDRY_GENERATION_ATTRIBUTE = "data-holosuite-foundry-generation";
 const WHATS_NEW_CATALOG_PATH = `modules/${MODULE_ID}/data/whats-new.json`;
+const WHATS_NEW_UPDATES_SINCE = Date.UTC(2026, 7, 1);
 
 const DEVICE_STYLE_CHOICES = {
   base: "Base",
@@ -582,6 +583,7 @@ function registerWhatsNewInternal(
 ): HoloSuiteWhatsNewRegistration | null {
   const normalized = normalizeWhatsNew(update);
   if (!normalized) return null;
+  if (getUpdateTimestamp(normalized) < WHATS_NEW_UPDATES_SINCE) return null;
   if (options.replace === false && registeredWhatsNew.has(normalized.moduleId)) {
     return registeredWhatsNew.get(normalized.moduleId) ?? null;
   }
