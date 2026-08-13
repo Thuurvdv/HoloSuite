@@ -43,7 +43,7 @@ function renderModule(module) {
       ? `<a class="button secondary" href="${escapeAttribute(module.patreonUrl)}" rel="noopener">Patreon</a>`
       : "";
     actions.innerHTML = `
-      <a class="button primary" href="${escapeAttribute(module.moduleUrl)}" rel="noopener">${module.tier === "premium" ? "Module Details" : "Open Module"}</a>
+      <a class="button primary" href="${escapeAttribute(module.moduleUrl)}" rel="noopener">${escapeHtml(module.moduleActionLabel || (module.tier === "premium" ? "Module Details" : "Open Module"))}</a>
       <a class="button secondary" href="./">All Docs</a>
       ${patreon}
     `;
