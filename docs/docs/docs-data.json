@@ -473,6 +473,62 @@
       "moduleUrl": "https://github.com/Thuurvdv/holodock"
     },
     {
+      "id": "holosuite-terminal",
+      "name": "HoloSuite Terminal",
+      "tier": "premium",
+      "category": "Diegetic systems",
+      "compatibility": "Foundry v12-v14",
+      "image": "assets/HoloSuiteTerminal-preview.png",
+      "summary": "Configurable, diegetic sci-fi computer systems with mail, files, cameras, utilities, permissions, downloads, and hacking.",
+      "overview": "HoloSuite Terminal lets GMs build interactive computers that feel like part of the game world. Each terminal can expose its own mail, files, camera feeds, utilities, authentication, access rules, sounds, desktop style, and visual theme.",
+      "features": [
+        "Create multiple terminal profiles with their own applications and presentation.",
+        "Add mail accounts, messages, and text, image, audio, video, or journal-backed files.",
+        "Link live camera feeds through the optional Security Cameras module.",
+        "Control doors, lighting, lockdowns, and camera states with configurable utilities.",
+        "Protect terminals and individual content with passwords, permissions, allow lists, deny lists, and optional hacking challenges.",
+        "Run file downloads by elapsed time or combat rounds, with automatic journal access after completion.",
+        "Open terminals from linked Scene Regions when a player-owned token enters.",
+        "Choose from Corporate, RED, Heavy Monitor, and Holo Blue desktops plus six interface themes."
+      ],
+      "installation": [
+        "Install the premium/private HoloSuite Terminal module from the release manifest or ZIP provided to licensed users.",
+        "Enable HoloSuite Core and HoloSuite Terminal in the Foundry world.",
+        "Optionally enable HoloSuite Hacking for minigames and Security Cameras for linked live feeds.",
+        "Open Terminal from the HoloSuite launcher or the module settings menu."
+      ],
+      "configuration": [
+        "Create a terminal profile and choose which applications it exposes.",
+        "Add mail, files, cameras, utilities, access rules, and optional hacking requirements.",
+        "Link Scene Regions that should open the terminal when player-owned tokens enter.",
+        "Configure boot text, login backgrounds, interface sounds, ambient audio, desktop style, and color theme.",
+        "Set per-user access levels and content-specific locks for the information players should discover."
+      ],
+      "faq": [
+        {
+          "question": "Does HoloSuite Terminal require other modules?",
+          "answer": "HoloSuite Core is required. HoloSuite Hacking and Security Cameras are optional integrations that add terminal hacking challenges and linked live camera feeds."
+        },
+        {
+          "question": "Can terminals grant Foundry journal access?",
+          "answer": "Yes. A completed journal-backed file download can automatically grant the requesting player access to the linked journal."
+        },
+        {
+          "question": "Is HoloSuite Terminal free?",
+          "answer": "No. HoloSuite Terminal is distributed as part of the HoloSuite Premium Collection."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Build a corporate workstation with employee mail, classified files, and a locked security-camera app.",
+        "Place a derelict ship terminal that controls emergency lighting and downloads a captain's log over several combat rounds.",
+        "Require a password or hacking challenge before players can unlock restricted files shared across the party.",
+        "Use a different desktop style and theme for each faction, ship, or facility."
+      ],
+      "moduleUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
+      "moduleActionLabel": "Get Premium Access"
+    },
+    {
       "id": "pulse-scanner",
       "name": "Pulse Scanner",
       "tier": "premium",

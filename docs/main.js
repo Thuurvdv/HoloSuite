@@ -67,7 +67,7 @@ function moduleCards(modules) {
           <ul>${features}</ul>
           <div class="module-actions">
             <a class="primary-link" href="${escapeAttribute(module.docsUrl)}" rel="noopener">Documentation</a>
-            <a href="${escapeAttribute(module.moduleUrl)}" rel="noopener">${isPremium ? "Details" : "GitHub"}</a>
+            <a href="${escapeAttribute(module.moduleUrl)}" rel="noopener">${escapeHtml(module.moduleActionLabel || (isPremium ? "Details" : "GitHub"))}</a>
             ${patreonButton}
           </div>
         </div>

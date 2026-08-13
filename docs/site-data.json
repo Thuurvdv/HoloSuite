@@ -1,8 +1,8 @@
 {
   "stats": [
-    { "label": "Modules Released", "value": 10, "suffix": "+" },
+    { "label": "Modules Released", "value": 11, "suffix": "+" },
     { "label": "Free Modules", "value": 9, "suffix": "" },
-    { "label": "Premium Modules", "value": 1, "suffix": "" },
+    { "label": "Premium Modules", "value": 2, "suffix": "" },
     { "label": "Foundry Compatibility", "value": 12, "prefix": "v", "suffix": "+" },
     { "label": "Active Development", "value": 2026, "suffix": "", "format": "plain" }
   ],
@@ -54,6 +54,12 @@
       "title": "Hack futuristic systems",
       "description": "Launch cyberpunk minigames shaped by Foundry rolls.",
       "moduleId": "holosuite-hacking"
+    },
+    {
+      "icon": "TRM",
+      "title": "Access in-world terminals",
+      "description": "Explore mail, files, cameras, utilities, downloads, and locked systems.",
+      "moduleId": "holosuite-terminal"
     }
   ],
   "modules": [
@@ -164,6 +170,19 @@
       "features": ["Multiple ship profiles", "Equipment slots with item drops and ship-image pins", "Power allocation, durability, presets, and activation controls"],
       "docsUrl": "docs/module.html?id=holodock",
       "moduleUrl": "https://github.com/Thuurvdv/holodock"
+    },
+    {
+      "id": "holosuite-terminal",
+      "name": "HoloSuite Terminal",
+      "tier": "premium",
+      "category": "Diegetic systems",
+      "image": "assets/HoloSuiteTerminal-preview.png",
+      "pitch": "Configurable in-world computers with mail, files, cameras, utilities, authentication, hacking, and distinctive sci-fi desktops.",
+      "compatibility": "Foundry v12-v14",
+      "features": ["Mail, files, cameras, and utility apps", "Passwords, permissions, and optional hacking", "Four desktop styles and six interface themes"],
+      "docsUrl": "docs/module.html?id=holosuite-terminal",
+      "moduleUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
+      "moduleActionLabel": "Get Premium Access"
     },
     {
       "id": "pulse-scanner",
