@@ -43,7 +43,7 @@ function renderResults(modules, query) {
 
   grid.innerHTML = results.map((module) => `
     <a class="docs-card" href="module.html?id=${encodeURIComponent(module.id)}">
-      <img src="../${escapeAttribute(module.image)}" alt="${escapeAttribute(module.name)} preview" loading="lazy">
+      ${moduleVisual(module, "../")}
       <div class="docs-card-body">
         <div class="module-meta">
           <span class="pill ${module.tier === "premium" ? "premium" : ""}">${escapeHtml(module.tier)}</span>
@@ -55,6 +55,28 @@ function renderResults(modules, query) {
       </div>
     </a>
   `).join("");
+}
+
+function moduleVisual(module, pathPrefix = "") {
+  if (module.visual === "terminal-interface") {
+    return `
+      <div class="terminal-interface-visual" role="img" aria-label="Stylized HoloSuite Terminal interface">
+        <div class="terminal-interface-bar">
+          <span>HoloSuite Terminal</span>
+          <span class="terminal-interface-status">Online</span>
+        </div>
+        <div class="terminal-interface-apps" aria-hidden="true">
+          <span><b>MAIL</b><small>03 unread</small></span>
+          <span><b>FILES</b><small>secure vault</small></span>
+          <span><b>CAM</b><small>feeds linked</small></span>
+          <span><b>UTIL</b><small>systems ready</small></span>
+        </div>
+        <div class="terminal-interface-footer">AUTH LEVEL: USER // SECURE SESSION</div>
+      </div>
+    `;
+  }
+
+  return `<img src="${escapeAttribute(`${pathPrefix}${module.image}`)}" alt="${escapeAttribute(module.name)} preview" loading="lazy">`;
 }
 
 function searchableText(module) {

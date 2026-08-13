@@ -504,12 +504,98 @@ h3 {
   box-shadow: var(--shadow);
 }
 
-.module-card img {
+.module-card > img,
+.module-card > .terminal-interface-visual {
   flex: 0 0 210px;
   width: 100%;
   height: 210px;
   object-fit: cover;
   border-bottom: 1px solid var(--line);
+}
+
+.terminal-interface-visual {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid rgba(69, 217, 208, 0.42);
+  color: #dffdfa;
+  background:
+    linear-gradient(rgba(69, 217, 208, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(69, 217, 208, 0.045) 1px, transparent 1px),
+    radial-gradient(circle at 50% 0%, rgba(69, 217, 208, 0.2), transparent 54%),
+    #071113;
+  background-size: 24px 24px, 24px 24px, auto, auto;
+  box-shadow: inset 0 0 40px rgba(69, 217, 208, 0.08);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.terminal-interface-bar,
+.terminal-interface-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--cyan);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.terminal-interface-status {
+  color: #9dffc9;
+}
+
+.terminal-interface-status::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.terminal-interface-apps {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.terminal-interface-apps span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid rgba(69, 217, 208, 0.25);
+  background: rgba(69, 217, 208, 0.06);
+}
+
+.terminal-interface-apps b {
+  color: #f5ffff;
+  font-size: clamp(0.7rem, 1.5vw, 1rem);
+}
+
+.terminal-interface-apps small {
+  overflow: hidden;
+  margin-top: 5px;
+  color: #84aaa7;
+  font-size: 0.58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.terminal-interface-footer {
+  justify-content: flex-start;
+  color: #84aaa7;
+  font-size: 0.56rem;
 }
 
 .module-body {

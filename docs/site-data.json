@@ -176,7 +176,7 @@
       "name": "HoloSuite Terminal",
       "tier": "premium",
       "category": "Diegetic systems",
-      "image": "assets/HoloSuiteTerminal-preview.png",
+      "visual": "terminal-interface",
       "pitch": "Configurable in-world computers with mail, files, cameras, utilities, authentication, hacking, and distinctive sci-fi desktops.",
       "compatibility": "Foundry v12-v14",
       "features": ["Mail, files, cameras, and utility apps", "Passwords, permissions, and optional hacking", "Four desktop styles and six interface themes"],

@@ -31,10 +31,9 @@ function renderModule(module) {
   setText("[data-module-title]", module.name);
   setText("[data-module-summary]", module.summary);
 
-  const image = document.querySelector("[data-module-image]");
-  if (image) {
-    image.src = `../${module.image}`;
-    image.alt = `${module.name} preview`;
+  const visual = document.querySelector("[data-module-visual]");
+  if (visual) {
+    visual.innerHTML = moduleVisual(module, "../");
   }
 
   const actions = document.querySelector("[data-module-actions]");
@@ -60,6 +59,28 @@ function renderModule(module) {
     ${faqSection(module.faq)}
     ${section("examples", "Examples", list(module.examples))}
   `;
+}
+
+function moduleVisual(module, pathPrefix = "") {
+  if (module.visual === "terminal-interface") {
+    return `
+      <div class="terminal-interface-visual" role="img" aria-label="Stylized HoloSuite Terminal interface">
+        <div class="terminal-interface-bar">
+          <span>HoloSuite Terminal</span>
+          <span class="terminal-interface-status">Online</span>
+        </div>
+        <div class="terminal-interface-apps" aria-hidden="true">
+          <span><b>MAIL</b><small>03 unread</small></span>
+          <span><b>FILES</b><small>secure vault</small></span>
+          <span><b>CAM</b><small>feeds linked</small></span>
+          <span><b>UTIL</b><small>systems ready</small></span>
+        </div>
+        <div class="terminal-interface-footer">AUTH LEVEL: USER // SECURE SESSION</div>
+      </div>
+    `;
+  }
+
+  return `<img src="${escapeAttribute(`${pathPrefix}${module.image}`)}" alt="${escapeAttribute(module.name)} preview" loading="lazy">`;
 }
 
 function renderMissing() {
