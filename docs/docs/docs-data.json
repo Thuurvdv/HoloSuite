@@ -478,7 +478,7 @@
       "tier": "premium",
       "category": "Diegetic systems",
       "compatibility": "Foundry v12-v14",
-      "image": "assets/HoloSuiteTerminal-preview.png",
+      "visual": "terminal-interface",
       "summary": "Configurable, diegetic sci-fi computer systems with mail, files, cameras, utilities, permissions, downloads, and hacking.",
       "overview": "HoloSuite Terminal lets GMs build interactive computers that feel like part of the game world. Each terminal can expose its own mail, files, camera feeds, utilities, authentication, access rules, sounds, desktop style, and visual theme.",
       "features": [
