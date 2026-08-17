@@ -48,7 +48,7 @@ function createFakeDocument() {
 test("loads both Core stylesheets in their declared order", () => {
   const fake = createFakeDocument();
 
-  setCoreStylesEnabled(true, fake.document, "1.0.8");
+  setCoreStylesEnabled(true, fake.document, "1.0.9");
 
   assert.deepEqual(
     fake.links.map((link) => link.getAttribute(CORE_STYLESHEET_ATTRIBUTE)),
@@ -56,7 +56,7 @@ test("loads both Core stylesheets in their declared order", () => {
   );
   assert.deepEqual(
     fake.links.map((link) => link.href),
-    CORE_STYLESHEET_PATHS.map((path) => `${path}?v=1.0.8`)
+    CORE_STYLESHEET_PATHS.map((path) => `${path}?v=1.0.9`)
   );
 });
 
