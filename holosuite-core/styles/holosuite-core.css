@@ -2142,3 +2142,46 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg") !important;
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg") !important;
 }
+
+.holosuite-core-diagnostics-window .window-content {
+  overflow: auto;
+}
+
+:where(:root, body)[data-holosuite-debug-no-effects="true"] :where(
+  .holosuite-launcher-window,
+  .holosuite-phone,
+  .holosuite-scene-control,
+  .holosuite-launcher-window *,
+  .holosuite-phone *
+) {
+  animation: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+  transition: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:where(:root, body)[data-holosuite-debug-no-effects="true"] :where(
+  .holosuite-launcher-window,
+  .holosuite-phone,
+  .holosuite-scene-control,
+  .holosuite-launcher-window *,
+  .holosuite-phone *
+)::before,
+:where(:root, body)[data-holosuite-debug-no-effects="true"] :where(
+  .holosuite-launcher-window,
+  .holosuite-phone,
+  .holosuite-scene-control,
+  .holosuite-launcher-window *,
+  .holosuite-phone *
+)::after {
+  animation: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+  transition: none !important;
+  -webkit-backdrop-filter: none !important;
+}

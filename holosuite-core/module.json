@@ -2,7 +2,7 @@
   "id": "holosuite-core",
   "title": "HoloSuite Core",
   "description": "A GM-only sci-fi phone launcher and registration API for HoloSuite Foundry VTT modules.",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "authors": [
     {
       "name": "Mage Tower Studios",
@@ -16,10 +16,7 @@
   "esmodules": [
     "dist/main.js"
   ],
-  "styles": [
-    "styles/holosuite-tokens.css",
-    "styles/holosuite-core.css"
-  ],
+  "styles": [],
   "languages": [],
   "packs": [],
   "socket": false,

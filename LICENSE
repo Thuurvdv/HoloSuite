@@ -11,6 +11,7 @@ modifications to the modules themselves must be shared under the same
 license.
 
 - holosuite-core/
+- holosuite-performance-check/
 - shared/
 
 See holosuite-core/LICENSE and shared/LICENSE for the full license text.

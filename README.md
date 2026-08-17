@@ -14,5 +14,6 @@ HoloSuite is a collection of Foundry VTT modules built for sci-fi, cyberpunk, an
 - **[Bounty Board](bounty-board/README.md)** - A bounty contract board for posting and browsing sci-fi jobs and contracts.
 - **[Critical Cut-In](holosuite-critical-cutin/README.md)** - Cinematic critical hit animations triggered by natural d20 rolls, with per-character images, sounds, and overlay text.
 - **[HoloSuite Hacking](holosuite-hacking/README.md)** - Interactive hacking minigames where skill checks determine puzzle difficulty. Includes Node Intrusion and Signal Alignment.
+- **[HoloSuite Performance Check](holosuite-performance-check/README.md)** - A standalone local profiler for measuring module hooks, browser long tasks, timers, sockets, DOM activity, and reproducible Foundry test environments. It intentionally does not require HoloSuite Core.
 
 Pulse Scanner is distributed separately as a premium HoloSuite module.

@@ -4,9 +4,17 @@ import type {
   HoloSuiteWhatsNewRegistration,
   HoloSuiteWhatsNewTier
 } from "../../shared/src/index";
+import {
+  CORE_STYLESHEET_ATTRIBUTE,
+  CORE_STYLESHEET_PATHS,
+  setCoreStylesEnabled
+} from "./core-styles";
 import { addSceneControlTool } from "./scene-controls";
 
 const MODULE_ID = "holosuite-core";
+const SETTING_API_ONLY_FOR_DEBUGGING = "apiOnlyForDebugging";
+const SETTING_DISABLE_CORE_CSS_FOR_DEBUGGING = "disableCoreCssForDebugging";
+const SETTING_DISABLE_VISUAL_EFFECTS_FOR_DEBUGGING = "disableVisualEffectsForDebugging";
 const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
 const SETTING_DEVICE_STYLE = "deviceStyle";
 const SETTING_FORCE_DEVICE_STYLE = "forceDeviceStyle";
@@ -14,6 +22,7 @@ const SETTING_THEME = "theme";
 const SETTING_WHATS_NEW_LAST_SEEN = "whatsNewLastSeen";
 const KEYBINDING_OPEN_LAUNCHER = "openLauncher";
 const FOUNDRY_GENERATION_ATTRIBUTE = "data-holosuite-foundry-generation";
+const REDUCED_EFFECTS_ATTRIBUTE = "data-holosuite-debug-no-effects";
 const WHATS_NEW_CATALOG_PATH = `modules/${MODULE_ID}/data/whats-new.json`;
 const WHATS_NEW_UPDATES_SINCE = Date.UTC(2026, 7, 1);
 
@@ -45,6 +54,10 @@ let launcherOpenPromise: Promise<HoloSuiteLauncher | null> | null = null;
 let launcherCloseInProgress = false;
 let launcherObserver: MutationObserver | null = null;
 let launcherControlClickHandledAt = 0;
+let coreReady = false;
+let apiOnlyRuntimeState: boolean | null = null;
+let whatsNewCatalogLoaded = false;
+let whatsNewCatalogPromise: Promise<void> | null = null;
 
 type LauncherView = "apps" | "whats-new" | "settings";
 type WhatsNewTab = "updates" | "releases";
@@ -84,6 +97,10 @@ function safeGetSetting(moduleId: string, key: string): unknown {
   } catch (error) {
     return null;
   }
+}
+
+function isApiOnlyMode(): boolean {
+  return apiOnlyRuntimeState ?? safeGetSetting(MODULE_ID, SETTING_API_ONLY_FOR_DEBUGGING) === true;
 }
 
 function getPublicApi(moduleId: string): any {
@@ -225,6 +242,7 @@ function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration |
 }
 
 function renderOpenLauncherControl(controls: unknown): void {
+  if (isApiOnlyMode()) return;
   const isGM = game.user?.isGM === true;
   if (!isGM && isDisabledForPlayers()) return;
   const createTool = () => ({
@@ -242,7 +260,7 @@ function renderOpenLauncherControl(controls: unknown): void {
 }
 
 function canOpenLauncher(): boolean {
-  return game.user?.isGM === true || !isDisabledForPlayers();
+  return !isApiOnlyMode() && (game.user?.isGM === true || !isDisabledForPlayers());
 }
 
 function createLauncherButton(tagName: "a" | "button", className: string): HTMLElement {
@@ -307,6 +325,7 @@ function observeLauncherContainers(): void {
 }
 
 function removeSidebarLaunchers(): void {
+  if (isApiOnlyMode()) return;
   document.querySelectorAll(".holosuite-sidebar-launcher, .holosuite-floating-launcher").forEach((element) => element.remove());
 }
 
@@ -370,6 +389,7 @@ function handleLauncherControlChange(...args: unknown[]): Promise<HoloSuiteLaunc
 }
 
 function injectRenderedLauncherControl(html: unknown): void {
+  if (isApiOnlyMode()) return;
   const isGM = game.user?.isGM === true;
   if (!isGM && isDisabledForPlayers()) return;
 
@@ -394,7 +414,56 @@ function injectRenderedLauncherControl(html: unknown): void {
   controlsList.appendChild(launcher);
 }
 
+function organizeCoreSettings(_app: unknown, html: unknown): void {
+  const root = unwrapHtmlElement(html);
+  if (!root) return;
+
+  const selectors = [
+    `input[name="${MODULE_ID}.${SETTING_API_ONLY_FOR_DEBUGGING}"]`,
+    `input[name="${MODULE_ID}.${SETTING_DISABLE_CORE_CSS_FOR_DEBUGGING}"]`,
+    `input[name="${MODULE_ID}.${SETTING_DISABLE_VISUAL_EFFECTS_FOR_DEBUGGING}"]`
+  ];
+  const groups = selectors
+    .map((selector) => root.querySelector<HTMLElement>(selector)?.closest<HTMLElement>(".form-group") ?? null)
+    .filter((group): group is HTMLElement => group !== null);
+
+  for (const group of groups) group.parentElement?.append(group);
+}
+
 function registerSettings(): void {
+  game.settings.register(MODULE_ID, SETTING_API_ONLY_FOR_DEBUGGING, {
+    name: "Debugging: API-Only Mode (This Browser)",
+    hint: "Diagnostic only. Keeps Core's registration API active while disabling its launcher, scene-control UI, sidebar cleanup, and What's New catalog work on this browser.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+    restricted: false,
+    onChange: (enabled: boolean) => applyApiOnlySetting(enabled)
+  });
+
+  game.settings.register(MODULE_ID, SETTING_DISABLE_CORE_CSS_FOR_DEBUGGING, {
+    name: "Debugging: Disable HoloSuite Core CSS (This Browser)",
+    hint: "Diagnostic only. Temporarily removes Core's shared tokens and launcher styles from this browser. HoloSuite interfaces will appear unstyled. Leave this off during normal play.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+    restricted: false,
+    onChange: (disabled: boolean) => applyCoreStylesSetting(disabled)
+  });
+
+  game.settings.register(MODULE_ID, SETTING_DISABLE_VISUAL_EFFECTS_FOR_DEBUGGING, {
+    name: "Debugging: Disable Core Visual Effects (This Browser)",
+    hint: "Diagnostic only. Keeps Core's layout and colors while disabling launcher transitions, animations, filters, shadows, and glows on this browser.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+    restricted: false,
+    onChange: (disabled: boolean) => applyVisualEffectsSetting(disabled)
+  });
+
   game.settings.register(MODULE_ID, SETTING_DEVICE_STYLE, {
     name: "HoloSuite Theme",
     hint: "Choose the HoloSuite launcher theme for this user.",
@@ -464,6 +533,68 @@ function registerSettings(): void {
     type: HoloSuiteLauncher,
     restricted: true
   });
+
+  game.settings.registerMenu(MODULE_ID, "diagnostics", {
+    name: "HoloSuite Core Diagnostics",
+    label: "Open Diagnostics",
+    hint: "Inspect, copy, or download the current HoloSuite and Foundry test state.",
+    icon: "fas fa-stethoscope",
+    type: HoloSuiteDiagnostics,
+    restricted: true
+  });
+}
+
+async function refreshSceneControlsForDiagnosticMode(): Promise<void> {
+  const controls = ui.controls as any;
+  if (typeof controls?.render !== "function") return;
+  const generation = Number(game.release?.generation ?? 0);
+  try {
+    if (generation >= 13) await controls.render({ force: true, reset: true });
+    else await controls.render(true);
+  } catch (error) {
+    console.warn(`${MODULE_ID} | Could not rebuild scene controls after changing API-only mode.`, error);
+  }
+}
+
+function applyApiOnlySetting(value: unknown = safeGetSetting(MODULE_ID, SETTING_API_ONLY_FOR_DEBUGGING)): void {
+  const enabled = value === true;
+  apiOnlyRuntimeState = enabled;
+  if (enabled) {
+    document.querySelectorAll(
+      "[data-tool='holosuite-core-launcher'], .holosuite-scene-control, .holosuite-sidebar-launcher, .holosuite-floating-launcher"
+    ).forEach((element) => element.remove());
+    if (launcherApp || hasStaleLauncherWindow()) void requestLauncherClose();
+    if (coreReady) void refreshSceneControlsForDiagnosticMode();
+    console.warn(`${MODULE_ID} | API-only diagnostic mode is enabled on this browser.`);
+    return;
+  }
+
+  if (coreReady) {
+    void loadBundledWhatsNewCatalog();
+    void refreshSceneControlsForDiagnosticMode();
+  }
+}
+
+function applyCoreStylesSetting(value: unknown = safeGetSetting(MODULE_ID, SETTING_DISABLE_CORE_CSS_FOR_DEBUGGING)): void {
+  const disabled = value === true;
+  const version = String(game.modules.get(MODULE_ID)?.version ?? "");
+  setCoreStylesEnabled(!disabled, document, version);
+  if (disabled) {
+    console.warn(`${MODULE_ID} | Core CSS is disabled on this browser for debugging.`);
+  }
+}
+
+function applyVisualEffectsSetting(
+  value: unknown = safeGetSetting(MODULE_ID, SETTING_DISABLE_VISUAL_EFFECTS_FOR_DEBUGGING)
+): void {
+  const disabled = value === true;
+  for (const target of [document.documentElement, document.body].filter(Boolean)) {
+    if (disabled) target.setAttribute(REDUCED_EFFECTS_ATTRIBUTE, "true");
+    else target.removeAttribute(REDUCED_EFFECTS_ATTRIBUTE);
+  }
+  if (disabled) {
+    console.warn(`${MODULE_ID} | Core visual effects are disabled on this browser for debugging.`);
+  }
 }
 
 function registerKeybindings(): void {
@@ -473,6 +604,10 @@ function registerKeybindings(): void {
     editable: [],
     restricted: false,
     onDown: () => {
+      if (isApiOnlyMode()) {
+        ui.notifications?.warn?.("HoloSuite Core is in API-only diagnostic mode on this browser.");
+        return false;
+      }
       if (!canOpenLauncher()) {
         ui.notifications?.warn?.("HoloSuite is disabled for players in this world.");
         return false;
@@ -588,7 +723,7 @@ function registerWhatsNewInternal(
     return registeredWhatsNew.get(normalized.moduleId) ?? null;
   }
   registeredWhatsNew.set(normalized.moduleId, normalized);
-  launcherApp?.render(false);
+  if (!isApiOnlyMode()) launcherApp?.render(false);
   return normalized;
 }
 
@@ -602,26 +737,36 @@ function registerReleaseInternal(
     return registeredReleases.get(normalized.moduleId) ?? null;
   }
   registeredReleases.set(normalized.moduleId, normalized);
-  launcherApp?.render(false);
+  if (!isApiOnlyMode()) launcherApp?.render(false);
   return normalized;
 }
 
 async function loadBundledWhatsNewCatalog(): Promise<void> {
-  try {
-    const response = await fetch(WHATS_NEW_CATALOG_PATH, { cache: "no-cache" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const catalog = await response.json();
-    const modules = safeArray(catalog?.modules);
-    for (const update of modules) {
-      registerWhatsNewInternal(update, { replace: false });
+  if (isApiOnlyMode() || whatsNewCatalogLoaded) return;
+  if (whatsNewCatalogPromise) return whatsNewCatalogPromise;
+
+  whatsNewCatalogPromise = (async () => {
+    try {
+      const response = await fetch(WHATS_NEW_CATALOG_PATH, { cache: "no-cache" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const catalog = await response.json();
+      const modules = safeArray(catalog?.modules);
+      for (const update of modules) {
+        registerWhatsNewInternal(update, { replace: false });
+      }
+      const releases = safeArray(catalog?.releases);
+      for (const release of releases) {
+        registerReleaseInternal(release, { replace: false });
+      }
+      whatsNewCatalogLoaded = true;
+    } catch (error) {
+      console.warn(`${MODULE_ID} | Could not load bundled what's new catalog.`, error);
     }
-    const releases = safeArray(catalog?.releases);
-    for (const release of releases) {
-      registerReleaseInternal(release, { replace: false });
-    }
-  } catch (error) {
-    console.warn(`${MODULE_ID} | Could not load bundled what's new catalog.`, error);
-  }
+  })().finally(() => {
+    whatsNewCatalogPromise = null;
+  });
+
+  return whatsNewCatalogPromise;
 }
 
 function renderHeaderActions(view: LauncherView): string {
@@ -1026,6 +1171,241 @@ async function requestLauncherClose(): Promise<void> {
   }, 0);
 }
 
+function getActiveModuleDiagnostics(): Array<{ id: string; title: string; version: string }> {
+  const moduleCollection = game.modules as any;
+  const modules = safeArray(moduleCollection?.contents ?? Array.from(moduleCollection?.values?.() ?? []));
+  return modules
+    .filter((foundryModule: any) => foundryModule?.active === true)
+    .map((foundryModule: any) => ({
+      id: String(foundryModule.id ?? ""),
+      title: String(foundryModule.title ?? foundryModule.id ?? ""),
+      version: String(foundryModule.version ?? "")
+    }))
+    .sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function getCoreStylesheetDiagnostics(): Array<{
+  path: string;
+  present: boolean;
+  loaded: boolean;
+  href: string | null;
+}> {
+  const links = Array.from(
+    document.querySelectorAll<HTMLLinkElement>(`link[${CORE_STYLESHEET_ATTRIBUTE}]`)
+  );
+  return CORE_STYLESHEET_PATHS.map((path) => {
+    const link = links.find((candidate) => candidate.getAttribute(CORE_STYLESHEET_ATTRIBUTE) === path) ?? null;
+    return {
+      path,
+      present: link !== null,
+      loaded: link?.sheet != null,
+      href: link?.href ?? null
+    };
+  });
+}
+
+function getChatMessageCount(): number {
+  const messages = game.messages as any;
+  const count = Number(messages?.size ?? messages?.contents?.length ?? 0);
+  return Number.isFinite(count) ? count : 0;
+}
+
+function collectCoreDiagnostics(): Record<string, unknown> {
+  const cssDisabled = safeGetSetting(MODULE_ID, SETTING_DISABLE_CORE_CSS_FOR_DEBUGGING) === true;
+  const apiOnly = isApiOnlyMode();
+  const visualEffectsDisabled = safeGetSetting(MODULE_ID, SETTING_DISABLE_VISUAL_EFFECTS_FOR_DEBUGGING) === true;
+  const stylesheets = getCoreStylesheetDiagnostics();
+  const activeModules = getActiveModuleDiagnostics();
+  const release = game.release as any;
+  const system = game.system as any;
+
+  return {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    core: {
+      version: String(game.modules.get(MODULE_ID)?.version ?? ""),
+      diagnosticModeActive: apiOnly || cssDisabled || visualEffectsDisabled,
+      apiOnly,
+      cssDisabled,
+      visualEffectsDisabled,
+      stylesheets,
+      launcherOpen: isRenderableLauncher(launcherApp) || hasStaleLauncherWindow(),
+      registeredApps: [...registeredApps.values()].map((app) => ({
+        id: app.id,
+        title: app.title,
+        premium: app.premium === true,
+        playerVisible: app.playerVisible !== false
+      })),
+      registeredWhatsNewModules: [...registeredWhatsNew.keys()].sort(),
+      deviceStyle: {
+        effective: getEffectiveDeviceStyle(),
+        client: getUserDeviceStyle(),
+        forced: getForcedDeviceStyle()
+      },
+      colorTheme: normalizeTheme(safeGetSetting(MODULE_ID, SETTING_THEME))
+    },
+    foundry: {
+      version: String(release?.version ?? game.version ?? ""),
+      generation: Number(release?.generation ?? 0) || null,
+      build: Number(release?.build ?? 0) || null,
+      systemId: String(system?.id ?? ""),
+      systemVersion: String(system?.version ?? ""),
+      worldId: String(game.world?.id ?? ""),
+      isGM: game.user?.isGM === true
+    },
+    workload: {
+      chatMessages: getChatMessageCount(),
+      renderedChatMessages: document.querySelectorAll(".chat-message").length,
+      domElements: document.getElementsByTagName("*").length,
+      openApplicationWindows: document.querySelectorAll(".window-app, .application").length
+    },
+    browser: {
+      userAgent: navigator.userAgent,
+      viewport: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        devicePixelRatio: window.devicePixelRatio
+      },
+      hardwareConcurrency: navigator.hardwareConcurrency ?? null,
+      deviceMemoryGb: Number((navigator as any).deviceMemory ?? 0) || null
+    },
+    activeModules
+  };
+}
+
+function diagnosticsJson(): string {
+  return JSON.stringify(collectCoreDiagnostics(), null, 2);
+}
+
+async function copyDiagnosticsToClipboard(): Promise<void> {
+  const json = diagnosticsJson();
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(json);
+    } else if ((game as any).clipboard?.copyPlainText) {
+      await (game as any).clipboard.copyPlainText(json);
+    } else {
+      throw new Error("No clipboard API is available.");
+    }
+    ui.notifications?.info?.("HoloSuite Core diagnostics copied to the clipboard.");
+  } catch (error) {
+    console.warn(`${MODULE_ID} | Could not copy diagnostics.`, error);
+    ui.notifications?.error?.("Could not copy diagnostics. Use Download JSON instead.");
+  }
+}
+
+function downloadDiagnosticsJson(): void {
+  const blob = new Blob([diagnosticsJson()], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  anchor.href = url;
+  anchor.download = `holosuite-core-diagnostics-${timestamp}.json`;
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function renderDiagnosticsHtml(): string {
+  const diagnostics = collectCoreDiagnostics() as any;
+  const core = diagnostics.core;
+  const activeLabels = [
+    core.apiOnly ? "API-only" : null,
+    core.cssDisabled ? "CSS disabled" : null,
+    core.visualEffectsDisabled ? "visual effects disabled" : null
+  ].filter(Boolean);
+  const modeLabel = activeLabels.length > 0 ? activeLabels.join(", ") : "Normal";
+
+  return `
+    <form class="standard-form holosuite-core-diagnostics">
+      <p>This report stays on this browser until you copy or download it. It includes module versions and browser/workload counts, but no actor, chat-message, or campaign content.</p>
+      <fieldset>
+        <legend>Current test state</legend>
+        <div class="form-group"><label>Diagnostic mode</label><div class="form-fields"><strong>${escapeHtml(modeLabel)}</strong></div></div>
+        <div class="form-group"><label>Core version</label><div class="form-fields"><code>${escapeHtml(core.version)}</code></div></div>
+        <div class="form-group"><label>Core styles loaded</label><div class="form-fields"><strong>${core.stylesheets.filter((sheet) => sheet.present).length}/${core.stylesheets.length}</strong></div></div>
+        <div class="form-group"><label>Launcher</label><div class="form-fields"><strong>${core.launcherOpen ? "Open" : "Closed"}</strong></div></div>
+        <div class="form-group"><label>Chat messages</label><div class="form-fields"><strong>${diagnostics.workload.chatMessages} stored / ${diagnostics.workload.renderedChatMessages} rendered</strong></div></div>
+        <div class="form-group"><label>Active modules</label><div class="form-fields"><strong>${diagnostics.activeModules.length}</strong></div></div>
+      </fieldset>
+      <footer class="form-footer">
+        <button type="button" data-action="refresh"><i class="fas fa-rotate"></i> Refresh</button>
+        <button type="button" data-action="copy"><i class="fas fa-copy"></i> Copy JSON</button>
+        <button type="button" data-action="download"><i class="fas fa-download"></i> Download JSON</button>
+      </footer>
+      <details>
+        <summary>JSON preview</summary>
+        <pre style="max-height: 360px; overflow: auto; user-select: text; white-space: pre-wrap;">${escapeHtml(JSON.stringify(diagnostics, null, 2))}</pre>
+      </details>
+    </form>
+  `;
+}
+
+function bindDiagnosticsControls(root: HTMLElement | null, app: HoloSuiteDiagnostics): void {
+  if (!root) return;
+  root.querySelector<HTMLElement>("[data-action='refresh']")?.addEventListener("click", () => app.render(false));
+  root.querySelector<HTMLElement>("[data-action='copy']")?.addEventListener("click", () => void copyDiagnosticsToClipboard());
+  root.querySelector<HTMLElement>("[data-action='download']")?.addEventListener("click", downloadDiagnosticsJson);
+}
+
+class HoloSuiteDiagnostics extends LegacyApplication {
+  static DEFAULT_OPTIONS = {
+    id: "holosuite-core-diagnostics",
+    tag: "section",
+    classes: ["holosuite-core-diagnostics-window"],
+    window: {
+      title: "HoloSuite Core Diagnostics",
+      resizable: true
+    },
+    position: {
+      width: 720,
+      height: 720
+    }
+  };
+
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "holosuite-core-diagnostics",
+      title: "HoloSuite Core Diagnostics",
+      classes: ["holosuite-core-diagnostics-window"],
+      popOut: true,
+      resizable: true,
+      width: 720,
+      height: 720
+    });
+  }
+
+  async _renderInner() {
+    return $(renderDiagnosticsHtml());
+  }
+
+  activateListeners(html) {
+    super.activateListeners(html);
+    bindDiagnosticsControls(unwrapHtmlElement(html), this);
+  }
+
+  async _renderHTML() {
+    const wrapper = document.createElement("template");
+    wrapper.innerHTML = renderDiagnosticsHtml().trim();
+    return wrapper.content;
+  }
+
+  _replaceHTML(result: unknown, content: unknown) {
+    const root = unwrapHtmlElement(content);
+    const target = root?.querySelector<HTMLElement>(".window-content") ?? root;
+    if (!target) return;
+    const resultElement = result instanceof DocumentFragment || result instanceof HTMLElement
+      ? result
+      : unwrapHtmlElement(result);
+    if (resultElement) target.replaceChildren(resultElement);
+    else target.innerHTML = String(result ?? "");
+    bindDiagnosticsControls(target, this);
+  }
+
+  async _updateObject() {
+    // This menu is a read-only diagnostics view.
+  }
+}
+
 class HoloSuiteLauncher extends LegacyApplication {
   private currentView: LauncherView = "apps";
   private whatsNewFilter: WhatsNewFilter = "all";
@@ -1055,6 +1435,14 @@ class HoloSuiteLauncher extends LegacyApplication {
       width: 483,
       height: "auto"
     });
+  }
+
+  render(...args: any[]) {
+    if (isApiOnlyMode()) {
+      ui.notifications?.warn?.("HoloSuite Core is in API-only diagnostic mode on this browser.");
+      return this;
+    }
+    return super.render(...args);
   }
 
   async _renderInner() {
@@ -1181,29 +1569,36 @@ const api = {
     const normalized = normalizeApp(app);
     if (!normalized) return null;
     registeredApps.set(normalized.id, normalized);
-    launcherApp?.render(false);
+    if (!isApiOnlyMode()) launcherApp?.render(false);
     return normalized;
   },
   unregisterApp(id: string): boolean {
     const removed = registeredApps.delete(String(id ?? ""));
-    if (removed) launcherApp?.render(false);
+    if (removed && !isApiOnlyMode()) launcherApp?.render(false);
     return removed;
   },
   getApps(): HoloSuiteAppRegistration[] {
     return [...registeredApps.values()];
+  },
+  getDiagnostics(): Record<string, unknown> {
+    return collectCoreDiagnostics();
   },
   registerWhatsNew(update: HoloSuiteWhatsNewRegistration): HoloSuiteWhatsNewRegistration | null {
     return registerWhatsNewInternal(update);
   },
   unregisterWhatsNew(moduleId: string): boolean {
     const removed = registeredWhatsNew.delete(String(moduleId ?? ""));
-    if (removed) launcherApp?.render(false);
+    if (removed && !isApiOnlyMode()) launcherApp?.render(false);
     return removed;
   },
   getWhatsNew(): HoloSuiteWhatsNewRegistration[] {
     return [...registeredWhatsNew.values()].sort(sortWhatsNew);
   },
   async openLauncher(): Promise<HoloSuiteLauncher | null> {
+    if (isApiOnlyMode()) {
+      ui.notifications?.warn?.("HoloSuite Core is in API-only diagnostic mode on this browser.");
+      return null;
+    }
     if (launcherOpenPromise) return launcherOpenPromise;
 
     launcherOpenPromise = (async () => {
@@ -1257,6 +1652,8 @@ function exposeApi(): void {
 Hooks.once("init", () => {
   applyFoundryGenerationMarker();
   registerSettings();
+  applyCoreStylesSetting();
+  applyVisualEffectsSetting();
   registerKeybindings();
   exposeApi();
 });
@@ -1265,13 +1662,19 @@ Hooks.on("getSceneControlButtons", renderOpenLauncherControl);
 Hooks.on("renderSceneControls", (_app: unknown, html: unknown) => injectRenderedLauncherControl(html));
 Hooks.on("renderSidebar", removeSidebarLaunchers);
 Hooks.on("renderSidebarTab", removeSidebarLaunchers);
+Hooks.on("renderSettingsConfig", organizeCoreSettings);
 
 Hooks.once("ready", () => {
+  coreReady = true;
   exposeApi();
   applyFoundryGenerationMarker();
   applySavedDeviceStyle();
   applySavedTheme();
-  removeSidebarLaunchers();
-  loadBundledWhatsNewCatalog();
+  if (isApiOnlyMode()) {
+    console.warn(`${MODULE_ID} | API-only diagnostic mode is enabled on this browser.`);
+  } else {
+    removeSidebarLaunchers();
+    void loadBundledWhatsNewCatalog();
+  }
   console.log(`${MODULE_ID} | Ready. API available at game.modules.get("${MODULE_ID}").api`);
 });

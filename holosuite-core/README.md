@@ -23,3 +23,14 @@ HoloSuite Core is free and always will be.
 HoloSuite Core's launcher is currently GM-only, so players do not interact with it directly. Players interact with each individual module through their own interfaces. For example, players receive CyberCalls, view security camera feeds, browse case boards, and trigger scanner pulses through each module's player-facing features.
 
 As the suite grows, player-facing launcher features may be added in the future.
+
+## CSS performance diagnostic
+
+Foundry's **Configure Settings → Module Settings → HoloSuite Core** section includes client-side controls for controlled performance comparisons:
+
+- **Debugging: API-Only Mode (This Browser)** preserves Core's public registration API while suppressing its launcher and related UI work.
+- **Debugging: Disable HoloSuite Core CSS (This Browser)** removes Core's shared tokens and launcher stylesheet without disabling its JavaScript or registration API.
+- **Debugging: Disable Core Visual Effects (This Browser)** preserves layout and colors while removing Core launcher animations, transitions, filters, shadows, and glows.
+- **HoloSuite Core Diagnostics** opens a read-only panel that can copy or download the exact module, browser, stylesheet, launcher, theme, chat-count, and diagnostic-setting state as JSON.
+
+These controls are intended only for debugging. HoloSuite interfaces will appear unstyled while Core CSS is disabled. Diagnostic reports remain local until the user explicitly copies or downloads them.

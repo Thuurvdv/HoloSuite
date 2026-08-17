@@ -1,7 +1,7 @@
 {
-  "name": "@holosuite/core",
+  "name": "@holosuite/performance-check",
   "private": true,
-  "version": "1.0.8",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "build": "vite build"

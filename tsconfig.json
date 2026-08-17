@@ -19,6 +19,7 @@
     "galaxy-map/src",
     "holosuite-critical-cutin/src",
     "holosuite-hacking/src",
+    "holosuite-performance-check/src",
     "shared/src"
   ]
 }
