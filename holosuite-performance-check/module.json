@@ -1,0 +1,30 @@
+{
+  "id": "holosuite-performance-check",
+  "title": "HoloSuite Performance Check",
+  "description": "A standalone, local performance profiler for Foundry VTT hooks, timers, sockets, DOM activity, and module attribution.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "Mage Tower Studios",
+      "email": "Magetowerfoundry@gmail.com"
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "esmodules": [
+    "dist/main.js"
+  ],
+  "styles": [
+    "styles/performance-check.css"
+  ],
+  "languages": [],
+  "packs": [],
+  "socket": false,
+  "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-performance-check",
+  "manifest": "",
+  "download": "",
+  "license": "LGPL-3.0-or-later",
+  "readme": "README.md"
+}

@@ -11,6 +11,7 @@ const modules = [
   "holosuite-core",
   "holosuite-critical-cutin",
   "holosuite-hacking",
+  "holosuite-performance-check",
   "security-cameras"
 ];
 
@@ -34,8 +35,11 @@ for (const moduleId of modules) {
   const styles = manifest.styles ?? [];
 
   if (!esmodules.includes("dist/main.js")) failures.push(`${moduleId}: manifest must load dist/main.js`);
-  if (styles[0] !== "styles/holosuite-tokens.css") failures.push(`${moduleId}: shared tokens must be the first stylesheet`);
-  if (!existsSync(tokenPath)) failures.push(`${moduleId}: missing synced holosuite-tokens.css`);
+  const standaloneProfiler = moduleId === "holosuite-performance-check";
+  const dynamicallyStyledCore = moduleId === "holosuite-core";
+  if (dynamicallyStyledCore && styles.length !== 0) failures.push(`${moduleId}: manifest styles must stay empty so the CSS debugging setting can fully disable them`);
+  if (!standaloneProfiler && !dynamicallyStyledCore && styles[0] !== "styles/holosuite-tokens.css") failures.push(`${moduleId}: shared tokens must be the first stylesheet`);
+  if (!standaloneProfiler && !existsSync(tokenPath)) failures.push(`${moduleId}: missing synced holosuite-tokens.css`);
   if (!existsSync(packagePath)) failures.push(`${moduleId}: missing package.json`);
 
   if (existsSync(srcPath) && readFileSync(srcPath, "utf8").startsWith("// @ts-nocheck")) {

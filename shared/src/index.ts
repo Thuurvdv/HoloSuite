@@ -39,6 +39,7 @@ export interface HoloSuiteApi {
   registerApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration | null;
   unregisterApp(id: string): boolean;
   getApps(): HoloSuiteAppRegistration[];
+  getDiagnostics?(): Record<string, unknown>;
   registerWhatsNew(update: HoloSuiteWhatsNewRegistration): HoloSuiteWhatsNewRegistration | null;
   unregisterWhatsNew(moduleId: string): boolean;
   getWhatsNew(): HoloSuiteWhatsNewRegistration[];

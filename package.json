@@ -13,6 +13,7 @@
     "galaxy-map",
     "holosuite-critical-cutin",
     "holosuite-hacking",
+    "holosuite-performance-check",
     "shared"
   ],
   "scripts": {
@@ -21,8 +22,8 @@
     "prebuild": "npm run sync:styles",
     "build": "npm run build --workspaces --if-present",
     "check": "tsc --noEmit",
-    "pretest": "tsc security-cameras/src/camera-model.ts security-cameras/src/region-geometry.ts security-cameras/src/frame-crop.ts security-cameras/src/token-projection.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests --skipLibCheck && tsc holosuite-core/src/scene-controls.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests/core --skipLibCheck && tsc holosuite-hacking/src/minigames/packet-switchboard/packet-switchboard-generator.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests/hacking --skipLibCheck && tsc holosuite-hacking/src/minigames/prism-lock/prism-lock-generator.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests/hacking/prism --skipLibCheck",
-    "test": "node --test security-cameras/src/*.test.mjs holosuite-core/src/*.test.mjs holosuite-hacking/src/*.test.mjs",
+    "pretest": "tsc security-cameras/src/camera-model.ts security-cameras/src/region-geometry.ts security-cameras/src/frame-crop.ts security-cameras/src/token-projection.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests --skipLibCheck && tsc holosuite-core/src/core-styles.ts holosuite-core/src/scene-controls.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests/core --skipLibCheck && tsc holosuite-hacking/src/minigames/packet-switchboard/packet-switchboard-generator.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests/hacking --skipLibCheck && tsc holosuite-hacking/src/minigames/prism-lock/prism-lock-generator.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests/hacking/prism --skipLibCheck && tsc holosuite-performance-check/src/attribution.ts holosuite-performance-check/src/report.ts holosuite-performance-check/src/instrumentation.ts holosuite-performance-check/src/scene-controls.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir .tmp-tests/performance-check --skipLibCheck",
+    "test": "node --test security-cameras/src/*.test.mjs holosuite-core/src/*.test.mjs holosuite-hacking/src/*.test.mjs holosuite-performance-check/src/*.test.mjs",
     "verify": "npm run audit && npm run check && npm run test && npm run build"
   },
   "devDependencies": {
