@@ -31,6 +31,11 @@ export class SignalAlignmentApp extends LegacyApplication {
   timer: ReturnType<typeof window.setInterval> | null;
   wasAligned: boolean;
   resultMessage?: string;
+  readOnly: boolean;
+  liveSessionId: string;
+  onLiveState: any;
+  onLiveEnd: any;
+  liveEnded: boolean;
 
   constructor(options: any = {}) {
     super(options);
@@ -42,6 +47,11 @@ export class SignalAlignmentApp extends LegacyApplication {
     this.onFailure = typeof options.onFailure === "function" ? options.onFailure : null;
     this.actorName = String(options.actorName ?? "Hacker");
     this.chatOnResult = options.chatOnResult !== false;
+    this.readOnly = options.readOnly === true;
+    this.liveSessionId = String(options.liveSessionId ?? "");
+    this.onLiveState = typeof options.onLiveState === "function" ? options.onLiveState : null;
+    this.onLiveEnd = typeof options.onLiveEnd === "function" ? options.onLiveEnd : null;
+    this.liveEnded = false;
     this.channels = generateSignalChannels(this.profile, this.seed);
     this.state = {
       traceProgress: 0,
@@ -94,6 +104,8 @@ export class SignalAlignmentApp extends LegacyApplication {
     return {
       rollTotal: this.rollTotal,
       dc: this.dc,
+      isReadOnly: this.readOnly,
+      isLiveEnded: this.liveEnded,
       profile: this.profile,
       channels,
       state: this.state,
@@ -107,25 +119,35 @@ export class SignalAlignmentApp extends LegacyApplication {
 
   activateListeners(html: any) {
     super.activateListeners(html);
-    html.find("[data-channel-slider]").on("input", (event) => this.handleSlider(event.currentTarget));
-    html.find("[data-action='start']").on("click", () => this.startRun());
-    html.find("[data-action='abort']").on("click", () => this.abort());
+    if (!this.readOnly) {
+      html.find("[data-channel-slider]").on("input", (event) => this.handleSlider(event.currentTarget));
+      html.find("[data-action='start']").on("click", () => this.startRun());
+      html.find("[data-action='abort']").on("click", () => this.abort());
+    } else {
+      html.find("[data-channel-slider]").prop("disabled", true);
+    }
     html.find("[data-action='close']").on("click", () => this.close());
     this.syncDom();
   }
 
   async render(force?: any, options?: any) {
     const rendered = await super.render(force, options);
-    if (this.state.hasStarted && this.state.isRunning) this.startTimer();
+    if (!this.readOnly && this.state.hasStarted && this.state.isRunning) this.startTimer();
     return rendered;
   }
 
   async close(options: any = {}) {
+    const finalState = this.serializeLiveState();
     this.stopTimer();
+    if (!this.readOnly && !this.liveEnded) {
+      this.liveEnded = true;
+      this.onLiveEnd?.(finalState);
+    }
     return super.close(options);
   }
 
   startRun() {
+    if (this.readOnly) return;
     if (this.state.hasStarted || this.state.result) return;
     this.state.hasStarted = true;
     this.state.isRunning = true;
@@ -133,6 +155,7 @@ export class SignalAlignmentApp extends LegacyApplication {
     this.lastTickAt = this.startedAt;
     this.startTimer();
     this.render(false);
+    this.publishLiveState(true);
   }
 
   handleSlider(slider: HTMLInputElement) {
@@ -230,6 +253,7 @@ export class SignalAlignmentApp extends LegacyApplication {
     this.resultMessage = message;
     this.syncDom();
     await this.render(false);
+    this.publishLiveState(true);
 
     const payload = {
       type: "signal-alignment",
@@ -294,5 +318,50 @@ export class SignalAlignmentApp extends LegacyApplication {
         wave.style.setProperty("--wave-duration", `${Math.max(1.2, 3.2 - (Number(this.profile.noiseLevel ?? 0) * 2))}s`);
       }
     }
+    this.publishLiveState();
+  }
+
+  serializeLiveState() {
+    return {
+      state: { ...this.state },
+      channels: this.channels.map((channel) => ({ ...channel })),
+      wasAligned: this.wasAligned,
+      resultMessage: this.resultMessage ?? ""
+    };
+  }
+
+  getLiveSessionData() {
+    return {
+      type: "signal-alignment",
+      options: {
+        rollTotal: this.rollTotal,
+        dc: this.dc,
+        profile: this.profile,
+        seed: this.seed,
+        actorName: this.actorName
+      },
+      state: this.serializeLiveState()
+    };
+  }
+
+  applyLiveState(snapshot: any) {
+    if (!this.readOnly || !snapshot?.state) return;
+    const resultChanged = this.state.result !== snapshot.state.result;
+    this.state = { ...snapshot.state };
+    this.channels = (snapshot.channels ?? []).map((channel) => ({ ...channel }));
+    this.wasAligned = Boolean(snapshot.wasAligned);
+    this.resultMessage = snapshot.resultMessage || undefined;
+    if (resultChanged) this.render(false);
+    else this.syncDom();
+  }
+
+  markLiveSessionEnded() {
+    this.liveEnded = true;
+    this.render(false);
+  }
+
+  publishLiveState(immediate = false) {
+    if (this.readOnly) return;
+    this.onLiveState?.(this.serializeLiveState(), { immediate });
   }
 }

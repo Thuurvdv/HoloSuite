@@ -31,10 +31,13 @@ declare const ChatMessage: any;
 const MODULE_ID = "holosuite-hacking";
 const SOCKET_NAME = `module.${MODULE_ID}`;
 const PENDING_CALLBACK_TTL_MS = 10 * 60 * 1000;
+const LIVE_STATE_INTERVAL_MS = 200;
 
 let api: any = null;
 let launcherApp: any = null;
 const pendingCallbacks = new Map<string, any>();
+const controllerSessions = new Map<string, any>();
+const spectatorApps = new Map<string, any>();
 
 function registerSettings() {
   game.settings.register(MODULE_ID, "defaultDc", {
@@ -89,6 +92,33 @@ function registerSettings() {
     config: true,
     type: Boolean,
     default: false
+  });
+
+  game.settings.register(MODULE_ID, "defaultLiveAudience", {
+    name: "Default Live Hacking Audience",
+    hint: "Choose who receives a read-only live view when a player begins a hacking challenge.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      none: "Nobody",
+      gm: "GM only",
+      everyone: "GM and players"
+    },
+    default: "everyone"
+  });
+
+  game.settings.register(MODULE_ID, "watchOtherHacks", {
+    name: "Watch Other Players' Hacks",
+    hint: "Automatically open read-only live views for hacks included in the GM's selected audience. This preference only affects your client.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: (enabled: boolean) => {
+      if (enabled) requestLiveSessionSync();
+      else closeSpectatorSessions();
+    }
   });
 
   game.settings.register(MODULE_ID, "visualGlitchIntensity", {
@@ -214,6 +244,10 @@ function sendHackToPlayer(options: any = {}) {
 
 function receiveSocketMessage(message: any) {
   try {
+    if (String(message?.type ?? "").startsWith("live-")) {
+      receiveLiveMessage(message);
+      return;
+    }
     if (message?.type === "result-report") {
       receiveResultReport(message.payload ?? {});
       return;
@@ -249,12 +283,196 @@ function receiveSocketMessage(message: any) {
   }
 }
 
+function createLiveController(payload: any) {
+  const sessionId = String(payload.requestId ?? foundry.utils.randomID());
+  const enabled = normalizeLiveAudience(payload.liveAudience) !== "none";
+  if (!enabled) {
+    return {
+      start: () => {},
+      publish: null,
+      end: null,
+      cancel: () => {}
+    };
+  }
+  const session: any = {
+    sessionId,
+    audience: normalizeLiveAudience(payload.liveAudience),
+    hackerUserId: String(game.user?.id ?? payload.userId ?? ""),
+    gmUserId: String(payload.gmUserId ?? ""),
+    startPayload: null,
+    latestState: null,
+    lastSentAt: 0,
+    timeoutId: null,
+    started: false
+  };
+
+  const emitState = () => {
+    session.timeoutId = null;
+    if (!enabled || !session.started || !session.latestState) return;
+    session.lastSentAt = Date.now();
+    game.socket?.emit?.(SOCKET_NAME, {
+      type: "live-state",
+      payload: {
+        sessionId,
+        hackerUserId: session.hackerUserId,
+        audience: session.audience,
+        state: session.latestState
+      }
+    });
+  };
+
+  const publish = (state: any, { immediate = false } = {}) => {
+    if (!enabled || !state) return;
+    session.latestState = state;
+    if (!session.started) return;
+    const remaining = LIVE_STATE_INTERVAL_MS - (Date.now() - session.lastSentAt);
+    if (immediate || remaining <= 0) {
+      if (session.timeoutId) window.clearTimeout(session.timeoutId);
+      emitState();
+    } else if (!session.timeoutId) {
+      session.timeoutId = window.setTimeout(emitState, remaining);
+    }
+  };
+
+  const start = (data: any) => {
+    if (!enabled || !data) return;
+    session.started = true;
+    session.startPayload = {
+      sessionId,
+      audience: session.audience,
+      hackerUserId: session.hackerUserId,
+      gmUserId: session.gmUserId,
+      minigameType: String(data.type ?? payload.minigameType),
+      options: data.options ?? {},
+      state: data.state ?? null
+    };
+    session.latestState = data.state ?? session.latestState;
+    controllerSessions.set(sessionId, session);
+    game.socket?.emit?.(SOCKET_NAME, { type: "live-start", payload: session.startPayload });
+    if (session.latestState) publish(session.latestState, { immediate: true });
+  };
+
+  const end = (state: any = null) => {
+    if (session.timeoutId) window.clearTimeout(session.timeoutId);
+    if (state) session.latestState = state;
+    controllerSessions.delete(sessionId);
+    if (!enabled || !session.started) return;
+    game.socket?.emit?.(SOCKET_NAME, {
+      type: "live-end",
+      payload: {
+        sessionId,
+        hackerUserId: session.hackerUserId,
+        audience: session.audience,
+        state: session.latestState
+      }
+    });
+    session.started = false;
+  };
+
+  const cancel = () => {
+    if (session.timeoutId) window.clearTimeout(session.timeoutId);
+    controllerSessions.delete(sessionId);
+    session.started = false;
+  };
+
+  return { start, publish, end, cancel };
+}
+
+function receiveLiveMessage(message: any) {
+  const payload = message?.payload ?? {};
+  if (message.type === "live-sync-request") {
+    const observerUserId = String(payload.observerUserId ?? "");
+    if (!observerUserId || observerUserId === game.user?.id) return;
+    for (const session of controllerSessions.values()) {
+      if (!session.started || !session.startPayload) continue;
+      game.socket?.emit?.(SOCKET_NAME, {
+        type: "live-start",
+        payload: { ...session.startPayload, state: session.latestState, observerUserId }
+      });
+    }
+    return;
+  }
+
+  const observerUserId = String(payload.observerUserId ?? "");
+  if (observerUserId && observerUserId !== game.user?.id) return;
+  if (!shouldObserveLiveSession(payload)) return;
+
+  const sessionId = String(payload.sessionId ?? "");
+  if (!sessionId) return;
+  if (message.type === "live-start") {
+    openSpectatorSession(payload);
+    return;
+  }
+
+  const app = spectatorApps.get(sessionId);
+  if (!app) return;
+  if (payload.state) app.applyLiveState?.(payload.state);
+  if (message.type === "live-end") {
+    spectatorApps.delete(sessionId);
+    app.markLiveSessionEnded?.();
+    if (!payload.state?.state?.result) app.close?.();
+  }
+}
+
+function shouldObserveLiveSession(payload: any) {
+  if (!game.user || String(payload.hackerUserId ?? "") === game.user.id) return false;
+  if (!game.settings.get(MODULE_ID, "watchOtherHacks")) return false;
+  const audience = normalizeLiveAudience(payload.audience);
+  if (audience === "none") return false;
+  if (audience === "gm") return Boolean(game.user.isGM);
+  return true;
+}
+
+function closeSpectatorSessions() {
+  const apps = [...spectatorApps.values()];
+  spectatorApps.clear();
+  for (const app of apps) app.close?.();
+}
+
+function openSpectatorSession(payload: any) {
+  const sessionId = String(payload.sessionId ?? "");
+  if (spectatorApps.has(sessionId)) {
+    if (payload.state) spectatorApps.get(sessionId)?.applyLiveState?.(payload.state);
+    return;
+  }
+  const options = payload.options ?? {};
+  const minigameType = String(payload.minigameType ?? options.type ?? "node-intrusion");
+  const safeSessionId = sessionId.replace(/[^A-Za-z0-9_-]/g, "");
+  const app = api.startHack({
+    ...options,
+    id: `holosuite-${minigameType}-spectator-${safeSessionId}`,
+    type: minigameType,
+    liveSessionId: sessionId,
+    readOnly: true,
+    chatOnResult: false,
+    onSuccess: null,
+    onFailure: null
+  });
+  if (!app) return;
+  const originalClose = app.close.bind(app);
+  app.close = async (...args) => {
+    spectatorApps.delete(sessionId);
+    return originalClose(...args);
+  };
+  spectatorApps.set(sessionId, app);
+  if (payload.state) app.applyLiveState?.(payload.state);
+}
+
+function requestLiveSessionSync() {
+  if (!game.user?.id) return;
+  game.socket?.emit?.(SOCKET_NAME, {
+    type: "live-sync-request",
+    payload: { observerUserId: game.user.id }
+  });
+}
+
 async function startPlayerHack(payload: any) {
   const actor = resolveHackerActor(payload.actorId, getUserById(payload.userId) ?? game.user);
 
-    const rollResult = await rollFallbackSkill(payload);
+  const rollResult = await rollFallbackSkill(payload);
   if (!Number.isFinite(rollResult?.total)) return null;
 
+  const liveController = createLiveController(payload);
   const options = {
     rollTotal: rollResult.total,
     naturalRoll: rollResult.naturalRoll,
@@ -263,13 +481,20 @@ async function startPlayerHack(payload: any) {
     actorName: actor?.name ?? payload.actorName ?? "Hacker",
     userId: payload.userId,
     skillId: payload.skillId,
+    liveSessionId: payload.requestId,
+    onLiveState: liveController.publish,
+    onLiveEnd: liveController.end,
     onSuccess: (result: any) => reportPlayerResult(payload, result),
     onFailure: (result: any) => reportPlayerResult(payload, result)
   };
 
-
-
-  return api.startHack({ ...options, type: payload.minigameType });
+  const app = api.startHack({ ...options, type: payload.minigameType });
+  if (!app) {
+    liveController.cancel();
+    return null;
+  }
+  liveController.start(app.getLiveSessionData?.());
+  return app;
 }
 
 async function rollFallbackSkill(payload: any) {
@@ -335,6 +560,7 @@ function renderStartPrompt(payload: any, actorName: string, skillLabel: string) 
 
 function sanitizeLaunchPayload(payload: any = {}) {
   const defaultDc = Number(game.settings.get(MODULE_ID, "defaultDc") ?? 15);
+  const defaultLiveAudience = normalizeLiveAudience(game.settings.get(MODULE_ID, "defaultLiveAudience"));
   return {
     requestId: String(payload.requestId ?? foundry.utils.randomID()),
     minigameType: String(payload.minigameType ?? payload.type ?? "node-intrusion"),
@@ -345,8 +571,14 @@ function sanitizeLaunchPayload(payload: any = {}) {
     skillLabel: String(payload.skillLabel ?? ""),
     skillModifier: Number(payload.skillModifier ?? 0),
     dc: Number(payload.dc ?? defaultDc),
-    gmUserId: String(payload.gmUserId ?? "")
+    gmUserId: String(payload.gmUserId ?? ""),
+    liveAudience: normalizeLiveAudience(payload.liveAudience ?? defaultLiveAudience)
   };
+}
+
+function normalizeLiveAudience(value: any) {
+  const audience = String(value ?? "everyone");
+  return ["none", "gm", "everyone"].includes(audience) ? audience : "everyone";
 }
 
 function resolveHackerActor(actorId: string, user: any) {
@@ -399,6 +631,7 @@ Hooks.once("init", () => {
 Hooks.once("ready", () => {
   exposeApi();
   game.socket?.on?.(SOCKET_NAME, receiveSocketMessage);
+  window.setTimeout(requestLiveSessionSync, 250);
   tryRegisterWithHoloSuite();
   window.setTimeout(() => tryRegisterWithHoloSuite(), 500);
   console.log(`${MODULE_ID} | Ready. API available at game.modules.get("${MODULE_ID}").api`);
