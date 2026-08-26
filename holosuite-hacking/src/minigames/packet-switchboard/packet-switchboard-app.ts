@@ -5,6 +5,7 @@ import {
   describeDirection,
   generatePacketSwitchboard,
   normalizeJunctionDirection,
+  planPacketSpawn,
   tracePacketRoute
 } from "./packet-switchboard-generator";
 import { getLegacyApplicationBase } from "../../../../shared/src/application-base";
@@ -46,6 +47,11 @@ export class PacketSwitchboardApp extends LegacyApplication {
   hoveredJunctionId: string | null;
   boundHoveredKeydown: (event: KeyboardEvent) => void;
   resultMessage?: string;
+  readOnly: boolean;
+  liveSessionId: string;
+  onLiveState: any;
+  onLiveEnd: any;
+  liveEnded: boolean;
 
   constructor(options: any = {}) {
     super(options);
@@ -58,6 +64,11 @@ export class PacketSwitchboardApp extends LegacyApplication {
     this.onSuccess = typeof options.onSuccess === "function" ? options.onSuccess : null;
     this.onFailure = typeof options.onFailure === "function" ? options.onFailure : null;
     this.chatOnResult = options.chatOnResult !== false;
+    this.readOnly = options.readOnly === true;
+    this.liveSessionId = String(options.liveSessionId ?? "");
+    this.onLiveState = typeof options.onLiveState === "function" ? options.onLiveState : null;
+    this.onLiveEnd = typeof options.onLiveEnd === "function" ? options.onLiveEnd : null;
+    this.liveEnded = false;
     this.board = generatePacketSwitchboard(this.profile, this.seed);
     this.state = {
       hasStarted: false,
@@ -94,6 +105,8 @@ export class PacketSwitchboardApp extends LegacyApplication {
     return {
       rollTotal: this.rollTotal,
       dc: this.dc,
+      isReadOnly: this.readOnly,
+      isLiveEnded: this.liveEnded,
       profile: this.profile,
       tuning: this.tuning,
       board: this.board,
@@ -110,26 +123,33 @@ export class PacketSwitchboardApp extends LegacyApplication {
   activateListeners(html: any) {
     super.activateListeners(html);
     this.hoveredJunctionId = null;
-    html.find("[data-junction-id]").on("click", (event) => this.cycleJunction(event.currentTarget.dataset.junctionId));
-    html.find("[data-junction-id]").on("mouseenter", (event) => this.setHoveredJunction(event.currentTarget.dataset.junctionId, event.currentTarget));
-    html.find("[data-junction-id]").on("mouseleave", (event) => this.clearHoveredJunction(event.currentTarget.dataset.junctionId, event.currentTarget));
-    html.find("[data-action='start']").on("click", () => this.startRun());
-    html.find("[data-action='abort']").on("click", () => this.abort());
+    if (!this.readOnly) {
+      html.find("[data-junction-id]").on("click", (event) => this.cycleJunction(event.currentTarget.dataset.junctionId));
+      html.find("[data-junction-id]").on("mouseenter", (event) => this.setHoveredJunction(event.currentTarget.dataset.junctionId, event.currentTarget));
+      html.find("[data-junction-id]").on("mouseleave", (event) => this.clearHoveredJunction(event.currentTarget.dataset.junctionId, event.currentTarget));
+      html.find("[data-action='start']").on("click", () => this.startRun());
+      html.find("[data-action='abort']").on("click", () => this.abort());
+    }
     html.find("[data-action='close']").on("click", () => this.close());
     window.removeEventListener("keydown", this.boundHoveredKeydown);
-    window.addEventListener("keydown", this.boundHoveredKeydown);
+    if (!this.readOnly) window.addEventListener("keydown", this.boundHoveredKeydown);
     this.syncDom();
   }
 
   async render(force?: any, options?: any) {
     const rendered = await super.render(force, options);
-    if (this.state.hasStarted && this.state.isRunning) this.startTimer();
+    if (!this.readOnly && this.state.hasStarted && this.state.isRunning) this.startTimer();
     return rendered;
   }
 
   async close(options: any = {}) {
+    const finalState = this.serializeLiveState();
     this.stopTimer();
     window.removeEventListener("keydown", this.boundHoveredKeydown);
+    if (!this.readOnly && !this.liveEnded) {
+      this.liveEnded = true;
+      this.onLiveEnd?.(finalState);
+    }
     return super.close(options);
   }
 
@@ -148,12 +168,14 @@ export class PacketSwitchboardApp extends LegacyApplication {
   }
 
   startRun() {
+    if (this.readOnly) return;
     if (this.state.hasStarted || this.state.result) return;
     this.state.hasStarted = true;
     this.state.isRunning = true;
     this.startedAt = performance.now();
     this.nextSpawnAt = this.startedAt;
     this.render(false);
+    this.publishLiveState(true);
   }
 
   setHoveredJunction(junctionId: string, element?: HTMLElement) {
@@ -199,6 +221,7 @@ export class PacketSwitchboardApp extends LegacyApplication {
       element.setAttribute("title", `Route ${junction.directionLabel}. Click to change direction.`);
     }
     this.syncRoutePreview();
+    this.publishLiveState(true);
   }
 
   startTimer() {
@@ -215,11 +238,15 @@ export class PacketSwitchboardApp extends LegacyApplication {
   tick(now: number) {
     if (!this.state.isRunning || !this.startedAt || this.nextSpawnAt === null) return;
     const spawnIntervalMs = Math.max(350, Number(this.tuning.packetIntervalSeconds ?? 2) * 1000);
-    while (now >= this.nextSpawnAt && this.state.isRunning) {
-      if (this.state.activePackets.length >= this.getMaxActivePackets()) break;
-      this.spawnPacket(now);
-      this.nextSpawnAt += spawnIntervalMs;
-    }
+    const spawnPlan = planPacketSpawn(
+      now,
+      this.nextSpawnAt,
+      spawnIntervalMs,
+      this.state.activePackets.length,
+      this.getMaxActivePackets()
+    );
+    this.nextSpawnAt = spawnPlan.nextSpawnAt;
+    if (spawnPlan.shouldSpawn && this.state.isRunning) this.spawnPacket(now);
 
     const stepMs = Math.max(250, Number(this.tuning.packetStepSeconds ?? 0.8) * 1000);
     for (const packet of [...this.state.activePackets]) {
@@ -419,6 +446,7 @@ export class PacketSwitchboardApp extends LegacyApplication {
     }
     this.syncPackets();
     this.syncRoutePreview();
+    this.publishLiveState();
   }
 
   async abort() {
@@ -432,6 +460,7 @@ export class PacketSwitchboardApp extends LegacyApplication {
     this.stopTimer();
     this.resultMessage = message;
     await this.render(false);
+    this.publishLiveState(true);
 
     const payload = {
       type: "packet-switchboard",
@@ -459,5 +488,70 @@ export class PacketSwitchboardApp extends LegacyApplication {
     if (result === "success") this.onSuccess?.(payload);
     else this.onFailure?.(payload);
     if (close) await this.close();
+  }
+
+  serializeLiveState() {
+    return {
+      state: {
+        ...this.state,
+        activePackets: this.state.activePackets.map((packet) => ({ ...packet }))
+      },
+      junctions: this.board.junctions.map((junction) => ({
+        id: junction.id,
+        direction: junction.direction,
+        directionLabel: junction.directionLabel
+      })),
+      resultMessage: this.resultMessage ?? ""
+    };
+  }
+
+  getLiveSessionData() {
+    return {
+      type: "packet-switchboard",
+      options: {
+        rollTotal: this.rollTotal,
+        dc: this.dc,
+        profile: this.profile,
+        seed: this.seed,
+        actorName: this.actorName
+      },
+      state: this.serializeLiveState()
+    };
+  }
+
+  applyLiveState(snapshot: any) {
+    if (!this.readOnly || !snapshot?.state) return;
+    const previousSignature = JSON.stringify({
+      junctions: this.board.junctions.map((junction) => [junction.id, junction.direction]),
+      result: this.state.result
+    });
+    this.state = {
+      ...snapshot.state,
+      activePackets: (snapshot.state.activePackets ?? []).map((packet) => ({ ...packet }))
+    };
+    for (const junctionState of snapshot.junctions ?? []) {
+      const junction = this.board.junctions.find((candidate) => candidate.id === junctionState.id);
+      if (junction) Object.assign(junction, junctionState);
+    }
+    this.resultMessage = snapshot.resultMessage || undefined;
+    const nextSignature = JSON.stringify({
+      junctions: this.board.junctions.map((junction) => [junction.id, junction.direction]),
+      result: this.state.result
+    });
+    if (previousSignature !== nextSignature) this.render(false);
+    else {
+      this.syncPreview();
+      this.syncDom();
+    }
+  }
+
+  markLiveSessionEnded() {
+    this.liveEnded = true;
+    this.render(false);
+  }
+
+  publishLiveState(immediate = false) {
+    if (this.readOnly) return;
+    this.onLiveState?.(this.serializeLiveState(), { immediate });
   }
 }

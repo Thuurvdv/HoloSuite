@@ -1,4 +1,5 @@
-<section class="hs-application hs-application--hacking hh-shell prism-lock-shell {{glitchClass}}" style="--glitch-intensity: {{profile.visualGlitchIntensity}}">
+<section class="hs-application hs-application--hacking hh-shell prism-lock-shell {{glitchClass}} {{#if isReadOnly}}is-read-only{{/if}}" style="--glitch-intensity: {{profile.visualGlitchIntensity}}">
+  {{#if isReadOnly}}<div class="hh-live-view-badge"><i class="fa-solid fa-eye"></i> {{#if isLiveEnded}}Live view ended{{else}}Watching live{{/if}}</div>{{/if}}
   <div class="hs-background" aria-hidden="true"></div>
   <div class="hs-frame" aria-hidden="true">
     <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-left" src="modules/holosuite-hacking/assets/frame/hs-frame-corner--top-left.svg?v=1" alt="">

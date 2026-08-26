@@ -67,6 +67,15 @@
   </div>
 
   <div class="form-group">
+    <label>Live audience</label>
+    <select name="liveAudience">
+      {{#each liveAudiences}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="form-group">
     <label>Test roll</label>
     <input type="number" name="testRollTotal" value="{{defaultTestRoll}}" step="1" />
   </div>

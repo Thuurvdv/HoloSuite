@@ -34,13 +34,14 @@ export class HackingLauncherApp extends LegacyApplication {
       popOut: true,
       resizable: true,
       width: 560,
-      height: 620,
+      height: 680,
       template: TEMPLATE_PATH
     });
   }
 
   getData() {
     const defaultDc = Number(game.settings.get(MODULE_ID, "defaultDc") ?? 15);
+    const defaultLiveAudience = String(game.settings.get(MODULE_ID, "defaultLiveAudience") ?? "everyone");
     const users = getPlayerUsers();
     const firstUser = users[0] ?? null;
     const actorOptions = getPlayerActorOptions(firstUser?.id);
@@ -48,6 +49,11 @@ export class HackingLauncherApp extends LegacyApplication {
     return {
       frameAssetBase: getModuleAssetPath("assets/frame"),
       defaultDc,
+      liveAudiences: [
+        { value: "everyone", label: "GM and players", selected: defaultLiveAudience === "everyone" },
+        { value: "gm", label: "GM only", selected: defaultLiveAudience === "gm" },
+        { value: "none", label: "Nobody", selected: defaultLiveAudience === "none" }
+      ],
       defaultTestRoll: defaultDc,
       minigames: this.api.getMinigames(),
       actors: actorOptions.map((actor) => ({
@@ -105,6 +111,7 @@ export class HackingLauncherApp extends LegacyApplication {
     const userSelect = form.querySelector<HTMLSelectElement>("[name='userId']");
     const skillSelect = form.querySelector<HTMLSelectElement>("[name='skillId']");
     const dcInput = form.querySelector<HTMLInputElement>("[name='dc']");
+    const liveAudienceSelect = form.querySelector<HTMLSelectElement>("[name='liveAudience']");
     const selectedSkill = skillSelect?.selectedOptions?.[0] ?? null;
 
     const minigameType = String(minigameSelect?.value || "node-intrusion");
@@ -114,6 +121,7 @@ export class HackingLauncherApp extends LegacyApplication {
     const skillLabel = String(selectedSkill?.dataset.skillLabel || selectedSkill?.textContent || skillId || "Skill");
     const skillModifier = Number(selectedSkill?.dataset.skillModifier ?? 0);
     const dc = Number(dcInput?.value ?? 15);
+    const liveAudience = String(liveAudienceSelect?.value || "everyone");
 
     const sent = this.api.sendHackToPlayer({
       minigameType,
@@ -123,6 +131,7 @@ export class HackingLauncherApp extends LegacyApplication {
       skillLabel,
       skillModifier,
       dc,
+      liveAudience,
       onSuccess: () => {},
       onFailure: () => {}
     });

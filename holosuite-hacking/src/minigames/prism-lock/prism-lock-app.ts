@@ -38,6 +38,11 @@ export class PrismLockApp extends LegacyApplication {
   timer: ReturnType<typeof window.setInterval> | null;
   previousIceSlots: Set<number>;
   resultMessage?: string;
+  readOnly: boolean;
+  liveSessionId: string;
+  onLiveState: any;
+  onLiveEnd: any;
+  liveEnded: boolean;
 
   constructor(options: any = {}) {
     super(options);
@@ -50,6 +55,11 @@ export class PrismLockApp extends LegacyApplication {
     this.onSuccess = typeof options.onSuccess === "function" ? options.onSuccess : null;
     this.onFailure = typeof options.onFailure === "function" ? options.onFailure : null;
     this.chatOnResult = options.chatOnResult !== false;
+    this.readOnly = options.readOnly === true;
+    this.liveSessionId = String(options.liveSessionId ?? "");
+    this.onLiveState = typeof options.onLiveState === "function" ? options.onLiveState : null;
+    this.onLiveEnd = typeof options.onLiveEnd === "function" ? options.onLiveEnd : null;
+    this.liveEnded = false;
     this.board = generatePrismLock(this.profile, this.seed);
     this.state = {
       rings: this.board.initialStates.map((state) => ({ ...state })),
@@ -93,6 +103,8 @@ export class PrismLockApp extends LegacyApplication {
     return {
       rollTotal: this.rollTotal,
       dc: this.dc,
+      isReadOnly: this.readOnly,
+      isLiveEnded: this.liveEnded,
       profile: this.profile,
       tuning: this.tuning,
       board: this.board,
@@ -108,24 +120,31 @@ export class PrismLockApp extends LegacyApplication {
 
   activateListeners(html: any) {
     super.activateListeners(html);
-    html.find("[data-action='rotate-ring']").on("click", (event) => {
-      this.rotateRing(event.currentTarget.dataset.ringId, Number(event.currentTarget.dataset.direction));
-    });
-    html.find("[data-action='toggle-ring']").on("click", (event) => this.toggleRing(event.currentTarget.dataset.ringId));
-    html.find("[data-action='start']").on("click", () => this.startRun());
-    html.find("[data-action='abort']").on("click", () => this.abort());
+    if (!this.readOnly) {
+      html.find("[data-action='rotate-ring']").on("click", (event) => {
+        this.rotateRing(event.currentTarget.dataset.ringId, Number(event.currentTarget.dataset.direction));
+      });
+      html.find("[data-action='toggle-ring']").on("click", (event) => this.toggleRing(event.currentTarget.dataset.ringId));
+      html.find("[data-action='start']").on("click", () => this.startRun());
+      html.find("[data-action='abort']").on("click", () => this.abort());
+    }
     html.find("[data-action='close']").on("click", () => this.close());
     this.syncDom();
   }
 
   async render(force?: any, options?: any) {
     const rendered = await super.render(force, options);
-    if (this.state.hasStarted && this.state.isRunning) this.startTimer();
+    if (!this.readOnly && this.state.hasStarted && this.state.isRunning) this.startTimer();
     return rendered;
   }
 
   async close(options: any = {}) {
+    const finalState = this.serializeLiveState();
     this.stopTimer();
+    if (!this.readOnly && !this.liveEnded) {
+      this.liveEnded = true;
+      this.onLiveEnd?.(finalState);
+    }
     return super.close(options);
   }
 
@@ -135,12 +154,14 @@ export class PrismLockApp extends LegacyApplication {
   }
 
   startRun() {
+    if (this.readOnly) return;
     if (this.state.hasStarted || this.state.result) return;
     this.state.hasStarted = true;
     this.state.isRunning = true;
     this.startedAt = performance.now();
     this.previousIceSlots = new Set(evaluatePrismBoard(this.board, this.state.rings).activeIceSlots);
     this.render(false);
+    this.publishLiveState(true);
   }
 
   rotateRing(ringId: string, direction: number) {
@@ -175,6 +196,7 @@ export class PrismLockApp extends LegacyApplication {
       return;
     }
     this.render(false);
+    this.publishLiveState(true);
   }
 
   startTimer() {
@@ -201,6 +223,7 @@ export class PrismLockApp extends LegacyApplication {
     const traceText = element.querySelector("[data-trace-text]");
     if (trace) trace.style.width = `${this.state.traceProgress}%`;
     if (traceText) traceText.textContent = `${Math.round(this.state.traceProgress)}%`;
+    this.publishLiveState();
   }
 
   async abort() {
@@ -214,6 +237,7 @@ export class PrismLockApp extends LegacyApplication {
     this.stopTimer();
     this.resultMessage = message;
     await this.render(false);
+    this.publishLiveState(true);
     const evaluation = evaluatePrismBoard(this.board, this.state.rings);
     const payload = {
       type: "prism-lock",
@@ -242,5 +266,54 @@ export class PrismLockApp extends LegacyApplication {
     if (result === "success") this.onSuccess?.(payload);
     else this.onFailure?.(payload);
     if (close) await this.close();
+  }
+
+  serializeLiveState() {
+    return {
+      state: {
+        ...this.state,
+        rings: this.state.rings.map((ring) => ({ ...ring }))
+      },
+      previousIceSlots: [...this.previousIceSlots],
+      resultMessage: this.resultMessage ?? ""
+    };
+  }
+
+  getLiveSessionData() {
+    return {
+      type: "prism-lock",
+      options: {
+        rollTotal: this.rollTotal,
+        dc: this.dc,
+        profile: this.profile,
+        seed: this.seed,
+        actorName: this.actorName
+      },
+      state: this.serializeLiveState()
+    };
+  }
+
+  applyLiveState(snapshot: any) {
+    if (!this.readOnly || !snapshot?.state) return;
+    const previousSignature = JSON.stringify({ rings: this.state.rings, result: this.state.result });
+    this.state = {
+      ...snapshot.state,
+      rings: (snapshot.state.rings ?? []).map((ring) => ({ ...ring }))
+    };
+    this.previousIceSlots = new Set(snapshot.previousIceSlots ?? []);
+    this.resultMessage = snapshot.resultMessage || undefined;
+    const nextSignature = JSON.stringify({ rings: this.state.rings, result: this.state.result });
+    if (previousSignature !== nextSignature) this.render(false);
+    else this.syncDom();
+  }
+
+  markLiveSessionEnded() {
+    this.liveEnded = true;
+    this.render(false);
+  }
+
+  publishLiveState(immediate = false) {
+    if (this.readOnly) return;
+    this.onLiveState?.(this.serializeLiveState(), { immediate });
   }
 }

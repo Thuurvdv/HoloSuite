@@ -38,12 +38,15 @@ When the GM sends a hacking challenge, the player's skill check is compared to t
    - The **player** who owns that actor.
    - The **skill** to roll (this comes from the actor's sheet).
    - The **DC** for the check.
+   - The **live audience**: GM and players, GM only, or nobody.
 4. Click **Send Challenge**. The selected player receives a prompt asking them to accept.
 5. When the player accepts, their client rolls the skill check and the minigame opens at the appropriate difficulty.
 
-### Watching the Result
+### Watching Live
 
-- The minigame runs on the player's screen. You can watch over their shoulder or wait for the result.
+- When the player accepts, the selected audience automatically receives the same minigame in a read-only window.
+- The hacking player's browser remains authoritative. Spectators see board changes, movement, timers, penalties, and the final outcome in real time, but cannot interact with the puzzle.
+- A client that connects or refreshes during an active hack requests the latest state and rejoins the live view automatically.
 - When the player succeeds or fails, the result is reported so you can narrate the outcome.
 
 ### Adjusting Settings
@@ -52,6 +55,8 @@ When the GM sends a hacking challenge, the player's skill check is compared to t
 - **Default Trace Duration Multiplier**: Scales all trace timers up or down. Increase this to give players more breathing room, or decrease it for a faster pace.
 - **Node Takeover Duration Override**: Optionally forces one global node takeover time for Node Intrusion. Set it to 0 to use each difficulty profile's own timing.
 - **Difficulty Profiles**: Opens a profile editor for all four minigames. Prism Lock profiles control ring and receptor counts, angular positions, blockers, ICE hazards, switchable rings, scrambling, and trace penalties.
+- **Default Live Hacking Audience**: Sets the initial live-audience choice in the launcher. The GM can override it for each challenge.
+- **Watch Other Players' Hacks**: A per-client setting available to GMs and players. Disable it to suppress all spectator windows on your own screen without changing what anyone else sees.
 - **Visual Glitch Intensity**: A client-side setting (low, medium, or high) that controls how much visual noise the minigame displays. Players can set this to their own preference.
 
 The difficulty profile editor applies logical limits while you edit. Decoys are capped by node count, firewalls are capped by available non-protected nodes unless protected-route firewalls are enabled, and route counts are capped by what the generated map can support. Each profile also has its own reset button to return only that profile to the module default.

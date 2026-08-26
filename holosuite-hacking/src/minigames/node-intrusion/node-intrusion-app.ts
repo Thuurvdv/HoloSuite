@@ -46,6 +46,11 @@ export class NodeIntrusionApp extends LegacyApplication {
   timer: ReturnType<typeof window.setInterval> | null;
   claimTimer: ReturnType<typeof window.setTimeout> | null;
   resultMessage?: string;
+  readOnly: boolean;
+  liveSessionId: string;
+  onLiveState: any;
+  onLiveEnd: any;
+  liveEnded: boolean;
 
   constructor(options: any = {}) {
     super(options);
@@ -57,6 +62,11 @@ export class NodeIntrusionApp extends LegacyApplication {
     this.onFailure = typeof options.onFailure === "function" ? options.onFailure : null;
     this.actorName = String(options.actorName ?? "Hacker");
     this.chatOnResult = options.chatOnResult !== false;
+    this.readOnly = options.readOnly === true;
+    this.liveSessionId = String(options.liveSessionId ?? "");
+    this.onLiveState = typeof options.onLiveState === "function" ? options.onLiveState : null;
+    this.onLiveEnd = typeof options.onLiveEnd === "function" ? options.onLiveEnd : null;
+    this.liveEnded = false;
     this.graph = generateIntrusionGraph(this.profile, this.seed);
     this.state = {
       currentNodeId: this.graph.startNodeId,
@@ -130,6 +140,8 @@ export class NodeIntrusionApp extends LegacyApplication {
     return {
       rollTotal: this.rollTotal,
       dc: this.dc,
+      isReadOnly: this.readOnly,
+      isLiveEnded: this.liveEnded,
       profile: this.profile,
       nodes,
       edges: this.graph.edges.map((edge) => {
@@ -167,23 +179,30 @@ export class NodeIntrusionApp extends LegacyApplication {
 
   activateListeners(html: any) {
     super.activateListeners(html);
-    html.find("[data-node-id]").on("click", (event) => this.handleNodeClick(event.currentTarget.dataset.nodeId));
-    html.find("[data-action='start']").on("click", () => this.startRun());
-    html.find("[data-action='abort']").on("click", () => this.abort());
+    if (!this.readOnly) {
+      html.find("[data-node-id]").on("click", (event) => this.handleNodeClick(event.currentTarget.dataset.nodeId));
+      html.find("[data-action='start']").on("click", () => this.startRun());
+      html.find("[data-action='abort']").on("click", () => this.abort());
+    }
     html.find("[data-action='close']").on("click", () => this.close());
     this.syncDom();
   }
 
   async render(force?: any, options?: any) {
     const rendered = await super.render(force, options);
-    if (this.state.hasStarted && this.state.isRunning) this.startTimer();
+    if (!this.readOnly && this.state.hasStarted && this.state.isRunning) this.startTimer();
     return rendered;
   }
 
   async close(options: any = {}) {
+    const finalState = this.serializeLiveState();
     this.stopTimer();
     if (this.claimTimer) window.clearTimeout(this.claimTimer);
     this.claimTimer = null;
+    if (!this.readOnly && !this.liveEnded) {
+      this.liveEnded = true;
+      this.onLiveEnd?.(finalState);
+    }
     return super.close(options);
   }
 
@@ -211,12 +230,14 @@ export class NodeIntrusionApp extends LegacyApplication {
   }
 
   startRun() {
+    if (this.readOnly) return;
     if (this.state.hasStarted || this.state.result) return;
     this.state.hasStarted = true;
     this.state.isRunning = true;
     this.startedAt = performance.now();
     this.startTimer();
     this.render(false);
+    this.publishLiveState(true);
   }
 
   handleNodeClick(nodeId: string) {
@@ -248,6 +269,7 @@ export class NodeIntrusionApp extends LegacyApplication {
     };
     this.state.claimingNodeId = nodeId;
     this.render(false);
+    this.publishLiveState(true);
 
     const baseClaimSeconds = Math.max(0.1, Number(this.profile.claimDurationSeconds ?? this.profile.nodeIntrusion?.claimDurationSeconds) || 0.5);
     const firewallMultiplier = Math.max(1, Number(this.profile.firewallClaimMultiplier ?? this.profile.nodeIntrusion?.firewallClaimMultiplier) || 1);
@@ -284,6 +306,7 @@ export class NodeIntrusionApp extends LegacyApplication {
         this.state.deadNodeIds.add(nodeId);
       }
       this.render(false);
+      this.publishLiveState(true);
       return;
     }
 
@@ -295,6 +318,7 @@ export class NodeIntrusionApp extends LegacyApplication {
       this.addTracePenalty(penalty);
       ui.notifications?.warn?.(`Decoy sink: trace accelerated by ${penalty}s.`);
       this.render(false);
+      this.publishLiveState(true);
       return;
     }
 
@@ -306,6 +330,7 @@ export class NodeIntrusionApp extends LegacyApplication {
     }
 
     this.render(false);
+    this.publishLiveState(true);
   }
 
   addTracePenalty(seconds: number) {
@@ -347,6 +372,7 @@ export class NodeIntrusionApp extends LegacyApplication {
     this.resultMessage = message;
     this.syncDom();
     await this.render(false);
+    this.publishLiveState(true);
 
     const payload = {
       type: "node-intrusion",
@@ -386,5 +412,76 @@ export class NodeIntrusionApp extends LegacyApplication {
     if (trace) trace.style.width = `${this.state.traceProgress}%`;
     if (traceText) traceText.textContent = `${Math.round(this.state.traceProgress)}%`;
     if (penaltyText) penaltyText.textContent = `${Math.round(this.state.tracePenaltyProgress)}%`;
+    this.publishLiveState();
+  }
+
+  serializeLiveState() {
+    return {
+      state: {
+        ...this.state,
+        visitedNodeIds: [...this.state.visitedNodeIds],
+        traversedEdgeIds: [...this.state.traversedEdgeIds],
+        blockedEdgeIds: [...this.state.blockedEdgeIds],
+        deadNodeIds: [...this.state.deadNodeIds]
+      },
+      nodes: this.graph.nodes.map((node) => ({ id: node.id, visited: Boolean(node.visited), revealed: Boolean(node.revealed) })),
+      resultMessage: this.resultMessage ?? ""
+    };
+  }
+
+  getLiveSessionData() {
+    return {
+      type: "node-intrusion",
+      options: {
+        rollTotal: this.rollTotal,
+        dc: this.dc,
+        profile: this.profile,
+        seed: this.seed,
+        actorName: this.actorName
+      },
+      state: this.serializeLiveState()
+    };
+  }
+
+  applyLiveState(snapshot: any) {
+    if (!this.readOnly || !snapshot?.state) return;
+    const previousSignature = JSON.stringify({
+      currentNodeId: this.state.currentNodeId,
+      claimingNodeId: this.state.claimingNodeId,
+      visitedNodeIds: [...this.state.visitedNodeIds],
+      blockedEdgeIds: [...this.state.blockedEdgeIds],
+      result: this.state.result
+    });
+    this.state = {
+      ...snapshot.state,
+      visitedNodeIds: new Set(snapshot.state.visitedNodeIds ?? []),
+      traversedEdgeIds: new Set(snapshot.state.traversedEdgeIds ?? []),
+      blockedEdgeIds: new Map(snapshot.state.blockedEdgeIds ?? []),
+      deadNodeIds: new Set(snapshot.state.deadNodeIds ?? [])
+    };
+    for (const nodeState of snapshot.nodes ?? []) {
+      const node = this.graph.nodes.find((candidate) => candidate.id === nodeState.id);
+      if (node) Object.assign(node, { visited: Boolean(nodeState.visited), revealed: Boolean(nodeState.revealed) });
+    }
+    this.resultMessage = snapshot.resultMessage || undefined;
+    const nextSignature = JSON.stringify({
+      currentNodeId: this.state.currentNodeId,
+      claimingNodeId: this.state.claimingNodeId,
+      visitedNodeIds: [...this.state.visitedNodeIds],
+      blockedEdgeIds: [...this.state.blockedEdgeIds],
+      result: this.state.result
+    });
+    if (previousSignature !== nextSignature) this.render(false);
+    else this.syncDom();
+  }
+
+  markLiveSessionEnded() {
+    this.liveEnded = true;
+    this.render(false);
+  }
+
+  publishLiveState(immediate = false) {
+    if (this.readOnly) return;
+    this.onLiveState?.(this.serializeLiveState(), { immediate });
   }
 }

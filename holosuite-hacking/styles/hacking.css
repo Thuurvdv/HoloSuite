@@ -910,3 +910,37 @@
     grid-template-columns: 1fr;
   }
 }
+.hh-live-view-badge {
+  position: absolute;
+  z-index: 20;
+  top: 10px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border: 1px solid rgba(78, 226, 255, 0.72);
+  border-radius: 3px;
+  background: rgba(3, 14, 24, 0.92);
+  color: #7eeaff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  pointer-events: none;
+  box-shadow: 0 0 14px rgba(52, 210, 255, 0.18);
+}
+
+.hh-shell.is-read-only [data-action="start"],
+.hh-shell.is-read-only [data-action="abort"] {
+  display: none !important;
+}
+
+.hh-shell.is-read-only [data-node-id],
+.hh-shell.is-read-only [data-channel-slider],
+.hh-shell.is-read-only [data-junction-id],
+.hh-shell.is-read-only [data-action="rotate-ring"],
+.hh-shell.is-read-only [data-action="toggle-ring"] {
+  pointer-events: none !important;
+  cursor: default !important;
+}

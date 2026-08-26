@@ -32,14 +32,18 @@ export function startMinigame(type: string, options: any = {}) {
     return null;
   }
 
-  activeApps.get(definition.id)?.close?.();
+  const liveSessionId = String(options.liveSessionId ?? "");
+  const instanceKey = options.readOnly && liveSessionId
+    ? `${definition.id}:spectator:${liveSessionId}`
+    : definition.id;
+  activeApps.get(instanceKey)?.close?.();
   const app = definition.create(options);
   const originalClose = app.close.bind(app);
   app.close = async (...args) => {
-    activeApps.delete(definition.id);
+    activeApps.delete(instanceKey);
     return originalClose(...args);
   };
-  activeApps.set(definition.id, app);
+  activeApps.set(instanceKey, app);
   app.render(true);
   return app;
 }

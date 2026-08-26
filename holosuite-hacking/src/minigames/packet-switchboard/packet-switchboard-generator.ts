@@ -56,6 +56,14 @@ export function normalizeJunctionDirection(direction: number, row: number, laneC
   return getValidDirections(row, laneCount).includes(requested) ? requested : 0;
 }
 
+export function planPacketSpawn(now: number, nextSpawnAt: number, intervalMs: number, activeCount: number, maxActive: number) {
+  if (now < nextSpawnAt) return { shouldSpawn: false, nextSpawnAt };
+  return {
+    shouldSpawn: activeCount < maxActive,
+    nextSpawnAt: now + Math.max(350, intervalMs)
+  };
+}
+
 export function tracePacketRoute(board: any, packet: any, startColumn = 0, startRow = packet?.sourceRow ?? 0) {
   let row = clamp(Math.round(Number(startRow) || 0), 0, board.laneCount - 1);
   const junctionIds: string[] = [];

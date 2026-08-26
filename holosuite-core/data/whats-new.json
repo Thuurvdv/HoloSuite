@@ -1,19 +1,19 @@
 {
-  "updated": "2026-08-10",
+  "updated": "2026-08-26",
   "modules": [
     {
       "moduleId": "holosuite-hacking",
       "title": "HoloSuite Hacking",
       "tier": "free",
-      "version": "1.1.10",
-      "updated": "2026-08-10",
+      "version": "1.1.11",
+      "updated": "2026-08-26",
       "icon": "fa-solid fa-terminal",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking",
       "entries": [
         {
-          "title": "Two new hacking minigames",
-          "summary": "Packet Switchboard and Prism Lock join the HoloSuite Hacking lineup, adding new packet-routing and optical-ring challenges with configurable difficulty profiles.",
-          "tags": ["Hacking", "Minigames", "Packet Switchboard", "Prism Lock"]
+          "title": "Live hacking views",
+          "summary": "GMs and selected players can now watch hacking minigames unfold live in a read-only view, with audience controls and synchronized session state.",
+          "tags": ["Hacking", "Live View", "Audience Controls", "Minigames"]
         }
       ]
     },
@@ -53,15 +53,15 @@
       "moduleId": "cybercall",
       "title": "CyberCall",
       "tier": "free",
-      "version": "1.0.7",
-      "updated": "2026-08-10",
+      "version": "1.0.8",
+      "updated": "2026-08-26",
       "icon": "fa-solid fa-phone-volume",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall",
       "entries": [
         {
-          "title": "Richer messages and notifications",
-          "summary": "CyberCall messaging now features clearer incoming notifications and improved image support, making conversations easier to follow and character identities more visually distinct.",
-          "tags": ["CyberCall", "Messages", "Notifications", "Images"]
+          "title": "Message scrolling stays put",
+          "summary": "CyberCall now keeps the conversation pinned to the newest message after sending while preserving the reader's position during other message refreshes.",
+          "tags": ["CyberCall", "Messages", "Bug Fix", "Scrolling"]
         }
       ]
     },
@@ -101,8 +101,8 @@
       "moduleId": "holosuite-core",
       "title": "HoloSuite Core",
       "tier": "free",
-      "version": "1.0.7",
-      "updated": "2026-08-10",
+      "version": "1.0.10",
+      "updated": "2026-08-26",
       "icon": "fa-solid fa-mobile-screen",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
       "entries": [
@@ -115,6 +115,22 @@
     }
   ],
   "releases": [
+    {
+      "moduleId": "holosuite-vending-machines",
+      "title": "HoloSuite Vending Machines",
+      "tier": "free",
+      "version": "1.5.0",
+      "updated": "2026-08-26",
+      "icon": "fa-solid fa-store",
+      "url": "https://github.com/Thuurvdv/holosuite-vending-machines",
+      "entries": [
+        {
+          "title": "Configurable vending machines join HoloSuite",
+          "summary": "Build scene-linked vending machines with Alien Market, Neon, Executive Terminal, or Corporate Kiosk styling, limited stock, item-currency purchases, and Region-based access controls.",
+          "tags": ["Vending Machines", "New Module", "Regions", "Foundry v12-v14"]
+        }
+      ]
+    },
     {
       "moduleId": "holosuite-terminal",
       "title": "HoloSuite Terminal",

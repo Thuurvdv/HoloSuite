@@ -45,7 +45,9 @@ function readOverrides() {
 }
 
 function numberValue(formData: FormData, key: string, fallback: number) {
-  const value = Number(formData.get(key));
+  const rawValue = formData.get(key);
+  if (rawValue === null || rawValue === "") return fallback;
+  const value = Number(rawValue);
   return Number.isFinite(value) ? value : fallback;
 }
 
@@ -395,8 +397,8 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
     html.find("[data-profile-section]").each((_index: number, section: HTMLElement) => this.syncProfileConstraints(section));
   }
 
-  clampNumberInputs() {
-    const element = this.element?.[0] as HTMLElement | undefined;
+  clampNumberInputs(root?: ParentNode | null) {
+    const element = root ?? this.element?.[0] as HTMLElement | undefined;
     element?.querySelectorAll<HTMLInputElement>("input[type='number']").forEach((input) => clampNumberInput(input));
   }
 
@@ -527,9 +529,21 @@ export class DifficultyProfilesApp extends LegacyFormApplication {
     this.syncProfileConstraints(section);
   }
 
-  async _updateObject(_event: Event, _formDataSource: any) {
-    this.clampNumberInputs();
-    const formData = new FormData(this.form as HTMLFormElement);
+  async _updateObject(event: Event, formDataSource: any) {
+    const eventForm = event?.currentTarget instanceof HTMLFormElement
+      ? event.currentTarget
+      : null;
+    const renderedRoot = this.element?.[0] as HTMLElement | undefined;
+    const renderedForm = renderedRoot instanceof HTMLFormElement
+      ? renderedRoot
+      : renderedRoot?.querySelector?.("form") as HTMLFormElement | null;
+    const submittedForm = eventForm ?? renderedForm ?? (this.form as HTMLFormElement | null);
+    this.clampNumberInputs(submittedForm);
+    const formData = submittedForm
+      ? new FormData(submittedForm)
+      : formDataSource instanceof FormData
+        ? formDataSource
+        : new FormData();
     const overrides: any = {};
 
     for (const id of PROFILE_IDS) {

@@ -59,3 +59,14 @@ test("generator preserves enough columns to reach every output lane", () => {
   assert.equal(board.columnCount, 5);
   assert.ok(board.packetPlan.every((packet) => Math.abs(packet.targetRow - packet.sourceRow) <= board.columnCount));
 });
+
+test("packet spawning does not accumulate a backlog at the active-packet cap", () => {
+  const blocked = generator.planPacketSpawn(5_000, 1_000, 1_000, 2, 2);
+  assert.deepEqual(blocked, { shouldSpawn: false, nextSpawnAt: 6_000 });
+
+  const stillWaiting = generator.planPacketSpawn(5_500, blocked.nextSpawnAt, 1_000, 1, 2);
+  assert.deepEqual(stillWaiting, { shouldSpawn: false, nextSpawnAt: 6_000 });
+
+  const available = generator.planPacketSpawn(6_000, stillWaiting.nextSpawnAt, 1_000, 1, 2);
+  assert.deepEqual(available, { shouldSpawn: true, nextSpawnAt: 7_000 });
+});
