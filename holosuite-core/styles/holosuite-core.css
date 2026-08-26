@@ -1193,6 +1193,11 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 255, 228, 92;
 }
 
+.holosuite-app-tile[data-holosuite-app="holosuite-vending-machines"] {
+  --hs-app-accent: #d966ff;
+  --hs-app-accent-rgb: 217, 102, 255;
+}
+
 .holosuite-app-tile[data-holosuite-app="holodock"] {
   --hs-app-accent: #d7dee8;
   --hs-app-accent-rgb: 215, 222, 232;
@@ -1365,6 +1370,12 @@ img.hs-frame-header {
   --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
   mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
 }
 
 .holosuite-app-icon[data-holosuite-app-icon="holodock"]::before {
@@ -1814,6 +1825,11 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 255, 228, 92;
 }
 
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-vending-machines"] {
+  --hs-app-accent: #d966ff;
+  --hs-app-accent-rgb: 217, 102, 255;
+}
+
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holodock"] {
   --hs-app-accent: #d7dee8;
   --hs-app-accent-rgb: 215, 222, 232;
@@ -1988,6 +2004,12 @@ img.hs-frame-header {
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg");
 }
 
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"]::before {
+  --hs-space-police-icon: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
+}
+
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holodock"]::before {
   --hs-space-police-icon: url("../assets/device-styles/space-police/icons/holodock.svg");
   mask-image: url("../assets/device-styles/space-police/icons/holodock.svg");
@@ -2141,6 +2163,32 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   display: block !important;
   mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg") !important;
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-terminal.svg") !important;
+}
+
+/* ApplicationV1 in Foundry v12 can preserve the fallback Font Awesome glyph
+   after the mask rules are evaluated. Force the custom vending identity in
+   that generation; v13 and v14 use the standard @supports path above. */
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-vending-machines"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-vending-machines"] {
+  --hs-app-accent: #d966ff !important;
+  --hs-app-accent-rgb: 217, 102, 255 !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"] {
+  color: #d966ff !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"] i,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"] i {
+  display: none !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"]::before,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"]::before {
+  display: block !important;
+  mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg") !important;
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg") !important;
 }
 
 .holosuite-core-diagnostics-window .window-content {
