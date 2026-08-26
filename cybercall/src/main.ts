@@ -313,6 +313,57 @@ function getElement(app: any, html: any = null) {
   return app.element ?? null;
 }
 
+const MESSAGE_LOG_BOTTOM_THRESHOLD = 24;
+
+function captureMessageScrollState(app: any) {
+  const element = getElement(app);
+  const messageLog = element?.querySelector?.(".cybercall-message-log");
+  if (!(messageLog instanceof HTMLElement)) return null;
+  const root = element.querySelector?.("[data-cybercall-active-thread]");
+  const distanceFromBottom = messageLog.scrollHeight - messageLog.clientHeight - messageLog.scrollTop;
+  return {
+    threadId: String(root?.dataset?.cybercallActiveThread ?? ""),
+    scrollTop: messageLog.scrollTop,
+    stickToBottom: distanceFromBottom <= MESSAGE_LOG_BOTTOM_THRESHOLD
+  };
+}
+
+function restoreMessageScrollState(app: any, element: HTMLElement) {
+  const messageLog = element.querySelector(".cybercall-message-log");
+  if (!(messageLog instanceof HTMLElement)) return;
+  const state = app?._cybercallMessageScrollState;
+  const root = element.querySelector("[data-cybercall-active-thread]") as HTMLElement | null;
+  const threadId = String(root?.dataset?.cybercallActiveThread ?? "");
+  const scrollToBottom = !state
+    || state.scrollToBottom === true
+    || state.stickToBottom === true
+    || state.threadId !== threadId;
+
+  delete app._cybercallMessageScrollState;
+
+  const restoreToken = {};
+  app._cybercallMessageScrollRestoreToken = restoreToken;
+  const applyScrollPosition = () => {
+    if (app._cybercallMessageScrollRestoreToken !== restoreToken || !messageLog.isConnected) return;
+    const maximumScrollTop = Math.max(0, messageLog.scrollHeight - messageLog.clientHeight);
+    messageLog.scrollTop = scrollToBottom
+      ? maximumScrollTop
+      : Math.min(state.scrollTop, maximumScrollTop);
+  };
+
+  // ApplicationV2 calls _onRender before the replacement content has completed
+  // layout. Reapply after two frames so scrollHeight reflects the rendered log.
+  applyScrollPosition();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      applyScrollPosition();
+      if (app._cybercallMessageScrollRestoreToken === restoreToken) {
+        delete app._cybercallMessageScrollRestoreToken;
+      }
+    });
+  });
+}
+
 function bindCallControls(app: any, html: any = null) {
   const element = getElement(app, html);
   if (!element) return;
@@ -886,6 +937,8 @@ function bindMessagesControls(app: any, html: any = null) {
   const element = getElement(app, html);
   if (!element) return;
 
+  restoreMessageScrollState(app, element);
+
   element.querySelectorAll("[data-cybercall-npc-link-drop]").forEach((dropTarget) => {
     dropTarget.addEventListener("dragover", (event) => {
       if (!game.user?.isGM) return;
@@ -1026,7 +1079,7 @@ function bindMessagesControls(app: any, html: any = null) {
     composingNewGroup = false;
     form.elements.body.value = "";
     await markActiveThreadRead();
-    await refreshMessages();
+    await refreshMessages({ scrollToBottom: true });
   });
 
   markActiveThreadRead();
@@ -1332,8 +1385,12 @@ async function openCallPanel() {
   return game.user?.isGM ? openComposer() : openContacts();
 }
 
-async function refreshMessages() {
+async function refreshMessages(options: any = {}) {
   if (!activePhone || activePhone.mode !== "messages") return;
+  activePhone._cybercallMessageScrollState = {
+    ...captureMessageScrollState(activePhone),
+    scrollToBottom: options.scrollToBottom === true
+  };
   await activePhone.render(true);
 }
 
