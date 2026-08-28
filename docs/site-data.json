@@ -1,7 +1,7 @@
 {
   "stats": [
-    { "label": "Modules Released", "value": 11, "suffix": "+" },
-    { "label": "Free Modules", "value": 9, "suffix": "" },
+    { "label": "Modules Released", "value": 12, "suffix": "+" },
+    { "label": "Free Modules", "value": 10, "suffix": "" },
     { "label": "Premium Modules", "value": 2, "suffix": "" },
     { "label": "Foundry Compatibility", "value": 12, "prefix": "v", "suffix": "+" },
     { "label": "Active Development", "value": 2026, "suffix": "", "format": "plain" }
@@ -60,6 +60,12 @@
       "title": "Access in-world terminals",
       "description": "Explore mail, files, cameras, utilities, downloads, and locked systems.",
       "moduleId": "holosuite-terminal"
+    },
+    {
+      "icon": "VND",
+      "title": "Shop futuristic markets",
+      "description": "Browse limited stock, fill a basket, and purchase equipment from in-world machines.",
+      "moduleId": "holosuite-vending-machines"
     }
   ],
   "modules": [
@@ -170,6 +176,18 @@
       "features": ["Multiple ship profiles", "Equipment slots with item drops and ship-image pins", "Power allocation, durability, presets, and activation controls"],
       "docsUrl": "docs/module.html?id=holodock",
       "moduleUrl": "https://github.com/Thuurvdv/holodock"
+    },
+    {
+      "id": "holosuite-vending-machines",
+      "name": "HoloSuite Vending Machines",
+      "tier": "free",
+      "category": "Commerce",
+      "image": "assets/VendingMachines.webp",
+      "pitch": "Create immersive vending machines, stock products, link them to Scene Regions, and let players purchase items through stylish HoloSuite terminals.",
+      "compatibility": "Foundry v12-v14",
+      "features": ["Limited stock and multi-item baskets", "Linked Region access and player prompts", "Four machine styles with system-agnostic currency support"],
+      "docsUrl": "docs/module.html?id=holosuite-vending-machines",
+      "moduleUrl": "https://github.com/Thuurvdv/holosuite-vending-machines"
     },
     {
       "id": "holosuite-terminal",

@@ -473,6 +473,67 @@
       "moduleUrl": "https://github.com/Thuurvdv/holodock"
     },
     {
+      "id": "holosuite-vending-machines",
+      "name": "HoloSuite Vending Machines",
+      "tier": "free",
+      "category": "Commerce",
+      "compatibility": "Foundry v12-v14",
+      "image": "assets/VendingMachines.webp",
+      "summary": "Immersive, Region-linked vending machines with limited stock, product baskets, currency handling, and four distinct terminal styles.",
+      "overview": "HoloSuite Vending Machines lets GMs build interactive shops that feel like physical terminals inside the game world. Stock machines with Foundry Items, link them to Scene Regions, control player access, and process purchases through a GM-authoritative workflow with limited inventory and persistent transaction records.",
+      "features": [
+        "Create and manage multiple vending machines with independent names, branding, status, products, prices, and stock.",
+        "Drag Items from world directories, compendiums, or actor sheets into six active product slots.",
+        "Choose Alien Market, Neon, Executive Terminal, or Corporate Kiosk presentation styles.",
+        "Link machines to Scene Regions and require a player-owned token to be present before access or purchase.",
+        "Let players select quantities, add multiple products to a basket, and confirm one combined purchase.",
+        "Use automatic actor currency detection, a configured actor data path, or a matching inventory currency item.",
+        "Reserve purchased stock before transferring products through the animated retrieval workflow.",
+        "Review a persistent success and failure transaction ledger, restock machines, and import or export machine data.",
+        "Configure local selection, purchase, dispensing, collection, and failure sounds."
+      ],
+      "installation": [
+        "Install HoloSuite Vending Machines with https://github.com/Thuurvdv/holosuite-vending-machines/releases/latest/download/module.json.",
+        "Enable HoloSuite Core and HoloSuite Vending Machines in the Foundry world.",
+        "Open Configure Settings, find HoloSuite Vending Machines, and open the machine manager.",
+        "Create a machine, drag in products, set prices and stock, then link any Scene Regions that should provide access."
+      ],
+      "configuration": [
+        "Choose the world currency source and optional actor currency data path in module settings.",
+        "Use the experimental Credit Transformer only when you want detected system money displayed as Credits.",
+        "Configure machine branding, visual style, online status, product descriptions, prices, current stock, and maximum stock.",
+        "Keep linked Region presence enabled when machines should only be available near their in-world location.",
+        "Player access through the HoloSuite launcher is disabled by default and can be enabled by a GM in module settings.",
+        "Adjust or replace each vending sound cue and set the shared volume for the world."
+      ],
+      "faq": [
+        {
+          "question": "Is HoloSuite Vending Machines tied to a particular game system?",
+          "answer": "No. It can automatically detect common actor currency structures, use a configured actor data path, or fall back to an inventory item with the configured currency name."
+        },
+        {
+          "question": "Can players open every vending machine from HoloSuite?",
+          "answer": "Not by default. A GM may enable player HoloSuite access, and machines that require linked Region presence remain hidden or inaccessible unless the player has an owned token in a linked Region."
+        },
+        {
+          "question": "Does a GM need to be connected for purchases?",
+          "answer": "Yes. A connected GM validates actor ownership, Region access, stock, and currency before authorizing a purchase."
+        },
+        {
+          "question": "Can machines be reused in another world?",
+          "answer": "Yes. The manager can export and import vending machine data as JSON."
+        }
+      ],
+      "videos": [],
+      "examples": [
+        "Place an Alien Market machine in a spaceport bazaar and link it to the stall's Scene Region.",
+        "Use a Corporate Kiosk as an office supply terminal with tightly controlled inventory.",
+        "Build a Neon black-market vendor with rare products, low stock, and inventory-item Credits.",
+        "Take a machine offline during a facility lockdown, then restore and restock it after the scene."
+      ],
+      "moduleUrl": "https://github.com/Thuurvdv/holosuite-vending-machines"
+    },
+    {
       "id": "holosuite-terminal",
       "name": "HoloSuite Terminal",
       "tier": "premium",
