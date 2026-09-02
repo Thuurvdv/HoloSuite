@@ -19,6 +19,7 @@
   </div>
 
   <div class="hs-content">
+  <div class="bb-topbar">
   <header class="bb-header">
     <div class="bb-heading">
       <p class="bb-kicker">{{localize "BOUNTYBOARD.Header.ContractTerminal"}}</p>
@@ -61,12 +62,7 @@
     {{/if}}
   </header>
 
-  {{#if boardHiddenForPlayers}}
-    <div class="bb-empty">
-      <i class="fa-solid fa-lock" aria-hidden="true"></i>
-      <p>{{localize "BOUNTYBOARD.Empty.Unavailable"}}</p>
-    </div>
-  {{else}}
+  {{#unless boardHiddenForPlayers}}
     <form class="bb-filters" autocomplete="off">
       <label class="bb-filter-field">
         <span>{{localize "BOUNTYBOARD.Filter.Status"}}</span>
@@ -121,23 +117,35 @@
         <span class="bb-visually-hidden">{{localize "BOUNTYBOARD.Filter.Clear"}}</span>
       </button>
     </form>
+  {{/unless}}
+  </div>
 
-    {{#if bounties.length}}
-      <div class="bb-card-grid">
-        {{#each bounties as |bounty|}}
-          {{> "modules/bounty-board/templates/bounty-card.hbs" bounty=bounty isGM=../isGM}}
-        {{/each}}
-      </div>
-      <div class="bb-empty bb-search-empty" {{#if visibleCount}}hidden{{/if}}>
-        <i class="fa-solid fa-satellite-dish" aria-hidden="true"></i>
-        <p>{{localize "BOUNTYBOARD.Empty.NoMatches"}}</p>
-      </div>
-    {{else}}
+  {{#if boardHiddenForPlayers}}
+    <div class="bb-results">
       <div class="bb-empty">
-        <i class="fa-solid fa-satellite-dish" aria-hidden="true"></i>
-        <p>{{localize "BOUNTYBOARD.Empty.NoMatches"}}</p>
+        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+        <p>{{localize "BOUNTYBOARD.Empty.Unavailable"}}</p>
       </div>
-    {{/if}}
+    </div>
+  {{else}}
+    <div class="bb-results">
+      {{#if bounties.length}}
+        <div class="bb-card-grid">
+          {{#each bounties as |bounty|}}
+            {{> "modules/bounty-board/templates/bounty-card.hbs" bounty=bounty isGM=../isGM}}
+          {{/each}}
+        </div>
+        <div class="bb-empty bb-search-empty" {{#if visibleCount}}hidden{{/if}}>
+          <i class="fa-solid fa-satellite-dish" aria-hidden="true"></i>
+          <p>{{localize "BOUNTYBOARD.Empty.NoMatches"}}</p>
+        </div>
+      {{else}}
+        <div class="bb-empty">
+          <i class="fa-solid fa-satellite-dish" aria-hidden="true"></i>
+          <p>{{localize "BOUNTYBOARD.Empty.NoMatches"}}</p>
+        </div>
+      {{/if}}
+    </div>
   {{/if}}
   </div>
   <div class="hs-effects" aria-hidden="true"></div>

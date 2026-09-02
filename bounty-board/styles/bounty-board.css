@@ -204,14 +204,32 @@
   z-index: 2;
 }
 
+/* Matches the shared holosuite shell contract: row 1 is the fixed head, row 2 is
+   the scrolling body. The head must hold both the title block and the filters,
+   otherwise the filters land in the 1fr row and collapse once the contract list
+   is taller than the window. */
 .bounty-board-window .bb-shell .hs-content {
   position: relative;
   z-index: 1;
-  display: block;
-  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 18px;
+  min-height: 0;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   padding: var(--hs-app-padding-block) var(--hs-app-padding-inline);
+}
+
+.bounty-board-window .bb-topbar {
+  min-width: 0;
+}
+
+.bounty-board-window .bb-results {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .bounty-board-window .bb-shell .hs-effects {
@@ -488,7 +506,7 @@
   grid-template-columns: repeat(4, minmax(105px, 0.72fr)) minmax(230px, 1.8fr) 34px;
   gap: 8px;
   align-items: end;
-  margin: 12px 0 16px;
+  margin: 12px 0 0;
   padding: 9px;
   border: 1px solid color-mix(in srgb, var(--bb-accent) 22%, transparent);
   background: color-mix(in srgb, var(--bb-panel) 86%, transparent);
