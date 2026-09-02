@@ -1,10 +1,10 @@
 var Oe = Object.defineProperty;
-var Fe = (e, i, t) => i in e ? Oe(e, i, { enumerable: !0, configurable: !0, writable: !0, value: t }) : e[i] = t;
-var E = (e, i, t) => Fe(e, typeof i != "symbol" ? i + "" : i, t);
-const Re = [4, 6, 8, 10, 12, 20, 100];
+var Re = (e, i, t) => i in e ? Oe(e, i, { enumerable: !0, configurable: !0, writable: !0, value: t }) : e[i] = t;
+var E = (e, i, t) => Re(e, typeof i != "symbol" ? i + "" : i, t);
+const Fe = [4, 6, 8, 10, 12, 20, 100];
 function $e(e = 20) {
   var r, a, c;
-  const i = z(e), t = /* @__PURE__ */ new Set([...Re, i]), n = ((c = (a = (r = globalThis.CONFIG) == null ? void 0 : r.Dice) == null ? void 0 : a.fulfillment) == null ? void 0 : c.dice) ?? {};
+  const i = z(e), t = /* @__PURE__ */ new Set([...Fe, i]), n = ((c = (a = (r = globalThis.CONFIG) == null ? void 0 : r.Dice) == null ? void 0 : a.fulfillment) == null ? void 0 : c.dice) ?? {};
   for (const o of Object.keys(n)) {
     const l = /^d([1-9]\d*)$/i.exec(o);
     if (!l) continue;
@@ -157,7 +157,7 @@ function f(e) {
 async function M(e, i) {
   return game.settings.set(h, e, i);
 }
-function F() {
+function R() {
   return pe(f(u.threshold), "success");
 }
 function q() {
@@ -166,15 +166,15 @@ function q() {
 function v() {
   return z(f(u.dieSides));
 }
-function K() {
+function B() {
   return ge(f(u.rollDirection)) === "low";
 }
 function pe(e, i) {
   const t = Number(e);
-  return Number.isInteger(t) && t >= 1 && t <= v() ? t : i === "success" === K() ? 1 : v();
+  return Number.isInteger(t) && t >= 1 && t <= v() ? t : i === "success" === B() ? 1 : v();
 }
 function ye(e, i, t) {
-  return t === "success" === K() ? e <= i : e >= i;
+  return t === "success" === B() ? e <= i : e >= i;
 }
 function V() {
   const e = f(u.playerConfigs);
@@ -270,7 +270,7 @@ async function ze(e) {
   const n = qe(e.audioPath, e.volume);
   await new Promise((r) => window.setTimeout(r, Math.max(250, i - 250))), Ve(await n), t.classList.add("hcci-exiting"), await new Promise((r) => window.setTimeout(r, 250)), t.remove(), document.body.classList.remove("hcci-screen-shake");
 }
-async function Ke() {
+async function Be() {
   if (!H) {
     for (H = !0; x.length; ) {
       const e = x.shift();
@@ -287,11 +287,11 @@ function D(e) {
       const i = I.values().next().value;
       I.size > 100 && i && I.delete(i);
     }
-    x.push(e), x.length > 3 && x.splice(1, x.length - 3), Ke();
+    x.push(e), x.length > 3 && x.splice(1, x.length - 3), Be();
   }
 }
 const C = /* @__PURE__ */ new Set(), j = /* @__PURE__ */ new Set();
-function Be(e) {
+function Ke(e) {
   return !!(e != null && e.id) && j.has(e.id);
 }
 function m(e) {
@@ -401,7 +401,7 @@ function Ce(e, i) {
   return t ?? null;
 }
 function oe(e = {}, i, t, n = !1) {
-  const r = i === "failure" ? q() : F(), a = f(i === "failure" ? u.defaultFailureText : u.defaultText), c = i === "failure" ? "#ff4d7d" : "#69e8ff", o = i === "failure" ? e.failure ?? {} : e, l = Number(o.threshold);
+  const r = i === "failure" ? q() : R(), a = f(i === "failure" ? u.defaultFailureText : u.defaultText), c = i === "failure" ? "#ff4d7d" : "#69e8ff", o = i === "failure" ? e.failure ?? {} : e, l = Number(o.threshold);
   return {
     kind: i,
     enabled: o.enabled !== !1,
@@ -463,7 +463,7 @@ function se() {
   const i = (((t = game.users) == null ? void 0 : t.filter((r) => r.active && r.isGM)) ?? []).sort((r, a) => r.id.localeCompare(a.id))[0];
   return ((n = game.user) == null ? void 0 : n.isGM) && (!i || i.id === game.user.id);
 }
-function R(e) {
+function F(e) {
   C.add(e);
   const i = C.values().next().value;
   C.size > 200 && i && C.delete(i);
@@ -474,7 +474,7 @@ function Ae(e) {
   const i = Te(e), t = Ce(e, i), n = k(t, i, "success"), r = k(t, i, "failure"), a = ce(e, r.threshold, "failure"), c = a ? null : ce(e, n.threshold, "success"), o = a ?? c;
   if (!o) return !1;
   const s = Se(e, o, i, t, a ? r : n);
-  return s ? (R(e.id), L("Triggering cut-in.", s), (d = game.socket) == null || d.emit($, { type: "play", payload: s }), D(s), !0) : (R(e.id), !0);
+  return s ? (F(e.id), L("Triggering cut-in.", s), (d = game.socket) == null || d.emit($, { type: "play", payload: s }), D(s), !0) : (F(e.id), !0);
 }
 function tt(e, i) {
   var g;
@@ -482,7 +482,7 @@ function tt(e, i) {
   const t = Te(e), n = Ce(e, t), r = k(n, t, "success"), a = k(n, t, "failure"), c = le(e, i, a.threshold, "failure"), o = c ? null : le(e, i, r.threshold, "success"), l = c ?? o;
   if (!l) return !1;
   const d = Se(e, l, t, n, c ? a : r);
-  return d ? (R(e.id), L("Triggering cut-in from rendered chat card.", d), (g = game.socket) == null || g.emit($, { type: "play", payload: d }), D(d), !0) : (R(e.id), !0);
+  return d ? (F(e.id), L("Triggering cut-in from rendered chat card.", d), (g = game.socket) == null || g.emit($, { type: "play", payload: d }), D(d), !0) : (F(e.id), !0);
 }
 function G(e, i) {
   e != null && e.id && globalThis.setTimeout(() => {
@@ -501,7 +501,7 @@ function it() {
     f(u.enabled) && se() && (Ae(t) || (G(t, 100), G(t, 500), G(t, 1500)));
   });
   const e = (t, n) => {
-    f(u.enabled) && (Be(t) || se() && tt(t, n));
+    f(u.enabled) && (Ke(t) || se() && tt(t, n));
   };
   Hooks.on("renderChatMessage", e), Hooks.on("renderChatMessageHTML", e), (i = game.socket) == null || i.on($, (t) => {
     (t == null ? void 0 : t.type) === "play" && f(u.enabled) && D(t.payload);
@@ -518,7 +518,7 @@ function Pe(e, i = {}) {
     actorName: (n == null ? void 0 : n.name) ?? (t == null ? void 0 : t.name) ?? "",
     naturalResult: i.naturalResult ?? a.threshold,
     triggerKind: r,
-    threshold: i.threshold ?? a.threshold ?? F(),
+    threshold: i.threshold ?? a.threshold ?? R(),
     animationStyle: i.animationStyle ?? a.animationStyle ?? "strike",
     imagePath: i.imagePath ?? a.imagePath ?? "",
     audioPath: i.audioPath ?? a.audioPath ?? "",
@@ -761,10 +761,10 @@ class Ie extends lt {
       moduleId: h,
       dieSides: v(),
       dice: $e(v()),
-      lowRollsGood: K(),
+      lowRollsGood: B(),
       threshold: f(u.threshold) ?? 0,
       failureThreshold: f(u.failureThreshold) ?? 0,
-      effectiveThreshold: F(),
+      effectiveThreshold: R(),
       effectiveFailureThreshold: q(),
       duration: f(u.duration),
       defaultText: f(u.defaultText),
@@ -831,7 +831,7 @@ class Ie extends lt {
     });
   }
   async _updateObject(t) {
-    var g, p, y, b, _, B, U, Q;
+    var g, p, y, b, _, K, U, Q;
     if (this.rollRuleChange) return;
     const n = t.currentTarget;
     if (!n.reportValidity()) return;
@@ -856,7 +856,7 @@ class Ie extends lt {
       const A = S.dataset.hcciRow, w = (y = S.querySelector("[data-hcci-panel].is-active")) == null ? void 0 : y.dataset.hcciPanel;
       w && this.activeTabs.set(A, w), c[A] = o(S, "success"), c[A].failure = o(S, "failure");
     }
-    const l = Number(((b = n.querySelector('[name="threshold"]')) == null ? void 0 : b.value) ?? F()), s = Number(((_ = n.querySelector('[name="failureThreshold"]')) == null ? void 0 : _.value) ?? q()), d = Number(((B = n.querySelector('[name="duration"]')) == null ? void 0 : B.value) ?? f(u.duration));
+    const l = Number(((b = n.querySelector('[name="threshold"]')) == null ? void 0 : b.value) ?? R()), s = Number(((_ = n.querySelector('[name="failureThreshold"]')) == null ? void 0 : _.value) ?? q()), d = Number(((K = n.querySelector('[name="duration"]')) == null ? void 0 : K.value) ?? f(u.duration));
     await M(u.dieSides, r), await M(u.rollDirection, a), await M(u.threshold, Math.min(r, Math.max(0, l))), await M(u.failureThreshold, Math.min(r, Math.max(0, s))), await M(u.duration, Math.min(8e3, Math.max(800, d))), await ae(c), (U = ui.notifications) == null || U.info("Critical Cut-In configuration saved."), (Q = this.element) == null || Q.removeClass("hcci-config-dirty"), this.render(!1);
   }
 }
@@ -886,13 +886,18 @@ function Le() {
     title: "Critical Cut-In",
     tier: "free",
     version: "1.0.6",
-    updated: "2026-07-14",
+    updated: "2026-09-02",
     icon: "fa-solid fa-bolt-lightning",
     entries: [
       {
-        title: "Foundry system d20 roll fix",
-        summary: "Fixed a bug that could occur when triggering Critical Cut-In from d20 rolls made through the Foundry system.",
-        tags: ["Fix", "Dice"]
+        title: "Critical cut-ins for more dice",
+        summary: "Choose from standard and registered dice, decide whether high or low results are positive, and configure separate success and failure thresholds for each character.",
+        tags: ["Critical Cut-In", "Dice", "Thresholds", "Customization"]
+      },
+      {
+        title: "More reliable cut-in detection",
+        summary: "Improved Foundry 14 support and prevented old chat rolls, damage rolls, discarded dice, and rerolls from triggering unwanted animations.",
+        tags: ["Critical Cut-In", "Bug Fix", "Foundry v12-v14", "Chat"]
       }
     ]
   }), console.log(`${h} | Registered with HoloSuite.`), !0) : !1;

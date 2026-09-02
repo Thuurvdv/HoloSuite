@@ -1733,13 +1733,13 @@ function registerWithHoloSuite() {
     title: "CyberCall",
     tier: "free",
     version: "1.0.9",
-    updated: "2026-07-14",
+    updated: "2026-09-02",
     icon: "fa-solid fa-satellite-dish",
     entries: [
       {
-        title: "Messages in CyberCall",
-        summary: "CyberCall now includes message threads, contact-based conversations, unread tracking, and player-facing message access.",
-        tags: ["Messages", "Comms"]
+        title: "Character names throughout CyberCall",
+        summary: "Calls, contacts, messages, and group conversations now use assigned character names, with usernames retained as a fallback when no character is assigned.",
+        tags: ["CyberCall", "Characters", "Calls", "Messages"]
       }
     ]
   });
