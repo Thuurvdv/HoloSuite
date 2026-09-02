@@ -4,6 +4,7 @@ import {
   clampSignal,
   createCallId,
   getInitials,
+  getUserDisplayName,
   getUserTokenImage,
   normalizeCallData,
   normalizeContact
@@ -63,7 +64,7 @@ function getPlayerChoices() {
     .filter((user) => !user.isGM)
     .map((user) => ({
       id: user.id,
-      name: user.name,
+      name: getUserDisplayName(user, "Unknown Player"),
       active: user.active === true
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -74,7 +75,7 @@ function getGroupMessageMemberChoices() {
     .filter((user) => !user.isGM && user.id !== game.user?.id)
     .map((user) => ({
       id: String(user.id),
-      name: String(user.name ?? "Unknown Player"),
+      name: getUserDisplayName(user, "Unknown Player"),
       active: user.active === true
     }))
     .sort((left, right) => left.name.localeCompare(right.name));
@@ -83,16 +84,19 @@ function getGroupMessageMemberChoices() {
 function getUserMessageContacts() {
   return (game.users?.contents ?? [])
     .filter((user) => user.id !== game.user?.id)
-    .map((user) => ({
-      id: `user-${user.id}`,
-      name: user.name,
-      number: `@${user.name}`,
-      image: getUserTokenImage(user),
-      userId: user.id,
-      userIds: [user.id],
-      isNpc: false,
-      managedByGM: false
-    }))
+    .map((user) => {
+      const name = getUserDisplayName(user, "Unknown Player");
+      return {
+        id: `user-${user.id}`,
+        name,
+        number: `@${name}`,
+        image: getUserTokenImage(user),
+        userId: user.id,
+        userIds: [user.id],
+        isNpc: false,
+        managedByGM: false
+      };
+    })
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -406,7 +410,7 @@ function readComposerForm(form) {
   const callerName = String(formData.get("callerName") ?? "").trim() || actor?.name || "UNKNOWN CALLER";
   const targetUserIds = formData.getAll("targetUserIds").map((id) => String(id)).filter(Boolean);
   const usersById = new Map<string, any>((game.users?.contents ?? []).map((user) => [user.id, user]));
-  const targetUserNames = targetUserIds.map((id) => usersById.get(id)?.name ?? id);
+  const targetUserNames = targetUserIds.map((id) => getUserDisplayName(usersById.get(id)) || id);
 
   return normalizeCallData({
     callerName,
@@ -723,7 +727,7 @@ function getReplyAsChoices(thread) {
   const contactReplyDefault = Boolean(game.user?.isGM && thread?.contact && !thread.contact.userId && (thread.contact.isNpc || thread.contact.managedByGM));
   const choices = [{
     id: "self",
-    label: game.user?.character?.name ?? game.user?.name ?? "Me",
+    label: getUserDisplayName(game.user, "Me"),
     selected: !contactReplyDefault
   }];
   if (!game.user?.isGM || !thread?.contact || thread.contact.userId) return choices;
@@ -738,7 +742,7 @@ function getReplyAsChoices(thread) {
 function getSendAsChoices() {
   const choices = [{
     id: "self",
-    label: game.user?.character?.name ?? game.user?.name ?? "Me",
+    label: getUserDisplayName(game.user, "Me"),
     selected: true,
     contact: null
   }];
@@ -898,11 +902,11 @@ async function createPlayerGroup(form, app) {
   const senderUserId = String(game.user?.id ?? "");
   const groupMemberUserIds = [...new Set([senderUserId, ...selectedUserIds].filter(Boolean))];
   const groupMemberNames = groupMemberUserIds
-    .map((id) => String(game.users?.get?.(id)?.name ?? "").trim())
+    .map((id) => getUserDisplayName(game.users?.get?.(id)))
     .filter(Boolean);
   const groupId = createCallId();
   const threadId = createGroupThreadId(groupId);
-  const creatorName = String(game.user?.character?.name ?? game.user?.name ?? "A player").trim();
+  const creatorName = getUserDisplayName(game.user, "A player");
   const groupContact = {
     id: `group-${groupId}`,
     name: groupName,
@@ -1196,10 +1200,11 @@ async function endCallForEveryone(callId) {
 
 function getUserContact(userId, fallbackName = "Player") {
   const user = game.users?.get?.(userId) ?? game.users?.contents?.find?.((entry) => entry.id === userId);
+  const name = getUserDisplayName(user, fallbackName);
   return {
     id: `user-${userId}`,
-    name: user?.name ?? fallbackName,
-    number: `@${user?.name ?? fallbackName}`,
+    name,
+    number: `@${name}`,
     image: getUserTokenImage(user),
     userId,
     userIds: userId ? [userId] : []
@@ -1282,6 +1287,7 @@ async function requestCallToGM(contact) {
 
   const callId = createCallId();
   const callerImage = getUserTokenImage(game.user);
+  const callerDisplayName = getUserDisplayName(game.user, "Unknown Caller");
   const baseCall = {
     id: callId,
     signal: game.settings.get(MODULE_ID, "defaultSignal"),
@@ -1310,10 +1316,10 @@ async function requestCallToGM(contact) {
   });
   const gmCall = normalizeCallData({
     ...baseCall,
-    callerName: game.user.name,
-    subtitle: `Call request from ${game.user.name}`,
+    callerName: callerDisplayName,
+    subtitle: `Call request from ${callerDisplayName}`,
     image: callerImage,
-    message: `${game.user.name} is calling ${contact.name} on ${contact.number}.`,
+    message: `${callerDisplayName} is calling ${contact.name} on ${contact.number}.`,
     canAccept: true,
     ringing: true
   });
