@@ -1,3 +1,5 @@
+import { normalizeDieSides, normalizeRollDirection } from "../../shared/src/dice-checks";
+
 export const MODULE_ID = "holosuite-critical-cutin";
 export const MODULE_TITLE = "HoloSuite Critical Cut-In";
 export const SOCKET_NAME = `module.${MODULE_ID}`;
@@ -5,6 +7,8 @@ export const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/player-config.hbs`;
 
 export const SETTINGS = {
   enabled: "enabled",
+  dieSides: "dieSides",
+  rollDirection: "rollDirection",
   threshold: "threshold",
   failureThreshold: "failureThreshold",
   duration: "duration",
@@ -29,31 +33,41 @@ declare const game: any;
 export function registerSettings(configAppClass: any) {
   game.settings.register(MODULE_ID, SETTINGS.enabled, {
     name: "Enable Critical Cut-In",
-    hint: "Play a configured cut-in when a qualifying natural d20 result is rolled.",
+    hint: "Play a configured cut-in when a qualifying natural result is rolled on the selected die.",
     scope: "world",
     config: true,
     type: Boolean,
     default: true
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.dieSides, {
+    name: "Check Die",
+    hint: "Configured in Configure Player Cut-Ins, where changes confirm the reset of all listed roll thresholds.",
+    scope: "world", config: false, type: Number, default: 20
+  });
+  game.settings.register(MODULE_ID, SETTINGS.rollDirection, {
+    name: "Positive Rolls",
+    hint: "Configured in Configure Player Cut-Ins, together with the check die and roll thresholds.",
+    scope: "world", config: false, type: String, default: "high",
+    choices: { high: "High rolls are positive", low: "Low rolls are positive" }
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.threshold, {
     name: "Default Trigger Threshold",
-    hint: "Natural d20 results equal to or above this number trigger the cut-in. Example: 19 triggers on 19 and 20.",
+    hint: "0 automatically uses the best die face. Otherwise success triggers at or above this value for high rolls, or at or below it for low rolls.",
     scope: "world",
     config: true,
     type: Number,
-    range: { min: 1, max: 20, step: 1 },
-    default: 20
+    default: 0
   });
 
   game.settings.register(MODULE_ID, SETTINGS.failureThreshold, {
     name: "Default Failure Trigger",
-    hint: "Natural d20 results equal to or below this number trigger the failure cut-in. Example: 1 triggers only on a natural 1.",
+    hint: "0 automatically uses the worst die face. Otherwise failure triggers at or below this value for high rolls, or at or above it for low rolls.",
     scope: "world",
     config: true,
     type: Number,
-    range: { min: 1, max: 20, step: 1 },
-    default: 1
+    default: 0
   });
 
   game.settings.register(MODULE_ID, SETTINGS.duration, {
@@ -137,7 +151,7 @@ export function registerSettings(configAppClass: any) {
   game.settings.registerMenu(MODULE_ID, "playerConfigMenu", {
     name: "Configure Player Cut-Ins",
     label: "Open Configuration",
-    hint: "Set each user or actor portrait, audio sample, label, accent color, and enable state.",
+    hint: "Choose the check die and positive roll direction, and set each user or actor's roll thresholds, portrait, audio, label, accent color, and enable state.",
     icon: "fa-solid fa-bolt",
     type: configAppClass,
     restricted: true
@@ -153,11 +167,31 @@ export async function setSetting(key: string, value: any) {
 }
 
 export function getThreshold() {
-  return Math.min(20, Math.max(1, Number(setting(SETTINGS.threshold) || 20)));
+  return resolveThreshold(setting(SETTINGS.threshold), "success");
 }
 
 export function getFailureThreshold() {
-  return Math.min(20, Math.max(1, Number(setting(SETTINGS.failureThreshold) || 1)));
+  return resolveThreshold(setting(SETTINGS.failureThreshold), "failure");
+}
+
+export function getDieSides() {
+  return normalizeDieSides(setting(SETTINGS.dieSides));
+}
+
+export function lowRollsAreGood() {
+  return normalizeRollDirection(setting(SETTINGS.rollDirection)) === "low";
+}
+
+function resolveThreshold(value: any, kind: "success" | "failure") {
+  const threshold = Number(value);
+  if (Number.isInteger(threshold) && threshold >= 1 && threshold <= getDieSides()) return threshold;
+  const useLowFace = (kind === "success") === lowRollsAreGood();
+  return useLowFace ? 1 : getDieSides();
+}
+
+export function resultQualifies(value: number, threshold: number, kind: "success" | "failure") {
+  const useLowFace = (kind === "success") === lowRollsAreGood();
+  return useLowFace ? value <= threshold : value >= threshold;
 }
 
 export function getPlayerConfigs() {

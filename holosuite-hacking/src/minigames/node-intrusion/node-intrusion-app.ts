@@ -32,8 +32,9 @@ function createRunSeed(rollTotal: number, dc: number, profile: any) {
 }
 
 export class NodeIntrusionApp extends LegacyApplication {
-  rollTotal: number;
-  dc: number;
+  quickOutcome: string | null;
+  rollTotal: number | null;
+  dc: number | null;
   profile: any;
   seed: string;
   onSuccess: any;
@@ -54,9 +55,10 @@ export class NodeIntrusionApp extends LegacyApplication {
 
   constructor(options: any = {}) {
     super(options);
-    this.rollTotal = Number(options.rollTotal ?? 15);
-    this.dc = Number(options.dc ?? 15);
-    this.profile = options.profile ? { ...options.profile } : getDifficultyProfile(this.rollTotal, this.dc);
+    this.quickOutcome = options.quickOutcome ?? null;
+    this.rollTotal = this.quickOutcome ? null : Number(options.rollTotal ?? 15);
+    this.dc = this.quickOutcome ? null : Number(options.dc ?? 15);
+    this.profile = options.profile ? { ...options.profile } : getDifficultyProfile(this.rollTotal, this.dc, null, { quickOutcome: this.quickOutcome });
     this.seed = options.seed ?? createRunSeed(this.rollTotal, this.dc, this.profile);
     this.onSuccess = typeof options.onSuccess === "function" ? options.onSuccess : null;
     this.onFailure = typeof options.onFailure === "function" ? options.onFailure : null;
@@ -105,7 +107,7 @@ export class NodeIntrusionApp extends LegacyApplication {
     const currentNode = this.getCurrentNode();
     const currentConnections = currentNode.connected;
     const radarEnabled = Boolean(this.profile.radarEnabled ?? this.profile.nodeIntrusion?.radarEnabled ?? Number(this.profile.radarRange ?? this.profile.nodeIntrusion?.radarRange) > 0);
-    const nodes = this.graph.nodes.map((node) => {
+    const nodes = this.graph.nodes.map((node, index) => {
       const isCurrent = node.id === this.state.currentNodeId;
       const isVisited = this.state.visitedNodeIds.has(node.id);
       const isClaiming = node.id === this.state.claimingNodeId;
@@ -133,11 +135,13 @@ export class NodeIntrusionApp extends LegacyApplication {
         isDangerVisible: node.type !== "target" && (this.profile.hintsEnabled || node.revealed || isVisited),
         dangerSignal,
         displayType,
-        title: `${node.id} - ${displayType}${dangerSignal ? ` / signal ${dangerSignal}` : ""}`
+        displayNumber: index + 1
       };
     });
 
     return {
+      quickOutcome: this.quickOutcome,
+
       rollTotal: this.rollTotal,
       dc: this.dc,
       isReadOnly: this.readOnly,
@@ -378,6 +382,8 @@ export class NodeIntrusionApp extends LegacyApplication {
       type: "node-intrusion",
       result,
       message,
+      quickOutcome: this.quickOutcome,
+
       rollTotal: this.rollTotal,
       dc: this.dc,
       profile: this.profile,
@@ -393,6 +399,8 @@ export class NodeIntrusionApp extends LegacyApplication {
         result,
         actorName: this.actorName,
         message,
+        quickOutcome: this.quickOutcome,
+
         rollTotal: this.rollTotal,
         dc: this.dc
       });
@@ -433,6 +441,8 @@ export class NodeIntrusionApp extends LegacyApplication {
     return {
       type: "node-intrusion",
       options: {
+        quickOutcome: this.quickOutcome,
+
         rollTotal: this.rollTotal,
         dc: this.dc,
         profile: this.profile,

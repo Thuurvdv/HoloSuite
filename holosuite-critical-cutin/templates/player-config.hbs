@@ -7,12 +7,27 @@
     </div>
     <div class="hcci-top-controls">
       <label class="hcci-threshold">
-        <span>Success Min</span>
-        <input type="number" name="threshold" min="1" max="20" step="1" value="{{threshold}}">
+        <span>Check die</span>
+        <select name="dieSides" required title="Changing dice asks to reset the listed players' success and failure thresholds.">
+          {{#each dice}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
       </label>
       <label class="hcci-threshold">
-        <span>Failure Max</span>
-        <input type="number" name="failureThreshold" min="1" max="20" step="1" value="{{failureThreshold}}">
+        <span>Positive rolls</span>
+        <select name="rollDirection" title="Changing roll direction asks to reset the listed players' success and failure thresholds.">
+          <option value="high" {{#unless lowRollsGood}}selected{{/unless}}>High rolls are positive</option>
+          <option value="low" {{#if lowRollsGood}}selected{{/if}}>Low rolls are positive</option>
+        </select>
+      </label>
+      <label class="hcci-threshold">
+        <span data-hcci-success-label>Success {{#if lowRollsGood}}≤{{else}}≥{{/if}}</span>
+        <input type="number" name="threshold" min="0" max="{{dieSides}}" step="1" value="{{threshold}}" title="0 = automatic best face. Set a value to customize the threshold.">
+      </label>
+      <label class="hcci-threshold">
+        <span data-hcci-failure-label>Failure {{#if lowRollsGood}}≥{{else}}≤{{/if}}</span>
+        <input type="number" name="failureThreshold" min="0" max="{{dieSides}}" step="1" value="{{failureThreshold}}" title="0 = automatic worst face. Set a value to customize the threshold.">
       </label>
       <label class="hcci-threshold">
         <span>Duration (ms)</span>
@@ -20,6 +35,7 @@
       </label>
     </div>
   </header>
+  <p class="hcci-roll-help">Changing the die or positive roll direction asks to reset roll thresholds for every listed entry in both tabs. Global thresholds of 0 use the best/worst face automatically; blank actor thresholds inherit them. Click Save to apply changes.</p>
 
   <section class="hcci-config-grid">
     {{#each rows}}
@@ -69,8 +85,8 @@
               </label>
 
               <label>
-                <span>Min Roll</span>
-                <input type="number" data-hcci-field="threshold" min="1" max="20" step="1" value="{{success.threshold}}" placeholder="{{../threshold}}">
+                <span data-hcci-success-label>Success {{#if ../lowRollsGood}}≤{{else}}≥{{/if}}</span>
+                <input type="number" data-hcci-field="threshold" min="1" max="{{../dieSides}}" step="1" value="{{success.threshold}}" placeholder="{{../effectiveThreshold}}">
               </label>
 
               <label>
@@ -125,8 +141,8 @@
               </label>
 
               <label>
-                <span>Max Roll</span>
-                <input type="number" data-hcci-field="threshold" min="1" max="20" step="1" value="{{failure.threshold}}" placeholder="{{../failureThreshold}}">
+                <span data-hcci-failure-label>Failure {{#if ../lowRollsGood}}≥{{else}}≤{{/if}}</span>
+                <input type="number" data-hcci-field="threshold" min="1" max="{{../dieSides}}" step="1" value="{{failure.threshold}}" placeholder="{{../effectiveFailureThreshold}}">
               </label>
 
               <label>

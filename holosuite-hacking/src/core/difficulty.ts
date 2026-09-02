@@ -1,3 +1,5 @@
+import { normalizeDieSides, normalizeRollDirection } from "../../../shared/src/dice-checks";
+
 export const DIFFICULTY_PROFILES = {
   critical_success: {
     profileId: "critical_success",
@@ -287,16 +289,30 @@ function flattenProfile(profile: any) {
   };
 }
 
-export function getDifficultyProfile(rollTotal = 0, dc = 10, naturalRoll: number | null = null) {
-  const roll = Number(rollTotal) || 0;
-  const target = Number(dc) || 10;
-  const natural = Number(naturalRoll);
+export function normalizeQuickOutcome(value: unknown): string | null {
+  if (value === undefined || value === null || value === "") return null;
+  if (typeof value !== "string" || !Object.hasOwn(DIFFICULTY_PROFILES, value)) throw new Error("Choose a valid Quick Hack outcome.");
+  return value;
+}
 
-  if (natural === 1) return flattenProfile(DIFFICULTY_PROFILES.critical_failure);
-  if (natural === 20) return flattenProfile(DIFFICULTY_PROFILES.critical_success);
-  if (roll <= target - 10) return flattenProfile(DIFFICULTY_PROFILES.critical_failure);
-  if (roll >= target + 10) return flattenProfile(DIFFICULTY_PROFILES.critical_success);
-  if (roll >= target + 5) return flattenProfile(DIFFICULTY_PROFILES.strong_success);
-  if (roll >= target) return flattenProfile(DIFFICULTY_PROFILES.success);
+export function getDifficultyProfile(rollTotal = 0, dc = 10, naturalRoll: number | null = null, options: any = {}) {
+  const quickOutcome = normalizeQuickOutcome(options.quickOutcome);
+  if (quickOutcome) return flattenProfile(DIFFICULTY_PROFILES[quickOutcome]);
+  if (["system", "sheet"].includes(options.rollSource) && Object.hasOwn(DIFFICULTY_PROFILES, options.systemOutcome ?? "")) {
+    return flattenProfile(DIFFICULTY_PROFILES[options.systemOutcome]);
+  }
+  const roll = Number(rollTotal) || 0;
+  const target = Number.isFinite(Number(dc)) ? Number(dc) : 10;
+  const natural = Number(naturalRoll);
+  const dieSides = normalizeDieSides(options.dieSides);
+  const lowIsGood = normalizeRollDirection(options.rollDirection) === "low";
+  const margin = lowIsGood ? target - roll : roll - target;
+
+  if (natural === (lowIsGood ? dieSides : 1)) return flattenProfile(DIFFICULTY_PROFILES.critical_failure);
+  if (natural === (lowIsGood ? 1 : dieSides)) return flattenProfile(DIFFICULTY_PROFILES.critical_success);
+  if (margin <= -10) return flattenProfile(DIFFICULTY_PROFILES.critical_failure);
+  if (margin >= 10) return flattenProfile(DIFFICULTY_PROFILES.critical_success);
+  if (margin >= 5) return flattenProfile(DIFFICULTY_PROFILES.strong_success);
+  if (margin >= 0) return flattenProfile(DIFFICULTY_PROFILES.success);
   return flattenProfile(DIFFICULTY_PROFILES.failure_but_playable);
 }

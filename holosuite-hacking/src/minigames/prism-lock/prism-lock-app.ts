@@ -23,8 +23,9 @@ function createRunSeed(rollTotal: number, dc: number, profile: any) {
 }
 
 export class PrismLockApp extends LegacyApplication {
-  rollTotal: number;
-  dc: number;
+  quickOutcome: string | null;
+  rollTotal: number | null;
+  dc: number | null;
   profile: any;
   tuning: any;
   seed: string;
@@ -46,9 +47,10 @@ export class PrismLockApp extends LegacyApplication {
 
   constructor(options: any = {}) {
     super(options);
-    this.rollTotal = Number(options.rollTotal ?? 15);
-    this.dc = Number(options.dc ?? 15);
-    this.profile = options.profile ? { ...options.profile } : getDifficultyProfile(this.rollTotal, this.dc);
+    this.quickOutcome = options.quickOutcome ?? null;
+    this.rollTotal = this.quickOutcome ? null : Number(options.rollTotal ?? 15);
+    this.dc = this.quickOutcome ? null : Number(options.dc ?? 15);
+    this.profile = options.profile ? { ...options.profile } : getDifficultyProfile(this.rollTotal, this.dc, null, { quickOutcome: this.quickOutcome });
     this.tuning = this.profile.prismLock ?? {};
     this.seed = options.seed ?? createRunSeed(this.rollTotal, this.dc, this.profile);
     this.actorName = String(options.actorName ?? "Hacker");
@@ -101,6 +103,8 @@ export class PrismLockApp extends LegacyApplication {
     });
 
     return {
+      quickOutcome: this.quickOutcome,
+
       rollTotal: this.rollTotal,
       dc: this.dc,
       isReadOnly: this.readOnly,
@@ -243,6 +247,8 @@ export class PrismLockApp extends LegacyApplication {
       type: "prism-lock",
       result,
       message,
+      quickOutcome: this.quickOutcome,
+
       rollTotal: this.rollTotal,
       dc: this.dc,
       profile: this.profile,
@@ -259,6 +265,8 @@ export class PrismLockApp extends LegacyApplication {
         result,
         actorName: this.actorName,
         message,
+        quickOutcome: this.quickOutcome,
+
         rollTotal: this.rollTotal,
         dc: this.dc
       });
@@ -283,6 +291,8 @@ export class PrismLockApp extends LegacyApplication {
     return {
       type: "prism-lock",
       options: {
+        quickOutcome: this.quickOutcome,
+
         rollTotal: this.rollTotal,
         dc: this.dc,
         profile: this.profile,

@@ -30,8 +30,9 @@ function createRunSeed(rollTotal: number, dc: number, profile: any) {
 }
 
 export class PacketSwitchboardApp extends LegacyApplication {
-  rollTotal: number;
-  dc: number;
+  quickOutcome: string | null;
+  rollTotal: number | null;
+  dc: number | null;
   profile: any;
   tuning: any;
   seed: string;
@@ -55,9 +56,10 @@ export class PacketSwitchboardApp extends LegacyApplication {
 
   constructor(options: any = {}) {
     super(options);
-    this.rollTotal = Number(options.rollTotal ?? 15);
-    this.dc = Number(options.dc ?? 15);
-    this.profile = options.profile ? { ...options.profile } : getDifficultyProfile(this.rollTotal, this.dc);
+    this.quickOutcome = options.quickOutcome ?? null;
+    this.rollTotal = this.quickOutcome ? null : Number(options.rollTotal ?? 15);
+    this.dc = this.quickOutcome ? null : Number(options.dc ?? 15);
+    this.profile = options.profile ? { ...options.profile } : getDifficultyProfile(this.rollTotal, this.dc, null, { quickOutcome: this.quickOutcome });
     this.tuning = this.profile.packetSwitchboard ?? {};
     this.seed = options.seed ?? createRunSeed(this.rollTotal, this.dc, this.profile);
     this.actorName = String(options.actorName ?? "Hacker");
@@ -103,6 +105,8 @@ export class PacketSwitchboardApp extends LegacyApplication {
 
   getData() {
     return {
+      quickOutcome: this.quickOutcome,
+
       rollTotal: this.rollTotal,
       dc: this.dc,
       isReadOnly: this.readOnly,
@@ -466,6 +470,8 @@ export class PacketSwitchboardApp extends LegacyApplication {
       type: "packet-switchboard",
       result,
       message,
+      quickOutcome: this.quickOutcome,
+
       rollTotal: this.rollTotal,
       dc: this.dc,
       profile: this.profile,
@@ -481,6 +487,8 @@ export class PacketSwitchboardApp extends LegacyApplication {
         result,
         actorName: this.actorName,
         message,
+        quickOutcome: this.quickOutcome,
+
         rollTotal: this.rollTotal,
         dc: this.dc
       });
@@ -509,6 +517,8 @@ export class PacketSwitchboardApp extends LegacyApplication {
     return {
       type: "packet-switchboard",
       options: {
+        quickOutcome: this.quickOutcome,
+
         rollTotal: this.rollTotal,
         dc: this.dc,
         profile: this.profile,

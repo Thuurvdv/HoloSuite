@@ -1,11 +1,15 @@
+import { DIFFICULTY_PROFILES } from "./difficulty";
+
 declare const ChatMessage: any;
 
-export async function postHackResultMessage({ title, result, actorName, message, rollTotal, dc }: any) {
+export async function postHackResultMessage({ title, result, actorName, message, rollTotal, dc, quickOutcome }: any) {
   const success = result === "success";
   const color = success ? "#38f28f" : "#ff477e";
   const label = success ? "HACK SUCCESS" : "HACK FAILED";
   const detail = message || (success ? "Objective completed." : "Trace or countermeasure completed.");
-  const rollLine = Number.isFinite(Number(rollTotal)) && Number.isFinite(Number(dc))
+  const rollLine = quickOutcome && Object.hasOwn(DIFFICULTY_PROFILES, quickOutcome)
+    ? `<p style="margin: 4px 0 0; color: #bdeff6;">GM-selected difficulty: ${escapeHtml(DIFFICULTY_PROFILES[quickOutcome].label)}</p>`
+    : rollTotal != null && dc != null && Number.isFinite(Number(rollTotal)) && Number.isFinite(Number(dc))
     ? `<p style="margin: 4px 0 0; color: #bdeff6;">Roll ${Number(rollTotal)} vs DC ${Number(dc)}</p>`
     : "";
 

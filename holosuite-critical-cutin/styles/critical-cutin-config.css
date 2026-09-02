@@ -160,6 +160,12 @@
   gap: 10px;
 }
 
+.hcci-roll-help {
+  margin: 0;
+  color: var(--hcci-muted);
+  font-size: 12px;
+}
+
 .hcci-top-controls .hcci-threshold:last-child input {
   width: 128px;
 }

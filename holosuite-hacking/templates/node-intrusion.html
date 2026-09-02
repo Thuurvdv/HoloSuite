@@ -25,7 +25,7 @@
     </div>
     <div class="node-intrusion-status">
       <span>{{profile.label}}</span>
-      <span>Roll {{rollTotal}} / DC {{dc}}</span>
+      <span>{{#if quickOutcome}}GM-selected difficulty{{else}}Roll {{rollTotal}} / DC {{dc}}{{/if}}</span>
     </div>
   </header>
 
@@ -102,8 +102,7 @@
             class="node-intrusion-node type-{{visualType}} radar-{{dangerSignal}}{{#if isCurrent}} is-current{{/if}}{{#if isVisited}} is-visited{{/if}}{{#if isNeighbor}} is-neighbor{{/if}}{{#if canMove}} can-move{{/if}}{{#if isDangerVisible}} is-revealed{{/if}}{{#if isClaiming}} is-claiming{{/if}}"
             data-node-id="{{id}}"
             style="left: {{x}}%; top: {{y}}%;"
-            title="{{title}}"
-            aria-label="{{id}} {{displayType}}"
+            aria-label="Node {{displayNumber}} {{displayType}}"
             {{#unless ../state.hasStarted}}disabled{{else}}{{#unless canMove}}{{#unless isCurrent}}disabled{{/unless}}{{/unless}}{{/unless}}
           >
             {{#if isCurrent}}<i class="fa-solid fa-location-crosshairs node-intrusion-current-icon"></i>{{/if}}
