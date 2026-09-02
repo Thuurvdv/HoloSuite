@@ -80,15 +80,14 @@ function moduleVisual(module, pathPrefix = "") {
 }
 
 function searchableText(module) {
-  return [
-    module.name,
-    module.category,
-    module.summary,
-    ...(module.features || []),
-    ...(module.installation || []),
-    ...(module.configuration || []),
-    ...(module.examples || [])
-  ].join(" ").toLowerCase();
+  return collectSearchText(module).join(" ").toLowerCase();
+}
+
+function collectSearchText(value) {
+  if (typeof value === "string" || typeof value === "number") return [String(value)];
+  if (Array.isArray(value)) return value.flatMap(collectSearchText);
+  if (value && typeof value === "object") return Object.values(value).flatMap(collectSearchText);
+  return [];
 }
 
 function escapeHtml(value) {

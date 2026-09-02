@@ -56,6 +56,8 @@
   align-self: start;
   position: sticky;
   top: 92px;
+  max-height: calc(100vh - 116px);
+  overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(16, 26, 29, 0.82);
@@ -141,6 +143,13 @@
   align-items: center;
 }
 
+.doc-module-hero > *,
+.doc-module-layout > *,
+.doc-content,
+.doc-section {
+  min-width: 0;
+}
+
 .doc-module-visual {
   width: 100%;
   aspect-ratio: 16 / 10;
@@ -175,6 +184,7 @@
 }
 
 .doc-section {
+  scroll-margin-top: 92px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(16, 26, 29, 0.82);
@@ -186,17 +196,100 @@
   font-size: clamp(1.7rem, 3vw, 2.6rem);
 }
 
+.doc-subsection {
+  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.doc-subsection:first-of-type {
+  margin-top: 20px;
+}
+
+.doc-subsection h3,
+.doc-table-wrap h3 {
+  margin: 0 0 12px;
+  color: var(--cyan);
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+}
+
 .doc-section p,
 .doc-section li {
   color: #d8e7e4;
+  overflow-wrap: anywhere;
 }
 
 .doc-section ul,
 .doc-section ol {
   display: grid;
   gap: 8px;
-  margin: 0;
+  margin: 14px 0 0;
   padding-left: 20px;
+}
+
+.doc-section li::marker {
+  color: var(--amber);
+  font-weight: 850;
+}
+
+.doc-callout {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--cyan);
+  border-radius: 7px;
+  background: rgba(69, 217, 208, 0.08);
+}
+
+.doc-callout--warning {
+  border-left-color: var(--amber);
+  background: rgba(246, 192, 79, 0.08);
+}
+
+.doc-callout--danger {
+  border-left-color: #ff6b72;
+  background: rgba(255, 107, 114, 0.08);
+}
+
+.doc-callout strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text);
+}
+
+.doc-callout p {
+  margin: 0;
+}
+
+.doc-table-wrap {
+  margin-top: 24px;
+  overflow-x: auto;
+}
+
+.doc-table-wrap table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 0.94rem;
+}
+
+.doc-table-wrap th,
+.doc-table-wrap td {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.doc-table-wrap th {
+  color: var(--amber);
+  background: rgba(5, 9, 11, 0.62);
+}
+
+.doc-table-wrap td:first-child {
+  color: var(--cyan);
+  font-weight: 800;
 }
 
 .faq-list {
@@ -259,6 +352,8 @@
   .docs-sidebar,
   .doc-toc {
     position: static;
+    max-height: none;
+    overflow-y: visible;
   }
 }
 
