@@ -50,15 +50,119 @@ function renderModule(module) {
 
   const content = document.querySelector("[data-module-content]");
   if (!content) return;
-  content.innerHTML = `
-    ${section("overview", "Overview", paragraphs([module.overview]))}
-    ${section("videos", "Video", videos(module.videos, module.name))}
-    ${section("features", "Features", list(module.features))}
-    ${section("installation", "Installation", orderedList(module.installation))}
-    ${section("configuration", "Configuration", list(module.configuration))}
-    ${faqSection(module.faq)}
-    ${section("examples", "Examples", list(module.examples))}
+  if (module.tutorial) {
+    renderTutorial(module, content);
+    return;
+  }
+
+  const defaultSections = [
+    { id: "overview", title: "Overview", body: paragraphs([module.overview]) },
+    { id: "videos", title: "Video", body: videos(module.videos, module.name) },
+    { id: "features", title: "Features", body: list(module.features) },
+    { id: "installation", title: "Installation", body: orderedList(module.installation) },
+    { id: "configuration", title: "Configuration", body: list(module.configuration) },
+    { id: "faq", title: "FAQ", body: faqList(module.faq) },
+    { id: "examples", title: "Examples", body: list(module.examples) }
+  ];
+  renderSections(content, defaultSections);
+}
+
+function renderTutorial(module, content) {
+  const tutorial = module.tutorial;
+  const tutorialSections = (tutorial.sections || []).map((item) => ({
+    id: item.id,
+    title: item.title,
+    body: tutorialSectionBody(item)
+  }));
+  const pageSections = [
+    {
+      id: "overview",
+      title: "Overview",
+      body: paragraphs([module.overview, tutorial.intro].filter(Boolean))
+        + callout("Who can configure HoloDock?", tutorial.audience, "info")
+    },
+    {
+      id: "quick-start",
+      title: tutorial.quickStart?.title || "Quick start",
+      body: paragraphs(tutorial.quickStart?.paragraphs || [])
+        + orderedList(tutorial.quickStart?.steps || [])
+        + renderCallouts(tutorial.quickStart?.callouts)
+    },
+    ...tutorialSections,
+    {
+      id: "configuration-reference",
+      title: tutorial.reference?.title || "Configuration reference",
+      body: paragraphs(tutorial.reference?.paragraphs || [])
+        + renderTables(tutorial.reference?.tables)
+        + renderCallouts(tutorial.reference?.callouts)
+    },
+    { id: "videos", title: "Video", body: videos(module.videos, module.name) },
+    { id: "faq", title: "Troubleshooting and FAQ", body: faqList(module.faq) },
+    { id: "examples", title: "Campaign ideas", body: list(module.examples) }
+  ].filter((item) => item.body);
+
+  renderSections(content, pageSections);
+}
+
+function renderSections(content, items) {
+  content.innerHTML = items.map((item) => section(item.id, item.title, item.body)).join("");
+  const toc = document.querySelector("[data-module-toc]");
+  if (toc) {
+    toc.innerHTML = items
+      .map((item) => `<a href="#${escapeAttribute(item.id)}">${escapeHtml(item.title)}</a>`)
+      .join("");
+  }
+}
+
+function tutorialSectionBody(item) {
+  return paragraphs(item.paragraphs || [])
+    + (item.steps?.length ? orderedList(item.steps) : "")
+    + (item.bullets?.length ? list(item.bullets) : "")
+    + (item.subsections || []).map(tutorialSubsection).join("")
+    + renderTables(item.tables)
+    + renderCallouts(item.callouts);
+}
+
+function tutorialSubsection(item) {
+  return `
+    <section class="doc-subsection">
+      <h3>${escapeHtml(item.title)}</h3>
+      ${paragraphs(item.paragraphs || [])}
+      ${item.steps?.length ? orderedList(item.steps) : ""}
+      ${item.bullets?.length ? list(item.bullets) : ""}
+      ${renderTables(item.tables)}
+      ${renderCallouts(item.callouts)}
+    </section>
   `;
+}
+
+function renderCallouts(items) {
+  if (!items?.length) return "";
+  return items.map((item) => callout(item.title, item.text, item.tone)).join("");
+}
+
+function callout(title, text, tone = "info") {
+  if (!text) return "";
+  return `
+    <aside class="doc-callout doc-callout--${escapeAttribute(tone)}">
+      ${title ? `<strong>${escapeHtml(title)}</strong>` : ""}
+      <p>${escapeHtml(text)}</p>
+    </aside>
+  `;
+}
+
+function renderTables(items) {
+  if (!items?.length) return "";
+  return items.map((table) => `
+    <div class="doc-table-wrap">
+      ${table.title ? `<h3>${escapeHtml(table.title)}</h3>` : ""}
+      ${table.description ? `<p>${escapeHtml(table.description)}</p>` : ""}
+      <table>
+        <thead><tr>${table.columns.map((column) => `<th scope="col">${escapeHtml(column)}</th>`).join("")}</tr></thead>
+        <tbody>${table.rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody>
+      </table>
+    </div>
+  `).join("");
 }
 
 function moduleVisual(module, pathPrefix = "") {
@@ -102,15 +206,22 @@ function paragraphs(items) {
 }
 
 function list(items) {
+  if (!items?.length) return "";
   return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
 }
 
 function orderedList(items) {
+  if (!items?.length) return "";
   return `<ol>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol>`;
 }
 
 function faqSection(items) {
-  return section("faq", "FAQ", `
+  return section("faq", "FAQ", faqList(items));
+}
+
+function faqList(items) {
+  if (!items?.length) return "";
+  return `
     <div class="faq-list">
       ${items.map((item) => `
         <details>
@@ -119,7 +230,7 @@ function faqSection(items) {
         </details>
       `).join("")}
     </div>
-  `);
+  `;
 }
 
 function videos(items, moduleName) {

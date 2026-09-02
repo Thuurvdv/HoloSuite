@@ -416,7 +416,7 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/HoloDockTeaser.png",
       "summary": "A system-agnostic ship loadout, equipment, power, and damage console for sci-fi and vehicle-focused campaigns.",
-      "overview": "HoloDock gives HoloSuite worlds a dedicated ship console. GMs can create ship profiles, define custom stats, build categorized equipment slots, place pins on the ship image, and manage ship power or damage without tying the workflow to a specific game system.",
+      "overview": "HoloDock gives HoloSuite worlds a dedicated ship operations console. A ship profile combines a vessel image, free-form statistics, categorized slots, installed Foundry Items, power allocation, durability, activation controls, and per-ship player rights. It does not impose a game system or ship ruleset: the GM decides what the numbers and equipment mean for the campaign.",
       "features": [
         "Create and manage multiple ship profiles.",
         "Assign custom ship images or use the bundled default.",
@@ -424,9 +424,12 @@
         "Create categorized equipment slots with descriptions and optional ship-image pins.",
         "Drag Foundry Items onto slots to convert them into tracked ship equipment.",
         "Display installed item names, icons, types, descriptions, power state, durability, and activation controls.",
-        "Manage ship power capacity, per-system allocation, online or offline state, and saved power presets.",
-        "Review dashboard pages for overview, systems, power grid, damage, speed, capacity, and additional stats.",
+        "Manage ship power capacity, per-system allocation, and online or offline state.",
+        "Review dashboard pages for overview, systems, power grid, damage, speed, capacity, and additional statistics.",
+        "Activate configured equipment and publish the result, cooldown, resource note, and durability consequences to chat.",
         "Let players request equipment installation through chat when GM approval is needed.",
+        "Configure equipment from the rocket button on any Foundry Item sheet.",
+        "Expose hooks and a game.holodock API for advanced integrations.",
         "Open HoloDock from the HoloSuite launcher."
       ],
       "installation": [
@@ -442,8 +445,483 @@
         "Create equipment slot categories and decide which slots can receive player install requests.",
         "Configure whether players may drag equipment into empty slots or activate ship systems.",
         "Place equipment pins on the ship image when spatial layout matters.",
-        "Use power capacity, per-system allocation, durability, and presets to keep the ship dashboard table-ready."
+        "Use power capacity, per-system allocation, durability, and activation settings to keep the ship dashboard table-ready."
       ],
+      "tutorial": {
+        "intro": "This guide starts with a working ship, then explains every control and configuration field. Unless a step specifically says player, perform setup while logged in as a GM.",
+        "audience": "Players can open visible ships and use only the actions allowed by that ship's Player Rights. Creating profiles, changing ship data, configuring Items, approving installs, changing power or durability, and placing pins are GM tasks.",
+        "quickStart": {
+          "title": "Quick start: build your first working ship",
+          "paragraphs": [
+            "Use this path when you want a usable console first and plan to learn the finer controls afterward."
+          ],
+          "steps": [
+            "Install and enable HoloSuite Core, then install HoloDock with https://github.com/Thuurvdv/holodock/releases/latest/download/module.json and enable it in the same world.",
+            "Open the HoloSuite launcher and select HoloDock. Players also open HoloDock from this launcher.",
+            "As GM, select the plus button beside Ship Profile. HoloDock creates New Ship with a default image, sample statistics, and four empty slots.",
+            "Expand Ship Setup. Enter the ship name and class, choose an image, set Power Capacity, and select Save Ship. Use 0 when you do not want a total power budget.",
+            "Open a Foundry Item that represents a ship system. Select the rocket-shaped Ship Equipment control in the Item sheet header, enable Ship Equipment, choose its category, and configure any activation, durability, or power options.",
+            "Drag the Item from its sheet or directory onto a compatible empty slot in HoloDock. Confirm the install. You can also open a slot's three-dot menu and select Choose to browse world Items.",
+            "Select the installed Item in the right-hand Equipment rail to inspect it, allocate power, change durability, open its Item sheet, remove it from the slot, or activate it.",
+            "Open Player Rights from the shield button beside the profile selector. Decide whether players can see the ship, request installs, and activate systems."
+          ],
+          "callouts": [
+            {
+              "title": "Recommended first test",
+              "text": "Create one powered Item with Power Draw 2 and Starting Allocation 2, give the ship Power Capacity 5, and enable activation. This makes the Systems, Power Grid, and activation views useful immediately.",
+              "tone": "info"
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "interface-tour",
+            "title": "Interface tour",
+            "paragraphs": [
+              "HoloDock keeps setup and play controls in one resizable window. The available controls change with GM status and the selected ship's rights."
+            ],
+            "subsections": [
+              {
+                "title": "Top bar and profile selector",
+                "bullets": [
+                  "Ship Profile switches between ships visible to the current user. The most recently selected ship becomes that user's default the next time HoloDock opens.",
+                  "The plus button creates a profile. The shield button opens Player Rights. The trash button permanently deletes the selected profile after confirmation. These buttons are GM-only."
+                ]
+              },
+              {
+                "title": "Left inspector",
+                "bullets": [
+                  "Ship Setup contains the vessel's name, class, image, and total power capacity.",
+                  "Operations shows the calculated Systems, Power, Online, Integrity, Speed, and Capacity tiles. Select a tile to open its detail page.",
+                  "Additional statistics appear below the tiles with GM edit and delete controls."
+                ]
+              },
+              {
+                "title": "Command deck and equipment rail",
+                "bullets": [
+                  "The center command deck shows the ship image on Overview and the Systems, Power Grid, Damage, Speed, Capacity, or selected Equipment page.",
+                  "The condition badge is calculated from installed systems, damage, power, and whether a capacity is configured; it is not a manually selected status.",
+                  "The right rail groups slots by category. Select installed equipment to open its Equipment page. Use a slot's three-dot menu to choose an Item, link a pin, edit the slot, or delete it."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ships-and-rights",
+            "title": "Ship profiles and player rights",
+            "subsections": [
+              {
+                "title": "Create and configure a ship",
+                "paragraphs": [
+                  "Select the plus button beside Ship Profile. A new profile starts visible to players, allows system activation, blocks player installs, uses the bundled ship image, and has an untracked power capacity of 0. It also includes example stats and Weapons, Defense, Utility, and Engines slots that you can change or delete."
+                ],
+                "steps": [
+                  "Expand Ship Setup in the left inspector.",
+                  "Set Ship Name and Class / Type. Class is descriptive and may be left blank.",
+                  "Paste an Image Path or use the folder button to choose a file through Foundry's File Picker. A missing image falls back to the bundled default.",
+                  "Set Power Capacity to a non-negative whole number, or 0 to show allocation without enforcing a total budget.",
+                  "Select Save Ship. Switching profiles does not submit unsaved setup fields."
+                ]
+              },
+              {
+                "title": "Configure player rights",
+                "steps": [
+                  "Select the shield button beside Ship Profile.",
+                  "Enable Hide ship from players to remove this profile from every non-GM user's profile selector.",
+                  "Enable Allow players to drag equipment into empty slots to let players submit installation requests. A GM must still approve each request; this does not grant direct editing rights.",
+                  "Enable Allow players to activate systems to show and enable configured activation actions for players. Disable it for a read-only player view.",
+                  "Select Save. Rights are stored separately for every ship profile."
+                ],
+                "callouts": [
+                  {
+                    "title": "Default rights",
+                    "text": "New profiles are visible, player installation is disabled, and player activation is enabled. Review Player Rights before inviting players into a new ship.",
+                    "tone": "warning"
+                  }
+                ]
+              },
+              {
+                "title": "Switch or delete profiles",
+                "bullets": [
+                  "Profile selection is saved per browser user, so the GM and each player may open on different ships.",
+                  "Deleting a profile removes its stats, slots, links, and assignments. It does not delete the Foundry Items that were installed or erase their Ship Equipment flags."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "statistics-and-dashboard",
+            "title": "Statistics and dashboard pages",
+            "paragraphs": [
+              "Statistics are free-form text values. HoloDock does not calculate speed, fuel, cargo, crew, or defense from a game system. Labels determine whether a stat appears on the dedicated Speed or Capacity pages."
+            ],
+            "subsections": [
+              {
+                "title": "Add, edit, and delete statistics",
+                "steps": [
+                  "Select the plus button in Operations.",
+                  "Enter a Label, Value, and optional Note. Values may include units or text, such as 8 hexes, 75%, 12 tons, or Operational.",
+                  "Select Save. Use the pencil and trash controls on an additional-stat card to edit or delete it.",
+                  "On the Speed and Capacity pages, GMs can edit recognized values directly. Changing or leaving a field saves it; the X control unsets that recognized statistic."
+                ]
+              },
+              {
+                "title": "Labels recognized by special pages",
+                "tables": [
+                  {
+                    "columns": ["Page field", "Recommended label", "Labels HoloDock recognizes"],
+                    "rows": [
+                      ["Speed", "Speed", "First statistic whose label contains speed"],
+                      ["Cruise", "Cruise Speed", "Label contains cruise"],
+                      ["Maximum", "Maximum Speed", "Label contains max speed, maximum speed, top speed, or maximum"],
+                      ["Thrust", "Thrust", "Label contains thrust or acceleration"],
+                      ["Capacity", "Capacity", "First label containing capacity or occupancy"],
+                      ["Crew", "Crew", "Label contains crew"],
+                      ["Berths", "Berths", "Label contains berth"],
+                      ["Cargo", "Cargo", "Label contains cargo or hold"],
+                      ["Life Support", "Life Support", "Label contains life support or life-support"]
+                    ]
+                  }
+                ],
+                "callouts": [
+                  {
+                    "title": "Avoid ambiguous names",
+                    "text": "Matching is case-insensitive and based on words contained in the label. Use the recommended labels and keep the main Speed statistic before Cruise Speed so the intended value is selected.",
+                    "tone": "warning"
+                  }
+                ]
+              },
+              {
+                "title": "What each dashboard page shows",
+                "bullets": [
+                  "Overview shows the vessel image, pins, condition, operation tiles, and equipment rail.",
+                  "Systems lists installed Ship Equipment and summarizes power, durability, and Ready, Offline, No Power, Low Power, Damaged, or Broken state.",
+                  "Power Grid lists only equipment with Requires power enabled and lets a GM edit each allocation.",
+                  "Damage lists durability-enabled installed systems and their current integrity state.",
+                  "Speed and Capacity show only when the corresponding statistic is configured for a player. GMs can open them to add recognized values.",
+                  "Selecting an installed Item in the rail opens its Equipment detail page even though Equipment is not a permanent navigation tile."
+                ]
+              },
+              {
+                "title": "How the condition badge is calculated",
+                "bullets": [
+                  "Critical: at least one system is Broken, or the ship is over its tracked power capacity while at least one system is underpowered.",
+                  "Compromised: there is damage, an offline or underpowered system, or a power-capacity overage that is not already Critical.",
+                  "Strained: there are no installed ship systems, or total Power Capacity is 0 and therefore untracked.",
+                  "Nominal: systems exist, capacity is tracked, and none of the warning conditions apply."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "slots-and-equipment",
+            "title": "Equipment slots and Item installation",
+            "subsections": [
+              {
+                "title": "Create a slot",
+                "steps": [
+                  "Select the plus button at the top of the Equipment rail.",
+                  "Set Slot Type. This text is both the slot's display label and its grouping category in the rail. Existing and default categories are suggested, but you may type a new one.",
+                  "Add an optional Description for your own slot definition.",
+                  "Optionally set Required Ship Equipment Category and Required Tags, then select Save. New categories are remembered as suggestions throughout the world."
+                ]
+              },
+              {
+                "title": "Compatibility rules",
+                "bullets": [
+                  "Required Ship Equipment Category must exactly match the Item's Ship Equipment Category, ignoring capitalization.",
+                  "Required Tags is a comma-separated list. An Item must have every required tag; tag matching also ignores capitalization.",
+                  "An ordinary Item dropped into an unrestricted slot is converted to Ship Equipment and starts in the slot category. If a required category exists, it starts in that required category.",
+                  "The Choose browser sorts compatible Items first and puts rejected Items in an Incompatible section with the reason. Selecting an incompatible Item still produces a warning and does not install it."
+                ]
+              },
+              {
+                "title": "Install, replace, inspect, and remove Items",
+                "steps": [
+                  "Drag a Foundry Item onto a slot, or choose Choose from the slot's three-dot menu. The Choose browser searches world Items; drag and drop can resolve other accessible Item UUIDs, but importing an Item into the world first is the safest workflow.",
+                  "Confirm the installation. If the slot is occupied, confirmation replaces its assignment; the old Item itself is not deleted.",
+                  "Select an installed entry to open its Equipment page. Open launches the original Item sheet. Remove clears only the slot assignment.",
+                  "As GM, you can also right-click a slot card to remove its installed Item immediately."
+                ],
+                "callouts": [
+                  {
+                    "title": "HoloDock references the original Item",
+                    "text": "A slot stores the Item's UUID; it does not make a copy. Renaming or reconfiguring that Item updates what HoloDock shows. Deleting it leaves the slot unable to resolve the equipment until another Item is installed.",
+                    "tone": "info"
+                  }
+                ]
+              },
+              {
+                "title": "Configure an Item as Ship Equipment",
+                "paragraphs": [
+                  "Open any Item sheet as GM and select the rocket-shaped Ship Equipment control in the header. If your system uses a custom sheet, HoloDock also attempts to add a small rocket fallback control near the window controls."
+                ],
+                "bullets": [
+                  "Ship Equipment enables or removes all HoloDock metadata on the Item. Turning it off removes the flag but does not remove a slot's UUID assignment.",
+                  "Category identifies the equipment type and participates in slot compatibility.",
+                  "Tags is a comma-separated list used by compatibility rules. Examples: turret, external, sensor, medical, or military.",
+                  "Activation, Durability, and Power are independent. Enable only the subsystems you want HoloDock to track."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "power-and-damage",
+            "title": "Power allocation and damage tracking",
+            "subsections": [
+              {
+                "title": "Configure the ship power budget",
+                "steps": [
+                  "In Ship Setup, set Power Capacity to the total allocation available to this vessel and save the ship.",
+                  "On each relevant Item, enable Requires power, set Power Draw, set Starting Allocation, and choose whether it begins Online.",
+                  "Use the Equipment page or Power Grid to change Allocated power. Use the Equipment page to switch an Item Online or Offline."
+                ],
+                "bullets": [
+                  "Only allocations on online, power-enabled equipment count toward the ship's Used total.",
+                  "Allocated below Power Draw makes a system underpowered and blocks its activation. An allocation of zero turns the system offline when its equipment data is saved.",
+                  "Going above ship Power Capacity marks the budget as over capacity but does not automatically redistribute power or shut systems down.",
+                  "Power Capacity 0 means untracked. HoloDock still shows each Item's draw and allocation, but there is no total-budget overage."
+                ],
+                "callouts": [
+                  {
+                    "title": "No saved presets",
+                    "text": "The current HoloDock release does not save named power presets. Allocation changes are live and persist directly on each Item.",
+                    "tone": "warning"
+                  }
+                ]
+              },
+              {
+                "title": "Configure durability",
+                "steps": [
+                  "Open an Item's Ship Equipment configuration and enable Has durability.",
+                  "Set Current, Maximum, and Broken At. Current is clamped between 0 and Maximum; Broken At is the threshold at or below which the system is Broken.",
+                  "During play, edit Current from the selected Equipment page. The Damage page summarizes every installed durability-enabled system."
+                ],
+                "bullets": [
+                  "Intact means Current equals Maximum. Damaged means Current is below Maximum but above Broken At. Broken means Current is at or below Broken At.",
+                  "A broken powered Item is automatically taken offline when its HoloDock equipment data is saved.",
+                  "Deleting or removing an Item from a slot does not change its durability values because they belong to the Item."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "activation",
+            "title": "Equipment activation",
+            "subsections": [
+              {
+                "title": "Configure the activation fields",
+                "tables": [
+                  {
+                    "columns": ["Field", "What it does", "Example"],
+                    "rows": [
+                      ["Can be activated", "Adds the activation action to installed equipment.", "Enabled for a railgun or scanner"],
+                      ["Button Label", "Text shown on the action button.", "Fire Railgun"],
+                      ["Action Type", "Descriptive integration key passed to hooks and shown on chat cards; HoloDock does not perform a system roll by itself.", "attack, scan, repair"],
+                      ["Cooldown", "Records and displays a real-time countdown using about 6 seconds per configured round after activation.", "3 rounds"],
+                      ["Resource Cost", "A descriptive cost included in the result; HoloDock does not deduct a game-system resource automatically.", "1 torpedo"],
+                      ["Durability Cost", "Automatically subtracts this amount from HoloDock Current durability after activation when durability is enabled.", "2"],
+                      ["Block activation when broken", "Prevents activation at or below Broken At.", "Enabled"]
+                    ]
+                  }
+                ]
+              },
+              {
+                "title": "What happens when Activate is selected",
+                "steps": [
+                  "HoloDock verifies that activation is enabled and that the user has activation rights for the ship.",
+                  "If power tracking is enabled, the Item must be Online and Allocated must be at least Power Draw.",
+                  "If Block activation when broken is enabled, the Item must be above its Broken At threshold.",
+                  "HoloDock calls the holodock.activateEquipment hook so a game system or another module can handle, add consequences, or block the action.",
+                  "If activation continues, HoloDock records the activation time, subtracts configured durability cost, lists descriptive resource and cooldown consequences, and calls holodock.equipmentActivated.",
+                  "When Enable Chat Cards is on, HoloDock posts Activated, Blocked, or Unhandled plus ship, slot, action, costs, cooldown, durability, and integration messages to chat."
+                ],
+                "callouts": [
+                  {
+                    "title": "Cooldown is informational",
+                    "text": "The current release shows the remaining cooldown but does not itself disable the button during that countdown. Enforce cooldown through table rules or an integration hook if it must be mandatory.",
+                    "tone": "warning"
+                  },
+                  {
+                    "title": "Resource Cost is informational",
+                    "text": "Text such as 1 missile is reported, not deducted from an Actor or Item. Durability Cost is the built-in numeric consequence that HoloDock applies automatically.",
+                    "tone": "info"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ship-image-pins",
+            "title": "Ship-image pins and link lines",
+            "paragraphs": [
+              "A slot pin connects a physical place on the ship image to its card in the Equipment rail. Pins inherit system status styling, so damage and power problems are visible on the vessel diagram."
+            ],
+            "steps": [
+              "Open the slot's three-dot menu and select Link.",
+              "Select the desired point on the ship image. HoloDock stores that position as percentages, so it remains aligned when the window resizes.",
+              "To reposition a pin as GM, drag it to a new point. A simple click opens that slot's Equipment page.",
+              "To remove the pin without deleting the slot, open the three-dot menu and select Clear Link."
+            ],
+            "callouts": [
+              {
+                "title": "Player interaction",
+                "text": "Players cannot create, move, or clear pins. Selecting a pin opens its installed equipment when the linked slot contains an Item.",
+                "tone": "info"
+              }
+            ]
+          },
+          {
+            "id": "player-workflows",
+            "title": "Player workflows and GM approval",
+            "subsections": [
+              {
+                "title": "Player installation requests",
+                "steps": [
+                  "The GM enables Allow players to drag equipment into empty slots for that ship.",
+                  "A player drags an accessible Foundry Item onto a compatible slot and confirms the request.",
+                  "With chat cards enabled, HoloDock posts a request card containing player, ship, slot, and Item. A GM selects Approve or Reject. Without chat cards, the primary active GM receives an approval dialog through the module socket.",
+                  "Approval converts an ordinary Item to Ship Equipment if necessary and assigns it to the slot. Rejection leaves both Item and slot unchanged."
+                ]
+              },
+              {
+                "title": "Player activation",
+                "bullets": [
+                  "The GM must enable Allow players to activate systems on the selected ship.",
+                  "A primary active GM should be connected so durability and activation timestamps can be saved authoritatively for a player's activation.",
+                  "Players cannot change allocation, toggle power, edit durability, reconfigure the Item, remove equipment, or change ship data.",
+                  "Hidden ships do not appear to players even if their activation or install rights are enabled.",
+                  "An allowed drop onto an occupied compatible slot creates a replacement request. HoloDock asks the player to confirm and still requires GM approval before changing the assignment."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "settings-and-storage",
+            "title": "Settings, persistence, and maintenance",
+            "subsections": [
+              {
+                "title": "Visible world setting",
+                "paragraphs": [
+                  "Foundry's Configure Settings > Module Settings contains Enable Chat Cards. It is on by default. Turning it off suppresses activation cards and uses socket-based GM prompts instead of chat cards for player install requests."
+                ]
+              },
+              {
+                "title": "Where HoloDock data lives",
+                "bullets": [
+                  "Ship profiles, rights, statistics, slots, pin positions, and Item assignments are stored as world-level HoloDock settings.",
+                  "Remembered slot and equipment categories are stored at world level and grow when a GM saves a new category.",
+                  "The selected default ship is stored per client user.",
+                  "Equipment category, tags, activation, durability, and power data are stored as a HoloDock flag on the original Foundry Item."
+                ]
+              },
+              {
+                "title": "Safe maintenance rules",
+                "bullets": [
+                  "Remove clears a slot assignment; it does not delete or reset the Item.",
+                  "Delete Slot removes that slot and its pin link; it does not delete installed equipment.",
+                  "Delete Profile removes the profile and all of its ship-side configuration; it does not delete any referenced Items.",
+                  "Disabling Ship Equipment on an Item removes its HoloDock flag. Remove it from any slots separately to avoid unresolved or untracked assignments."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "advanced-integrations",
+            "title": "Advanced integrations",
+            "paragraphs": [
+              "HoloDock works without code, but module and system authors can connect activation to rolls, resource consumption, automation, or custom UI. The API is available as game.holodock and on the active holodock module's api property."
+            ],
+            "subsections": [
+              {
+                "title": "Activation hooks",
+                "bullets": [
+                  "holodock.activateEquipment receives a mutable activation context before built-in consequences are saved. An integration can set handled, blocked, message, or append consequence text.",
+                  "holodock.equipmentActivated fires after a successful activation and saved built-in consequences.",
+                  "Action Type is included in the Item's equipment data so integrations can route values such as attack, scan, or repair."
+                ]
+              },
+              {
+                "title": "Public API groups",
+                "tables": [
+                  {
+                    "columns": ["Purpose", "Available methods"],
+                    "rows": [
+                      ["Open and read", "open, getProfiles, getProfile, getCategories, getShipPowerBudget"],
+                      ["Profiles", "createProfile, updateProfileMetadata, updateProfilePermissions, deleteProfile"],
+                      ["Ship layout", "upsertSlot, deleteSlot, upsertStat, deleteStat, setSlotAnchor, clearSlotAnchor"],
+                      ["Assignments", "equipItem, unequipItem, validateItemForSlot"],
+                      ["Equipment", "getShipEquipmentData, isShipEquipment, setShipEquipmentData, updateShipEquipmentDurability, updateShipEquipmentPowerState, updateShipEquipmentPowerAllocation, activateEquipment"]
+                    ]
+                  }
+                ],
+                "callouts": [
+                  {
+                    "title": "GM authority still applies",
+                    "text": "Most mutation methods enforce the same GM checks as the interface. Build integrations around the exposed methods and hooks rather than editing world settings or Item flags directly.",
+                    "tone": "warning"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "worked-example",
+            "title": "Worked example: a combat-ready courier",
+            "steps": [
+              "Create a ship named Wayfarer, class Light Courier, with Power Capacity 10.",
+              "Keep Speed 6 and Cruise Speed 4. Add Maximum Speed 9, Thrust 3, Crew 4, Berths 6, Cargo 2 tons, and Life Support 30 days so both detail pages are populated.",
+              "Create a Weapons slot requiring category Weapons and tags turret, external. Create an Engines slot requiring Engines, plus unrestricted Defense and Utility slots.",
+              "Configure a Railgun Item as category Weapons with turret and external tags. Enable power with Draw 4 and Allocation 4; enable durability at 10/10 with Broken At 0; enable activation with Fire Railgun, Action Type attack, Resource Cost 1 slug, Cooldown 2, and Durability Cost 1.",
+              "Configure Engines with power 3/3 and durability 12/12, Shields with power 2/2, and a Scanner with power 1/1. Install all four Items. The ship now uses 10/10 power and should be Nominal.",
+              "Link each slot to the corresponding place on the ship image. Open Player Rights, keep the ship visible, enable player activation, and enable installs only if you want player requests.",
+              "Test damage by lowering Engines to 5/12; the condition becomes Compromised. Lower it to 0/12; it becomes Broken, powers off, and the ship becomes Critical. Restore durability and switch it Online to return to Nominal."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Configuration field reference",
+          "paragraphs": [
+            "Use these tables as a compact checklist after working through the tutorial. Numeric HoloDock fields accept non-negative values and are normalized when saved."
+          ],
+          "tables": [
+            {
+              "title": "Ship profile fields",
+              "columns": ["Field", "Scope", "Behavior"],
+              "rows": [
+                ["Ship Name", "Per profile", "Display name in the selector and command deck."],
+                ["Class / Type", "Per profile", "Optional descriptive subtitle."],
+                ["Image Path", "Per profile", "Foundry-accessible image path; missing images fall back to HoloDock's default."],
+                ["Power Capacity", "Per profile", "Total online allocation budget; 0 disables total-budget tracking."],
+                ["Hide ship from players", "Per profile", "Removes the profile from all non-GM views."],
+                ["Allow players to drag equipment", "Per profile", "Allows compatible install requests that still require GM approval."],
+                ["Allow players to activate systems", "Per profile", "Allows players to select configured activation buttons."]
+              ]
+            },
+            {
+              "title": "Slot fields",
+              "columns": ["Field", "Required", "Behavior"],
+              "rows": [
+                ["Slot Type", "Yes", "Display label and grouping category."],
+                ["Description", "No", "Free-form slot notes."],
+                ["Required Ship Equipment Category", "No", "Case-insensitive exact match against Item category."],
+                ["Required Tags", "No", "Comma-separated tags; every tag must exist on the Item."],
+                ["Image anchor", "No", "Percentage position created through Link; draws a line to the slot card."]
+              ]
+            },
+            {
+              "title": "Item equipment fields",
+              "columns": ["Group", "Fields", "Behavior"],
+              "rows": [
+                ["Identity", "Ship Equipment, Category, Tags", "Enables tracking and controls slot compatibility."],
+                ["Activation", "Enabled, Label, Action Type, Cooldown, Resource Cost, Durability Cost, Block when broken", "Creates an action and records or applies its configured consequences."],
+                ["Durability", "Enabled, Current, Maximum, Broken At", "Calculates Intact, Damaged, or Broken state."],
+                ["Power", "Enabled, Online, Power Draw, Starting Allocation", "Calculates power state, activation eligibility, and ship budget use."]
+              ]
+            }
+          ]
+        }
+      },
       "faq": [
         {
           "question": "Is HoloDock tied to a specific game system?",
@@ -456,6 +934,34 @@
         {
           "question": "Does HoloDock require HoloSuite Core?",
           "answer": "Yes. HoloDock opens from the HoloSuite launcher and requires HoloSuite Core."
+        },
+        {
+          "question": "Why is an activation button blocked?",
+          "answer": "Check that the Item is Online, has at least as much Allocated power as Power Draw, and is not Broken when Block activation when broken is enabled. Also confirm the ship allows player activation if a player is using it."
+        },
+        {
+          "question": "Does Cooldown stop repeated activation?",
+          "answer": "Not by itself in the current release. It records the activation time and displays a countdown based on about six seconds per round, but the button remains available unless an integration blocks it."
+        },
+        {
+          "question": "Does Resource Cost subtract ammunition, charges, or Actor resources?",
+          "answer": "No. Resource Cost is descriptive and appears in activation results. Durability Cost is applied automatically to HoloDock durability; game-system resource changes require an integration."
+        },
+        {
+          "question": "Why is the ship Strained when everything looks healthy?",
+          "answer": "A ship with no installed Ship Equipment or with Power Capacity set to 0 is Strained because HoloDock cannot verify a complete tracked configuration. Set a capacity and install at least one configured system to allow Nominal status."
+        },
+        {
+          "question": "Why can a player not see a ship or install an Item?",
+          "answer": "Review that ship's Player Rights. The profile must not be hidden, and Allow players to drag equipment must be enabled. The Item must satisfy every category and tag rule, and a GM must approve the request."
+        },
+        {
+          "question": "Why does an installed slot show missing or stop resolving its Item?",
+          "answer": "Slots reference the original Item by UUID. Restore that Item if it was deleted or moved out of reach, or remove the stale assignment and install another accessible Item."
+        },
+        {
+          "question": "Can I save travel, stealth, or combat power presets?",
+          "answer": "Not in the current HoloDock release. Power allocations persist live on each Item, but named presets are not implemented."
         }
       ],
       "videos": [
