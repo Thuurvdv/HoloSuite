@@ -28,7 +28,7 @@ export function registerHoloSuiteIntegration() {
     moduleId: MODULE_ID,
     title: "Critical Cut-In",
     tier: "free",
-    version: "1.0.5",
+    version: "1.0.6",
     updated: "2026-07-14",
     icon: "fa-solid fa-bolt-lightning",
     entries: [

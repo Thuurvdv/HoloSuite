@@ -1732,7 +1732,7 @@ function registerWithHoloSuite() {
     moduleId: MODULE_ID,
     title: "CyberCall",
     tier: "free",
-    version: "1.0.5",
+    version: "1.0.9",
     updated: "2026-07-14",
     icon: "fa-solid fa-satellite-dish",
     entries: [

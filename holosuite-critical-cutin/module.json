@@ -2,7 +2,7 @@
   "id": "holosuite-critical-cutin",
   "title": "HoloSuite Critical Cut-In",
   "description": "A HoloSuite-compatible sci-fi critical cut-in animation module with configurable dice and high- or low-roll triggers.",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "authors": [
     {
       "name": "Mage Tower Studios",
