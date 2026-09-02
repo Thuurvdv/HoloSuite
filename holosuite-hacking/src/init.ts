@@ -1,4 +1,8 @@
 import { createHackingApi } from "./core/hacking-api";
+import { DIFFICULTY_PROFILES, normalizeQuickOutcome } from "./core/difficulty";
+import { getDefaultRollSource, getRollOptions, rollSkillCheck } from "./core/check-roll";
+import { getDieOptions } from "../../shared/src/dice-checks";
+import { isCoC7System } from "./core/system-id";
 import {
   actorIsOwnedByUser,
   escapeHtml,
@@ -13,7 +17,7 @@ import {
   getWorldUsers
 } from "./core/actor-skills";
 import { registerMinigame } from "./core/minigame-runner";
-import { HackingLauncherApp } from "./ui/hacking-launcher-app";
+import { HackingLauncherApp, openHackConfiguration } from "./ui/hacking-launcher-app";
 import { DifficultyProfilesApp } from "./ui/difficulty-profiles-app";
 import { NodeIntrusionApp } from "./minigames/node-intrusion/node-intrusion-app";
 import { SignalAlignmentApp } from "./minigames/signal-alignment/signal-alignment-app";
@@ -40,6 +44,49 @@ const controllerSessions = new Map<string, any>();
 const spectatorApps = new Map<string, any>();
 
 function registerSettings() {
+  game.settings.register(MODULE_ID, "quickHackMode", {
+    name: "Quick Hack launcher mode", scope: "client", config: false, type: Boolean, default: false
+  });
+  game.settings.register(MODULE_ID, "showSkillModifiers", {
+    name: "Show Skill Modifiers",
+    hint: "Show modifiers and skill percentages when choosing a character's skill. Display only; does not change rolls.",
+    scope: "world", config: true, type: Boolean, default: false
+  });
+  game.settings.register(MODULE_ID, "defaultRollSource", {
+    name: "Hacking Roll Source",
+    hint: "System skill roll uses the system's dialog. Roll from character sheet uses a chat result. Custom dice roll uses your dice and modifiers. Used as the initial choice for new attached hacks.",
+    scope: "world", config: true, type: String, default: getDefaultRollSource(),
+    choices: { custom: "Custom dice roll", system: "System skill roll", sheet: "Roll from character sheet" }
+  });
+  game.settings.register(MODULE_ID, "defaultStaticModifier", {
+    name: "Hacking Custom Static Modifier",
+    hint: "Extra adjustment for custom checks. Negative numbers subtract. Used as the initial choice for new attached hacks; existing hacks keep their own settings.",
+    scope: "world", config: true, type: Number, default: 0
+  });
+  game.settings.register(MODULE_ID, "defaultDiceCount", {
+    name: "Hacking Custom Dice Count",
+    hint: "Roll this many dice and keep one result in Custom dice roll mode.",
+    scope: "world", config: true, type: Number, default: 1,
+    choices: Object.fromEntries(Array.from({ length: 10 }, (_, index) => [index + 1, String(index + 1)]))
+  });
+  game.settings.register(MODULE_ID, "defaultKeepResult", {
+    name: "Hacking Custom Result",
+    hint: "Keep the best or worst die. Best means highest when high rolls are positive, and lowest when low rolls are positive.",
+    scope: "world", config: true, type: String, default: "best",
+    choices: { best: "Keep best", worst: "Keep worst" }
+  });
+  game.settings.register(MODULE_ID, "defaultDieSides", {
+    name: "Hacking Check Die",
+    hint: "Choose a standard or system-registered numbered die. The last launcher choice is saved here and used initially for new attached hacks.",
+    scope: "world", config: true, type: Number, default: isCoC7System() ? 100 : 20,
+    choices: () => Object.fromEntries(getDieOptions(game.settings.get(MODULE_ID, "defaultDieSides")).map(({ value, label }) => [value, label]))
+  });
+  game.settings.register(MODULE_ID, "defaultRollDirection", {
+    name: "Hacking Positive Rolls",
+    hint: "High: meet or exceed the DC. Low: meet or roll under the DC. Natural best/worst faces also follow this choice. Skill modifiers are still added as shown.",
+    scope: "world", config: true, type: String, default: isCoC7System() ? "low" : "high",
+    choices: { high: "High rolls are positive", low: "Low rolls are positive" }
+  });
   game.settings.register(MODULE_ID, "defaultDc", {
     name: "Default Hacking DC",
     hint: "Used by the GM launcher and API calls that omit a DC.",
@@ -178,7 +225,7 @@ function openLauncher() {
 }
 
 function exposeApi() {
-  api = api ?? createHackingApi({ moduleId: MODULE_ID, openLauncher });
+  api = api ?? createHackingApi({ moduleId: MODULE_ID, openLauncher, openConfiguration: openHackConfiguration, createLiveController });
   api.sendHackToPlayer = sendHackToPlayer;
   api.registerWithHoloSuite = tryRegisterWithHoloSuite;
   const foundryModule = game.modules.get(MODULE_ID);
@@ -199,6 +246,10 @@ function sendHackToPlayer(options: any = {}) {
 
   const payload = sanitizeLaunchPayload(options);
   const targetUser = getUserById(payload.userId);
+  if (payload.quickOutcome && (!targetUser || targetUser.isGM || targetUser.active === false)) {
+    ui.notifications?.warn?.("Choose a connected player for Quick Hack.");
+    return false;
+  }
   const actor = resolveHackerActor(payload.actorId, targetUser);
   if (!actor) {
     console.warn(`${MODULE_ID} | Could not resolve hacker actor.`, {
@@ -212,11 +263,9 @@ function sendHackToPlayer(options: any = {}) {
     console.warn(`${MODULE_ID} | ${targetUser.name} does not appear to own ${actor.name}; sending fallback roll data anyway.`);
   }
 
-  const skillData = getSkillData(actor, payload.skillId);
-  const skillLabel = payload.skillLabel || getSkillLabel(payload.skillId, skillData);
-  const skillModifier = Number.isFinite(Number(payload.skillModifier)) && Number(payload.skillModifier) !== 0
-    ? Number(payload.skillModifier)
-    : getSkillModifier(skillData);
+  const skillData = payload.quickOutcome ? null : getSkillData(actor, payload.skillId);
+  const skillLabel = payload.quickOutcome ? "GM-selected outcome" : payload.skillLabel || getSkillLabel(payload.skillId, skillData);
+  const skillModifier = skillData != null ? getSkillModifier(skillData) : payload.skillModifier;
 
   if (typeof options.onSuccess === "function" || typeof options.onFailure === "function") {
     const timeoutId = window.setTimeout(() => pendingCallbacks.delete(payload.requestId), PENDING_CALLBACK_TTL_MS);
@@ -256,17 +305,15 @@ function receiveSocketMessage(message: any) {
     const payload = sanitizeLaunchPayload(message.payload ?? {});
     if (payload.userId && payload.userId !== game.user?.id) return;
     if (!payload.userId && game.user?.isGM) return;
+    if (payload.quickOutcome && !getUserById(payload.gmUserId)?.isGM) return;
 
-    const actor = resolveHackerActor(payload.actorId, getUserById(payload.userId) ?? game.user);
-    const actorName = payload.actorName || actor?.name || "Intruder";
-    const skillLabel = payload.skillLabel || getSkillLabel(payload.skillId, getSkillData(actor, payload.skillId));
     new Dialog({
       title: getMinigameTitle(payload.minigameType),
-      content: renderStartPrompt(payload, actorName, skillLabel),
+      content: renderStartPrompt(payload),
       buttons: {
         start: {
           icon: '<i class="fa-solid fa-terminal"></i>',
-          label: "Accept and roll",
+          label: payload.quickOutcome ? "HACK" : "Accept and roll",
           callback: async () => startPlayerHack(payload)
         }
       },
@@ -469,14 +516,22 @@ function requestLiveSessionSync() {
 async function startPlayerHack(payload: any) {
   const actor = resolveHackerActor(payload.actorId, getUserById(payload.userId) ?? game.user);
 
-  const rollResult = await rollFallbackSkill(payload);
-  if (!Number.isFinite(rollResult?.total)) return null;
+  const rollResult: any = payload.quickOutcome ? { total: null, naturalRoll: null, rollSource: "gm" } : await rollPlayerSkill(payload, actor);
+  if (!payload.quickOutcome && !Number.isFinite(rollResult?.total)) return null;
 
   const liveController = createLiveController(payload);
   const options = {
+    quickOutcome: payload.quickOutcome,
     rollTotal: rollResult.total,
     naturalRoll: rollResult.naturalRoll,
-    dc: payload.dc,
+    dieSides: rollResult.dieSides,
+    rollDirection: rollResult.rollDirection,
+    rollSource: rollResult.rollSource,
+    diceCount: rollResult.diceCount,
+    keepResult: rollResult.keepResult,
+    staticModifier: rollResult.staticModifier,
+    systemOutcome: rollResult.systemOutcome,
+    dc: payload.quickOutcome ? null : payload.dc,
     actorId: payload.actorId,
     actorName: actor?.name ?? payload.actorName ?? "Hacker",
     userId: payload.userId,
@@ -497,33 +552,12 @@ async function startPlayerHack(payload: any) {
   return app;
 }
 
-async function rollFallbackSkill(payload: any) {
-  try {
-    const modifier = Number(payload.skillModifier ?? 0);
-    const formula = `1d20 ${modifier >= 0 ? "+" : "-"} ${Math.abs(modifier)}`;
-    const roll = await new Roll(formula).evaluate({ async: true });
-    await roll.toMessage({
-      speaker: ChatMessage.getSpeaker(),
-      flavor: `${escapeHtml(getMinigameTitle(payload.minigameType))}: ${escapeHtml(payload.skillLabel || payload.skillId || "Skill")} vs DC ${Number(payload.dc)}`
-    });
-    return {
-      total: Number(roll.total),
-      naturalRoll: getNaturalD20Result(roll),
-      roll
-    };
-  } catch (error) {
-    console.error(`${MODULE_ID} | Fallback skill roll failed.`, error);
-    ui.notifications?.warn?.("HoloSuite Hacking skill check failed.");
-    return null;
-  }
-}
-
-function getNaturalD20Result(roll: any) {
-  const dice = roll?.dice ?? roll?.terms?.filter?.((term: any) => term?.faces === 20) ?? [];
-  const d20 = dice.find((die: any) => Number(die?.faces) === 20);
-  const result = d20?.results?.find?.((entry: any) => !entry.discarded && !entry.rerolled)?.result;
-  const natural = Number(result);
-  return Number.isFinite(natural) ? natural : null;
+async function rollPlayerSkill(payload: any, actor: any) {
+  return rollSkillCheck({
+    ...payload,
+    actor,
+    flavor: `${escapeHtml(getMinigameTitle(payload.minigameType))}: ${escapeHtml(payload.skillLabel || payload.skillId || "Skill")} vs DC ${Number(payload.dc)} (${getRollOptions(payload).rollDirection === "low" ? "low" : "high"} rolls are positive)`
+  });
 }
 
 function reportPlayerResult(payload: any, result: any) {
@@ -548,20 +582,32 @@ function receiveResultReport(payload: any = {}) {
   else callbacks?.onFailure?.(result);
 }
 
-function renderStartPrompt(payload: any, actorName: string, skillLabel: string) {
+function renderStartPrompt(payload: any) {
+  if (payload.quickOutcome) {
+    const label = payload.quickOutcome === "failure_but_playable" ? "Failure" : DIFFICULTY_PROFILES[payload.quickOutcome].label;
+    return `<section class="holosuite-hacking-start-prompt"><p>Quick Hack</p>
+      <h2>${escapeHtml(getMinigameTitle(payload.minigameType))}</h2>
+      <div>Result: ${escapeHtml(label)}</div></section>`;
+  }
+  // Native percentile checks choose their difficulty in the roll dialog, not via the hacking DC.
+  const difficulty = payload.rollSource === "system" && isCoC7System()
+    ? "Set when rolling" : String(Number(payload.dc));
   return `
     <section class="holosuite-hacking-start-prompt">
       <p>Incoming hacking challenge</p>
       <h2>${escapeHtml(getMinigameTitle(payload.minigameType))}</h2>
-      <div>${escapeHtml(actorName)} rolls ${escapeHtml(skillLabel)} vs DC ${Number(payload.dc)}</div>
+      <div>Difficulty: ${escapeHtml(difficulty)}</div>
     </section>
   `;
 }
 
 function sanitizeLaunchPayload(payload: any = {}) {
+  const quickOutcome = normalizeQuickOutcome(payload.quickOutcome);
   const defaultDc = Number(game.settings.get(MODULE_ID, "defaultDc") ?? 15);
   const defaultLiveAudience = normalizeLiveAudience(game.settings.get(MODULE_ID, "defaultLiveAudience"));
   return {
+    ...(quickOutcome ? { rollSource: "gm" } : getRollOptions(payload)),
+    quickOutcome,
     requestId: String(payload.requestId ?? foundry.utils.randomID()),
     minigameType: String(payload.minigameType ?? payload.type ?? "node-intrusion"),
     userId: String(payload.userId ?? ""),

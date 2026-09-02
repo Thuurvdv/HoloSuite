@@ -16,8 +16,9 @@ function clamp(value: number, min: number, max: number) {
 }
 
 export class SignalAlignmentApp extends LegacyApplication {
-  rollTotal: number;
-  dc: number;
+  quickOutcome: string | null;
+  rollTotal: number | null;
+  dc: number | null;
   profile: any;
   seed: string;
   onSuccess: any;
@@ -39,9 +40,10 @@ export class SignalAlignmentApp extends LegacyApplication {
 
   constructor(options: any = {}) {
     super(options);
-    this.rollTotal = Number(options.rollTotal ?? 15);
-    this.dc = Number(options.dc ?? 15);
-    this.profile = options.profile ? { ...options.profile } : getDifficultyProfile(this.rollTotal, this.dc);
+    this.quickOutcome = options.quickOutcome ?? null;
+    this.rollTotal = this.quickOutcome ? null : Number(options.rollTotal ?? 15);
+    this.dc = this.quickOutcome ? null : Number(options.dc ?? 15);
+    this.profile = options.profile ? { ...options.profile } : getDifficultyProfile(this.rollTotal, this.dc, null, { quickOutcome: this.quickOutcome });
     this.seed = options.seed ?? `${this.rollTotal}:${this.dc}:${this.profile.profileId ?? this.profile.id}:signal`;
     this.onSuccess = typeof options.onSuccess === "function" ? options.onSuccess : null;
     this.onFailure = typeof options.onFailure === "function" ? options.onFailure : null;
@@ -102,6 +104,8 @@ export class SignalAlignmentApp extends LegacyApplication {
     });
 
     return {
+      quickOutcome: this.quickOutcome,
+
       rollTotal: this.rollTotal,
       dc: this.dc,
       isReadOnly: this.readOnly,
@@ -259,6 +263,8 @@ export class SignalAlignmentApp extends LegacyApplication {
       type: "signal-alignment",
       result,
       message,
+      quickOutcome: this.quickOutcome,
+
       rollTotal: this.rollTotal,
       dc: this.dc,
       profile: this.profile,
@@ -275,6 +281,8 @@ export class SignalAlignmentApp extends LegacyApplication {
         result,
         actorName: this.actorName,
         message,
+        quickOutcome: this.quickOutcome,
+
         rollTotal: this.rollTotal,
         dc: this.dc
       });
@@ -334,6 +342,8 @@ export class SignalAlignmentApp extends LegacyApplication {
     return {
       type: "signal-alignment",
       options: {
+        quickOutcome: this.quickOutcome,
+
         rollTotal: this.rollTotal,
         dc: this.dc,
         profile: this.profile,

@@ -1,7 +1,7 @@
 import { MESSAGE_FLAG_KIND, MESSAGE_SCHEMA_VERSION, MODULE_ID } from "./constants";
 import { escapeHTML } from "./dom-utils";
 import { createThreadIdForContact, CyberCallMessage, normalizeMessage } from "./message-model";
-import { getUserTokenImage, normalizeContact } from "./call-model";
+import { getUserDisplayName, getUserTokenImage, normalizeContact } from "./call-model";
 
 declare const ChatMessage: any;
 declare const game: any;
@@ -104,7 +104,7 @@ export async function sendMessageToContact(contactSource: any, bodySource: any, 
     : getRecipientUserIds(contactSource);
   const routesToGMManagedContact = !hasExplicitUserRecipient(contactSource);
   const threadId = String(options.threadId ?? createThreadIdForContact(contactSource, senderUser?.id));
-  const senderName = String(options.senderName ?? senderUser?.character?.name ?? senderUser?.name ?? "Unknown Sender").trim();
+  const senderName = String(options.senderName ?? "").trim() || getUserDisplayName(senderUser, "Unknown Sender");
   const senderActorId = String(options.senderActorId ?? senderUser?.character?.id ?? "").trim();
   const senderNumber = String(options.senderNumber ?? "").trim();
   const message = normalizeMessage({

@@ -357,7 +357,9 @@
 }
 
 .holosuite-hacking-launcher {
-  grid-template-rows: auto repeat(6, auto) minmax(0, 1fr) auto !important;
+  grid-template-rows: none !important;
+  grid-auto-rows: max-content;
+  overflow-y: auto;
   align-content: start;
   gap: 10px;
   box-sizing: border-box;
@@ -389,6 +391,31 @@
   font-size: 13px;
 }
 
+.holosuite-hacking-launcher [hidden] {
+  display: none !important;
+}
+
+.hh-launcher-mode-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.hh-launcher-mode-row button { flex: 0 0 auto; width: auto; padding: 6px 12px; color: var(--hs-cyan); border: 1px solid var(--hs-cyan); }
+.holosuite-hacking-launcher .hh-full-setup { display: grid; gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.hh-quick-setup p { margin: 2px 0 14px; color: var(--hs-text-secondary); font-size: 13px; line-height: 1.5; }
+.hh-quick-results { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hh-quick-results button { min-height: 42px; height: auto; padding: 8px; white-space: normal; color: var(--hs-text); border: 1px solid var(--hs-border); border-radius: 6px; background: var(--hs-field); }
+.hh-quick-results [data-quick-outcome="success"] { grid-column: 1 / -1; border-color: #51cf91; }
+.hh-quick-results [data-quick-outcome="critical_success"], .hh-quick-results [data-quick-outcome="strong_success"] { border-color: #4cb9ce; }
+.hh-quick-results [data-quick-outcome="failure_but_playable"] { border-color: #d49d50; }
+.hh-quick-results [data-quick-outcome="critical_failure"] { border-color: #dc647e; }
+.hh-quick-results button:hover { box-shadow: var(--hs-glow-cyan); }
+.hh-quick-results button[aria-pressed="true"] { background: var(--hs-active-bg); box-shadow: inset 0 0 0 2px var(--hs-cyan); }
+.hh-quick-configuration-actions { margin-top: 16px; }
+
+.holosuite-hacking-launcher [data-label-help] {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--hs-border);
+}
+
 .holosuite-hacking-launcher .form-group {
   display: grid;
   grid-template-columns: minmax(118px, 0.42fr) minmax(0, 1fr);
@@ -407,6 +434,19 @@
   text-transform: uppercase;
 }
 
+.holosuite-hacking-launcher .hh-skill-warning {
+  display: inline-block;
+  margin-left: 5px;
+  color: var(--hs-warning, #ffc857);
+  cursor: help;
+}
+
+.holosuite-hacking-launcher .hh-skill-warning:focus-visible,
+.holosuite-hacking-launcher [data-label-help]:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
 .holosuite-hacking-launcher input,
 .holosuite-hacking-launcher select {
   width: 100%;
@@ -416,8 +456,12 @@
 }
 
 .holosuite-hacking-launcher select option {
-  background: var(--hs-bg-deep);
-  color: var(--hs-text);
+  background: var(--hs-bg-deep, #061116);
+  color: var(--hs-text, #e7faff);
+}
+
+.holosuite-hacking-launcher select {
+  color-scheme: dark;
 }
 
 .holosuite-hacking-launcher-actions {
@@ -910,6 +954,27 @@
     grid-template-columns: 1fr;
   }
 }
+.hh-sheet-waiting {
+  position: fixed; z-index: 10000; bottom: 90px; left: 20px;
+  width: min(340px, calc(100vw - 40px)); max-height: calc(100vh - 120px); overflow: auto;
+  padding: 14px; display: grid; gap: 10px; border: 1px solid #356479; border-radius: 8px;
+  background: #101d28; color: #d9f2fa; box-shadow: 0 6px 24px #0008;
+  font: 14px/1.45 var(--font-primary, sans-serif);
+}
+.hh-sheet-waiting p { margin: 0; }
+.hh-sheet-waiting .hh-sheet-hint, .hh-sheet-waiting details { font-size: 12px; color: #b0c7d0; }
+.hh-sheet-waiting summary { cursor: pointer; }
+.hh-sheet-waiting details p { margin: 8px 0; }
+.hh-sheet-waiting-actions { display: flex; gap: 8px; }
+.hh-sheet-waiting label { display: grid; gap: 4px; }
+.hh-sheet-waiting input, .hh-sheet-waiting button, .hh-chat-roll-actions button {
+  width: 100%; min-height: 30px; height: auto; white-space: normal;
+  background: #07151f; color: #d9f2fa; border: 1px solid #356479; border-radius: 4px; padding: 5px 8px;
+}
+.hh-chat-roll-actions { display: grid; gap: 5px; margin-top: 10px; }
+.hh-chat-roll-actions button { border-color: #69e8ff; font-weight: 600; }
+.hh-sheet-waiting button:hover, .hh-chat-roll-actions button:hover { background: #183544; }
+
 .hh-live-view-badge {
   position: absolute;
   z-index: 20;

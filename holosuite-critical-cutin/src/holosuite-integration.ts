@@ -28,14 +28,19 @@ export function registerHoloSuiteIntegration() {
     moduleId: MODULE_ID,
     title: "Critical Cut-In",
     tier: "free",
-    version: "1.0.5",
-    updated: "2026-07-14",
+    version: "1.0.6",
+    updated: "2026-09-02",
     icon: "fa-solid fa-bolt-lightning",
     entries: [
       {
-        title: "Foundry system d20 roll fix",
-        summary: "Fixed a bug that could occur when triggering Critical Cut-In from d20 rolls made through the Foundry system.",
-        tags: ["Fix", "Dice"]
+        title: "Critical cut-ins for more dice",
+        summary: "Choose from standard and registered dice, decide whether high or low results are positive, and configure separate success and failure thresholds for each character.",
+        tags: ["Critical Cut-In", "Dice", "Thresholds", "Customization"]
+      },
+      {
+        title: "More reliable cut-in detection",
+        summary: "Improved Foundry 14 support and prevented old chat rolls, damage rolls, discarded dice, and rerolls from triggering unwanted animations.",
+        tags: ["Critical Cut-In", "Bug Fix", "Foundry v12-v14", "Chat"]
       }
     ]
   });

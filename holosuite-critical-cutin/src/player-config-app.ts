@@ -1,5 +1,6 @@
-import { MODULE_ID, MODULE_TITLE, SETTINGS, TEMPLATE_PATH, getFailureThreshold, getPlayerConfigs, getThreshold, savePlayerConfigs, setSetting, setting } from "./settings";
+import { MODULE_ID, MODULE_TITLE, SETTINGS, TEMPLATE_PATH, getDieSides, getFailureThreshold, getPlayerConfigs, getThreshold, lowRollsAreGood, savePlayerConfigs, setSetting, setting } from "./settings";
 import { getLegacyFormApplicationBase } from "../../shared/src/application-base";
+import { getCriticalRollEndpoints, getDieOptions } from "../../shared/src/dice-checks";
 
 declare const foundry: any;
 declare const game: any;
@@ -7,6 +8,25 @@ declare const ui: any;
 declare const FilePicker: any;
 
 const BaseFormApplication = getLegacyFormApplicationBase();
+
+export async function confirmRollThresholdReset(dieSides: number, rollDirection: string, targetCount: number) {
+  const { success, failure } = getCriticalRollEndpoints(dieSides, rollDirection);
+  const content = `<p>Change to <strong>d${dieSides}</strong> with <strong>${rollDirection === "low" ? "low" : "high"} rolls positive</strong>?</p>
+    <p>This resets the roll configuration for all ${targetCount} listed players/GM entries, in both tabs, and the global thresholds:</p>
+    <ul><li>Success: <strong>${success}</strong></li><li>Failure: <strong>${failure}</strong></li></ul>
+    <p>Images, audio, animation, labels, colors, and enabled states stay unchanged. Click Save afterward to apply these changes.</p>`;
+  const DialogV2 = foundry?.applications?.api?.DialogV2;
+  if (DialogV2?.confirm) {
+    return await DialogV2.confirm({
+      window: { title: "Reset Critical Cut-In Roll Configuration?" },
+      content, modal: true, rejectClose: false,
+      yes: { label: "Change and Reset Rolls" }, no: { label: "Cancel", default: true }
+    }) === true;
+  }
+  const DialogV1 = (globalThis as any).Dialog ?? foundry?.appv1?.api?.Dialog;
+  if (!DialogV1?.confirm) throw new Error("Foundry confirmation dialog is unavailable.");
+  return await DialogV1.confirm({ title: "Reset Critical Cut-In Roll Configuration?", content, defaultYes: false, rejectClose: false }) === true;
+}
 
 function targetKey(type: string, id: string) {
   return `${type}:${id}`;
@@ -26,7 +46,7 @@ function normalizeTriggerConfig(config: any = {}, { defaultAccent = "#69e8ff" } 
   const animationStyle = ["strike", "breach", "signal"].includes(config.animationStyle) ? config.animationStyle : "strike";
   return {
     enabled: config.enabled !== false,
-    threshold: Number.isInteger(threshold) && threshold >= 1 && threshold <= 20 ? threshold : "",
+    threshold: Number.isInteger(threshold) && threshold >= 1 && threshold <= getDieSides() ? threshold : "",
     animationStyle,
     animationStyles: [
       { value: "strike", label: "Neon Strike", selected: animationStyle === "strike" },
@@ -80,6 +100,7 @@ function buildTargets() {
 
 export class PlayerConfigApp extends BaseFormApplication {
   activeTabs: Map<string, string>;
+  rollRuleChange: Promise<void> | null = null;
 
   constructor(options: any = {}) {
     super(options);
@@ -128,8 +149,13 @@ export class PlayerConfigApp extends BaseFormApplication {
 
     return {
       moduleId: MODULE_ID,
-      threshold: getThreshold(),
-      failureThreshold: getFailureThreshold(),
+      dieSides: getDieSides(),
+      dice: getDieOptions(getDieSides()),
+      lowRollsGood: lowRollsAreGood(),
+      threshold: setting(SETTINGS.threshold) ?? 0,
+      failureThreshold: setting(SETTINGS.failureThreshold) ?? 0,
+      effectiveThreshold: getThreshold(),
+      effectiveFailureThreshold: getFailureThreshold(),
       duration: setting(SETTINGS.duration),
       defaultText: setting(SETTINGS.defaultText),
       defaultFailureText: setting(SETTINGS.defaultFailureText),
@@ -143,8 +169,55 @@ export class PlayerConfigApp extends BaseFormApplication {
       html.closest(".app")?.addClass("hcci-config-dirty");
       html.find("[data-hcci-dirty]").prop("hidden", false);
     };
+    const syncRollControls = () => {
+      const sides = Number(html.find("[name='dieSides']").val());
+      const low = html.find("[name='rollDirection']").val() === "low";
+      html.find("[data-hcci-success-label]").text(low ? "Success ≤" : "Success ≥");
+      html.find("[data-hcci-failure-label]").text(low ? "Failure ≥" : "Failure ≤");
+      if (!Number.isInteger(sides) || sides < 2 || sides > 10000) return;
+      html.find("[name='threshold'], [name='failureThreshold'], [data-hcci-field='threshold']").attr("max", sides);
+      const success = Number(html.find("[name='threshold']").val()) || (low ? 1 : sides);
+      const failure = Number(html.find("[name='failureThreshold']").val()) || (low ? sides : 1);
+      html.find("[data-hcci-panel='success'] [data-hcci-field='threshold']").attr("placeholder", success);
+      html.find("[data-hcci-panel='failure'] [data-hcci-field='threshold']").attr("placeholder", failure);
+    };
+    html.find("[name='threshold'], [name='failureThreshold']").on("input change", syncRollControls);
+    syncRollControls();
+
+    let acceptedSides = Number(html.find("[name='dieSides']").val());
+    let acceptedDirection = String(html.find("[name='rollDirection']").val());
+    html.find("[name='dieSides'], [name='rollDirection']").on("change", () => {
+      if (this.rollRuleChange) return;
+      const sides = Number(html.find("[name='dieSides']").val());
+      const direction = String(html.find("[name='rollDirection']").val());
+      if (sides === acceptedSides && direction === acceptedDirection) return;
+      const controls = html.find("[name='dieSides'], [name='rollDirection'], [type='submit']");
+      controls.prop("disabled", true);
+      this.rollRuleChange = (async () => {
+        try {
+          const confirmed = await confirmRollThresholdReset(sides, direction, html.find("[data-hcci-row]").length);
+          if (!confirmed) return;
+          const { success, failure } = getCriticalRollEndpoints(sides, direction);
+          html.find("[name='threshold'], [data-hcci-panel='success'] [data-hcci-field='threshold']").val(success);
+          html.find("[name='failureThreshold'], [data-hcci-panel='failure'] [data-hcci-field='threshold']").val(failure);
+          acceptedSides = sides;
+          acceptedDirection = direction;
+          markDirty();
+        } catch (error) {
+          console.error(`${MODULE_ID} | Could not confirm dice change.`, error);
+          ui.notifications?.error?.("Could not confirm the dice change. Your roll configuration has not changed.");
+        } finally {
+          html.find("[name='dieSides']").val(acceptedSides);
+          html.find("[name='rollDirection']").val(acceptedDirection);
+          syncRollControls();
+          controls.prop("disabled", false);
+          this.rollRuleChange = null;
+        }
+      })();
+    });
 
     html.find("input, select").on("input change", (event) => {
+      if (["dieSides", "rollDirection"].includes(event.currentTarget.name)) return;
       markDirty();
       if (event.currentTarget.dataset.hcciField !== "imagePath") return;
       const panel = event.currentTarget.closest("[data-hcci-panel]");
@@ -193,8 +266,12 @@ export class PlayerConfigApp extends BaseFormApplication {
   }
 
   async _updateObject(event: Event) {
+    if (this.rollRuleChange) return;
     const form = event.currentTarget as HTMLFormElement;
-    const configs: Record<string, any> = {};
+    if (!form.reportValidity()) return;
+    const dieSides = Number(form.querySelector<HTMLSelectElement>('[name="dieSides"]')?.value ?? getDieSides());
+    const rollDirection = form.querySelector<HTMLSelectElement>('[name="rollDirection"]')?.value === "low" ? "low" : "high";
+    const configs: Record<string, any> = getPlayerConfigs();
 
     const readPanel = (row: HTMLElement, scope: string) => {
       const panel = row.querySelector<HTMLElement>(`[data-hcci-panel="${scope}"]`);
@@ -203,7 +280,7 @@ export class PlayerConfigApp extends BaseFormApplication {
         enabled: panel?.querySelector<HTMLInputElement>('[data-hcci-field="enabled"]')?.checked === true,
         threshold: (() => {
           const value = Number(field("threshold")?.value);
-          return Number.isInteger(value) && value >= 1 && value <= 20 ? value : "";
+          return Number.isInteger(value) && value >= 1 && value <= dieSides ? value : "";
         })(),
         animationStyle: field("animationStyle")?.value || "strike",
         imagePath: field("imagePath")?.value?.trim() ?? "",
@@ -224,8 +301,10 @@ export class PlayerConfigApp extends BaseFormApplication {
     const threshold = Number(form.querySelector<HTMLInputElement>('[name="threshold"]')?.value ?? getThreshold());
     const failureThreshold = Number(form.querySelector<HTMLInputElement>('[name="failureThreshold"]')?.value ?? getFailureThreshold());
     const duration = Number(form.querySelector<HTMLInputElement>('[name="duration"]')?.value ?? setting(SETTINGS.duration));
-    await setSetting(SETTINGS.threshold, Math.min(20, Math.max(1, threshold)));
-    await setSetting(SETTINGS.failureThreshold, Math.min(20, Math.max(1, failureThreshold)));
+    await setSetting(SETTINGS.dieSides, dieSides);
+    await setSetting(SETTINGS.rollDirection, rollDirection);
+    await setSetting(SETTINGS.threshold, Math.min(dieSides, Math.max(0, threshold)));
+    await setSetting(SETTINGS.failureThreshold, Math.min(dieSides, Math.max(0, failureThreshold)));
     await setSetting(SETTINGS.duration, Math.min(8000, Math.max(800, duration)));
     await savePlayerConfigs(configs);
     ui.notifications?.info("Critical Cut-In configuration saved.");

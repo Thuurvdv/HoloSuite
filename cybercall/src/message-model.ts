@@ -1,5 +1,5 @@
 import { MESSAGE_SCHEMA_VERSION } from "./constants";
-import { createCallId, getInitials, normalizeContact } from "./call-model";
+import { createCallId, getInitials, getUserDisplayName, normalizeContact } from "./call-model";
 
 declare const game: any;
 
@@ -163,7 +163,7 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
       const storedGroupMemberNames = isGroup ? unique(sorted.flatMap((message) => message.groupMemberNames)) : [];
       const groupMemberNames = storedGroupMemberNames.length
         ? storedGroupMemberNames
-        : groupMemberUserIds.map((id) => game.users?.get?.(id)?.name).filter(Boolean);
+        : groupMemberUserIds.map((id) => getUserDisplayName(game.users?.get?.(id))).filter(Boolean);
       const otherUserId = lastMessage?.senderUserId === game?.user?.id
         ? lastMessage?.recipientUserIds?.find((id) => id !== game?.user?.id)
         : lastMessage?.senderUserId;

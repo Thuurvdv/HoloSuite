@@ -1,4 +1,4 @@
-import { MODULE_ID, SOCKET_NAME, SETTINGS, debugLog, getFailureThreshold, getPlayerConfigs, getThreshold, setting } from "./settings";
+import { MODULE_ID, SOCKET_NAME, SETTINGS, debugLog, getDieSides, getFailureThreshold, getPlayerConfigs, getThreshold, resultQualifies, setting } from "./settings";
 import { playCutin, type CutinPayload } from "./cutin-animation";
 
 declare const foundry: any;
@@ -6,6 +6,17 @@ declare const game: any;
 declare const Hooks: any;
 
 const processedMessages = new Set<string>();
+
+// Every message that already existed when detection was registered. The chat log
+// replays its backlog (CONFIG.ChatMessage.batchSize, 100 by default) through the
+// render hooks on page load, and pulls another batch whenever the log is scrolled
+// up far enough, so rendered detection has to ignore anything that predates this
+// session or every historical crit fires a cut-in again on load.
+const messagesKnownAtLoad = new Set<string>();
+
+function isBacklogMessage(message: any) {
+  return !!message?.id && messagesKnownAtLoad.has(message.id);
+}
 
 function asArray(value: any) {
   if (!value) return [];
@@ -51,23 +62,21 @@ function collectDiceTerms(roll: any) {
 }
 
 function isDamageRoll(message: any, roll: any) {
-  const diceTerms = collectDiceTerms(roll);
-  if (diceTerms.some((term) => term && term.faces === 20)) return false;
   const flags = message?.flags ?? {};
   const dnd5eRollType = flags.dnd5e?.roll?.type ?? flags.dnd5e?.roll?.rollType;
   const pf2eContextType = flags.pf2e?.context?.type;
-  return [dnd5eRollType, pf2eContextType].some((type) => String(type ?? "").toLowerCase().includes("damage"));
+  return [roll?.options?.type, roll?.options?.rollType, dnd5eRollType, pf2eContextType].some((type) => String(type ?? "").toLowerCase().includes("damage"));
 }
 
-function getActiveD20Results(roll: any) {
+function getActiveDieResults(roll: any) {
   const results: number[] = [];
   for (const term of collectDiceTerms(roll)) {
     const faces = Number(term?.faces ?? term?._faces);
-    if (faces !== 20 || !Array.isArray(term.results)) continue;
+    if (faces !== getDieSides() || !Array.isArray(term.results)) continue;
     for (const result of term.results) {
-      if (result.active === false || result.discarded === true) continue;
+      if (result.active === false || result.discarded === true || result.rerolled === true) continue;
       const value = Number(result.result ?? result.value ?? result.total);
-      if (Number.isInteger(value)) results.push(value);
+      if (Number.isInteger(value) && value >= 1 && value <= faces) results.push(value);
     }
   }
   return results;
@@ -80,15 +89,16 @@ function getHtmlRoot(html: any): HTMLElement | null {
   return null;
 }
 
-function getRenderedD20Results(html: any) {
+function getRenderedDieResults(html: any) {
   const root = getHtmlRoot(html);
   if (!root) return [];
   const results: number[] = [];
+  const dieClass = `d${getDieSides()}`;
   const selectors = [
-    ".dice-rolls .roll.d20",
-    ".dice-rolls .roll.die.d20",
-    ".dice-tooltip .roll.d20",
-    ".dice-tooltip .dice.d20 .roll"
+    `.dice-rolls .roll.${dieClass}`,
+    `.dice-rolls .roll.die.${dieClass}`,
+    `.dice-tooltip .roll.${dieClass}`,
+    `.dice-tooltip .dice.${dieClass} .roll`
   ];
   const dice = new Set<HTMLElement>();
   for (const selector of selectors) {
@@ -105,7 +115,7 @@ function getRenderedD20Results(html: any) {
       continue;
     }
     const value = Number(element.textContent?.trim());
-    if (Number.isInteger(value) && value >= 1 && value <= 20) results.push(value);
+    if (Number.isInteger(value) && value >= 1 && value <= getDieSides()) results.push(value);
   }
 
   return results;
@@ -136,15 +146,23 @@ function resolveActor(message: any) {
   return null;
 }
 
+// v12 renamed ChatMessage#user to #author and v14 dropped the deprecated alias,
+// so the author has to be read from both shapes, as a document or as a raw id.
+function resolveMessageAuthor(message: any) {
+  const author = message?.author ?? message?.user;
+  if (author && typeof author === "object") return author.id ? game.users?.get(author.id) ?? author : null;
+  const authorId = author ?? message?._source?.author ?? message?.userId;
+  return authorId ? game.users?.get(authorId) ?? null : null;
+}
+
 function resolveTriggerUser(message: any, actor: any) {
-  const authorId = message?.user?.id ?? message?.user ?? message?.userId;
-  const author = game.users?.get(authorId);
+  const author = resolveMessageAuthor(message);
   if (author && !author.isGM) return author;
   if (actor) {
     const owner = game.users?.find((user) => !user.isGM && hasOwner(actor, user.id));
     if (owner) return owner;
   }
-  return author ?? game.users?.get(authorId) ?? null;
+  return author ?? null;
 }
 
 type TriggerConfig = {
@@ -158,7 +176,7 @@ type TriggerConfig = {
   accentColor: string;
 };
 
-function normalizeTriggerConfig(rawConfig: any = {}, kind: "success" | "failure", actor: any): TriggerConfig {
+function normalizeTriggerConfig(rawConfig: any = {}, kind: "success" | "failure", actor: any, preferActorImage = false): TriggerConfig {
   const fallbackThreshold = kind === "failure" ? getFailureThreshold() : getThreshold();
   const defaultText = kind === "failure" ? setting(SETTINGS.defaultFailureText) : setting(SETTINGS.defaultText);
   const defaultAccent = kind === "failure" ? "#ff4d7d" : "#69e8ff";
@@ -167,11 +185,11 @@ function normalizeTriggerConfig(rawConfig: any = {}, kind: "success" | "failure"
   return {
     kind,
     enabled: config.enabled !== false,
-    threshold: Number.isInteger(configuredThreshold) && configuredThreshold >= 1 && configuredThreshold <= 20
+    threshold: Number.isInteger(configuredThreshold) && configuredThreshold >= 1 && configuredThreshold <= getDieSides()
       ? configuredThreshold
       : fallbackThreshold,
     animationStyle: sanitizeAnimationStyle(config.animationStyle),
-    imagePath: config.imagePath || actor?.img || "",
+    imagePath: (preferActorImage ? actor?.img : "") || config.imagePath || actor?.img || "",
     audioPath: config.audioPath || "",
     overlayText: config.overlayText || defaultText,
     accentColor: config.accentColor || defaultAccent
@@ -181,12 +199,17 @@ function normalizeTriggerConfig(rawConfig: any = {}, kind: "success" | "failure"
 function resolveConfig(user: any, actor: any, kind: "success" | "failure" = "success"): TriggerConfig {
   const configs = getPlayerConfigs();
   const actorConfig = actor ? configs[targetKey("actor", actor.id)] : null;
-  const gmConfig = user?.isGM ? configs[gmTargetKey()] : null;
-  if (!actor && !user?.isGM && !actorConfig) {
+  const isGm = user?.isGM === true;
+  const gmConfig = isGm ? configs[gmTargetKey()] : null;
+  if (!actor && !isGm && !actorConfig) {
     return normalizeTriggerConfig({ enabled: false }, kind, actor);
   }
 
-  return normalizeTriggerConfig(actorConfig ?? gmConfig ?? {}, kind, actor);
+  // A GM rolling as an unconfigured actor keeps their own animation, audio,
+  // thresholds, label and accent, but shows that actor's portrait so monsters
+  // look like themselves. Rolling as themselves uses the configured GM image.
+  const preferActorImage = isGm && !actorConfig && !!actor?.img;
+  return normalizeTriggerConfig(actorConfig ?? gmConfig ?? {}, kind, actor, preferActorImage);
 }
 
 function buildPayload(message: any, qualifyingResult: number, actor: any, user: any, config: any): CutinPayload | null {
@@ -219,27 +242,22 @@ function buildPayload(message: any, qualifyingResult: number, actor: any, user: 
   };
 }
 
-function messageHasQualifyingD20(message: any, threshold: number, kind: "success" | "failure" = "success") {
+export function messageHasQualifyingDie(message: any, threshold: number, kind: "success" | "failure" = "success") {
   const rolls = collectRolls(message);
   if (!message?.isRoll && !rolls.length) return null;
   for (const roll of rolls) {
     if (isDamageRoll(message, roll)) continue;
-    const d20Results = getActiveD20Results(roll);
-    const qualifying = kind === "failure"
-      ? d20Results.find((value) => value <= threshold)
-      : d20Results.find((value) => value >= threshold);
+    const qualifying = getActiveDieResults(roll).find((value) => resultQualifies(value, threshold, kind));
     if (qualifying) return qualifying;
   }
   return null;
 }
 
-function renderedMessageHasQualifyingD20(message: any, html: any, threshold: number, kind: "success" | "failure" = "success") {
-  const results = getRenderedD20Results(html);
+export function renderedMessageHasQualifyingDie(message: any, html: any, threshold: number, kind: "success" | "failure" = "success") {
+  const results = getRenderedDieResults(html);
   if (!results.length) return null;
   if (isDamageRoll(message, {})) return null;
-  return kind === "failure"
-    ? results.find((value) => value <= threshold) ?? null
-    : results.find((value) => value >= threshold) ?? null;
+  return results.find((value) => resultQualifies(value, threshold, kind)) ?? null;
 }
 
 function shouldAuthoritativelyDetect() {
@@ -261,8 +279,8 @@ function detectChatMessage(message: any) {
   const user = resolveTriggerUser(message, actor);
   const successConfig = resolveConfig(user, actor, "success");
   const failureConfig = resolveConfig(user, actor, "failure");
-  const failureNatural = messageHasQualifyingD20(message, failureConfig.threshold, "failure");
-  const successNatural = failureNatural ? null : messageHasQualifyingD20(message, successConfig.threshold, "success");
+  const failureNatural = messageHasQualifyingDie(message, failureConfig.threshold, "failure");
+  const successNatural = failureNatural ? null : messageHasQualifyingDie(message, successConfig.threshold, "success");
   const natural = failureNatural ?? successNatural;
   if (!natural) return false;
   const config = failureNatural ? failureConfig : successConfig;
@@ -287,10 +305,10 @@ function detectRenderedChatMessage(message: any, html: any) {
   const user = resolveTriggerUser(message, actor);
   const successConfig = resolveConfig(user, actor, "success");
   const failureConfig = resolveConfig(user, actor, "failure");
-  const failureNatural = renderedMessageHasQualifyingD20(message, html, failureConfig.threshold, "failure");
+  const failureNatural = renderedMessageHasQualifyingDie(message, html, failureConfig.threshold, "failure");
   const successNatural = failureNatural
     ? null
-    : renderedMessageHasQualifyingD20(message, html, successConfig.threshold, "success");
+    : renderedMessageHasQualifyingDie(message, html, successConfig.threshold, "success");
   const natural = failureNatural ?? successNatural;
   if (!natural) return false;
   const config = failureNatural ? failureConfig : successConfig;
@@ -318,6 +336,11 @@ function scheduleChatMessageRetry(message: any, delay: number) {
 }
 
 export function registerRollDetection() {
+  messagesKnownAtLoad.clear();
+  for (const message of game.messages ?? []) {
+    if (message?.id) messagesKnownAtLoad.add(message.id);
+  }
+
   Hooks.on("createChatMessage", (message) => {
     if (!setting(SETTINGS.enabled)) return;
     if (!shouldAuthoritativelyDetect()) return;
@@ -327,11 +350,17 @@ export function registerRollDetection() {
     scheduleChatMessageRetry(message, 1500);
   });
 
-  Hooks.on("renderChatMessage", (message, html) => {
+  const onRenderedChatMessage = (message: any, html: any) => {
     if (!setting(SETTINGS.enabled)) return;
+    if (isBacklogMessage(message)) return;
     if (!shouldAuthoritativelyDetect()) return;
     detectRenderedChatMessage(message, html);
-  });
+  };
+
+  // v12 passes jQuery; v13+ passes an HTMLElement through renderChatMessageHTML and
+  // still fires the deprecated renderChatMessage until v15. getHtmlRoot handles both.
+  Hooks.on("renderChatMessage", onRenderedChatMessage);
+  Hooks.on("renderChatMessageHTML", onRenderedChatMessage);
 
   game.socket?.on(SOCKET_NAME, (data) => {
     if (data?.type !== "play") return;
@@ -351,7 +380,7 @@ export function createManualPayloadForUser(userId: string, options: any = {}): C
     actorId: actor?.id ?? null,
     userName: user?.name ?? "",
     actorName: actor?.name ?? user?.name ?? "",
-    naturalResult: options.naturalResult ?? 20,
+    naturalResult: options.naturalResult ?? config.threshold,
     triggerKind,
     threshold: options.threshold ?? config.threshold ?? getThreshold(),
     animationStyle: options.animationStyle ?? config.animationStyle ?? "strike",

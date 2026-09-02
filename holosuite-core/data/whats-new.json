@@ -1,19 +1,29 @@
 {
-  "updated": "2026-08-26",
+  "updated": "2026-09-02",
   "modules": [
     {
       "moduleId": "holosuite-hacking",
       "title": "HoloSuite Hacking",
       "tier": "free",
-      "version": "1.1.11",
-      "updated": "2026-08-26",
+      "version": "1.2.0",
+      "updated": "2026-09-02",
       "icon": "fa-solid fa-terminal",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking",
       "entries": [
         {
-          "title": "Live hacking views",
-          "summary": "GMs and selected players can now watch hacking minigames unfold live in a read-only view, with audience controls and synchronized session state.",
-          "tags": ["Hacking", "Live View", "Audience Controls", "Minigames"]
+          "title": "More ways to make hacking checks",
+          "summary": "Use supported game-system skill rolls, select a new roll from the character sheet, or configure custom dice with best-or-worst results and high-or-low success rules.",
+          "tags": ["Hacking", "Skill Checks", "Character Sheets", "Dice"]
+        },
+        {
+          "title": "Quick Hack and reusable challenges",
+          "summary": "GMs can choose a difficulty immediately with Quick Hack or save complete hacking challenges for compatible HoloSuite content such as terminal logins, files, messages, and cameras.",
+          "tags": ["Hacking", "Quick Hack", "Terminal", "Minigames"]
+        },
+        {
+          "title": "Broader system and skill support",
+          "summary": "Native checks now support D&D 5e, Pathfinder 2e, Starfinder 2e, Call of Cthulhu 7e, and Cyberpunk RED, with clearer skill choices and setup guidance.",
+          "tags": ["Hacking", "Game Systems", "Skills", "Foundry v12-v14"]
         }
       ]
     },
@@ -53,15 +63,15 @@
       "moduleId": "cybercall",
       "title": "CyberCall",
       "tier": "free",
-      "version": "1.0.8",
-      "updated": "2026-08-26",
+      "version": "1.0.9",
+      "updated": "2026-09-02",
       "icon": "fa-solid fa-phone-volume",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall",
       "entries": [
         {
-          "title": "Message scrolling stays put",
-          "summary": "CyberCall now keeps the conversation pinned to the newest message after sending while preserving the reader's position during other message refreshes.",
-          "tags": ["CyberCall", "Messages", "Bug Fix", "Scrolling"]
+          "title": "Character names throughout CyberCall",
+          "summary": "Calls, contacts, messages, and group conversations now use assigned character names, with usernames retained as a fallback when no character is assigned.",
+          "tags": ["CyberCall", "Characters", "Calls", "Messages"]
         }
       ]
     },
@@ -69,15 +79,36 @@
       "moduleId": "bounty-board",
       "title": "Bounty Board",
       "tier": "free",
-      "version": "1.0.5",
-      "updated": "2026-08-10",
+      "version": "1.0.6",
+      "updated": "2026-09-02",
       "icon": "fa-solid fa-crosshairs",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board",
       "entries": [
         {
-          "title": "Bounty Board adopts HoloSuite styling",
-          "summary": "Bounty Board is now integrated with HoloSuite's shared visual system, delivering a more cohesive look and feel across the suite.",
-          "tags": ["Bounties", "HoloSuite", "Styling", "Integration"]
+          "title": "Smoother contract browsing",
+          "summary": "The Bounty Board title and filters now stay in place while long contract lists scroll independently, keeping search controls available even on a busy board.",
+          "tags": ["Bounties", "Filters", "Scrolling", "Interface"]
+        }
+      ]
+    },
+    {
+      "moduleId": "holosuite-critical-cutin",
+      "title": "HoloSuite Critical Cut-In",
+      "tier": "free",
+      "version": "1.0.6",
+      "updated": "2026-09-02",
+      "icon": "fa-solid fa-bolt-lightning",
+      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-critical-cutin",
+      "entries": [
+        {
+          "title": "Critical cut-ins for more dice",
+          "summary": "Choose from standard and registered dice, decide whether high or low results are positive, and configure separate success and failure thresholds for each character.",
+          "tags": ["Critical Cut-In", "Dice", "Thresholds", "Customization"]
+        },
+        {
+          "title": "More reliable cut-in detection",
+          "summary": "Improved Foundry 14 support and prevented old chat rolls, damage rolls, discarded dice, and rerolls from triggering unwanted animations.",
+          "tags": ["Critical Cut-In", "Bug Fix", "Foundry v12-v14", "Chat"]
         }
       ]
     },
@@ -101,15 +132,15 @@
       "moduleId": "holosuite-core",
       "title": "HoloSuite Core",
       "tier": "free",
-      "version": "1.0.10",
-      "updated": "2026-08-26",
+      "version": "1.0.11",
+      "updated": "2026-09-02",
       "icon": "fa-solid fa-mobile-screen",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
       "entries": [
         {
-          "title": "Expanded launcher integration",
-          "summary": "HoloSuite Core adds launcher support for HoloSuite Terminal and keeps the Updates feed focused on the latest module improvements.",
-          "tags": ["Core", "Launcher", "Terminal", "What's New"]
+          "title": "Fresh updates across HoloSuite",
+          "summary": "The What's New feed now highlights the latest Hacking, CyberCall, Bounty Board, and Critical Cut-In improvements.",
+          "tags": ["Core", "What's New", "Updates", "Foundry v12-v14"]
         }
       ]
     }

@@ -26,7 +26,7 @@
       </div>
       <div class="prism-lock-status">
         <span>{{profile.label}}</span>
-        <span>Roll {{rollTotal}} / DC {{dc}}</span>
+      <span>{{#if quickOutcome}}GM-selected difficulty{{else}}Roll {{rollTotal}} / DC {{dc}}{{/if}}</span>
       </div>
     </header>
 

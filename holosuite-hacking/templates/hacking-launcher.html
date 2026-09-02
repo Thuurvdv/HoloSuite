@@ -19,22 +19,25 @@
   <form class="hs-content holosuite-hacking-launcher">
     <header class="holosuite-hacking-launcher-header">
       <p class="hh-kicker">HoloSuite / hacking deck</p>
-      <h2>Launch Minigame</h2>
-      <span>Dispatch intrusion training to a player terminal.</span>
+      <div class="hh-launcher-mode-row"><h2 data-launcher-heading>{{#if quickHack}}Quick Hack{{else}}Launch Minigame{{/if}}</h2>
+        <button type="button" data-action="quick-toggle" aria-pressed="{{#if quickHack}}true{{else}}false{{/if}}">{{#if quickHack}}Full setup{{else}}Quick Hack{{/if}}</button>
+      </div>
+      <span>{{#if configurationMode}}Save a challenge for whoever attempts the hack.{{else}}Dispatch intrusion training to a player terminal.{{/if}}</span>
     </header>
 
   <div class="form-group">
-    <label>Minigame</label>
-    <select name="minigameType">
+    <label for="{{fieldIdPrefix}}-minigame"><span data-label-help="minigameType" tabindex="0" role="button" aria-expanded="false">Minigame</span></label>
+    <select id="{{fieldIdPrefix}}-minigame" name="minigameType">
       {{#each minigames}}
-        <option value="{{id}}">{{title}}</option>
+        <option value="{{id}}" {{#if selected}}selected{{/if}}>{{title}}</option>
       {{/each}}
     </select>
   </div>
 
+  {{#unless configurationMode}}
   <div class="form-group">
-    <label>Player</label>
-    <select name="userId" required>
+    <label for="{{fieldIdPrefix}}-player"><span data-label-help="userId" tabindex="0" role="button" aria-expanded="false">Player</span></label>
+    <select id="{{fieldIdPrefix}}-player" name="userId" required>
       {{#each users}}
         <option value="{{id}}">{{name}}</option>
       {{/each}}
@@ -42,8 +45,8 @@
   </div>
 
   <div class="form-group">
-    <label>Hacker character</label>
-    <select name="actorId">
+    <label for="{{fieldIdPrefix}}-actor"><span data-label-help="actorId" tabindex="0" role="button" aria-expanded="false">Hacker character</span></label>
+    <select id="{{fieldIdPrefix}}-actor" name="actorId">
       {{#each actors}}
         <option value="{{id}}">{{name}} ({{ownerNames}})</option>
       {{else}}
@@ -52,38 +55,115 @@
     </select>
   </div>
 
+  {{/unless}}
+  <section class="hh-quick-setup" data-quick-setup {{#unless quickHack}}hidden{{/unless}}>
+    <p>{{#if configurationMode}}Choose a fixed check outcome. No roll is needed; the player still completes the minigame.{{else}}Resolve the check however you like, then choose its outcome to send the minigame. The player still needs to complete the hack.{{/if}}</p>
+    <div class="hh-quick-results">
+      {{#each quickOutcomes}}
+        <button type="button" data-quick-outcome="{{id}}">{{label}}</button>
+      {{/each}}
+    </div>
+    {{#if configurationMode}}
+    <footer class="holosuite-hacking-launcher-actions hh-quick-configuration-actions">
+      <button type="button" data-action="cancel-configuration">Cancel</button>
+      <button type="button" data-action="save-quick-configuration"><i class="fa-solid fa-check"></i> {{configurationAction}}</button>
+    </footer>
+    {{/if}}
+  </section>
+
+  <fieldset class="hh-full-setup" data-full-setup {{#if quickHack}}hidden disabled{{/if}}>
   <div class="form-group">
-    <label>Skill</label>
-    <select name="skillId" required>
+    <label for="{{fieldIdPrefix}}-skill"><span data-label-help="skillId" tabindex="0" role="button" aria-expanded="false">Skill</span>
+      <span class="hh-skill-warning" data-skill-warning {{#if skills}}hidden{{/if}} tabindex="0" role="button" aria-expanded="false" aria-label="Skill detection help"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span>
+    </label>
+    <select id="{{fieldIdPrefix}}-skill" name="skillId" {{#if skills}}required{{else}}disabled{{/if}}>
       {{#each skills}}
         <option value="{{id}}" data-skill-label="{{name}}" data-skill-modifier="{{modifier}}">{{label}}</option>
+      {{else}}
+        <option value="">No skills detected</option>
       {{/each}}
     </select>
   </div>
 
   <div class="form-group">
-    <label>DC</label>
-    <input type="number" name="dc" value="{{defaultDc}}" step="1" />
+    <label for="{{fieldIdPrefix}}-roll-source"><span data-label-help="rollSource" tabindex="0" role="button" aria-expanded="false">Roll source</span></label>
+    <select id="{{fieldIdPrefix}}-roll-source" name="rollSource">
+      <option value="system" {{#if systemRoll}}selected{{/if}} {{#unless systemRollSupported}}disabled{{/unless}}>System skill roll{{#unless systemRollSupported}} (not supported){{/unless}}</option>
+      <option value="sheet" {{#if sheetRoll}}selected{{/if}}>Roll from character sheet</option>
+      <option value="custom" {{#if customRoll}}selected{{/if}}>Custom dice roll</option>
+    </select>
+  </div>
+
+  <div class="form-group" data-custom-roll {{#unless customRoll}}hidden{{/unless}}>
+    <label for="{{fieldIdPrefix}}-check-die"><span data-label-help="dieSides" tabindex="0" role="button" aria-expanded="false">Check die</span></label>
+    <select id="{{fieldIdPrefix}}-check-die" name="dieSides" required>
+      {{#each dice}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="form-group" data-custom-roll {{#unless customRoll}}hidden{{/unless}}>
+    <label for="{{fieldIdPrefix}}-dice-count"><span data-label-help="diceCount" tabindex="0" role="button" aria-expanded="false">Dice count</span></label>
+    <select id="{{fieldIdPrefix}}-dice-count" name="diceCount">
+      {{#each diceCounts}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>{{value}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="form-group" data-custom-roll {{#unless customRoll}}hidden{{/unless}}>
+    <label for="{{fieldIdPrefix}}-keep-result"><span data-label-help="keepResult" tabindex="0" role="button" aria-expanded="false">Result to keep</span></label>
+    <select id="{{fieldIdPrefix}}-keep-result" name="keepResult">
+      <option value="best" {{#unless keepWorst}}selected{{/unless}}>Keep best</option>
+      <option value="worst" {{#if keepWorst}}selected{{/if}}>Keep worst</option>
+    </select>
+  </div>
+
+  <div class="form-group" data-custom-roll {{#unless customRoll}}hidden{{/unless}}>
+    <label for="{{fieldIdPrefix}}-static-modifier"><span data-label-help="staticModifier" tabindex="0" role="button" aria-expanded="false">Static modifier</span></label>
+    <input id="{{fieldIdPrefix}}-static-modifier" type="number" name="staticModifier" value="{{staticModifier}}" step="any" />
   </div>
 
   <div class="form-group">
-    <label>Live audience</label>
-    <select name="liveAudience">
+    <label for="{{fieldIdPrefix}}-roll-direction"><span data-label-help="rollDirection" tabindex="0" role="button" aria-expanded="false">Positive rolls</span></label>
+    <select id="{{fieldIdPrefix}}-roll-direction" name="rollDirection">
+      <option value="high" {{#unless lowRollsGood}}selected{{/unless}}>High rolls are positive (roll ≥ DC)</option>
+      <option value="low" {{#if lowRollsGood}}selected{{/if}}>Low rolls are positive (roll ≤ DC)</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="{{fieldIdPrefix}}-dc"><span data-label-help="dc" tabindex="0" role="button" aria-expanded="false">DC</span></label>
+    <input id="{{fieldIdPrefix}}-dc" type="number" name="dc" value="{{defaultDc}}" step="1" />
+  </div>
+
+  <div class="form-group">
+    <label for="{{fieldIdPrefix}}-live-audience"><span data-label-help="liveAudience" tabindex="0" role="button" aria-expanded="false">Live audience</span></label>
+    <select id="{{fieldIdPrefix}}-live-audience" name="liveAudience">
       {{#each liveAudiences}}
         <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
       {{/each}}
     </select>
   </div>
 
+  {{#unless configurationMode}}
   <div class="form-group">
-    <label>Test roll</label>
-    <input type="number" name="testRollTotal" value="{{defaultTestRoll}}" step="1" />
+    <label for="{{fieldIdPrefix}}-test-roll"><span data-label-help="testRollTotal" tabindex="0" role="button" aria-expanded="false">Test roll</span></label>
+    <input id="{{fieldIdPrefix}}-test-roll" type="number" name="testRollTotal" value="{{defaultTestRoll}}" step="1" />
   </div>
 
     <footer class="holosuite-hacking-launcher-actions">
       <button type="button" data-action="test-self"><i class="fa-solid fa-gamepad"></i> Test Yourself</button>
       <button type="submit" data-action="start"><i class="fa-solid fa-paper-plane"></i> Send to Player</button>
     </footer>
+  {{/unless}}
+  </fieldset>
+  {{#if configurationMode}}
+    <footer class="holosuite-hacking-launcher-actions" data-full-configuration-actions {{#if quickHack}}hidden{{/if}}>
+      <button type="button" data-action="cancel-configuration">Cancel</button>
+      <button type="submit" data-action="start"><i class="fa-solid fa-check"></i> {{configurationAction}}</button>
+    </footer>
+  {{/if}}
   </form>
   <div class="hs-effects" aria-hidden="true"></div>
 </section>

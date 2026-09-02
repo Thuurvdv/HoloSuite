@@ -125,8 +125,7 @@ export function getUserTokenImage(user: any) {
   const characterId = typeof characterReference === "string"
     ? characterReference
     : String(characterReference?.id ?? characterReference?._id ?? "");
-  const actor = (characterId ? globalGame?.actors?.get?.(characterId) : null)
-    ?? (typeof characterReference === "object" ? characterReference : null);
+  const actor = getUserCharacter(user);
   const placeables = Array.isArray(globalCanvas?.tokens?.placeables) ? globalCanvas.tokens.placeables : [];
   const controlled = String(globalGame?.user?.id ?? "") === String(user.id ?? "")
     ? (globalCanvas?.tokens?.controlled ?? [])
@@ -157,4 +156,21 @@ export function getUserTokenImage(user: any) {
   const actorImage = String(actor?.img ?? actor?._source?.img ?? "").trim();
   if (!isDefaultIdentityImage(actorImage)) return actorImage;
   return isDefaultIdentityImage(userAvatar) ? "" : userAvatar;
+}
+
+export function getUserCharacter(user: any) {
+  if (!user) return null;
+  const globalGame = (globalThis as any).game;
+  const characterReference = user.character ?? user.characterId ?? user._source?.character;
+  const characterId = typeof characterReference === "string"
+    ? characterReference
+    : String(characterReference?.id ?? characterReference?._id ?? "");
+  return (characterId ? globalGame?.actors?.get?.(characterId) : null)
+    ?? (typeof characterReference === "object" ? characterReference : null);
+}
+
+export function getUserDisplayName(user: any, fallback = "") {
+  const characterName = String(getUserCharacter(user)?.name ?? "").trim();
+  if (characterName) return characterName;
+  return String(user?.name ?? "").trim() || fallback;
 }
