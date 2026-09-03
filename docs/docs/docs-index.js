@@ -13,9 +13,17 @@
 
 async function loadDocs() {
   try {
-    const response = await fetch("docs-data.json", { cache: "no-cache" });
-    if (!response.ok) throw new Error(`Unable to load docs-data.json: ${response.status}`);
-    return await response.json();
+    const [docsResponse, tutorialsResponse] = await Promise.all([
+      fetch("docs-data.json", { cache: "no-cache" }),
+      fetch("tutorials-data.json", { cache: "no-cache" })
+    ]);
+    if (!docsResponse.ok) throw new Error(`Unable to load docs-data.json: ${docsResponse.status}`);
+    if (!tutorialsResponse.ok) throw new Error(`Unable to load tutorials-data.json: ${tutorialsResponse.status}`);
+    const docs = await docsResponse.json();
+    const tutorials = await tutorialsResponse.json();
+    const additions = tutorials.modules || {};
+    docs.modules = docs.modules.map((module) => ({ ...module, ...(additions[module.id] || {}) }));
+    return docs;
   } catch (error) {
     console.error(error);
     return null;

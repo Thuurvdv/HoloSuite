@@ -361,4 +361,23 @@
   .docs-card-grid {
     grid-template-columns: 1fr;
   }
+
+  .doc-module-hero h1 {
+    font-size: clamp(2.2rem, 10vw, 2.75rem);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .doc-module-hero,
+  .doc-module-layout {
+    padding-inline: 18px;
+  }
+
+  .doc-section {
+    padding: 18px;
+  }
+
+  .doc-table-wrap table {
+    min-width: 560px;
+  }
 }

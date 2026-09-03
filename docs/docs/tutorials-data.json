@@ -1,0 +1,2334 @@
+{
+  "modules": {
+    "holosuite-core": {
+      "overview": "HoloSuite Core is the shared launcher and registration layer for the HoloSuite family. It discovers installed HoloSuite apps, presents them in a single device-style interface, provides theme and accessibility controls, shows release notices, and exposes a small API for module authors and macros.",
+      "tutorial": {
+        "intro": "Use Core as the front door to your HoloSuite tools. Most features configure themselves when another module registers, so the practical work is choosing who can use the launcher, selecting a visual theme, and knowing where to inspect a missing app.",
+        "audience": "World settings and the Command Deck are GM-only. Theme and debugging preferences marked “This Browser” affect only the current browser. Players can use the launcher when a registered app is player-visible and the GM has not enabled Disable HoloSuite for Players.",
+        "quickStart": {
+          "title": "Quick start",
+          "steps": [
+            "Install and enable HoloSuite Core, then enable the HoloSuite feature modules you want in the same world.",
+            "Reload the world after changing modules so every app can register with Core.",
+            "Open HoloSuite from its scene-control button, the configured keybinding, the module settings menu, or a macro that calls game.holosuite.openLauncher().",
+            "Choose Apps and select a tile. GMs see every registered app; players see only apps that explicitly allow player access.",
+            "Open Settings inside the launcher to pick the device style. Use Foundry Module Settings for world-wide theme, player-access, and debugging options."
+          ],
+          "callouts": [
+            {
+              "title": "Core is a launcher, not a data store",
+              "text": "Contacts, cases, maps, terminals, and other feature data remain owned by their respective modules. Disabling Core removes the common launcher but does not erase that module data.",
+              "tone": "tip"
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "opening-core",
+            "title": "Opening and navigating the launcher",
+            "subsections": [
+              {
+                "title": "Ways to open it",
+                "bullets": [
+                  "Scene controls: select the HoloSuite button added by Core.",
+                  "Keybinding: open Foundry’s Configure Controls screen and assign a key to HoloSuite Core → Open HoloSuite.",
+                  "Module settings: GMs can use the HoloSuite Command Deck submenu.",
+                  "Macro: call game.holosuite.openLauncher(); game.holosuite.toggleLauncher() opens or closes it."
+                ]
+              },
+              {
+                "title": "Apps",
+                "paragraphs": [
+                  "The Apps view is built from live registrations. A tile may include an icon, free or premium badge, short description, and a numeric badge supplied by the feature module. Examples include unread CyberCall contacts, visible CSI cases, open bounties, or available Galaxy Maps."
+                ],
+                "bullets": [
+                  "If only one feature was recently enabled, reload once so its ready hook can register.",
+                  "A disabled or missing dependency can leave a tile unavailable even though Core itself works.",
+                  "The app grid is filtered for players: a module can mark a tile playerVisible false, and Core also respects its own world-level player switch."
+                ]
+              },
+              {
+                "title": "What’s New",
+                "paragraphs": [
+                  "What’s New collects release notices registered by HoloSuite modules. Use the All, Free, Premium, and Installed filters to narrow the catalog. Seen state is stored for this browser, so another browser may still show an unread badge."
+                ]
+              },
+              {
+                "title": "Settings",
+                "paragraphs": [
+                  "The launcher’s Settings page is the quick device-style picker. The full Foundry Module Settings page contains all Core world and client preferences described below."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "themes",
+            "title": "Themes and visual accessibility",
+            "tables": [
+              {
+                "columns": ["Control", "Scope", "What it changes"],
+                "rows": [
+                  ["HoloSuite Theme", "This browser", "Selects the Base or Space Police interface for this user unless the GM forces a theme."],
+                  ["Force HoloSuite Theme", "World / GM", "Allow User Choice leaves the client setting active; Base or Space Police overrides it for everyone."],
+                  ["HoloSuite Color Theme", "World / GM", "Selects Cyan, Ember, or Violet shared accent tokens."],
+                  ["Disable HoloSuite Core CSS", "This browser", "Removes Core’s shared tokens and launcher styling. Use only for stylesheet debugging."],
+                  ["Disable Core Visual Effects", "This browser", "Keeps layout and colors but removes transitions, animation, filters, shadows, and glow effects."]
+                ]
+              }
+            ],
+            "callouts": [
+              {
+                "title": "Performance troubleshooting",
+                "text": "If a device struggles with animated UI, try Disable Core Visual Effects first. It preserves the interface structure and is less disruptive than disabling the complete stylesheet.",
+                "tone": "tip"
+              }
+            ]
+          },
+          {
+            "id": "player-access",
+            "title": "Player access and app visibility",
+            "paragraphs": [
+              "Core can present player-facing apps, but each feature module controls whether its tile is eligible. The world setting Disable HoloSuite for Players is the final master switch: when enabled, non-GM users cannot use the Core launcher even if individual apps are player-visible."
+            ],
+            "steps": [
+              "Leave Disable HoloSuite for Players off when you want players to launch modules such as Galaxy Map or a permitted vending-machine browser.",
+              "Configure player access inside each feature module; Core does not override its permissions, ownership tests, Region requirements, or visibility rules.",
+              "Sign in as a test player or use a separate browser to verify the visible tile set."
+            ]
+          },
+          {
+            "id": "diagnostics",
+            "title": "Diagnostics and API-only mode",
+            "subsections": [
+              {
+                "title": "Diagnostics window",
+                "paragraphs": [
+                  "GMs can open HoloSuite Diagnostics from Module Settings. It reports Core state and current registrations. Copy or download the JSON only when you intend to share it; opening the window alone does not upload anything."
+                ],
+                "steps": [
+                  "Open Configure Settings → Module Settings → HoloSuite Core → Diagnostics.",
+                  "Check whether the expected app is registered and whether Core reports any disabled UI or theme overrides.",
+                  "Use Copy JSON for a support message or Download JSON for an attachment."
+                ]
+              },
+              {
+                "title": "API-Only Mode",
+                "paragraphs": [
+                  "API-Only Mode is a per-browser debugging switch. Core still accepts app and What’s New registrations and exposes its API, but it suppresses the launcher, scene-control integration, sidebar cleanup, and catalog UI. Turn it back off to restore normal use."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "developer-api",
+            "title": "Macros and module integration",
+            "paragraphs": [
+              "The same API is available through game.holosuite, globalThis.HoloSuiteCoreApi, and the Core module’s api property. Core also emits the holosuite-core.apiReady hook when the registration surface is ready."
+            ],
+            "tables": [
+              {
+                "columns": ["Method", "Purpose"],
+                "rows": [
+                  ["openLauncher() / toggleLauncher()", "Open the launcher or toggle its current state."],
+                  ["registerApp(definition)", "Register or replace an app tile. Common fields are id, title, icon, description, premium, playerVisible, badge, and open."],
+                  ["unregisterApp(id) / getApps()", "Remove a registration or inspect the normalized app catalog."],
+                  ["registerWhatsNew(entry)", "Add a release notice to What’s New."],
+                  ["unregisterWhatsNew(id) / getWhatsNew()", "Remove or inspect release notices."],
+                  ["getDiagnostics()", "Return the same structured diagnostic snapshot used by the diagnostics window."]
+                ]
+              }
+            ],
+            "callouts": [
+              {
+                "title": "Compatibility alias",
+                "text": "Older examples may use game.holosuite.open(). Prefer openLauncher() in new macros; feature-module APIs are documented on their own pages.",
+                "tone": "info"
+              }
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Complete settings reference",
+          "tables": [
+            {
+              "columns": ["Setting", "Default", "Scope", "Use"],
+              "rows": [
+                ["HoloSuite Theme", "Base", "Client", "Personal device presentation."],
+                ["Force HoloSuite Theme", "Allow User Choice", "World", "GM-enforced presentation."],
+                ["HoloSuite Color Theme", "Cyan", "World", "Shared accent palette: Cyan, Ember, or Violet."],
+                ["Disable HoloSuite for Players", "Off", "World", "Master switch for non-GM launcher access."],
+                ["API-Only Mode", "Off", "Client", "Keep APIs and registrations while suppressing Core UI."],
+                ["Disable HoloSuite Core CSS", "Off", "Client", "Remove all Core styling for diagnostics."],
+                ["Disable Core Visual Effects", "Off", "Client", "Remove motion and costly visual effects."]
+              ]
+            }
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Can players use the Core launcher?",
+          "answer": "Yes, when the GM has not disabled HoloSuite for players and at least one installed app is registered as player-visible. Each feature module still applies its own access rules."
+        },
+        {
+          "question": "Why is an installed app missing?",
+          "answer": "Reload the world, confirm the feature module and its dependencies are active, check playerVisible rules if testing as a player, and use Core Diagnostics to inspect current registrations."
+        },
+        {
+          "question": "Will changing themes alter my game data?",
+          "answer": "No. Core theme, color, CSS, and visual-effects controls affect presentation only."
+        },
+        {
+          "question": "Does API-Only Mode disable other modules?",
+          "answer": "No. It suppresses Core’s local UI while leaving registration and API services available."
+        }
+      ]
+    },
+    "cybercall": {
+      "tutorial": {
+        "intro": "CyberCall combines synchronized holographic calls with persistent, private in-world messaging. GMs can stage broadcasts, players can call contacts, and both sides can maintain direct or group conversations without exposing private content to ordinary chat.",
+        "audience": "Players can use contacts, calls, and messages when their Foundry role meets the configured minimum. GMs control group contacts, managed NPC identities, broadcasts, and optional conversation oversight. Personal contacts and read state belong to the individual browser/world user.",
+        "quickStart": {
+          "title": "Run your first call",
+          "steps": [
+            "Enable HoloSuite Core and CyberCall, then open CyberCall from the launcher.",
+            "As GM, open the call composer and choose a caller name, subtitle or faction, portrait, message, signal strength, visual variant, ringtone, and recipients.",
+            "Use Preview Locally to check the presentation without contacting anyone.",
+            "Choose Broadcast to Players. Recipients receive the ringing or incoming-call display; the synchronized call opens when accepted.",
+            "Use Close Active Call to end the current call on connected clients."
+          ]
+        },
+        "sections": [
+          {
+            "id": "call-composer",
+            "title": "The GM call composer",
+            "tables": [
+              {
+                "columns": ["Field", "How it behaves"],
+                "rows": [
+                  ["Actor Portrait", "Select a world Actor to use its name/image as a starting point, or keep the call manual."],
+                  ["Variant", "Standard uses blue styling, Emergency uses red alert styling, and Corrupted uses green glitch styling."],
+                  ["Caller Name", "Primary identity displayed to recipients."],
+                  ["Subtitle / Faction", "Secondary organization, ship, role, or source label."],
+                  ["Portrait", "Image path used in the hologram; the file picker can select it."],
+                  ["Message", "Main transmission text."],
+                  ["Signal", "0–100 signal quality used by the visual presentation."],
+                  ["Fullscreen", "Expands the call for a dramatic table-wide presentation."],
+                  ["Recipients", "Target selected users rather than automatically sending to everyone; offline users can be listed but cannot receive live playback."],
+                  ["Ringtone", "Silent or one of the available ringtone cues for this call."]
+                ]
+              }
+            ],
+            "bullets": [
+              "Preview Locally never broadcasts and is ideal for checking art, text length, and sound.",
+              "Reset Form restores the composer fields; it does not delete contacts or messages.",
+              "Only one active call presentation is maintained per client. A new incoming call replaces the current presentation."
+            ]
+          },
+          {
+            "id": "call-flow",
+            "title": "Incoming, outgoing, and synchronized calls",
+            "subsections": [
+              {
+                "title": "Player-to-GM calls",
+                "steps": [
+                  "Open Contacts and select Call on a personal or group contact.",
+                  "The active GM receives an incoming-call prompt identifying the caller/contact.",
+                  "When accepted, the linked call display opens. Ending the call closes the active synchronized call for everyone."
+                ]
+              },
+              {
+                "title": "GM broadcasts",
+                "paragraphs": [
+                  "The composer can target a subset of users. Fullscreen, visual variant, message, portrait, signal, and ringtone are part of the transmitted presentation, so every recipient sees the same authored scene while keeping their own interface volume."
+                ]
+              },
+              {
+                "title": "Call history",
+                "paragraphs": [
+                  "Direct call events are written into the related message thread, giving the conversation a record of placed, received, or ended calls."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "contacts",
+            "title": "Personal, group, and managed contacts",
+            "tables": [
+              {
+                "columns": ["Contact type", "Stored where", "Who manages it", "Best use"],
+                "rows": [
+                  ["Personal", "Client setting, isolated per world", "The current user", "Private aliases, fixers, crew contacts, and personal numbers."],
+                  ["Group", "World setting", "GM / active-GM workflow", "Shared organizations or contacts every intended user should see."],
+                  ["Managed identity", "World-linked group/contact data", "GM", "NPC identities the GM can use as the sender in messages or link to Actors."]
+                ]
+              }
+            ],
+            "steps": [
+              "Open Contacts and choose Personal or Group.",
+              "Create a contact with a required name and number. Optionally choose a picture and ringtone.",
+              "For GM-managed contacts, link a world Actor when you want its portrait/identity available.",
+              "Use Call for a live call or Message to open/create the conversation.",
+              "Remove deletes the contact definition; it does not automatically erase existing private chat history."
+            ]
+          },
+          {
+            "id": "messages",
+            "title": "Private messages and group conversations",
+            "subsections": [
+              {
+                "title": "Starting a conversation",
+                "steps": [
+                  "Open Messages, then choose New for a direct message or New Group for a private group thread.",
+                  "Select players, GMs, personal contacts, or group contacts as recipients. A group name can be up to 80 characters.",
+                  "Write the message and send. Replies stay locked to the thread’s recipient set.",
+                  "Use Refresh if another client changed the conversation and the window has not updated yet."
+                ]
+              },
+              {
+                "title": "GM sender identities",
+                "paragraphs": [
+                  "A GM can Reply As a linked contact and can choose Send As for managed contacts or Actors. This makes NPC correspondence appear from the intended diegetic identity without giving players control of that Actor."
+                ]
+              },
+              {
+                "title": "NPC portrait links",
+                "paragraphs": [
+                  "In a thread’s NPC link panel, drag an Actor or Token to bind the conversation. Use Share Portrait or Hide Portrait to control whether participants see that art, Change to replace the link, and Unlink to return the thread to its ordinary identity."
+                ]
+              },
+              {
+                "title": "Unread, timestamps, and deletion",
+                "paragraphs": [
+                  "Unread state is saved per client. Message timestamps are optional. Deleting a thread records a local cutoff rather than deleting other users’ messages; a later message can make the thread appear again."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "privacy",
+            "title": "Privacy and chat-card behavior",
+            "paragraphs": [
+              "CyberCall stores history as Foundry ChatMessage documents with private recipient data in module flags. Ordinary player-to-player conversations are hidden from the GM by default. Enabling View Player Conversations gives the GM oversight and displays a visible indicator so participants know monitoring is active."
+            ],
+            "bullets": [
+              "CyberCall chat cards are hidden from the normal chat log by default; enable Show CyberCall Chat Cards to expose them there.",
+              "Incoming Message Alerts controls local notifications only.",
+              "Read state and deleted-thread cutoffs are client-scoped.",
+              "Private messages still depend on the Foundry world and its server/database security; they are not end-to-end encrypted."
+            ]
+          },
+          {
+            "id": "roles-and-access",
+            "title": "Roles and access control",
+            "paragraphs": [
+              "Minimum Player Role is a world setting. Select None, Limited, Observer, Player, Trusted, or Assistant GM. Users below the threshold cannot use the player-facing CyberCall features even if the launcher tile is visible."
+            ],
+            "steps": [
+              "Choose the lowest role that should use calls and messages.",
+              "Test with a user at that exact role and one role below it.",
+              "Keep group-contact editing with an active GM online so the authoritative world data can be saved."
+            ]
+          },
+          {
+            "id": "cybercall-troubleshooting",
+            "title": "Troubleshooting calls and messages",
+            "bullets": [
+              "No ringing sound: check the selected ringtone, the local interface volume, browser autoplay restrictions, and whether silent mode is selected.",
+              "A player cannot open CyberCall: verify Minimum Player Role and Core’s Disable HoloSuite for Players setting.",
+              "A group contact will not save: make sure an active GM is connected.",
+              "The GM cannot see a player conversation: this is expected until View Player Conversations is enabled.",
+              "A deleted thread returned: a new message after the local deletion cutoff revives it by design.",
+              "A portrait is missing: confirm the asset path is readable by every client and that Share Portrait is enabled for an NPC-linked thread."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Complete settings reference",
+          "tables": [
+            {
+              "columns": ["Setting", "Default", "Scope", "Effect"],
+              "rows": [
+                ["Default Signal Strength", "Module default", "Client", "Starting signal value in the call composer."],
+                ["Incoming Call Ringtone", "Configured in CyberCall UI", "Client", "Local default: silent or ringtone 1–3."],
+                ["Minimum Player Role", "Player", "World", "Lowest Foundry role allowed to use CyberCall."],
+                ["Incoming Message Alerts", "On", "Client", "Show local new-message notifications."],
+                ["Show CyberCall Chat Cards", "Off", "Client", "Reveal CyberCall storage messages in the normal chat log."],
+                ["Show Message Timestamps", "Off", "Client", "Display timestamps in threads."],
+                ["View Player Conversations", "Off", "World / GM", "Allow GM oversight; participants receive a monitoring indicator."]
+              ]
+            }
+          ],
+          "callouts": [
+            {
+              "title": "Internal settings",
+              "text": "Personal contacts, group contacts, NPC bindings, read markers, and deleted-thread cutoffs are stored as hidden settings and should be managed through CyberCall rather than edited manually.",
+              "tone": "info"
+            }
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Can players call the GM?",
+          "answer": "Yes. A player can call an available contact; the active GM receives the incoming request and can accept it."
+        },
+        {
+          "question": "Can I send a call to only some players?",
+          "answer": "Yes. Select the intended recipients in the GM composer before broadcasting."
+        },
+        {
+          "question": "Are messages persistent and private?",
+          "answer": "They persist as recipient-restricted Foundry ChatMessages. They are hidden from the GM by default for player conversations unless the GM enables the disclosed oversight setting."
+        },
+        {
+          "question": "What is the difference between personal and group contacts?",
+          "answer": "Personal contacts are client-scoped for one user in one world. Group and managed contacts are world data maintained through the GM-authoritative workflow."
+        },
+        {
+          "question": "Does deleting a thread delete it for everyone?",
+          "answer": "No. Thread deletion is local and cutoff-based; other participants retain their history and a later message can revive the thread."
+        }
+      ]
+    },
+    "security-cameras": {
+      "tutorial": {
+        "intro": "Security Cameras lets a GM define surveillance feeds backed by a static image or a live crop of a Foundry Scene, then open or broadcast those feeds in a monitor window or picture-in-picture display.",
+        "audience": "Camera creation, editing, previews, broadcasts, and feed closure are GM-controlled. Players do not browse the manager themselves; they receive broadcasts or open permitted feeds through integrations such as HoloSuite Terminal.",
+        "quickStart": {
+          "title": "Create and broadcast a camera",
+          "steps": [
+            "Draw a Region on the source Scene if you want a cropped live feed. Static-image cameras do not need a Region.",
+            "Open Security Cameras from HoloSuite and select New.",
+            "Enter a name and location, choose Live Scene or Static Image, select the Scene/Region or image, then choose a status and display mode.",
+            "Save the camera and use Preview to check it on the GM client.",
+            "Choose Show to Players to broadcast it. Use Close Feeds when the scene should end."
+          ]
+        },
+        "sections": [
+          {
+            "id": "camera-fields",
+            "title": "Every camera field",
+            "tables": [
+              {
+                "columns": ["Field", "Configuration"],
+                "rows": [
+                  ["ID", "Optional stable identifier. Leave blank on a new camera to generate one automatically."],
+                  ["Name", "Required display name shown in the manager and feed."],
+                  ["Scene", "Source scene for a live feed. Unassigned is valid for a static camera."],
+                  ["Scene Region", "Optional Region used as the live camera frame."],
+                  ["Location", "Human-readable location label."],
+                  ["Feed Source", "Live Scene captures the Foundry canvas; Static Image displays the chosen asset."],
+                  ["Static Image", "Image path used when Feed Source is Static Image."],
+                  ["Status", "Online, Offline, Corrupted, or Restricted."],
+                  ["Display Mode", "Window or picture-in-picture."],
+                  ["Notes", "GM-facing setup/context notes."],
+                  ["Legacy frame coordinates", "Stored x/y/width/height values support older definitions; a linked Region is the preferred framing method."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "live-feeds",
+            "title": "Live Scene feeds and Regions",
+            "paragraphs": [
+              "A live feed is coordinated by the GM client. The linked Region determines the portion of the source Scene that is captured and streamed to viewers. This makes Region placement part of the camera setup: resize or move the Region to change the framing."
+            ],
+            "steps": [
+              "Activate the source Scene as GM and draw a Region over the camera’s field of view.",
+              "Choose that Scene and Region in the camera editor.",
+              "Preview while the source Scene is available and adjust the Region until the composition is correct.",
+              "Keep an active GM connected while players view live feeds. A different or unavailable source Scene can show a waiting-for-signal state until frames arrive."
+            ],
+            "callouts": [
+              {
+                "title": "Performance",
+                "text": "A live feed repeatedly captures and transmits image frames. Use a sensibly sized Region, close feeds when finished, and prefer static images for cameras that do not need changing action.",
+                "tone": "tip"
+              }
+            ]
+          },
+          {
+            "id": "static-feeds",
+            "title": "Static image feeds",
+            "paragraphs": [
+              "Static cameras show the configured image directly and require no scene capture. They are ideal for prerecorded security stills, dossier images, disabled installations, or a surveillance reveal that must be identical for every viewer."
+            ],
+            "steps": [
+              "Set Feed Source to Static Image.",
+              "Choose a web-accessible image with the file picker.",
+              "Leave Scene and Region unassigned unless you also want the camera associated with a location for organization.",
+              "Preview on the GM client before broadcasting to catch missing or permission-restricted assets."
+            ]
+          },
+          {
+            "id": "camera-states",
+            "title": "Statuses and access behavior",
+            "tables": [
+              {
+                "columns": ["Status", "Player result", "Use it for"],
+                "rows": [
+                  ["Online", "Normal feed with active/recording presentation.", "Ordinary working surveillance."],
+                  ["Offline", "Signal unavailable; players cannot access the feed.", "Destroyed hardware or powered-down sectors."],
+                  ["Corrupted", "Feed remains usable but displays interference/glitch treatment.", "Damage, hostile intrusion, or unreliable evidence."],
+                  ["Restricted", "Access-denied presentation; players cannot access normally.", "GM-only or clearance-gated cameras."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "camera-manager",
+            "title": "Manager actions and display modes",
+            "bullets": [
+              "New creates a blank camera; Duplicate creates a separate copy for fast setup of similar locations.",
+              "Save Camera persists the editor fields to the world.",
+              "Preview opens the selected feed locally for the GM.",
+              "Show to Players broadcasts the selected feed to connected player clients.",
+              "Close Feeds closes the active camera presentation on connected clients.",
+              "Pan to Region activates/centers the linked scene area when possible, which is useful while editing live framing.",
+              "Delete permanently removes the camera definition after confirmation."
+            ],
+            "tables": [
+              {
+                "columns": ["Display", "Behavior"],
+                "rows": [
+                  ["Window", "A resizable monitor-style application, approximately 720 × 520 by default."],
+                  ["Picture-in-picture", "A compact feed automatically placed near the lower-right of the viewport."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "camera-integrations",
+            "title": "Terminal and API integration",
+            "paragraphs": [
+              "HoloSuite Terminal can list linked Security Cameras, apply terminal-specific camera locks, and call the camera API after access succeeds. A camera’s own Offline or Restricted state still applies."
+            ],
+            "tables": [
+              {
+                "columns": ["API method", "Purpose"],
+                "rows": [
+                  ["openMonitor() / closeMonitor()", "Open or close the GM camera manager."],
+                  ["getCameras() / getCamera(id)", "Read normalized camera definitions."],
+                  ["registerCamera(data) / createNewCamera()", "Save a supplied definition or start a new one."],
+                  ["duplicateCamera(id) / deleteCamera(id)", "Copy or remove a camera."],
+                  ["openCameraFeed(id, options)", "Open a feed for the current client."],
+                  ["showFeed(id)", "GM broadcast of a feed."],
+                  ["closeFeed()", "Close the active local feed."],
+                  ["hasCameraAccess(id)", "Check current-user access for integrations."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "camera-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "Waiting for signal: ensure an active GM can render the source Scene and that the camera points to the correct Scene/Region.",
+              "Black or badly framed live image: resize the Region, activate the source Scene, and preview again.",
+              "Players see Access Denied: check Restricted/Offline status and any Terminal lock wrapping the camera.",
+              "Static image is blank: verify the path is served by Foundry and readable by player clients.",
+              "Feed remains open: use Close Feeds from the manager; opening a replacement feed also replaces the active presentation on a client."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Storage and defaults",
+          "paragraphs": [
+            "Security Cameras has no ordinary user-facing module settings. Camera definitions are stored in a hidden world setting and should be edited through the manager."
+          ],
+          "tables": [
+            {
+              "columns": ["New-camera default", "Value"],
+              "rows": [
+                ["Name / location", "Unnamed Camera / Unknown Location"],
+                ["Feed source", "Static image"],
+                ["Status", "Online"],
+                ["Display", "Window"],
+                ["Fallback frame", "1200 × 675 when legacy coordinates are needed"]
+              ]
+            }
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Do live feeds require a Scene Region?",
+          "answer": "A Region is the recommended way to define the crop. Static-image feeds do not need one."
+        },
+        {
+          "question": "Can players browse all cameras?",
+          "answer": "No. The manager is GM-only. Players receive GM broadcasts or access cameras through a permitted integration such as a configured Terminal."
+        },
+        {
+          "question": "Why is the feed waiting for signal?",
+          "answer": "Live frames are coordinated by an active GM. Check that the source Scene and linked Region exist and can be rendered by that GM."
+        },
+        {
+          "question": "What does Corrupted do?",
+          "answer": "It keeps the camera viewable while adding interference. Offline and Restricted block normal player access."
+        }
+      ]
+    },
+    "csi-toolkit": {
+      "tutorial": {
+        "intro": "CSI Toolkit is a shared investigation workspace built around cases, evidence-board cards, connections, timelines, and a large pannable canvas. It supports both GM preparation and player collaboration through a GM-authoritative socket workflow.",
+        "audience": "GMs create and manage cases from the case manager. Players use the case browser and can contribute to available cases; their saved changes require an active GM to authorize and persist them. Current manager-created cases are player-visible. Older imported data may still contain legacy GM visibility values.",
+        "quickStart": {
+          "title": "Build your first case",
+          "steps": [
+            "Open CSI Toolkit as GM and choose New Case.",
+            "Set the title, subtitle, status, board theme, image, and description, then save.",
+            "Open Board and right-click empty space to add Evidence, Suspect, Location, or Timeline cards.",
+            "Right-click or use the connection action to connect two cards, then choose a label, relationship type, line style, and color.",
+            "Drag cards into position and select Publish Layout so collaborators receive the saved arrangement."
+          ]
+        },
+        "sections": [
+          {
+            "id": "cases",
+            "title": "Case setup and lifecycle",
+            "tables": [
+              {
+                "columns": ["Field", "Options and use"],
+                "rows": [
+                  ["Title", "Required case name."],
+                  ["Subtitle", "Operation number, jurisdiction, or short hook."],
+                  ["Status", "Open, Cold, Solved, or Classified."],
+                  ["Board Theme", "Database for a clean analytical board; Noir for a darker investigation style."],
+                  ["Case Image", "Header/dossier artwork."],
+                  ["Description", "Shared case briefing."]
+                ]
+              }
+            ],
+            "bullets": [
+              "Board opens the interactive canvas for the selected case.",
+              "Export downloads one case as JSON. Import accepts a case JSON file and assigns a new ID when the imported ID collides.",
+              "Delete removes the case and its contained cards, timeline, layout, and connections.",
+              "Changes are stored world-wide in the hidden cases setting."
+            ]
+          },
+          {
+            "id": "board-navigation",
+            "title": "Board navigation and layout",
+            "bullets": [
+              "The board is a 5200 × 3600 workspace. Pan the background and use zoom controls between roughly 45% and 180%.",
+              "Drag cards to organize clusters. The current pan/zoom view is local and is not part of the published layout.",
+              "Publish Layout saves card coordinates. For a player, the request is sent to an active GM; without one online, it cannot persist.",
+              "Refresh reloads authoritative case data when another participant has changed the board.",
+              "Use the Evidence, Suspects, Locations, and Timeline dim controls to visually de-emphasize categories without changing or hiding their data.",
+              "Click card art to open it at full size. Double-click a connection line to edit that relationship."
+            ]
+          },
+          {
+            "id": "case-cards",
+            "title": "Evidence, suspects, locations, and timeline",
+            "tables": [
+              {
+                "title": "Evidence",
+                "columns": ["Field", "Values"],
+                "rows": [
+                  ["Title", "Evidence label."],
+                  ["Type", "Physical, Digital, Biological, Weapon, Document, Testimony, or Other."],
+                  ["Status", "Unknown, Relevant, Red Herring, or Confirmed."],
+                  ["Details", "Image, description, and notes."]
+                ]
+              },
+              {
+                "title": "Suspects",
+                "columns": ["Field", "Values"],
+                "rows": [
+                  ["Identity", "Name and optional alias."],
+                  ["Status", "Unknown, Cleared, Person of Interest, Prime Suspect, Arrested, or Dead."],
+                  ["Details", "Mugshot, motive, alibi, and notes."]
+                ]
+              },
+              {
+                "title": "Locations and timeline",
+                "columns": ["Card", "Fields"],
+                "rows": [
+                  ["Location", "Name, Scene ID text, image, description, and notes."],
+                  ["Timeline", "Time, title, linked item IDs, and description. Use the up/down controls to reorder entries."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "connections",
+            "title": "Creating and styling connections",
+            "steps": [
+              "Start a connection from a card’s action menu or by right-clicking as offered by the board.",
+              "Select the destination card.",
+              "Enter an optional label and choose Link, Supports, Contradicts, Location, Timeline, or Identity.",
+              "Choose Solid, Dashed, or Dotted and an accent color: cyan, green, red, amber, violet, orange, or white.",
+              "Save. Double-click the rendered line later to edit it."
+            ],
+            "callouts": [
+              {
+                "title": "Deletion cleanup",
+                "text": "Deleting a card also removes connections attached to it, removes its ID from timeline links, and clears its saved layout entry.",
+                "tone": "warning"
+              }
+            ]
+          },
+          {
+            "id": "collaboration",
+            "title": "Player collaboration and synchronization",
+            "paragraphs": [
+              "Players work against the same case model, but world updates are GM-authoritative. A player action is sent to an active GM, saved there, and then synchronized. This prevents a non-GM client from writing world settings directly."
+            ],
+            "bullets": [
+              "Keep at least one GM connected while players add/edit cards, connections, timelines, or published positions.",
+              "Card dragging is a local draft until Publish Layout is used.",
+              "Refresh if collaborators have overlapping edits or a window was left open.",
+              "Case status and theme are descriptive/presentational; they do not lock the board automatically.",
+              "Current UI-created cases are intended for players. Treat legacy imported GM-only visibility as compatibility data rather than a current manager control."
+            ]
+          },
+          {
+            "id": "csi-import-export",
+            "title": "Backup, transfer, and campaign practice",
+            "steps": [
+              "Export a case before major restructuring or before deleting many cards.",
+              "Keep exported JSON with the world backup; images and Scene IDs are references, not embedded assets.",
+              "When importing into another world, check image paths and Scene IDs, then republish the layout.",
+              "Use a separate case for player-facing deductions and GM-only prep if your campaign requires information the current shared board should never expose."
+            ]
+          },
+          {
+            "id": "csi-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "A player edit does not save: connect an active GM, repeat the edit, and Refresh.",
+              "Card positions reset: use Publish Layout after dragging; panning and zooming are intentionally local.",
+              "A connection is difficult to select: double-click the visible line or edit from the relevant card/connection controls.",
+              "An imported image is broken: restore the referenced asset at the same path or edit the card/case image.",
+              "A Scene link does nothing: location Scene ID is stored as text; verify it matches a Scene in the destination world."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Data and API notes",
+          "paragraphs": [
+            "The manager is the supported configuration surface. The hidden world cases setting contains the shared data. The module API provides case retrieval, create/save/delete/duplicate, board/browser opening, and import/export helpers for macros and integrations."
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Can players edit the case board?",
+          "answer": "Yes, for cases available in the current player browser. Their changes are sent through an active GM for authoritative persistence."
+        },
+        {
+          "question": "Why did moved cards return to their old positions?",
+          "answer": "Dragging is a local layout draft. Choose Publish Layout to save coordinates for everyone."
+        },
+        {
+          "question": "Does Publish Layout save my zoom and pan?",
+          "answer": "No. It saves card positions; each user’s viewport remains local."
+        },
+        {
+          "question": "Can I back up one case?",
+          "answer": "Yes. Export it as JSON. Remember that referenced images and Scene IDs are not embedded."
+        },
+        {
+          "question": "What happens when I delete a card?",
+          "answer": "Attached connections, timeline references to that card, and its layout entry are cleaned up with it."
+        }
+      ]
+    },
+    "galaxy-map": {
+      "tutorial": {
+        "intro": "Galaxy Map is a cinematic campaign-navigation board for star systems, routes, factions, linked Scenes and Journals, discoveries, and group-approved travel. The GM edits authoritative map data while players receive a filtered view.",
+        "audience": "GMs create and edit maps, systems, routes, and factions; set the current system; reveal discoveries; broadcast maps; and approve travel. Players can open player-visible maps, inspect revealed data, open permitted links, and request travel over a direct visible route.",
+        "quickStart": {
+          "title": "Create a playable galaxy map",
+          "steps": [
+            "Open Galaxy Map from HoloSuite as GM and choose Create Map.",
+            "Edit the map title, subtitle, description, background image, and visibility.",
+            "Create at least two systems, position them on the map, and mark them player-visible.",
+            "Create a route between the systems and mark the route player-visible.",
+            "Set the party’s current system, then choose Show to broadcast the map to players.",
+            "Have a player select the connected destination and Request Travel; all active voters must accept before the current system moves."
+          ]
+        },
+        "sections": [
+          {
+            "id": "map-setup",
+            "title": "Map metadata and manager workflow",
+            "tables": [
+              {
+                "columns": ["Map field", "Purpose"],
+                "rows": [
+                  ["Title", "Primary map name shown in the manager and player chooser."],
+                  ["Subtitle", "Campaign region, sector, or era label."],
+                  ["Description", "Map-wide briefing text."],
+                  ["Background Image", "Optional starfield or chart artwork behind the map."],
+                  ["Visibility", "GM keeps the map out of normal player browsing; Players makes it available in the player chooser."],
+                  ["Current System", "The party marker and origin used for direct-route travel."]
+                ]
+              }
+            ],
+            "bullets": [
+              "The manager lists every map and its system/route counts.",
+              "Edit changes metadata; Open Map opens the full GM view; Show broadcasts it; Close Players closes broadcast player windows.",
+              "Export downloads the selected normalized map JSON. The public API can import that JSON; a colliding ID becomes a new “Import” map unless replace is requested.",
+              "Duplicate creates an independent copy. Delete removes the map after confirmation."
+            ]
+          },
+          {
+            "id": "systems",
+            "title": "Configuring star systems",
+            "tables": [
+              {
+                "columns": ["Field", "Values or behavior"],
+                "rows": [
+                  ["Name and position", "Name plus x/y percentage. In GM map view, drag a system to save its position."],
+                  ["Type", "Core, Colony, Frontier, Station, Anomaly, Ruins, Restricted, or Unknown."],
+                  ["Status", "Undiscovered, Known, Visited, Danger, or Locked."],
+                  ["Faction", "Optional link to a configured faction."],
+                  ["Visibility", "GM or Players."],
+                  ["Description / image", "Player-facing system detail and optional artwork."],
+                  ["Scenes", "One or more linked Foundry Scenes."],
+                  ["Journal", "Optional linked Journal entry."],
+                  ["GM notes", "Shown only in the GM interface."],
+                  ["Icon", "Planet, Ringed, Star, Diamond, or Void; size 18–56; optional override color; pulse on/off."]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "Player-visible systems with Undiscovered status appear as an obscured “???” sensor contact with unknown details. GM-only systems are removed from the player display entirely. Revealing a system changes visibility; use Notify Discovery separately when you want a pop-up announcement."
+            ]
+          },
+          {
+            "id": "routes-and-factions",
+            "title": "Routes and factions",
+            "subsections": [
+              {
+                "title": "Routes",
+                "paragraphs": [
+                  "A route connects two systems in either direction. Choose Safe, Dangerous, Restricted, Smuggler, or Unknown; add a travel-time label, numeric fuel cost, visibility, and notes. A player route is shown only when both endpoint systems are also visible."
+                ],
+                "callouts": [
+                  {
+                    "title": "Fuel is descriptive",
+                    "text": "Galaxy Map displays the configured fuel cost but does not deduct currency, fuel, or Actor resources. Apply campaign resource changes separately or through your own integration.",
+                    "tone": "info"
+                  }
+                ]
+              },
+              {
+                "title": "Factions",
+                "paragraphs": [
+                  "A faction has a name, color, description, and visibility. Its color supplies a system’s icon color unless that system has an explicit override. A GM-only faction is omitted from player faction data, so linked visible systems fall back to an unaffiliated presentation."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "map-navigation",
+            "title": "Using the map",
+            "bullets": [
+              "Select a system to open its details. GMs can edit, set current, reveal/hide, notify discovery, or delete it.",
+              "Select a route to see type, travel time, fuel, and notes. GMs can edit, reveal/hide, or delete it.",
+              "Pan the chart and zoom from 0.55× to 2.6×; reset returns to the standard view.",
+              "The current-system marker identifies the party’s location.",
+              "Linked Scene and Journal controls open the referenced Foundry documents when the current user has access.",
+              "Right-click actions provide fast creation/editing on the GM map. Creating a route requires at least two systems."
+            ]
+          },
+          {
+            "id": "travel",
+            "title": "Travel requests and voting",
+            "steps": [
+              "The GM sets a current system.",
+              "The destination, origin, route, and map must all be player-visible, and the destination must have a direct route from the current system.",
+              "A player selects the destination and chooses Request Travel.",
+              "Every other active user is added as a voter; the primary active GM is always included.",
+              "Any decline, closing a vote dialog, or the 60-second timeout rejects the request.",
+              "When every voter accepts, all open copies animate travel for about 2.4 seconds and the GM coordinator then saves the destination as current."
+            ],
+            "callouts": [
+              {
+                "title": "Active-user consensus",
+                "text": "The requester does not vote. All other active users do, including the GM coordinator. Ask disconnected or idle users to leave the world if they should not be part of a vote.",
+                "tone": "warning"
+              }
+            ]
+          },
+          {
+            "id": "visibility-and-broadcast",
+            "title": "Visibility, discovery, and broadcasts",
+            "tables": [
+              {
+                "columns": ["Action", "What changes"],
+                "rows": [
+                  ["Set map visibility to Players", "Allows normal player opening from HoloSuite/player chooser."],
+                  ["Show", "Forces the chosen map window open for connected players, useful for a reveal."],
+                  ["Close Players", "Closes the active broadcast map on player clients."],
+                  ["Reveal / Hide system", "Changes whether the system is included in player data."],
+                  ["Undiscovered status", "Keeps a visible marker but obscures identity/details as an unresolved contact."],
+                  ["Reveal / Hide route", "Changes route visibility; hidden endpoints still suppress an otherwise visible route."],
+                  ["Notify Discovery", "Sends “New System Discovered” and refreshes an open matching player map."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "galaxy-api",
+            "title": "Macros and API",
+            "paragraphs": [
+              "The API is available at game.galaxyMap and on the module’s api property."
+            ],
+            "tables": [
+              {
+                "columns": ["Area", "Methods"],
+                "rows": [
+                  ["Open and broadcast", "openMap, openMapManager, openPlayerMapChooser, showMapToPlayers, closePlayerMap"],
+                  ["Maps", "createMap, getMaps, updateMap, updateMapMetadata, deleteMap, duplicateMap, importMapData, exportMap"],
+                  ["Systems and scenes", "upsertSystem, deleteSystem, saveSystemPosition, setCurrentSystem, getSceneIdsForSystem, getSystemsForScene"],
+                  ["Routes and factions", "upsertRoute, deleteRoute, upsertFaction, deleteFaction"],
+                  ["Visibility and travel", "revealSystemToPlayers, hideSystemFromPlayers, revealRouteToPlayers, hideRouteFromPlayers, notifySystemDiscovered, requestTravelToSystem"]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "galaxy-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "Players see no maps: set the map itself to Players; broadcasting can open a GM-only map for a reveal, but normal browsing still filters it.",
+              "A route is missing: reveal the route and both endpoint systems.",
+              "A system shows ???: it is player-visible but still Undiscovered.",
+              "Travel is unavailable: set a current system and create a direct player-visible route to the selected visible destination.",
+              "A travel vote times out: keep the primary GM online and ensure every other active user responds.",
+              "Scene or journal buttons fail: verify IDs and user document permissions, especially after importing a map into another world."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Types, limits, and storage",
+          "paragraphs": [
+            "Galaxy Map has no ordinary Module Settings controls. Maps are stored in a hidden world setting and configured through the manager."
+          ],
+          "tables": [
+            {
+              "columns": ["Reference", "Values"],
+              "rows": [
+                ["System types", "Core, Colony, Frontier, Station, Anomaly, Ruins, Restricted, Unknown"],
+                ["System statuses", "Undiscovered, Known, Visited, Danger, Locked"],
+                ["Route types", "Safe, Dangerous, Restricted, Smuggler, Unknown"],
+                ["Icon styles", "Planet, Ringed, Star, Diamond, Void"],
+                ["Zoom", "0.55× minimum; 2.6× maximum"],
+                ["Travel vote timeout", "60 seconds"],
+                ["Travel animation", "2.4 seconds"]
+              ]
+            }
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Why does a visible system show as ???",
+          "answer": "Its visibility is Players but its status is Undiscovered. Change the status when the party learns its identity."
+        },
+        {
+          "question": "Does travel spend the listed fuel?",
+          "answer": "No. Fuel cost is displayed metadata; Galaxy Map does not modify Actor or inventory resources."
+        },
+        {
+          "question": "Who must approve player travel?",
+          "answer": "Every active user except the requester, with the primary active GM always included. One decline or a 60-second timeout rejects it."
+        },
+        {
+          "question": "Can a route cross multiple systems automatically?",
+          "answer": "No. Player travel requires one direct route from the current system to the selected destination."
+        },
+        {
+          "question": "Can I move a map between worlds?",
+          "answer": "Export the map JSON and import it through the API or supported workflow. Recheck linked Scene/Journal IDs and asset paths afterward."
+        }
+      ]
+    },
+    "bounty-board": {
+      "tutorial": {
+        "intro": "Bounty Board is a shared contract terminal. GMs author and publish jobs, filter and bulk-manage the board, assign claimants, resolve contracts, and optionally post lifecycle cards to chat. Players see only published contracts while the board is enabled.",
+        "audience": "GMs create, edit, publish, assign, resolve, hide, archive, and delete contracts. Players browse published contracts, expand public details, open permitted linked Journals, and submit a contract request through chat; a request does not automatically assign the bounty.",
+        "quickStart": {
+          "title": "Publish your first contract",
+          "steps": [
+            "Open Bounty Board from HoloSuite as GM and choose New Contract.",
+            "Enter a contract ID, title, target, reward, currency, threat, and the public description.",
+            "Optionally add faction, location, comma-separated tags, image, long dossier text, linked Journal, and claimed-by text.",
+            "Enable Published to Players and save, or save privately and use Publish from the card.",
+            "Ask a player to open the board, filter or search, expand the card, and choose Request Contract.",
+            "Use Assign to mark it Claimed, then Complete or Mark Failed when the job resolves."
+          ]
+        },
+        "sections": [
+          {
+            "id": "contract-fields",
+            "title": "Every contract field",
+            "tables": [
+              {
+                "columns": ["Field", "Use"],
+                "rows": [
+                  ["Contract ID", "Required identifier, up to 32 characters. Shown prominently on the card."],
+                  ["Title / Target Name", "Required contract title and subject."],
+                  ["Reward Amount / Currency", "Non-negative amount and free-text currency label."],
+                  ["Threat Level", "Unknown, Low, Moderate, High, Severe, or Extreme."],
+                  ["Status", "Available, Claimed, Completed, Failed, Hidden, or Archived."],
+                  ["Faction / Source", "Organization issuing or owning the contract."],
+                  ["Location", "Destination or operating area."],
+                  ["Short Description", "Compact card summary."],
+                  ["Long Description", "Expanded dossier notes."],
+                  ["Tags", "Comma-separated categories used by the board filter."],
+                  ["Image", "Target art with file-picker support."],
+                  ["Linked Journal", "Optional world Journal; player access follows the document-link setting and permissions."],
+                  ["Claimed By", "Party/player display text."],
+                  ["Published to Players", "Makes a non-archived contract eligible for the player board."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "publishing",
+            "title": "Publishing, hiding, and board visibility",
+            "paragraphs": [
+              "Publication and status are related. Publishing a Hidden contract changes it to Available. Hiding/unpublishing changes status to Hidden. Archived contracts are not republished by bulk publication."
+            ],
+            "bullets": [
+              "Publish or Unpublish one card from its footer.",
+              "Use Show Filtered or Hide Filtered to apply publication state to the contracts currently matched by the filters.",
+              "Hide Board disables player access to the entire board without changing each contract.",
+              "Show Board restores the player board with only currently published contracts.",
+              "GMs can still include hidden contracts in their own manager view."
+            ]
+          },
+          {
+            "id": "filters",
+            "title": "Filters, search, and tags",
+            "bullets": [
+              "Filter by Status, Threat, Faction, or Tag; filters combine.",
+              "Search matches contract, target, location, and other indexed card text.",
+              "Clear Filters restores the full eligible list.",
+              "Default tags include Smuggling, Assassination, Rescue, Investigation, Monster Hunt, Recovery, Escort, and Sabotage.",
+              "GMs can remove the currently selected tag from the dropdown and every contract. This is a world-wide destructive cleanup and asks for confirmation."
+            ]
+          },
+          {
+            "id": "bounty-lifecycle",
+            "title": "Claiming and resolving contracts",
+            "tables": [
+              {
+                "columns": ["Action", "Result"],
+                "rows": [
+                  ["Request Contract (player)", "Posts an authorization request to chat for GM attention; it does not mutate the contract."],
+                  ["Assign (GM)", "Sets status to Claimed and records the Claimed By text."],
+                  ["Complete", "Sets status to Completed and can post a result card."],
+                  ["Mark Failed", "Sets status to Failed and can post a result card."],
+                  ["Hide", "Unpublishes and changes status to Hidden."],
+                  ["Archive", "Moves the contract to Archived for historical retention."],
+                  ["Delete", "Permanently removes the contract after confirmation."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "journals-chat",
+            "title": "Linked Journals and chat cards",
+            "paragraphs": [
+              "A linked Journal button appears to a player only when the contract is published and the player may see the Journal: the user is a GM, public document links are enabled, or Foundry grants at least Observer permission. Publishing and resolution can each create a chat card when their settings are enabled."
+            ],
+            "callouts": [
+              {
+                "title": "Permission remains important",
+                "text": "Show Linked Journals To Players allows the bounty card to expose the link, but you should still configure appropriate Journal ownership for the intended audience.",
+                "tone": "warning"
+              }
+            ]
+          },
+          {
+            "id": "bounty-api",
+            "title": "API for macros and integrations",
+            "paragraphs": [
+              "Use game.scifiSuite.bountyBoard or the module’s api property."
+            ],
+            "tables": [
+              {
+                "columns": ["Method", "Purpose"],
+                "rows": [
+                  ["open()", "Open the board for the current user."],
+                  ["getAllBounties(options) / getBounty(id)", "Read normalized contract data."],
+                  ["upsertBounty(data) / deleteBounty(id)", "Create/update or remove contracts; mutations require GM authority."],
+                  ["publishBounty(id, published)", "Change one contract’s publication state."],
+                  ["setBountiesPublished(ids, published)", "Bulk show/hide specific IDs."],
+                  ["setBoardVisibleToPlayers(visible)", "Toggle the whole player board."],
+                  ["archiveBounty(id) / claimBounty(id, claimedBy)", "Move a contract through its lifecycle."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "bounty-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "Players see an unavailable board: enable Show Bounty Board To Players.",
+              "A contract is missing for players: confirm Published to Players and ensure it is not Hidden or Archived.",
+              "A Journal button is absent: check the linked Journal, publication, Show Linked Journals To Players, and Observer permission.",
+              "Publishing created unexpected chat: disable Post Chat Card When Publishing.",
+              "A removed default tag is gone everywhere: removing a tag intentionally adds it to a hidden removed-tags list and strips it from all contracts."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Complete settings reference",
+          "tables": [
+            {
+              "columns": ["Setting", "Default", "Scope", "Effect"],
+              "rows": [
+                ["Post Chat Card When Publishing", "On", "World", "Create a contract chat card on publication."],
+                ["Post Chat Card When Resolved", "On", "World", "Create a result card on completion/failure."],
+                ["Show Linked Journals To Players", "Off", "World", "Permit linked-Journal buttons on published cards, subject to access logic."],
+                ["Show Bounty Board To Players", "On", "World", "Master switch for the player board."]
+              ]
+            }
+          ],
+          "paragraphs": [
+            "Contract data and the removed-tag list are hidden world settings managed by the board."
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Does Request Contract assign the bounty?",
+          "answer": "No. It posts a request to chat. A GM must use Assign or otherwise update the contract."
+        },
+        {
+          "question": "Why can the GM see a contract that players cannot?",
+          "answer": "GMs include hidden records. Players require both an enabled board and a published, eligible contract."
+        },
+        {
+          "question": "Can I show or hide several contracts at once?",
+          "answer": "Yes. Filter the board, then use Show Filtered or Hide Filtered from Terminal Options."
+        },
+        {
+          "question": "Who can open a linked Journal?",
+          "answer": "GMs always can. Players need a published contract and either the public-link setting or sufficient Foundry Journal permission."
+        }
+      ]
+    },
+    "holosuite-critical-cutin": {
+      "tutorial": {
+        "intro": "Critical Cut-In watches qualifying natural results on a chosen numbered die and synchronizes a full-screen success or failure animation with per-Actor art, sound, threshold, label, color, and animation style.",
+        "audience": "Only the GM configures cut-ins and the module is GM-only in the HoloSuite launcher. The first active GM detects new qualifying chat rolls and broadcasts playback according to the selected audience. Players only receive animations they are permitted to see.",
+        "quickStart": {
+          "title": "Configure the first cut-in",
+          "steps": [
+            "Enable HoloSuite Core and Critical Cut-In, then open Configure Player Cut-Ins.",
+            "Choose the check die and whether high or low rolls are positive. Confirming a change resets every listed threshold to the new die’s best/worst endpoints; Save applies it.",
+            "Set global success and failure thresholds, duration, and each Actor’s Success and Failure tabs.",
+            "For each desired cut-in, enable it and choose art, audio, threshold override, animation, overlay text, and accent color.",
+            "Roll the selected die in a non-damage roll and verify the natural result qualifies."
+          ]
+        },
+        "sections": [
+          {
+            "id": "roll-detection",
+            "title": "How roll detection works",
+            "paragraphs": [
+              "The detector examines active natural results on the selected die, not the modified total. It skips damage rolls, discarded dice, rerolled dice, inactive results, historical chat backlog, and already-processed messages. Failure is checked before success if thresholds overlap."
+            ],
+            "bullets": [
+              "Only numbered dice matching Check Die are considered.",
+              "High-positive success triggers at or above its threshold; failure triggers at or below its threshold.",
+              "Low-positive success triggers at or below its threshold; failure triggers at or above its threshold.",
+              "A global threshold of 0 means the automatic best or worst face.",
+              "A blank Actor threshold inherits the effective global threshold.",
+              "One authoritative active GM prevents duplicate broadcasts in multi-GM sessions."
+            ]
+          },
+          {
+            "id": "dice-thresholds",
+            "title": "Dice and threshold configuration",
+            "paragraphs": [
+              "The Check Die list includes standard d4, d6, d8, d10, d12, d20, d100, other registered numeric dice, and a previously saved custom numeric die. Non-numeric dice such as Fate dice are not supported."
+            ],
+            "steps": [
+              "Choose the die and Positive Rolls direction.",
+              "Review the reset confirmation. For high-positive d20, endpoints are success 20 and failure 1; for low-positive d100, they are success 1 and failure 100.",
+              "Confirm to stage the reset or Cancel to keep all previous roll rules.",
+              "Customize global and Actor thresholds if desired, then choose Save. The reset does not change images, audio, animations, labels, colors, or enabled states."
+            ]
+          },
+          {
+            "id": "per-character",
+            "title": "Per-Actor and GM cut-ins",
+            "paragraphs": [
+              "The configuration lists the GM fallback and every world Actor owned by at least one non-GM user. Success and Failure are independent tabs, so each can have different media, thresholds, styles, text, colors, and enabled state."
+            ],
+            "tables": [
+              {
+                "columns": ["Control", "Behavior"],
+                "rows": [
+                  ["Enabled", "Turns that Actor/kind on or off."],
+                  ["Image / Portrait", "Custom asset; blank falls back to the Actor portrait."],
+                  ["Audio Sample", "Optional sound played locally during the animation."],
+                  ["Threshold", "Per-Actor override; blank inherits the global success/failure value."],
+                  ["Animation", "Neon Strike, Panel Breach, or Signal Bloom."],
+                  ["Overlay Text", "Per-Actor text; blank uses the relevant global default."],
+                  ["Accent Color", "Success defaults cyan; failure defaults red."]
+                ]
+              }
+            ],
+            "callouts": [
+              {
+                "title": "GM monster rolls",
+                "text": "If a GM rolls as an Actor without its own configured row, the GM’s cut-in settings are used but the Actor portrait is preferred, so an NPC can still look like itself.",
+                "tone": "tip"
+              }
+            ]
+          },
+          {
+            "id": "playback",
+            "title": "Playback, audience, and privacy",
+            "tables": [
+              {
+                "columns": ["Audience", "Who sees it"],
+                "rows": [
+                  ["Everyone", "All connected clients receiving the broadcast."],
+                  ["GM only", "Only GM clients."],
+                  ["Triggering player only", "The user resolved as the roll’s triggering player."]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "Blind and whispered roll visibility is respected in addition to the audience choice. A player outside a whisper does not receive the hidden result’s cut-in. Audio volume is multiplied by Foundry’s global interface volume."
+            ]
+          },
+          {
+            "id": "cutin-reset",
+            "title": "Saving and resetting",
+            "bullets": [
+              "The window marks unsaved changes; closing before Save leaves stored configuration unchanged.",
+              "Reset clears all per-player/Actor configurations after the action, returning them to inherited defaults.",
+              "Changing die or direction is staged after confirmation and still requires Save.",
+              "Global settings such as audio volume, audience, text enable, and fallback labels live in Foundry Module Settings."
+            ]
+          },
+          {
+            "id": "cutin-api",
+            "title": "Manual playback API",
+            "paragraphs": [
+              "Use the module’s api property or game.holosuiteCriticalCutin. A GM call broadcasts; a non-GM call plays locally."
+            ],
+            "tables": [
+              {
+                "columns": ["Method", "Use"],
+                "rows": [
+                  ["playCutinForUser(userId, options)", "Build and play a manual payload using the user/assigned Actor configuration."],
+                  ["playCutinForActor(actorId, options)", "Build and play a manual payload for an Actor."],
+                  ["openConfig()", "Open the GM configuration window."]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "Options can override triggerKind (success or failure), naturalResult, animationStyle, art, audio, label, color, and related payload values."
+            ]
+          },
+          {
+            "id": "cutin-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "No trigger: confirm Enable Critical Cut-In, the exact die size, roll direction, threshold, Actor enabled state, and that the roll is not damage.",
+              "Wrong portrait: configure the Actor’s row or verify the roll’s ChatMessage speaker resolves to that Actor.",
+              "Old rolls animate on reload: current detection ignores the known backlog; update the module if using an older release.",
+              "Some players do not see it: inspect audience, whisper/blind recipients, and whether they were connected.",
+              "No sound: verify the asset path, Cut-In Audio Volume, Foundry interface volume, and browser autoplay permission.",
+              "Duplicate playback: make sure every client runs the same version; the first active GM is designed to be the sole detector."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Complete settings reference",
+          "tables": [
+            {
+              "columns": ["Setting", "Default", "Scope", "Effect"],
+              "rows": [
+                ["Enable Critical Cut-In", "On", "World", "Master detection/playback switch."],
+                ["Default Trigger Threshold", "0", "World", "Success boundary; 0 uses the best face."],
+                ["Default Failure Trigger", "0", "World", "Failure boundary; 0 uses the worst face."],
+                ["Animation Duration", "2500 ms", "World", "800–8000 ms in 100 ms steps."],
+                ["Cut-In Audio Volume", "0.8", "World", "0–1 multiplier before Foundry interface volume."],
+                ["Show Animation To", "Everyone", "World", "Everyone, GM only, or triggering player."],
+                ["Enable Text Overlay", "On", "World", "Show/hide labels."],
+                ["Default Overlay Text", "CRITICAL", "World", "Success fallback label."],
+                ["Default Failure Overlay Text", "CRITICAL FAILURE", "World", "Failure fallback label."],
+                ["Debug Logging", "Off", "World", "Log detection and playback decisions."],
+                ["Check Die / Positive Rolls", "d20 / High", "World", "Configured in the player cut-in window."]
+              ]
+            }
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Does the module check the modified roll total?",
+          "answer": "No. It checks active natural results on the selected die and ignores damage, discarded, and rerolled dice."
+        },
+        {
+          "question": "Can I use d100 or low-is-good systems?",
+          "answer": "Yes. Choose d100 or another numeric die and set Low rolls are positive."
+        },
+        {
+          "question": "Can success and failure look different?",
+          "answer": "Yes. Every Actor and the GM fallback have separate Success and Failure tabs."
+        },
+        {
+          "question": "Why did changing the die reset thresholds?",
+          "answer": "Thresholds are bounded by the die and direction. The confirmation resets only roll thresholds to the new endpoints; all presentation settings remain."
+        },
+        {
+          "question": "Are whispered or blind rolls leaked?",
+          "answer": "Playback applies the roll’s blind/whisper recipients in addition to the configured audience."
+        }
+      ]
+    },
+    "holosuite-hacking": {
+      "tutorial": {
+        "intro": "HoloSuite Hacking turns a skill check into one of four timed puzzles. The roll selects a difficulty profile; the player’s puzzle performance determines the final success or failure. It also provides a reusable attachment editor for Terminal and other modules.",
+        "audience": "The launcher is GM-only. The selected player accepts and performs the roll/puzzle. Spectators receive read-only live state only when the challenge audience includes them and their local Watch Other Players’ Hacks setting is enabled. Allow Players To Interact Directly is reserved and does not currently make the launcher player-accessible.",
+        "quickStart": {
+          "title": "Send a hacking challenge",
+          "steps": [
+            "Open HoloSuite Hacking as GM and choose a minigame, player, and owned hacker Actor.",
+            "For Full Setup, choose a detected skill, roll source, roll rules, DC, and live audience. For Quick Hack, choose a fixed outcome instead.",
+            "Use Test Yourself to preview locally, or Send to Player for a live challenge.",
+            "The player accepts. Native modes open the system roll, Sheet mode waits for a new chat roll, and Custom mode rolls the configured dice.",
+            "The resulting profile generates the puzzle. Spectators can watch but cannot interact.",
+            "The puzzle’s actual completion is reported to the GM and any registered integration callback."
+          ],
+          "callouts": [
+            {
+              "title": "Roll outcome is difficulty, not final success",
+              "text": "Even Critical Failure launches a playable puzzle, and even Critical Success still requires the player to solve it.",
+              "tone": "warning"
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "hacking-launcher",
+            "title": "Launcher modes and fields",
+            "subsections": [
+              {
+                "title": "Quick Hack",
+                "paragraphs": [
+                  "Quick Hack keeps only Minigame, Player, and Hacker Character. Resolve the skill check outside the module, select Critical Success, Strong Success, Success, Failure, or Critical Failure, then send. The player sees HACK rather than a roll prompt. The selected outcome configures difficulty but does not auto-complete the puzzle."
+                ],
+                "bullets": [
+                  "The launcher remembers Quick/Full mode on the GM’s client.",
+                  "Quick Hack uses the configured live audience and current profile tuning.",
+                  "It does not fabricate a roll total in headers, result cards, or spectator views."
+                ]
+              },
+              {
+                "title": "Full Setup",
+                "tables": [
+                  {
+                    "columns": ["Field", "Meaning"],
+                    "rows": [
+                      ["Minigame", "Node Intrusion, Signal Alignment, Packet Switchboard, or Prism Lock."],
+                      ["Player", "Recipient who accepts and runs the challenge."],
+                      ["Hacker Character", "Owned Actor supplying the skill and current modifier."],
+                      ["Skill", "System/Actor skill. Optional no-modifier choice is available in attached custom configurations."],
+                      ["Roll Source", "System skill roll, Roll from character sheet, or Custom dice roll."],
+                      ["Check Die", "Numeric die used by Custom mode and difficulty critical detection."],
+                      ["Dice Count", "1–10 dice in Custom mode."],
+                      ["Result to Keep", "Best or Worst, interpreted using the positive-roll direction."],
+                      ["Static Modifier", "Extra signed adjustment in Custom mode."],
+                      ["Positive Rolls", "High meets/exceeds DC; Low meets/rolls under DC."],
+                      ["DC", "Target used by Custom and Sheet modes and supported non-percentile native outcomes."],
+                      ["Live Audience", "Nobody, GM only, or GM and players."],
+                      ["Test Roll", "Fake final total used only by Test Yourself; modifiers are not added again."]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "roll-sources",
+            "title": "Roll sources and supported systems",
+            "tables": [
+              {
+                "columns": ["Source", "Workflow", "Important rules"],
+                "rows": [
+                  ["System skill roll", "Uses the game system’s own dialog/API.", "Supported for D&D 5e, PF2e, SF2e, CoC7, and Cyberpunk RED. Custom die/static settings are ignored and modifiers are not added twice."],
+                  ["Roll from character sheet", "Opens the sheet; the player rolls normally and selects Use for hacking on a new visible chat result.", "Uses the selected final total, adds nothing again, and does not infer natural criticals. Cancel Hack removes waiting controls."],
+                  ["Custom dice roll", "Rolls configured dice and creates the check directly.", "Kept die + current computed skill modifier + static modifier. Item-only skills outside supported systems may not supply an additive modifier."]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "Sheet-mode buttons appear only on the current user’s new visible rolls and exclude rolls attributed to someone else. Multi-roll cards receive one button per readable total. If a card cannot be parsed, use the manual fallback under “Can’t use your chat roll?” in the waiting notice."
+            ],
+            "callouts": [
+              {
+                "title": "CoC7",
+                "text": "CoC7 uses native Regular/Hard/Extreme and fumble outcomes with low-positive percentile rules. Its skill percentages and bonus/penalty dice stay under system control; the generic DC applies only to Custom, Sheet, and Test Yourself.",
+                "tone": "info"
+              },
+              {
+                "title": "Cyberpunk RED",
+                "text": "RED uses its final adjusted total, including its critical die and Luck, and must beat the DC/DV. Natural 1 or 10 alone does not select the HoloSuite critical profile.",
+                "tone": "info"
+              }
+            ]
+          },
+          {
+            "id": "difficulty",
+            "title": "Difficulty calculation",
+            "tables": [
+              {
+                "columns": ["Profile", "Generic high-positive rule", "Baseline trace"],
+                "rows": [
+                  ["Critical Success", "Best natural face or margin +10 or more", "95 s"],
+                  ["Strong Success", "Margin +5 to +9", "75 s"],
+                  ["Success", "Meets DC through +4", "60 s"],
+                  ["Failure, But Playable", "Misses DC by 1–9", "45 s"],
+                  ["Critical Failure", "Worst natural face or margin −10 or worse", "24 s"]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "For low-positive rolls the margin is DC minus total, and the best/worst natural faces reverse. Native system outcomes can map directly to profiles. The Default Trace Duration Multiplier scales every minigame’s profile timer after selection."
+            ]
+          },
+          {
+            "id": "node-intrusion",
+            "title": "Playing Node Intrusion",
+            "steps": [
+              "Start the run and inspect the randomized connected node graph.",
+              "Click an adjacent reachable node and wait for its takeover timer.",
+              "Use radar warnings on current, visited, and reachable nodes when the profile enables radar.",
+              "Firewalls increase trace. They normally burn their route; if protected-route firewalls are allowed, a firewall may be passable but takes longer to claim.",
+              "Decoys increase trace and burn their route.",
+              "Reach the target before trace reaches 100%."
+            ],
+            "paragraphs": [
+              "The profile controls trace seconds, node count, route count, firewall and decoy counts, claim time, firewall claim multiplier, hazard penalties, radar, target visibility, hints, and whether a firewall may occupy the protected main path. Node Takeover Duration Override can replace every profile’s claim time."
+            ]
+          },
+          {
+            "id": "signal-alignment",
+            "title": "Playing Signal Alignment",
+            "steps": [
+              "Start the trace and adjust each channel toward its hidden or visible target range.",
+              "Watch for proximity feedback; target values appear only within the profile’s reveal radius.",
+              "Bring every channel inside tolerance at the same time.",
+              "Hold the complete lock for the required duration while drift and noise continue.",
+              "If a locked signal destabilizes, its configured penalty advances the trace. Maintain lock until decryption completes."
+            ],
+            "paragraphs": [
+              "Profile fields are trace seconds, channel count, tolerance, signal drift speed, noise level, lock-hold seconds, target reveal radius, destabilization penalty, hints, and visual glitch intensity."
+            ]
+          },
+          {
+            "id": "packet-switchboard",
+            "title": "Playing Packet Switchboard",
+            "steps": [
+              "Read each queued packet’s input and required output.",
+              "Click a junction to cycle its arrow, or hover it and press Up, Right, or Down to choose directly.",
+              "Use the highlighted route: green reaches the correct output; red currently ends at the wrong output.",
+              "Prepare during the entry staging pause, accounting for multiple simultaneous packets on harder profiles.",
+              "Deliver the required number of packets. Each misroute adds trace time/pressure; trace completion fails the run."
+            ],
+            "paragraphs": [
+              "Profile fields are trace seconds, lane and column counts, delivery goal, spawn interval, movement step time, preview count, misroute penalty, maximum active packets, entry hold, hints, and visual glitch intensity."
+            ]
+          },
+          {
+            "id": "prism-lock",
+            "title": "Playing Prism Lock",
+            "steps": [
+              "Rotate each concentric optical ring one position clockwise or counter-clockwise.",
+              "Track how emitters and blockers redirect the laser lattice.",
+              "Illuminate every white authorization receptor simultaneously.",
+              "Avoid newly energizing red ICE receptors, which add trace pressure.",
+              "On harder locks, toggle switchable decoy rings out of phase when they prevent a valid solution."
+            ],
+            "paragraphs": [
+              "Profile fields are trace seconds, ring count, slots per ring, authorization receptors, blockers per ring, ICE receptors, switchable ring count, scramble steps, ICE penalty, hints, and visual glitch intensity."
+            ]
+          },
+          {
+            "id": "profile-editor",
+            "title": "Difficulty Profiles editor",
+            "paragraphs": [
+              "Configure Profiles exposes separate tunings for all five roll outcomes. Shared controls set hints and gameplay glitch intensity, followed by every minigame field described above."
+            ],
+            "bullets": [
+              "Logical limits are enforced while editing: decoys cannot exceed usable nodes, firewall counts respect protected-node rules, and route counts respect generator limits.",
+              "Reset Profile restores only the selected outcome. Reset Defaults restores the complete profile set.",
+              "Profile tuning is world-wide and affects launcher challenges and attached hacks.",
+              "Client Visual Glitch Intensity is a separate comfort preference; it does not replace profile gameplay tuning."
+            ]
+          },
+          {
+            "id": "live-spectating",
+            "title": "Live spectator views",
+            "bullets": [
+              "The hacking player’s browser is authoritative and publishes state about five times per second.",
+              "Spectators receive movement, boards, timers, penalties, and final state in read-only windows.",
+              "Nobody disables live publication; GM only excludes non-GMs; GM and players includes all eligible clients.",
+              "Watch Other Players’ Hacks can opt one client out without changing the challenge audience.",
+              "A reconnecting or refreshed client requests current active sessions and can rejoin automatically."
+            ]
+          },
+          {
+            "id": "attached-hacks",
+            "title": "Attaching hacks to other modules",
+            "steps": [
+              "In the parent module, choose Add Hack or Edit Hack.",
+              "Configure a full check or select a Quick Hack outcome. The editor stores a portable skill key/name, not one Actor’s numeric modifier.",
+              "Choose Add or Save inside the hacking editor; merely selecting a Quick outcome does not attach it.",
+              "Save the parent Terminal/file/mail/camera form. Cancelling either editor leaves saved data unchanged.",
+              "At play time, runConfiguredHack resolves the current Actor and uses the stored roll rules. The integration should persist an unlock only after it returns true."
+            ],
+            "paragraphs": [
+              "Attached hacks keep their own roll source, die, count, keep rule, static modifier, direction, DC, skill, minigame, Quick outcome, and audience. Later launcher-default changes do not alter them."
+            ]
+          },
+          {
+            "id": "hacking-api",
+            "title": "Public API",
+            "paragraphs": [
+              "Use game.modules.get(“holosuite-hacking”).api or game.holosuiteHacking."
+            ],
+            "tables": [
+              {
+                "columns": ["Area", "Methods"],
+                "rows": [
+                  ["Launch", "openLauncher, sendHackToPlayer, startHack and dedicated minigame starters"],
+                  ["Checks", "rollSkillCheck, getDifficultyProfile, supportsSystemSkillRoll"],
+                  ["Skills", "getActorSkillOptions, resolveSkillId, getSkillData, getConfigurationSkills"],
+                  ["Attachments", "configureHack, createHackConfiguration, runConfiguredHack"],
+                  ["Registry", "registerMinigame, getMinigames"]
+                ]
+              }
+            ],
+            "callouts": [
+              {
+                "title": "Authorization belongs to the integration",
+                "text": "runConfiguredHack runs the challenge and reports success. The calling module remains responsible for deciding who may try and for persisting any unlock.",
+                "tone": "warning"
+              }
+            ]
+          },
+          {
+            "id": "hacking-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "System Skill Roll is disabled: use Sheet or Custom, or verify the active system has a supported adapter.",
+              "No skills detected: assign/own the intended Actor and check its system skill data; Sheet mode remains available.",
+              "The sheet opened but nothing happened: roll a new visible check and select Use for hacking; closing the sheet does not cancel.",
+              "A spectator window is absent: check the challenge audience and that client’s Watch Other Players’ Hacks setting.",
+              "An attached hack will not run: enable a compatible Hacking version, confirm the minigame exists, and verify the current user has a resolvable Actor/skill.",
+              "The puzzle is universally too fast: increase Default Trace Duration Multiplier. For one outcome/minigame, edit that profile instead."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Complete settings reference",
+          "tables": [
+            {
+              "columns": ["Setting", "Default", "Scope", "Effect"],
+              "rows": [
+                ["Show Skill Modifiers", "Off", "World", "Display modifiers/percentages in the launcher only."],
+                ["Hacking Roll Source", "System-dependent", "World", "Initial source for launcher and new attachments."],
+                ["Hacking Custom Static Modifier", "0", "World", "Extra Custom-roll adjustment."],
+                ["Hacking Custom Dice Count", "1", "World", "1–10 dice."],
+                ["Hacking Custom Result", "Keep Best", "World", "Best or Worst retained die."],
+                ["Hacking Check Die", "d20; d100 for CoC7", "World", "Custom die and natural critical basis."],
+                ["Hacking Positive Rolls", "High; Low for CoC7", "World", "Comparison direction."],
+                ["Default Hacking DC", "15", "World", "Initial/omitted DC."],
+                ["Default Trace Duration Multiplier", "1", "World", "Scale all trace timers."],
+                ["Node Takeover Duration Override", "0", "World", "0 uses profile; positive value forces seconds."],
+                ["Difficulty Profiles", "Built-in profiles", "World", "Full per-outcome minigame tuning."],
+                ["Allow Players To Interact Directly", "Off", "World", "Reserved; launcher remains GM-only."],
+                ["Default Live Hacking Audience", "GM and players", "World", "Initial audience for new challenges."],
+                ["Watch Other Players’ Hacks", "On", "Client", "Local spectator opt-in."],
+                ["Visual Glitch Intensity", "Medium", "Client", "Low, Medium, or High local visual noise."]
+              ]
+            }
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Does a successful skill roll automatically win?",
+          "answer": "No. It selects an easier profile. The player still has to complete the minigame."
+        },
+        {
+          "question": "Which systems support native skill rolls?",
+          "answer": "D&D 5e, PF2e, Starfinder 2e, CoC7, and Cyberpunk RED. Sheet and Custom modes provide broader fallbacks."
+        },
+        {
+          "question": "Can players open the hacking launcher?",
+          "answer": "No. The launcher is currently GM-only; the direct-interaction setting is reserved for future behavior."
+        },
+        {
+          "question": "Can other players watch?",
+          "answer": "Yes, when the challenge audience includes them and Watch Other Players’ Hacks is enabled on their client."
+        },
+        {
+          "question": "Why did my attached Terminal hack not change with launcher settings?",
+          "answer": "Attachments store a snapshot of their own roll rules. Edit the attachment itself to change it."
+        }
+      ]
+    },
+    "holosuite-vending-machines": {
+      "tutorial": {
+        "intro": "HoloSuite Vending Machines provides GM-built, Region-linked shops with six physical slots, carts, finite stock, system-agnostic currency, authoritative purchases, dispense/collection animation, and a transaction ledger.",
+        "audience": "GMs configure machines, currency, Regions, stock, sound, and the ledger. Players can open nearby online machines from Region prompts or, when enabled, the HoloSuite browser. A connected GM validates every purchase.",
+        "quickStart": {
+          "title": "Build a working machine",
+          "steps": [
+            "Draw one or more Foundry Regions where the machine should be accessible.",
+            "Open Module Settings and choose the currency source, fallback label/item, optional Actor path, player launcher access, and audio.",
+            "Open Vending Machines → Create. Name and style it, choose Online, link Regions, and leave Require presence enabled for physical access.",
+            "Drop Items from the world, a compendium, or an Actor sheet into the inventory; set display art, description, price, stock, and maximum for up to six products.",
+            "Save & Test with a controlled/assigned Actor, then enter the linked Region as a player and make a small purchase.",
+            "Verify the success entry in Recent Transactions."
+          ]
+        },
+        "sections": [
+          {
+            "id": "machine-editor",
+            "title": "Machine identity, presentation, and access",
+            "tables": [
+              {
+                "columns": ["Field", "Behavior"],
+                "rows": [
+                  ["Name", "Machine title shown to players and in the network list."],
+                  ["Manufacturer", "Printed verbatim on the machine, up to 48 characters."],
+                  ["Style", "Alien Market, Executive Terminal, Corporate Kiosk, or Neon, with a live preview."],
+                  ["Machine / Brand Image", "Used in scene listings and as the machine brand mark."],
+                  ["Status", "Online or Offline. Sold Out is derived automatically when active stock reaches zero."],
+                  ["Description", "Machine/location flavor text."],
+                  ["Require presence in a linked Region", "When enabled, non-GM access must originate from a valid owned token in one of the selected Regions."],
+                  ["Linked Regions", "Entering a selected Region prompts the owning player to open this machine."]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "The editor is draft-safe. Save persists changes; Save & Test persists and opens the machine. Cancel or closing with changes asks before discarding."
+            ]
+          },
+          {
+            "id": "stocking",
+            "title": "Products, slots, and restocking",
+            "bullets": [
+              "A machine has six active product slots. Drag Items into the drop zone or use Add Product for a manual entry.",
+              "An Item-backed product keeps its UUID and an embedded fallback snapshot; manual entries use their configured fallback data.",
+              "Edit display name, transparent PNG/WebP art, description, price, current Stock, and Maximum.",
+              "Drag rows or use arrows to reorder physical slots.",
+              "Restock restores one machine’s current stock to each product’s Maximum; Restock All applies it to every machine.",
+              "Older/imported inventories beyond the six-slot limit are preserved as inactive overflow. Remove an active product to Restore Next, or deliberately Discard Archived.",
+              "Import rejects a new payload that directly contains more than six active products."
+            ]
+          },
+          {
+            "id": "currency",
+            "title": "Currency modes and Credit Transformer",
+            "tables": [
+              {
+                "columns": ["Mode", "Resolution"],
+                "rows": [
+                  ["Automatic", "Try the configured Actor path, then detect common system currency fields, then fall back to an inventory Item matching the currency name."],
+                  ["Actor Data Path", "Require a numeric value or currency object at the dot path, such as system.currency or system.wealth.value."],
+                  ["Inventory Item", "Count and deduct an embedded Item whose name matches the fallback currency label/item."],
+                  ["Credit Transformer", "Display detected system money as Credits at one Credit per base unit while deducting the Actor’s native denominations."]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "Detected denomination objects use base-value multipliers (for example cp 0.01, sp 0.1, ep 0.5, gp 1, pp 10) and allocate the remainder after a purchase. Credit Transformer is experimental across unfamiliar systems."
+            ],
+            "callouts": [
+              {
+                "title": "Test the exact game system",
+                "text": "Use a low-price test product and verify the Actor’s balance before and after purchase. An invalid Actor path blocks priced purchases rather than silently granting an item.",
+                "tone": "warning"
+              }
+            ]
+          },
+          {
+            "id": "regions-vending",
+            "title": "Region access and player launcher access",
+            "paragraphs": [
+              "Saving machine links synchronizes tokenEnter Region behaviors. When an owning player token enters, that player receives an Open/Not Now prompt. Presence enforcement is enabled by default on new machines."
+            ],
+            "bullets": [
+              "Show Vending Machines in Player HoloSuite is off by default. Enabling it exposes a scene-machine browser, but it does not bypass Region proximity.",
+              "The browser resolves an owned Actor/token and lists applicable scene machines.",
+              "GMs bypass ordinary player proximity for administration/testing, but a test still needs a selected token or assigned character to model a buyer.",
+              "If Regions are renamed or links appear stale, save the machine or run the Region-link synchronization API."
+            ]
+          },
+          {
+            "id": "purchase-flow",
+            "title": "Cart, authorization, dispense, and collection",
+            "steps": [
+              "Select a product slot, choose a quantity up to available stock, and Add to Basket. Repeat for a multi-product cart.",
+              "Review the queue and total, then choose Purchase & Dispense and confirm.",
+              "A connected GM serializes the request, rejects duplicates, verifies user ownership, Region access, machine state, stock, and currency.",
+              "The GM deducts currency and reserves stock. If either write fails, compensating rollback restores the prior state.",
+              "An authorized reservation appears in the retrieval bay. Collect it to transfer the Items, or wait roughly eleven seconds for automatic delivery.",
+              "After delivery, a success ledger entry and purchase chat message are created. Failures are recorded with their reason."
+            ],
+            "callouts": [
+              {
+                "title": "Why items arrive after payment",
+                "text": "Payment and stock are authorized first, then the retrieval action performs Item transfer. Pending reservations persist so a refresh does not casually lose an accepted purchase.",
+                "tone": "info"
+              }
+            ]
+          },
+          {
+            "id": "machine-network",
+            "title": "Machine network and audit ledger",
+            "bullets": [
+              "Open / Test opens a selected machine as the GM’s test buyer.",
+              "The power action toggles Online/Offline immediately.",
+              "Duplicate copies machine configuration and products into a new machine.",
+              "Export Machines downloads machine definitions; Import merges by ID and updates matching machines.",
+              "Recent Transactions holds the latest 250 success/failure entries with machine, Actor, user, items, amount, and error context.",
+              "Export Ledger downloads the audit history. Clear Ledger permanently removes it after confirmation."
+            ]
+          },
+          {
+            "id": "vending-audio",
+            "title": "Audio cues",
+            "paragraphs": [
+              "Vending Machine Audio is a world master switch. Vending Audio Volume (0–1) applies to selection, purchase accepted, dispensing, collection, and failure cues. Each cue has its own audio path; clear a path to disable only that cue."
+            ]
+          },
+          {
+            "id": "vending-api",
+            "title": "Public API",
+            "paragraphs": [
+              "Use game.holosuiteVending or the module api property."
+            ],
+            "tables": [
+              {
+                "columns": ["Method", "Purpose"],
+                "rows": [
+                  ["openMachine(machineId, actor, context)", "Open a specific machine after access validation."],
+                  ["promptMachineAccess(machineId, options)", "Show the linked-Region confirmation, then open."],
+                  ["openManager() / openSceneMachines()", "Open GM network management or the current scene browser."],
+                  ["getMachines() / getLedger()", "Read cloned machine or audit data."],
+                  ["restockMachine(machineId)", "GM restock to maximum."],
+                  ["exportMachines()", "Return a cloned export payload."],
+                  ["syncRegionLinks()", "GM synchronization of Region behaviors."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "vending-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "No machine prompt: verify the Region is on the active Scene, linked and synchronized, and the entering token is owned by that player.",
+              "Too far: control an owned token currently inside a linked Region, or disable Require presence for a remote shop.",
+              "No buyer: assign a user character or control an owned token.",
+              "No GM: purchases require an active GM even if the machine UI opens.",
+              "Invalid currency path: switch to Automatic/Item or correct the Actor dot path.",
+              "Sold out: restock or raise current Stock; setting Maximum alone does not refill it until restock/save values change.",
+              "Item waits in tray: click the retrieval bay or allow automatic delivery; a busy status prevents double collection."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Complete settings reference",
+          "tables": [
+            {
+              "columns": ["Setting", "Default", "Scope", "Effect"],
+              "rows": [
+                ["Fallback Currency Label / Item", "Credits", "World", "Display label and inventory-item fallback name."],
+                ["Currency Source", "Automatic", "World", "Automatic, Actor Data Path, or Inventory Item."],
+                ["Actor Currency Data Path", "Blank", "World", "Optional dot path for Actor currency."],
+                ["Credit Transformer", "Off", "World / manager", "Present native money as Credits; experimental."],
+                ["Show Vending Machines in Player HoloSuite", "Off", "World", "Expose player scene browser; proximity still applies."],
+                ["Vending Machine Audio", "On", "World", "Master sound switch."],
+                ["Vending Audio Volume", "0.35", "World", "0–1 cue volume."],
+                ["Five sound paths", "Bundled OGG files", "World", "Selection, purchase, dispense, collect, and failure cues."]
+              ]
+            }
+          ],
+          "paragraphs": [
+            "Machine data, pending dispenses, and the 250-entry transaction ledger are hidden world settings managed by the module."
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Why can a player see the browser but not open a machine?",
+          "answer": "Player HoloSuite access does not bypass the machine’s linked-Region presence rule. Control an owned token inside a linked Region."
+        },
+        {
+          "question": "Must a GM be online for purchases?",
+          "answer": "Yes. A connected GM authorizes ownership, proximity, stock, currency, and item transfer."
+        },
+        {
+          "question": "When does stock become Sold Out?",
+          "answer": "Sold Out is derived automatically when the machine is online but all active product stock is zero."
+        },
+        {
+          "question": "What if the player does not click the retrieval bay?",
+          "answer": "The accepted reservation is automatically delivered after the short dispense timeout."
+        },
+        {
+          "question": "Can the machine use my system’s currency?",
+          "answer": "Usually. Automatic detects common Actor currency structures, Actor Data Path handles a custom location, and Inventory Item provides a system-agnostic fallback."
+        }
+      ]
+    },
+    "holosuite-terminal": {
+      "tutorial": {
+        "intro": "HoloSuite Terminal creates diegetic computers with independent profiles, themes, boot/audio presentation, mail, files, trash, cameras, utilities, Region entry, per-user permissions, passwords, and optional HoloSuite Hacking locks.",
+        "audience": "GMs create and configure Terminal profiles and content. Players open terminals through linked Regions or other GM-authorized flows, then see only the applications and content allowed by profile permissions, authentication, access level, locks, and Foundry document permissions.",
+        "quickStart": {
+          "title": "Create your first terminal",
+          "steps": [
+            "Enable HoloSuite Core and Terminal. Enable HoloSuite Hacking and Security Cameras too if this terminal needs those integrations.",
+            "Open Terminal Manager from HoloSuite or Module Settings and create a Terminal Profile.",
+            "Set its name, theme, desktop style, enabled apps, and current-scene Regions.",
+            "Create or attach a mail account and file folder, then add at least one message and one file.",
+            "Set player access levels/overrides and optional password or hacking authentication.",
+            "Save, enter a linked Region with a player-owned token, and verify boot, login, apps, and content from a player client."
+          ],
+          "callouts": [
+            {
+              "title": "Integrations are optional",
+              "text": "Terminal itself works without HoloSuite Hacking or Security Cameras. Hacking buttons and camera feeds require those modules; disabling an integration preserves saved Terminal configuration.",
+              "tone": "info"
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "terminal-profiles",
+            "title": "Profiles, appearance, and Regions",
+            "tables": [
+              {
+                "columns": ["Field", "Configuration"],
+                "rows": [
+                  ["Name / Description", "Terminal identity and location/owner briefing."],
+                  ["Theme", "RED, Heavy Monitor, Neon Blue Holo, Corporate, Obsidian Gold, or Ultraviolet color treatment."],
+                  ["Desktop Style", "RED, Heavy Monitor, Neon Blue Holo, or Corporate frame/layout."],
+                  ["Login Background", "Optional image behind authentication."],
+                  ["Enabled Apps", "Mail, Cameras, Files, Trash, and Utilities can be enabled independently."],
+                  ["Regions", "Any selected Region on the active Scene opens this profile when a player-owned token enters."]
+                ]
+              }
+            ],
+            "bullets": [
+              "Duplicate makes a new independent profile with the same configuration.",
+              "Delete removes the profile and its saved unlock state; shared mail accounts/folders remain separate manager data unless explicitly deleted.",
+              "The launcher opens a selector when multiple profiles exist and opens the only profile directly when appropriate.",
+              "Debug terminal region triggers writes Region-link diagnostics to the browser console."
+            ]
+          },
+          {
+            "id": "terminal-access",
+            "title": "Player permissions and login authentication",
+            "subsections": [
+              {
+                "title": "Profile access",
+                "paragraphs": [
+                  "Each non-GM user has an access level and a profile mode: Use access level, Always allow, or Block. GMs always have override access. The profile’s Access Level is the minimum for default-mode users; Allow bypasses that comparison and Block denies entry."
+                ]
+              },
+              {
+                "title": "Password and hacking",
+                "paragraphs": [
+                  "A profile can require a password, a hacking challenge, or both. These are alternative successful login paths: when both are enabled, unlocking either password or hacking opens the terminal. The GM can bypass login."
+                ],
+                "steps": [
+                  "Enable Requires Password and enter the exact password, and/or add a login hack with HoloSuite Hacking.",
+                  "Save the profile. A player who otherwise has profile permission sees the login screen after boot.",
+                  "Successful authentication is stored as shared world unlock state for the profile.",
+                  "Use Reset Access to clear saved password, hacking, and content unlocks without deleting content or changing the configured locks."
+                ]
+              }
+            ],
+            "callouts": [
+              {
+                "title": "Shared unlocks",
+                "text": "Authentication and content-lock unlocks are persisted at the Terminal profile level, not as a private per-user session. Reset Access when a new crew should encounter the security again.",
+                "tone": "warning"
+              }
+            ]
+          },
+          {
+            "id": "boot-audio",
+            "title": "Boot sequence and audio",
+            "subsections": [
+              {
+                "title": "Boot sequence",
+                "bullets": [
+                  "Enable/disable the boot screen per profile.",
+                  "Duration has a 500 ms minimum and defaults to 1400 ms.",
+                  "Boot Lines accepts one line per row and falls back to the bundled kernel/mount/calibration/credential text.",
+                  "Show Diagnostics appends node, theme, authentication, user, and handoff information.",
+                  "Require Manual Continue pauses after the timer until the user selects Continue; otherwise the desktop/login appears automatically.",
+                  "Skip Boot ends it immediately."
+                ]
+              },
+              {
+                "title": "Audio",
+                "paragraphs": [
+                  "Enable audio per profile, choose the bundled sound set or custom uploads, and set cue volume and ambient-loop volume independently from 0 to 1. Custom paths cover boot, login, unlock, access denied, failure, UI click, and ambient loop. The terminal header mute button affects only the current open terminal/client."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "terminal-mail",
+            "title": "Mail accounts and messages",
+            "steps": [
+              "Create a Mail Account with a name and address in Terminal Manager.",
+              "Attach the account to one or more profiles.",
+              "Open the terminal as GM and use Add Email to enter Subject, From, To, Timestamp, Body, Read state, and an optional content lock.",
+              "Players select messages in Mail. Locked messages show their lock state until successfully hacked; open messages display the body.",
+              "Mark a message Deleted to move it into the Terminal Trash view. The GM’s permanent delete action removes it entirely and bypasses Trash."
+            ],
+            "paragraphs": [
+              "Message tags and attachment data are preserved by the model, while the current inline editor focuses on core message fields. Trash is a read-only recovery/history presentation, not an automatic restore workflow."
+            ]
+          },
+          {
+            "id": "terminal-files",
+            "title": "Files, media, Journals, and downloads",
+            "tables": [
+              {
+                "columns": ["File control", "Behavior"],
+                "rows": [
+                  ["Type", "Text, image, audio, video, journal, and any preserved legacy/custom type."],
+                  ["Required Access Level", "Player’s Terminal access level must meet this value; GMs bypass it."],
+                  ["Content", "Text payload or supplemental description."],
+                  ["Media Path", "Image/audio/video asset used by media types."],
+                  ["Linked Journal", "Direct content for Journal type, or an access reward after a downloadable file completes."],
+                  ["Deleted", "Moves the file to Trash; permanent delete removes it from the folder."],
+                  ["Content Lock", "Open, Hackable, or Hard Locked."],
+                  ["Downloadable", "Enables Timed seconds or Combat rounds progress."]
+                ]
+              }
+            ],
+            "subsections": [
+              {
+                "title": "Timed downloads",
+                "paragraphs": [
+                  "Set Download Progress to Timed and choose at least one second. The transfer progresses in real time and can be interrupted. On completion, a linked Journal is granted/opened according to the download workflow."
+                ]
+              },
+              {
+                "title": "Combat-round downloads",
+                "paragraphs": [
+                  "Set Combat rounds and the required count. Starting the download prepares an encounter using the requesting player’s controlled token. Progress follows round advancement; if encounter preparation fails, the download does not start."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "terminal-locks",
+            "title": "Content locks and attached hacking",
+            "tables": [
+              {
+                "columns": ["Lock mode", "Player behavior"],
+                "rows": [
+                  ["Open", "Content is readable when other permissions allow."],
+                  ["Hackable", "Run the stored HoloSuite Hacking configuration; puzzle success persists the unlock."],
+                  ["Hard Locked", "Cannot be opened by players through hacking."]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "Mail, files, and linked cameras each support a lock. Login uses the same shared Hacking editor but is configured as a profile authentication path. Add Hack captures minigame, skill key, roll source, custom dice rules, DC, Quick outcome, and audience. Save both the hack editor and the parent Terminal form."
+            ],
+            "bullets": [
+              "Quick Hack fixes difficulty but still requires solving the selected puzzle.",
+              "Closing/cancelling never unlocks content.",
+              "Existing saved attachments keep their rules when global Hacking defaults change.",
+              "Old attachments migrate once when an updated Hacking module is active; passwords, hard locks, and existing unlocks are preserved.",
+              "An unavailable Hacking module/version disables configuration or play without erasing the saved attachment."
+            ]
+          },
+          {
+            "id": "terminal-cameras",
+            "title": "Camera application",
+            "steps": [
+              "Enable Cameras on the profile and choose Link Cameras as GM.",
+              "Select Security Cameras definitions and optionally attach an independent Terminal lock to each.",
+              "Save. The Camera tab reports missing integration, unavailable feed, camera-level access, Terminal lock, and terminal surveillance state separately.",
+              "After access succeeds, Open Feed calls the camera module’s feed API.",
+              "Utilities can disable or re-enable this terminal’s camera buttons without changing the original camera definitions."
+            ]
+          },
+          {
+            "id": "terminal-utilities",
+            "title": "Facility utility buttons",
+            "paragraphs": [
+              "Enable Utilities for the profile, then Add Utility. Choose an action type, label, Font Awesome icon class, enabled state, and description. A player request is sent to the active GM, who applies the operation to the active Scene."
+            ],
+            "tables": [
+              {
+                "columns": ["Utility", "Effect on active Scene/profile"],
+                "rows": [
+                  ["Close and Lock Doors", "Closes and locks every door wall."],
+                  ["Unlock Doors", "Leaves doors closed but unlocked."],
+                  ["Open Doors", "Opens every door."],
+                  ["Lights Off / Lights On", "Hides or reveals ambient lights."],
+                  ["Disable Cameras / Enable Cameras", "Changes feed-button availability for this terminal."],
+                  ["Blackout", "Turns lights off and disables terminal camera feed buttons."],
+                  ["Restore Surveillance", "Turns lights on and enables terminal camera feed buttons."]
+                ]
+              }
+            ],
+            "callouts": [
+              {
+                "title": "Scene-wide actions",
+                "text": "Door and light utilities affect all matching controls on the active Scene, not only objects inside the Terminal’s Region. Configure labels clearly and test before play.",
+                "tone": "warning"
+              }
+            ]
+          },
+          {
+            "id": "terminal-workflow",
+            "title": "Practical GM workflow",
+            "steps": [
+              "Create reusable mail accounts and file folders first, then link them to profiles.",
+              "Use one profile per physical terminal or security context, even when profiles share an account/folder.",
+              "Set appearance, enabled apps, Region links, and access rules.",
+              "Add content and locks from the terminal’s GM controls.",
+              "Test as GM, then verify with a player at the intended access level.",
+              "Before rerunning the location for another group, Reset Access and restore any deleted/read content state you want replayed."
+            ]
+          },
+          {
+            "id": "terminal-api",
+            "title": "Public API",
+            "paragraphs": [
+              "Use game.modules.get(“holosuite-terminal”).api or game.holosuiteTerminal."
+            ],
+            "tables": [
+              {
+                "columns": ["Method", "Purpose"],
+                "rows": [
+                  ["openTerminal(terminalId, options)", "Open a profile or selector when the ID is omitted."],
+                  ["promptTerminalAccess(terminalId, context)", "Run the Region/access prompt workflow."],
+                  ["getTerminalProfiles()", "Return configured profiles."],
+                  ["getTerminalProfileById(id)", "Return one normalized profile."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "terminal-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "Region does not open: confirm the profile is linked to a Region on the active Scene, the token is player-owned, and enable debug region triggers.",
+              "Access denied: inspect the user’s Always allow/Block/default mode and compare user vs profile access level.",
+              "Password or hack no longer appears: the profile may already have a shared unlock; use Reset Access.",
+              "Camera tab is empty/unavailable: enable Cameras, link camera IDs, and activate Security Cameras with its API.",
+              "Hack button is unavailable: activate a compatible HoloSuite Hacking version and edit/save the attachment.",
+              "File is listed but unreadable: check required access level and content lock separately.",
+              "Combat download will not start: control the requesting player’s token and make sure an encounter can be created.",
+              "Audio is silent: enable profile audio, unmute the terminal, verify source paths and volumes, and allow browser playback."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Configuration and defaults reference",
+          "tables": [
+            {
+              "columns": ["Area", "Defaults / limits"],
+              "rows": [
+                ["Enabled apps", "Mail, Cameras, Files, Trash on; Utilities off"],
+                ["Themes", "RED, Heavy Monitor, Neon Blue Holo, Corporate, Obsidian Gold, Ultraviolet"],
+                ["Desktop styles", "RED, Heavy Monitor, Neon Blue Holo, Corporate"],
+                ["Boot", "Enabled, 1400 ms minimum-normalized to at least 500 ms, diagnostics on, manual continue off"],
+                ["Audio", "Disabled by default; cue volume 0.2, loop volume 0.15; bundled or custom set"],
+                ["File download", "Timed, 10 seconds; alternate 3 combat rounds; minimum 1"],
+                ["Content locks", "Open; Hackable defaults DC 15 / Technology / Node Intrusion; Hard Locked"],
+                ["Visible module setting", "Debug terminal region triggers, off, world scope"]
+              ]
+            }
+          ],
+          "paragraphs": [
+            "Profiles, mail, files, and shared unlocks live in one hidden world setting. Use Terminal Manager and in-terminal GM tools instead of editing that object manually."
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "If password and hacking are both enabled, must players complete both?",
+          "answer": "No. They are alternative login paths; either successful password or hacking unlock opens the terminal."
+        },
+        {
+          "question": "Are unlocks per player?",
+          "answer": "No. Terminal authentication and content unlocks persist at the shared profile level until a GM uses Reset Access."
+        },
+        {
+          "question": "Can a file both display content and unlock a Journal?",
+          "answer": "Yes. A downloadable file can link a Journal that is granted after the download completes."
+        },
+        {
+          "question": "Do utilities affect only the linked Region?",
+          "answer": "No. Door and light actions operate on matching controls across the active Scene."
+        },
+        {
+          "question": "What happens if HoloSuite Hacking is disabled?",
+          "answer": "Terminal preserves saved hack attachments but cannot configure or run them until a compatible Hacking module is active."
+        }
+      ]
+    },
+    "pulse-scanner": {
+      "tutorial": {
+        "intro": "Pulse Scanner lets GMs attach sensor signatures to Scene Regions and grant Actors one or more scanners. A scan emits a cinematic pulse from a token and finds in-range targets whose configured signal matches the scanner mode.",
+        "audience": "GMs create, reveal, resolve, import, and export targets and grant/recharge scanners. Players may scan from owned tokens when world settings allow it and, by default, only when that Actor has a grant. The HoloSuite tile is player-visible.",
+        "quickStart": {
+          "title": "Create and detect a target",
+          "steps": [
+            "On the active Scene, draw a Region around the hidden passage, object, or area.",
+            "Open Pulse Scanner as GM, stay on Targets, and choose New Target.",
+            "Link the Region, choose a signal and type, set Reticle/Icon/Region ping, visibility, status, color, integrity when relevant, and description, then save.",
+            "Open Scanners, select the player’s Actor, choose scanner name, signal, range in scene units, and charges, then Grant Scanner.",
+            "As the player, control an owned token, open Pulse Scanner, select the grant, and scan inside range.",
+            "Use the manager to Reveal, Hide, Resolve, or recharge the scanner as the investigation changes."
+          ]
+        },
+        "sections": [
+          {
+            "id": "pulse-targets",
+            "title": "Target configuration",
+            "tables": [
+              {
+                "columns": ["Field", "Behavior"],
+                "rows": [
+                  ["Label", "Signature name; defaults from the selected type."],
+                  ["Scene Region", "Required practical anchor. Its bounds supply target center/radius and Region-outline geometry."],
+                  ["Scanner Mode", "Signal that can detect the target."],
+                  ["Type", "Semantic icon/color and, for Breakable, integrity behavior."],
+                  ["Ping Shape", "Reticle, type Icon, or exact Region outline."],
+                  ["Visibility", "GM, Revealed, or Always."],
+                  ["Status", "Active, Revealed, or Resolved."],
+                  ["Integrity", "0–100, shown for Breakable targets when enabled."],
+                  ["Color", "Eleven supplied colors plus preserved valid custom hex values."],
+                  ["Description", "Extra scan-result context."]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "Target records also normalize a numeric difficulty, icon, center, and radius for API/import compatibility. Region geometry is reapplied at scan time, so moving/resizing the linked Region updates the effective scan point."
+            ]
+          },
+          {
+            "id": "signals",
+            "title": "Signals and target types",
+            "tables": [
+              {
+                "columns": ["Signal", "Default matching types"],
+                "rows": [
+                  ["Structural", "Breakable, Hidden"],
+                  ["Arcane", "Magic, Hidden, Custom"],
+                  ["Thermal", "Trap, Biological, Radiation"],
+                  ["Forensic", "Evidence, Loot, Biological, Footprints"],
+                  ["Tech", "Tech, Radiation, Hidden"],
+                  ["Biological", "Biological, Evidence, Footprints"]
+                ]
+              },
+              {
+                "columns": ["All target types", "Default meaning"],
+                "rows": [
+                  ["Breakable / Hidden / Trap", "Breakable Wall, Hidden Passage, Trap"],
+                  ["Magic / Tech / Biological", "Magic Residue, Tech Signature, Biological Trace"],
+                  ["Footprints / Radiation", "Footprints, Radiation Leak"],
+                  ["Evidence / Loot / Custom", "Evidence, Loot Cache, user-defined signature"]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "The manager can explicitly pair any target with a scanner mode. Type-to-mode lists supply sensible defaults rather than a permanent restriction."
+            ]
+          },
+          {
+            "id": "scanner-grants",
+            "title": "Granting scanners and charges",
+            "tables": [
+              {
+                "columns": ["Grant field", "Meaning"],
+                "rows": [
+                  ["Owner", "Actor that receives the scanner flag."],
+                  ["Scanner Name", "Display name; default comes from the world setting."],
+                  ["Signal", "One of the six modes used by player scans."],
+                  ["Radius", "Range in the active Scene’s distance units, converted to pixels from grid settings."],
+                  ["Max Charges", "0 means unlimited."],
+                  ["Current Charges", "Remaining uses; cannot exceed Max after normalization."]
+                ]
+              }
+            ],
+            "bullets": [
+              "An Actor can hold multiple named scanner grants.",
+              "Each limited scan consumes one charge before scanning. A player may reduce their own charge through normal use but cannot recharge or edit grant configuration.",
+              "Use Save in the scanner overview to change Max and Now; Remove revokes one grant.",
+              "The API can revoke all grants by omitting a scanner ID.",
+              "For performance, keep ordinary scanner ranges at 100 scene units or less."
+            ]
+          },
+          {
+            "id": "running-scans",
+            "title": "How a scan is resolved",
+            "steps": [
+              "The module resolves the selected token, falling back to the user’s character token or another owned token with scanner access.",
+              "For players it verifies Allow Players to Scan, token ownership, and the required Actor grant. GMs can scan without those player restrictions.",
+              "The token center becomes the origin. Grant radius is converted from scene units; each target’s linked Region supplies its effective location/size.",
+              "Targets must be in range and match the selected mode. GMs may additionally supply type/mode filters through the API.",
+              "The module plays the pulse sound, temporarily locks canvas pan/drag/wheel during the effect, and renders up to its safe target limit.",
+              "The latest target IDs are retained locally so a GM can Reveal Latest Scan."
+            ],
+            "paragraphs": [
+              "A player scan returns sanitized target objects. GM visibility strips sensitive description/difficulty details from the player payload until state is revealed; do not treat Scene flags as secure secret storage against users inspecting client data."
+            ]
+          },
+          {
+            "id": "pulse-visuals",
+            "title": "Pulse, pings, labels, and sound",
+            "bullets": [
+              "The pulse color follows the scanner signal and expands from the token center.",
+              "Reticle uses a circular marker sized from target radius; Icon uses the type icon; Region draws polygon/circle/ellipse outlines from Foundry Region geometry.",
+              "No matching targets displays NO SIGNATURES DETECTED.",
+              "Default Highlight Duration controls the visible result lifetime; internal normalization keeps unsafe extremes bounded.",
+              "Show Labels To Players controls result labels. Show Integrity To Players controls Breakable integrity bars.",
+              "Scan Pulse Sound can use the bundled MP3, a custom uploaded audio path, or no sound."
+            ]
+          },
+          {
+            "id": "reveal-resolve",
+            "title": "Visibility and lifecycle actions",
+            "tables": [
+              {
+                "columns": ["Action/state", "Effect"],
+                "rows": [
+                  ["GM visibility", "Not included in ordinary non-GM getTargets results; scan payload sanitization applies when detected."],
+                  ["Revealed", "Player-visible persistent target state."],
+                  ["Always", "Player-visible persistent target state intended to remain available."],
+                  ["Reveal Target", "Sets visibility/status to Revealed, unless already Resolved."],
+                  ["Reveal Latest Scan", "Reveals every target found by the GM’s latest scan on the current Scene."],
+                  ["Hide Target", "Returns visibility to GM and status to Active."],
+                  ["Resolve", "Marks Resolved and Revealed, useful for destroyed walls or collected evidence."],
+                  ["Unresolve", "Returns to Active and GM visibility."]
+                ]
+              }
+            ]
+          },
+          {
+            "id": "pulse-import-export",
+            "title": "Import, export, and storage",
+            "paragraphs": [
+              "Targets are stored as a hidden flag on their Scene. Export produces JSON with module/version, source Scene metadata, timestamp, and targets. Import can merge into or replace the current Scene’s target store; colliding IDs are regenerated and every target is rebound to the destination Scene."
+            ],
+            "callouts": [
+              {
+                "title": "Regions are references",
+                "text": "Imported targets retain Region IDs but do not create Regions. Re-link targets when the destination Scene uses different Region document IDs.",
+                "tone": "warning"
+              }
+            ]
+          },
+          {
+            "id": "pulse-hook-api",
+            "title": "Public API and scan-complete hook",
+            "paragraphs": [
+              "Use game.pulseScanner or the module api property."
+            ],
+            "tables": [
+              {
+                "columns": ["Area", "Methods"],
+                "rows": [
+                  ["Open/use", "openTargetManager, openPulseScannerPanel, scan, usePulseScanner, refreshPulseScanner"],
+                  ["Targets", "createTarget, getTargets, deleteTarget, revealTarget, revealLatestScan, hideTarget, resolveTarget, unresolveTarget"],
+                  ["Transfer", "exportTargets, importTargets"],
+                  ["Grants", "grantPulseScannerAccess, updatePulseScannerAccess, revokePulseScannerAccess, hasPulseScannerAccess, getScannerCharges"]
+                ]
+              }
+            ],
+            "paragraphs": [
+              "scanCompleteHook is the string pulse-scanner.scanComplete. After an allowed scan, the initiating client calls that local hook with sceneId, userId, and anonymous x/y points only—no target IDs, labels, descriptions, Actors, or Tokens. Empty successful scans include an empty points array; denied scans do not fire. Consumers must enforce permissions and coarsen locations before sharing them."
+            ]
+          },
+          {
+            "id": "pulse-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "No target found: confirm range, Region placement, target mode, scanner signal, active status, and current Scene.",
+              "Player cannot scan: enable Allow Players to Scan, control an owned token, and grant that Actor a scanner when Require Pulse Scanner Access is on.",
+              "No charges: recharge Current Charges as GM or set Max Charges to 0 for unlimited use.",
+              "Region outline is wrong: check the Region’s supported shapes and reopen after editing; the module falls back to bounds if exact geometry is unavailable.",
+              "Labels/integrity missing for players: enable their world display settings and ensure visibility/sanitization permits the data.",
+              "Custom sound is silent: select Custom uploaded sound and provide a readable audio path.",
+              "Imported target points nowhere: recreate/relink the destination Scene Region."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Complete settings reference",
+          "tables": [
+            {
+              "columns": ["Setting", "Default", "Scope", "Effect"],
+              "rows": [
+                ["Default Scan Radius", "600 pixels", "World", "GM/fallback scan radius."],
+                ["Allow Players to Scan", "On", "World", "Master player scan permission."],
+                ["Require Pulse Scanner Access", "On", "World", "Require a scanner grant for non-GMs."],
+                ["Pulse Scanner Name", "Pulse Scanner", "World", "Default grant name."],
+                ["Default Highlight Duration", "4200 ms", "World", "Result visibility time."],
+                ["Show Integrity to Players", "On", "World", "Breakable integrity bars."],
+                ["Show Labels to Players", "On", "World", "Target label display in player result effects."],
+                ["Scan Pulse Sound", "Bundled", "World", "Bundled, Custom, or None."],
+                ["Custom Scan Pulse Sound", "Blank", "World", "Path used only in Custom mode."],
+                ["Scanner Charges", "0", "World", "Default maximum for new grants; 0 unlimited."]
+              ]
+            }
+          ],
+          "paragraphs": [
+            "Default scanner signal (Structural) and default grant radius (30 scene units) are hidden settings managed through the Scanners workflow."
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Do players need an inventory Item to scan?",
+          "answer": "No. This release uses Actor-based scanner grants, not a world Item workflow."
+        },
+        {
+          "question": "What does Max Charges 0 mean?",
+          "answer": "Unlimited scans. Positive maxima consume one Current Charge per use."
+        },
+        {
+          "question": "Why does an imported target not follow its Region?",
+          "answer": "Region IDs are references and may differ between Scenes/worlds. Edit the target and link a Region in the destination Scene."
+        },
+        {
+          "question": "Can a player recharge their scanner?",
+          "answer": "No. Players can consume charges through scanning; only a GM can increase/reconfigure them."
+        },
+        {
+          "question": "Does the scanComplete hook reveal targets?",
+          "answer": "No. It is local and contains only Scene/user IDs and x/y points. It grants no access and sends no target identity or metadata."
+        }
+      ]
+    }
+  }
+}
