@@ -494,3 +494,230 @@
     inset 0 0 12px rgba(105, 232, 255, 0.08) !important;
   outline: none;
 }
+
+.cybercall-ringtone-settings-app .window-content {
+  padding: 0 !important;
+  background: #020910 !important;
+  color: #edfaff !important;
+}
+
+.cybercall-ringtone-config {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  background:
+    linear-gradient(135deg, rgba(35, 178, 215, 0.08), transparent 42%),
+    #020910;
+  color: #edfaff;
+}
+
+.cybercall-ringtone-config-header {
+  padding: 16px 18px;
+  border: 1px solid #247f98;
+  border-radius: 8px;
+  background: #071b26;
+  box-shadow: inset 3px 0 0 #69e8ff;
+}
+
+.cybercall-ringtone-config-header h2 {
+  margin: 2px 0 6px;
+  color: #ffffff;
+  font-size: 1.45rem;
+  line-height: 1.15;
+}
+
+.cybercall-ringtone-config-header p {
+  margin: 0;
+  color: #c7e8ef;
+  line-height: 1.4;
+}
+
+.cybercall-ringtone-config-header .cybercall-kicker {
+  color: #79eeff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cybercall-ringtone-config-columns {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.7fr) minmax(280px, 1.3fr) 42px;
+  gap: 10px;
+  padding: 0 13px;
+  color: #9bcbd5;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cybercall-ringtone-config-list {
+  display: grid;
+  gap: 10px;
+}
+
+.cybercall-ringtone-config-row ~ .cybercall-ringtone-config-empty {
+  display: none;
+}
+
+.cybercall-ringtone-config-empty {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding: 24px 16px;
+  border: 1px dashed #347a8c;
+  border-radius: 8px;
+  background: #05131c;
+  color: #b8dce4;
+  text-align: center;
+}
+
+.cybercall-ringtone-config-empty i {
+  margin-bottom: 4px;
+  color: #69e8ff;
+  font-size: 1.4rem;
+}
+
+.cybercall-ringtone-config-empty strong {
+  color: #f1fcff;
+}
+
+.cybercall-ringtone-config-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.7fr) minmax(280px, 1.3fr) 42px;
+  gap: 10px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid #18546a;
+  border-radius: 8px;
+  background: #06141e;
+}
+
+.cybercall-ringtone-config-row:hover {
+  border-color: #2d91ab;
+  background: #081b27;
+}
+
+.cybercall-ringtone-config-field {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  color: #d9f7fc;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.cybercall-ringtone-config-path {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 6px;
+}
+
+.cybercall-ringtone-config input[type="text"] {
+  height: 38px !important;
+  padding: 7px 10px !important;
+  border: 1px solid #3b9db5 !important;
+  border-radius: 6px !important;
+  background: #00070c !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(105, 232, 255, 0.04) !important;
+}
+
+.cybercall-ringtone-config input[type="text"]::placeholder {
+  color: #789aa3 !important;
+  opacity: 1;
+}
+
+.cybercall-ringtone-config input[type="text"]:focus {
+  border-color: #87f2ff !important;
+  box-shadow: 0 0 0 2px rgba(105, 232, 255, 0.24) !important;
+  outline: none !important;
+}
+
+.cybercall-ringtone-config button {
+  min-height: 38px;
+  margin: 0 !important;
+  border: 1px solid #3b9db5 !important;
+  border-radius: 6px !important;
+  background: #0a3040 !important;
+  color: #ecfbff !important;
+  font-weight: 700;
+  box-shadow: none !important;
+}
+
+.cybercall-ringtone-config button:hover,
+.cybercall-ringtone-config button:focus-visible {
+  border-color: #8bf3ff !important;
+  background: #10506a !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(105, 232, 255, 0.2) !important;
+}
+
+.cybercall-ringtone-remove {
+  width: 42px;
+  border-color: #a94559 !important;
+  background: #451623 !important;
+  color: #ffdbe2 !important;
+}
+
+.cybercall-ringtone-remove:hover,
+.cybercall-ringtone-remove:focus-visible {
+  border-color: #ff8098 !important;
+  background: #722238 !important;
+}
+
+.cybercall-ringtone-add {
+  justify-self: start;
+  padding-inline: 14px !important;
+  border-style: dashed !important;
+}
+
+.cybercall-ringtone-config footer {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 14px;
+  border-top: 1px solid #18546a;
+  color: #9bcbd5;
+  font-size: 0.78rem;
+}
+
+.cybercall-ringtone-save {
+  min-width: 150px;
+  border-color: #4bc989 !important;
+  background: #0b5136 !important;
+  color: #effff6 !important;
+}
+
+.cybercall-ringtone-save:hover,
+.cybercall-ringtone-save:focus-visible {
+  border-color: #8dffc0 !important;
+  background: #11724a !important;
+}
+
+@media (max-width: 620px) {
+  .cybercall-ringtone-config-columns {
+    display: none;
+  }
+
+  .cybercall-ringtone-config-row {
+    grid-template-columns: minmax(0, 1fr) 42px;
+  }
+
+  .cybercall-ringtone-config-field {
+    grid-column: 1 / -1;
+  }
+
+  .cybercall-ringtone-remove {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .cybercall-ringtone-config footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

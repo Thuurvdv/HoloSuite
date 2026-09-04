@@ -5,6 +5,7 @@ export const COMPOSER_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-
 export const CONTACTS_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-contacts.hbs`;
 export const MESSAGES_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-messages.hbs`;
 export const PHONE_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/cybercall-phone.hbs`;
+export const RINGTONE_SETTINGS_TEMPLATE_PATH = `modules/${MODULE_ID}/templates/ringtone-settings.hbs`;
 export const MESSAGE_FLAG_KIND = "phoneMessage";
 export const MESSAGE_SCHEMA_VERSION = 3;
 
@@ -14,3 +15,5 @@ export const RINGTONE_CHOICES = {
   [`modules/${MODULE_ID}/audio/Ringtone2.ogg`]: "Ringtone 2",
   [`modules/${MODULE_ID}/audio/Ringtone3.ogg`]: "Ringtone 3"
 };
+
+export const DEFAULT_RINGTONE = `modules/${MODULE_ID}/audio/Ringtone1.ogg`;

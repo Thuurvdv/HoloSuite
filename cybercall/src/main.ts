@@ -17,9 +17,11 @@ import {
   MODULE_ID,
   PHONE_TEMPLATE_PATH,
   RINGTONE_CHOICES,
+  DEFAULT_RINGTONE,
   SOCKET_NAME,
   TEMPLATE_PATH
 } from "./constants";
+import { getFilePickerClass, normalizeCustomRingtones, RingtoneSettingsApp } from "./ringtone-settings";
 import { escapeHTML } from "./dom-utils";
 import { createGroupThreadId, createThreadIdForContact, getAvatarTone, prepareThreads } from "./message-model";
 import { createMessageEvent, getStoredMessages, sendMessageToContact } from "./message-service";
@@ -443,7 +445,7 @@ function bindComposerControls(app: any, html: any = null) {
   const ringtoneSelect = element.querySelector("[data-cybercall-ringtone]");
   if (ringtoneSelect) {
     ringtoneSelect.addEventListener("change", async (event) => {
-      await game.settings.set(MODULE_ID, "ringSound", event.currentTarget.value);
+      await setSoundPath(event.currentTarget.value);
     });
   }
 
@@ -482,7 +484,7 @@ function bindComposerControls(app: any, html: any = null) {
 
       if (action === "browse-image") {
         const input = form.elements.image;
-        const Picker = (globalThis as any).FilePicker ?? (globalThis as any).foundry?.applications?.apps?.FilePicker;
+        const Picker = getFilePickerClass();
         if (!input || !Picker) {
           ui.notifications?.warn?.("Foundry FilePicker is unavailable.");
           return;
@@ -560,7 +562,7 @@ function bindContactsControls(app: any, html: any = null) {
   const ringtoneSelect = element.querySelector("[data-cybercall-ringtone]");
   if (ringtoneSelect) {
     ringtoneSelect.addEventListener("change", async (event) => {
-      await game.settings.set(MODULE_ID, "ringSound", event.currentTarget.value);
+      await setSoundPath(event.currentTarget.value);
     });
   }
 
@@ -1506,13 +1508,42 @@ function applyFullscreenPosition(app: any) {
   });
 }
 
+function getRingtoneSelectionStore() {
+  const value = game.settings.get(MODULE_ID, "ringSoundsByWorld");
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function getAvailableRingtonePaths() {
+  return new Set([
+    ...Object.keys(RINGTONE_CHOICES),
+    ...normalizeCustomRingtones(game.settings.get(MODULE_ID, "customRingtones")).map((ringtone) => ringtone.path)
+  ]);
+}
+
 function getSoundPath() {
-  return String(game.settings.get(MODULE_ID, "ringSound") ?? "").trim();
+  const worldKey = getWorldContactsKey();
+  const selections = getRingtoneSelectionStore();
+  const hasWorldSelection = Object.prototype.hasOwnProperty.call(selections, worldKey);
+  const selected = String(hasWorldSelection ? selections[worldKey] : game.settings.get(MODULE_ID, "ringSound") ?? "").trim();
+  return getAvailableRingtonePaths().has(selected) ? selected : DEFAULT_RINGTONE;
+}
+
+async function setSoundPath(path: any) {
+  const worldKey = getWorldContactsKey();
+  await game.settings.set(MODULE_ID, "ringSoundsByWorld", {
+    ...getRingtoneSelectionStore(),
+    [worldKey]: String(path ?? "").trim()
+  });
 }
 
 function getRingtoneChoices() {
   const current = getSoundPath();
-  return Object.entries(RINGTONE_CHOICES).map(([value, label]) => ({
+  const customChoices = normalizeCustomRingtones(game.settings.get(MODULE_ID, "customRingtones"));
+  const choices = new Map(Object.entries(RINGTONE_CHOICES));
+  for (const ringtone of customChoices) {
+    if (!choices.has(ringtone.path)) choices.set(ringtone.path, ringtone.label);
+  }
+  return [...choices].map(([value, label]) => ({
     value,
     label,
     selected: value === current
@@ -1538,19 +1569,20 @@ function playRinging(callData) {
   const soundPath = getSoundPath();
   if (!soundPath) return;
 
-  const interfaceVolume = Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5);
-  const volume = 0.65 * interfaceVolume;
+  const ringtoneVolume = Math.max(0, Math.min(100, Number(game.settings.get(MODULE_ID, "ringVolume") ?? 100)));
+  const volume = 0.65 * (ringtoneVolume / 100);
   const AudioHelperClass = foundry?.audio?.AudioHelper ?? (globalThis as any).AudioHelper;
   if (AudioHelperClass?.play) {
-    AudioHelperClass.play({ src: soundPath, volume, autoplay: true, loop: true }, false)
+    AudioHelperClass.play({ src: soundPath, volume, autoplay: true, loop: true, channel: "interface" }, false)
       .then((handle) => { ringingAudio = handle; })
       .catch((error) => {
         console.warn(`${MODULE_ID} | Unable to play ringing sound.`, error);
       });
   } else {
+    const interfaceVolume = Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5);
     ringingAudio = new Audio(soundPath);
     ringingAudio.loop = true;
-    ringingAudio.volume = volume;
+    ringingAudio.volume = volume * interfaceVolume;
     ringingAudio.play().catch((error) => {
       console.warn(`${MODULE_ID} | Unable to play ringing sound.`, error);
     });
@@ -1732,14 +1764,19 @@ function registerWithHoloSuite() {
     moduleId: MODULE_ID,
     title: "CyberCall",
     tier: "free",
-    version: "1.0.9",
-    updated: "2026-09-02",
+    version: "1.0.10",
+    updated: "2026-09-04",
     icon: "fa-solid fa-satellite-dish",
     entries: [
       {
-        title: "Character names throughout CyberCall",
-        summary: "Calls, contacts, messages, and group conversations now use assigned character names, with usernames retained as a fallback when no character is assigned.",
-        tags: ["CyberCall", "Characters", "Calls", "Messages"]
+        title: "Custom ringtones and volume controls",
+        summary: "GMs can add multiple world ringtones, while each user can choose a per-world ringtone and set its volume relative to Foundry's Interface volume.",
+        tags: ["CyberCall", "Ringtones", "Audio", "Settings"]
+      },
+      {
+        title: "Foundry v12–v14 audio compatibility",
+        summary: "Ringtone selection, file browsing, and playback now behave consistently across supported Foundry versions, with clearer configuration contrast and an audible default.",
+        tags: ["CyberCall", "Compatibility", "Foundry v12", "Foundry v14"]
       }
     ]
   });
@@ -1780,8 +1817,54 @@ function registerSettings() {
     scope: "client",
     config: false,
     type: String,
-    default: "",
+    default: DEFAULT_RINGTONE,
     choices: RINGTONE_CHOICES
+  });
+
+  game.settings.register(MODULE_ID, "ringSoundsByWorld", {
+    name: "CyberCall Ringtone Selections",
+    hint: "Stores this client's ringtone choice separately for each world.",
+    scope: "client",
+    config: false,
+    type: Object,
+    default: {}
+  });
+
+  game.settings.register(MODULE_ID, "ringVolume", {
+    name: "Incoming Call Volume",
+    hint: "Personal CyberCall ringtone volume. This is multiplied by Foundry's Interface volume, so the global audio control still applies.",
+    scope: "client",
+    config: true,
+    type: Number,
+    default: 100,
+    range: {
+      min: 0,
+      max: 100,
+      step: 5
+    }
+  });
+
+  game.settings.register(MODULE_ID, "customRingtones", {
+    name: "Additional CyberCall Ringtones",
+    hint: "GM-managed ringtone audio files available to everyone in this world.",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: [],
+    onChange: () => {
+      if (activePhone) activePhone.render?.(true);
+      else if (activeComposer) activeComposer.render?.(true);
+      else activeContacts?.render?.(true);
+    }
+  });
+
+  game.settings.registerMenu(MODULE_ID, "customRingtonesMenu", {
+    name: "Additional Ringtones",
+    label: "Manage Ringtones",
+    hint: "Add one or more audio files to the ringtone list for this world.",
+    icon: "fa-solid fa-bell",
+    type: RingtoneSettingsApp,
+    restricted: true
   });
 
   game.settings.register(MODULE_ID, "minimumRole", {
