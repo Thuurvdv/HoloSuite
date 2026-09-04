@@ -1,0 +1,44 @@
+<form class="cybercall-ringtone-config">
+  <header class="cybercall-ringtone-config-header">
+    <p class="cybercall-kicker">World Configuration</p>
+    <h2>Additional Ringtones</h2>
+    <p>Add audio files that everyone can select as their personal CyberCall ringtone. The three built-in ringtones remain available.</p>
+  </header>
+
+  <div class="cybercall-ringtone-config-columns" aria-hidden="true">
+    <span>Display name</span>
+    <span>Audio file</span>
+    <span></span>
+  </div>
+
+  <div class="cybercall-ringtone-config-list" data-ringtone-list>
+    {{#each ringtones}}
+      <div class="cybercall-ringtone-config-row" data-ringtone-row>
+        <label class="cybercall-ringtone-config-field">
+          <span>Display name</span>
+          <input type="text" data-ringtone-label name="ringtones.{{@index}}.label" value="{{label}}" placeholder="For example: Urgent Call">
+        </label>
+        <label class="cybercall-ringtone-config-field">
+          <span>Audio file</span>
+          <div class="cybercall-ringtone-config-path">
+            <input type="text" data-ringtone-path name="ringtones.{{@index}}.path" value="{{path}}" placeholder="Choose an audio file…">
+            <button type="button" class="cybercall-ringtone-browse" data-ringtone-browse title="Choose audio file" aria-label="Choose audio file"><i class="fa-solid fa-folder-open"></i></button>
+          </div>
+        </label>
+        <button type="button" class="cybercall-ringtone-remove" data-ringtone-remove title="Remove ringtone" aria-label="Remove ringtone"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    {{/each}}
+    <div class="cybercall-ringtone-config-empty" data-ringtone-empty>
+      <i class="fa-solid fa-bell-slash" aria-hidden="true"></i>
+      <strong>No additional ringtones yet</strong>
+      <span>Use the button below to add your first audio file.</span>
+    </div>
+  </div>
+
+  <button type="button" class="cybercall-ringtone-add" data-ringtone-add><i class="fa-solid fa-plus"></i> Add another ringtone</button>
+
+  <footer>
+    <span>Saved ringtones become available to all users in this world.</span>
+    <button type="submit" class="cybercall-ringtone-save"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
+  </footer>
+</form>

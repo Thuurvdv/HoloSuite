@@ -11,7 +11,7 @@ Players can also call the GM using a built-in contacts directory, making two-way
 - The GM composes and broadcasts holographic calls to all connected players.
 - Calls display a caller portrait, name, faction, message, and signal strength bar.
 - Three visual styles are available: standard blue, emergency red, and corrupted green.
-- Calls can ring with a looping sci-fi ringtone until someone picks up.
+- Calls can ring with a looping sci-fi ringtone until someone picks up. GMs can add multiple world-wide ringtone choices from Module Settings.
 - Players can accept or end calls, and the state syncs across all connected clients.
 - Fullscreen mode turns a call into a dramatic table-wide broadcast.
 - Players can keep a personal contacts list for each world and a shared group contacts list, and place calls to the GM from those contacts.
@@ -74,7 +74,9 @@ Players can also call the GM using a built-in contacts directory, making two-way
 ### Choosing a Ringtone
 
 - Open **Configure Settings** and find the **CyberCall** section.
-- Pick a ringtone from the dropdown, or choose **Silent** if you prefer no sound.
+- Pick a ringtone from the dropdown, or choose **Silent** if you prefer no sound. New clients default to Ringtone 1.
+- Set **Incoming Call Volume** in Module Settings to adjust CyberCall relative to Foundry's Interface volume.
+- GMs can open **Additional Ringtones** in Module Settings to add named audio files for everyone in the world.
 - Your personal contacts and ringtone choice are saved per browser, so they only affect your own client. Personal contacts are separated per world.
 
 ### Sending Messages
