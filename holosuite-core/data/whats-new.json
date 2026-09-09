@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02",
+  "updated": "2026-09-09",
   "modules": [
     {
       "moduleId": "holosuite-hacking",
@@ -132,20 +132,36 @@
       "moduleId": "holosuite-core",
       "title": "HoloSuite Core",
       "tier": "free",
-      "version": "1.0.11",
-      "updated": "2026-09-02",
+      "version": "1.0.12",
+      "updated": "2026-09-09",
       "icon": "fa-solid fa-mobile-screen",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
       "entries": [
         {
-          "title": "Fresh updates across HoloSuite",
-          "summary": "The What's New feed now highlights the latest Hacking, CyberCall, Bounty Board, and Critical Cut-In improvements.",
-          "tags": ["Core", "What's New", "Updates", "Foundry v12-v14"]
+          "title": "Blueprint joins the HoloSuite launcher",
+          "summary": "HoloSuite Core now includes launcher styling for HoloSuite Blueprint and announces its premium 1.0.0 release in What's New.",
+          "tags": ["Core", "Blueprint", "What's New", "Foundry v12-v14"]
         }
       ]
     }
   ],
   "releases": [
+    {
+      "moduleId": "holosuite-blueprint",
+      "title": "HoloSuite Blueprint",
+      "tier": "premium",
+      "version": "1.0.0",
+      "updated": "2026-09-09",
+      "icon": "fa-solid fa-draw-polygon",
+      "url": "https://patreon.com/MageTowerStudios",
+      "entries": [
+        {
+          "title": "Tactical blueprints join HoloSuite",
+          "summary": "Turn Foundry Scenes into multi-floor tactical schematics with generated or custom layouts, rooms, markers, freehand planning, player presentations, PNG export, and published previews inside HoloSuite Terminal.",
+          "tags": ["Blueprint", "New Premium Module", "Tactical Maps", "Foundry v12-v13"]
+        }
+      ]
+    },
     {
       "moduleId": "holosuite-vending-machines",
       "title": "HoloSuite Vending Machines",

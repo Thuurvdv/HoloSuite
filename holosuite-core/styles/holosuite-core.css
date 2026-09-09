@@ -1198,6 +1198,11 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 217, 102, 255;
 }
 
+.holosuite-app-tile[data-holosuite-app="holosuite-blueprint"] {
+  --hs-app-accent: #2a46b8;
+  --hs-app-accent-rgb: 42, 70, 184;
+}
+
 .holosuite-app-tile[data-holosuite-app="holodock"] {
   --hs-app-accent: #d7dee8;
   --hs-app-accent-rgb: 215, 222, 232;
@@ -1376,6 +1381,12 @@ img.hs-frame-header {
   --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
   mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg");
 }
 
 .holosuite-app-icon[data-holosuite-app-icon="holodock"]::before {
@@ -1830,6 +1841,11 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 217, 102, 255;
 }
 
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-blueprint"] {
+  --hs-app-accent: #2a46b8;
+  --hs-app-accent-rgb: 42, 70, 184;
+}
+
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holodock"] {
   --hs-app-accent: #d7dee8;
   --hs-app-accent-rgb: 215, 222, 232;
@@ -2008,6 +2024,12 @@ img.hs-frame-header {
   --hs-space-police-icon: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
   mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg");
+}
+
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"]::before {
+  --hs-space-police-icon: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg");
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holodock"]::before {
@@ -2189,6 +2211,29 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   display: block !important;
   mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg") !important;
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg") !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-blueprint"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-blueprint"] {
+  --hs-app-accent: #2a46b8 !important;
+  --hs-app-accent-rgb: 42, 70, 184 !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"] {
+  color: #2a46b8 !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"] i,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"] i {
+  display: none !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"]::before,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"]::before {
+  display: block !important;
+  mask-image: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg") !important;
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg") !important;
 }
 
 .holosuite-core-diagnostics-window .window-content {
