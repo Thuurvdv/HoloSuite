@@ -2329,6 +2329,645 @@
           "answer": "No. It is local and contains only Scene/user IDs and x/y points. It grants no access and sends no target identity or metadata."
         }
       ]
+    },
+    "holosuite-blueprint": {
+      "tutorial": {
+        "intro": "This guide builds a usable facility first, then explains every authoring, sharing, publishing, integration, and export control. Unless a step says player, perform setup while logged in as a GM.",
+        "audience": "GMs open the Blueprint authoring window and control permanent facility data. Players receive filtered, read-only presentations or open published layouts through another module. If player drawing is enabled, they may add freehand strokes and erase only their own marks while an active GM validates and saves them.",
+        "quickStart": {
+          "title": "Quick start: create and share your first blueprint",
+          "paragraphs": [
+            "Use this route to turn an existing Scene into a presentable plan in a few minutes."
+          ],
+          "steps": [
+            "Install and enable HoloSuite Core and HoloSuite Blueprint, then activate a Scene that contains Foundry walls.",
+            "Open the HoloSuite launcher and select Blueprint, or use Open Blueprint in Scene Controls.",
+            "Open Settings. Enter a Location name and optional Facility designation, keep Generated from Scene selected, choose a theme, and save.",
+            "Open Rooms and select Auto-detect Rooms. Review the number of closed spaces found, accept them, then edit the generated room names and optional details.",
+            "Use Marker to place an entrance, objective, hazard, terminal, or another icon. Use Text for a plain label and Pencil for a temporary route or note.",
+            "Switch from GM View to Player View. Check the hidden-information badge and verify that GM-only details and unrevealed secret doors do not appear.",
+            "Select Present to Players to open the filtered blueprint for connected players. Use Export PNG when you also want a static handout.",
+            "If a HoloSuite Terminal should keep the plan available, return to Settings and select Publish Layout, then link the published layout from that Terminal profile's Layout app."
+          ],
+          "callouts": [
+            {
+              "title": "Start with clean wall data",
+              "text": "Generated architecture and automatic rooms follow the Scene's walls. Gaps, overlapping endpoints, and decorative wall fragments can create unexpected outlines or prevent a room from closing.",
+              "tone": "info"
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "blueprint-interface",
+            "title": "Interface and navigation",
+            "paragraphs": [
+              "Blueprint places the authoring tools around a pan-and-zoom canvas. The toolbar adapts when the window narrows, so some text labels may collapse to icons."
+            ],
+            "subsections": [
+              {
+                "title": "Header and view controls",
+                "bullets": [
+                  "The location name appears at the left of the custom header. Drag the header to move the window.",
+                  "GM View shows the complete facility. Player View previews the filtered presentation without changing your Foundry user permissions.",
+                  "The hidden-information badge summarizes rooms, markers, structures, links, lights, or an image withheld from players; select it to jump to Player View.",
+                  "Present to Players opens a filtered shared view for connected players. Export PNG downloads the current view as an image. Settings opens facility, layer, floor, drawing, and publishing controls.",
+                  "Use minus, plus, Fit Blueprint, or the mouse wheel to zoom. Drag the canvas to pan. Reset/Fit restores a useful overview."
+                ]
+              },
+              {
+                "title": "Authoring toolbar",
+                "bullets": [
+                  "Select is the normal navigation and selection mode. Drag existing markers to move them and use their on-canvas grip to resize them.",
+                  "Marker places a configured symbol. Text places or edits a plain blueprint label. Room draws a polygonal room.",
+                  "Pencil draws freehand strokes. Eraser removes any touched drawing for a GM and only the current player's own strokes for a player.",
+                  "Undo reverses recent GM changes to markers, text, rooms, floors, links, drawings, and settings. Ctrl+Z triggers the same action."
+                ]
+              },
+              {
+                "title": "Floor footer and drawers",
+                "bullets": [
+                  "The footer shows the current level and Scene grid size. Select another level number or use PageUp/PageDown to change floors.",
+                  "Rooms and Markers open searchable index drawers. Their Locate controls center the requested item without changing its data."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-source",
+            "title": "Facility identity, source, and themes",
+            "subsections": [
+              {
+                "title": "Name the facility",
+                "steps": [
+                  "Open Settings and find Facility Identity.",
+                  "Set Location name to the main title players should recognize, such as Safehouse or Orbital Customs.",
+                  "Optionally set Facility designation for a smaller subtitle such as Security Annex / Level 04.",
+                  "Save the settings. The data belongs to the facility's root Scene."
+                ]
+              },
+              {
+                "title": "Choose the blueprint source",
+                "tables": [
+                  {
+                    "columns": [
+                      "Source",
+                      "Use it when",
+                      "What Blueprint does"
+                    ],
+                    "rows": [
+                      [
+                        "Generated from Scene",
+                        "The Scene has useful Foundry wall data.",
+                        "Converts wall behavior, doors, and optional lights into theme-independent SVG geometry."
+                      ],
+                      [
+                        "Custom Image",
+                        "You already have a schematic or floor-plan image.",
+                        "Displays the selected Foundry-hosted image and places rooms, markers, text, and drawings in the same Scene-coordinate space."
+                      ]
+                    ]
+                  }
+                ],
+                "callouts": [
+                  {
+                    "title": "Custom-image alignment",
+                    "text": "Use an image that aligns with the referenced Scene when you want live doors, lights, or Scene-coordinate annotations to line up. A remote cross-origin image may display but prevent browser-based PNG export; hosting it through Foundry is the reliable option.",
+                    "tone": "warning"
+                  }
+                ]
+              },
+              {
+                "title": "Choose a visual theme",
+                "bullets": [
+                  "HoloSuite uses the default deep-blue command-interface styling.",
+                  "Classic Blueprint uses the familiar technical-drawing look.",
+                  "Military presents the plan as an operational field display.",
+                  "RED matches HoloSuite Terminal's RED palette.",
+                  "Corporate uses a restrained professional display."
+                ]
+              },
+              {
+                "title": "How generated walls are interpreted",
+                "tables": [
+                  {
+                    "columns": [
+                      "Blueprint line",
+                      "Foundry wall behavior"
+                    ],
+                    "rows": [
+                      [
+                        "Wall",
+                        "Blocks ordinary movement and sight."
+                      ],
+                      [
+                        "Window",
+                        "Blocks movement while sight passes through, or has Blueprint's explicit window flag."
+                      ],
+                      [
+                        "Ethereal",
+                        "Allows movement while sight remains blocked."
+                      ],
+                      [
+                        "Terrain",
+                        "Uses LIMITED behavior for one or more senses."
+                      ],
+                      [
+                        "Door / locked door / secret door",
+                        "Uses the Foundry door type and current state; door classification takes priority over the other wall styles."
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-floors",
+            "title": "Build a multi-floor facility",
+            "subsections": [
+              {
+                "title": "Add or edit a floor",
+                "steps": [
+                  "Open Settings and expand Facility Floors.",
+                  "Select Add Floor and enter the short Floor label shown in the canvas footer.",
+                  "Choose Inherit facility source to reuse the root source, Generated from Scene to read a referenced Scene's walls, or Custom Image to use a floor-specific image.",
+                  "When the floor uses another Scene, select that Referenced Scene. For a custom floor, select a Foundry-hosted image path.",
+                  "Save, then select the new level in the canvas footer. Use Edit Floor to revise it later."
+                ],
+                "bullets": [
+                  "Every facility keeps at least one floor.",
+                  "Deleting a floor also removes that floor's rooms, annotations, transfer links, and tactical drawings after confirmation.",
+                  "Coordinates are interpreted in the selected floor Scene's coordinate system."
+                ]
+              },
+              {
+                "title": "Connect floors with stairs or elevators",
+                "steps": [
+                  "Create at least two floors and activate the source floor.",
+                  "In Facility Floors, select Add Lift / Stair Link and choose the destination floor.",
+                  "Click the stair or elevator position on the active blueprint.",
+                  "Repeat on other floors when you want a return marker at a different location. Clear Floor Links removes every transfer marker from the active floor."
+                ],
+                "callouts": [
+                  {
+                    "title": "Floor links are interactive",
+                    "text": "GMs, presented players, and players viewing a published layout can select a transfer marker to switch to its destination floor. The marker changes only the Blueprint level; it does not move tokens or activate another Foundry Scene.",
+                    "tone": "info"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-rooms",
+            "title": "Create and manage rooms",
+            "subsections": [
+              {
+                "title": "Automatically detect enclosed rooms",
+                "steps": [
+                  "Open the Rooms drawer on the desired generated floor.",
+                  "Select Auto-detect Rooms. Blueprint searches closed loops made from walls, windows, and doors and ignores open chains.",
+                  "Review the count and accept the detected rooms. Existing rooms and GM-authored details are preserved rather than replaced.",
+                  "Edit each new AUTO ROOM entry to give it a useful name and optional type, security level, description, and label scale."
+                ],
+                "callouts": [
+                  {
+                    "title": "When detection finds nothing",
+                    "text": "Inspect the Scene for small wall gaps or endpoints that do not meet. You can correct the Scene walls or outline the room manually; Blueprint never edits the walls for you.",
+                    "tone": "warning"
+                  }
+                ]
+              },
+              {
+                "title": "Draw a room by hand",
+                "steps": [
+                  "Select Room or New Room. The outline begins immediately.",
+                  "Click each corner around the space. The live guide shows the next edge and the edge that will close the polygon.",
+                  "Double-click or press Enter to finish. Backspace removes the last point; Escape cancels the unfinished room.",
+                  "Enter the Room name. Room type, Security level, and Description are optional, then save."
+                ]
+              },
+              {
+                "title": "Labels, search, and deletion",
+                "bullets": [
+                  "Blueprint chooses a label size from the polygon and name. Edit Label size from 40% to 300%; 100% keeps the automatic result.",
+                  "Use the Rooms search field and type filter to review large facilities. Locate centers a room; Edit changes its details; Delete removes it immediately for the GM.",
+                  "Delete also removes the currently selected room. Single-room deletion uses Undo instead of an extra confirmation dialog.",
+                  "Room descriptions and security text are presentation details. Blueprint does not enforce doors, token movement, or game-system security rules."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-markers",
+            "title": "Markers and blueprint text",
+            "subsections": [
+              {
+                "title": "Place and edit a marker",
+                "steps": [
+                  "Select Marker and choose Entrance, Exit, Objective, Hazard, Camera, Terminal, Power, Elevator / Stairs, Locked Area, Loot, or Medical.",
+                  "Add an optional label and choose Players and GM or GM only visibility.",
+                  "For a Camera or Terminal marker, optionally select a linked system from the matching installed module.",
+                  "Select Place on Blueprint, click its position, then drag it or use the corner grip when its position or size needs adjustment.",
+                  "Use the marker toolbar or Markers drawer to locate, edit, or delete it. Delete removes the selected marker and Ctrl+Z restores the latest change."
+                ]
+              },
+              {
+                "title": "Add plain text",
+                "steps": [
+                  "Select Text, then click the desired position on the blueprint.",
+                  "Type the label and save it. Select existing text with the Text tool to edit it.",
+                  "Move, resize, locate, change visibility, or delete text in the same way as other annotations."
+                ]
+              },
+              {
+                "title": "Use the marker index",
+                "bullets": [
+                  "The Markers drawer lists the active floor's markers and text. Search matches marker information, and Locate centers the selected annotation.",
+                  "GM-only entries remain visible in GM View and are removed from player presentation data rather than hidden only with CSS."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-drawing",
+            "title": "Freehand planning and undo",
+            "subsections": [
+              {
+                "title": "Draw and erase as GM",
+                "steps": [
+                  "Select Pencil, choose a Drawing color and Line width, then drag over the blueprint.",
+                  "Select Eraser, set its radius, and sweep the circle over strokes to remove them.",
+                  "Use Undo or Ctrl+Z to reverse the latest Blueprint edit. Clear Drawings removes every temporary stroke on the active floor after confirmation."
+                ],
+                "paragraphs": [
+                  "Pencil strokes are smoothed and tapered. Width scales against the Scene grid so it remains visually consistent across differently sized facilities."
+                ]
+              },
+              {
+                "title": "Let players draw on a shared plan",
+                "steps": [
+                  "Open Settings and enable Let players draw on a shared plan.",
+                  "Present the blueprint or let players open its published layout through Terminal.",
+                  "Players use Pencil to add strokes and Erase your own marks to remove only strokes they created.",
+                  "Keep one active GM connected while players draw; that GM validates, serializes, and saves the shared changes."
+                ],
+                "callouts": [
+                  {
+                    "title": "Temporary but persistent",
+                    "text": "Shared drawings are separate from permanent rooms and annotations, but they remain in the Scene's Blueprint data until a GM clears them. A facility keeps a bounded history of marks and discards the oldest after the limit is reached.",
+                    "tone": "info"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-player-view",
+            "title": "Control what players receive",
+            "subsections": [
+              {
+                "title": "Configure information layers",
+                "tables": [
+                  {
+                    "columns": [
+                      "Setting",
+                      "Effect"
+                    ],
+                    "rows": [
+                      [
+                        "Display doors",
+                        "Includes doors in the rendered architecture."
+                      ],
+                      [
+                        "Reveal secret doors to players",
+                        "Allows secret-door geometry in player snapshots. When off, the opening is sent as ordinary wall so its position is not exposed."
+                      ],
+                      [
+                        "Display light sources",
+                        "Draws a simple lamp/status marker at each included Ambient Light. It does not draw the illumination radius."
+                      ],
+                      [
+                        "Camera coverage",
+                        "Draws Security Cameras coverage from camera-linked Scene Regions on the floor's Scene; no Blueprint camera marker is required."
+                      ],
+                      [
+                        "Let players draw on a shared plan",
+                        "Shows player pencil and own-stroke eraser controls in presented and Terminal-opened layouts."
+                      ],
+                      [
+                        "Live door states for players",
+                        "Sends state-only updates for doors already included in an existing presentation."
+                      ],
+                      [
+                        "Live light states for players",
+                        "Sends state-only online, offline, or disabled updates for included lights."
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "title": "Review Player View",
+                "steps": [
+                  "Switch the header from GM View to Player View.",
+                  "Check each floor for hidden rooms, markers, links, structures, lights, and custom images.",
+                  "Use the hidden-information badge as a quick count, then inspect the actual canvas because a GM preview does not impersonate a particular player's permissions in linked modules.",
+                  "Return to GM View to edit. Present, publish, and player-safe export all use filtered presentation data."
+                ]
+              },
+              {
+                "title": "What live system updates do",
+                "bullets": [
+                  "An active GM observes Scene door or light changes and debounces state updates for systems already present in player snapshots.",
+                  "Live updates preserve the player's floor, pan, and zoom and do not republish geometry, new systems, room edits, annotations, images, or linked-system data.",
+                  "Present again after adding, deleting, revealing, or structurally changing systems. Turning a live option off leaves the last received state until a full presentation refresh.",
+                  "Lights are informational: positive radius is online, zero radius or a Blueprint offline override is offline, and hidden or explicitly disabled lights are disabled where the viewer may receive them."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-present-publish",
+            "title": "Present, publish, and use Terminal layouts",
+            "subsections": [
+              {
+                "title": "Present to connected players",
+                "steps": [
+                  "Select Player View and inspect the complete facility.",
+                  "Select Present to Players. Connected players receive a read-only snapshot and can move between permitted floors.",
+                  "If player drawing or live states are enabled, keep an active GM connected so those separate updates can be validated and sent."
+                ],
+                "paragraphs": [
+                  "Presentation is best for a briefing or a plan everyone should see immediately. Permanent facility editing remains GM-only."
+                ]
+              },
+              {
+                "title": "Publish a persistent layout",
+                "steps": [
+                  "Open Settings and find Published Layout.",
+                  "Select Publish Layout. Blueprint freezes the current filtered player view in a world-level layout library.",
+                  "Open HoloSuite Terminal's manager, edit the desired profile, enable its Layout app, and select the published Blueprint.",
+                  "Players can now see a static preview on the Terminal layout card and open the full read-only layout without the authoring GM being online.",
+                  "After changing architecture or presentation data, return to Blueprint. If it says Edited since it was published, select Publish Layout again to replace the stored copy."
+                ],
+                "bullets": [
+                  "Publishing uses the stable Blueprint ID, so integrations do not need to store a Scene ID.",
+                  "Withdrawing a layout removes it from modules that link to the published library. A world keeps up to 40 published layouts and discards the oldest when the limit is exceeded.",
+                  "The stored architecture and metadata are frozen. Shared drawings and their current GM permission synchronize separately while a GM is connected, so drawing permission can be changed without republishing.",
+                  "Locked or disabled Terminal layouts withhold their static preview according to Terminal's own rules."
+                ]
+              },
+              {
+                "title": "Presentation versus publishing",
+                "tables": [
+                  {
+                    "columns": [
+                      "Method",
+                      "Best for",
+                      "GM online afterward"
+                    ],
+                    "rows": [
+                      [
+                        "Present to Players",
+                        "Opening the plan immediately for currently connected players.",
+                        "Needed for optional drawing and live door/light updates."
+                      ],
+                      [
+                        "Publish Layout",
+                        "Making a frozen plan available to HoloSuite Terminal and other integrations later.",
+                        "Not needed to open the frozen layout; needed to save shared drawings."
+                      ],
+                      [
+                        "Export PNG",
+                        "A static image handout outside the interactive Blueprint viewer.",
+                        "No."
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-integrations",
+            "title": "Camera and Terminal marker integrations",
+            "subsections": [
+              {
+                "title": "Link a marker",
+                "steps": [
+                  "Install and enable Security Cameras or HoloSuite Terminal in the same world.",
+                  "Place or edit a Camera or Terminal marker and choose the optional Linked system.",
+                  "In GM authoring mode, select the marker and use its external-link control. In player or preview mode, click it or focus it and press Enter.",
+                  "If the viewer lacks access, the target was removed, or the module is unavailable, Blueprint shows an unavailable/access warning and keeps the saved link for later reconnection."
+                ]
+              },
+              {
+                "title": "Permission behavior",
+                "bullets": [
+                  "A linked Security Cameras marker opens one local feed and still requires that module's camera access. Blueprint never broadcasts the feed to the table or grants camera rights.",
+                  "A linked HoloSuite Terminal marker calls Terminal's open API. Terminal rechecks its user allow/block list and access level every time.",
+                  "Player View is a visibility preview. A GM who activates a link still does so with GM privileges; use an actual player account when testing that module's access configuration.",
+                  "Unlinked camera and Terminal markers remain ordinary visual annotations. Neither optional integration is required to use Blueprint."
+                ]
+              },
+              {
+                "title": "Show camera coverage",
+                "steps": [
+                  "In Security Cameras, assign a camera to the floor's Scene and give it a Scene Region that defines its coverage.",
+                  "In Blueprint Settings, enable Camera coverage.",
+                  "Read the layer status if nothing appears: it reports a missing module/API, no cameras, cameras on another Scene, or cameras without Regions."
+                ],
+                "callouts": [
+                  {
+                    "title": "Coverage follows cameras, not markers",
+                    "text": "A Blueprint Camera marker is optional and does not define coverage. The linked Scene Region in Security Cameras supplies the area.",
+                    "tone": "info"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-export-storage",
+            "title": "Export, storage, and safe editing",
+            "subsections": [
+              {
+                "title": "Export a PNG",
+                "steps": [
+                  "Choose GM View or Player View according to the information the image should contain.",
+                  "Set the desired floor, theme, source, annotations, title block, and viewport.",
+                  "Select Export PNG. The browser downloads the rendered blueprint with its current source, theme, annotations, and title information."
+                ],
+                "callouts": [
+                  {
+                    "title": "If custom-image export fails",
+                    "text": "Choose the image through Foundry's File Picker or host it on the Foundry server. Browser security can block canvas export when an image comes from another origin.",
+                    "tone": "warning"
+                  }
+                ]
+              },
+              {
+                "title": "Where Blueprint data lives",
+                "bullets": [
+                  "The facility configuration, floors, rooms, permanent annotations, links, and temporary drawings are stored in the root Scene's holosuite-blueprint flag.",
+                  "Published player layouts are stored in a world-level Blueprint library for other modules.",
+                  "Blueprint reads Scene walls and lights but does not modify them. Deleting or changing the source documents changes later generated views.",
+                  "Camera and Terminal markers store only the linked system ID. Their module data and permissions stay with the owning module."
+                ]
+              },
+              {
+                "title": "Undo and destructive actions",
+                "bullets": [
+                  "Undo covers recent GM edits in the current authoring session, including settings, floors, rooms, links, annotations, and drawings.",
+                  "Deleting a floor asks for confirmation because it removes all Blueprint data assigned to that level.",
+                  "Deleting one selected marker or room is immediate and is recovered through Undo.",
+                  "Clear Drawings affects the active floor only. Withdraw Layout removes the published copy but leaves the editable Scene blueprint intact."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "blueprint-troubleshooting",
+            "title": "Troubleshooting",
+            "bullets": [
+              "Blueprint opens with No Scene Data: activate a Scene, then open Blueprint again. Only GMs open the authoring view directly.",
+              "Generated walls look incomplete: inspect gaps, wall endpoints, unusual movement/sight restrictions, and whether the correct floor Scene is referenced.",
+              "Auto-detect finds no rooms: the walls do not form a new fully closed loop, or the enclosed space already exists in the room list. Draw the polygon manually when needed.",
+              "A secret door seems absent in Player View: this is expected while Reveal secret doors to players is off; the segment is represented as ordinary wall rather than an exposed opening.",
+              "Players cannot draw: enable Let players draw on a shared plan and keep an active GM connected to validate and store strokes.",
+              "A player cannot erase a line: players may erase only strokes they created; a GM can erase any shared drawing.",
+              "Terminal shows an old layout: Blueprint publishing is a frozen snapshot. Republish after edits when Settings reports Edited since it was published.",
+              "Terminal has no layout preview: confirm the layout remains published and that Terminal's layout card is enabled, linked, and not locked from that viewer.",
+              "Live doors or lights do not reflect new systems: state-only updates cover systems already included. Present the blueprint again after structural or visibility changes.",
+              "A camera coverage layer is empty: read its status in Settings and verify Security Cameras is active, the camera uses this floor's Scene, and it has a Scene Region.",
+              "A linked camera or Terminal does not open: verify the optional module is active, the link still exists, and the current user has access in that module.",
+              "PNG export fails with a custom image: move the image into Foundry-accessible storage and select it through the File Picker."
+            ]
+          }
+        ],
+        "reference": {
+          "title": "Controls and behavior reference",
+          "paragraphs": [
+            "Use this table as a compact checklist after working through the tutorial. Blueprint is system-agnostic and all permanent authoring controls are GM-only."
+          ],
+          "tables": [
+            {
+              "columns": [
+                "Area",
+                "Available choices / limits",
+                "Notes"
+              ],
+              "rows": [
+                [
+                  "Source",
+                  "Generated from Scene; Custom Image",
+                  "Each floor may inherit, reference a Scene, generate separately, or use its own image."
+                ],
+                [
+                  "Themes",
+                  "HoloSuite; Classic Blueprint; Military; RED; Corporate",
+                  "Theme changes presentation, not stored Scene geometry."
+                ],
+                [
+                  "Marker types",
+                  "Entrance, Exit, Objective, Hazard, Camera, Terminal, Power, Elevator/Stairs, Locked Area, Loot, Medical, Text",
+                  "Camera and Terminal alone support optional system links."
+                ],
+                [
+                  "Room label scale",
+                  "40%–300%",
+                  "100% is the automatically chosen size."
+                ],
+                [
+                  "Views",
+                  "GM View; Player View",
+                  "Player View controls the filtering used for sharing and publishing."
+                ],
+                [
+                  "Player drawings",
+                  "Freehand pencil; erase own strokes",
+                  "Require permission and an active GM to save; maximum 200 facility marks."
+                ],
+                [
+                  "Published library",
+                  "Up to 40 world layouts",
+                  "Publishing replaces the same stable Blueprint ID; the oldest layout is discarded at the limit."
+                ],
+                [
+                  "Live data",
+                  "Door state; light/power state",
+                  "Opt-in, state-only, and requires an active GM."
+                ],
+                [
+                  "World setting",
+                  "Blueprint debug logging",
+                  "Off by default; adds concise browser-console diagnostics."
+                ],
+                [
+                  "Client setting",
+                  "Show Blueprint opening sequence",
+                  "Controls the short architectural-data sequence when Blueprint opens."
+                ]
+              ]
+            }
+          ],
+          "callouts": [
+            {
+              "title": "Current release boundary",
+              "text": "Information Profiles are hidden while their player-audience workflow is redesigned. Blueprint still preserves compatible stored profile data, but the normal 1.0.0 interface uses GM/player visibility and layer settings described above.",
+              "tone": "info"
+            }
+          ]
+        }
+      },
+      "faq": [
+        {
+          "question": "Does Blueprint edit my Scene walls, doors, or lights?",
+          "answer": "No. It reads those documents to build and update its schematic, but Blueprint annotations and facility data are stored separately."
+        },
+        {
+          "question": "Can I use Blueprint without wall data?",
+          "answer": "Yes. Choose Custom Image and select a Foundry-hosted plan. Generated mode and automatic room detection need suitable wall geometry."
+        },
+        {
+          "question": "Can players create rooms, markers, or permanent text?",
+          "answer": "No. Permanent authoring is GM-only. When enabled, players may add freehand strokes and erase only their own shared marks."
+        },
+        {
+          "question": "Does a GM need to be online for a Terminal layout?",
+          "answer": "No for opening the frozen published layout and its static preview. An active GM is required to validate and save player drawings or provide live state updates."
+        },
+        {
+          "question": "Why did my Terminal layout not update after I edited the Scene blueprint?",
+          "answer": "Published architecture is a frozen player-safe snapshot. Open Blueprint Settings and publish it again after edits."
+        },
+        {
+          "question": "Do linked markers grant access to cameras or terminals?",
+          "answer": "No. Security Cameras and HoloSuite Terminal reapply their own permissions whenever the current viewer opens a link."
+        },
+        {
+          "question": "Can a player discover an unrevealed secret door from the blueprint payload?",
+          "answer": "Blueprint removes secret-door identity from filtered player models while reveal is disabled and renders the segment as ordinary wall, so the opening is not disclosed by the Blueprint snapshot."
+        },
+        {
+          "question": "Does live light state simulate a power grid or illumination area?",
+          "answer": "No. It displays an informational online, offline, or disabled state at the light position. It does not draw light radii or model electrical networks."
+        },
+        {
+          "question": "Is HoloSuite Blueprint tied to a game system?",
+          "answer": "No. It uses Foundry Scene documents and works independently of a specific game system. Version 1.0.0 supports Foundry VTT v12 and v13."
+        },
+        {
+          "question": "Does Blueprint require HoloSuite Core?",
+          "answer": "Yes. Install and activate HoloSuite Core so Blueprint can register in the HoloSuite launcher."
+        },
+        {
+          "question": "Is Blueprint free?",
+          "answer": "No. HoloSuite Blueprint is part of the HoloSuite Premium Collection."
+        }
+      ]
     }
   }
 }

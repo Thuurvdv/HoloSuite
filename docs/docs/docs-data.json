@@ -1040,6 +1040,51 @@
       "moduleUrl": "https://github.com/Thuurvdv/holosuite-vending-machines"
     },
     {
+      "id": "holosuite-blueprint",
+      "name": "HoloSuite Blueprint",
+      "tier": "premium",
+      "category": "Tactical maps",
+      "compatibility": "Foundry v12-v13",
+      "image": "assets/Blueprint-preview.png",
+      "summary": "Generate, annotate, present, publish, and export polished tactical blueprints from Foundry VTT Scenes.",
+      "overview": "HoloSuite Blueprint turns Foundry wall data or a custom map image into a focused tactical schematic. A GM can organize a facility across multiple floors, outline and name rooms, place operational markers and free text, sketch plans, preview exactly what players may see, present a live shared view, publish a layout for HoloSuite Terminal, or export the result as a PNG. Blueprint is system-agnostic and never changes the Scene walls or lights it reads.",
+      "features": [
+        "Generate styled SVG architecture from Scene walls, windows, terrain walls, ethereal walls, and door types.",
+        "Use a Foundry-hosted image instead while keeping annotations in Scene coordinates.",
+        "Build multi-floor facilities from the root Scene, other Scenes, inherited sources, or per-floor images.",
+        "Auto-detect enclosed rooms or draw polygonal rooms by hand, then name, classify, describe, resize, search, and locate them.",
+        "Place entrance, exit, objective, hazard, camera, terminal, power, elevator, locked-area, loot, medical, and text markers.",
+        "Draw tapered freehand plans, erase marks, and undo GM edits.",
+        "Preview the filtered Player View before presenting or publishing it.",
+        "Allow players to add and erase their own temporary pencil marks while a GM is connected.",
+        "Optionally keep already-presented door and light states current.",
+        "Publish frozen layouts with static HoloSuite Terminal previews.",
+        "Link camera and Terminal markers without bypassing either module's access rules.",
+        "Export the current blueprint as a themed PNG."
+      ],
+      "installation": [
+        "Obtain HoloSuite Blueprint through the HoloSuite Premium Collection and install the supplied Foundry module ZIP or private manifest.",
+        "Install and enable HoloSuite Core, then enable HoloSuite Blueprint in the same world.",
+        "Activate the Scene that will anchor the facility.",
+        "Open Blueprint from HoloSuite Core or the Scene Controls button."
+      ],
+      "configuration": [
+        "Set the location name, optional facility designation, source mode, theme, and visible information layers.",
+        "Add floors, rooms, markers, text, and freehand drawings as the facility requires.",
+        "Review Player View before using Present to Players or Publish Layout.",
+        "Enable player drawing or live system states only when the session needs them."
+      ],
+      "examples": [
+        "Brief a crew on entrances, hazards, objectives, and escape routes before an infiltration.",
+        "Publish a station directory inside an in-world HoloSuite Terminal.",
+        "Track a multi-floor heist while players sketch a temporary route over the shared plan.",
+        "Export a clean facility handout without exposing GM-only rooms or secret doors."
+      ],
+      "moduleUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
+      "moduleActionLabel": "Get Premium Access",
+      "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+    },
+    {
       "id": "holosuite-terminal",
       "name": "HoloSuite Terminal",
       "tier": "premium",
