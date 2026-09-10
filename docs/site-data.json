@@ -1,8 +1,8 @@
 {
   "stats": [
-    { "label": "Modules Released", "value": 12, "suffix": "+" },
+    { "label": "Modules Released", "value": 13, "suffix": "+" },
     { "label": "Free Modules", "value": 10, "suffix": "" },
-    { "label": "Premium Modules", "value": 2, "suffix": "" },
+    { "label": "Premium Modules", "value": 3, "suffix": "" },
     { "label": "Foundry Compatibility", "value": 12, "prefix": "v", "suffix": "+" },
     { "label": "Active Development", "value": 2026, "suffix": "", "format": "plain" }
   ],
@@ -66,6 +66,12 @@
       "title": "Shop futuristic markets",
       "description": "Browse limited stock, fill a basket, and purchase equipment from in-world machines.",
       "moduleId": "holosuite-vending-machines"
+    },
+    {
+      "icon": "MAP",
+      "title": "Plan tactical facilities",
+      "description": "Turn Scene walls into annotated, multi-floor blueprints and share them with players.",
+      "moduleId": "holosuite-blueprint"
     }
   ],
   "modules": [
@@ -188,6 +194,23 @@
       "features": ["Limited stock and multi-item baskets", "Linked Region access and player prompts", "Four machine styles with system-agnostic currency support"],
       "docsUrl": "docs/module.html?id=holosuite-vending-machines",
       "moduleUrl": "https://github.com/Thuurvdv/holosuite-vending-machines"
+    },
+    {
+      "id": "holosuite-blueprint",
+      "name": "HoloSuite Blueprint",
+      "tier": "premium",
+      "category": "Tactical maps",
+      "image": "assets/Blueprint-preview.png",
+      "pitch": "Turn Foundry Scenes into annotated, multi-floor tactical schematics that you can present, publish, draw on, and export.",
+      "compatibility": "Foundry v12-v13",
+      "features": [
+        "Generated Scene schematics or custom blueprint images",
+        "Rooms, markers, freehand plans, multiple floors, and player presentation",
+        "Published layouts with static previews inside HoloSuite Terminal"
+      ],
+      "docsUrl": "docs/module.html?id=holosuite-blueprint",
+      "moduleUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
+      "moduleActionLabel": "Get Premium Access"
     },
     {
       "id": "holosuite-terminal",
