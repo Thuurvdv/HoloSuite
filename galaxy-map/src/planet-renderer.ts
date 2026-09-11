@@ -181,9 +181,21 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
   });
   const effectObserver = new MutationObserver(wake);
   const api = {
-    async setTexture(path: string) {
+    async setTexture(path: string | null, color = "#ffffff") {
       if (disposed || !renderer) return;
       const request = ++textureRequest;
+      material.color.set(path ? "#ffffff" : color);
+      atmosphereMaterial.uniforms.tint.value.set(color);
+      if (!path) {
+        material.map = null;
+        material.needsUpdate = true;
+        texture?.dispose();
+        texture = null;
+        host.dataset.planetReady = "true";
+        options.onStatus?.(`Flat color · Drag to rotate ${shape} · Scroll to zoom`);
+        draw(); schedule();
+        return;
+      }
       options.onStatus?.("Loading planet surface…");
       let next: any = null;
       try {
@@ -216,7 +228,7 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
         draw(); schedule();
       } catch {
         if (next && next !== texture) next.dispose();
-        if (!disposed && request === textureRequest) options.onStatus?.("Texture unavailable. Choose another image in Edit System or preview a preset.");
+        if (!disposed && request === textureRequest) options.onStatus?.("Texture unavailable. Choose another image or a flat color in Edit System.");
       }
     },
     setPaused(value: boolean) {
@@ -315,7 +327,7 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
     activeViewer = api;
     resize();
     options.onPaused?.(paused);
-    void api.setTexture(options.texture);
+    void api.setTexture(options.texture, options.color);
   } catch {
     api.dispose();
     options.onStatus?.("3D is unavailable on this device. Static planet preview shown.");

@@ -70,8 +70,8 @@
         {{/unless}}
       </div>
 
-      {{#if system.canInspectPlanet}}
-        <button type="button" class="gmf-inspect-planet" data-action="inspect-planet"><i class="fa-solid fa-globe"></i> Inspect Planet <i class="fa-solid fa-arrow-right"></i></button>
+      {{#if system.canInspectSystem}}
+        <button type="button" class="gmf-inspect-system" data-action="inspect-system"><i class="fa-solid fa-magnifying-glass"></i> Inspect System <i class="fa-solid fa-arrow-right"></i></button>
       {{/if}}
       {{/unless}}
 
@@ -80,6 +80,7 @@
         <p>{{gmfFallback system.displayDescription "No survey information has been recorded."}}</p>
       </section>
 
+      {{#if planetView}}
       {{#unless system.obscured}}
         <section class="gmf-system-panel__section">
           <h4>Linked Content</h4>
@@ -87,22 +88,12 @@
             <button type="button" class="gmf-content-link" data-action="open-journal"><i class="fa-solid fa-book-open"></i><span>Open Journal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
           {{/if}}
           {{#if system.hasScenes}}
-            <button type="button" class="gmf-content-link" data-action="open-scene"><i class="fa-solid fa-image"></i><span>Open Scene</span><small>{{system.sceneIds.length}}</small></button>
+            <button type="button" class="gmf-content-link" data-action="open-scene"><i class="fa-solid fa-image"></i><span>Go to Scene</span><small>{{system.sceneIds.length}}</small></button>
           {{/if}}
           {{#unless system.hasJournal}}{{#unless system.hasScenes}}<p class="gmf-empty-copy">No linked journal or scene.</p>{{/unless}}{{/unless}}
         </section>
       {{/unless}}
-
-      <section class="gmf-system-panel__section">
-        <h4>Alerts &amp; Signals</h4>
-        {{#if system.hasAlert}}
-          <p class="gmf-signal gmf-signal--alert"><i class="fa-solid fa-triangle-exclamation"></i>{{system.alertLabel}}</p>
-        {{/if}}
-        {{#if system.hasSignal}}
-          <p class="gmf-signal"><i class="fa-solid fa-tower-broadcast"></i>{{system.externalFocus.label}}</p>
-        {{/if}}
-        {{#unless system.hasAlert}}{{#unless system.hasSignal}}<p class="gmf-empty-copy">No active alerts or signals.</p>{{/unless}}{{/unless}}
-      </section>
+      {{/if}}
 
       {{#unless playerMode}}
         <section class="gmf-system-panel__section gmf-system-panel__section--gm">
@@ -113,18 +104,16 @@
 
       <div class="gmf-inspector-actions">
         {{#unless planetView}}
-        <div class="gmf-inspector-actions__primary">
           {{#if system.canTravel}}
             {{#unless system.obscured}}
+            <div class="gmf-inspector-actions__primary">
               <button type="button" class="gmf-button--primary" data-action="travel-to-system"><i class="fa-solid fa-route"></i>{{#if playerMode}}Request Travel{{else}}Travel to System{{/if}}</button>
+            </div>
             {{/unless}}
           {{/if}}
-          <button type="button" class="gmf-button--accent" data-action="scan-system"><i class="fa-solid fa-satellite-dish"></i>Scan System</button>
-        </div>
         {{/unless}}
+        {{#if map.canEdit}}
         <div class="gmf-inspector-actions__secondary">
-          {{#unless planetView}}<button type="button" class="gmf-button--quiet" data-action="ping-system"><i class="fa-solid fa-bullseye"></i>Ping System</button>{{/unless}}
-          {{#if map.canEdit}}
             {{#if planetView}}<button type="button" data-action="edit-system"><i class="fa-solid fa-pen"></i> Edit System</button>{{/if}}
             <details class="gmf-action-menu">
               <summary><i class="fa-solid fa-ellipsis"></i>GM Actions</summary>
@@ -140,8 +129,8 @@
                 <button type="button" class="gmf-button--danger" data-action="delete-system"><i class="fa-solid fa-trash"></i>Delete System</button>
               </div>
             </details>
-          {{/if}}
         </div>
+        {{/if}}
       </div>
     {{else}}
       <div class="gmf-empty">

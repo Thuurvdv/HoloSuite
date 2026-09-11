@@ -85,6 +85,12 @@ Travel prompts show the number of approvals needed and the participants who have
 - You cannot add, edit, or move systems and routes. Map building is a GM tool.
 - Scene associations are organizational tags for the GM and are not buttons in the system details panel.
 
+### Optional bounty intel
+
+When Bounty Board is active, hovering or keyboard-focusing a system with a Scene-linked bounty reveals a compact holographic intel callout. It shows the target, status, reward, and a runtime-processed portrait; use its arrows when several bounties match. Clicking the callout opens Bounty Board at that contract. Player results obey both Galaxy Map visibility and Bounty Board publication/board visibility rules.
+
+This uses the existing System → Scene relationship and Bounty Board's permission-filtered API. Galaxy Map has no hard dependency on Bounty Board: the small hover controller resolves that API on demand, and an unavailable module or API produces no visible placeholder or error.
+
 ## Map appearance
 
 The map includes a subdued nebula and dust-lane background, with stronger glows reserved for selected systems, the party location, destinations, and alerts. Custom background images remain supported.
@@ -98,6 +104,8 @@ Select a planet on the galaxy map and choose **Inspect Planet**. The same window
 In **Edit System → Planet close-up**, choose a **Sphere**, **Cube**, **Donut**, **Asteroid**, **Crystal**, or **Cylinder** and one of three bundled appearances: **Cartoon · Acid Seas**, **Painterly · Golden Frontier**, or **Realistic · Blue Marble**. The GM's **Compare appearance** selector previews these looks locally without saving; use Edit System to save a choice.
 
 Choose **Custom texture** under Appearance to reveal the custom texture picker and a shape-specific UV guide. The selected image is shown directly beneath the translucent guide. The guide documents the recommended canvas and the exact regions used by the renderer: 2:1 wrapped maps for spheres, donuts, asteroids, and crystals; a 4×3 cube cross; and a square cylinder atlas with a central side strip and separate end caps. The custom controls remain hidden for bundled appearances.
+
+Creating a system uses a compact quick-create form for its name, type, and live marker preview. Secondary marker and visibility settings stay under **More options**. Description, planet appearance, images, linked scenes, journals, and GM notes are added later through the independent **Overview**, **Planet**, and **Content** editor workspaces. Scene and journal links use searchable add/remove pickers instead of a world-sized checkbox list.
 
 To use your own surface, use **Planet Texture → Browse** to select a PNG, JPEG, or WebP. A seamless 2:1 equirectangular image (an unwrapped world map, preferably 2048 × 1024) fits best. This field is separate from the existing system portrait image. Clear the texture path to return to a preset. Custom paths and preset choices are included in JSON map import/export; external images must also be copied when moving between worlds.
 

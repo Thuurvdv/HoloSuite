@@ -75,7 +75,7 @@ export function normalizeSystem(system: any = {}) {
   const requestedPlanetPreset = normalizePlanetPreset(system.planetPreset);
   // Before the Custom option existed, any saved texture implicitly overrode the
   // selected preset. Preserve that behavior by migrating it to Custom.
-  const planetPreset = planetTexture && requestedPlanetPreset !== "none" ? "custom" : requestedPlanetPreset;
+  const planetPreset = planetTexture && !["none", "color"].includes(requestedPlanetPreset) ? "custom" : requestedPlanetPreset;
   return {
     id: String(system.id || randomId("system")),
     name: String(system.name || "Unnamed System"),
@@ -89,6 +89,7 @@ export function normalizeSystem(system: any = {}) {
     planetPreset,
     planetShape: normalizePlanetShape(system.planetShape),
     planetTexture,
+    planetColor: normalizeOptionalColor(system.planetColor) || "#58d8ff",
     sceneIds,
     journalId: String(system.journalId || ""),
     visibility: normalizeVisibility(system.visibility, "players"),

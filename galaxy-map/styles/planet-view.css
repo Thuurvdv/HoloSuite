@@ -51,13 +51,10 @@
   border-radius: 50% / 10%;
 }
 .gmf-planet-controls { position: relative; padding: 10px 20px 16px; background: linear-gradient(transparent, rgba(1, 5, 13, 0.75)); }
-.gmf-planet-compare { display: grid; grid-template-columns: auto minmax(160px, 1fr); gap: 7px 12px; align-items: center; color: var(--gmf-muted); font-size: 12px; margin-bottom: 12px; }
-.gmf-planet-compare select { width: 100%; color: var(--gmf-text); background: #0b1c2c; border: 1px solid var(--gmf-line); border-radius: 5px; min-height: 32px; }
-.gmf-planet-compare small { grid-column: 1 / -1; font-size: 11px; opacity: 0.85; }
 .gmf-planet-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
 .gmf-planet-buttons button { width: auto; min-height: 32px; font-size: 12px; }
 .gmf-planet-controls [role="status"] { margin: 9px 0 0; min-height: 16px; color: var(--gmf-muted); font-size: 11px; }
-.gmf-inspect-planet { width: 100%; border-color: var(--gmf-green); color: var(--gmf-green); min-height: 36px; }
+.gmf-inspect-system { width: 100%; min-height: 36px; margin-top: 12px; border-color: var(--gmf-green); color: var(--gmf-green); }
 @container galaxy-map (max-width: 760px) {
   .gmf-galaxy__content:has(.gmf-planet-stage) { grid-template-rows: minmax(530px, 70vh) auto; }
   .gmf-planet-stage { border-right: 0; border-bottom: 1px solid var(--gmf-line); }
@@ -65,6 +62,5 @@
 @container galaxy-map (max-width: 520px) {
   .gmf-planet-heading { padding: 12px 14px 0; }
   .gmf-planet-heading > button { float: none; margin-bottom: 12px; }
-  .gmf-planet-compare { grid-template-columns: 1fr; }
   .gmf-planet-controls { padding: 8px 14px 14px; }
 }

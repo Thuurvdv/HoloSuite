@@ -27,37 +27,11 @@ export function escapeHtml(value: unknown): string {
 export function optionList(options: Array<string | { value: string; label: string }>, selected: unknown): string {
   return options.map((option) => {
     const value = typeof option === "string" ? option : option.value;
-    const label = typeof option === "string" ? option : option.label;
+    const label = typeof option === "string"
+      ? option.split(/[-_]/).map((word) => word.toLowerCase() === "gm" ? "GM" : `${word.charAt(0).toUpperCase()}${word.slice(1)}`).join(" ")
+      : option.label;
     return `<option value="${escapeHtml(value)}" ${value === selected ? "selected" : ""}>${escapeHtml(label)}</option>`;
   }).join("");
-}
-
-export function documentOptions(collection: any, selectedId: unknown): string {
-  const documents = collection?.contents ?? [];
-  return [
-    { value: "", label: "None" },
-    ...documents.map((doc) => ({ value: doc.id, label: doc.name }))
-  ].map((option) => `<option value="${escapeHtml(option.value)}" ${option.value === selectedId ? "selected" : ""}>${escapeHtml(option.label)}</option>`).join("");
-}
-
-export function documentCheckboxes(collection: any, selectedIds: unknown, name: string): string {
-  const documents = collection?.contents ?? [];
-  const selected = new Set(Array.isArray(selectedIds) ? selectedIds.map(String) : selectedIds ? [String(selectedIds)] : []);
-  const knownIds = new Set(documents.map((doc) => String(doc.id)));
-  const options = [
-    ...documents.map((doc) => ({ value: String(doc.id), label: String(doc.name || doc.id), missing: false })),
-    ...[...selected]
-      .filter((id) => !knownIds.has(id))
-      .map((id) => ({ value: id, label: `Missing scene (${id})`, missing: true }))
-  ];
-
-  if (!options.length) return '<p class="gmf-scene-picker__empty">No scenes exist in this world yet.</p>';
-  return options.map((option) => `
-    <label class="gmf-scene-picker__option ${option.missing ? "is-missing" : ""}">
-      <input type="checkbox" name="${escapeHtml(name)}" value="${escapeHtml(option.value)}" ${selected.has(option.value) ? "checked" : ""} />
-      <span>${escapeHtml(option.label)}</span>
-    </label>
-  `).join("");
 }
 
 export function getHtmlElement(html: any): any {

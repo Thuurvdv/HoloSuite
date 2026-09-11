@@ -26,10 +26,10 @@
 
     <div class="gmf-galaxy__content">
       {{#if planetView}}
-        <main class="gmf-planet-stage" aria-label="Planet close-up">
+        <main class="gmf-planet-stage" aria-label="System detail view">
           <header class="gmf-planet-heading">
             <button type="button" data-action="back-to-galaxy"><i class="fa-solid fa-arrow-left"></i> Back to Galaxy</button>
-            <p class="gmf-kicker">Orbital Survey</p>
+            <p class="gmf-kicker">System Detail</p>
             <h3>{{planetSystem.displayName}}</h3>
             <p data-planet-appearance>{{planetAppearance.label}}</p>
           </header>
@@ -37,15 +37,6 @@
             <div class="gmf-planet-fallback" role="img" aria-label="Static planet preview"></div>
           </div>
           <footer class="gmf-planet-controls">
-            {{#if map.canEdit}}
-              <label class="gmf-planet-compare">Compare appearance
-                <select data-planet-preset>
-                  <option value="" {{#unless planetPreview}}selected{{/unless}}>Saved appearance</option>
-                  {{#each planetPresets}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-                </select>
-                <small>Preview only. Save a preset or your own texture in Edit System.</small>
-              </label>
-            {{/if}}
             <div class="gmf-planet-buttons">
               <button type="button" data-action="planet-pause" data-planet-control aria-pressed="false">Pause rotation</button>
               <button type="button" data-action="planet-zoom-out" data-planet-control aria-label="Zoom out">−</button>
@@ -53,7 +44,7 @@
               <button type="button" data-action="planet-reset" data-planet-control>Reset view</button>
               <button type="button" data-action="planet-static" aria-pressed="false">Static view</button>
             </div>
-            <p data-planet-status role="status">Preparing planet…</p>
+            <p data-planet-status role="status">Preparing model…</p>
           </footer>
         </main>
         {{> "modules/galaxy-map/templates/system-details.hbs" system=planetSystem map=map playerMode=playerMode planetView=true}}
@@ -127,8 +118,6 @@
                 {{/if}}
                 <span class="gmf-system__type-glyph" aria-hidden="true"></span>
                 <span class="gmf-system__selection" aria-hidden="true"></span>
-                {{#if system.isCurrent}}<span class="gmf-system__current" title="Current location"></span>{{/if}}
-                {{#if system.isDestination}}<span class="gmf-system__destination" title="Navigation destination"></span>{{/if}}
                 {{#if system.hasAlert}}<span class="gmf-system__alert" title="{{system.alertLabel}}"><i class="fa-solid fa-triangle-exclamation"></i></span>{{/if}}
                 {{#if system.isExternalFocus}}
                   <span class="gmf-external-focus" aria-hidden="true">
@@ -142,6 +131,8 @@
           </div>
           <div class="gmf-ship-layer" data-ship-layer></div>
         </div>
+
+        <div class="gmf-intel-layer" data-intel-layer aria-live="polite"></div>
 
         {{#if map.canEdit}}
           <div class="gmf-map-hint">

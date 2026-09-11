@@ -20,7 +20,7 @@ import { createGalaxyMapViewClass } from "./view-app";
 import { getPlanetAppearance, PLANET_OPTIONS, PLANET_SHAPE_OPTIONS } from "./planet-presets";
 import { evaluateTravelApproval, getTravelElectorate, TRAVEL_APPROVAL_OPTIONS } from "./travel-approval";
 import { MODULE_ID, SETTING_MAPS, SOCKET_NAME, TEMPLATE_ROOT } from "./constants";
-import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, slugify } from "./dom-utils";
+import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, slugify } from "./dom-utils";
 
 (() => {
   "use strict";
@@ -88,6 +88,59 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
 
   function activateCrudDialog(html) {
     const root = getHtmlElement(html);
+    const ownerDocument = root?.ownerDocument ?? window.document;
+    const dialogListeners = new AbortController();
+    const dialogObserver = root ? new MutationObserver(() => {
+      if (root.isConnected) return;
+      dialogListeners.abort();
+      dialogObserver.disconnect();
+    }) : null;
+    if (root && ownerDocument.body) dialogObserver?.observe(ownerDocument.body, { childList: true, subtree: true });
+    let activeDocumentPicker: HTMLElement | null = null;
+    const closeDocumentPicker = (restoreFocus = false) => {
+      if (!activeDocumentPicker) return;
+      const picker = activeDocumentPicker.closest("[data-linked-documents]");
+      activeDocumentPicker.hidden = true;
+      activeDocumentPicker.style.removeProperty("left");
+      activeDocumentPicker.style.removeProperty("top");
+      activeDocumentPicker.style.removeProperty("width");
+      const trigger: HTMLElement | null = picker?.querySelector("[data-open-document-picker]") ?? null;
+      trigger?.setAttribute("aria-expanded", "false");
+      activeDocumentPicker = null;
+      if (restoreFocus) trigger?.focus();
+    };
+    const positionDocumentPicker = () => {
+      if (!activeDocumentPicker || activeDocumentPicker.hidden) return;
+      const trigger: HTMLElement | null = activeDocumentPicker.closest("[data-linked-documents]")?.querySelector("[data-open-document-picker]") ?? null;
+      if (!trigger) return;
+      const viewportWidth = ownerDocument.documentElement.clientWidth;
+      const viewportHeight = ownerDocument.documentElement.clientHeight;
+      const width = Math.min(320, viewportWidth - 24);
+      activeDocumentPicker.style.width = `${width}px`;
+      const anchor = trigger.getBoundingClientRect();
+      const popover = activeDocumentPicker.getBoundingClientRect();
+      const left = Math.max(12, Math.min(anchor.right - width, viewportWidth - width - 12));
+      const below = anchor.bottom + 6;
+      const top = below + popover.height <= viewportHeight - 12
+        ? below
+        : Math.max(12, anchor.top - popover.height - 6);
+      activeDocumentPicker.style.left = `${left}px`;
+      activeDocumentPicker.style.top = `${top}px`;
+    };
+    ownerDocument.addEventListener("pointerdown", (event) => {
+      if (!activeDocumentPicker) return;
+      const target = event.target as Node;
+      const trigger = activeDocumentPicker.closest("[data-linked-documents]")?.querySelector("[data-open-document-picker]");
+      if (!activeDocumentPicker.contains(target) && !trigger?.contains(target)) closeDocumentPicker();
+    }, { signal: dialogListeners.signal });
+    ownerDocument.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !activeDocumentPicker) return;
+      event.preventDefault();
+      event.stopPropagation();
+      closeDocumentPicker(true);
+    }, { capture: true, signal: dialogListeners.signal });
+    ownerDocument.addEventListener("scroll", positionDocumentPicker, { capture: true, passive: true, signal: dialogListeners.signal });
+    ownerDocument.defaultView?.addEventListener("resize", positionDocumentPicker, { signal: dialogListeners.signal });
     root?.querySelectorAll("[data-browse-target]").forEach((button) => {
       button.addEventListener("click", (event) => {
         event.preventDefault();
@@ -103,13 +156,200 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
         }).browse();
       });
     });
+    const editorTabs = Array.from(root?.querySelectorAll("[data-system-editor-tab]") ?? []);
+    const editorPanels = Array.from(root?.querySelectorAll("[data-system-editor-panel]") ?? []);
+    const selectEditorTab = (tabId: string, focus = false) => {
+      closeDocumentPicker();
+      editorTabs.forEach((tab: HTMLElement) => {
+        const active = tab.dataset.systemEditorTab === tabId;
+        tab.classList.toggle("is-active", active);
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focus) tab.focus();
+      });
+      editorPanels.forEach((panel: HTMLElement) => { panel.hidden = panel.dataset.systemEditorPanel !== tabId; });
+    };
+    editorTabs.forEach((tab: HTMLElement, index) => {
+      tab.addEventListener("click", () => selectEditorTab(tab.dataset.systemEditorTab ?? "overview"));
+      tab.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        const direction = event.key === 'ArrowRight' ? 1 : -1;
+        const next = editorTabs[(index + direction + editorTabs.length) % editorTabs.length] as HTMLElement;
+        selectEditorTab(next.dataset.systemEditorTab ?? "overview", true);
+      });
+    });
+    if (editorTabs.length) selectEditorTab("overview");
+
+    root?.querySelectorAll("[data-marker-preview]").forEach((preview: HTMLElement) => {
+      const form = preview.closest("form");
+      const styleInput: HTMLSelectElement | null = form?.querySelector('[name="iconStyle"]') ?? null;
+      const typeInput: HTMLSelectElement | null = form?.querySelector('[name="type"]') ?? null;
+      const statusInput: HTMLSelectElement | null = form?.querySelector('[name="status"]') ?? null;
+      const colorInput: HTMLInputElement | null = form?.querySelector('[name="iconColor"]') ?? null;
+      const sizeInput: HTMLInputElement | null = form?.querySelector('[name="iconSize"]') ?? null;
+      const pulseInput: HTMLInputElement | null = form?.querySelector('[name="pulse"]') ?? null;
+      const nameInput: HTMLInputElement | null = form?.querySelector('[name="name"]') ?? null;
+      const marker: HTMLElement | null = preview.querySelector("[data-marker-preview-system]");
+      const icon = preview.querySelector("[data-marker-preview-icon]");
+      const label = preview.querySelector("[data-marker-preview-label]");
+      let renderSequence = 0;
+      const updateMarkerPreview = async () => {
+        if (!marker || !icon) return;
+        const type = typeInput?.value ?? "unknown";
+        const status = statusInput?.value ?? "known";
+        const iconStyle = getDisplayIconStyle(type, styleInput?.value ?? "planet");
+        marker.className = `gmf-system gmf-system--${type} gmf-icon--${iconStyle} gmf-status--${status}${pulseInput?.checked ? " is-marker-preview-pulsing" : " gmf-no-pulse"}`;
+        marker.style.setProperty("--gmf-faction-color", colorInput?.value || "#58d8ff");
+        marker.style.setProperty("--gmf-system-size", `${sizeInput?.value || 28}px`);
+        if (label) label.textContent = nameInput?.value.trim() || "New System";
+        const sequence = ++renderSequence;
+        if (ANIMATED_CELESTIAL_STYLES.includes(iconStyle)) {
+          const markup = await renderTemplate(`${TEMPLATE_ROOT}/celestial-icon.hbs`, { system: { iconStyle } });
+          if (sequence === renderSequence) icon.innerHTML = markup;
+        } else {
+          icon.innerHTML = '<span class="gmf-system__core"></span>';
+        }
+      };
+      for (const control of [styleInput, typeInput, statusInput, colorInput, sizeInput, pulseInput, nameInput]) {
+        control?.addEventListener("input", updateMarkerPreview);
+        control?.addEventListener("change", updateMarkerPreview);
+      }
+      updateMarkerPreview();
+    });
+    root?.querySelectorAll("[data-linked-documents]").forEach((picker: HTMLElement) => {
+      const list = picker.querySelector("[data-linked-document-list]");
+      const panel: HTMLElement | null = picker.querySelector("[data-document-picker]");
+      const search: HTMLInputElement | null = picker.querySelector("[data-document-search]");
+      const results = picker.querySelector("[data-document-results]");
+      const collection = game[picker.dataset.collection]?.contents ?? [];
+      const inputName = picker.dataset.inputName ?? "documentId";
+      const multiple = picker.dataset.multiple === "true";
+      const kindLabel = picker.dataset.kindLabel ?? "Document";
+      const iconClass = picker.dataset.iconClass ?? "fa-file";
+      const openButton: HTMLElement | null = picker.querySelector("[data-open-document-picker]");
+
+      const selectedIds = () => new Set(Array.from(list?.querySelectorAll(`input[name="${inputName}"]`) ?? []).map((input: HTMLInputElement) => input.value));
+      const updateEmptyState = () => {
+        const empty: HTMLElement | null = picker.querySelector("[data-linked-document-empty]");
+        if (empty) empty.hidden = Boolean(list?.querySelector("[data-linked-document]"));
+      };
+      const renderResults = () => {
+        if (!results) return;
+        const query = search?.value.trim().toLocaleLowerCase() ?? "";
+        const selected = selectedIds();
+        const matches = collection
+          .filter((document) => !selected.has(String(document.id)))
+          .filter((document) => !query || String(document.name ?? document.id).toLocaleLowerCase().includes(query));
+        results.replaceChildren();
+        for (const document of matches.slice(0, 50)) {
+          const button = window.document.createElement("button");
+          button.type = "button";
+          button.className = "gmf-document-picker__result";
+          button.dataset.documentId = String(document.id);
+          button.textContent = String(document.name ?? document.id);
+          results.append(button);
+        }
+        if (!matches.length) {
+          const message = window.document.createElement("p");
+          message.textContent = collection.length ? `No matching ${kindLabel.toLocaleLowerCase()}s.` : `No ${kindLabel.toLocaleLowerCase()}s exist in this world yet.`;
+          results.append(message);
+        } else if (matches.length > 50) {
+          const message = window.document.createElement("p");
+          message.textContent = `${matches.length - 50} more results — refine your search.`;
+          results.append(message);
+        }
+      };
+      const addDocument = (document) => {
+        if (!list || selectedIds().has(String(document.id))) return;
+        if (!multiple) list.querySelectorAll("[data-linked-document]").forEach((row) => row.remove());
+        const row = ownerDocument.createElement("div");
+        row.className = "gmf-linked-document";
+        row.dataset.linkedDocument = "";
+        row.dataset.documentId = String(document.id);
+        const icon = ownerDocument.createElement("i");
+        icon.className = `fa-solid ${iconClass} gmf-linked-document__icon`;
+        icon.setAttribute("aria-hidden", "true");
+        const copy = ownerDocument.createElement("span");
+        copy.className = "gmf-linked-document__copy";
+        const name = ownerDocument.createElement("strong");
+        name.textContent = String(document.name ?? document.id);
+        const meta = ownerDocument.createElement("small");
+        meta.textContent = kindLabel;
+        copy.append(name, meta);
+        const input = ownerDocument.createElement("input");
+        input.type = "hidden";
+        input.name = inputName;
+        input.value = String(document.id);
+        const remove = ownerDocument.createElement("button");
+        remove.type = "button";
+        remove.dataset.unlinkDocument = "";
+        remove.title = `Remove ${kindLabel.toLocaleLowerCase()}`;
+        remove.setAttribute("aria-label", remove.title);
+        remove.innerHTML = '<i class="fa-solid fa-xmark"></i><span>Unlink</span>';
+        row.append(icon, copy, input, remove);
+        list.append(row);
+        updateEmptyState();
+        renderResults();
+        closeDocumentPicker(true);
+      };
+
+      list?.addEventListener("click", (event) => {
+        const button = (event.target as HTMLElement).closest("[data-unlink-document]");
+        if (!button) return;
+        button.closest("[data-linked-document]")?.remove();
+        updateEmptyState();
+        renderResults();
+      });
+      openButton?.addEventListener("click", () => {
+        if (!panel) return;
+        if (activeDocumentPicker === panel) return closeDocumentPicker(true);
+        closeDocumentPicker();
+        activeDocumentPicker = panel;
+        panel.hidden = false;
+        openButton.setAttribute("aria-expanded", "true");
+        renderResults();
+        requestAnimationFrame(() => {
+          positionDocumentPicker();
+          search?.focus();
+          search?.select();
+        });
+      });
+      picker.querySelector("[data-close-document-picker]")?.addEventListener("click", () => closeDocumentPicker(true));
+      search?.addEventListener("input", renderResults);
+      search?.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          (results?.querySelector("[data-document-id]") as HTMLElement | null)?.focus();
+        }
+        if (event.key === "Enter") {
+          event.preventDefault();
+          event.stopPropagation();
+          (results?.querySelector("[data-document-id]") as HTMLElement | null)?.click();
+        }
+      });
+      results?.addEventListener("click", (event) => {
+        const button: HTMLElement | null = (event.target as HTMLElement).closest("[data-document-id]");
+        const document = collection.find((candidate) => String(candidate.id) === button?.dataset.documentId);
+        if (document) addDocument(document);
+      });
+      updateEmptyState();
+    });
     const texturePanel = root?.querySelector("[data-texture-upload-fields]");
     const textureInput = root?.querySelector('[name="planetTexture"]');
+    const colorPanel = root?.querySelector("[data-color-appearance-fields]");
     const textureStatus = root?.querySelector("[data-texture-upload-status]");
     const appearanceInput = root?.querySelector('[name="planetPreset"]');
     const shapeInput = root?.querySelector('[name="planetShape"]');
     const textureGuide = root?.querySelector("[data-texture-guide]");
     const texturePreviews = root?.querySelectorAll("[data-texture-guide-preview]") ?? [];
+    const updateCustomTextureState = () => {
+      const custom = appearanceInput?.value === "custom";
+      if (texturePanel) texturePanel.hidden = !custom;
+      if (colorPanel) colorPanel.hidden = appearanceInput?.value !== "color";
+      if (textureInput) textureInput.required = custom;
+      return custom;
+    };
     const updateTexturePreview = () => {
       if (!textureGuide) return;
       const path = textureInput?.value?.trim();
@@ -145,8 +385,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       updateTexturePreview();
     };
     appearanceInput?.addEventListener("change", () => {
-      const custom = appearanceInput.value === "custom";
-      if (texturePanel) texturePanel.hidden = !custom;
+      const custom = updateCustomTextureState();
       if (!custom && textureInput?.value) {
         textureInput.value = "";
         textureInput.dispatchEvent(new Event("change", { bubbles: true }));
@@ -161,29 +400,44 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     shapeInput?.addEventListener("change", () => {
       if (textureGuide) textureGuide.dataset.shape = shapeInput.value;
     });
+    updateCustomTextureState();
     updateTextureStatus();
+
   }
 
-  function renderCrudDialog({ title, content, submitLabel = "Save", onSubmit, render = activateCrudDialog }) {
+  function renderCrudDialog({ title, content, submitLabel = "Save", onSubmit, render = activateCrudDialog, width = 700, height = "auto", dialogClass = "" }) {
     new Dialog({
       title,
       content,
       render,
       buttons: {
-        save: {
-          icon: '<i class="fa-solid fa-floppy-disk"></i>',
-          label: submitLabel,
-          callback: (html) => onSubmit(getFormValues(html))
-        },
         cancel: {
           icon: '<i class="fa-solid fa-xmark"></i>',
           label: "Cancel"
+        },
+        save: {
+          icon: '<i class="fa-solid fa-floppy-disk"></i>',
+          label: submitLabel,
+          callback: (html) => {
+            const root = getHtmlElement(html);
+            const form = root?.matches?.("form") ? root : root?.querySelector("form");
+            const invalid = form ? Array.from(form.elements).find((control: any) => control.willValidate && !control.checkValidity()) as HTMLElement : null;
+            if (invalid) {
+              const panel: HTMLElement | null = invalid.closest("[data-system-editor-panel]");
+              if (panel?.dataset.systemEditorPanel) root.querySelector(`[data-system-editor-tab="${panel.dataset.systemEditorPanel}"]`)?.click();
+              (invalid as any).reportValidity();
+              invalid.focus();
+              return false;
+            }
+            return onSubmit(getFormValues(html));
+          }
         }
       },
       default: "save"
     }, {
-      classes: ["galaxy-map", "gmf-crud-dialog"],
-      width: 700
+      classes: ["galaxy-map", "gmf-crud-dialog", dialogClass].filter(Boolean),
+      width,
+      height
     }).render(true);
   }
 
@@ -204,6 +458,11 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     return playerMode && system.status === "undiscovered";
   }
 
+  function getDisplayIconStyle(type, iconStyle) {
+    const typeIconFallbacks: Record<string, string> = { station: "station", anomaly: "diamond", ruins: "diamond", unknown: "diamond" };
+    return iconStyle === "planet" ? typeIconFallbacks[type] ?? iconStyle : iconStyle;
+  }
+
   function prepareMapForDisplay(map, { playerMode = false, selectedSystemId = null, selectedRouteId = null } = {}) {
     const normalized = normalizeMap(map);
     const systems = playerMode ? normalized.systems.filter(canPlayerSeeSystem) : normalized.systems;
@@ -216,11 +475,10 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     const displaySystems = systems.map((system) => {
       const faction = factionLookup.get(system.factionId);
       const obscured = isSystemObscured(system, playerMode);
-      const typeIconFallbacks: Record<string, string> = { station: "station", anomaly: "diamond", ruins: "diamond", unknown: "diamond" };
       const displayType = obscured ? "unknown" : system.type;
       const displayIconStyle = obscured
         ? "diamond"
-        : system.iconStyle === "planet" ? typeIconFallbacks[displayType] ?? system.iconStyle : system.iconStyle;
+        : getDisplayIconStyle(displayType, system.iconStyle);
       return {
         ...system,
         iconStyle: displayIconStyle,
@@ -240,7 +498,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
         hasJournal: Boolean(!obscured && system.journalId),
         hasScenes: Boolean(!obscured && system.sceneIds.length),
         showImage: Boolean(!obscured && system.image),
-        canInspectPlanet: Boolean(getPlanetAppearance({ ...system, iconStyle: displayIconStyle, obscured }))
+        canInspectSystem: Boolean(getPlanetAppearance({ ...system, iconStyle: displayIconStyle, obscured }))
       };
     });
 
@@ -624,38 +882,6 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     notifyInfo(`Discovery notification sent: ${system.name}.`);
   }
 
-  function showSystemPingOnOpenMaps(payload) {
-    getOpenMapViews(payload.mapId).forEach((app) => app.showSystemPing?.(payload.systemId, payload));
-  }
-
-  function pingSystem(mapId, systemId) {
-    const rawMap = getRawMap(mapId);
-    const map = rawMap ? normalizeMap(rawMap) : null;
-    const system = map?.systems.find((candidate) => candidate.id === systemId);
-    if (!map || !system) {
-      notifyError(`System "${systemId}" was not found.`);
-      return null;
-    }
-    if (!game.user?.isGM && (map.visibility !== "players" || system.visibility !== "players")) {
-      notifyError("That system is not available on the player map.");
-      return null;
-    }
-
-    const userColor = String(game.user?.color || "");
-    const payload = {
-      action: "system-ping",
-      pingId: randomId("ping"),
-      mapId,
-      systemId,
-      userId: game.user?.id,
-      userName: String(game.user?.name || "Navigator").slice(0, 80),
-      color: /^#[0-9a-f]{6}$/i.test(userColor) ? userColor : "#58d8ff"
-    };
-    game.socket.emit(SOCKET_NAME, payload);
-    showSystemPingOnOpenMaps(payload);
-    return payload;
-  }
-
   async function importMapData(mapData, { replace = false } = {}) {
     if (!requireGM("import galaxy maps")) return null;
     const maps = getMapStore();
@@ -756,7 +982,65 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     `;
   }
 
-  function getSystemDialogContent(mapId, system = {}, defaults = {}) {
+  function getLinkedDocumentPickerMarkup({ collection, selectedIds, inputName, collectionName, kindLabel, iconClass, multiple = false }) {
+    const documents = collection?.contents ?? [];
+    const documentsById = new Map(documents.map((document) => [String(document.id), document]));
+    const selected = (Array.isArray(selectedIds) ? selectedIds : selectedIds ? [selectedIds] : []).map(String);
+    const rows = selected.map((id) => {
+      const document = documentsById.get(id);
+      const label = document?.name ?? `Missing ${kindLabel}`;
+      return `<div class="gmf-linked-document ${document ? "" : "is-missing"}" data-linked-document data-document-id="${escapeHtml(id)}">
+        <i class="fa-solid ${escapeHtml(iconClass)} gmf-linked-document__icon" aria-hidden="true"></i>
+        <span class="gmf-linked-document__copy"><strong>${escapeHtml(label)}</strong><small>${document ? escapeHtml(kindLabel) : escapeHtml(id)}</small></span>
+        <input type="hidden" name="${escapeHtml(inputName)}" value="${escapeHtml(id)}" />
+        <button type="button" data-unlink-document title="Unlink ${escapeHtml(kindLabel.toLocaleLowerCase())}" aria-label="Unlink ${escapeHtml(kindLabel.toLocaleLowerCase())}"><i class="fa-solid fa-xmark"></i><span>Unlink</span></button>
+      </div>`;
+    }).join("");
+    return `<div class="gmf-linked-documents" data-linked-documents data-collection="${escapeHtml(collectionName)}" data-input-name="${escapeHtml(inputName)}" data-kind-label="${escapeHtml(kindLabel)}" data-icon-class="${escapeHtml(iconClass)}" data-multiple="${multiple}">
+      <div class="gmf-linked-document-list" data-linked-document-list>${rows}</div>
+      <p class="gmf-linked-document-empty" data-linked-document-empty ${rows ? "hidden" : ""}>No linked ${escapeHtml(kindLabel.toLocaleLowerCase())}${multiple ? "s" : ""}.</p>
+      <button type="button" class="gmf-button--quiet gmf-linked-documents__add" data-open-document-picker aria-haspopup="dialog" aria-expanded="false"><i class="fa-solid fa-plus"></i> Add ${escapeHtml(kindLabel)}</button>
+      <div class="gmf-document-picker" data-document-picker role="dialog" aria-label="Choose ${escapeHtml(kindLabel.toLocaleLowerCase())}" hidden>
+        <div class="gmf-document-picker__toolbar">
+          <label>Search ${escapeHtml(kindLabel.toLocaleLowerCase())}${multiple ? "s" : ""}<input type="search" data-document-search autocomplete="off" placeholder="Type to filter…" /></label>
+          <button type="button" class="gmf-button--quiet" data-close-document-picker aria-label="Close picker"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="gmf-document-picker__results" data-document-results></div>
+      </div>
+    </div>`;
+  }
+
+  function getMarkerPreviewMarkup(data, color) {
+    const iconStyle = getDisplayIconStyle(data.type, data.iconStyle);
+    return `<div class="gmf-marker-preview gmf-galaxy" data-marker-preview aria-label="Live map marker preview">
+      <div class="gmf-marker-preview__stage">
+        <span class="gmf-system gmf-system--${escapeHtml(data.type)} gmf-icon--${escapeHtml(iconStyle)} gmf-status--${escapeHtml(data.status)} ${data.pulse ? "is-marker-preview-pulsing" : "gmf-no-pulse"}" data-marker-preview-system style="--gmf-faction-color: ${escapeHtml(color)}; --gmf-system-size: ${escapeHtml(data.iconSize)}px;">
+          <span class="gmf-system__halo"></span>
+          <span data-marker-preview-icon><span class="gmf-system__core"></span></span>
+          <span class="gmf-system__type-glyph" aria-hidden="true"></span>
+        </span>
+      </div>
+      <span class="gmf-marker-preview__label" data-marker-preview-label>${escapeHtml(data.name || "New System")}</span>
+    </div>`;
+  }
+
+  function getMarkerComposerMarkup(data, color, { quick = false } = {}) {
+    return `<div class="gmf-marker-composer ${quick ? "gmf-marker-composer--quick" : ""}">
+      <div class="gmf-marker-composer__controls">
+        <div class="gmf-form-grid">
+          <label>Marker Style <select name="iconStyle">${optionList(ICON_STYLE_OPTIONS, data.iconStyle)}</select></label>
+          <label>Marker Color <input type="color" name="iconColor" value="${escapeHtml(color)}" /></label>
+        </div>
+        ${quick ? "" : `<div class="gmf-form-grid">
+          <label>Marker Size <input type="range" name="iconSize" value="${escapeHtml(data.iconSize)}" min="18" max="56" step="1" /></label>
+          <label class="gmf-checkbox-label"><input type="checkbox" name="pulse" value="true" ${data.pulse ? "checked" : ""} /> Pulse Glow</label>
+        </div>`}
+      </div>
+      ${getMarkerPreviewMarkup(data, color)}
+    </div>`;
+  }
+
+  function getSystemDialogContent(mapId, system = {}, defaults = {}, creating = false) {
     const map = getRawMap(mapId);
     const data = normalizeSystem({ ...defaults, ...system });
     const factionOptions = [
@@ -766,36 +1050,24 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     const faction = (map?.factions ?? []).find((candidate) => candidate.id === data.factionId);
     const iconColorValue = data.iconColor || faction?.color || "#58d8ff";
     const texturePanelId = `gmf-texture-${String(data.id).replace(/[^a-z0-9_-]/gi, "") || "system"}`;
-    return `
-      <form class="gmf-crud-form">
-        <input type="hidden" name="id" value="${escapeHtml(data.id)}" />
-        <input type="hidden" name="x" value="${escapeHtml(data.x)}" />
-        <input type="hidden" name="y" value="${escapeHtml(data.y)}" />
-        <label>Name <input type="text" name="name" value="${escapeHtml(data.name)}" /></label>
-        <div class="gmf-form-grid">
-          <label>Type <select name="type">${optionList(SYSTEM_TYPES, data.type)}</select></label>
-          <label>Status <select name="status">${optionList(SYSTEM_STATUSES, data.status)}</select></label>
-        </div>
-        <div class="gmf-form-grid">
-          <label>Faction <select name="factionId">${optionList(factionOptions, data.factionId)}</select></label>
-          <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
-        </div>
-        <div class="gmf-form-grid">
-          <label>Icon Style <select name="iconStyle">${optionList(ICON_STYLE_OPTIONS, data.iconStyle)}</select></label>
-          <label>Icon Size <input type="range" name="iconSize" value="${escapeHtml(data.iconSize)}" min="18" max="56" step="1" /></label>
-        </div>
-        <div class="gmf-form-grid">
-          <label>Icon Color <input type="color" name="iconColor" value="${escapeHtml(iconColorValue)}" /></label>
-          <label class="gmf-checkbox-label"><input type="checkbox" name="pulse" value="true" ${data.pulse ? "checked" : ""} /> Pulse Glow</label>
-        </div>
-        <label>Description <textarea name="description">${escapeHtml(data.description)}</textarea></label>
-        <fieldset>
-          <legend>Planet close-up</legend>
+    const hiddenFields = `
+      <input type="hidden" name="id" value="${escapeHtml(data.id)}" />
+      <input type="hidden" name="x" value="${escapeHtml(data.x)}" />
+      <input type="hidden" name="y" value="${escapeHtml(data.y)}" />`;
+    const planetWorkspace = `
+      <div class="gmf-planet-workspace__heading">
+        <div><h3>System Appearance</h3><p>Configure the rotating model shown in the system detail view.</p></div>
+      </div>
+      <div class="gmf-planet-workspace__controls">
           <div class="gmf-form-grid">
             <label>Appearance <select name="planetPreset">${optionList(PLANET_OPTIONS, data.planetPreset)}</select></label>
             <label>3D Shape <select name="planetShape">${optionList(PLANET_SHAPE_OPTIONS, data.planetShape)}</select></label>
           </div>
           <div class="gmf-texture-upload">
+            <div class="gmf-color-appearance__fields" data-color-appearance-fields ${data.planetPreset === "color" ? "" : "hidden"}>
+              <label>Model color <input type="color" name="planetColor" value="${escapeHtml(data.planetColor)}" /></label>
+              <p class="gmf-scene-picker__hint">The selected color covers the complete 3D shape without an image texture.</p>
+            </div>
             <div id="${texturePanelId}" class="gmf-texture-upload__fields" data-texture-upload-fields ${data.planetPreset === "custom" ? "" : "hidden"}>
               <label>Custom texture image
                 <div class="gmf-path-field">
@@ -808,23 +1080,83 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
               ${getTextureGuideMarkup(data.planetShape)}
             </div>
           </div>
-          <p class="gmf-scene-picker__hint">Choose Custom texture to reveal the image picker and UV preview. No planet view disables the close-up for stations and other locations.</p>
-        </fieldset>
-        <label>Image Path
+      </div>`;
+    const contentWorkspace = `
+      <section class="gmf-content-section">
+        <header><h3>System Image</h3><p>Shown in system details when this location is selected.</p></header>
+        <label class="gmf-content-section__control">Image path
           <div class="gmf-path-field">
             <input type="text" name="image" value="${escapeHtml(data.image)}" />
             <button type="button" data-browse-target="image"><i class="fa-solid fa-folder-open"></i> Browse</button>
           </div>
         </label>
-        <fieldset class="gmf-scene-picker">
-          <legend>System Scenes</legend>
-          <p class="gmf-scene-picker__hint">Tag every Foundry scene that belongs to this system.</p>
-          <div class="gmf-scene-picker__options">
-            ${documentCheckboxes(game.scenes, data.sceneIds, "sceneIds")}
+      </section>
+      <section class="gmf-content-section">
+        <header><h3>Linked Scenes</h3><p>Connect one or more scenes to this system for navigation and cross-module overlays.</p></header>
+        ${getLinkedDocumentPickerMarkup({ collection: game.scenes, selectedIds: data.sceneIds, inputName: "sceneIds", collectionName: "scenes", kindLabel: "Scene", iconClass: "fa-image", multiple: true })}
+      </section>
+      <section class="gmf-content-section">
+        <header><h3>Linked Journal</h3><p>Optionally attach one journal entry for lore and reference material.</p></header>
+        ${getLinkedDocumentPickerMarkup({ collection: game.journal, selectedIds: data.journalId, inputName: "journalId", collectionName: "journal", kindLabel: "Journal", iconClass: "fa-book-open", multiple: false })}
+      </section>
+      <section class="gmf-content-section">
+        <header><h3>GM Notes</h3><p>Private notes shown only to GMs.</p></header>
+        <label class="gmf-content-section__control">Notes<textarea name="notes" rows="4">${escapeHtml(data.notes)}</textarea></label>
+      </section>`;
+
+    if (creating) return `
+      <form class="gmf-crud-form gmf-system-form gmf-system-form--create">
+        ${hiddenFields}
+        <div class="gmf-quick-create__identity">
+          <label>Name <input type="text" name="name" value="${escapeHtml(data.name)}" required autofocus /></label>
+          <label>Type <select name="type">${optionList(SYSTEM_TYPES, data.type)}</select></label>
+        </div>
+        ${getMarkerComposerMarkup(data, iconColorValue, { quick: true })}
+        <details class="gmf-more-options">
+          <summary>More options</summary>
+          <div class="gmf-more-options__content">
+            <div class="gmf-form-grid">
+              <label>Faction <select name="factionId">${optionList(factionOptions, data.factionId)}</select></label>
+              <label>Status <select name="status">${optionList(SYSTEM_STATUSES, data.status)}</select></label>
+            </div>
+            <div class="gmf-form-grid">
+              <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
+              <label>Marker Size <input type="range" name="iconSize" value="${escapeHtml(data.iconSize)}" min="18" max="56" step="1" /></label>
+            </div>
+            <label class="gmf-checkbox-label"><input type="checkbox" name="pulse" value="true" ${data.pulse ? "checked" : ""} /> Pulse Glow</label>
           </div>
-        </fieldset>
-        <label>Journal <select name="journalId">${documentOptions(game.journal, data.journalId)}</select></label>
-        <label>GM Notes <textarea name="notes">${escapeHtml(data.notes)}</textarea></label>
+        </details>
+      </form>`;
+
+    return `
+      <form class="gmf-crud-form gmf-system-form gmf-system-form--edit">
+        ${hiddenFields}
+        <nav class="gmf-system-editor-tabs" role="tablist" aria-label="System editor sections">
+          <button type="button" role="tab" data-system-editor-tab="overview"><i class="fa-solid fa-circle-info" aria-hidden="true"></i>Overview</button>
+          <button type="button" role="tab" data-system-editor-tab="planet"><i class="fa-solid fa-globe" aria-hidden="true"></i>Planet</button>
+          <button type="button" role="tab" data-system-editor-tab="content"><i class="fa-solid fa-link" aria-hidden="true"></i>Content</button>
+        </nav>
+        <section class="gmf-system-editor-panel gmf-system-editor-panel--overview" role="tabpanel" data-system-editor-panel="overview">
+          <div class="gmf-overview-fields">
+            <label>Name <input type="text" name="name" value="${escapeHtml(data.name)}" required autofocus /></label>
+            <div class="gmf-form-grid">
+              <label>Type <select name="type">${optionList(SYSTEM_TYPES, data.type)}</select></label>
+              <label>Status <select name="status">${optionList(SYSTEM_STATUSES, data.status)}</select></label>
+            </div>
+            <div class="gmf-form-grid">
+              <label>Faction <select name="factionId">${optionList(factionOptions, data.factionId)}</select></label>
+              <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
+            </div>
+            <label>Description <textarea name="description" rows="3">${escapeHtml(data.description)}</textarea></label>
+          </div>
+          <div class="gmf-overview-marker"><h3>Map Appearance</h3>${getMarkerComposerMarkup(data, iconColorValue)}</div>
+        </section>
+        <section class="gmf-system-editor-panel gmf-system-editor-panel--planet" role="tabpanel" data-system-editor-panel="planet" hidden>
+          ${planetWorkspace}
+        </section>
+        <section class="gmf-system-editor-panel gmf-system-editor-panel--content" role="tabpanel" data-system-editor-panel="content" hidden>
+          ${contentWorkspace}
+        </section>
       </form>
     `;
   }
@@ -910,8 +1242,11 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     const system = systemId ? map?.systems?.find((candidate) => candidate.id === systemId) : null;
     renderCrudDialog({
       title: system ? "Edit Star System" : "Create Star System",
-      content: getSystemDialogContent(mapId, system ?? { id: randomId("system"), name: "New System" }, defaults),
+      content: getSystemDialogContent(mapId, system ?? { id: randomId("system"), name: "New System" }, defaults, !system),
       submitLabel: system ? "Save System" : "Create System",
+      width: system ? 860 : 540,
+      height: system ? Math.min(760, Math.max(360, window.innerHeight - 64)) : "auto",
+      dialogClass: system ? "gmf-system-edit-dialog" : "gmf-system-create-dialog",
       onSubmit: (values) => upsertSystem(mapId, {
         ...values,
         sceneIds: values.sceneIds ?? [],
@@ -1638,7 +1973,6 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     setCurrentSystem,
     requestTravelToSystem,
     notifySystemDiscovered,
-    pingSystem,
     exportMap,
     getTravelRoute,
     broadcastTravelAnimation,
@@ -1726,7 +2060,6 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       hideRouteFromPlayers,
       hideFactionFromPlayers,
       notifySystemDiscovered,
-      pingSystem,
       requestTravelToSystem,
       importMapData,
       exportMap
@@ -1768,11 +2101,6 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
         if (payload.coordinatorId !== game.user?.id) animateTravelOnOpenMaps(payload);
         return;
       }
-      if (payload.action === "system-ping") {
-        if (payload.userId !== game.user?.id && payload.mapId && payload.systemId) showSystemPingOnOpenMaps(payload);
-        return;
-      }
-
       if (game.user?.isGM) return;
       if (payload.action === "open" && payload.mapId) {
         playerMapApp?.close();

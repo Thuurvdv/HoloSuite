@@ -4,10 +4,11 @@ export const PLANET_PRESETS = [
   { value: "realistic", label: "Realistic · Blue Marble", color: "#78caff" }
 ];
 export const PLANET_OPTIONS = [
-  { value: "auto", label: "Automatic (cartoon for planet icons)" },
+  { value: "auto", label: "Automatic texture" },
   ...PLANET_PRESETS,
+  { value: "color", label: "Flat color" },
   { value: "custom", label: "Custom texture" },
-  { value: "none", label: "No planet view" }
+  { value: "none", label: "No detail view" }
 ];
 export const PLANET_SHAPE_OPTIONS = [
   { value: "sphere", label: "Sphere" },
@@ -26,16 +27,14 @@ export function normalizePlanetPreset(value: unknown) {
 export function getPlanetAppearance(system: any, preview = "") {
   if (!system || system.obscured || system.planetPreset === "none") return null;
   const preset = normalizePlanetPreset(system.planetPreset);
-  const isPlanet = ["planet", "terrestrial", "gas-giant", "ice-world", "volcanic", "artificial", "ringed"].includes(system.iconStyle ?? "planet")
-    && system.type !== "station" && system.type !== "anomaly";
-  if (preset === "auto" && !isPlanet && !system.planetTexture) return null;
   const selected = PLANET_PRESETS.find(p => p.value === preview)
     ?? PLANET_PRESETS.find(p => p.value === preset) ?? PLANET_PRESETS[0];
   const usesCustomTexture = !preview && preset === "custom" && Boolean(system.planetTexture);
+  const usesFlatColor = !preview && preset === "color";
   return {
-    texture: usesCustomTexture ? system.planetTexture : `modules/galaxy-map/assets/planets/${selected.value}.png`,
-    label: usesCustomTexture ? "Custom texture" : selected.label,
-    color: selected.color,
+    texture: usesFlatColor ? null : usesCustomTexture ? system.planetTexture : `modules/galaxy-map/assets/planets/${selected.value}.png`,
+    label: usesFlatColor ? "Flat color" : usesCustomTexture ? "Custom texture" : selected.label,
+    color: usesFlatColor ? system.planetColor || "#58d8ff" : selected.color,
     shape: normalizePlanetShape(system.planetShape)
   };
 }
