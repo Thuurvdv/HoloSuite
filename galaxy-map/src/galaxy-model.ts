@@ -1,8 +1,36 @@
+import { normalizePlanetPreset, normalizePlanetShape } from "./planet-presets.ts";
+import { normalizeTravelApprovalMode } from "./travel-approval.ts";
 export const SYSTEM_TYPES = ["core", "colony", "frontier", "station", "anomaly", "ruins", "restricted", "unknown"];
 export const SYSTEM_STATUSES = ["undiscovered", "known", "visited", "danger", "locked"];
 export const ROUTE_TYPES = ["safe", "dangerous", "restricted", "smuggler", "unknown"];
 export const VISIBILITIES = ["gm", "players"];
-export const ICON_STYLES = ["planet", "ringed", "star", "diamond", "void"];
+export const ICON_STYLE_OPTIONS = [
+  { value: "planet", label: "Planet" },
+  { value: "terrestrial", label: "Terrestrial" },
+  { value: "gas-giant", label: "Gas Giant" },
+  { value: "ice-world", label: "Ice World" },
+  { value: "volcanic", label: "Volcanic" },
+  { value: "artificial", label: "Artificial / Machine World" },
+  { value: "ringed", label: "Ringed" },
+  { value: "star", label: "Star" },
+  { value: "black-hole", label: "Black Hole" },
+  { value: "station", label: "Space Station" },
+  { value: "diamond", label: "Diamond" },
+  { value: "void", label: "Void" }
+];
+export const ICON_STYLES = ICON_STYLE_OPTIONS.map((option) => option.value);
+export const ANIMATED_CELESTIAL_STYLES = [
+  "planet",
+  "terrestrial",
+  "gas-giant",
+  "ice-world",
+  "volcanic",
+  "artificial",
+  "ringed",
+  "star",
+  "black-hole",
+  "station"
+];
 export const MIN_ZOOM = 0.55;
 export const MAX_ZOOM = 2.6;
 export const TRAVEL_ANIMATION_MS = 2400;
@@ -43,6 +71,11 @@ export function normalizeSystem(system: any = {}) {
   // `sceneId` was the pre-1.1 single-scene field. Treat it as migration input
   // only when the canonical array is absent, so an explicit [] can clear tags.
   const sceneIds = normalizeIdList(system.sceneIds === undefined ? system.sceneId : system.sceneIds);
+  const planetTexture = String(system.planetTexture || "").trim();
+  const requestedPlanetPreset = normalizePlanetPreset(system.planetPreset);
+  // Before the Custom option existed, any saved texture implicitly overrode the
+  // selected preset. Preserve that behavior by migrating it to Custom.
+  const planetPreset = planetTexture && requestedPlanetPreset !== "none" ? "custom" : requestedPlanetPreset;
   return {
     id: String(system.id || randomId("system")),
     name: String(system.name || "Unnamed System"),
@@ -53,6 +86,9 @@ export function normalizeSystem(system: any = {}) {
     status: SYSTEM_STATUSES.includes(system.status) ? system.status : "known",
     description: String(system.description || ""),
     image: String(system.image || ""),
+    planetPreset,
+    planetShape: normalizePlanetShape(system.planetShape),
+    planetTexture,
     sceneIds,
     journalId: String(system.journalId || ""),
     visibility: normalizeVisibility(system.visibility, "players"),
@@ -99,6 +135,7 @@ export function normalizeMap(map: any = {}) {
     description: String(map.description || ""),
     backgroundImage: String(map.backgroundImage || ""),
     visibility: normalizeVisibility(map.visibility, "players"),
+    travelApprovalMode: normalizeTravelApprovalMode(map.travelApprovalMode),
     currentSystemId: String(map.currentSystemId || systems[0]?.id || ""),
     systems,
     routes,

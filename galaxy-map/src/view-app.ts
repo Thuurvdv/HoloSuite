@@ -5,6 +5,8 @@ import {
   clamp,
   normalizeMap
 } from "./galaxy-model";
+import { buildTerritories } from "./territories";
+import { getPlanetAppearance, PLANET_PRESETS } from "./planet-presets";
 
 declare const foundry: any;
 declare const Application: any;
@@ -37,6 +39,7 @@ export function createGalaxyMapViewClass(deps: any) {
     setCurrentSystem,
     requestTravelToSystem,
     notifySystemDiscovered,
+    pingSystem,
     exportMap,
     getTravelRoute,
     broadcastTravelAnimation,
@@ -59,6 +62,18 @@ export function createGalaxyMapViewClass(deps: any) {
     _drag: any;
     _contextTarget: any;
     _boundContextClose: any;
+    externalFocus: any;
+    _externalFocusTimeout: any;
+    _pendingFocusZoom: number | null;
+    searchQuery: string;
+    showTerritories = true;
+    planetSystemId: string | null = null;
+    planetPreview = "";
+    planetStatic = false;
+    _planetRenderer: any = null;
+    _planetGeneration = 0;
+    _planetReturnFocus = false;
+    _effectTimeouts: Set<any>;
 
     static DEFAULT_OPTIONS = {
       id: "galaxy-map-view",
@@ -98,6 +113,11 @@ export function createGalaxyMapViewClass(deps: any) {
       this._drag = null;
       this._contextTarget = null;
       this._boundContextClose = null;
+      this.externalFocus = null;
+      this._externalFocusTimeout = null;
+      this._pendingFocusZoom = null;
+      this.searchQuery = "";
+      this._effectTimeouts = new Set();
     }
 
     get title() {
@@ -114,13 +134,33 @@ export function createGalaxyMapViewClass(deps: any) {
         selectedSystemId: this.selectedSystemId,
         selectedRouteId: this.selectedRouteId
       }) : null;
+      if (displayMap?.systems && this.externalFocus) {
+        displayMap.systems = displayMap.systems.map((system: any) => system.id === this.externalFocus.systemId
+          ? { ...system, isExternalFocus: true, hasSignal: true, externalFocus: this.externalFocus }
+          : system);
+        if (displayMap.selectedSystem?.id === this.externalFocus.systemId) {
+          displayMap.selectedSystem = displayMap.systems.find((system: any) => system.id === this.externalFocus.systemId);
+        }
+      }
       if (displayMap?.selectedSystem) this.selectedSystemId = displayMap.selectedSystem.id;
+      const planetSystem = displayMap?.systems.find((system: any) => system.id === this.planetSystemId);
+      const planetAppearance = (!this.playerMode || rawMap?.visibility === "players")
+        ? getPlanetAppearance(planetSystem, this.playerMode ? "" : this.planetPreview) : null;
+      if (!planetAppearance) this.planetSystemId = null;
       return {
         ...context,
         map: displayMap,
+        planetView: Boolean(planetAppearance),
+        planetSystem,
+        planetAppearance,
+        planetPresets: PLANET_PRESETS.map(p => ({ ...p, selected: p.value === this.planetPreview })),
+        planetPreview: this.planetPreview,
+        territories: displayMap ? buildTerritories(displayMap.systems, displayMap.factions) : [],
+        showTerritories: this.showTerritories,
         mapId: this.mapId,
         playerMode: this.playerMode,
         zoomPercent: Math.round(this.zoom * 100),
+        searchQuery: this.searchQuery,
         panX: this.panX,
         panY: this.panY,
         zoom: this.zoom,
@@ -129,16 +169,35 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     _onRender(context: any, options: any) {
+      this._disposePlanetRenderer();
       super._onRender?.(context, options);
       const html = this.element instanceof HTMLElement ? this.element : this.element?.[0];
-      if (html) this._attachPartListeners("main", html, options);
+      if (html) {
+        this._attachPartListeners("main", html, options);
+        if (this.externalFocus && this._pendingFocusZoom !== null) {
+          const system = normalizeMap(getRawMap(this.mapId)).systems.find((candidate: any) => candidate.id === this.externalFocus.systemId);
+          if (system) this._centerOnSystem(system, html, this._pendingFocusZoom);
+          this._pendingFocusZoom = null;
+        }
+        this._applySearchState(this.searchQuery, html);
+        if (context.planetView) void this._mountPlanetRenderer(html, context.planetAppearance);
+        else if (this._planetReturnFocus) {
+          html.querySelector("[data-action='inspect-planet']")?.focus();
+          this._planetReturnFocus = false;
+        }
+      }
     }
 
     _attachPartListeners(partId: string, html: any, options: any) {
-      const boundStage = html.matches?.(".gmf-map-stage") ? html : html.querySelector?.(".gmf-map-stage");
+      const boundStage = html.matches?.(".gmf-map-stage") ? html : html.querySelector?.(".gmf-map-stage, .gmf-planet-stage");
       if (boundStage?.dataset.gmfMapBound === "true") return;
       if (boundStage) boundStage.dataset.gmfMapBound = "true";
       super._attachPartListeners?.(partId, html, options);
+      this._attachPlanetListeners(html);
+      html.querySelector("[data-action='toggle-territories']")?.addEventListener("click", () => {
+        this.showTerritories = !this.showTerritories;
+        this.render({ force: true });
+      });
       this._applyViewportTransform(html);
 
       html.querySelectorAll("[data-system-id]").forEach((node: any) => {
@@ -159,10 +218,6 @@ export function createGalaxyMapViewClass(deps: any) {
       html.querySelectorAll("[data-route-id]").forEach((route: any) => {
         route.addEventListener("click", (event: any) => {
           event.stopPropagation();
-          if (!this.playerMode && game.user?.isGM) {
-            openRouteDialog(this.mapId, route.dataset.routeId);
-            return;
-          }
           this.selectedRouteId = route.dataset.routeId;
           this.selectedSystemId = null;
           this.render({ force: true });
@@ -184,7 +239,29 @@ export function createGalaxyMapViewClass(deps: any) {
         this.panY = 0;
         this._applyViewportTransform(html);
       });
+      const searchInput = html.querySelector("[data-system-search]");
+      searchInput?.addEventListener("input", () => {
+        this.searchQuery = searchInput.value;
+        this._applySearchState(this.searchQuery, html);
+      });
+      searchInput?.addEventListener("keydown", (event: any) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        this._focusSearchResult(searchInput.value, html);
+      });
+      html.querySelector("[data-action='run-system-search']")?.addEventListener("click", () => this._focusSearchResult(searchInput?.value ?? "", html));
+      html.querySelector("[data-action='clear-system-search']")?.addEventListener("click", () => {
+        this.searchQuery = "";
+        if (searchInput) searchInput.value = "";
+        this._applySearchState("", html);
+        searchInput?.focus();
+      });
       html.querySelector("[data-action='open-journal']")?.addEventListener("click", () => this._openLinkedJournal());
+      html.querySelector("[data-action='open-scene']")?.addEventListener("click", () => this._openLinkedScene());
+      html.querySelector("[data-action='scan-system']")?.addEventListener("click", () => this._scanSelectedSystem(html));
+      html.querySelector("[data-action='ping-system']")?.addEventListener("click", () => {
+        if (this.selectedSystemId) pingSystem(this.mapId, this.selectedSystemId);
+      });
       html.querySelector("[data-action='edit-system']")?.addEventListener("click", () => {
         if (this.selectedSystemId) openSystemDialog(this.mapId, this.selectedSystemId);
       });
@@ -244,6 +321,187 @@ export function createGalaxyMapViewClass(deps: any) {
       this._applyViewportTransform(html);
     }
 
+    _attachPlanetListeners(html: HTMLElement) {
+      html.querySelector("[data-action='inspect-planet']")?.addEventListener("click", () => {
+        const raw = getRawMap(this.mapId);
+        const display = prepareMapForDisplay(raw, { playerMode: this.playerMode, selectedSystemId: this.selectedSystemId });
+        if (this.playerMode && raw?.visibility !== "players") return;
+        if (!getPlanetAppearance(display?.selectedSystem)) return;
+        this.planetSystemId = this.selectedSystemId;
+        this.planetPreview = "";
+        this.render({ force: true });
+      });
+      html.querySelector("[data-action='back-to-galaxy']")?.addEventListener("click", () => {
+        this._disposePlanetRenderer();
+        this.planetSystemId = null;
+        this._planetReturnFocus = true;
+        this.render({ force: true });
+      });
+      html.querySelector("[data-planet-preset]")?.addEventListener("change", (event: any) => {
+        if (this.playerMode || !game.user?.isGM) return;
+        this.planetPreview = event.target.value;
+        const display = prepareMapForDisplay(getRawMap(this.mapId), { playerMode: this.playerMode, selectedSystemId: this.planetSystemId });
+        const appearance = getPlanetAppearance(display.selectedSystem, this.planetPreview);
+        if (!appearance) return;
+        this._setPlanetFallback(html, appearance);
+        void this._planetRenderer?.setTexture(appearance.texture);
+      });
+      html.querySelector("[data-action='planet-pause']")?.addEventListener("click", () => this._planetRenderer?.setPaused(!this._planetRenderer.paused));
+      html.querySelector("[data-action='planet-zoom-in']")?.addEventListener("click", () => this._planetRenderer?.zoom(-0.25));
+      html.querySelector("[data-action='planet-zoom-out']")?.addEventListener("click", () => this._planetRenderer?.zoom(0.25));
+      html.querySelector("[data-action='planet-reset']")?.addEventListener("click", () => this._planetRenderer?.reset());
+      html.querySelector("[data-action='planet-static']")?.addEventListener("click", () => {
+        this.planetStatic = !this.planetStatic;
+        this.render({ force: true });
+      });
+    }
+
+    async focusSystem(systemId: string, options: any = {}) {
+      const rawMap = normalizeMap(getRawMap(this.mapId));
+      const system = rawMap.systems.find((candidate: any) => candidate.id === systemId);
+      if (!system) return false;
+
+      const displayMap = prepareMapForDisplay(rawMap, {
+        playerMode: this.playerMode,
+        selectedSystemId: systemId,
+        selectedRouteId: null
+      });
+      if (!displayMap?.systems?.some((candidate: any) => candidate.id === systemId)) return false;
+
+      const focusId = String(options.focusId || systemId).slice(0, 80);
+      const kind = ["distress", "warning", "objective", "custom"].includes(options.kind) ? options.kind : "custom";
+      const color = /^#[0-9a-f]{6}$/i.test(options.color ?? "") ? options.color : kind === "distress" ? "#ff5c7a" : "#58d8ff";
+      const duration = clamp(Number(options.duration) || 0, 0, 600000);
+      const zoom = clamp(Number(options.zoom) || 1.45, MIN_ZOOM, MAX_ZOOM);
+      this.externalFocus = {
+        id: focusId,
+        systemId,
+        kind,
+        color,
+        label: String(options.label || (kind === "distress" ? "Distress signal" : "Signal located")).slice(0, 120)
+      };
+      this.selectedSystemId = systemId;
+      this.planetSystemId = null;
+      this.selectedRouteId = null;
+      this._pendingFocusZoom = zoom;
+      if (this._externalFocusTimeout) globalThis.clearTimeout(this._externalFocusTimeout);
+      this._externalFocusTimeout = null;
+
+      await this.render({ force: true });
+      this.bringToFront?.();
+
+      if (duration > 0) {
+        this._externalFocusTimeout = globalThis.setTimeout(() => {
+          if (this.externalFocus?.id === focusId) this.clearSystemFocus(focusId);
+        }, duration);
+      }
+      return true;
+    }
+
+    clearSystemFocus(focusId = "") {
+      if (!this.externalFocus || (focusId && this.externalFocus.id !== focusId)) return false;
+      if (this._externalFocusTimeout) globalThis.clearTimeout(this._externalFocusTimeout);
+      this._externalFocusTimeout = null;
+      this._pendingFocusZoom = null;
+      this.externalFocus = null;
+      if (this.rendered) this.render({ force: true });
+      return true;
+    }
+
+    _centerOnSystem(system: any, html: any, zoom: number) {
+      const stage = html.querySelector(".gmf-map-stage");
+      if (!stage) return;
+      const rect = stage.getBoundingClientRect();
+      this.zoom = zoom;
+      this.panX = rect.width / 2 - (Number(system.x) / 100) * rect.width * zoom;
+      this.panY = rect.height / 2 - (Number(system.y) / 100) * rect.height * zoom;
+      this._applyViewportTransform(html);
+    }
+
+    _getVisibleSystems() {
+      const rawMap = getRawMap(this.mapId);
+      if (!rawMap) return [];
+      return prepareMapForDisplay(rawMap, {
+        playerMode: this.playerMode,
+        selectedSystemId: this.selectedSystemId,
+        selectedRouteId: this.selectedRouteId
+      })?.systems ?? [];
+    }
+
+    _applySearchState(query: string, html: any) {
+      const normalizedQuery = String(query || "").trim().toLocaleLowerCase();
+      const nodes = Array.from(html.querySelectorAll("[data-system-id]"));
+      nodes.forEach((node: any) => {
+        const searchText = String(node.dataset.searchText || "").toLocaleLowerCase();
+        const matches = Boolean(normalizedQuery && searchText.includes(normalizedQuery));
+        node.classList.toggle("is-search-match", matches);
+        node.classList.toggle("is-search-dimmed", Boolean(normalizedQuery && !matches));
+      });
+      html.querySelector("[data-action='clear-system-search']")?.toggleAttribute("hidden", !normalizedQuery);
+      return nodes.find((node: any) => node.classList.contains("is-search-match")) ?? null;
+    }
+
+    _focusSearchResult(query: string, html: any) {
+      const normalizedQuery = String(query || "").trim().toLocaleLowerCase();
+      if (!normalizedQuery) {
+        html.querySelector("[data-system-search]")?.focus();
+        return;
+      }
+      const systems = this._getVisibleSystems();
+      const searchable = (system: any) => [system.displayName, system.displayType, system.displayStatus, system.factionName]
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase();
+      const system = systems.find((candidate: any) => candidate.displayName.toLocaleLowerCase() === normalizedQuery)
+        ?? systems.find((candidate: any) => candidate.displayName.toLocaleLowerCase().startsWith(normalizedQuery))
+        ?? systems.find((candidate: any) => searchable(candidate).includes(normalizedQuery));
+      if (!system) {
+        notifyInfo(`No charted system matches "${String(query).trim()}".`);
+        return;
+      }
+
+      this.searchQuery = String(query);
+      this.selectedSystemId = system.id;
+      this.selectedRouteId = null;
+      this._centerOnSystem(system, html, Math.max(this.zoom, 1.2));
+      this.render({ force: true });
+    }
+
+    _scanSelectedSystem(html: any) {
+      if (!this.selectedSystemId) return;
+      const node = Array.from(html.querySelectorAll("[data-system-id]")).find((candidate: any) => candidate.dataset.systemId === this.selectedSystemId) as any;
+      if (!node) return;
+      node.classList.remove("is-scanning");
+      void node.offsetWidth;
+      node.classList.add("is-scanning");
+      const system = this._getVisibleSystems().find((candidate: any) => candidate.id === this.selectedSystemId);
+      const timer = globalThis.setTimeout(() => {
+        node.classList.remove("is-scanning");
+        this._effectTimeouts.delete(timer);
+        if (system) notifyInfo(`Sensor sweep complete: ${system.displayName}.`);
+      }, 1800);
+      this._effectTimeouts.add(timer);
+    }
+
+    showSystemPing(systemId: string, payload: any = {}) {
+      const html = this.element instanceof HTMLElement ? this.element : this.element?.[0];
+      if (!html) return false;
+      const node = Array.from(html.querySelectorAll("[data-system-id]")).find((candidate: any) => candidate.dataset.systemId === systemId) as any;
+      if (!node) return false;
+      const ping = document.createElement("span");
+      ping.className = "gmf-system-ping";
+      ping.style.setProperty("--gmf-ping-color", /^#[0-9a-f]{6}$/i.test(payload.color ?? "") ? payload.color : "#58d8ff");
+      ping.title = payload.userName ? `Ping from ${payload.userName}` : "System ping";
+      ping.setAttribute("aria-hidden", "true");
+      node.appendChild(ping);
+      const timer = globalThis.setTimeout(() => {
+        ping.remove();
+        this._effectTimeouts.delete(timer);
+      }, 3000);
+      this._effectTimeouts.add(timer);
+      return true;
+    }
+
     _onWheelZoom(event: any, html: any) {
       event.preventDefault();
       const stage = html.querySelector(".gmf-map-stage");
@@ -265,7 +523,7 @@ export function createGalaxyMapViewClass(deps: any) {
 
     _startPan(event: any, html: any) {
       if (event.button !== 0) return;
-      if (event.target.closest("[data-system-id], [data-route-id], button")) return;
+      if (event.target.closest("[data-system-id], [data-route-id], button, input")) return;
       event.preventDefault();
       const startX = event.clientX;
       const startY = event.clientY;
@@ -547,15 +805,87 @@ export function createGalaxyMapViewClass(deps: any) {
       journal.sheet?.render(true);
     }
 
+    _openLinkedScene() {
+      const system = this._getSelectedRawSystem();
+      const sceneId = system?.sceneIds?.find((id: string) => game.scenes?.get(id));
+      if (!sceneId) {
+        notifyError("No available scene is linked to this system.");
+        return;
+      }
+      const scene = game.scenes.get(sceneId);
+      if (scene?.view) scene.view();
+      else scene?.sheet?.render(true);
+    }
+
     _getSelectedRawSystem() {
       const map = getRawMap(this.mapId);
       return map?.systems?.find((system: any) => system.id === this.selectedSystemId) ?? null;
     }
 
     async close(options: any = {}) {
+      this._disposePlanetRenderer();
       this._hideContextMenu();
+      if (this._externalFocusTimeout) globalThis.clearTimeout(this._externalFocusTimeout);
+      this._externalFocusTimeout = null;
+      this._effectTimeouts.forEach((timer) => globalThis.clearTimeout(timer));
+      this._effectTimeouts.clear();
       clearMapView(this);
       return super.close(options);
+    }
+
+    _disposePlanetRenderer() {
+      this._planetGeneration++;
+      this._planetRenderer?.dispose();
+      this._planetRenderer = null;
+    }
+
+    _setPlanetFallback(html: HTMLElement, appearance: any) {
+      const fallback = html.querySelector<HTMLElement>(".gmf-planet-fallback");
+      if (fallback) fallback.style.backgroundImage = `url(${JSON.stringify(appearance.texture)})`;
+      const host = html.querySelector<HTMLElement>("[data-planet-canvas]");
+      if (host) host.dataset.planetShape = appearance.shape;
+      const stage = html.querySelector<HTMLElement>(".gmf-planet-stage");
+      stage?.style.setProperty("--gmf-planet-color", appearance.color);
+      const label = html.querySelector("[data-planet-appearance]");
+      if (label) label.textContent = appearance.label;
+    }
+
+    async _mountPlanetRenderer(html: HTMLElement, appearance: any) {
+      const host = html.querySelector<HTMLElement>("[data-planet-canvas]");
+      if (!host || !appearance) return;
+      this._setPlanetFallback(html, appearance);
+      const generation = this._planetGeneration;
+      const status = html.querySelector("[data-planet-status]");
+      const toggle = html.querySelector("[data-action='planet-static']");
+      const controls = html.querySelectorAll<HTMLButtonElement>("[data-planet-control]");
+      if (toggle) { toggle.textContent = this.planetStatic ? "Enable 3D" : "Static view"; toggle.setAttribute("aria-pressed", String(this.planetStatic)); }
+      if (this.planetStatic) {
+        if (status) status.textContent = "Static preview · Enable 3D to rotate and zoom";
+        controls.forEach(b => b.disabled = true);
+        return;
+      }
+      try {
+        const { createPlanetRenderer } = await import("./planet-renderer");
+        if (generation !== this._planetGeneration || !host.isConnected) return;
+        controls.forEach(b => b.disabled = false);
+        this._planetRenderer = createPlanetRenderer(host, {
+          texture: appearance.texture,
+          shape: appearance.shape,
+          isVisible: () => !(this as any).minimized && !(this as any)._minimized,
+          onStatus: (text: string) => { if (status) status.textContent = text; },
+          onPaused: (paused: boolean) => {
+            const button = html.querySelector("[data-action='planet-pause']");
+            if (button) { button.textContent = paused ? "Resume rotation" : "Pause rotation"; button.setAttribute("aria-pressed", String(paused)); }
+          },
+          onStopped: () => {
+            controls.forEach(b => b.disabled = true);
+            if (status) status.textContent = "Static preview · Reopen this planet to resume 3D";
+          }
+        });
+      } catch {
+        controls.forEach(b => b.disabled = true);
+        if (status) status.textContent = "3D could not be loaded. Static preview shown.";
+      }
     }
   };
 }

@@ -1,0 +1,70 @@
+.gmf-planet-stage {
+  --gmf-planet-color: #af91ff;
+  position: relative;
+  min-width: 0;
+  min-height: 480px;
+  display: grid;
+  grid-template-rows: auto minmax(220px, 1fr) auto;
+  overflow: hidden;
+  border-right: 1px solid var(--gmf-line);
+  background: radial-gradient(ellipse at 50% 48%, color-mix(in srgb, var(--gmf-planet-color) 12%, transparent), transparent 62%), rgba(1, 5, 13, 0.55);
+}
+.gmf-planet-heading { padding: 16px 22px 0; z-index: 1; }
+.gmf-planet-heading > button { float: right; width: auto; }
+.gmf-planet-heading h3 { margin: 5px 0; font-size: clamp(22px, 3cqw, 34px); font-weight: 500; letter-spacing: 0.025em; }
+.gmf-planet-heading > p:last-child { margin: 0; color: var(--gmf-muted); font-size: 12px; }
+.gmf-planet-canvas { position: relative; min-width: 0; min-height: 220px; overflow: hidden; }
+.gmf-planet-canvas > canvas { display: block; width: 100%; height: 100%; position: absolute; inset: 0; cursor: grab; touch-action: none; }
+.gmf-planet-canvas > canvas:active { cursor: grabbing; }
+.gmf-planet-canvas > canvas:focus-visible { outline: 1px solid var(--gmf-planet-color); outline-offset: -4px; border-radius: 8px; }
+.gmf-planet-fallback {
+  position: absolute;
+  z-index: 1;
+  height: 72%;
+  aspect-ratio: 1;
+  max-width: 85%;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  border-radius: 50%; background-size: auto 100%; background-position: 40% center;
+  background-color: #263b51;
+  box-shadow: inset -35px -15px 50px rgba(0, 4, 15, 0.7), inset 3px 2px 10px #b9e6ff77, 0 0 35px color-mix(in srgb, var(--gmf-planet-color) 20%, transparent);
+  pointer-events: none;
+}
+.gmf-planet-canvas[data-planet-ready="true"] .gmf-planet-fallback { display: none; }
+.gmf-planet-canvas[data-planet-shape="cube"] .gmf-planet-fallback { border-radius: 10%; transform: translate(-50%, -50%) rotate(-8deg); }
+.gmf-planet-canvas[data-planet-shape="donut"] .gmf-planet-fallback {
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(circle, transparent 0 24%, #000 26%);
+  mask: radial-gradient(circle, transparent 0 24%, #000 26%);
+}
+.gmf-planet-canvas[data-planet-shape="asteroid"] .gmf-planet-fallback {
+  border-radius: 42% 58% 51% 49% / 55% 43% 57% 45%;
+  transform: translate(-50%, -50%) rotate(9deg) scaleX(1.08) scaleY(0.9);
+}
+.gmf-planet-canvas[data-planet-shape="crystal"] .gmf-planet-fallback {
+  border-radius: 0;
+  clip-path: polygon(50% 0, 91% 50%, 50% 100%, 9% 50%);
+  transform: translate(-50%, -50%) scaleX(0.82);
+}
+.gmf-planet-canvas[data-planet-shape="cylinder"] .gmf-planet-fallback {
+  height: 64%;
+  aspect-ratio: 0.78;
+  border-radius: 50% / 10%;
+}
+.gmf-planet-controls { position: relative; padding: 10px 20px 16px; background: linear-gradient(transparent, rgba(1, 5, 13, 0.75)); }
+.gmf-planet-compare { display: grid; grid-template-columns: auto minmax(160px, 1fr); gap: 7px 12px; align-items: center; color: var(--gmf-muted); font-size: 12px; margin-bottom: 12px; }
+.gmf-planet-compare select { width: 100%; color: var(--gmf-text); background: #0b1c2c; border: 1px solid var(--gmf-line); border-radius: 5px; min-height: 32px; }
+.gmf-planet-compare small { grid-column: 1 / -1; font-size: 11px; opacity: 0.85; }
+.gmf-planet-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+.gmf-planet-buttons button { width: auto; min-height: 32px; font-size: 12px; }
+.gmf-planet-controls [role="status"] { margin: 9px 0 0; min-height: 16px; color: var(--gmf-muted); font-size: 11px; }
+.gmf-inspect-planet { width: 100%; border-color: var(--gmf-green); color: var(--gmf-green); min-height: 36px; }
+@container galaxy-map (max-width: 760px) {
+  .gmf-galaxy__content:has(.gmf-planet-stage) { grid-template-rows: minmax(530px, 70vh) auto; }
+  .gmf-planet-stage { border-right: 0; border-bottom: 1px solid var(--gmf-line); }
+}
+@container galaxy-map (max-width: 520px) {
+  .gmf-planet-heading { padding: 12px 14px 0; }
+  .gmf-planet-heading > button { float: none; margin-bottom: 12px; }
+  .gmf-planet-compare { grid-template-columns: 1fr; }
+  .gmf-planet-controls { padding: 8px 14px 14px; }
+}

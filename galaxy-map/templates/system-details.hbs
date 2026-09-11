@@ -1,124 +1,148 @@
-<aside class="gmf-system-panel">
+<aside class="gmf-system-panel" aria-label="Navigation inspector">
   {{#if route}}
-    <div class="gmf-system-panel__top">
+    <header class="gmf-system-panel__top">
       <p class="gmf-kicker">Travel Route</p>
-      <h3>{{route.fromName}} to {{route.toName}}</h3>
+      <h3>{{route.fromName}} <i class="fa-solid fa-arrow-right-long"></i> {{route.toName}}</h3>
       <div class="gmf-chip-row">
         <span class="gmf-chip">{{route.type}}</span>
-        <span class="gmf-chip">{{route.travelTime}}</span>
+        <span class="gmf-chip">{{gmfFallback route.travelTime "Transit time unknown"}}</span>
         <span class="gmf-chip">Fuel {{route.fuelCost}}</span>
         {{#if route.gmOnly}}<span class="gmf-chip gmf-chip--gm">GM Only</span>{{/if}}
       </div>
+    </header>
+
+    <div class="gmf-route-visual" aria-hidden="true">
+      <span></span><i class="fa-solid fa-chevron-right"></i><span></span>
     </div>
 
-    <div class="gmf-system-panel__section">
+    <section class="gmf-system-panel__section">
       <h4>Transit Data</h4>
       <p>{{gmfFallback route.notes "No route intelligence has been recorded."}}</p>
-    </div>
+    </section>
 
     {{#if map.canEdit}}
-      <div class="gmf-link-actions">
-        <button type="button" data-action="edit-route">
-          <i class="fa-solid fa-pen"></i>
-          Edit Route
-        </button>
-        <button type="button" data-action="reveal-route">
-          <i class="fa-solid fa-eye"></i>
-          Reveal Route
-        </button>
-        <button type="button" data-action="hide-route">
-          <i class="fa-solid fa-eye-slash"></i>
-          Hide Route
-        </button>
-        <button type="button" data-action="delete-route">
-          <i class="fa-solid fa-trash"></i>
-          Delete
-        </button>
+      <div class="gmf-inspector-actions">
+        <button type="button" class="gmf-button--primary" data-action="edit-route"><i class="fa-solid fa-pen"></i>Edit Route</button>
+        <details class="gmf-action-menu">
+          <summary><i class="fa-solid fa-ellipsis"></i>More</summary>
+          <div class="gmf-action-menu__panel">
+            {{#if route.gmOnly}}
+              <button type="button" data-action="reveal-route"><i class="fa-solid fa-eye"></i>Reveal Route</button>
+            {{else}}
+              <button type="button" data-action="hide-route"><i class="fa-solid fa-eye-slash"></i>Hide Route</button>
+            {{/if}}
+            <button type="button" class="gmf-button--danger" data-action="delete-route"><i class="fa-solid fa-trash"></i>Delete Route</button>
+          </div>
+        </details>
       </div>
     {{/if}}
   {{else}}
     {{#if system}}
-      <div class="gmf-system-panel__top" style="--gmf-faction-color: {{system.factionColor}};">
+      <header class="gmf-system-panel__top" style="--gmf-faction-color: {{system.factionColor}};">
         <p class="gmf-kicker">{{system.factionName}}</p>
         <h3>{{system.displayName}}</h3>
-        <div class="gmf-chip-row">
+        <div class="gmf-chip-row" aria-label="System state">
           <span class="gmf-chip">{{system.displayType}}</span>
           <span class="gmf-chip gmf-chip--status">{{system.displayStatus}}</span>
-          {{#if system.isCurrent}}<span class="gmf-chip gmf-chip--current">Current</span>{{/if}}
-          {{#if system.gmOnly}}<span class="gmf-chip gmf-chip--gm">GM Only</span>{{/if}}
+          {{#if system.isCurrent}}<span class="gmf-chip gmf-chip--current"><i class="fa-solid fa-location-crosshairs"></i>Current</span>{{/if}}
+          {{#if system.isDestination}}<span class="gmf-chip gmf-chip--destination"><i class="fa-solid fa-crosshairs"></i>Destination</span>{{/if}}
+          {{#if system.hasAlert}}<span class="gmf-chip gmf-chip--alert"><i class="fa-solid fa-triangle-exclamation"></i>Alert</span>{{/if}}
+          {{#if system.obscured}}<span class="gmf-chip gmf-chip--unknown">Unknown</span>{{/if}}
+          {{#if system.gmOnly}}<span class="gmf-chip gmf-chip--gm">Hidden</span>{{/if}}
         </div>
-      </div>
+      </header>
 
-      {{#if system.image}}
-        {{#unless system.obscured}}
-          <img class="gmf-system-panel__image" src="{{system.image}}" alt="{{system.name}}" />
+      {{#unless planetView}}
+      <div class="gmf-inspector-visual {{#if system.showImage}}gmf-inspector-visual--image{{/if}}" style="--gmf-faction-color: {{system.factionColor}};">
+        {{#if system.showImage}}
+          <img src="{{system.image}}" alt="{{system.name}}" />
+        {{/if}}
+        {{#unless system.showImage}}
+          <div class="gmf-inspector-visual__marker gmf-system--{{system.displayType}} gmf-icon--{{system.iconStyle}} gmf-status--{{system.displayStatus}}" style="--gmf-system-size: 92px;">
+            <span class="gmf-system__halo"></span>
+            {{#if system.animatedCelestial}}
+              {{> "modules/galaxy-map/templates/celestial-icon.hbs" system=system}}
+            {{else}}
+              <span class="gmf-system__core"></span>
+            {{/if}}
+            <span class="gmf-system__type-glyph" aria-hidden="true"></span>
+          </div>
         {{/unless}}
-      {{/if}}
-
-      <div class="gmf-system-panel__section">
-        <h4>Survey</h4>
-        <p>{{gmfFallback system.displayDescription "No survey text has been recorded."}}</p>
       </div>
 
-      {{#unless playerMode}}
-        <div class="gmf-system-panel__section gmf-system-panel__section--gm">
-          <h4>GM Notes</h4>
-          <p>{{gmfFallback system.notes "No GM notes."}}</p>
-        </div>
+      {{#if system.canInspectPlanet}}
+        <button type="button" class="gmf-inspect-planet" data-action="inspect-planet"><i class="fa-solid fa-globe"></i> Inspect Planet <i class="fa-solid fa-arrow-right"></i></button>
+      {{/if}}
       {{/unless}}
+
+      <section class="gmf-system-panel__section">
+        <h4>Survey</h4>
+        <p>{{gmfFallback system.displayDescription "No survey information has been recorded."}}</p>
+      </section>
 
       {{#unless system.obscured}}
-        {{#if system.journalId}}
-          <div class="gmf-link-actions">
-            <button type="button" data-action="open-journal">
-              <i class="fa-solid fa-book-open"></i>
-              Journal
-            </button>
-          </div>
-        {{/if}}
+        <section class="gmf-system-panel__section">
+          <h4>Linked Content</h4>
+          {{#if system.hasJournal}}
+            <button type="button" class="gmf-content-link" data-action="open-journal"><i class="fa-solid fa-book-open"></i><span>Open Journal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+          {{/if}}
+          {{#if system.hasScenes}}
+            <button type="button" class="gmf-content-link" data-action="open-scene"><i class="fa-solid fa-image"></i><span>Open Scene</span><small>{{system.sceneIds.length}}</small></button>
+          {{/if}}
+          {{#unless system.hasJournal}}{{#unless system.hasScenes}}<p class="gmf-empty-copy">No linked journal or scene.</p>{{/unless}}{{/unless}}
+        </section>
       {{/unless}}
 
-      {{#if system.canTravel}}
-        {{#unless system.obscured}}
-          <div class="gmf-link-actions gmf-link-actions--stacked">
-            <button type="button" data-action="travel-to-system">
-              <i class="fa-solid fa-rocket"></i>
-              {{#if playerMode}}Request Travel{{else}}Travel To{{/if}}
-            </button>
-          </div>
-        {{/unless}}
-      {{/if}}
+      <section class="gmf-system-panel__section">
+        <h4>Alerts &amp; Signals</h4>
+        {{#if system.hasAlert}}
+          <p class="gmf-signal gmf-signal--alert"><i class="fa-solid fa-triangle-exclamation"></i>{{system.alertLabel}}</p>
+        {{/if}}
+        {{#if system.hasSignal}}
+          <p class="gmf-signal"><i class="fa-solid fa-tower-broadcast"></i>{{system.externalFocus.label}}</p>
+        {{/if}}
+        {{#unless system.hasAlert}}{{#unless system.hasSignal}}<p class="gmf-empty-copy">No active alerts or signals.</p>{{/unless}}{{/unless}}
+      </section>
 
-      {{#if map.canEdit}}
-        <div class="gmf-link-actions gmf-link-actions--stacked">
-          <button type="button" data-action="edit-system">
-            <i class="fa-solid fa-pen"></i>
-            Edit System
-          </button>
-          {{#unless system.isCurrent}}
-            <button type="button" data-action="set-current-system">
-              <i class="fa-solid fa-location-crosshairs"></i>
-              Set Current
-            </button>
-          {{/unless}}
-          <button type="button" data-action="reveal-system">
-            <i class="fa-solid fa-eye"></i>
-            Reveal System
-          </button>
-          <button type="button" data-action="hide-system">
-            <i class="fa-solid fa-eye-slash"></i>
-            Hide System
-          </button>
-          <button type="button" data-action="notify-discovery">
-            <i class="fa-solid fa-bell"></i>
-            Notify Discovery
-          </button>
-          <button type="button" data-action="delete-system">
-            <i class="fa-solid fa-trash"></i>
-            Delete
-          </button>
+      {{#unless playerMode}}
+        <section class="gmf-system-panel__section gmf-system-panel__section--gm">
+          <h4>GM Notes</h4>
+          <p class="{{#unless system.notes}}gmf-empty-copy{{/unless}}">{{gmfFallback system.notes "No GM notes."}}</p>
+        </section>
+      {{/unless}}
+
+      <div class="gmf-inspector-actions">
+        {{#unless planetView}}
+        <div class="gmf-inspector-actions__primary">
+          {{#if system.canTravel}}
+            {{#unless system.obscured}}
+              <button type="button" class="gmf-button--primary" data-action="travel-to-system"><i class="fa-solid fa-route"></i>{{#if playerMode}}Request Travel{{else}}Travel to System{{/if}}</button>
+            {{/unless}}
+          {{/if}}
+          <button type="button" class="gmf-button--accent" data-action="scan-system"><i class="fa-solid fa-satellite-dish"></i>Scan System</button>
         </div>
-      {{/if}}
+        {{/unless}}
+        <div class="gmf-inspector-actions__secondary">
+          {{#unless planetView}}<button type="button" class="gmf-button--quiet" data-action="ping-system"><i class="fa-solid fa-bullseye"></i>Ping System</button>{{/unless}}
+          {{#if map.canEdit}}
+            {{#if planetView}}<button type="button" data-action="edit-system"><i class="fa-solid fa-pen"></i> Edit System</button>{{/if}}
+            <details class="gmf-action-menu">
+              <summary><i class="fa-solid fa-ellipsis"></i>GM Actions</summary>
+              <div class="gmf-action-menu__panel">
+                {{#unless planetView}}<button type="button" data-action="edit-system"><i class="fa-solid fa-pen"></i>Edit System</button>{{/unless}}
+                {{#unless system.isCurrent}}<button type="button" data-action="set-current-system"><i class="fa-solid fa-location-crosshairs"></i>Set Current Location</button>{{/unless}}
+                {{#if system.gmOnly}}
+                  <button type="button" data-action="reveal-system"><i class="fa-solid fa-eye"></i>Reveal to Players</button>
+                {{else}}
+                  <button type="button" data-action="hide-system"><i class="fa-solid fa-eye-slash"></i>Hide from Players</button>
+                {{/if}}
+                <button type="button" data-action="notify-discovery"><i class="fa-solid fa-bell"></i>Notify Discovery</button>
+                <button type="button" class="gmf-button--danger" data-action="delete-system"><i class="fa-solid fa-trash"></i>Delete System</button>
+              </div>
+            </details>
+          {{/if}}
+        </div>
+      </div>
     {{else}}
       <div class="gmf-empty">
         <i class="fa-solid fa-location-crosshairs"></i>

@@ -2,7 +2,7 @@
   "id": "galaxy-map",
   "title": "Galaxy Map",
   "description": "A system-agnostic cinematic galaxy map framework for Foundry VTT campaigns.",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "authors": [
     {
       "name": "Mage Tower Studios",
@@ -11,7 +11,7 @@
   ],
   "compatibility": {
     "minimum": "12",
-    "verified": "13"
+    "verified": "14"
   },
   "socket": true,
   "esmodules": [

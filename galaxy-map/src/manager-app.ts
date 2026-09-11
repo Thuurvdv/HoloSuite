@@ -31,12 +31,14 @@ export function createGalaxyMapManagerClass(deps: any) {
     closePlayerMap,
     hideSystemFromPlayers,
     hideRouteFromPlayers,
+    hideFactionFromPlayers,
     clearManagerApp
   } = deps;
 
   return class GalaxyMapManager extends getApplicationBase() {
     selectedMapId: string | null;
     jsonDraft: string;
+    activeTab: "systems" | "routes" | "factions";
 
     static DEFAULT_OPTIONS = {
       id: "galaxy-map-manager",
@@ -62,6 +64,7 @@ export function createGalaxyMapManagerClass(deps: any) {
       super(options);
       this.selectedMapId = options.selectedMapId ?? null;
       this.jsonDraft = "";
+      this.activeTab = ["systems", "routes", "factions"].includes(options.activeTab) ? options.activeTab : "systems";
     }
 
     async _prepareContext(options: any) {
@@ -76,6 +79,10 @@ export function createGalaxyMapManagerClass(deps: any) {
         maps,
         selectedMap,
         selectedMapId: this.selectedMapId,
+        activeTab: this.activeTab,
+        showSystems: this.activeTab === "systems",
+        showRoutes: this.activeTab === "routes",
+        showFactions: this.activeTab === "factions",
         hasMaps: maps.length > 0
       };
     }
@@ -94,6 +101,14 @@ export function createGalaxyMapManagerClass(deps: any) {
       });
       html.querySelector("[data-action='create-faction']")?.addEventListener("click", () => {
         if (this.selectedMapId) openFactionDialog(this.selectedMapId);
+      });
+      html.querySelectorAll("[data-manager-tab]").forEach((button: any) => {
+        button.addEventListener("click", () => {
+          const tab = button.dataset.managerTab;
+          if (!["systems", "routes", "factions"].includes(tab) || tab === this.activeTab) return;
+          this.activeTab = tab;
+          this.render({ force: true });
+        });
       });
       html.querySelectorAll("[data-edit-system]").forEach((button: any) => {
         button.addEventListener("click", () => openSystemDialog(this.selectedMapId, button.dataset.editSystem));
@@ -121,6 +136,12 @@ export function createGalaxyMapManagerClass(deps: any) {
       });
       html.querySelectorAll("[data-edit-faction]").forEach((button: any) => {
         button.addEventListener("click", () => openFactionDialog(this.selectedMapId, button.dataset.editFaction));
+      });
+      html.querySelectorAll("[data-show-faction]").forEach((button: any) => {
+        button.addEventListener("click", () => hideFactionFromPlayers(this.selectedMapId, button.dataset.showFaction, false));
+      });
+      html.querySelectorAll("[data-hide-faction]").forEach((button: any) => {
+        button.addEventListener("click", () => hideFactionFromPlayers(this.selectedMapId, button.dataset.hideFaction, true));
       });
       html.querySelectorAll("[data-delete-faction]").forEach((button: any) => {
         button.addEventListener("click", () => this._confirmDeleteFaction(button.dataset.deleteFaction));

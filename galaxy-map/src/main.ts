@@ -1,5 +1,6 @@
 import {
-  ICON_STYLES,
+  ANIMATED_CELESTIAL_STYLES,
+  ICON_STYLE_OPTIONS,
   ROUTE_TYPES,
   SYSTEM_STATUSES,
   SYSTEM_TYPES,
@@ -16,6 +17,8 @@ import {
 } from "./galaxy-model";
 import { createGalaxyMapManagerClass } from "./manager-app";
 import { createGalaxyMapViewClass } from "./view-app";
+import { getPlanetAppearance, PLANET_OPTIONS, PLANET_SHAPE_OPTIONS } from "./planet-presets";
+import { evaluateTravelApproval, getTravelElectorate, TRAVEL_APPROVAL_OPTIONS } from "./travel-approval";
 import { MODULE_ID, SETTING_MAPS, SOCKET_NAME, TEMPLATE_ROOT } from "./constants";
 import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, slugify } from "./dom-utils";
 
@@ -27,6 +30,8 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
   let playerMapApp = null;
   const pendingTravelRequests = new Map();
   const promptedTravelRequests = new Set();
+  const travelRequestPrompts = new Map();
+  const latestTravelProgress = new Map();
 
   function clone(data) {
     if (foundry.utils.deepClone) return foundry.utils.deepClone(data);
@@ -98,6 +103,65 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
         }).browse();
       });
     });
+    const texturePanel = root?.querySelector("[data-texture-upload-fields]");
+    const textureInput = root?.querySelector('[name="planetTexture"]');
+    const textureStatus = root?.querySelector("[data-texture-upload-status]");
+    const appearanceInput = root?.querySelector('[name="planetPreset"]');
+    const shapeInput = root?.querySelector('[name="planetShape"]');
+    const textureGuide = root?.querySelector("[data-texture-guide]");
+    const texturePreviews = root?.querySelectorAll("[data-texture-guide-preview]") ?? [];
+    const updateTexturePreview = () => {
+      if (!textureGuide) return;
+      const path = textureInput?.value?.trim();
+      if (path) {
+        textureGuide.dataset.hasTexture = "true";
+        if (textureStatus) textureStatus.textContent = "Loading custom texture preview…";
+        texturePreviews.forEach((preview: HTMLImageElement) => {
+          preview.hidden = false;
+          preview.onload = () => {
+            if (textureInput?.value?.trim() !== path) return;
+            if (textureStatus) textureStatus.textContent = "Custom texture selected · visible beneath the guide";
+          };
+          preview.onerror = () => {
+            preview.hidden = true;
+            if (textureInput?.value?.trim() === path && textureStatus) textureStatus.textContent = "Custom texture selected, but its preview could not be loaded";
+          };
+          preview.src = path;
+        });
+      } else {
+        delete textureGuide.dataset.hasTexture;
+        texturePreviews.forEach((preview: HTMLImageElement) => {
+          preview.onload = null;
+          preview.onerror = null;
+          preview.removeAttribute("src");
+          preview.hidden = true;
+        });
+      }
+    };
+    const updateTextureStatus = () => {
+      if (textureStatus) textureStatus.textContent = textureInput?.value?.trim()
+        ? "Loading custom texture preview…"
+        : "Choose an image to preview it beneath the guide";
+      updateTexturePreview();
+    };
+    appearanceInput?.addEventListener("change", () => {
+      const custom = appearanceInput.value === "custom";
+      if (texturePanel) texturePanel.hidden = !custom;
+      if (!custom && textureInput?.value) {
+        textureInput.value = "";
+        textureInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+    root?.querySelector("[data-clear-planet-texture]")?.addEventListener("click", () => {
+      if (!textureInput) return;
+      textureInput.value = "";
+      textureInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    textureInput?.addEventListener("change", updateTextureStatus);
+    shapeInput?.addEventListener("change", () => {
+      if (textureGuide) textureGuide.dataset.shape = shapeInput.value;
+    });
+    updateTextureStatus();
   }
 
   function renderCrudDialog({ title, content, submitLabel = "Save", onSubmit, render = activateCrudDialog }) {
@@ -119,7 +183,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       default: "save"
     }, {
       classes: ["galaxy-map", "gmf-crud-dialog"],
-      width: 560
+      width: 700
     }).render(true);
   }
 
@@ -152,18 +216,31 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     const displaySystems = systems.map((system) => {
       const faction = factionLookup.get(system.factionId);
       const obscured = isSystemObscured(system, playerMode);
+      const typeIconFallbacks: Record<string, string> = { station: "station", anomaly: "diamond", ruins: "diamond", unknown: "diamond" };
+      const displayType = obscured ? "unknown" : system.type;
+      const displayIconStyle = obscured
+        ? "diamond"
+        : system.iconStyle === "planet" ? typeIconFallbacks[displayType] ?? system.iconStyle : system.iconStyle;
       return {
         ...system,
+        iconStyle: displayIconStyle,
         displayName: obscured ? "???" : system.name,
         displayDescription: obscured ? "Unresolved sensor contact. Details are not available." : system.description,
-        displayType: obscured ? "unknown" : system.type,
+        displayType,
         displayStatus: obscured ? "undiscovered" : system.status,
         factionName: faction?.name ?? "Unaffiliated",
         factionColor: system.iconColor || faction?.color || "#58d8ff",
         obscured,
         isCurrent: system.id === normalized.currentSystemId,
         isSelected: system.id === selectedSystemId,
-        gmOnly: system.visibility === "gm"
+        gmOnly: system.visibility === "gm",
+        animatedCelestial: ANIMATED_CELESTIAL_STYLES.includes(displayIconStyle),
+        hasAlert: ["danger", "locked"].includes(obscured ? "undiscovered" : system.status),
+        alertLabel: system.status === "danger" ? "Hazard advisory" : system.status === "locked" ? "Restricted access" : "",
+        hasJournal: Boolean(!obscured && system.journalId),
+        hasScenes: Boolean(!obscured && system.sceneIds.length),
+        showImage: Boolean(!obscured && system.image),
+        canInspectPlanet: Boolean(getPlanetAppearance({ ...system, iconStyle: displayIconStyle, obscured }))
       };
     });
 
@@ -201,7 +278,11 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       selectedSystem.canTravel = Boolean(selectedTravelRoute);
       selectedSystem.travelRouteId = selectedTravelRoute?.id ?? "";
       selectedSystem.isCurrent = selectedSystem.id === currentSystem?.id;
+      selectedSystem.isDestination = Boolean(selectedTravelRoute && !selectedSystem.isCurrent);
     }
+    routes.forEach((route) => {
+      route.isActive = route.isSelected || route.id === selectedTravelRoute?.id;
+    });
 
     return {
       ...normalized,
@@ -411,6 +492,25 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     return true;
   }
 
+  async function hideFactionFromPlayers(mapId, factionId, hidden = true) {
+    if (!requireGM(hidden ? "hide factions" : "reveal factions")) return null;
+    const maps = getMapStore();
+    const map = maps[mapId];
+    const faction = map?.factions?.find((candidate) => candidate.id === factionId);
+    if (!faction) {
+      notifyError(`Faction "${factionId}" was not found.`);
+      return null;
+    }
+
+    faction.visibility = hidden ? "gm" : "players";
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    notifyInfo(`${faction.name} ${hidden ? "hidden from" : "visible to"} players.`);
+    return clone(faction);
+  }
+
   async function saveSystemPosition(mapId, systemId, x, y) {
     if (!requireGM("move star systems")) return null;
     const maps = getMapStore();
@@ -524,6 +624,38 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     notifyInfo(`Discovery notification sent: ${system.name}.`);
   }
 
+  function showSystemPingOnOpenMaps(payload) {
+    getOpenMapViews(payload.mapId).forEach((app) => app.showSystemPing?.(payload.systemId, payload));
+  }
+
+  function pingSystem(mapId, systemId) {
+    const rawMap = getRawMap(mapId);
+    const map = rawMap ? normalizeMap(rawMap) : null;
+    const system = map?.systems.find((candidate) => candidate.id === systemId);
+    if (!map || !system) {
+      notifyError(`System "${systemId}" was not found.`);
+      return null;
+    }
+    if (!game.user?.isGM && (map.visibility !== "players" || system.visibility !== "players")) {
+      notifyError("That system is not available on the player map.");
+      return null;
+    }
+
+    const userColor = String(game.user?.color || "");
+    const payload = {
+      action: "system-ping",
+      pingId: randomId("ping"),
+      mapId,
+      systemId,
+      userId: game.user?.id,
+      userName: String(game.user?.name || "Navigator").slice(0, 80),
+      color: /^#[0-9a-f]{6}$/i.test(userColor) ? userColor : "#58d8ff"
+    };
+    game.socket.emit(SOCKET_NAME, payload);
+    showSystemPingOnOpenMaps(payload);
+    return payload;
+  }
+
   async function importMapData(mapData, { replace = false } = {}) {
     if (!requireGM("import galaxy maps")) return null;
     const maps = getMapStore();
@@ -551,6 +683,79 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     downloadJson(`${slugify(map.title)}.json`, normalizeMap(map));
   }
 
+  function getTextureGuideMarkup(shape: string) {
+    return `
+      <div class="gmf-texture-guide" data-texture-guide data-shape="${escapeHtml(shape)}">
+        <figure data-guide-shape="sphere">
+          <div class="gmf-uv-map gmf-uv-map--sphere" aria-hidden="true">
+            <img class="gmf-uv-texture-preview" data-texture-guide-preview alt="" draggable="false" hidden />
+            <b class="gmf-uv-guide-grid"></b>
+            <span class="gmf-uv-pole gmf-uv-pole--north">North pole · 15%</span>
+            <span class="gmf-uv-equator">Equator · 50%</span>
+            <span class="gmf-uv-pole gmf-uv-pole--south">South pole · 15%</span>
+            <i class="gmf-uv-seam">wrap seam</i>
+          </div>
+          <figcaption><strong>2048×1024 · 2:1</strong> Left and right join. Keep important details out of the pale polar bands, where the image pinches to a point.</figcaption>
+        </figure>
+        <figure data-guide-shape="asteroid">
+          <div class="gmf-uv-map gmf-uv-map--asteroid" aria-hidden="true">
+            <img class="gmf-uv-texture-preview" data-texture-guide-preview alt="" draggable="false" hidden />
+            <b class="gmf-uv-guide-grid"></b>
+            <span class="gmf-uv-pole gmf-uv-pole--north">Distorted pole · 15%</span>
+            <span class="gmf-uv-equator">Best detail near equator · 50%</span>
+            <span class="gmf-uv-pole gmf-uv-pole--south">Distorted pole · 15%</span>
+            <i class="gmf-uv-seam">wrap seam</i>
+          </div>
+          <figcaption><strong>2048×1024 · 2:1</strong> Uses the full 8×4 grid—there are no required circles or fixed crater positions. Left and right join; place recognizable features near the equator and expect organic distortion.</figcaption>
+        </figure>
+        <figure data-guide-shape="donut">
+          <div class="gmf-uv-map gmf-uv-map--donut" aria-hidden="true">
+            <img class="gmf-uv-texture-preview" data-texture-guide-preview alt="" draggable="false" hidden />
+            <b class="gmf-uv-guide-grid"></b>
+            <span class="gmf-uv-donut-ring">Around ring →</span>
+            <span class="gmf-uv-donut-tube">Around tube ↓</span>
+            <span class="gmf-uv-donut-landmark is-outer-top">Outer bend · 0%</span>
+            <span class="gmf-uv-donut-landmark is-side-a">Side A · 25%</span>
+            <span class="gmf-uv-donut-landmark is-inner">Inner bend · 50%</span>
+            <span class="gmf-uv-donut-landmark is-side-b">Side B · 75%</span>
+            <span class="gmf-uv-donut-landmark is-outer-bottom">Outer bend · 100%</span>
+          </div>
+          <figcaption><strong>2048×1024 · 2:1</strong> Top and bottom meet on the outer bend. The center line becomes the inner bend; 25% and 75% become the two sides. Left/right join as the texture travels around the ring, so all four edges must be seamless.</figcaption>
+        </figure>
+        <figure data-guide-shape="cube">
+          <div class="gmf-uv-map gmf-uv-map--cube" aria-hidden="true">
+            <img class="gmf-uv-texture-preview" data-texture-guide-preview alt="" draggable="false" hidden />
+            <b class="gmf-uv-guide-grid"></b>
+            <span class="is-top">Top</span><span class="is-left">Left</span><span class="is-front">Front</span>
+            <span class="is-right">Right</span><span class="is-back">Back</span><span class="is-bottom">Bottom</span>
+          </div>
+          <figcaption><strong>2048×1536 · 4:3</strong> The full 4×3 grid contains twelve 512px squares. Draw only in the six labeled squares; the six dim squares are unused.</figcaption>
+        </figure>
+        <figure data-guide-shape="cylinder">
+          <div class="gmf-uv-map gmf-uv-map--cylinder" aria-hidden="true">
+            <img class="gmf-uv-texture-preview" data-texture-guide-preview alt="" draggable="false" hidden />
+            <b class="gmf-uv-guide-grid"></b>
+            <span class="gmf-uv-cap gmf-uv-cap--top">Top<br>25% × 25%</span>
+            <span class="gmf-uv-cylinder-side">Side band · 100% × 50%<br>left/right join</span>
+            <span class="gmf-uv-cap gmf-uv-cap--bottom">Bottom<br>25% × 25%</span>
+            <i class="gmf-uv-row-label is-top">25%</i><i class="gmf-uv-row-label is-middle">50%</i><i class="gmf-uv-row-label is-bottom">25%</i>
+          </div>
+          <figcaption><strong>2048×2048 · 1:1</strong> The middle 50% (y=25–75%) is the side. Each cap is a 512px circle: top at x=12.5–37.5%, y=0–25%; bottom at x=62.5–87.5%, y=75–100%.</figcaption>
+        </figure>
+        <figure data-guide-shape="crystal">
+          <div class="gmf-uv-map gmf-uv-map--crystal" aria-hidden="true">
+            <img class="gmf-uv-texture-preview" data-texture-guide-preview alt="" draggable="false" hidden />
+            <b class="gmf-uv-guide-grid"></b>
+            ${Array.from({ length: 8 }, (_, index) => `<span class="is-face-${index + 1}">Face ${index + 1}</span>`).join("")}
+            <i class="gmf-uv-grid-label is-columns">4 columns · 512px each</i>
+            <i class="gmf-uv-grid-label is-rows">NO GAP · center seam y=512</i>
+          </div>
+          <figcaption><strong>2048×1024 · 2:1</strong> Divide the image into four 512×512 columns. Each column is one diamond containing two faces: Faces 1–4 point down from the top edge; Faces 5–8 point up from the bottom edge. Their bases meet exactly at y=512—leave no gap. Only the tinted triangles are used; the untinted corner halves are ignored.</figcaption>
+        </figure>
+      </div>
+    `;
+  }
+
   function getSystemDialogContent(mapId, system = {}, defaults = {}) {
     const map = getRawMap(mapId);
     const data = normalizeSystem({ ...defaults, ...system });
@@ -560,6 +765,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     ];
     const faction = (map?.factions ?? []).find((candidate) => candidate.id === data.factionId);
     const iconColorValue = data.iconColor || faction?.color || "#58d8ff";
+    const texturePanelId = `gmf-texture-${String(data.id).replace(/[^a-z0-9_-]/gi, "") || "system"}`;
     return `
       <form class="gmf-crud-form">
         <input type="hidden" name="id" value="${escapeHtml(data.id)}" />
@@ -575,7 +781,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
           <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
         </div>
         <div class="gmf-form-grid">
-          <label>Icon Style <select name="iconStyle">${optionList(ICON_STYLES, data.iconStyle)}</select></label>
+          <label>Icon Style <select name="iconStyle">${optionList(ICON_STYLE_OPTIONS, data.iconStyle)}</select></label>
           <label>Icon Size <input type="range" name="iconSize" value="${escapeHtml(data.iconSize)}" min="18" max="56" step="1" /></label>
         </div>
         <div class="gmf-form-grid">
@@ -583,6 +789,27 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
           <label class="gmf-checkbox-label"><input type="checkbox" name="pulse" value="true" ${data.pulse ? "checked" : ""} /> Pulse Glow</label>
         </div>
         <label>Description <textarea name="description">${escapeHtml(data.description)}</textarea></label>
+        <fieldset>
+          <legend>Planet close-up</legend>
+          <div class="gmf-form-grid">
+            <label>Appearance <select name="planetPreset">${optionList(PLANET_OPTIONS, data.planetPreset)}</select></label>
+            <label>3D Shape <select name="planetShape">${optionList(PLANET_SHAPE_OPTIONS, data.planetShape)}</select></label>
+          </div>
+          <div class="gmf-texture-upload">
+            <div id="${texturePanelId}" class="gmf-texture-upload__fields" data-texture-upload-fields ${data.planetPreset === "custom" ? "" : "hidden"}>
+              <label>Custom texture image
+                <div class="gmf-path-field">
+                  <input type="text" name="planetTexture" value="${escapeHtml(data.planetTexture)}" placeholder="Choose PNG, JPEG, or WebP" />
+                  <button type="button" data-browse-target="planetTexture"><i class="fa-solid fa-folder-open"></i> Browse</button>
+                </div>
+              </label>
+              <p class="gmf-scene-picker__hint" data-texture-upload-status>${data.planetTexture ? "Custom texture selected · previewed beneath the guide" : "Choose an image to preview it beneath the guide"}</p>
+              <button type="button" class="gmf-button--quiet gmf-texture-upload__clear" data-clear-planet-texture>Clear custom texture</button>
+              ${getTextureGuideMarkup(data.planetShape)}
+            </div>
+          </div>
+          <p class="gmf-scene-picker__hint">Choose Custom texture to reveal the image picker and UV preview. No planet view disables the close-up for stations and other locations.</p>
+        </fieldset>
         <label>Image Path
           <div class="gmf-path-field">
             <input type="text" name="image" value="${escapeHtml(data.image)}" />
@@ -662,6 +889,8 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
           </div>
         </label>
         <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
+        <label>Player Travel Approval <select name="travelApprovalMode">${optionList(TRAVEL_APPROVAL_OPTIONS, data.travelApprovalMode)}</select></label>
+        <p class="gmf-form-help">GM approval asks only the primary online GM. Majority counts the requester as an approval and passes at more than half of active participants. Unanimous asks every other active participant and cancels on any decline.</p>
       </form>
     `;
   }
@@ -783,6 +1012,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     const factionsById = new Map<string, any>(normalized.factions.map((faction) => [faction.id, faction]));
     return {
       ...normalized,
+      travelApprovalModeLabel: TRAVEL_APPROVAL_OPTIONS.find(option => option.value === normalized.travelApprovalMode)?.label ?? "Unanimous agreement",
       systems: normalized.systems.map((system) => ({
         ...system,
         factionName: factionsById.get(system.factionId)?.name ?? "Unaffiliated"
@@ -843,12 +1073,6 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     )) ?? null;
   }
 
-  function getTravelVoterIds(requesterId) {
-    return getActiveUsers()
-      .filter((user) => user.id !== requesterId)
-      .map((user) => user.id);
-  }
-
   function buildTravelRequest(mapId, destinationSystemId) {
     const rawMap = getRawMap(mapId);
     if (!rawMap) {
@@ -889,8 +1113,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       return null;
     }
 
-    const voterIds = getTravelVoterIds(game.user.id);
-    if (!voterIds.includes(primaryGM.id)) voterIds.push(primaryGM.id);
+    const electorate = getTravelElectorate(getActiveUsers(), game.user.id, primaryGM, map.travelApprovalMode);
 
     return {
       action: "travel-request",
@@ -907,7 +1130,11 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       fuelCost: route.fuelCost,
       requesterId: game.user.id,
       requesterName: game.user.name,
-      voterIds: [...new Set(voterIds)]
+      approvalMode: electorate.approvalMode,
+      voterIds: electorate.voterIds,
+      voterNames: electorate.voterNames,
+      requiredApprovals: electorate.requiredApprovals,
+      participantCount: electorate.participantCount
     };
   }
 
@@ -926,6 +1153,8 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     promptedTravelRequests.add(payload.requestId);
 
     let responded = false;
+    let resolved = false;
+    let dialog: any = null;
     const respond = (accepted) => {
       if (responded) return;
       responded = true;
@@ -941,15 +1170,28 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       handleTravelVote(vote);
     };
 
-    new Dialog({
+    const modeLabel = TRAVEL_APPROVAL_OPTIONS.find(option => option.value === payload.approvalMode)?.label ?? "Unanimous agreement";
+    dialog = new Dialog({
       title: "Travel Request",
       content: `
         <section class="gmf-travel-request">
           <p><strong>${escapeHtml(payload.requesterName)}</strong> wants to travel on <strong>${escapeHtml(payload.mapTitle)}</strong>.</p>
           <p>${escapeHtml(payload.fromName)} &rarr; ${escapeHtml(payload.toName)}</p>
           <p class="gmf-travel-request__meta">${escapeHtml(payload.routeType)} route / ${escapeHtml(payload.travelTime || "Unknown time")} / Fuel ${escapeHtml(payload.fuelCost ?? 0)}</p>
+          <p class="gmf-travel-request__mode"><i class="fa-solid fa-users"></i> ${escapeHtml(modeLabel)}</p>
+          <div class="gmf-travel-progress" data-travel-progress aria-live="polite">
+            <div class="gmf-travel-progress__bar"><span data-travel-progress-bar></span></div>
+            <strong data-travel-progress-count>Waiting for vote status…</strong>
+            <span data-travel-progress-pending></span>
+          </div>
         </section>
       `,
+      render: (html) => {
+        const root = getHtmlElement(html);
+        const state = travelRequestPrompts.get(payload.requestId);
+        if (state) state.root = root;
+        updateTravelPrompt(payload.requestId, latestTravelProgress.get(payload.requestId));
+      },
       buttons: {
         accept: {
           icon: '<i class="fa-solid fa-check"></i>',
@@ -963,25 +1205,119 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
         }
       },
       default: "accept",
-      close: () => respond(false)
+      close: () => {
+        travelRequestPrompts.delete(payload.requestId);
+        if (!resolved) respond(false);
+      }
     }, {
       classes: ["galaxy-map", "gmf-crud-dialog"],
       width: 420
-    }).render(true);
+    });
+    travelRequestPrompts.set(payload.requestId, {
+      root: null,
+      resolve: () => {
+        resolved = true;
+        responded = true;
+        dialog?.close();
+      }
+    });
+    dialog.render(true);
+  }
+
+  function isPrimaryGMMessage(payload) {
+    return Boolean(payload?.coordinatorId && payload.coordinatorId === getPrimaryGM()?.id);
+  }
+
+  function getTravelProgressPayload(pending) {
+    const evaluation = evaluateTravelApproval(pending);
+    return {
+      action: "travel-progress",
+      requestId: pending.requestId,
+      mapId: pending.mapId,
+      requesterId: pending.requesterId,
+      approvalMode: pending.approvalMode,
+      acceptedCount: evaluation.acceptedCount,
+      declinedCount: evaluation.declinedCount,
+      requiredApprovals: evaluation.required,
+      participantCount: pending.participantCount,
+      pendingNames: evaluation.pendingIds.map(id => pending.voterNames?.[id] || "Navigator"),
+      coordinatorId: game.user.id
+    };
+  }
+
+  function updateTravelPrompt(requestId, progress) {
+    if (!progress) return;
+    latestTravelProgress.set(requestId, progress);
+    const root = travelRequestPrompts.get(requestId)?.root;
+    if (!root) return;
+    const count = root.querySelector("[data-travel-progress-count]");
+    const pending = root.querySelector("[data-travel-progress-pending]");
+    const bar = root.querySelector("[data-travel-progress-bar]");
+    if (count) count.textContent = `${progress.acceptedCount} of ${progress.requiredApprovals} approvals`;
+    if (pending) pending.textContent = progress.pendingNames?.length ? `Waiting for: ${progress.pendingNames.join(", ")}` : "All votes received";
+    if (bar) bar.style.width = `${Math.min(100, (progress.acceptedCount / Math.max(1, progress.requiredApprovals)) * 100)}%`;
+  }
+
+  function broadcastTravelProgress(pending) {
+    const progress = getTravelProgressPayload(pending);
+    latestTravelProgress.set(pending.requestId, progress);
+    updateTravelPrompt(pending.requestId, progress);
+    game.socket.emit(SOCKET_NAME, progress);
+    return progress;
+  }
+
+  function handleTravelProgress(payload) {
+    if (!payload?.requestId || !isPrimaryGMMessage(payload)) return;
+    const previous = latestTravelProgress.get(payload.requestId);
+    updateTravelPrompt(payload.requestId, payload);
+    if (payload.requesterId === game.user?.id && (!previous || previous.acceptedCount !== payload.acceptedCount || previous.declinedCount !== payload.declinedCount)) {
+      const waiting = payload.pendingNames?.length ? ` Waiting for ${payload.pendingNames.join(", ")}.` : "";
+      ui.notifications?.info(`Travel vote: ${payload.acceptedCount}/${payload.requiredApprovals} approvals.${waiting}`);
+    }
   }
 
   function trackTravelRequest(payload) {
-    if (!isPrimaryGM() || !payload?.requestId) return;
+    if (!isPrimaryGM() || !payload?.requestId || pendingTravelRequests.has(payload.requestId)) return null;
+    const rawMap = getRawMap(payload.mapId);
+    if (!rawMap) return null;
+    const currentMap = normalizeMap(rawMap);
+    const requester = getActiveUsers().find(user => user.id === payload.requesterId && !user.isGM);
+    const from = currentMap.systems.find(system => system.id === currentMap.currentSystemId);
+    const to = currentMap.systems.find(system => system.id === payload.toSystemId);
+    const route = from && to ? getTravelRoute(currentMap, from.id, to.id) : null;
+    if (!requester || currentMap.visibility !== "players" || !from || !to || from.id === to.id
+      || from.visibility !== "players" || to.visibility !== "players" || !route || route.visibility !== "players") return null;
+    const mode = currentMap.travelApprovalMode;
+    const primaryGM = getPrimaryGM();
+    const electorate = getTravelElectorate(getActiveUsers(), payload.requesterId, primaryGM, mode);
     const timeoutId = globalThis.setTimeout(() => {
       const pending = pendingTravelRequests.get(payload.requestId);
-      if (pending) rejectTravelRequest(pending, "Request timeout");
+      if (pending) rejectTravelRequest(pending, { reason: "Travel request timed out." });
     }, TRAVEL_REQUEST_TIMEOUT_MS);
-    pendingTravelRequests.set(payload.requestId, {
-      ...payload,
+    const pending = {
+      action: "travel-ballot",
+      requestId: String(payload.requestId).slice(0, 80),
+      mapId: currentMap.id,
+      mapTitle: currentMap.title,
+      fromSystemId: from.id,
+      fromName: from.name,
+      toSystemId: to.id,
+      toName: to.name,
+      routeId: route.id,
+      routeType: route.type,
+      travelTime: route.travelTime,
+      fuelCost: route.fuelCost,
+      requesterId: requester.id,
+      requesterName: requester.name,
+      coordinatorId: game.user.id,
+      ...electorate,
       accepted: new Set(),
-      voterIds: [...new Set(payload.voterIds ?? [])],
+      declined: new Set(),
       timeoutId
-    });
+    };
+    pendingTravelRequests.set(payload.requestId, pending);
+    broadcastTravelProgress(pending);
+    return pending;
   }
 
   function animateTravelOnOpenMaps(payload) {
@@ -1011,6 +1347,10 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
   async function approveTravelRequest(pending) {
     pendingTravelRequests.delete(pending.requestId);
     if (pending.timeoutId) globalThis.clearTimeout(pending.timeoutId);
+    promptedTravelRequests.delete(pending.requestId);
+    travelRequestPrompts.get(pending.requestId)?.resolve();
+    travelRequestPrompts.delete(pending.requestId);
+    latestTravelProgress.delete(pending.requestId);
     const payload = {
       action: "travel-approved",
       requestId: pending.requestId,
@@ -1027,9 +1367,14 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     globalThis.setTimeout(() => setCurrentSystem(pending.mapId, pending.toSystemId), TRAVEL_ANIMATION_MS);
   }
 
-  function rejectTravelRequest(pending, voterName = "A player") {
+  function rejectTravelRequest(pending, { voterName = "", reason = "" } = {}) {
     pendingTravelRequests.delete(pending.requestId);
     if (pending.timeoutId) globalThis.clearTimeout(pending.timeoutId);
+    promptedTravelRequests.delete(pending.requestId);
+    travelRequestPrompts.get(pending.requestId)?.resolve();
+    travelRequestPrompts.delete(pending.requestId);
+    latestTravelProgress.delete(pending.requestId);
+    const message = reason || `${voterName || "A participant"} declined the request.`;
     const payload = {
       action: "travel-declined",
       requestId: pending.requestId,
@@ -1037,39 +1382,50 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       fromName: pending.fromName,
       toName: pending.toName,
       voterName,
+      reason: message,
       coordinatorId: game.user.id
     };
     game.socket.emit(SOCKET_NAME, payload);
-    notifyInfo(`Travel declined by ${voterName}: ${pending.fromName} to ${pending.toName}.`);
+    notifyInfo(`Travel cancelled: ${message}`);
   }
 
   function handleTravelVote(payload) {
     if (!isPrimaryGM() || !payload?.requestId) return;
     const pending = pendingTravelRequests.get(payload.requestId);
     if (!pending || !pending.voterIds.includes(payload.userId)) return;
-
-    if (!payload.accepted) {
-      rejectTravelRequest(pending, payload.userName);
-      return;
-    }
-
-    pending.accepted.add(payload.userId);
-    if (pending.voterIds.every((userId) => pending.accepted.has(userId))) {
-      approveTravelRequest(pending);
-    }
+    if (pending.accepted.has(payload.userId) || pending.declined.has(payload.userId)) return;
+    if (payload.accepted) pending.accepted.add(payload.userId);
+    else pending.declined.add(payload.userId);
+    const evaluation = evaluateTravelApproval(pending);
+    broadcastTravelProgress(pending);
+    if (evaluation.outcome === "approved") approveTravelRequest(pending);
+    else if (evaluation.outcome === "declined") rejectTravelRequest(pending, {
+      voterName: payload.userName,
+      reason: pending.approvalMode === "unanimous"
+        ? `${payload.userName || "A participant"} declined the unanimous request.`
+        : "The remaining votes cannot reach a majority."
+    });
   }
 
   function handleTravelApproved(payload) {
+    if (!isPrimaryGMMessage(payload)) return;
     if (payload.coordinatorId === game.user?.id) return;
     if (payload.requestId) promptedTravelRequests.delete(payload.requestId);
+    travelRequestPrompts.get(payload.requestId)?.resolve();
+    travelRequestPrompts.delete(payload.requestId);
+    latestTravelProgress.delete(payload.requestId);
     animateTravelOnOpenMaps(payload);
     ui.notifications?.info(`Travel approved: ${payload.fromName} to ${payload.toName}.`);
   }
 
   function handleTravelDeclined(payload) {
+    if (!isPrimaryGMMessage(payload)) return;
     if (payload.coordinatorId === game.user?.id) return;
     if (payload.requestId) promptedTravelRequests.delete(payload.requestId);
-    ui.notifications?.warn(`Travel declined by ${payload.voterName}: ${payload.fromName} to ${payload.toName}.`);
+    travelRequestPrompts.get(payload.requestId)?.resolve();
+    travelRequestPrompts.delete(payload.requestId);
+    latestTravelProgress.delete(payload.requestId);
+    ui.notifications?.warn(`Travel cancelled: ${payload.reason || `${payload.voterName || "A participant"} declined.`}`);
   }
 
   function closeOpenMap(mapId) {
@@ -1103,6 +1459,24 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     else openMaps.set(key, app);
     app.render({ force: true });
     return app;
+  }
+
+  async function focusSystem(mapId, systemId, options: any = {}) {
+    if (!mapId || !systemId) return false;
+    const app = openMap(mapId, {
+      playerMode: options.playerMode ?? !game.user?.isGM,
+      broadcast: options.broadcast === true
+    });
+    if (!app?.focusSystem) return false;
+    return app.focusSystem(systemId, options);
+  }
+
+  function clearSystemFocus(mapId, focusId = "") {
+    let cleared = false;
+    for (const app of getOpenMapViews(mapId)) {
+      cleared = app.clearSystemFocus?.(focusId) || cleared;
+    }
+    return cleared;
   }
 
   function openMapManager() {
@@ -1240,6 +1614,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     closePlayerMap,
     hideSystemFromPlayers,
     hideRouteFromPlayers,
+    hideFactionFromPlayers,
     clearManagerApp: (app) => {
       if (managerApp === app) managerApp = null;
     }
@@ -1263,6 +1638,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     setCurrentSystem,
     requestTravelToSystem,
     notifySystemDiscovered,
+    pingSystem,
     exportMap,
     getTravelRoute,
     broadcastTravelAnimation,
@@ -1311,6 +1687,7 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
     await loadTemplates([
       `${TEMPLATE_ROOT}/map-manager.hbs`,
       `${TEMPLATE_ROOT}/galaxy-map.hbs`,
+      `${TEMPLATE_ROOT}/celestial-icon.hbs`,
       `${TEMPLATE_ROOT}/system-details.hbs`
     ]);
   });
@@ -1320,6 +1697,8 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
   Hooks.once("ready", () => {
     game.galaxyMap = {
       openMap,
+      focusSystem,
+      clearSystemFocus,
       openMapManager,
       openGalaxyMapFromSceneControls,
       openPlayerMapChooser,
@@ -1345,7 +1724,9 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       revealRouteToPlayers,
       hideSystemFromPlayers,
       hideRouteFromPlayers,
+      hideFactionFromPlayers,
       notifySystemDiscovered,
+      pingSystem,
       requestTravelToSystem,
       importMapData,
       exportMap
@@ -1356,12 +1737,23 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
 
     game.socket.on(SOCKET_NAME, (payload: any = {}) => {
       if (payload.action === "travel-request") {
-        trackTravelRequest(payload);
-        promptForTravelRequest(payload);
+        const ballot = trackTravelRequest(payload);
+        if (ballot) {
+          game.socket.emit(SOCKET_NAME, ballot);
+          promptForTravelRequest(ballot);
+        }
+        return;
+      }
+      if (payload.action === "travel-ballot") {
+        if (isPrimaryGMMessage(payload) && payload.coordinatorId !== game.user?.id) promptForTravelRequest(payload);
         return;
       }
       if (payload.action === "travel-vote") {
         handleTravelVote(payload);
+        return;
+      }
+      if (payload.action === "travel-progress") {
+        handleTravelProgress(payload);
         return;
       }
       if (payload.action === "travel-approved") {
@@ -1374,6 +1766,10 @@ import { documentCheckboxes, documentOptions, downloadJson, escapeHtml, getFormV
       }
       if (payload.action === "travel-animation") {
         if (payload.coordinatorId !== game.user?.id) animateTravelOnOpenMaps(payload);
+        return;
+      }
+      if (payload.action === "system-ping") {
+        if (payload.userId !== game.user?.id && payload.mapId && payload.systemId) showSystemPingOnOpenMaps(payload);
         return;
       }
 

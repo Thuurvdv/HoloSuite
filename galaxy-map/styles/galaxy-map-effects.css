@@ -47,6 +47,189 @@
   }
 }
 
+@keyframes gmf-route-draw {
+  from {
+    stroke-dashoffset: 160;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes gmf-current-track {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gmf-destination-track {
+  to {
+    transform: rotate(405deg);
+  }
+}
+
+@keyframes gmf-alert-ring {
+  0%,
+  45% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  55% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes gmf-scan-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(0.55);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+@keyframes gmf-system-ping {
+  from {
+    opacity: 1;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.8);
+  }
+}
+
+@keyframes gmf-external-focus-pulse {
+  0% {
+    opacity: 1;
+    transform: scale(0.76);
+  }
+  72%,
+  100% {
+    opacity: 0.12;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes gmf-external-focus-scan {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gmf-celestial-surface-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes gmf-celestial-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gmf-celestial-ring-drift {
+  0%,
+  100% {
+    transform: rotate(-16deg) translateX(-2%);
+  }
+  50% {
+    transform: rotate(-13deg) translateX(2%);
+  }
+}
+
+@keyframes gmf-station-beacon {
+  0%,
+  86%,
+  100% {
+    opacity: 0.35;
+  }
+  88%,
+  93% {
+    opacity: 1;
+  }
+}
+
+@keyframes gmf-celestial-star-pulse {
+  0%,
+  100% {
+    opacity: 0.84;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes gmf-celestial-fissure-glow {
+  0%,
+  100% {
+    opacity: 0.64;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gmf-galaxy .gmf-route,
+  .gmf-galaxy .gmf-system__halo,
+  .gmf-galaxy .gmf-system__current,
+  .gmf-galaxy .gmf-system__destination,
+  .gmf-galaxy .gmf-system.has-alert::before,
+  .gmf-galaxy .gmf-system.is-scanning::after,
+  .gmf-galaxy .gmf-system-ping,
+  .gmf-galaxy .gmf-external-focus,
+  .gmf-galaxy .gmf-external-focus::after,
+  .gmf-galaxy .gmf-system.is-obscured .gmf-system__label,
+  .gmf-galaxy .gmf-celestial__surface,
+  .gmf-galaxy .gmf-celestial__fissure,
+  .gmf-galaxy .gmf-celestial__star-corona,
+  .gmf-galaxy .gmf-celestial__star-core,
+  .gmf-galaxy .gmf-celestial__accretion,
+  .gmf-galaxy .gmf-celestial__station-ring,
+  .gmf-galaxy .gmf-celestial__station-beacon,
+  .gmf-galaxy .gmf-celestial__planet-ring,
+  .gmf-galaxy .gmf-system--anomaly .gmf-system__type-glyph::before {
+    animation: none !important;
+  }
+}
+
+:where(:root, body)[data-holosuite-debug-no-effects="true"] .gmf-galaxy :where(
+  .gmf-route,
+  .gmf-system__halo,
+  .gmf-system__current,
+  .gmf-system__destination,
+  .gmf-system.has-alert::before,
+  .gmf-system.is-scanning::after,
+  .gmf-system-ping,
+  .gmf-external-focus,
+  .gmf-external-focus::after,
+  .gmf-system.is-obscured .gmf-system__label,
+  .gmf-celestial__surface,
+  .gmf-celestial__fissure,
+  .gmf-celestial__star-corona,
+  .gmf-celestial__star-core,
+  .gmf-celestial__accretion,
+  .gmf-celestial__station-ring,
+  .gmf-celestial__station-beacon,
+  .gmf-celestial__planet-ring,
+  .gmf-system--anomaly .gmf-system__type-glyph::before
+) {
+  animation: none !important;
+}
+
 @media (max-width: 900px) {
   .gmf-manager__body,
   .gmf-galaxy__content {
