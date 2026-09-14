@@ -67,7 +67,7 @@ function renderModule(module) {
     { id: "overview", title: "Overview", body: paragraphs([module.overview]) },
     { id: "videos", title: "Video", body: videos(module.videos, module.name) },
     { id: "features", title: "Features", body: list(module.features) },
-    { id: "installation", title: "Installation", body: orderedList(module.installation) },
+    { id: "installation", title: "Installation", body: installationBody(module) },
     { id: "configuration", title: "Configuration", body: list(module.configuration) },
     { id: "faq", title: "FAQ", body: faqList(module.faq) },
     { id: "examples", title: "Examples", body: list(module.examples) }
@@ -89,6 +89,7 @@ function renderTutorial(module, content) {
       body: paragraphs([module.overview, tutorial.intro].filter(Boolean))
         + callout(tutorial.audienceTitle || `Who can configure ${module.name}?`, tutorial.audience, "info")
     },
+    { id: "installation", title: "Installation", body: installationBody(module) },
     {
       id: "quick-start",
       title: tutorial.quickStart?.title || "Quick start",
@@ -110,6 +111,18 @@ function renderTutorial(module, content) {
   ].filter((item) => item.body);
 
   renderSections(content, pageSections);
+}
+
+function installationBody(module) {
+  const steps = orderedList(module.installation);
+  if (!steps) return "";
+  const premiumHelp = module.tier === "premium"
+    ? `<p>If Foundry shows Not Owned, check that your Patreon subscription is linked to the account that owns this server's Foundry license.</p>
+       <p><a href="https://foundryvtt.com/me/edit">Link your Patreon account</a> · <a href="https://foundryvtt.com/article/premium-content/">Foundry's premium installation guide</a></p>`
+    : "";
+  return steps + premiumHelp
+    + `<p>Installing a module adds it to the server. Enable it separately in each world where you want to use it. Players joining that world do not need to install their own copy.</p>
+       <p>For updates, return to Setup > Add-on Modules and use Update on the module. Check Foundry's compatibility information before updating.</p>`;
 }
 
 function renderSections(content, items) {
@@ -243,7 +256,7 @@ function faqList(items) {
 
 function videos(items, moduleName) {
   if (!items?.length) {
-    return `<div class="video-placeholder">Demo videos are planned for this module. Current documentation uses screenshots and workflow examples until short loops are available.</div>`;
+    return `<div class="video-placeholder">There is no demo video for this module yet.</div>`;
   }
   return `<div class="doc-video-list">${items.map((item) => {
     const video = typeof item === "string" ? { src: item } : item;

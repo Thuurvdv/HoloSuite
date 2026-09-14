@@ -2,7 +2,6 @@
   const data = await loadSiteData();
   if (!data) return;
 
-  renderExperiences(data.experiences || [], data.modules || []);
   renderModules(data.modules || []);
   renderStats(data.stats || []);
   renderCommunity(data.community || []);
@@ -19,24 +18,6 @@ async function loadSiteData() {
     console.error(error);
     return null;
   }
-}
-
-function renderExperiences(experiences, modules) {
-  const grid = document.querySelector("[data-experience-grid]");
-  if (!grid) return;
-
-  const moduleMap = new Map(modules.map((module) => [module.id, module]));
-  grid.innerHTML = experiences.map((experience) => {
-    const module = moduleMap.get(experience.moduleId);
-    const href = module ? `#module-${module.id}` : "#modules";
-    return `
-      <a class="experience-card" href="${escapeAttribute(href)}">
-        <span class="experience-icon">${escapeHtml(experience.icon)}</span>
-        <strong>${escapeHtml(experience.title)}</strong>
-        <span>${escapeHtml(experience.description)}</span>
-      </a>
-    `;
-  }).join("");
 }
 
 function renderModules(modules) {
