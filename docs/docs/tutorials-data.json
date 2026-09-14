@@ -1,14 +1,13 @@
 {
   "modules": {
     "holosuite-core": {
-      "overview": "HoloSuite Core is the shared launcher and registration layer for the HoloSuite family. It discovers installed HoloSuite apps, presents them in a single device-style interface, provides theme and accessibility controls, shows release notices, and exposes a small API for module authors and macros.",
       "tutorial": {
-        "intro": "Use Core as the front door to your HoloSuite tools. Most features configure themselves when another module registers, so the practical work is choosing who can use the launcher, selecting a visual theme, and knowing where to inspect a missing app.",
+        "intro": "Installed HoloSuite modules add themselves to the launcher. Choose who can open it and pick a theme. If an app is missing, check that its module is enabled in this world.",
         "audience": "World settings and the Command Deck are GM-only. Theme and debugging preferences marked “This Browser” affect only the current browser. Players can use the launcher when a registered app is player-visible and the GM has not enabled Disable HoloSuite for Players.",
         "quickStart": {
           "title": "Quick start",
           "steps": [
-            "Install and enable HoloSuite Core, then enable the HoloSuite feature modules you want in the same world.",
+            "Follow the Installation steps above to install Core and enable it with your other HoloSuite modules.",
             "Reload the world after changing modules so every app can register with Core.",
             "Open HoloSuite from its scene-control button, the configured keybinding, the module settings menu, or a macro that calls game.holosuite.openLauncher().",
             "Choose Apps and select a tile. GMs see every registered app; players see only apps that explicitly allow player access.",
@@ -383,7 +382,7 @@
         },
         {
           "question": "What is the difference between personal and group contacts?",
-          "answer": "Personal contacts are client-scoped for one user in one world. Group and managed contacts are world data maintained through the GM-authoritative workflow."
+          "answer": "Personal contacts are saved in that user's browser for the current world. The GM manages group contacts and contact identities for the whole world."
         },
         {
           "question": "Does deleting a thread delete it for everyone?",
@@ -452,7 +451,7 @@
             "id": "static-feeds",
             "title": "Static image feeds",
             "paragraphs": [
-              "Static cameras show the configured image directly and require no scene capture. They are ideal for prerecorded security stills, dossier images, disabled installations, or a surveillance reveal that must be identical for every viewer."
+              "Static cameras show the configured image directly and require no scene capture. Use them for prerecorded security stills, dossier images, or a feed that should look the same for every viewer."
             ],
             "steps": [
               "Set Feed Source to Static Image.",
@@ -572,7 +571,7 @@
     },
     "csi-toolkit": {
       "tutorial": {
-        "intro": "CSI Toolkit is a shared investigation workspace built around cases, evidence-board cards, connections, timelines, and a large pannable canvas. It supports both GM preparation and player collaboration through a GM-authoritative socket workflow.",
+        "intro": "Use CSI Toolkit to prepare a case and let players arrange evidence, suspects, and connections on a shared board. A GM must be connected to save player edits.",
         "audience": "GMs create and manage cases from the case manager. Players use the case browser and can contribute to available cases; their saved changes require an active GM to authorize and persist them. Current manager-created cases are player-visible. Older imported data may still contain legacy GM visibility values.",
         "quickStart": {
           "title": "Build your first case",
@@ -717,7 +716,7 @@
       "faq": [
         {
           "question": "Can players edit the case board?",
-          "answer": "Yes, for cases available in the current player browser. Their changes are sent through an active GM for authoritative persistence."
+          "answer": "Yes, for cases available in the current player browser. A connected GM saves their changes."
         },
         {
           "question": "Why did moved cards return to their old positions?",
@@ -952,7 +951,7 @@
     },
     "bounty-board": {
       "tutorial": {
-        "intro": "Bounty Board is a shared contract terminal. GMs author and publish jobs, filter and bulk-manage the board, assign claimants, resolve contracts, and optionally post lifecycle cards to chat. Players see only published contracts while the board is enabled.",
+        "intro": "The GM posts jobs, assigns them to players, and marks them complete or failed. Status changes can also be posted to chat. Players see published contracts while the board is enabled.",
         "audience": "GMs create, edit, publish, assign, resolve, hide, archive, and delete contracts. Players browse published contracts, expand public details, open permitted linked Journals, and submit a contract request through chat; a request does not automatically assign the bounty.",
         "quickStart": {
           "title": "Publish your first contract",
@@ -1590,7 +1589,7 @@
     },
     "holosuite-vending-machines": {
       "tutorial": {
-        "intro": "HoloSuite Vending Machines provides GM-built, Region-linked shops with six physical slots, carts, finite stock, system-agnostic currency, authoritative purchases, dispense/collection animation, and a transaction ledger.",
+        "intro": "Each vending machine has six product slots, prices, and stock counts. Link it to a Scene Region so players can walk up and shop. A connected GM processes payment and item delivery, and the machine records each transaction.",
         "audience": "GMs configure machines, currency, Regions, stock, sound, and the ledger. Players can open nearby online machines from Region prompts or, when enabled, the HoloSuite browser. A connected GM validates every purchase.",
         "quickStart": {
           "title": "Build a working machine",
@@ -1623,7 +1622,7 @@
               }
             ],
             "paragraphs": [
-              "The editor is draft-safe. Save persists changes; Save & Test persists and opens the machine. Cancel or closing with changes asks before discarding."
+              "Save keeps your changes. Save & Test also opens the machine. If you cancel or close the editor with unsaved changes, it asks before discarding them."
             ]
           },
           {
@@ -1691,7 +1690,7 @@
             "callouts": [
               {
                 "title": "Why items arrive after payment",
-                "text": "Payment and stock are authorized first, then the retrieval action performs Item transfer. Pending reservations persist so a refresh does not casually lose an accepted purchase.",
+                "text": "The machine checks payment and reserves stock before delivering the Items. It saves pending purchases so refreshing the page does not lose them.",
                 "tone": "info"
               }
             ]
@@ -1797,7 +1796,7 @@
     },
     "holosuite-terminal": {
       "tutorial": {
-        "intro": "HoloSuite Terminal creates diegetic computers with independent profiles, themes, boot/audio presentation, mail, files, trash, cameras, utilities, Region entry, per-user permissions, passwords, and optional HoloSuite Hacking locks.",
+        "intro": "Give each terminal its own files, mail, camera feeds, and utility buttons. You can set who can open it, add a password or hacking challenge, and link it to a Scene Region.",
         "audience": "GMs create and configure Terminal profiles and content. Players open terminals through linked Regions or other GM-authorized flows, then see only the applications and content allowed by profile permissions, authentication, access level, locks, and Foundry document permissions.",
         "quickStart": {
           "title": "Create your first terminal",
@@ -2332,15 +2331,15 @@
     },
     "holosuite-blueprint": {
       "tutorial": {
-        "intro": "This guide builds a usable facility first, then explains every authoring, sharing, publishing, integration, and export control. Unless a step says player, perform setup while logged in as a GM.",
+        "intro": "Start with a Scene and build a plan your players can use. Follow the setup steps as a GM unless a step says otherwise.",
         "audience": "GMs open the Blueprint authoring window and control permanent facility data. Players receive filtered, read-only presentations or open published layouts through another module. If player drawing is enabled, they may add freehand strokes and erase only their own marks while an active GM validates and saves them.",
         "quickStart": {
           "title": "Quick start: create and share your first blueprint",
           "paragraphs": [
-            "Use this route to turn an existing Scene into a presentable plan in a few minutes."
+            "Start with an existing Scene, add rooms and markers, then check what players will see."
           ],
           "steps": [
-            "Install and enable HoloSuite Core and HoloSuite Blueprint, then activate a Scene that contains Foundry walls.",
+            "Follow the Installation steps above, then activate a Scene that contains Foundry walls.",
             "Open the HoloSuite launcher and select Blueprint, or use Open Blueprint in Scene Controls.",
             "Open Settings. Enter a Location name and optional Facility designation, keep Generated from Scene selected, choose a theme, and save.",
             "Open Rooms and select Auto-detect Rooms. Review the number of closed spaces found, accept them, then edit the generated room names and optional details.",

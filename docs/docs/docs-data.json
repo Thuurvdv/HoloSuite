@@ -7,33 +7,31 @@
       "category": "Core app",
       "compatibility": "Foundry v12-v14",
       "image": "assets/HoloSuiteCorePng.png",
-      "summary": "The GM-facing launcher and registration layer that connects HoloSuite modules into one sci-fi command center.",
-      "overview": "HoloSuite Core is the foundation of the HoloSuite module family. It adds a phone-style launcher for GMs and gives installed HoloSuite modules a shared place to register as app tiles.",
+      "summary": "The GM-facing launcher module that connects HoloSuite modules.",
+      "overview": "HoloSuite Core is the foundation of the HoloSuite modules. It adds a phone-themed launcher for GMs from which you launch the other HoloSuite modules.",
       "features": [
-        "GM-only phone-style app launcher.",
-        "Automatic app registration for installed HoloSuite modules.",
-        "Shared visual foundation for the wider HoloSuite ecosystem.",
-        "Macro access through game.holosuite.open()."
+        "Phone-themed module launcher.",
+        "Read about the latest updates & releases to HoloSuite",
+        "Several visual themes"
       ],
       "installation": [
-        "Install and enable HoloSuite Core before enabling other HoloSuite modules.",
-        "Enable the feature modules you want to use, such as CyberCall, Security Cameras, CSI Toolkit, or Galaxy Map.",
-        "Open the launcher from scene controls or by running game.holosuite.open() in a macro.",
-        "Click an app tile to open the relevant module window."
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloSuite Core, and click Install.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, check HoloSuite Core, and save.",
+        "Install the other HoloSuite modules you want through the same installer, then enable them in Manage Modules.",
+        "Open the launcher from the button in the token-controls and click a module's button to open it."
       ],
       "configuration": [
         "Core has minimal setup by design.",
-        "Feature modules register themselves when active.",
-        "Keep Core active in worlds that use HoloSuite modules."
+        "Feature modules register themselves when active."
       ],
       "faq": [
         {
           "question": "Do players use the Core launcher directly?",
-          "answer": "The launcher is currently GM-only. Players interact with each module through its own player-facing interface."
+          "answer": "Players can use the launcher when the GM allows it. They only see modules that offer player access, and each module still applies its own permissions."
         },
         {
           "question": "Is HoloSuite Core required?",
-          "answer": "Most HoloSuite modules expect Core to be installed and active so they can register into the launcher."
+          "answer": "All HoloSuite modules rely on Core to be installed and active to work."
         }
       ],
       "videos": [
@@ -43,9 +41,8 @@
         }
       ],
       "examples": [
-        "Keep the launcher open on a second monitor during a sci-fi session.",
-        "Use a macro with game.holosuite.open() for quick access.",
-        "Treat every module as another in-world app installed inside the HoloSuite interface."
+        "Treat HoloSuite as an in-universe device.",
+        "Use a macro with game.holosuite.open() for quick access."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core"
     },
@@ -56,8 +53,8 @@
       "category": "Comms",
       "compatibility": "Foundry v12-v14",
       "image": "assets/Cybercall.jpg",
-      "summary": "Holographic calls, contacts, ringtones, and private message threads for in-character sci-fi communication.",
-      "overview": "CyberCall lets the GM broadcast holographic transmissions to connected players and lets players call the GM through personal or group contacts. It supports dramatic call states, signal styles, and persistent private messages.",
+      "summary": "Make calls or send messages to players & npc's",
+      "overview": "CyberCall lets the GM send holographic calls to connected players. Players can also call the GM through personal or group contacts, choose a ringtone, and keep private message threads with their contacts.",
       "features": [
         "GM-composed holographic calls with caller, faction, portrait, message, and signal strength.",
         "Standard, emergency, and corrupted visual styles.",
@@ -66,14 +63,15 @@
         "Persistent private message threads for players, GMs, contacts, and linked actors."
       ],
       "installation": [
-        "Enable HoloSuite Core and CyberCall in the Foundry world.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for CyberCall, and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and CyberCall, and save.",
         "Open CyberCall from the HoloSuite launcher.",
         "Use the composer to prepare a call or open contacts to manage call targets.",
         "Broadcast calls to players or let players initiate calls to the GM."
       ],
       "configuration": [
         "Choose caller name, faction, portrait, message, signal strength, and style for each broadcast.",
-        "Use fullscreen mode for table-wide dramatic broadcasts.",
+        "Use fullscreen mode for table-wide broadcasts.",
         "Pick a ringtone or silent mode from module settings.",
         "Create personal contacts, group contacts, and GM-managed contact identities."
       ],
@@ -107,8 +105,8 @@
       "category": "Surveillance",
       "compatibility": "Foundry v12-v14",
       "image": "assets/CameraFeed.jpg",
-      "summary": "A sci-fi surveillance system for live-feeling camera feeds, static images, and player broadcasts.",
-      "overview": "Security Cameras gives GMs a full surveillance camera system for cyberpunk and sci-fi sessions. Cameras can show live canvas regions or static images, then broadcast feeds to players in cyberpunk-styled windows.",
+      "summary": "Show players camera feeds taken from live Scene regions or static images.",
+      "overview": "Security Cameras lets a GM create feeds from live canvas regions or static images. A feed can be online, offline, corrupted, or restricted, and can be sent to players in a window or picture-in-picture view.",
       "features": [
         "Create, organize, and manage cameras across scenes.",
         "Use live canvas regions or static image feeds.",
@@ -118,7 +116,8 @@
         "Foundry v13 Scene Region framing for live views."
       ],
       "installation": [
-        "Enable HoloSuite Core and Security Cameras.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Security Cameras, and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Security Cameras, and save.",
         "Open the Camera Manager from the HoloSuite launcher.",
         "Create a camera and choose the current scene or a static image source.",
         "Save the camera, then use Show to Players during a session."
@@ -159,8 +158,8 @@
       "category": "Investigation",
       "compatibility": "Foundry v12-v14",
       "image": "assets/CSI%20Board.jpg",
-      "summary": "Interactive case boards for evidence, suspects, locations, timelines, and investigation theories.",
-      "overview": "CSI Toolkit is a system-agnostic investigation module for collaborative case management. GMs and players can organize cards, connections, timelines, and evidence on shared case boards.",
+      "summary": "Shared case boards for evidence, suspects, locations, timelines, and theories.",
+      "overview": "CSI Toolkit gives GMs and players a shared investigation board. Add cards for evidence, suspects, locations, and timeline events, then connect them with labeled lines.",
       "features": [
         "Create and manage investigation cases.",
         "Add draggable cards for evidence, suspects, locations, and timeline entries.",
@@ -170,7 +169,8 @@
         "Import and export cases as JSON."
       ],
       "installation": [
-        "Enable HoloSuite Core and CSI Toolkit.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Crime Scene Investigation Toolkit, and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Crime Scene Investigation Toolkit, and save.",
         "Open the Case Manager from the HoloSuite launcher.",
         "Create a case with title, subtitle, description, visibility, and board theme.",
         "Add cards and connections as the investigation develops."
@@ -211,8 +211,8 @@
       "category": "Navigation",
       "compatibility": "Foundry v12-v14",
       "image": "assets/Galaxy%20Map%20Manager.png",
-      "summary": "Campaign-scale holographic star maps with systems, routes, travel, reveals, and JSON import/export.",
-      "overview": "Galaxy Map gives sci-fi campaigns a Foundry-native star map. GMs build systems and routes, control visibility, reveal discoveries, and let players request travel.",
+      "summary": "Build a holographic star map with systems, routes, travel, and GM-controlled reveals.",
+      "overview": "Galaxy Map adds a star map inside Foundry. The GM places systems and routes, decides what players can see, reveals discoveries, and handles player travel requests.",
       "features": [
         "Interactive star maps with clickable system nodes.",
         "Custom icons, colors, sizes, pulse effects, descriptions, multi-scene tags, journals, and factions.",
@@ -222,7 +222,8 @@
         "Zoom, pan, resize, import, and export."
       ],
       "installation": [
-        "Enable HoloSuite Core and Galaxy Map.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Galaxy Map, and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Galaxy Map, and save.",
         "Open Map Manager from the HoloSuite launcher.",
         "Create a new map or import existing JSON.",
         "Open the map and start adding systems and routes."
@@ -263,8 +264,8 @@
       "category": "Contracts",
       "compatibility": "Foundry v12-v14",
       "image": "assets/BountyBoard.jpg",
-      "summary": "A sci-fi contract terminal for posting, browsing, updating, and resolving bounty jobs.",
-      "overview": "Bounty Board gives GMs a modern or sci-fi job board where players can browse available contracts. It is built for bounty hunting, mercenary work, and mission-hub campaign structures.",
+      "summary": "Post contracts for players to browse, claim, and complete from a sci-fi job board.",
+      "overview": "Bounty Board gives the GM a place to post jobs with a target, description, reward, and conditions. Players can browse the available contracts while the GM updates or removes them as the campaign changes.",
       "features": [
         "Create and manage bounty contracts.",
         "Let players browse available jobs.",
@@ -272,7 +273,8 @@
         "Update or remove bounties as the story changes."
       ],
       "installation": [
-        "Enable HoloSuite Core and Bounty Board.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Bounty Board, and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Bounty Board, and save.",
         "Open Bounty Board from the HoloSuite launcher.",
         "Create contracts with the details players need.",
         "Post or update jobs as the campaign moves through hubs and factions."
@@ -310,19 +312,20 @@
       "name": "Critical Cut-In",
       "tier": "free",
       "category": "Combat",
-      "compatibility": "Foundry v12-v13",
+      "compatibility": "Foundry v12-v14",
       "image": "assets/CriticalSucces.jpg",
-      "summary": "Full-screen sci-fi critical roll animations with character portraits, sounds, labels, and accent colors.",
-      "overview": "Critical Cut-In watches d20 rolls and triggers cinematic full-screen overlays for qualifying natural results. It turns important rolls into memorable table moments without changing mechanics.",
+      "summary": "Play full-screen character animations for critical rolls.",
+      "overview": "Critical Cut-In watches rolls on the selected die and displays a full-screen overlay when a natural result meets its configured threshold. Each character can have a portrait, sound, label, animation style, and accent color. The module does not change the roll itself.",
       "features": [
-        "Automatic d20 roll detection.",
+        "Automatic roll detection for the selected die.",
         "Global and per-character trigger thresholds.",
         "Custom images, sounds, overlay labels, animation styles, and accent colors.",
         "GM fallback configuration for non-player rolls.",
         "Adjustable display duration."
       ],
       "installation": [
-        "Enable HoloSuite Core and HoloSuite Critical Cut-In.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloSuite Critical Cut-In, and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Critical Cut-In, and save.",
         "Open Configure Settings and find the module settings.",
         "Set the default trigger threshold.",
         "Open Configure Player Cut-Ins to customize actors."
@@ -350,7 +353,7 @@
         }
       ],
       "examples": [
-        "Trigger only on natural 20s for rare cinematic moments.",
+        "Trigger only on natural 20s so the cut-in stays rare.",
         "Give a recurring villain a GM cut-in.",
         "Use a custom catchphrase as the overlay label."
       ],
@@ -364,16 +367,19 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/NodeIntrustion_hacking.jpg",
       "summary": "Interactive hacking minigames where Foundry skill checks shape puzzle difficulty.",
-      "overview": "HoloSuite Hacking replaces single-roll hacking with timed minigames. The player's skill check determines the difficulty profile, creating a playable scene with risk and pressure.",
+      "overview": "HoloSuite Hacking runs a timed minigame after a Foundry skill check. The check result selects the difficulty profile, so the character's roll still affects what the player has to solve.",
       "features": [
         "GM-launched hacking challenges for selected players.",
         "Node Intrusion network traversal minigame.",
         "Signal Alignment channel tuning minigame.",
+        "Packet Switchboard routing minigame.",
+        "Prism Lock ring puzzle.",
         "Difficulty profiles based on margin of success or failure.",
         "Trace timers, hazards, assists, radar, and configurable profile tuning."
       ],
       "installation": [
-        "Enable HoloSuite Core and HoloSuite Hacking.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloSuite Hacking, and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Hacking, and save.",
         "Open the hacking launcher from the HoloSuite launcher.",
         "Choose minigame, actor, owning player, skill, and DC.",
         "Send the challenge and let the player accept."
@@ -415,8 +421,8 @@
       "category": "Ships",
       "compatibility": "Foundry v12-v14",
       "image": "assets/HoloDockTeaser.png",
-      "summary": "A system-agnostic ship loadout, equipment, power, and damage console for sci-fi and vehicle-focused campaigns.",
-      "overview": "HoloDock gives HoloSuite worlds a dedicated ship operations console. A ship profile combines a vessel image, free-form statistics, categorized slots, installed Foundry Items, power allocation, durability, activation controls, and per-ship player rights. It does not impose a game system or ship ruleset: the GM decides what the numbers and equipment mean for the campaign.",
+      "summary": "Manage ship loadouts, equipment, power, and damage without tying them to one game system.",
+      "overview": "HoloDock gives each ship a profile with an image, GM-defined statistics, equipment slots, power allocation, durability, and player permissions. Foundry Items can be dropped into slots and pinned onto the ship image. The GM decides what the statistics and equipment mean for the campaign.",
       "features": [
         "Create and manage multiple ship profiles.",
         "Assign custom ship images or use the bundled default.",
@@ -433,8 +439,8 @@
         "Open HoloDock from the HoloSuite launcher."
       ],
       "installation": [
-        "Install HoloDock from the Foundry VTT module installer with https://github.com/Thuurvdv/holodock/releases/latest/download/module.json.",
-        "Enable HoloSuite Core and HoloDock in the Foundry world.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloDock, and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloDock, and save.",
         "Open HoloDock from the HoloSuite launcher.",
         "Create a ship profile, then add stats and equipment slots to match your campaign's vehicle rules."
       ],
@@ -453,10 +459,10 @@
         "quickStart": {
           "title": "Quick start: build your first working ship",
           "paragraphs": [
-            "Use this path when you want a usable console first and plan to learn the finer controls afterward."
+            "Start with one ship and one piece of equipment."
           ],
           "steps": [
-            "Install and enable HoloSuite Core, then install HoloDock with https://github.com/Thuurvdv/holodock/releases/latest/download/module.json and enable it in the same world.",
+            "Follow the Installation steps above, then open your world as a GM.",
             "Open the HoloSuite launcher and select HoloDock. Players also open HoloDock from this launcher.",
             "As GM, select the plus button beside Ship Profile. HoloDock creates New Ship with a default image, sample statistics, and four empty slots.",
             "Expand Ship Setup. Enter the ship name and class, choose an image, set Power Capacity, and select Save Ship. Use 0 when you do not want a total power budget.",
@@ -974,7 +980,7 @@
         "Build a party ship with engines, shields, weapons, cargo, and crew systems.",
         "Pin critical systems directly onto the ship image for a tactical damage overview.",
         "Let an engineer player request a weapon upgrade while the GM approves the install from chat.",
-        "Save power presets for travel, stealth, combat, and emergency modes."
+        "Adjust power allocations for travel, stealth, combat, and emergencies."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/holodock"
     },
@@ -985,8 +991,8 @@
       "category": "Commerce",
       "compatibility": "Foundry v12-v14",
       "image": "assets/VendingMachines.webp",
-      "summary": "Immersive, Region-linked vending machines with limited stock, product baskets, currency handling, and four distinct terminal styles.",
-      "overview": "HoloSuite Vending Machines lets GMs build interactive shops that feel like physical terminals inside the game world. Stock machines with Foundry Items, link them to Scene Regions, control player access, and process purchases through a GM-authoritative workflow with limited inventory and persistent transaction records.",
+      "summary": "Region-linked vending machines with limited stock, baskets, actor currency, and four terminal styles.",
+      "overview": "HoloSuite Vending Machines lets the GM stock machines with Foundry Items and link them to Scene Regions. Players can fill a basket and pay with an actor's currency. A connected GM processes purchases. The machine tracks stock and keeps a record of successful and failed transactions.",
       "features": [
         "Create and manage multiple vending machines with independent names, branding, status, products, prices, and stock.",
         "Drag Items from world directories, compendiums, or actor sheets into six active product slots.",
@@ -999,8 +1005,8 @@
         "Configure local selection, purchase, dispensing, collection, and failure sounds."
       ],
       "installation": [
-        "Install HoloSuite Vending Machines with https://github.com/Thuurvdv/holosuite-vending-machines/releases/latest/download/module.json.",
-        "Enable HoloSuite Core and HoloSuite Vending Machines in the Foundry world.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloSuite Vending Machines, and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Vending Machines, and save.",
         "Open Configure Settings, find HoloSuite Vending Machines, and open the machine manager.",
         "Create a machine, drag in products, set prices and stock, then link any Scene Regions that should provide access."
       ],
@@ -1044,10 +1050,10 @@
       "name": "HoloSuite Blueprint",
       "tier": "premium",
       "category": "Tactical maps",
-      "compatibility": "Foundry v12-v13",
+      "compatibility": "Foundry v12-v14",
       "image": "assets/Blueprint-preview.png",
-      "summary": "Generate, annotate, present, publish, and export polished tactical blueprints from Foundry VTT Scenes.",
-      "overview": "HoloSuite Blueprint turns Foundry wall data or a custom map image into a focused tactical schematic. A GM can organize a facility across multiple floors, outline and name rooms, place operational markers and free text, sketch plans, preview exactly what players may see, present a live shared view, publish a layout for HoloSuite Terminal, or export the result as a PNG. Blueprint is system-agnostic and never changes the Scene walls or lights it reads.",
+      "summary": "Build, annotate, present, publish, and export tactical blueprints from Foundry Scenes.",
+      "overview": "HoloSuite Blueprint reads Foundry wall data or uses a custom map image to build a tactical schematic. The GM can add floors, rooms, markers, text, and freehand plans before sharing a filtered player view. A blueprint can also be published to HoloSuite Terminal or exported as a PNG. The module never changes the Scene walls or lights it reads.",
       "features": [
         "Generate styled SVG architecture from Scene walls, windows, terrain walls, ethereal walls, and door types.",
         "Use a Foundry-hosted image instead while keeping annotations in Scene coordinates.",
@@ -1063,8 +1069,11 @@
         "Export the current blueprint as a themed PNG."
       ],
       "installation": [
-        "Obtain HoloSuite Blueprint through the HoloSuite Premium Collection and install the supplied Foundry module ZIP or private manifest.",
-        "Install and enable HoloSuite Core, then enable HoloSuite Blueprint in the same world.",
+        "Subscribe to my Mage Tower Studios Patreon at a tier that includes the premium modules.",
+        "On the Foundry VTT website, sign in to the account that owns the license used by your server. Link your subscribed Patreon account in your profile.",
+        "Check Subscribed Content in your Foundry profile. If your access is missing, refresh the Patreon link and check your subscription tier.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module. Find HoloSuite Blueprint under Premium Content and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Blueprint, and save.",
         "Activate the Scene that will anchor the facility.",
         "Open Blueprint from HoloSuite Core or the Scene Controls button."
       ],
@@ -1088,11 +1097,11 @@
       "id": "holosuite-terminal",
       "name": "HoloSuite Terminal",
       "tier": "premium",
-      "category": "Diegetic systems",
+      "category": "Computers",
       "compatibility": "Foundry v12-v14",
       "visual": "terminal-interface",
-      "summary": "Configurable, diegetic sci-fi computer systems with mail, files, cameras, utilities, permissions, downloads, and hacking.",
-      "overview": "HoloSuite Terminal lets GMs build interactive computers that feel like part of the game world. Each terminal can expose its own mail, files, camera feeds, utilities, authentication, access rules, sounds, desktop style, and visual theme.",
+      "summary": "Create in-world computers with mail, files, cameras, utilities, downloads, and hacking.",
+      "overview": "HoloSuite Terminal lets the GM create computers that players can open inside Foundry. Each terminal can have its own mail, files, camera feeds, utilities, passwords, access rules, sounds, desktop style, and theme.",
       "features": [
         "Create multiple terminal profiles with their own applications and presentation.",
         "Add mail accounts, messages, and text, image, audio, video, or journal-backed files.",
@@ -1104,8 +1113,11 @@
         "Choose from Corporate, RED, Heavy Monitor, and Holo Blue desktops plus six interface themes."
       ],
       "installation": [
-        "Install the premium/private HoloSuite Terminal module from the release manifest or ZIP provided to licensed users.",
-        "Enable HoloSuite Core and HoloSuite Terminal in the Foundry world.",
+        "Subscribe to my Mage Tower Studios Patreon at a tier that includes the premium modules.",
+        "On the Foundry VTT website, sign in to the account that owns the license used by your server. Link your subscribed Patreon account in your profile.",
+        "Check Subscribed Content in your Foundry profile. If your access is missing, refresh the Patreon link and check your subscription tier.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module. Find HoloSuite Terminal under Premium Content and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Terminal, and save.",
         "Optionally enable HoloSuite Hacking for minigames and Security Cameras for linked live feeds.",
         "Open Terminal from the HoloSuite launcher or the module settings menu."
       ],
@@ -1147,19 +1159,22 @@
       "category": "Scanner",
       "compatibility": "Foundry v12-v14",
       "image": "assets/PulseScanner-preview.png",
-      "summary": "Premium cinematic scene scanning with animated pulses, hidden signatures, signals, and scan target reveals.",
-      "overview": "Pulse Scanner lets GMs place hidden scan targets on Foundry Scene Regions. Player-owned tokens with scanner grants can emit animated pulses to detect nearby signatures.",
+      "summary": "Scan Scene Regions for hidden targets with animated pulses and matching signal types.",
+      "overview": "Pulse Scanner lets the GM place hidden targets on Foundry Scene Regions. Actors with a scanner can send out an animated pulse and detect nearby targets whose signal matches the selected scan mode.",
       "features": [
         "GM-managed scan targets linked to Foundry Scene Regions.",
         "Structural, Arcane, Thermal, Forensic, Tech, and Biological signals.",
         "Target types for walls, hidden passages, traps, residue, tech, evidence, loot, and custom signatures.",
         "Reticle, icon, and region-outline ping styles.",
         "Actor-based scanner grants with radius and charges.",
-        "Sanitized player scan results."
+        "Player scan results hide unrevealed target details."
       ],
       "installation": [
-        "Install the premium/private Pulse Scanner module from the release manifest or ZIP provided to licensed users.",
-        "Enable HoloSuite Core and Pulse Scanner.",
+        "Subscribe to my Mage Tower Studios Patreon at a tier that includes the premium modules.",
+        "On the Foundry VTT website, sign in to the account that owns the license used by your server. Link your subscribed Patreon account in your profile.",
+        "Check Subscribed Content in your Foundry profile. If your access is missing, refresh the Patreon link and check your subscription tier.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module. Find Pulse Scanner under Premium Content and click Install. Install HoloSuite Core here too if you do not have it.",
+        "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Pulse Scanner, and save.",
         "Use scenes with Foundry Scene Regions for linked scan targets.",
         "Open Pulse Scanner from the HoloSuite launcher."
       ],

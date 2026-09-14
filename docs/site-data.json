@@ -85,9 +85,9 @@
       "tier": "free",
       "category": "Combat",
       "image": "assets/CriticalSucces.jpg",
-      "pitch": "Play a full-screen character animation when a d20 roll meets its configured threshold.",
+      "pitch": "Play a full-screen character animation when a natural result on the selected die meets its configured threshold.",
       "compatibility": "Foundry v12-v14",
-      "features": ["Per-character images and sounds", "Critical success and failure support", "HoloSuite-compatible configuration"],
+      "features": ["Per-character images and sounds", "Critical success and failure support", "Global and per-character thresholds"],
       "docsUrl": "docs/module.html?id=holosuite-critical-cutin",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-critical-cutin"
     },
@@ -99,7 +99,7 @@
       "image": "assets/NodeIntrustion_hacking.jpg",
       "pitch": "Run a hacking minigame whose difficulty is set by the result of a Foundry skill check.",
       "compatibility": "Foundry v12-v14",
-      "features": ["Node Intrusion traversal", "Signal Alignment tuning", "Roll-based difficulty profiles"],
+      "features": ["Node Intrusion and Signal Alignment", "Packet Switchboard and Prism Lock", "Roll-based difficulty profiles"],
       "docsUrl": "docs/module.html?id=holosuite-hacking",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking"
     },
@@ -111,7 +111,7 @@
       "image": "assets/HoloDockTeaser.png",
       "pitch": "Manage ship profiles, equipment slots, power allocation, and damage without tying them to one game system.",
       "compatibility": "Foundry v12-v14",
-      "features": ["Multiple ship profiles", "Equipment slots with item drops and ship-image pins", "Power allocation, durability, presets, and activation controls"],
+      "features": ["Multiple ship profiles", "Equipment slots with item drops and ship-image pins", "Power allocation, durability, and activation controls"],
       "docsUrl": "docs/module.html?id=holodock",
       "moduleUrl": "https://github.com/Thuurvdv/holodock"
     },
@@ -148,7 +148,7 @@
       "id": "holosuite-terminal",
       "name": "HoloSuite Terminal",
       "tier": "premium",
-      "category": "Diegetic systems",
+      "category": "Computers",
       "visual": "terminal-interface",
       "pitch": "Create in-world computers with mail, files, camera feeds, utilities, passwords, and optional hacking.",
       "compatibility": "Foundry v12-v14",
@@ -165,9 +165,10 @@
       "image": "assets/PulseScanner-preview.png",
       "pitch": "Give actors scanners that send out animated pulses and reveal matching targets placed by the GM.",
       "compatibility": "Foundry v12-v14",
-      "features": ["Animated pulse scans", "Hidden and revealed target signatures", "Premium Patreon release"],
+      "features": ["Animated pulse scans", "Hidden and revealed target signatures", "Scanner range and charge limits"],
       "docsUrl": "docs/module.html?id=pulse-scanner",
-      "moduleUrl": "https://github.com/Thuurvdv/pulse-scanner",
+      "moduleUrl": "https://patreon.com/MageTowerStudios",
+      "moduleActionLabel": "Get Premium Access",
       "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
     }
   ],
