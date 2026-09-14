@@ -6,74 +6,6 @@
     { "label": "Foundry Compatibility", "value": 12, "prefix": "v", "suffix": "+" },
     { "label": "Active Development", "value": 2026, "suffix": "", "format": "plain" }
   ],
-  "experiences": [
-    {
-      "icon": "BIO",
-      "title": "Scan nearby lifeforms",
-      "description": "Reveal hidden targets and table-wide scan results.",
-      "moduleId": "pulse-scanner"
-    },
-    {
-      "icon": "COM",
-      "title": "Call your crew",
-      "description": "Trigger holographic calls, contacts, messages, and alerts.",
-      "moduleId": "cybercall"
-    },
-    {
-      "icon": "CAM",
-      "title": "Monitor security cameras",
-      "description": "Broadcast live-feeling camera feeds and restricted views.",
-      "moduleId": "security-cameras"
-    },
-    {
-      "icon": "NAV",
-      "title": "Navigate the galaxy",
-      "description": "Plot star systems, routes, ship travel, and reveals.",
-      "moduleId": "galaxy-map"
-    },
-    {
-      "icon": "CSI",
-      "title": "Investigate crime scenes",
-      "description": "Build evidence boards for suspects, timelines, and theories.",
-      "moduleId": "csi-toolkit"
-    },
-    {
-      "icon": "JOB",
-      "title": "Accept bounties",
-      "description": "Post contracts, rewards, targets, and mission status.",
-      "moduleId": "bounty-board"
-    },
-    {
-      "icon": "SHP",
-      "title": "Manage ship loadouts",
-      "description": "Track profiles, equipment slots, power, damage, and ship-image pins.",
-      "moduleId": "holodock"
-    },
-    {
-      "icon": "NET",
-      "title": "Hack futuristic systems",
-      "description": "Launch cyberpunk minigames shaped by Foundry rolls.",
-      "moduleId": "holosuite-hacking"
-    },
-    {
-      "icon": "TRM",
-      "title": "Access in-world terminals",
-      "description": "Explore mail, files, cameras, utilities, downloads, and locked systems.",
-      "moduleId": "holosuite-terminal"
-    },
-    {
-      "icon": "VND",
-      "title": "Shop futuristic markets",
-      "description": "Browse limited stock, fill a basket, and purchase equipment from in-world machines.",
-      "moduleId": "holosuite-vending-machines"
-    },
-    {
-      "icon": "MAP",
-      "title": "Plan tactical facilities",
-      "description": "Turn Scene walls into annotated, multi-floor blueprints and share them with players.",
-      "moduleId": "holosuite-blueprint"
-    }
-  ],
   "modules": [
     {
       "id": "holosuite-core",
@@ -81,9 +13,9 @@
       "tier": "free",
       "category": "Core app",
       "image": "assets/HoloSuiteCorePng.png",
-      "pitch": "The sci-fi launcher and registration layer that makes HoloSuite feel like one operating system.",
+      "pitch": "HoloSuite Core gives GMs one launcher for opening the other HoloSuite modules.",
       "compatibility": "Foundry v12-v14",
-      "features": ["GM-only command launcher", "Shared visual language", "Required by most HoloSuite apps"],
+      "features": ["Phone-themed GM launcher", "News and release notes", "Several visual themes"],
       "docsUrl": "docs/module.html?id=holosuite-core",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core"
     },
@@ -93,7 +25,7 @@
       "tier": "free",
       "category": "Comms",
       "image": "assets/Cybercall.jpg",
-      "pitch": "Holographic calls, player-to-GM calling, contacts, ringtones, and private message threads.",
+      "pitch": "Send holographic calls and private messages between the GM, players, and NPC contacts.",
       "compatibility": "Foundry v12-v14",
       "features": ["Incoming call broadcasts", "Emergency and corrupted styles", "Persistent contacts and messages"],
       "docsUrl": "docs/module.html?id=cybercall",
@@ -105,7 +37,7 @@
       "tier": "free",
       "category": "Surveillance",
       "image": "assets/CameraFeed.jpg",
-      "pitch": "Live-feeling and static camera feeds wrapped in cinematic cyberpunk overlays.",
+      "pitch": "Show live Scene regions or static images through online, offline, corrupted, and restricted camera feeds.",
       "compatibility": "Foundry v12-v14",
       "features": ["Online, offline, corrupted, and restricted states", "Window and picture-in-picture modes", "Scene Region framing"],
       "docsUrl": "docs/module.html?id=security-cameras",
@@ -117,7 +49,7 @@
       "tier": "free",
       "category": "Investigation",
       "image": "assets/CSI%20Board.jpg",
-      "pitch": "Collaborative case boards for evidence, suspects, locations, timelines, and theories.",
+      "pitch": "Create shared case boards with evidence, suspects, locations, timelines, and connection lines.",
       "compatibility": "Foundry v12-v14",
       "features": ["Draggable cards and connection lines", "Database and noir board themes", "Case JSON import and export"],
       "docsUrl": "docs/module.html?id=csi-toolkit",
@@ -129,7 +61,7 @@
       "tier": "free",
       "category": "Navigation",
       "image": "assets/Galaxy%20Map%20Manager.png",
-      "pitch": "Cinematic star maps with clickable systems, travel routes, ship movement, and campaign reveals.",
+      "pitch": "Build a star map with clickable systems, travel routes, ship movement, and GM-controlled reveals.",
       "compatibility": "Foundry v12-v14",
       "features": ["Reveal star systems over time", "Animated route movement", "Scene and journal linking"],
       "docsUrl": "docs/module.html?id=galaxy-map",
@@ -141,7 +73,7 @@
       "tier": "free",
       "category": "Contracts",
       "image": "assets/BountyBoard.jpg",
-      "pitch": "A sci-fi contract terminal for creating, publishing, claiming, and resolving jobs.",
+      "pitch": "Post contracts for players to browse, claim, and complete from a sci-fi job board.",
       "compatibility": "Foundry v12-v14",
       "features": ["Post campaign contracts", "Track rewards and target details", "Player browsing with GM management"],
       "docsUrl": "docs/module.html?id=bounty-board",
@@ -153,8 +85,8 @@
       "tier": "free",
       "category": "Combat",
       "image": "assets/CriticalSucces.jpg",
-      "pitch": "Sci-fi critical hit animations triggered by qualifying natural d20 results.",
-      "compatibility": "Foundry v12-v13",
+      "pitch": "Play a full-screen character animation when a d20 roll meets its configured threshold.",
+      "compatibility": "Foundry v12-v14",
       "features": ["Per-character images and sounds", "Critical success and failure support", "HoloSuite-compatible configuration"],
       "docsUrl": "docs/module.html?id=holosuite-critical-cutin",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-critical-cutin"
@@ -165,7 +97,7 @@
       "tier": "free",
       "category": "Minigames",
       "image": "assets/NodeIntrustion_hacking.jpg",
-      "pitch": "Playable cyberpunk hacking minigames where skill checks shape puzzle difficulty.",
+      "pitch": "Run a hacking minigame whose difficulty is set by the result of a Foundry skill check.",
       "compatibility": "Foundry v12-v14",
       "features": ["Node Intrusion traversal", "Signal Alignment tuning", "Roll-based difficulty profiles"],
       "docsUrl": "docs/module.html?id=holosuite-hacking",
@@ -177,7 +109,7 @@
       "tier": "free",
       "category": "Ships",
       "image": "assets/HoloDockTeaser.png",
-      "pitch": "A system-agnostic ship console for profiles, loadouts, equipment slots, power allocation, and damage tracking.",
+      "pitch": "Manage ship profiles, equipment slots, power allocation, and damage without tying them to one game system.",
       "compatibility": "Foundry v12-v14",
       "features": ["Multiple ship profiles", "Equipment slots with item drops and ship-image pins", "Power allocation, durability, presets, and activation controls"],
       "docsUrl": "docs/module.html?id=holodock",
@@ -189,7 +121,7 @@
       "tier": "free",
       "category": "Commerce",
       "image": "assets/VendingMachines.webp",
-      "pitch": "Create immersive vending machines, stock products, link them to Scene Regions, and let players purchase items through stylish HoloSuite terminals.",
+      "pitch": "Stock vending machines, link them to Scene Regions, and let players buy items with their actor's currency.",
       "compatibility": "Foundry v12-v14",
       "features": ["Limited stock and multi-item baskets", "Linked Region access and player prompts", "Four machine styles with system-agnostic currency support"],
       "docsUrl": "docs/module.html?id=holosuite-vending-machines",
@@ -201,8 +133,8 @@
       "tier": "premium",
       "category": "Tactical maps",
       "image": "assets/Blueprint-preview.png",
-      "pitch": "Turn Foundry Scenes into annotated, multi-floor tactical schematics that you can present, publish, draw on, and export.",
-      "compatibility": "Foundry v12-v13",
+      "pitch": "Build an annotated, multi-floor blueprint from a Foundry Scene, then present, publish, or export it.",
+      "compatibility": "Foundry v12-v14",
       "features": [
         "Generated Scene schematics or custom blueprint images",
         "Rooms, markers, freehand plans, multiple floors, and player presentation",
@@ -218,7 +150,7 @@
       "tier": "premium",
       "category": "Diegetic systems",
       "visual": "terminal-interface",
-      "pitch": "Configurable in-world computers with mail, files, cameras, utilities, authentication, hacking, and distinctive sci-fi desktops.",
+      "pitch": "Create in-world computers with mail, files, camera feeds, utilities, passwords, and optional hacking.",
       "compatibility": "Foundry v12-v14",
       "features": ["Mail, files, cameras, and utility apps", "Passwords, permissions, and optional hacking", "Four desktop styles and six interface themes"],
       "docsUrl": "docs/module.html?id=holosuite-terminal",
@@ -231,7 +163,7 @@
       "tier": "premium",
       "category": "Scanner",
       "image": "assets/PulseScanner-preview.png",
-      "pitch": "Cinematic scanner pulses for GM-placed targets, hidden signatures, scan difficulty, and table-wide reveals.",
+      "pitch": "Give actors scanners that send out animated pulses and reveal matching targets placed by the GM.",
       "compatibility": "Foundry v12-v14",
       "features": ["Animated pulse scans", "Hidden and revealed target signatures", "Premium Patreon release"],
       "docsUrl": "docs/module.html?id=pulse-scanner",
@@ -243,7 +175,7 @@
     {
       "name": "Patreon",
       "icon": "PT",
-      "description": "Unlock the premium collection and follow release previews.",
+      "description": "Get the premium modules and follow development previews.",
       "url": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
     },
     {
