@@ -739,7 +739,7 @@
     },
     "galaxy-map": {
       "tutorial": {
-        "intro": "Galaxy Map is a cinematic campaign-navigation board for star systems, routes, factions, linked Scenes and Journals, discoveries, and group-approved travel. The GM edits authoritative map data while players receive a filtered view.",
+        "intro": "Galaxy Map is a campaign-navigation board for star systems, routes, factions, linked Scenes and Journals, discoveries, and group-approved travel. The GM edits the map while players receive a filtered view.",
         "audience": "GMs create and edit maps, systems, routes, and factions; set the current system; reveal discoveries; broadcast maps; and approve travel. Players can open player-visible maps, inspect revealed data, open permitted links, and request travel over a direct visible route.",
         "quickStart": {
           "title": "Create a playable galaxy map",
@@ -2097,7 +2097,7 @@
     },
     "pulse-scanner": {
       "tutorial": {
-        "intro": "Pulse Scanner lets GMs attach sensor signatures to Scene Regions and grant Actors one or more scanners. A scan emits a cinematic pulse from a token and finds in-range targets whose configured signal matches the scanner mode.",
+        "intro": "Pulse Scanner lets GMs attach sensor signatures to Scene Regions and grant Actors one or more scanners. A scan sends an animated pulse from a token and finds in-range targets whose configured signal matches the scanner mode.",
         "audience": "GMs create, reveal, resolve, import, and export targets and grant/recharge scanners. Players may scan from owned tokens when world settings allow it and, by default, only when that Actor has a grant. The HoloSuite tile is player-visible.",
         "quickStart": {
           "title": "Create and detect a target",
@@ -2957,7 +2957,7 @@
         },
         {
           "question": "Is HoloSuite Blueprint tied to a game system?",
-          "answer": "No. It uses Foundry Scene documents and works independently of a specific game system. Version 1.0.0 supports Foundry VTT v12 and v13."
+          "answer": "No. It uses Foundry Scene documents and works independently of a specific game system. It supports Foundry VTT v12-v14."
         },
         {
           "question": "Does Blueprint require HoloSuite Core?",
