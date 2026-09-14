@@ -243,7 +243,7 @@ function faqList(items) {
 
 function videos(items, moduleName) {
   if (!items?.length) {
-    return `<div class="video-placeholder">Demo videos are planned for this module. Current documentation uses screenshots and workflow examples until short loops are available.</div>`;
+    return `<div class="video-placeholder">There is no demo video for this module yet.</div>`;
   }
   return `<div class="doc-video-list">${items.map((item) => {
     const video = typeof item === "string" ? { src: item } : item;
