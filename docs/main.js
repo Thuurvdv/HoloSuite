@@ -38,12 +38,8 @@ function moduleCards(modules) {
       <article class="module-card" id="module-${escapeAttribute(module.id)}" data-tier="${escapeAttribute(module.tier)}">
         ${moduleVisual(module)}
         <div class="module-body">
-          <div class="module-meta">
-            <span class="pill ${isPremium ? "premium" : ""}">${escapeHtml(module.tier)}</span>
-            <span class="pill">${escapeHtml(module.category)}</span>
-            <span class="pill">${escapeHtml(module.compatibility)}</span>
-          </div>
           <h3>${escapeHtml(module.name)}</h3>
+          <p class="module-details">${isPremium ? "Premium" : "Free"} · ${escapeHtml(module.compatibility)}</p>
           <p>${escapeHtml(module.pitch)}</p>
           <ul>${features}</ul>
           <div class="module-actions">

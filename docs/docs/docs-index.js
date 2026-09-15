@@ -53,12 +53,8 @@ function renderResults(modules, query) {
     <a class="docs-card" href="module.html?id=${encodeURIComponent(module.id)}">
       ${moduleVisual(module, "../")}
       <div class="docs-card-body">
-        <div class="module-meta">
-          <span class="pill ${module.tier === "premium" ? "premium" : ""}">${escapeHtml(module.tier)}</span>
-          <span class="pill">${escapeHtml(module.category)}</span>
-          <span class="pill">${escapeHtml(module.compatibility)}</span>
-        </div>
         <h2>${escapeHtml(module.name)}</h2>
+        <p class="module-details">${module.tier === "premium" ? "Premium" : "Free"} · ${escapeHtml(module.compatibility)}</p>
         <p>${escapeHtml(module.summary)}</p>
       </div>
     </a>
