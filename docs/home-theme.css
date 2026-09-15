@@ -1,0 +1,141 @@
+/* Homepage only. Documentation retains the shared styles.css palette. */
+.home-page {
+  --bg: #070d19;
+  --bg-soft: #0b1423;
+  --surface: #101e30;
+  --text: #f0f7ff;
+  --muted: #b9c8da;
+  --cyan: #20d9ff;
+  --pink: #ff4fa3;
+  --ink: #071321;
+  --line: rgba(32, 217, 255, 0.24);
+  --line-strong: rgba(32, 217, 255, 0.58);
+  background: var(--bg);
+}
+
+.home-page .site-header {
+  background: rgba(7, 13, 25, 0.95);
+  border-image: linear-gradient(90deg, var(--cyan), var(--pink)) 1;
+}
+.home-page nav a:hover { color: var(--cyan); background: rgba(32, 217, 255, 0.09); }
+.home-page nav a[href="#premium"] { color: var(--pink); }
+.home-page nav a[href="#premium"]:hover { background: rgba(255, 79, 163, 0.1); }
+
+.home-page .hero::after {
+  background:
+    linear-gradient(90deg, rgba(7, 13, 25, 0.96), rgba(7, 13, 25, 0.76) 55%, rgba(7, 13, 25, 0.55)),
+    radial-gradient(ellipse at 88% 25%, rgba(255, 79, 163, 0.22), transparent 55%),
+    linear-gradient(0deg, var(--bg), transparent 65%);
+}
+.home-page .eyebrow { color: var(--cyan); }
+.home-page #hero-title {
+  color: var(--cyan);
+  font-size: clamp(1.8rem, 3.2vw, 3rem);
+  line-height: 1.15;
+}
+.home-page .hero-copy { color: #cedaec; }
+.home-page .hero-product {
+  border-color: rgba(255, 79, 163, 0.5);
+  /* Flat composite of the previous cyan tint and translucent navy base. */
+  background: rgba(11, 49, 66, 0.847);
+  box-shadow: var(--shadow);
+}
+.home-page .hero-platform-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(8px, 2vw, 24px);
+  max-width: 560px;
+  margin-top: 32px;
+}
+.home-page .platform-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  text-align: center;
+}
+.home-page .platform-stat strong {
+  color: var(--pink);
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.1;
+}
+.home-page .platform-stat__art {
+  width: 150px;
+  max-width: 100%;
+  height: auto;
+  margin-top: 4px;
+  transition: filter 180ms ease;
+}
+.home-page .platform-stat > span {
+  margin-top: 8px;
+  color: var(--text);
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
+  font-weight: 600;
+}
+@media (hover: hover) {
+  .home-page .platform-stat:hover .platform-stat__art {
+    filter: drop-shadow(0 0 3px var(--pink)) drop-shadow(0 0 9px var(--pink));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-page .platform-stat__art { transition: none; }
+}
+
+.home-page .button.primary {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: var(--ink);
+}
+.home-page .button.secondary { background: #101a2b; border-color: var(--line-strong); }
+.home-page .button[href="#premium"],
+.home-page .button[href^="https://patreon.com/"] {
+  color: var(--pink);
+  border-color: var(--pink);
+  background: #1c1325;
+}
+.home-page .button:hover { box-shadow: 0 0 14px rgba(32, 217, 255, 0.24); }
+.home-page .button[href="#premium"]:hover,
+.home-page .button[href^="https://patreon.com/"]:hover { box-shadow: 0 0 14px rgba(255, 79, 163, 0.3); }
+
+.home-page .featured-modules {
+  --featured-cyan: var(--cyan);
+  background: var(--bg);
+  border-block-color: var(--line);
+}
+.home-page .featured-modules h2 { color: var(--text); }
+.home-page .featured-modules__note { color: var(--pink); }
+.home-page .featured-modules__heading {
+  background-image: none;
+  position: relative;
+}
+.home-page .featured-modules__heading::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), rgba(32, 217, 255, 0.2) 60%, var(--pink));
+  pointer-events: none;
+}
+.home-page .filter-button.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+.home-page .filter-button[data-filter="premium"].active { color: var(--pink); border-bottom-color: var(--pink); }
+
+.home-page .community-section {
+  background: linear-gradient(120deg, #0b1423, #141126);
+  border-block: 1px solid var(--line);
+}
+.home-page .community-card { background: #101b2c; }
+.home-page a.community-card:hover { border-color: var(--cyan); }
+.home-page .community-card[href^="https://patreon.com/"] { border-color: rgba(255, 79, 163, 0.55); }
+.home-page .community-card[href^="https://patreon.com/"] .community-icon { color: var(--pink); }
+.home-page .community-card[href^="https://patreon.com/"]:hover { border-color: var(--pink); }
+.home-page .final-cta { background: linear-gradient(150deg, #070d19, #151127); }
+.home-page .final-cta .eyebrow { color: var(--pink); }
+.home-page footer { background: #070d19; }
+.home-page a:focus-visible, .home-page button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-page .button:hover, .home-page .button:focus-visible { transform: none; }
+}

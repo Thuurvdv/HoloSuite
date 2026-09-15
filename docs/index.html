@@ -28,6 +28,8 @@
 
     <link rel="preload" href="assets/HoloSuiteCorePng.png" as="image" type="image/png">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="featured-modules.css">
+    <link rel="stylesheet" href="home-theme.css">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -57,7 +59,7 @@
       }
     </script>
   </head>
-  <body>
+  <body class="home-page">
     <header class="site-header">
       <a class="brand" href="#top" aria-label="HoloSuite home">
         <img src="assets/MTS_Logo.png" alt="" class="brand-mark" width="42" height="42">
@@ -78,8 +80,7 @@
         </div>
         <div class="hero-grid">
           <div class="hero-content">
-            <p class="eyebrow">HoloSuite for FoundryVTT</p>
-            <h1 id="hero-title">Add sci-fi immersion to any campaign!</h1>
+            <h1 id="hero-title">HOLOSUITE FOR FOUNDRY VTT</h1>
             <p class="hero-copy">
               HoloSuite is a collection of sci-fi themed modules that all share 1 launcher. Each one has been created to add more immersion for the players & GM.
             </p>
@@ -87,9 +88,7 @@
               <a class="button primary" href="#modules">Browse Modules</a>
               <a class="button secondary" href="#premium">View Premium Modules</a>
             </div>
-            <div class="hero-stats" aria-label="HoloSuite stats">
-              <div class="stats-grid" data-stats-grid></div>
-            </div>
+            <div class="hero-platform-stats" data-stats-grid role="group" aria-label="HoloSuite stats"></div>
           </div>
           <div class="hero-product" aria-label="HoloSuite Core preview">
             <img src="assets/HoloSuiteCorePng.png" alt="HoloSuite Core launcher interface in FoundryVTT" width="607" height="850">
@@ -97,39 +96,23 @@
         </div>
       </section>
 
-      <section class="section" id="modules" aria-labelledby="modules-title">
-        <div class="section-heading with-controls">
+      <section class="section featured-modules" id="modules" aria-labelledby="modules-title">
+        <div class="featured-modules__heading">
           <div>
-            <h2 id="modules-title">HoloSuite modules</h2>
+            <h2 id="modules-title">HoloSuite Modules</h2>
+            <p class="featured-modules__note">Pick a tool. Make a mess. Build a better universe.</p>
           </div>
-          <div class="filters" role="group" aria-label="Filter modules">
-            <button class="filter-button active" type="button" data-filter="all">All</button>
-            <button class="filter-button" type="button" data-filter="free">Free</button>
-            <button class="filter-button" type="button" data-filter="premium">Premium</button>
-          </div>
+          <a class="featured-modules__all" href="docs/">Documentation <span aria-hidden="true">→</span></a>
         </div>
-        <div class="module-grid" data-module-grid></div>
+          <div class="filters" role="group" aria-label="Filter all modules">
+            <button class="filter-button active" type="button" data-filter="all" aria-pressed="true">All</button>
+            <button class="filter-button" type="button" data-filter="free" aria-pressed="false">Free</button>
+            <button class="filter-button" type="button" data-filter="premium" aria-pressed="false">Premium</button>
+          </div>
+        <div class="featured-modules__grid" data-featured-grid></div>
+        <noscript><p>Browse the <a href="docs/">module documentation</a> with JavaScript enabled to see the module catalogue.</p></noscript>
       </section>
 
-      <section class="premium-band" id="premium" aria-labelledby="premium-title">
-        <div class="premium-copy">
-          <h2 id="premium-title">Premium collection</h2>
-          <p>
-            The premium collection expands every month. Join my premium Patreon tier to get access to everything!
-          </p>
-          <p>
-            Link your subscribed Patreon account to the Foundry account that owns your server's license,
-            then install the modules from Foundry's Add-on Modules screen.
-            Each module's documentation includes the installation steps.
-          </p>
-          <div class="hero-actions">
-            <a class="button primary" href="https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink" rel="noopener">Join Patreon</a>
-          </div>
-        </div>
-        <div class="premium-showcase">
-          <img src="assets/PulseScanner-preview.png" alt="Pulse Scanner FoundryVTT scan interface" loading="lazy" width="1600" height="900">
-        </div>
-      </section>
 
       <section class="community-section" id="community" aria-labelledby="community-title">
         <div class="section-heading">
@@ -157,6 +140,7 @@
       <a href="https://github.com/Thuurvdv/MageTowerFoundryModules" rel="noopener">GitHub</a>
     </footer>
 
+    <script src="featured-modules.js" defer></script>
     <script src="main.js" defer></script>
     <script
       data-goatcounter="https://magetowerstudios.goatcounter.com/count"

@@ -2,10 +2,11 @@
   const data = await loadSiteData();
   if (!data) return;
 
-  renderModules(data.modules || []);
+  renderFeaturedModules(data.featuredModules || [], data.modules || []);
   renderStats(data.stats || []);
   renderCommunity(data.community || []);
-  bindFilters(data.modules || []);
+  bindFilters(data.modules || [], data.featuredModules || []);
+  bindModuleCatalog();
   startCounterObserver();
 })();
 
@@ -20,67 +21,13 @@ async function loadSiteData() {
   }
 }
 
-function renderModules(modules) {
-  const grid = document.querySelector("[data-module-grid]");
-  if (!grid) return;
-  grid.innerHTML = moduleCards(modules);
-}
-
-function moduleCards(modules) {
-  return modules.map((module) => {
-    const isPremium = module.tier === "premium";
-    const features = (module.features || []).map((feature) => `<li>${escapeHtml(feature)}</li>`).join("");
-    const patreonButton = module.patreonUrl
-      ? `<a href="${escapeAttribute(module.patreonUrl)}" rel="noopener">Patreon</a>`
-      : "";
-
-    return `
-      <article class="module-card" id="module-${escapeAttribute(module.id)}" data-tier="${escapeAttribute(module.tier)}">
-        ${moduleVisual(module)}
-        <div class="module-body">
-          <h3>${escapeHtml(module.name)}</h3>
-          <p class="module-details">${isPremium ? "Premium" : "Free"} · ${escapeHtml(module.compatibility)}</p>
-          <p>${escapeHtml(module.pitch)}</p>
-          <ul>${features}</ul>
-          <div class="module-actions">
-            <a class="primary-link" href="${escapeAttribute(module.docsUrl)}" rel="noopener">Documentation</a>
-            <a href="${escapeAttribute(module.moduleUrl)}" rel="noopener">${escapeHtml(module.moduleActionLabel || (isPremium ? "Details" : "GitHub"))}</a>
-            ${patreonButton}
-          </div>
-        </div>
-      </article>
-    `;
-  }).join("");
-}
-
-function moduleVisual(module, pathPrefix = "") {
-  if (module.visual === "terminal-interface") {
-    return `
-      <div class="terminal-interface-visual" role="img" aria-label="Stylized HoloSuite Terminal interface">
-        <div class="terminal-interface-bar">
-          <span>HoloSuite Terminal</span>
-          <span class="terminal-interface-status">Online</span>
-        </div>
-        <div class="terminal-interface-apps" aria-hidden="true">
-          <span><b>MAIL</b><small>03 unread</small></span>
-          <span><b>FILES</b><small>secure vault</small></span>
-          <span><b>CAM</b><small>feeds linked</small></span>
-          <span><b>UTIL</b><small>systems ready</small></span>
-        </div>
-        <div class="terminal-interface-footer">AUTH LEVEL: USER // SECURE SESSION</div>
-      </div>
-    `;
-  }
-
-  return `<img src="${escapeAttribute(`${pathPrefix}${module.image}`)}" alt="${escapeAttribute(module.name)} preview" loading="lazy">`;
-}
 
 function renderStats(stats) {
   const grid = document.querySelector("[data-stats-grid]");
   if (!grid) return;
 
   grid.innerHTML = stats.map((stat) => `
-    <article class="stat-card">
+    <article class="platform-stat">
       <strong
         data-counter
         data-value="${escapeAttribute(String(stat.value))}"
@@ -88,6 +35,7 @@ function renderStats(stats) {
         data-suffix="${escapeAttribute(stat.suffix || "")}"
         data-format="${escapeAttribute(stat.format || "number")}"
       >${escapeHtml(`${stat.prefix || ""}0${stat.suffix || ""}`)}</strong>
+      <img class="platform-stat__art" src="assets/featured-modules/value-platform.svg" alt="" aria-hidden="true" width="150" height="50">
       <span>${escapeHtml(stat.label)}</span>
     </article>
   `).join("");
@@ -109,19 +57,48 @@ function renderCommunity(items) {
   }).join("");
 }
 
-function bindFilters(modules) {
+function bindFilters(modules, presentation) {
   const buttons = Array.from(document.querySelectorAll("[data-filter]"));
-  const grid = document.querySelector("[data-module-grid]");
+  const grid = document.querySelector("[data-featured-grid]");
   if (!buttons.length || !grid) return;
 
   buttons.forEach((button) => {
     button.addEventListener("click", () => {
       const filter = button.dataset.filter;
-      buttons.forEach((item) => item.classList.toggle("active", item === button));
+      buttons.forEach((item) => {
+        item.classList.toggle("active", item === button);
+        item.setAttribute("aria-pressed", String(item === button));
+      });
       const filtered = filter === "all" ? modules : modules.filter((module) => module.tier === filter);
-      grid.innerHTML = moduleCards(filtered);
+      renderFeaturedModules(presentation, filtered);
     });
   });
+}
+
+function bindModuleCatalog() {
+  const catalog = document.querySelector("#modules");
+  if (!catalog) return;
+  const revealModule = () => {
+    // Keep existing Premium navigation links useful after removing the promo band.
+    if (window.location.hash === "#premium") {
+      catalog.querySelector('[data-filter="premium"]')?.click();
+      catalog.scrollIntoView({ block: "start", behavior: "instant" });
+      return;
+    }
+    if (!window.location.hash.startsWith("#module-")) return;
+    // Restore All before revealing a card hidden by a previous filter.
+    catalog.querySelector('[data-filter="all"]')?.click();
+    const target = document.getElementById(window.location.hash.slice(1));
+    if (!target || !catalog.contains(target)) return;
+    target.scrollIntoView({ block: "start", behavior: "instant" });
+  };
+  window.addEventListener("hashchange", revealModule);
+  document.querySelectorAll('a[href="#premium"]').forEach(link => {
+    link.addEventListener("click", () => {
+      if (window.location.hash === "#premium") revealModule();
+    });
+  });
+  revealModule();
 }
 
 function startCounterObserver() {
