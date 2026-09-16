@@ -8,41 +8,17 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/HoloSuiteCorePng.png",
       "summary": "The GM-facing launcher module that connects HoloSuite modules.",
-      "overview": "HoloSuite Core is the foundation of the HoloSuite modules. It adds a phone-themed launcher for GMs from which you launch the other HoloSuite modules.",
-      "features": [
-        "Phone-themed module launcher.",
-        "Read about the latest updates & releases to HoloSuite",
-        "Several visual themes"
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloSuite Core, and click Install.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, check HoloSuite Core, and save.",
         "Install the other HoloSuite modules you want through the same installer, then enable them in Manage Modules.",
         "Open the launcher from the button in the token-controls and click a module's button to open it."
       ],
-      "configuration": [
-        "Core has minimal setup by design.",
-        "Feature modules register themselves when active."
-      ],
-      "faq": [
-        {
-          "question": "Do players use the Core launcher directly?",
-          "answer": "Players can use the launcher when the GM allows it. They only see modules that offer player access, and each module still applies its own permissions."
-        },
-        {
-          "question": "Is HoloSuite Core required?",
-          "answer": "All HoloSuite modules rely on Core to be installed and active to work."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/HoloSuite-clip.mp4",
           "title": "HoloSuite Core overview"
         }
-      ],
-      "examples": [
-        "Treat HoloSuite as an in-universe device.",
-        "Use a macro with game.holosuite.open() for quick access."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core"
     },
@@ -54,14 +30,6 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/Cybercall.jpg",
       "summary": "Make calls or send messages to players & npc's",
-      "overview": "CyberCall lets the GM send holographic calls to connected players. Players can also call the GM through personal or group contacts, choose a ringtone, and keep private message threads with their contacts.",
-      "features": [
-        "GM-composed holographic calls with caller, faction, portrait, message, and signal strength.",
-        "Standard, emergency, and corrupted visual styles.",
-        "Ringing calls, accept/end states, and fullscreen broadcasts.",
-        "Personal and shared contact lists.",
-        "Persistent private message threads for players, GMs, contacts, and linked actors."
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for CyberCall, and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and CyberCall, and save.",
@@ -69,32 +37,11 @@
         "Use the composer to prepare a call or open contacts to manage call targets.",
         "Broadcast calls to players or let players initiate calls to the GM."
       ],
-      "configuration": [
-        "Choose caller name, faction, portrait, message, signal strength, and style for each broadcast.",
-        "Use fullscreen mode for table-wide broadcasts.",
-        "Pick a ringtone or silent mode from module settings.",
-        "Create personal contacts, group contacts, and GM-managed contact identities."
-      ],
-      "faq": [
-        {
-          "question": "Can players call the GM?",
-          "answer": "Yes. Players can call contacts from the CyberCall contacts interface, and the GM receives an incoming call prompt."
-        },
-        {
-          "question": "Are messages persistent?",
-          "answer": "CyberCall stores message history as private Foundry chat messages with module flags. Read state is saved locally per client."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/cybercall-clip.mp4",
           "title": "CyberCall overview"
         }
-      ],
-      "examples": [
-        "Broadcast an emergency transmission from a ship captain during combat.",
-        "Let a player call a black-market contact through the group contacts list.",
-        "Use corrupted style and low signal strength for a damaged distress call."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall"
     },
@@ -106,15 +53,6 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/CameraFeed.jpg",
       "summary": "Show players camera feeds taken from live Scene regions or static images.",
-      "overview": "Security Cameras lets a GM create feeds from live canvas regions or static images. A feed can be online, offline, corrupted, or restricted, and can be sent to players in a window or picture-in-picture view.",
-      "features": [
-        "Create, organize, and manage cameras across scenes.",
-        "Use live canvas regions or static image feeds.",
-        "Online, offline, corrupted, and restricted camera states.",
-        "Broadcast camera feeds to all players.",
-        "Window and picture-in-picture display modes.",
-        "Foundry v13 Scene Region framing for live views."
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Security Cameras, and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Security Cameras, and save.",
@@ -122,32 +60,11 @@
         "Create a camera and choose the current scene or a static image source.",
         "Save the camera, then use Show to Players during a session."
       ],
-      "configuration": [
-        "Set camera name, location, feed source, and display mode.",
-        "Link live cameras to Foundry Scene Regions where supported.",
-        "Change camera status mid-session to online, offline, corrupted, or restricted.",
-        "Use Close All Player Feeds to remove every active feed at once."
-      ],
-      "faq": [
-        {
-          "question": "Can players open cameras themselves?",
-          "answer": "No. The GM controls which feeds are shown and when they close."
-        },
-        {
-          "question": "Do live canvas feeds work across scenes?",
-          "answer": "Players generally need to be on the same scene for live canvas updates. Otherwise the feed may use a fallback display."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/cameras-clip.mp4",
           "title": "Security Cameras overview"
         }
-      ],
-      "examples": [
-        "Show a lobby camera as players infiltrate a corporate facility.",
-        "Switch a feed to corrupted when an enemy jams the signal.",
-        "Use restricted status for cameras players have not hacked yet."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/security-cameras"
     },
@@ -159,15 +76,6 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/CSI%20Board.jpg",
       "summary": "Shared case boards for evidence, suspects, locations, timelines, and theories.",
-      "overview": "CSI Toolkit gives GMs and players a shared investigation board. Add cards for evidence, suspects, locations, and timeline events, then connect them with labeled lines.",
-      "features": [
-        "Create and manage investigation cases.",
-        "Add draggable cards for evidence, suspects, locations, and timeline entries.",
-        "Connect cards with labeled, styled relationship lines.",
-        "Share player-visible case boards.",
-        "Use database and noir corkboard themes.",
-        "Import and export cases as JSON."
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Crime Scene Investigation Toolkit, and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Crime Scene Investigation Toolkit, and save.",
@@ -175,32 +83,11 @@
         "Create a case with title, subtitle, description, visibility, and board theme.",
         "Add cards and connections as the investigation develops."
       ],
-      "configuration": [
-        "Set case visibility to GM-only or player-visible.",
-        "Choose database or corkboard visual theme per case.",
-        "Use card status, images, descriptions, and notes to control reveal detail.",
-        "Export case JSON for backup or sharing."
-      ],
-      "faq": [
-        {
-          "question": "Can players edit the board?",
-          "answer": "Players can contribute to visible case boards, including dragging cards and adding connections depending on the board workflow."
-        },
-        {
-          "question": "Can cases be moved between worlds?",
-          "answer": "Yes. Use export and import to move case JSON between worlds."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/Csi-clip.mp4",
           "title": "CSI Toolkit overview"
         }
-      ],
-      "examples": [
-        "Run a cyberpunk murder investigation with suspect and evidence cards.",
-        "Use connection labels like found at, last seen with, or encrypted by.",
-        "Dim card types to focus the table on evidence or timeline entries."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/csi-toolkit"
     },
@@ -212,15 +99,6 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/Galaxy%20Map%20Manager.png",
       "summary": "Build a holographic star map with systems, routes, travel, and GM-controlled reveals.",
-      "overview": "Galaxy Map adds a star map inside Foundry. The GM places systems and routes, decides what players can see, reveals discoveries, and handles player travel requests.",
-      "features": [
-        "Interactive star maps with clickable system nodes.",
-        "Custom icons, colors, sizes, pulse effects, descriptions, multi-scene tags, journals, and factions.",
-        "Routes with travel time, fuel cost, and route type.",
-        "GM-controlled visibility and discovery notifications.",
-        "Player travel requests and ship movement animations.",
-        "Zoom, pan, resize, import, and export."
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Galaxy Map, and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Galaxy Map, and save.",
@@ -228,32 +106,11 @@
         "Create a new map or import existing JSON.",
         "Open the map and start adding systems and routes."
       ],
-      "configuration": [
-        "Right-click empty space to add systems.",
-        "Right-click systems to create routes, reveal content, edit, or delete.",
-        "Set systems and routes as player-visible or GM-only.",
-        "Tag systems with any number of scenes and link journal entries where useful."
-      ],
-      "faq": [
-        {
-          "question": "Can players see hidden systems?",
-          "answer": "Players only see systems and routes the GM has made visible. Some systems can appear as unknown until revealed."
-        },
-        {
-          "question": "Can players move the party ship?",
-          "answer": "Players can request travel. The GM and active players can accept or decline depending on the workflow."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/galaxymap-clip.mp4",
           "title": "Galaxy Map overview"
         }
-      ],
-      "examples": [
-        "Reveal a hidden system after players decode a nav beacon.",
-        "Track the party ship location during a sector campaign.",
-        "Export a finished star map to reuse in another world."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map"
     },
@@ -265,13 +122,6 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/BountyBoard.jpg",
       "summary": "Post contracts for players to browse, claim, and complete from a sci-fi job board.",
-      "overview": "Bounty Board gives the GM a place to post jobs with a target, description, reward, and conditions. Players can browse the available contracts while the GM updates or removes them as the campaign changes.",
-      "features": [
-        "Create and manage bounty contracts.",
-        "Let players browse available jobs.",
-        "Track target details, rewards, descriptions, and conditions.",
-        "Update or remove bounties as the story changes."
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Bounty Board, and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Bounty Board, and save.",
@@ -279,31 +129,11 @@
         "Create contracts with the details players need.",
         "Post or update jobs as the campaign moves through hubs and factions."
       ],
-      "configuration": [
-        "Define target name, reward, job description, and conditions.",
-        "Keep old jobs visible or remove them when completed.",
-        "Use the board as an in-world contract terminal."
-      ],
-      "faq": [
-        {
-          "question": "Who manages bounties?",
-          "answer": "The GM controls bounty creation, updates, and removal."
-        },
-        {
-          "question": "Can players browse jobs?",
-          "answer": "Yes. Players can browse available contracts when the board is available to them."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/BountyBoard-clip.mp4",
           "title": "Bounty Board overview"
         }
-      ],
-      "examples": [
-        "Create a bounty board in a space station hub.",
-        "Offer several faction contracts before a session.",
-        "Update a bounty after the target escapes or the reward changes."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board"
     },
@@ -315,14 +145,6 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/CriticalSucces.jpg",
       "summary": "Play full-screen character animations for critical rolls.",
-      "overview": "Critical Cut-In watches rolls on the selected die and displays a full-screen overlay when a natural result meets its configured threshold. Each character can have a portrait, sound, label, animation style, and accent color. The module does not change the roll itself.",
-      "features": [
-        "Automatic roll detection for the selected die.",
-        "Global and per-character trigger thresholds.",
-        "Custom images, sounds, overlay labels, animation styles, and accent colors.",
-        "GM fallback configuration for non-player rolls.",
-        "Adjustable display duration."
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloSuite Critical Cut-In, and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Critical Cut-In, and save.",
@@ -330,32 +152,11 @@
         "Set the default trigger threshold.",
         "Open Configure Player Cut-Ins to customize actors."
       ],
-      "configuration": [
-        "Enable or disable cut-ins per character.",
-        "Set minimum roll thresholds globally or per actor.",
-        "Choose image, audio, overlay text, animation style, accent color, and duration.",
-        "Use actor portraits as fallback images where custom art is not set."
-      ],
-      "faq": [
-        {
-          "question": "Does this affect game mechanics?",
-          "answer": "No. The cut-in is visual and audio presentation only."
-        },
-        {
-          "question": "Can players configure their own cut-ins?",
-          "answer": "The GM controls module settings. Players should ask the GM to set custom art or labels."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/criticalcutin-clip.mp4",
           "title": "Critical Cut-In overview"
         }
-      ],
-      "examples": [
-        "Trigger only on natural 20s so the cut-in stays rare.",
-        "Give a recurring villain a GM cut-in.",
-        "Use a custom catchphrase as the overlay label."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-critical-cutin"
     },
@@ -367,16 +168,6 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/NodeIntrustion_hacking.jpg",
       "summary": "Interactive hacking minigames where Foundry skill checks shape puzzle difficulty.",
-      "overview": "HoloSuite Hacking runs a timed minigame after a Foundry skill check. The check result selects the difficulty profile, so the character's roll still affects what the player has to solve.",
-      "features": [
-        "GM-launched hacking challenges for selected players.",
-        "Node Intrusion network traversal minigame.",
-        "Signal Alignment channel tuning minigame.",
-        "Packet Switchboard routing minigame.",
-        "Prism Lock ring puzzle.",
-        "Difficulty profiles based on margin of success or failure.",
-        "Trace timers, hazards, assists, radar, and configurable profile tuning."
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloSuite Hacking, and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Hacking, and save.",
@@ -384,33 +175,11 @@
         "Choose minigame, actor, owning player, skill, and DC.",
         "Send the challenge and let the player accept."
       ],
-      "configuration": [
-        "Set the default hacking DC.",
-        "Adjust trace duration multiplier.",
-        "Override Node Intrusion takeover duration if desired.",
-        "Tune difficulty profiles for both minigames.",
-        "Let players choose visual glitch intensity client-side."
-      ],
-      "faq": [
-        {
-          "question": "Does a failed roll skip the minigame?",
-          "answer": "No. A poor roll makes the minigame harder, but the player still gets to attempt it."
-        },
-        {
-          "question": "What does a natural 20 do?",
-          "answer": "A natural 20 uses the critical success profile, typically giving better assists, more time, and clearer information."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/hacking-clip.mp4",
           "title": "HoloSuite Hacking overview"
         }
-      ],
-      "examples": [
-        "Use Node Intrusion to bypass corporate security.",
-        "Use Signal Alignment to decrypt an unstable transmission.",
-        "Lower trace timers for high-pressure combat hacking."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking"
     },
@@ -422,565 +191,17 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/HoloDockTeaser.png",
       "summary": "Manage ship loadouts, equipment, power, and damage without tying them to one game system.",
-      "overview": "HoloDock gives each ship a profile with an image, GM-defined statistics, equipment slots, power allocation, durability, and player permissions. Foundry Items can be dropped into slots and pinned onto the ship image. The GM decides what the statistics and equipment mean for the campaign.",
-      "features": [
-        "Create and manage multiple ship profiles.",
-        "Assign custom ship images or use the bundled default.",
-        "Track GM-defined ship statistics like speed, fuel, defense, cargo, crew, or campaign-specific values.",
-        "Create categorized equipment slots with descriptions and optional ship-image pins.",
-        "Drag Foundry Items onto slots to convert them into tracked ship equipment.",
-        "Display installed item names, icons, types, descriptions, power state, durability, and activation controls.",
-        "Manage ship power capacity, per-system allocation, and online or offline state.",
-        "Review dashboard pages for overview, systems, power grid, damage, speed, capacity, and additional statistics.",
-        "Activate configured equipment and publish the result, cooldown, resource note, and durability consequences to chat.",
-        "Let players request equipment installation through chat when GM approval is needed.",
-        "Configure equipment from the rocket button on any Foundry Item sheet.",
-        "Expose hooks and a game.holodock API for advanced integrations.",
-        "Open HoloDock from the HoloSuite launcher."
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloDock, and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloDock, and save.",
         "Open HoloDock from the HoloSuite launcher.",
         "Create a ship profile, then add stats and equipment slots to match your campaign's vehicle rules."
       ],
-      "configuration": [
-        "Create one or more ship profiles and choose whether players can see each profile.",
-        "Set a custom ship image if the default ship does not match the campaign.",
-        "Add custom statistics for anything your system needs to track.",
-        "Create equipment slot categories and decide which slots can receive player install requests.",
-        "Configure whether players may drag equipment into empty slots or activate ship systems.",
-        "Place equipment pins on the ship image when spatial layout matters.",
-        "Use power capacity, per-system allocation, durability, and activation settings to keep the ship dashboard table-ready."
-      ],
-      "tutorial": {
-        "intro": "This guide starts with a working ship, then explains every control and configuration field. Unless a step specifically says player, perform setup while logged in as a GM.",
-        "audience": "Players can open visible ships and use only the actions allowed by that ship's Player Rights. Creating profiles, changing ship data, configuring Items, approving installs, changing power or durability, and placing pins are GM tasks.",
-        "quickStart": {
-          "title": "Quick start: build your first working ship",
-          "paragraphs": [
-            "Start with one ship and one piece of equipment."
-          ],
-          "steps": [
-            "Follow the Installation steps above, then open your world as a GM.",
-            "Open the HoloSuite launcher and select HoloDock. Players also open HoloDock from this launcher.",
-            "As GM, select the plus button beside Ship Profile. HoloDock creates New Ship with a default image, sample statistics, and four empty slots.",
-            "Expand Ship Setup. Enter the ship name and class, choose an image, set Power Capacity, and select Save Ship. Use 0 when you do not want a total power budget.",
-            "Open a Foundry Item that represents a ship system. Select the rocket-shaped Ship Equipment control in the Item sheet header, enable Ship Equipment, choose its category, and configure any activation, durability, or power options.",
-            "Drag the Item from its sheet or directory onto a compatible empty slot in HoloDock. Confirm the install. You can also open a slot's three-dot menu and select Choose to browse world Items.",
-            "Select the installed Item in the right-hand Equipment rail to inspect it, allocate power, change durability, open its Item sheet, remove it from the slot, or activate it.",
-            "Open Player Rights from the shield button beside the profile selector. Decide whether players can see the ship, request installs, and activate systems."
-          ],
-          "callouts": [
-            {
-              "title": "Recommended first test",
-              "text": "Create one powered Item with Power Draw 2 and Starting Allocation 2, give the ship Power Capacity 5, and enable activation. This makes the Systems, Power Grid, and activation views useful immediately.",
-              "tone": "info"
-            }
-          ]
-        },
-        "sections": [
-          {
-            "id": "interface-tour",
-            "title": "Interface tour",
-            "paragraphs": [
-              "HoloDock keeps setup and play controls in one resizable window. The available controls change with GM status and the selected ship's rights."
-            ],
-            "subsections": [
-              {
-                "title": "Top bar and profile selector",
-                "bullets": [
-                  "Ship Profile switches between ships visible to the current user. The most recently selected ship becomes that user's default the next time HoloDock opens.",
-                  "The plus button creates a profile. The shield button opens Player Rights. The trash button permanently deletes the selected profile after confirmation. These buttons are GM-only."
-                ]
-              },
-              {
-                "title": "Left inspector",
-                "bullets": [
-                  "Ship Setup contains the vessel's name, class, image, and total power capacity.",
-                  "Operations shows the calculated Systems, Power, Online, Integrity, Speed, and Capacity tiles. Select a tile to open its detail page.",
-                  "Additional statistics appear below the tiles with GM edit and delete controls."
-                ]
-              },
-              {
-                "title": "Command deck and equipment rail",
-                "bullets": [
-                  "The center command deck shows the ship image on Overview and the Systems, Power Grid, Damage, Speed, Capacity, or selected Equipment page.",
-                  "The condition badge is calculated from installed systems, damage, power, and whether a capacity is configured; it is not a manually selected status.",
-                  "The right rail groups slots by category. Select installed equipment to open its Equipment page. Use a slot's three-dot menu to choose an Item, link a pin, edit the slot, or delete it."
-                ]
-              }
-            ]
-          },
-          {
-            "id": "ships-and-rights",
-            "title": "Ship profiles and player rights",
-            "subsections": [
-              {
-                "title": "Create and configure a ship",
-                "paragraphs": [
-                  "Select the plus button beside Ship Profile. A new profile starts visible to players, allows system activation, blocks player installs, uses the bundled ship image, and has an untracked power capacity of 0. It also includes example stats and Weapons, Defense, Utility, and Engines slots that you can change or delete."
-                ],
-                "steps": [
-                  "Expand Ship Setup in the left inspector.",
-                  "Set Ship Name and Class / Type. Class is descriptive and may be left blank.",
-                  "Paste an Image Path or use the folder button to choose a file through Foundry's File Picker. A missing image falls back to the bundled default.",
-                  "Set Power Capacity to a non-negative whole number, or 0 to show allocation without enforcing a total budget.",
-                  "Select Save Ship. Switching profiles does not submit unsaved setup fields."
-                ]
-              },
-              {
-                "title": "Configure player rights",
-                "steps": [
-                  "Select the shield button beside Ship Profile.",
-                  "Enable Hide ship from players to remove this profile from every non-GM user's profile selector.",
-                  "Enable Allow players to drag equipment into empty slots to let players submit installation requests. A GM must still approve each request; this does not grant direct editing rights.",
-                  "Enable Allow players to activate systems to show and enable configured activation actions for players. Disable it for a read-only player view.",
-                  "Select Save. Rights are stored separately for every ship profile."
-                ],
-                "callouts": [
-                  {
-                    "title": "Default rights",
-                    "text": "New profiles are visible, player installation is disabled, and player activation is enabled. Review Player Rights before inviting players into a new ship.",
-                    "tone": "warning"
-                  }
-                ]
-              },
-              {
-                "title": "Switch or delete profiles",
-                "bullets": [
-                  "Profile selection is saved per browser user, so the GM and each player may open on different ships.",
-                  "Deleting a profile removes its stats, slots, links, and assignments. It does not delete the Foundry Items that were installed or erase their Ship Equipment flags."
-                ]
-              }
-            ]
-          },
-          {
-            "id": "statistics-and-dashboard",
-            "title": "Statistics and dashboard pages",
-            "paragraphs": [
-              "Statistics are free-form text values. HoloDock does not calculate speed, fuel, cargo, crew, or defense from a game system. Labels determine whether a stat appears on the dedicated Speed or Capacity pages."
-            ],
-            "subsections": [
-              {
-                "title": "Add, edit, and delete statistics",
-                "steps": [
-                  "Select the plus button in Operations.",
-                  "Enter a Label, Value, and optional Note. Values may include units or text, such as 8 hexes, 75%, 12 tons, or Operational.",
-                  "Select Save. Use the pencil and trash controls on an additional-stat card to edit or delete it.",
-                  "On the Speed and Capacity pages, GMs can edit recognized values directly. Changing or leaving a field saves it; the X control unsets that recognized statistic."
-                ]
-              },
-              {
-                "title": "Labels recognized by special pages",
-                "tables": [
-                  {
-                    "columns": ["Page field", "Recommended label", "Labels HoloDock recognizes"],
-                    "rows": [
-                      ["Speed", "Speed", "First statistic whose label contains speed"],
-                      ["Cruise", "Cruise Speed", "Label contains cruise"],
-                      ["Maximum", "Maximum Speed", "Label contains max speed, maximum speed, top speed, or maximum"],
-                      ["Thrust", "Thrust", "Label contains thrust or acceleration"],
-                      ["Capacity", "Capacity", "First label containing capacity or occupancy"],
-                      ["Crew", "Crew", "Label contains crew"],
-                      ["Berths", "Berths", "Label contains berth"],
-                      ["Cargo", "Cargo", "Label contains cargo or hold"],
-                      ["Life Support", "Life Support", "Label contains life support or life-support"]
-                    ]
-                  }
-                ],
-                "callouts": [
-                  {
-                    "title": "Avoid ambiguous names",
-                    "text": "Matching is case-insensitive and based on words contained in the label. Use the recommended labels and keep the main Speed statistic before Cruise Speed so the intended value is selected.",
-                    "tone": "warning"
-                  }
-                ]
-              },
-              {
-                "title": "What each dashboard page shows",
-                "bullets": [
-                  "Overview shows the vessel image, pins, condition, operation tiles, and equipment rail.",
-                  "Systems lists installed Ship Equipment and summarizes power, durability, and Ready, Offline, No Power, Low Power, Damaged, or Broken state.",
-                  "Power Grid lists only equipment with Requires power enabled and lets a GM edit each allocation.",
-                  "Damage lists durability-enabled installed systems and their current integrity state.",
-                  "Speed and Capacity show only when the corresponding statistic is configured for a player. GMs can open them to add recognized values.",
-                  "Selecting an installed Item in the rail opens its Equipment detail page even though Equipment is not a permanent navigation tile."
-                ]
-              },
-              {
-                "title": "How the condition badge is calculated",
-                "bullets": [
-                  "Critical: at least one system is Broken, or the ship is over its tracked power capacity while at least one system is underpowered.",
-                  "Compromised: there is damage, an offline or underpowered system, or a power-capacity overage that is not already Critical.",
-                  "Strained: there are no installed ship systems, or total Power Capacity is 0 and therefore untracked.",
-                  "Nominal: systems exist, capacity is tracked, and none of the warning conditions apply."
-                ]
-              }
-            ]
-          },
-          {
-            "id": "slots-and-equipment",
-            "title": "Equipment slots and Item installation",
-            "subsections": [
-              {
-                "title": "Create a slot",
-                "steps": [
-                  "Select the plus button at the top of the Equipment rail.",
-                  "Set Slot Type. This text is both the slot's display label and its grouping category in the rail. Existing and default categories are suggested, but you may type a new one.",
-                  "Add an optional Description for your own slot definition.",
-                  "Optionally set Required Ship Equipment Category and Required Tags, then select Save. New categories are remembered as suggestions throughout the world."
-                ]
-              },
-              {
-                "title": "Compatibility rules",
-                "bullets": [
-                  "Required Ship Equipment Category must exactly match the Item's Ship Equipment Category, ignoring capitalization.",
-                  "Required Tags is a comma-separated list. An Item must have every required tag; tag matching also ignores capitalization.",
-                  "An ordinary Item dropped into an unrestricted slot is converted to Ship Equipment and starts in the slot category. If a required category exists, it starts in that required category.",
-                  "The Choose browser sorts compatible Items first and puts rejected Items in an Incompatible section with the reason. Selecting an incompatible Item still produces a warning and does not install it."
-                ]
-              },
-              {
-                "title": "Install, replace, inspect, and remove Items",
-                "steps": [
-                  "Drag a Foundry Item onto a slot, or choose Choose from the slot's three-dot menu. The Choose browser searches world Items; drag and drop can resolve other accessible Item UUIDs, but importing an Item into the world first is the safest workflow.",
-                  "Confirm the installation. If the slot is occupied, confirmation replaces its assignment; the old Item itself is not deleted.",
-                  "Select an installed entry to open its Equipment page. Open launches the original Item sheet. Remove clears only the slot assignment.",
-                  "As GM, you can also right-click a slot card to remove its installed Item immediately."
-                ],
-                "callouts": [
-                  {
-                    "title": "HoloDock references the original Item",
-                    "text": "A slot stores the Item's UUID; it does not make a copy. Renaming or reconfiguring that Item updates what HoloDock shows. Deleting it leaves the slot unable to resolve the equipment until another Item is installed.",
-                    "tone": "info"
-                  }
-                ]
-              },
-              {
-                "title": "Configure an Item as Ship Equipment",
-                "paragraphs": [
-                  "Open any Item sheet as GM and select the rocket-shaped Ship Equipment control in the header. If your system uses a custom sheet, HoloDock also attempts to add a small rocket fallback control near the window controls."
-                ],
-                "bullets": [
-                  "Ship Equipment enables or removes all HoloDock metadata on the Item. Turning it off removes the flag but does not remove a slot's UUID assignment.",
-                  "Category identifies the equipment type and participates in slot compatibility.",
-                  "Tags is a comma-separated list used by compatibility rules. Examples: turret, external, sensor, medical, or military.",
-                  "Activation, Durability, and Power are independent. Enable only the subsystems you want HoloDock to track."
-                ]
-              }
-            ]
-          },
-          {
-            "id": "power-and-damage",
-            "title": "Power allocation and damage tracking",
-            "subsections": [
-              {
-                "title": "Configure the ship power budget",
-                "steps": [
-                  "In Ship Setup, set Power Capacity to the total allocation available to this vessel and save the ship.",
-                  "On each relevant Item, enable Requires power, set Power Draw, set Starting Allocation, and choose whether it begins Online.",
-                  "Use the Equipment page or Power Grid to change Allocated power. Use the Equipment page to switch an Item Online or Offline."
-                ],
-                "bullets": [
-                  "Only allocations on online, power-enabled equipment count toward the ship's Used total.",
-                  "Allocated below Power Draw makes a system underpowered and blocks its activation. An allocation of zero turns the system offline when its equipment data is saved.",
-                  "Going above ship Power Capacity marks the budget as over capacity but does not automatically redistribute power or shut systems down.",
-                  "Power Capacity 0 means untracked. HoloDock still shows each Item's draw and allocation, but there is no total-budget overage."
-                ],
-                "callouts": [
-                  {
-                    "title": "No saved presets",
-                    "text": "The current HoloDock release does not save named power presets. Allocation changes are live and persist directly on each Item.",
-                    "tone": "warning"
-                  }
-                ]
-              },
-              {
-                "title": "Configure durability",
-                "steps": [
-                  "Open an Item's Ship Equipment configuration and enable Has durability.",
-                  "Set Current, Maximum, and Broken At. Current is clamped between 0 and Maximum; Broken At is the threshold at or below which the system is Broken.",
-                  "During play, edit Current from the selected Equipment page. The Damage page summarizes every installed durability-enabled system."
-                ],
-                "bullets": [
-                  "Intact means Current equals Maximum. Damaged means Current is below Maximum but above Broken At. Broken means Current is at or below Broken At.",
-                  "A broken powered Item is automatically taken offline when its HoloDock equipment data is saved.",
-                  "Deleting or removing an Item from a slot does not change its durability values because they belong to the Item."
-                ]
-              }
-            ]
-          },
-          {
-            "id": "activation",
-            "title": "Equipment activation",
-            "subsections": [
-              {
-                "title": "Configure the activation fields",
-                "tables": [
-                  {
-                    "columns": ["Field", "What it does", "Example"],
-                    "rows": [
-                      ["Can be activated", "Adds the activation action to installed equipment.", "Enabled for a railgun or scanner"],
-                      ["Button Label", "Text shown on the action button.", "Fire Railgun"],
-                      ["Action Type", "Descriptive integration key passed to hooks and shown on chat cards; HoloDock does not perform a system roll by itself.", "attack, scan, repair"],
-                      ["Cooldown", "Records and displays a real-time countdown using about 6 seconds per configured round after activation.", "3 rounds"],
-                      ["Resource Cost", "A descriptive cost included in the result; HoloDock does not deduct a game-system resource automatically.", "1 torpedo"],
-                      ["Durability Cost", "Automatically subtracts this amount from HoloDock Current durability after activation when durability is enabled.", "2"],
-                      ["Block activation when broken", "Prevents activation at or below Broken At.", "Enabled"]
-                    ]
-                  }
-                ]
-              },
-              {
-                "title": "What happens when Activate is selected",
-                "steps": [
-                  "HoloDock verifies that activation is enabled and that the user has activation rights for the ship.",
-                  "If power tracking is enabled, the Item must be Online and Allocated must be at least Power Draw.",
-                  "If Block activation when broken is enabled, the Item must be above its Broken At threshold.",
-                  "HoloDock calls the holodock.activateEquipment hook so a game system or another module can handle, add consequences, or block the action.",
-                  "If activation continues, HoloDock records the activation time, subtracts configured durability cost, lists descriptive resource and cooldown consequences, and calls holodock.equipmentActivated.",
-                  "When Enable Chat Cards is on, HoloDock posts Activated, Blocked, or Unhandled plus ship, slot, action, costs, cooldown, durability, and integration messages to chat."
-                ],
-                "callouts": [
-                  {
-                    "title": "Cooldown is informational",
-                    "text": "The current release shows the remaining cooldown but does not itself disable the button during that countdown. Enforce cooldown through table rules or an integration hook if it must be mandatory.",
-                    "tone": "warning"
-                  },
-                  {
-                    "title": "Resource Cost is informational",
-                    "text": "Text such as 1 missile is reported, not deducted from an Actor or Item. Durability Cost is the built-in numeric consequence that HoloDock applies automatically.",
-                    "tone": "info"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "id": "ship-image-pins",
-            "title": "Ship-image pins and link lines",
-            "paragraphs": [
-              "A slot pin connects a physical place on the ship image to its card in the Equipment rail. Pins inherit system status styling, so damage and power problems are visible on the vessel diagram."
-            ],
-            "steps": [
-              "Open the slot's three-dot menu and select Link.",
-              "Select the desired point on the ship image. HoloDock stores that position as percentages, so it remains aligned when the window resizes.",
-              "To reposition a pin as GM, drag it to a new point. A simple click opens that slot's Equipment page.",
-              "To remove the pin without deleting the slot, open the three-dot menu and select Clear Link."
-            ],
-            "callouts": [
-              {
-                "title": "Player interaction",
-                "text": "Players cannot create, move, or clear pins. Selecting a pin opens its installed equipment when the linked slot contains an Item.",
-                "tone": "info"
-              }
-            ]
-          },
-          {
-            "id": "player-workflows",
-            "title": "Player workflows and GM approval",
-            "subsections": [
-              {
-                "title": "Player installation requests",
-                "steps": [
-                  "The GM enables Allow players to drag equipment into empty slots for that ship.",
-                  "A player drags an accessible Foundry Item onto a compatible slot and confirms the request.",
-                  "With chat cards enabled, HoloDock posts a request card containing player, ship, slot, and Item. A GM selects Approve or Reject. Without chat cards, the primary active GM receives an approval dialog through the module socket.",
-                  "Approval converts an ordinary Item to Ship Equipment if necessary and assigns it to the slot. Rejection leaves both Item and slot unchanged."
-                ]
-              },
-              {
-                "title": "Player activation",
-                "bullets": [
-                  "The GM must enable Allow players to activate systems on the selected ship.",
-                  "A primary active GM should be connected so durability and activation timestamps can be saved authoritatively for a player's activation.",
-                  "Players cannot change allocation, toggle power, edit durability, reconfigure the Item, remove equipment, or change ship data.",
-                  "Hidden ships do not appear to players even if their activation or install rights are enabled.",
-                  "An allowed drop onto an occupied compatible slot creates a replacement request. HoloDock asks the player to confirm and still requires GM approval before changing the assignment."
-                ]
-              }
-            ]
-          },
-          {
-            "id": "settings-and-storage",
-            "title": "Settings, persistence, and maintenance",
-            "subsections": [
-              {
-                "title": "Visible world setting",
-                "paragraphs": [
-                  "Foundry's Configure Settings > Module Settings contains Enable Chat Cards. It is on by default. Turning it off suppresses activation cards and uses socket-based GM prompts instead of chat cards for player install requests."
-                ]
-              },
-              {
-                "title": "Where HoloDock data lives",
-                "bullets": [
-                  "Ship profiles, rights, statistics, slots, pin positions, and Item assignments are stored as world-level HoloDock settings.",
-                  "Remembered slot and equipment categories are stored at world level and grow when a GM saves a new category.",
-                  "The selected default ship is stored per client user.",
-                  "Equipment category, tags, activation, durability, and power data are stored as a HoloDock flag on the original Foundry Item."
-                ]
-              },
-              {
-                "title": "Safe maintenance rules",
-                "bullets": [
-                  "Remove clears a slot assignment; it does not delete or reset the Item.",
-                  "Delete Slot removes that slot and its pin link; it does not delete installed equipment.",
-                  "Delete Profile removes the profile and all of its ship-side configuration; it does not delete any referenced Items.",
-                  "Disabling Ship Equipment on an Item removes its HoloDock flag. Remove it from any slots separately to avoid unresolved or untracked assignments."
-                ]
-              }
-            ]
-          },
-          {
-            "id": "advanced-integrations",
-            "title": "Advanced integrations",
-            "paragraphs": [
-              "HoloDock works without code, but module and system authors can connect activation to rolls, resource consumption, automation, or custom UI. The API is available as game.holodock and on the active holodock module's api property."
-            ],
-            "subsections": [
-              {
-                "title": "Activation hooks",
-                "bullets": [
-                  "holodock.activateEquipment receives a mutable activation context before built-in consequences are saved. An integration can set handled, blocked, message, or append consequence text.",
-                  "holodock.equipmentActivated fires after a successful activation and saved built-in consequences.",
-                  "Action Type is included in the Item's equipment data so integrations can route values such as attack, scan, or repair."
-                ]
-              },
-              {
-                "title": "Public API groups",
-                "tables": [
-                  {
-                    "columns": ["Purpose", "Available methods"],
-                    "rows": [
-                      ["Open and read", "open, getProfiles, getProfile, getCategories, getShipPowerBudget"],
-                      ["Profiles", "createProfile, updateProfileMetadata, updateProfilePermissions, deleteProfile"],
-                      ["Ship layout", "upsertSlot, deleteSlot, upsertStat, deleteStat, setSlotAnchor, clearSlotAnchor"],
-                      ["Assignments", "equipItem, unequipItem, validateItemForSlot"],
-                      ["Equipment", "getShipEquipmentData, isShipEquipment, setShipEquipmentData, updateShipEquipmentDurability, updateShipEquipmentPowerState, updateShipEquipmentPowerAllocation, activateEquipment"]
-                    ]
-                  }
-                ],
-                "callouts": [
-                  {
-                    "title": "GM authority still applies",
-                    "text": "Most mutation methods enforce the same GM checks as the interface. Build integrations around the exposed methods and hooks rather than editing world settings or Item flags directly.",
-                    "tone": "warning"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "id": "worked-example",
-            "title": "Worked example: a combat-ready courier",
-            "steps": [
-              "Create a ship named Wayfarer, class Light Courier, with Power Capacity 10.",
-              "Keep Speed 6 and Cruise Speed 4. Add Maximum Speed 9, Thrust 3, Crew 4, Berths 6, Cargo 2 tons, and Life Support 30 days so both detail pages are populated.",
-              "Create a Weapons slot requiring category Weapons and tags turret, external. Create an Engines slot requiring Engines, plus unrestricted Defense and Utility slots.",
-              "Configure a Railgun Item as category Weapons with turret and external tags. Enable power with Draw 4 and Allocation 4; enable durability at 10/10 with Broken At 0; enable activation with Fire Railgun, Action Type attack, Resource Cost 1 slug, Cooldown 2, and Durability Cost 1.",
-              "Configure Engines with power 3/3 and durability 12/12, Shields with power 2/2, and a Scanner with power 1/1. Install all four Items. The ship now uses 10/10 power and should be Nominal.",
-              "Link each slot to the corresponding place on the ship image. Open Player Rights, keep the ship visible, enable player activation, and enable installs only if you want player requests.",
-              "Test damage by lowering Engines to 5/12; the condition becomes Compromised. Lower it to 0/12; it becomes Broken, powers off, and the ship becomes Critical. Restore durability and switch it Online to return to Nominal."
-            ]
-          }
-        ],
-        "reference": {
-          "title": "Configuration field reference",
-          "paragraphs": [
-            "Use these tables as a compact checklist after working through the tutorial. Numeric HoloDock fields accept non-negative values and are normalized when saved."
-          ],
-          "tables": [
-            {
-              "title": "Ship profile fields",
-              "columns": ["Field", "Scope", "Behavior"],
-              "rows": [
-                ["Ship Name", "Per profile", "Display name in the selector and command deck."],
-                ["Class / Type", "Per profile", "Optional descriptive subtitle."],
-                ["Image Path", "Per profile", "Foundry-accessible image path; missing images fall back to HoloDock's default."],
-                ["Power Capacity", "Per profile", "Total online allocation budget; 0 disables total-budget tracking."],
-                ["Hide ship from players", "Per profile", "Removes the profile from all non-GM views."],
-                ["Allow players to drag equipment", "Per profile", "Allows compatible install requests that still require GM approval."],
-                ["Allow players to activate systems", "Per profile", "Allows players to select configured activation buttons."]
-              ]
-            },
-            {
-              "title": "Slot fields",
-              "columns": ["Field", "Required", "Behavior"],
-              "rows": [
-                ["Slot Type", "Yes", "Display label and grouping category."],
-                ["Description", "No", "Free-form slot notes."],
-                ["Required Ship Equipment Category", "No", "Case-insensitive exact match against Item category."],
-                ["Required Tags", "No", "Comma-separated tags; every tag must exist on the Item."],
-                ["Image anchor", "No", "Percentage position created through Link; draws a line to the slot card."]
-              ]
-            },
-            {
-              "title": "Item equipment fields",
-              "columns": ["Group", "Fields", "Behavior"],
-              "rows": [
-                ["Identity", "Ship Equipment, Category, Tags", "Enables tracking and controls slot compatibility."],
-                ["Activation", "Enabled, Label, Action Type, Cooldown, Resource Cost, Durability Cost, Block when broken", "Creates an action and records or applies its configured consequences."],
-                ["Durability", "Enabled, Current, Maximum, Broken At", "Calculates Intact, Damaged, or Broken state."],
-                ["Power", "Enabled, Online, Power Draw, Starting Allocation", "Calculates power state, activation eligibility, and ship budget use."]
-              ]
-            }
-          ]
-        }
-      },
-      "faq": [
-        {
-          "question": "Is HoloDock tied to a specific game system?",
-          "answer": "No. HoloDock is system-agnostic and lets the GM define the ship statistics and equipment structure the campaign needs."
-        },
-        {
-          "question": "Can players modify ship equipment?",
-          "answer": "GMs control this per ship. Players can view visible ships, and GMs may allow player equipment drops, system activation, or chat-based install requests."
-        },
-        {
-          "question": "Does HoloDock require HoloSuite Core?",
-          "answer": "Yes. HoloDock opens from the HoloSuite launcher and requires HoloSuite Core."
-        },
-        {
-          "question": "Why is an activation button blocked?",
-          "answer": "Check that the Item is Online, has at least as much Allocated power as Power Draw, and is not Broken when Block activation when broken is enabled. Also confirm the ship allows player activation if a player is using it."
-        },
-        {
-          "question": "Does Cooldown stop repeated activation?",
-          "answer": "Not by itself in the current release. It records the activation time and displays a countdown based on about six seconds per round, but the button remains available unless an integration blocks it."
-        },
-        {
-          "question": "Does Resource Cost subtract ammunition, charges, or Actor resources?",
-          "answer": "No. Resource Cost is descriptive and appears in activation results. Durability Cost is applied automatically to HoloDock durability; game-system resource changes require an integration."
-        },
-        {
-          "question": "Why is the ship Strained when everything looks healthy?",
-          "answer": "A ship with no installed Ship Equipment or with Power Capacity set to 0 is Strained because HoloDock cannot verify a complete tracked configuration. Set a capacity and install at least one configured system to allow Nominal status."
-        },
-        {
-          "question": "Why can a player not see a ship or install an Item?",
-          "answer": "Review that ship's Player Rights. The profile must not be hidden, and Allow players to drag equipment must be enabled. The Item must satisfy every category and tag rule, and a GM must approve the request."
-        },
-        {
-          "question": "Why does an installed slot show missing or stop resolving its Item?",
-          "answer": "Slots reference the original Item by UUID. Restore that Item if it was deleted or moved out of reach, or remove the stale assignment and install another accessible Item."
-        },
-        {
-          "question": "Can I save travel, stealth, or combat power presets?",
-          "answer": "Not in the current HoloDock release. Power allocations persist live on each Item, but named presets are not implemented."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/holodock-clip.mp4",
           "title": "HoloDock overview"
         }
-      ],
-      "examples": [
-        "Build a party ship with engines, shields, weapons, cargo, and crew systems.",
-        "Pin critical systems directly onto the ship image for a tactical damage overview.",
-        "Let an engineer player request a weapon upgrade while the GM approves the install from chat.",
-        "Adjust power allocations for travel, stealth, combat, and emergencies."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/holodock"
     },
@@ -992,57 +213,13 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/VendingMachines.webp",
       "summary": "Region-linked vending machines with limited stock, baskets, actor currency, and four terminal styles.",
-      "overview": "HoloSuite Vending Machines lets the GM stock machines with Foundry Items and link them to Scene Regions. Players can fill a basket and pay with an actor's currency. A connected GM processes purchases. The machine tracks stock and keeps a record of successful and failed transactions.",
-      "features": [
-        "Create and manage multiple vending machines with independent names, branding, status, products, prices, and stock.",
-        "Drag Items from world directories, compendiums, or actor sheets into six active product slots.",
-        "Choose Alien Market, Neon, Executive Terminal, or Corporate Kiosk presentation styles.",
-        "Link machines to Scene Regions and require a player-owned token to be present before access or purchase.",
-        "Let players select quantities, add multiple products to a basket, and confirm one combined purchase.",
-        "Use automatic actor currency detection, a configured actor data path, or a matching inventory currency item.",
-        "Reserve purchased stock before transferring products through the animated retrieval workflow.",
-        "Review a persistent success and failure transaction ledger, restock machines, and import or export machine data.",
-        "Configure local selection, purchase, dispensing, collection, and failure sounds."
-      ],
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloSuite Vending Machines, and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Vending Machines, and save.",
         "Open Configure Settings, find HoloSuite Vending Machines, and open the machine manager.",
         "Create a machine, drag in products, set prices and stock, then link any Scene Regions that should provide access."
       ],
-      "configuration": [
-        "Choose the world currency source and optional actor currency data path in module settings.",
-        "Use the experimental Credit Transformer only when you want detected system money displayed as Credits.",
-        "Configure machine branding, visual style, online status, product descriptions, prices, current stock, and maximum stock.",
-        "Keep linked Region presence enabled when machines should only be available near their in-world location.",
-        "Player access through the HoloSuite launcher is disabled by default and can be enabled by a GM in module settings.",
-        "Adjust or replace each vending sound cue and set the shared volume for the world."
-      ],
-      "faq": [
-        {
-          "question": "Is HoloSuite Vending Machines tied to a particular game system?",
-          "answer": "No. It can automatically detect common actor currency structures, use a configured actor data path, or fall back to an inventory item with the configured currency name."
-        },
-        {
-          "question": "Can players open every vending machine from HoloSuite?",
-          "answer": "Not by default. A GM may enable player HoloSuite access, and machines that require linked Region presence remain hidden or inaccessible unless the player has an owned token in a linked Region."
-        },
-        {
-          "question": "Does a GM need to be connected for purchases?",
-          "answer": "Yes. A connected GM validates actor ownership, Region access, stock, and currency before authorizing a purchase."
-        },
-        {
-          "question": "Can machines be reused in another world?",
-          "answer": "Yes. The manager can export and import vending machine data as JSON."
-        }
-      ],
       "videos": [],
-      "examples": [
-        "Place an Alien Market machine in a spaceport bazaar and link it to the stall's Scene Region.",
-        "Use a Corporate Kiosk as an office supply terminal with tightly controlled inventory.",
-        "Build a Neon black-market vendor with rare products, low stock, and inventory-item Credits.",
-        "Take a machine offline during a facility lockdown, then restore and restock it after the scene."
-      ],
       "moduleUrl": "https://github.com/Thuurvdv/holosuite-vending-machines"
     },
     {
@@ -1053,21 +230,6 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/Blueprint-preview.png",
       "summary": "Build, annotate, present, publish, and export tactical blueprints from Foundry Scenes.",
-      "overview": "HoloSuite Blueprint reads Foundry wall data or uses a custom map image to build a tactical schematic. The GM can add floors, rooms, markers, text, and freehand plans before sharing a filtered player view. A blueprint can also be published to HoloSuite Terminal or exported as a PNG. The module never changes the Scene walls or lights it reads.",
-      "features": [
-        "Generate styled SVG architecture from Scene walls, windows, terrain walls, ethereal walls, and door types.",
-        "Use a Foundry-hosted image instead while keeping annotations in Scene coordinates.",
-        "Build multi-floor facilities from the root Scene, other Scenes, inherited sources, or per-floor images.",
-        "Auto-detect enclosed rooms or draw polygonal rooms by hand, then name, classify, describe, resize, search, and locate them.",
-        "Place entrance, exit, objective, hazard, camera, terminal, power, elevator, locked-area, loot, medical, and text markers.",
-        "Draw tapered freehand plans, erase marks, and undo GM edits.",
-        "Preview the filtered Player View before presenting or publishing it.",
-        "Allow players to add and erase their own temporary pencil marks while a GM is connected.",
-        "Optionally keep already-presented door and light states current.",
-        "Publish frozen layouts with static HoloSuite Terminal previews.",
-        "Link camera and Terminal markers without bypassing either module's access rules.",
-        "Export the current blueprint as a themed PNG."
-      ],
       "installation": [
         "Subscribe to my Mage Tower Studios Patreon at a tier that includes the premium modules.",
         "On the Foundry VTT website, sign in to the account that owns the license used by your server. Link your subscribed Patreon account in your profile.",
@@ -1076,18 +238,6 @@
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Blueprint, and save.",
         "Activate the Scene that will anchor the facility.",
         "Open Blueprint from HoloSuite Core or the Scene Controls button."
-      ],
-      "configuration": [
-        "Set the location name, optional facility designation, source mode, theme, and visible information layers.",
-        "Add floors, rooms, markers, text, and freehand drawings as the facility requires.",
-        "Review Player View before using Present to Players or Publish Layout.",
-        "Enable player drawing or live system states only when the session needs them."
-      ],
-      "examples": [
-        "Brief a crew on entrances, hazards, objectives, and escape routes before an infiltration.",
-        "Publish a station directory inside an in-world HoloSuite Terminal.",
-        "Track a multi-floor heist while players sketch a temporary route over the shared plan.",
-        "Export a clean facility handout without exposing GM-only rooms or secret doors."
       ],
       "moduleUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
       "moduleActionLabel": "Get Premium Access",
@@ -1099,19 +249,8 @@
       "tier": "premium",
       "category": "Computers",
       "compatibility": "Foundry v12-v14",
-      "visual": "terminal-interface",
+      "image": "assets/TerminalPreview.webp",
       "summary": "Create in-world computers with mail, files, cameras, utilities, downloads, and hacking.",
-      "overview": "HoloSuite Terminal lets the GM create computers that players can open inside Foundry. Each terminal can have its own mail, files, camera feeds, utilities, passwords, access rules, sounds, desktop style, and theme.",
-      "features": [
-        "Create multiple terminal profiles with their own applications and presentation.",
-        "Add mail accounts, messages, and text, image, audio, video, or journal-backed files.",
-        "Link live camera feeds through the optional Security Cameras module.",
-        "Control doors, lighting, lockdowns, and camera states with configurable utilities.",
-        "Protect terminals and individual content with passwords, permissions, allow lists, deny lists, and optional hacking challenges.",
-        "Run file downloads by elapsed time or combat rounds, with automatic journal access after completion.",
-        "Open terminals from linked Scene Regions when a player-owned token enters.",
-        "Choose from Corporate, RED, Heavy Monitor, and Holo Blue desktops plus six interface themes."
-      ],
       "installation": [
         "Subscribe to my Mage Tower Studios Patreon at a tier that includes the premium modules.",
         "On the Foundry VTT website, sign in to the account that owns the license used by your server. Link your subscribed Patreon account in your profile.",
@@ -1121,34 +260,7 @@
         "Optionally enable HoloSuite Hacking for minigames and Security Cameras for linked live feeds.",
         "Open Terminal from the HoloSuite launcher or the module settings menu."
       ],
-      "configuration": [
-        "Create a terminal profile and choose which applications it exposes.",
-        "Add mail, files, cameras, utilities, access rules, and optional hacking requirements.",
-        "Link Scene Regions that should open the terminal when player-owned tokens enter.",
-        "Configure boot text, login backgrounds, interface sounds, ambient audio, desktop style, and color theme.",
-        "Set per-user access levels and content-specific locks for the information players should discover."
-      ],
-      "faq": [
-        {
-          "question": "Does HoloSuite Terminal require other modules?",
-          "answer": "HoloSuite Core is required. HoloSuite Hacking and Security Cameras are optional integrations that add terminal hacking challenges and linked live camera feeds."
-        },
-        {
-          "question": "Can terminals grant Foundry journal access?",
-          "answer": "Yes. A completed journal-backed file download can automatically grant the requesting player access to the linked journal."
-        },
-        {
-          "question": "Is HoloSuite Terminal free?",
-          "answer": "No. HoloSuite Terminal is distributed as part of the HoloSuite Premium Collection."
-        }
-      ],
       "videos": [],
-      "examples": [
-        "Build a corporate workstation with employee mail, classified files, and a locked security-camera app.",
-        "Place a derelict ship terminal that controls emergency lighting and downloads a captain's log over several combat rounds.",
-        "Require a password or hacking challenge before players can unlock restricted files shared across the party.",
-        "Use a different desktop style and theme for each faction, ship, or facility."
-      ],
       "moduleUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
       "moduleActionLabel": "Get Premium Access"
     },
@@ -1160,15 +272,6 @@
       "compatibility": "Foundry v12-v14",
       "image": "assets/PulseScanner-preview.png",
       "summary": "Scan Scene Regions for hidden targets with animated pulses and matching signal types.",
-      "overview": "Pulse Scanner lets the GM place hidden targets on Foundry Scene Regions. Actors with a scanner can send out an animated pulse and detect nearby targets whose signal matches the selected scan mode.",
-      "features": [
-        "GM-managed scan targets linked to Foundry Scene Regions.",
-        "Structural, Arcane, Thermal, Forensic, Tech, and Biological signals.",
-        "Target types for walls, hidden passages, traps, residue, tech, evidence, loot, and custom signatures.",
-        "Reticle, icon, and region-outline ping styles.",
-        "Actor-based scanner grants with radius and charges.",
-        "Player scan results hide unrevealed target details."
-      ],
       "installation": [
         "Subscribe to my Mage Tower Studios Patreon at a tier that includes the premium modules.",
         "On the Foundry VTT website, sign in to the account that owns the license used by your server. Link your subscribed Patreon account in your profile.",
@@ -1178,33 +281,11 @@
         "Use scenes with Foundry Scene Regions for linked scan targets.",
         "Open Pulse Scanner from the HoloSuite launcher."
       ],
-      "configuration": [
-        "Create scan targets linked to Scene Regions.",
-        "Set target signal, type, ping style, visibility, status, integrity, color, and description.",
-        "Grant scanners to actors from the Scanners tab.",
-        "Configure scanner name, signal, radius, max charges, and current charges.",
-        "Use max charges 0 for unlimited use."
-      ],
-      "faq": [
-        {
-          "question": "Is Pulse Scanner free?",
-          "answer": "No. Pulse Scanner is part of the HoloSuite Premium Collection."
-        },
-        {
-          "question": "Can players see hidden target data?",
-          "answer": "Player scan payloads are sanitized, but GMs should avoid placing campaign-critical secrets in client-side labels or descriptions."
-        }
-      ],
       "videos": [
         {
           "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/pulsescanner-clip.mp4",
           "title": "Pulse Scanner overview"
         }
-      ],
-      "examples": [
-        "Reveal biological traces in a crime scene.",
-        "Detect weak structural points in a derelict station.",
-        "Give a specialist actor a limited-charge thermal scanner."
       ],
       "moduleUrl": "https://github.com/Thuurvdv/pulse-scanner",
       "patreonUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"

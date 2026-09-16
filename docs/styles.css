@@ -1,4 +1,55 @@
+/* Self-hosted fonts; licenses and sources are in assets/fonts/. */
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/fonts/barlow-regular-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("assets/fonts/barlow-semibold-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("assets/fonts/barlow-bold-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("assets/fonts/barlow-extrabold-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("assets/fonts/barlow-black-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Oxanium";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("assets/fonts/oxanium-variable-latin.woff2") format("woff2");
+}
+
 :root {
+  --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Oxanium", "Barlow", system-ui, sans-serif;
   color-scheme: dark;
   --bg: #05090b;
   --bg-soft: #081113;
@@ -34,7 +85,7 @@ body {
     repeating-linear-gradient(0deg, rgba(69, 217, 208, 0.045) 0 1px, transparent 1px 38px),
     var(--bg);
   color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   line-height: 1.5;
 }
 
@@ -50,6 +101,19 @@ img {
 button,
 input {
   font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.brand,
+.eyebrow,
+.button,
+button {
+  font-family: var(--font-display);
 }
 
 .site-header {
@@ -263,8 +327,7 @@ h3 {
 .experience-card,
 .module-card,
 .stat-card,
-.community-card,
-.premium-stack span {
+.community-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(16, 26, 29, 0.82);
@@ -465,18 +528,15 @@ h3 {
 
 .filters {
   display: inline-flex;
-  gap: 6px;
-  padding: 5px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(16, 26, 29, 0.82);
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
 }
 
 .filter-button {
-  min-height: 38px;
+  min-height: 44px;
   padding: 8px 12px;
   border: 0;
-  border-radius: 6px;
+  border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
@@ -485,9 +545,13 @@ h3 {
 .filter-button.active,
 .filter-button:hover,
 .filter-button:focus-visible {
-  background: rgba(69, 217, 208, 0.14);
+  border-bottom-color: var(--cyan);
   color: var(--text);
-  outline: none;
+}
+
+.filter-button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
 }
 
 .module-grid {
@@ -606,29 +670,10 @@ h3 {
   padding: 22px;
 }
 
-.module-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 26px;
-  padding: 4px 8px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--cyan);
-  font-size: 0.72rem;
-  font-weight: 850;
-  text-transform: uppercase;
-}
-
-.pill.premium {
-  border-color: rgba(246, 192, 79, 0.42);
-  color: var(--amber);
+.module-details {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
 .module-body ul {
@@ -645,27 +690,29 @@ h3 {
 .module-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px 20px;
   margin-top: auto;
 }
 
 .module-actions a {
   display: inline-flex;
   align-items: center;
-  min-height: 38px;
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  min-height: 44px;
+  padding: 8px 0;
   color: var(--text);
   font-size: 0.88rem;
   font-weight: 800;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .module-actions a.primary-link {
-  border-color: transparent;
-  background: rgba(69, 217, 208, 0.16);
   color: var(--cyan);
+}
+
+.module-actions a:hover,
+.module-actions a:focus-visible {
+  color: var(--amber);
 }
 
 .premium-band {
@@ -692,21 +739,6 @@ h3 {
   object-fit: cover;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
-}
-
-.premium-stack {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.premium-stack span {
-  min-height: 58px;
-  display: grid;
-  place-items: center;
-  color: var(--amber);
-  font-weight: 850;
-  text-align: center;
 }
 
 .stats-grid {
@@ -892,8 +924,7 @@ footer a:focus-visible,
   .trust-strip,
   .experience-grid,
   .module-grid,
-  .community-grid,
-  .premium-stack {
+  .community-grid {
     grid-template-columns: 1fr;
   }
 

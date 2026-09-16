@@ -1,10 +1,23 @@
 {
   "stats": [
-    { "label": "Modules Released", "value": 13, "suffix": "+" },
     { "label": "Free Modules", "value": 10, "suffix": "" },
     { "label": "Premium Modules", "value": 3, "suffix": "" },
-    { "label": "Foundry Compatibility", "value": 12, "prefix": "v", "suffix": "+" },
-    { "label": "Active Development", "value": 2026, "suffix": "", "format": "plain" }
+    { "label": "Foundry", "value": 12, "prefix": "v", "suffix": "+" }
+  ],
+  "featuredModules": [
+    { "id": "holosuite-core", "icon": "icon-holosuite.png" },
+    { "id": "cybercall", "icon": "cybercall.svg" },
+    { "id": "csi-toolkit", "icon": "csi-toolkit.svg" },
+    { "id": "holosuite-critical-cutin", "icon": "holosuite-critical-cutin.svg" },
+    { "id": "holosuite-hacking", "icon": "holosuite-hacking.svg" },
+    { "id": "holodock", "icon": "holodock.svg" },
+    { "id": "holosuite-blueprint", "icon": "Blueprint.svg" },
+    { "id": "galaxy-map", "variant": "navigation", "icon": "GalaxyMap.svg" },
+    { "id": "holosuite-terminal", "variant": "industrial", "icon": "icon-terminal.svg" },
+    { "id": "pulse-scanner", "variant": "scanner", "icon": "pulseScanner.svg" },
+    { "id": "security-cameras", "variant": "surveillance", "icon": "security-cameras.svg" },
+    { "id": "bounty-board", "variant": "contracts", "icon": "BountyBoardIcon.svg" },
+    { "id": "holosuite-vending-machines", "variant": "organic", "icon": "VendingMachines.svg" }
   ],
   "modules": [
     {
@@ -149,7 +162,7 @@
       "name": "HoloSuite Terminal",
       "tier": "premium",
       "category": "Computers",
-      "visual": "terminal-interface",
+      "image": "assets/TerminalPreview.webp",
       "pitch": "Create in-world computers with mail, files, camera feeds, utilities, passwords, and optional hacking.",
       "compatibility": "Foundry v12-v14",
       "features": ["Mail, files, cameras, and utility apps", "Passwords, permissions, and optional hacking", "Four desktop styles and six interface themes"],
