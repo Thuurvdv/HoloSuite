@@ -58,40 +58,38 @@
         ]
       }
     </script>
+    <link rel="stylesheet" href="site-nav.css">
   </head>
   <body class="home-page">
     <header class="site-header">
       <a class="brand" href="#top" aria-label="HoloSuite home">
-        <img src="assets/MTS_Logo.png" alt="" class="brand-mark" width="42" height="42">
+        <img src="assets/MTS_Logo_nobg.png" alt="" class="brand-mark" width="42" height="42">
         <span>Mage Tower Studios</span>
       </a>
       <nav aria-label="Primary navigation">
+        <a href="#top" aria-current="page">HoloSuite</a>
         <a href="#modules">Modules</a>
         <a href="#premium">Premium</a>
         <a href="docs/">Docs</a>
         <a href="#community">Community</a>
+        <a href="about.html">About me</a>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-media" aria-hidden="true">
-          <img src="assets/HoloSuite.jpg" alt="" width="1600" height="900">
-        </div>
         <div class="hero-grid">
-          <div class="hero-content">
-            <h1 id="hero-title">HOLOSUITE FOR FOUNDRY VTT</h1>
-            <p class="hero-copy">
-              HoloSuite is a collection of sci-fi themed modules that all share 1 launcher. Each one has been created to add more immersion for the players & GM.
-            </p>
-            <div class="hero-actions" aria-label="Primary actions">
-              <a class="button primary" href="#modules">Browse Modules</a>
-              <a class="button secondary" href="#premium">View Premium Modules</a>
-            </div>
-            <div class="hero-platform-stats" data-stats-grid role="group" aria-label="HoloSuite stats"></div>
-          </div>
+          <h1 id="hero-title">HOLOSUITE FOR FOUNDRY VTT</h1>
+          <p class="hero-copy">
+            HoloSuite is a collection of sci-fi themed modules that all share 1 launcher. Each one has been created to add more immersion for the players & GM.
+          </p>
           <div class="hero-product" aria-label="HoloSuite Core preview">
             <img src="assets/HoloSuiteCorePng.png" alt="HoloSuite Core launcher interface in FoundryVTT" width="607" height="850">
+          </div>
+          <div class="hero-platform-stats" data-stats-grid role="group" aria-label="HoloSuite stats"></div>
+          <div class="hero-actions" aria-label="Primary actions">
+            <a class="button primary" href="#modules">Browse Modules</a>
+            <a class="button secondary" href="#premium">View Premium Modules</a>
           </div>
         </div>
       </section>
@@ -100,9 +98,8 @@
         <div class="featured-modules__heading">
           <div>
             <h2 id="modules-title">HoloSuite Modules</h2>
-            <p class="featured-modules__note">Pick a tool. Make a mess. Build a better universe.</p>
           </div>
-          <a class="featured-modules__all" href="docs/">Documentation <span aria-hidden="true">→</span></a>
+          <a class="featured-modules__all" href="docs/">Documentation</a>
         </div>
           <div class="filters" role="group" aria-label="Filter all modules">
             <button class="filter-button active" type="button" data-filter="all" aria-pressed="true">All</button>
@@ -137,6 +134,7 @@
       <span>HoloSuite by Mage Tower Studios</span>
       <a href="mailto:Magetowerfoundry@gmail.com">Magetowerfoundry@gmail.com</a>
       <a href="privacy.html">Privacy &amp; Cookies</a>
+      <a href="about.html">About me</a>
       <a href="https://github.com/Thuurvdv/MageTowerFoundryModules" rel="noopener">GitHub</a>
     </footer>
 

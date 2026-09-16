@@ -1,0 +1,62 @@
+/* Isolated page styling; no changes to shared or documentation styles. */
+.about-page {
+  --cyan: #20d9ff;
+  --pink: #ff4fa3;
+  --text: #f0f7ff;
+  --muted: #b9c8da;
+  --line: rgba(32, 217, 255, 0.24);
+  background: #070d19;
+}
+.about-page .site-header { background: #0b1423; }
+.about-page nav a[aria-current="page"] { color: var(--cyan); }
+.about-content {
+  width: min(100%, 900px);
+  min-height: calc(100svh - 180px);
+  margin-inline: auto;
+  padding: clamp(48px, 7vw, 88px) clamp(20px, 5vw, 48px);
+}
+.about-content h1 { color: var(--cyan); font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.15; }
+.about-content h2 { font-size: clamp(1.25rem, 3vw, 1.7rem); line-height: 1.3; margin-bottom: 20px; }
+.about-content section { margin-top: 36px; }
+.about-content p { font-size: 1.05rem; line-height: 1.7; color: var(--muted); }
+.about-content .about-placeholder { color: var(--text); }
+.about-content .about-policy { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--line); }
+.about-policy h2 { color: var(--pink); }
+.ai-policy-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 12px 0;
+  margin-block: 28px;
+}
+.ai-policy-table .ai-policy-yes { --policy-accent: #50ec8b; --policy-tint: #0c231d; }
+.ai-policy-table .ai-policy-no { --policy-accent: #ff6978; --policy-tint: #27131d; }
+.ai-policy-table th, .ai-policy-table td {
+  padding: 18px;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  background: var(--policy-tint);
+  border: 1px solid var(--policy-accent);
+}
+.ai-policy-table th {
+  color: var(--policy-accent);
+  font-family: var(--font-display);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 -4px 12px -6px var(--policy-accent);
+}
+.ai-policy-table td {
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px -6px var(--policy-accent);
+  color: var(--text);
+  line-height: 1.65;
+}
+.ai-policy-table ul { list-style: none; padding: 0; margin: 0; }
+.ai-policy-table li + li { margin-top: 14px; }
+@media (max-width: 560px) {
+  .ai-policy-table { border-spacing: 6px 0; }
+  .ai-policy-table th, .ai-policy-table td { padding: 12px 9px; font-size: 0.95rem; }
+}
+.about-page a:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }

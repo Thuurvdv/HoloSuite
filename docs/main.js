@@ -6,6 +6,8 @@
   renderStats(data.stats || []);
   renderCommunity(data.community || []);
   bindFilters(data.modules || [], data.featuredModules || []);
+  // Fragment scrolling must wait until the async catalogue and fonts set its height.
+  await document.fonts.ready;
   bindModuleCatalog();
   startCounterObserver();
 })();
@@ -71,7 +73,16 @@ function bindFilters(modules, presentation) {
       });
       const filtered = filter === "all" ? modules : modules.filter((module) => module.tier === filter);
       renderFeaturedModules(presentation, filtered);
+      updateHomeNavigation(filter === "premium" ? "#premium" : "#modules");
     });
+  });
+}
+
+function updateHomeNavigation(hash = window.location.hash) {
+  const selected = hash === "#premium" ? "#premium" : hash === "#community" ? "#community" : hash.startsWith("#module") ? "#modules" : "#top";
+  document.querySelectorAll('.site-header nav a[href^="#"]').forEach(link => {
+    if (link.getAttribute("href") === selected) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
   });
 }
 
@@ -79,10 +90,15 @@ function bindModuleCatalog() {
   const catalog = document.querySelector("#modules");
   if (!catalog) return;
   const revealModule = () => {
+    updateHomeNavigation();
     // Keep existing Premium navigation links useful after removing the promo band.
     if (window.location.hash === "#premium") {
       catalog.querySelector('[data-filter="premium"]')?.click();
       catalog.scrollIntoView({ block: "start", behavior: "instant" });
+      return;
+    }
+    if (["#community", "#modules", "#top"].includes(window.location.hash)) {
+      document.querySelector(window.location.hash)?.scrollIntoView({ block: "start", behavior: "instant" });
       return;
     }
     if (!window.location.hash.startsWith("#module-")) return;
@@ -93,9 +109,9 @@ function bindModuleCatalog() {
     target.scrollIntoView({ block: "start", behavior: "instant" });
   };
   window.addEventListener("hashchange", revealModule);
-  document.querySelectorAll('a[href="#premium"]').forEach(link => {
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
     link.addEventListener("click", () => {
-      if (window.location.hash === "#premium") revealModule();
+      if (window.location.hash === link.getAttribute("href")) revealModule();
     });
   });
   revealModule();

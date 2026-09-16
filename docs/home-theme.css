@@ -21,12 +21,8 @@
 .home-page nav a[href="#premium"] { color: var(--pink); }
 .home-page nav a[href="#premium"]:hover { background: rgba(255, 79, 163, 0.1); }
 
-.home-page .hero::after {
-  background:
-    linear-gradient(90deg, rgba(7, 13, 25, 0.96), rgba(7, 13, 25, 0.76) 55%, rgba(7, 13, 25, 0.55)),
-    radial-gradient(ellipse at 88% 25%, rgba(255, 79, 163, 0.22), transparent 55%),
-    linear-gradient(0deg, var(--bg), transparent 65%);
-}
+.home-page .hero { background: var(--bg); }
+.home-page .hero::after { content: none; }
 .home-page .eyebrow { color: var(--cyan); }
 .home-page #hero-title {
   color: var(--cyan);
@@ -35,17 +31,45 @@
 }
 .home-page .hero-copy { color: #cedaec; }
 .home-page .hero-product {
-  border-color: rgba(255, 79, 163, 0.5);
-  /* Flat composite of the previous cyan tint and translucent navy base. */
-  background: rgba(11, 49, 66, 0.847);
-  box-shadow: var(--shadow);
+  grid-area: product;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
+.home-page .hero { min-height: 0; }
+.home-page .hero-grid {
+  width: min(100%, 1280px);
+  margin-inline: auto;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 400px) minmax(0, 1fr);
+  grid-template-areas: "title title title" "copy product stats" "actions actions actions";
+  gap: 24px 32px;
+  padding: clamp(40px, 5vw, 72px) clamp(20px, 4vw, 48px);
+}
+.home-page .hero-grid > #hero-title { grid-area: title; max-width: none; margin: 0 0 8px; text-align: center; }
+.home-page .hero-grid > .hero-copy { grid-area: copy; max-width: 300px; justify-self: end; margin: 0; }
+.home-page .hero-product img { width: 100%; max-height: 560px; }
+.home-page .hero-grid > .hero-actions { grid-area: actions; justify-content: center; margin-top: 8px; }
 .home-page .hero-platform-stats {
+  grid-area: stats;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(8px, 2vw, 24px);
-  max-width: 560px;
-  margin-top: 32px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  width: min(100%, 180px);
+  justify-self: start;
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .home-page .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "title" "copy" "product" "stats" "actions";
+    justify-items: center;
+  }
+  .home-page .hero-grid > .hero-copy { justify-self: center; text-align: center; max-width: 420px; }
+  .home-page .hero-product { width: min(100%, 340px); }
+  .home-page .hero-platform-stats { justify-self: center; }
 }
 .home-page .platform-stat {
   display: flex;
@@ -132,6 +156,7 @@
 .home-page .final-cta { background: linear-gradient(150deg, #070d19, #151127); }
 .home-page .final-cta .eyebrow { color: var(--pink); }
 .home-page footer { background: #070d19; }
+.home-page #community, .home-page #top { scroll-margin-top: 90px; }
 .home-page a:focus-visible, .home-page button:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: 4px;
