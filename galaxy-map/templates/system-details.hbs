@@ -1,14 +1,14 @@
 <aside class="gmf-system-panel" aria-label="Navigation inspector">
   {{#if route}}
     <header class="gmf-system-panel__top">
-      <p class="gmf-kicker">Travel Route</p>
+      <p class="gmf-kicker">{{#if objectView}}Entity Route{{else}}Travel Route{{/if}}</p>
       <h3>{{route.fromName}} <i class="fa-solid fa-arrow-right-long"></i> {{route.toName}}</h3>
-      <div class="gmf-chip-row">
-        <span class="gmf-chip">{{route.type}}</span>
-        <span class="gmf-chip">{{gmfFallback route.travelTime "Transit time unknown"}}</span>
-        <span class="gmf-chip">Fuel {{route.fuelCost}}</span>
-        {{#if route.gmOnly}}<span class="gmf-chip gmf-chip--gm">GM Only</span>{{/if}}
-      </div>
+      {{#if objectView}}<div class="gmf-status-icons" aria-label="Route information">
+        <span title="Route type: {{route.type}}" aria-label="Route type: {{route.type}}"><i class="fa-solid fa-route"></i></span>
+        <span title="{{gmfFallback route.travelTime "Transit time unknown"}}" aria-label="{{gmfFallback route.travelTime "Transit time unknown"}}"><i class="fa-solid fa-clock"></i></span>
+        <span title="Fuel {{route.fuelCost}}" aria-label="Fuel {{route.fuelCost}}"><i class="fa-solid fa-gas-pump"></i></span>
+        {{#if route.gmOnly}}<span title="GM Only" aria-label="GM Only"><i class="fa-solid fa-eye-slash"></i></span>{{/if}}
+      </div>{{/if}}
     </header>
 
     <div class="gmf-route-visual" aria-hidden="true">
@@ -20,36 +20,36 @@
       <p>{{gmfFallback route.notes "No route intelligence has been recorded."}}</p>
     </section>
 
-    {{#if map.canEdit}}
+    {{#if map.canEdit}}{{#unless objectView}}
       <div class="gmf-inspector-actions">
-        <button type="button" class="gmf-button--primary" data-action="edit-route"><i class="fa-solid fa-pen"></i>Edit Route</button>
+        <button type="button" class="gmf-icon-button" data-action="edit-route" title="Edit Route" aria-label="Edit Route"><i class="fa-solid fa-pen"></i></button>
         <details class="gmf-action-menu">
-          <summary><i class="fa-solid fa-ellipsis"></i>More</summary>
+          <summary title="More route actions" aria-label="More route actions"><i class="fa-solid fa-ellipsis"></i></summary>
           <div class="gmf-action-menu__panel">
             {{#if route.gmOnly}}
-              <button type="button" data-action="reveal-route"><i class="fa-solid fa-eye"></i>Reveal Route</button>
+              <button type="button" class="gmf-icon-button" data-action="reveal-route" title="Reveal Route" aria-label="Reveal Route"><i class="fa-solid fa-eye"></i><span>Reveal Route</span></button>
             {{else}}
-              <button type="button" data-action="hide-route"><i class="fa-solid fa-eye-slash"></i>Hide Route</button>
+              <button type="button" class="gmf-icon-button" data-action="hide-route" title="Hide Route" aria-label="Hide Route"><i class="fa-solid fa-eye-slash"></i><span>Hide Route</span></button>
             {{/if}}
-            <button type="button" class="gmf-button--danger" data-action="delete-route"><i class="fa-solid fa-trash"></i>Delete Route</button>
+            <button type="button" class="gmf-icon-button" data-action="delete-route" title="Delete Route" aria-label="Delete Route"><i class="fa-solid fa-trash"></i><span>Delete Route</span></button>
           </div>
         </details>
       </div>
-    {{/if}}
+    {{/unless}}{{/if}}
   {{else}}
     {{#if system}}
       <header class="gmf-system-panel__top" style="--gmf-faction-color: {{system.factionColor}};">
         <p class="gmf-kicker">{{system.factionName}}</p>
         <h3>{{system.displayName}}</h3>
-        <div class="gmf-chip-row" aria-label="System state">
-          <span class="gmf-chip">{{system.displayType}}</span>
-          <span class="gmf-chip gmf-chip--status">{{system.displayStatus}}</span>
-          {{#if system.isCurrent}}<span class="gmf-chip gmf-chip--current"><i class="fa-solid fa-location-crosshairs"></i>Current</span>{{/if}}
-          {{#if system.isDestination}}<span class="gmf-chip gmf-chip--destination"><i class="fa-solid fa-crosshairs"></i>Destination</span>{{/if}}
-          {{#if system.hasAlert}}<span class="gmf-chip gmf-chip--alert"><i class="fa-solid fa-triangle-exclamation"></i>Alert</span>{{/if}}
-          {{#if system.obscured}}<span class="gmf-chip gmf-chip--unknown">Unknown</span>{{/if}}
-          {{#if system.gmOnly}}<span class="gmf-chip gmf-chip--gm">Hidden</span>{{/if}}
-        </div>
+        {{#if objectView}}<div class="gmf-status-icons" aria-label="Entity state">
+          <span title="Type: {{system.displayType}}" aria-label="Type: {{system.displayType}}"><i class="fa-solid fa-cube"></i></span>
+          <span title="Status: {{system.displayStatus}}" aria-label="Status: {{system.displayStatus}}"><i class="fa-solid fa-signal"></i></span>
+          {{#if system.isCurrent}}<span title="Current location" aria-label="Current location"><i class="fa-solid fa-location-crosshairs"></i></span>{{/if}}
+          {{#if system.isDestination}}<span title="Destination" aria-label="Destination"><i class="fa-solid fa-crosshairs"></i></span>{{/if}}
+          {{#if system.hasAlert}}<span title="Alert" aria-label="Alert"><i class="fa-solid fa-triangle-exclamation"></i></span>{{/if}}
+          {{#if system.obscured}}<span title="Unknown" aria-label="Unknown"><i class="fa-solid fa-question"></i></span>{{/if}}
+          {{#if system.gmOnly}}<span title="Hidden from players" aria-label="Hidden from players"><i class="fa-solid fa-eye-slash"></i></span>{{/if}}
+        </div>{{/if}}
       </header>
 
       {{#unless planetView}}
@@ -70,8 +70,10 @@
         {{/unless}}
       </div>
 
-      {{#if system.canInspectSystem}}
-        <button type="button" class="gmf-inspect-system" data-action="inspect-system"><i class="fa-solid fa-magnifying-glass"></i> Inspect System <i class="fa-solid fa-arrow-right"></i></button>
+      {{#if objectView}}
+        {{#if system.canInspectSystem}}<button type="button" class="gmf-icon-button gmf-inspect-system" data-action="inspect-system" title="Inspect {{system.displayType}}" aria-label="Inspect {{system.displayType}}"><i class="fa-solid fa-magnifying-glass"></i></button>{{/if}}
+      {{else}}
+        <button type="button" class="gmf-icon-button gmf-inspect-system" data-action="open-system" title="Open System" aria-label="Open System"><i class="fa-solid fa-circle-nodes"></i></button>
       {{/if}}
       {{/unless}}
 
@@ -80,18 +82,27 @@
         <p>{{gmfFallback system.displayDescription "No survey information has been recorded."}}</p>
       </section>
 
-      {{#if planetView}}
+      {{#if objectView}}
       {{#unless system.obscured}}
-        <section class="gmf-system-panel__section">
-          <h4>Linked Content</h4>
-          {{#if system.hasJournal}}
-            <button type="button" class="gmf-content-link" data-action="open-journal"><i class="fa-solid fa-book-open"></i><span>Open Journal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
-          {{/if}}
-          {{#if system.hasScenes}}
-            <button type="button" class="gmf-content-link" data-action="open-scene"><i class="fa-solid fa-image"></i><span>Go to Scene</span><small>{{system.sceneIds.length}}</small></button>
-          {{/if}}
-          {{#unless system.hasJournal}}{{#unless system.hasScenes}}<p class="gmf-empty-copy">No linked journal or scene.</p>{{/unless}}{{/unless}}
-        </section>
+        <details class="gmf-system-panel__section gmf-linked-content" open data-linked-content-drop>
+          <summary><span>Linked Content</span><small>{{linkedScenes.length}}{{#if linkedJournal}} + journal{{/if}}</small></summary>
+          <div class="gmf-linked-content__list">
+            {{#if linkedJournal}}
+              <div class="gmf-linked-content__item">
+                <button type="button" data-action="open-journal" title="Open {{linkedJournal.name}}"><i class="fa-solid fa-book-open"></i><span>{{linkedJournal.name}}</span></button>
+                {{#if canEditLinks}}<button type="button" data-unlink-linked-journal title="Unlink journal" aria-label="Unlink {{linkedJournal.name}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+              </div>
+            {{/if}}
+            {{#each linkedScenes as |scene|}}
+              <div class="gmf-linked-content__item" {{#if ../canEditLinks}}draggable="true" data-planet-scene-drag="{{scene.id}}" data-planet-scene-uuid="{{scene.uuid}}" title="Drag onto the planet to place this Scene"{{/if}}>
+                <button type="button" data-open-linked-scene="{{scene.id}}" title="Open {{scene.name}}"><i class="fa-solid fa-image"></i><span>{{scene.name}}</span></button>
+                {{#if ../canEditLinks}}<button type="button" data-unlink-planet-scene="{{scene.id}}" title="Unlink scene" aria-label="Unlink {{scene.name}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+              </div>
+            {{/each}}
+            {{#unless linkedJournal}}{{#unless linkedScenes.length}}<p class="gmf-empty-copy">No linked content.</p>{{/unless}}{{/unless}}
+          </div>
+          {{#if canEditLinks}}<div class="gmf-linked-content__drop-hint"><i class="fa-solid fa-arrow-down"></i> Drop a Scene or Journal here to link it</div>{{/if}}
+        </details>
       {{/unless}}
       {{/if}}
 
@@ -104,29 +115,29 @@
 
       <div class="gmf-inspector-actions">
         {{#unless planetView}}
-          {{#if system.canTravel}}
+          {{#unless objectView}}{{#if system.canTravel}}
             {{#unless system.obscured}}
             <div class="gmf-inspector-actions__primary">
-              <button type="button" class="gmf-button--primary" data-action="travel-to-system"><i class="fa-solid fa-route"></i>{{#if playerMode}}Request Travel{{else}}Travel to System{{/if}}</button>
+              <button type="button" class="gmf-icon-button" data-action="travel-to-system" title="{{#if playerMode}}Request Travel{{else}}Travel to System{{/if}}" aria-label="{{#if playerMode}}Request Travel{{else}}Travel to System{{/if}}"><i class="fa-solid fa-route"></i></button>
             </div>
             {{/unless}}
-          {{/if}}
+          {{/if}}{{/unless}}
         {{/unless}}
         {{#if map.canEdit}}
         <div class="gmf-inspector-actions__secondary">
-            {{#if planetView}}<button type="button" data-action="edit-system"><i class="fa-solid fa-pen"></i> Edit System</button>{{/if}}
+            {{#if planetView}}<button type="button" class="gmf-icon-button" data-action="edit-system" title="Edit Entity" aria-label="Edit Entity"><i class="fa-solid fa-pen"></i></button>{{/if}}
             <details class="gmf-action-menu">
-              <summary><i class="fa-solid fa-ellipsis"></i>GM Actions</summary>
+              <summary title="GM Actions" aria-label="GM Actions"><i class="fa-solid fa-ellipsis"></i></summary>
               <div class="gmf-action-menu__panel">
-                {{#unless planetView}}<button type="button" data-action="edit-system"><i class="fa-solid fa-pen"></i>Edit System</button>{{/unless}}
-                {{#unless system.isCurrent}}<button type="button" data-action="set-current-system"><i class="fa-solid fa-location-crosshairs"></i>Set Current Location</button>{{/unless}}
+                {{#unless planetView}}<button type="button" class="gmf-icon-button" data-action="edit-system" title="Edit {{#if objectView}}Entity{{else}}System{{/if}}" aria-label="Edit {{#if objectView}}Entity{{else}}System{{/if}}"><i class="fa-solid fa-pen"></i><span>Edit {{#if objectView}}Entity{{else}}System{{/if}}</span></button>{{/unless}}
+                {{#unless system.isCurrent}}<button type="button" class="gmf-icon-button" data-action="set-current-system" title="Set Current Location" aria-label="Set Current Location"><i class="fa-solid fa-location-crosshairs"></i><span>Set Current</span></button>{{/unless}}
                 {{#if system.gmOnly}}
-                  <button type="button" data-action="reveal-system"><i class="fa-solid fa-eye"></i>Reveal to Players</button>
+                  <button type="button" class="gmf-icon-button" data-action="reveal-system" title="Reveal to Players" aria-label="Reveal to Players"><i class="fa-solid fa-eye"></i><span>Reveal</span></button>
                 {{else}}
-                  <button type="button" data-action="hide-system"><i class="fa-solid fa-eye-slash"></i>Hide from Players</button>
+                  <button type="button" class="gmf-icon-button" data-action="hide-system" title="Hide from Players" aria-label="Hide from Players"><i class="fa-solid fa-eye-slash"></i><span>Hide</span></button>
                 {{/if}}
-                <button type="button" data-action="notify-discovery"><i class="fa-solid fa-bell"></i>Notify Discovery</button>
-                <button type="button" class="gmf-button--danger" data-action="delete-system"><i class="fa-solid fa-trash"></i>Delete System</button>
+                {{#unless objectView}}<button type="button" class="gmf-icon-button" data-action="notify-discovery" title="Notify Discovery" aria-label="Notify Discovery"><i class="fa-solid fa-bell"></i><span>Notify</span></button>{{/unless}}
+                <button type="button" class="gmf-icon-button" data-action="delete-system" title="Delete {{#if objectView}}Entity{{else}}System{{/if}}" aria-label="Delete {{#if objectView}}Entity{{else}}System{{/if}}"><i class="fa-solid fa-trash"></i><span>Delete</span></button>
               </div>
             </details>
         </div>

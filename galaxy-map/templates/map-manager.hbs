@@ -1,13 +1,16 @@
 <section class="gmf-manager">
-  <header class="gmf-manager__header">
+  <header class="gmf-manager__header" data-gmf-window-drag>
     <div>
       <p class="gmf-kicker">Galaxy Map Framework</p>
       <h2>Map Manager</h2>
     </div>
-    <button type="button" class="gmf-button gmf-button--primary" data-action="create-map">
-      <i class="fa-solid fa-plus"></i>
-      Create Map
-    </button>
+    <div class="gmf-window-actions">
+      <button type="button" class="gmf-button gmf-button--primary" data-action="create-map">
+        <i class="fa-solid fa-plus"></i>
+        Create Map
+      </button>
+      <button type="button" class="gmf-window-close" data-action="close-window" title="Close" aria-label="Close Galaxy Map Manager"><i class="fa-solid fa-xmark"></i></button>
+    </div>
   </header>
 
   <div class="gmf-manager__body">
@@ -111,17 +114,18 @@
               <section class="gmf-crud-section" role="tabpanel" aria-label="Systems">
                 <div class="gmf-crud-list">
                   {{#each selectedMap.systems as |system|}}
-                    <article class="gmf-crud-row">
+                    <article class="gmf-crud-row gmf-system-tree">
                       <div class="gmf-crud-row__identity">
                         <strong>{{system.name}}</strong>
                         <span class="gmf-row-tags">
-                          <span>{{system.type}}</span><span>{{system.status}}</span>
-                          {{#if system.factionId}}<span>{{system.factionName}}</span>{{/if}}
-                          {{#if system.sceneIds.length}}<span>{{system.sceneIds.length}} scene links</span>{{/if}}
+                          <span>{{system.status}}</span>
+                          <span>{{system.objects.length}} entities</span>
                         </span>
                       </div>
                       <span class="gmf-visibility-state gmf-visibility-state--{{system.visibility}}"><i class="fa-solid {{#if (gmfEq system.visibility "players")}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>{{system.visibility}}</span>
                       <div class="gmf-row-actions">
+                        <button type="button" data-create-object="{{system.id}}" title="Add entity" aria-label="Add entity to {{system.name}}"><i class="fa-solid fa-circle-plus"></i></button>
+                        <button type="button" data-merge-system="{{system.id}}" title="Merge into another system" aria-label="Merge {{system.name}} into another system"><i class="fa-solid fa-code-merge"></i></button>
                         <button type="button" data-edit-system="{{system.id}}" title="Edit system" aria-label="Edit {{system.name}}"><i class="fa-solid fa-pen"></i></button>
                         {{#if (gmfEq system.visibility "players")}}
                           <button type="button" data-hide-system="{{system.id}}" title="Hide from players" aria-label="Hide {{system.name}} from players"><i class="fa-solid fa-eye-slash"></i></button>
@@ -129,6 +133,20 @@
                           <button type="button" data-show-system="{{system.id}}" title="Show to players" aria-label="Show {{system.name}} to players"><i class="fa-solid fa-eye"></i></button>
                         {{/if}}
                         <button type="button" class="gmf-button--danger" data-delete-system="{{system.id}}" title="Delete system" aria-label="Delete {{system.name}}"><i class="fa-solid fa-trash"></i></button>
+                      </div>
+                      <div class="gmf-object-tree">
+                        {{#each system.objects as |object|}}
+                          <div class="gmf-object-tree__row">
+                            <span><i class="fa-solid fa-circle-dot"></i><strong>{{object.name}}</strong><small>{{object.kind}} · {{object.status}}</small></span>
+                            <div class="gmf-row-actions">
+                              <button type="button" data-primary-object="{{object.id}}" data-object-system="{{system.id}}" title="{{#if (gmfEq object.id system.primaryObjectId)}}Arrival entity{{else}}Set as arrival entity{{/if}}" aria-pressed="{{#if (gmfEq object.id system.primaryObjectId)}}true{{else}}false{{/if}}"><i class="fa-solid fa-location-crosshairs"></i></button>
+                              <button type="button" data-edit-object="{{object.id}}" data-object-system="{{system.id}}" title="Edit entity"><i class="fa-solid fa-pen"></i></button>
+                              <button type="button" class="gmf-button--danger" data-delete-object="{{object.id}}" data-object-system="{{system.id}}" title="Delete entity"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                          </div>
+                        {{else}}
+                          <p class="gmf-empty-inline">No entities in this system.</p>
+                        {{/each}}
                       </div>
                     </article>
                   {{else}}

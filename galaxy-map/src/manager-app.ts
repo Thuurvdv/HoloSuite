@@ -2,6 +2,8 @@ declare const foundry: any;
 declare const Application: any;
 declare const Dialog: any;
 
+import { activateGalaxyWindowChrome, GALAXY_DIALOG_OPTIONS } from "./window-chrome";
+
 function getApplicationBase() {
   const ApplicationV2 = foundry.applications?.api?.ApplicationV2;
   const HandlebarsApplicationMixin = foundry.applications?.api?.HandlebarsApplicationMixin;
@@ -17,6 +19,7 @@ export function createGalaxyMapManagerClass(deps: any) {
     getRawMap,
     openMapMetadataDialog,
     openSystemDialog,
+    openObjectDialog,
     openRouteDialog,
     openFactionDialog,
     exportMap,
@@ -24,6 +27,9 @@ export function createGalaxyMapManagerClass(deps: any) {
     deleteMap,
     createMap,
     deleteSystem,
+    deleteObject,
+    setPrimaryObject,
+    mergeSystems,
     deleteRoute,
     deleteFaction,
     openMap,
@@ -89,6 +95,7 @@ export function createGalaxyMapManagerClass(deps: any) {
 
     _attachPartListeners(partId: string, html: any, options: any) {
       super._attachPartListeners?.(partId, html, options);
+      activateGalaxyWindowChrome(this, html);
       html.querySelector("[data-action='create-map']")?.addEventListener("click", () => this._onCreateMap());
       html.querySelector("[data-action='edit-map-metadata']")?.addEventListener("click", () => {
         if (this.selectedMapId) openMapMetadataDialog(this.selectedMapId);
@@ -112,6 +119,21 @@ export function createGalaxyMapManagerClass(deps: any) {
       });
       html.querySelectorAll("[data-edit-system]").forEach((button: any) => {
         button.addEventListener("click", () => openSystemDialog(this.selectedMapId, button.dataset.editSystem));
+      });
+      html.querySelectorAll("[data-create-object]").forEach((button: any) => {
+        button.addEventListener("click", () => openObjectDialog(this.selectedMapId, button.dataset.createObject));
+      });
+      html.querySelectorAll("[data-edit-object]").forEach((button: any) => {
+        button.addEventListener("click", () => openObjectDialog(this.selectedMapId, button.dataset.objectSystem, button.dataset.editObject));
+      });
+      html.querySelectorAll("[data-delete-object]").forEach((button: any) => {
+        button.addEventListener("click", () => this._confirmDeleteObject(button.dataset.objectSystem, button.dataset.deleteObject));
+      });
+      html.querySelectorAll("[data-primary-object]").forEach((button: any) => {
+        button.addEventListener("click", () => setPrimaryObject(this.selectedMapId, button.dataset.objectSystem, button.dataset.primaryObject));
+      });
+      html.querySelectorAll("[data-merge-system]").forEach((button: any) => {
+        button.addEventListener("click", () => this._openMergeSystem(button.dataset.mergeSystem));
       });
       html.querySelectorAll("[data-show-system]").forEach((button: any) => {
         button.addEventListener("click", () => hideSystemFromPlayers(this.selectedMapId, button.dataset.showSystem, false));
@@ -179,7 +201,7 @@ export function createGalaxyMapManagerClass(deps: any) {
           const confirmed = await Dialog.confirm({
             title: "Delete Galaxy Map",
             content: `<p>Delete <strong>${map?.title ?? mapId}</strong>? This cannot be undone.</p>`
-          });
+          }, GALAXY_DIALOG_OPTIONS);
           if (!confirmed) return;
           await deleteMap(mapId);
           if (this.selectedMapId === mapId) this.selectedMapId = null;
@@ -219,15 +241,47 @@ export function createGalaxyMapManagerClass(deps: any) {
       const confirmed = await Dialog.confirm({
         title: "Delete Star System",
         content: "<p>Delete this star system and any connected routes?</p>"
-      });
+      }, GALAXY_DIALOG_OPTIONS);
       if (confirmed) await deleteSystem(this.selectedMapId, systemId);
+    }
+
+    async _confirmDeleteObject(systemId: string, objectId: string) {
+      const confirmed = await Dialog.confirm({
+        title: "Delete Entity",
+        content: "<p>Delete this entity and its linked content from the system?</p>"
+      });
+      if (confirmed) await deleteObject(this.selectedMapId, systemId, objectId);
+    }
+
+    _openMergeSystem(sourceSystemId: string) {
+      const map = getRawMap(this.selectedMapId);
+      const source = map?.systems?.find((system: any) => system.id === sourceSystemId);
+      const destinations = (map?.systems ?? []).filter((system: any) => system.id !== sourceSystemId);
+      if (!source || !destinations.length) return;
+      const options = destinations.map((system: any) => `<option value="${system.id}">${system.name}</option>`).join("");
+      new Dialog({
+        title: `Merge ${source.name}`,
+        content: `<form class="gmf-crud-form"><p>All ${source.objects?.length ?? 0} entities will move to the destination. Routes will be redirected; internal and duplicate routes will be removed.</p><label>Destination system<select name="destinationSystemId">${options}</select></label></form>`,
+        buttons: {
+          cancel: { icon: '<i class="fa-solid fa-xmark"></i>', label: "Cancel" },
+          merge: {
+            icon: '<i class="fa-solid fa-code-merge"></i>', label: "Merge Systems",
+            callback: (html: any) => {
+              const root = html instanceof HTMLElement ? html : html?.[0];
+              const destinationSystemId = root?.querySelector('[name="destinationSystemId"]')?.value;
+              if (destinationSystemId) mergeSystems(this.selectedMapId, sourceSystemId, destinationSystemId);
+            }
+          }
+        },
+        default: "cancel"
+      }, { classes: ["galaxy-map", "gmf-crud-dialog"], width: 500 }).render(true);
     }
 
     async _confirmDeleteRoute(routeId: string) {
       const confirmed = await Dialog.confirm({
         title: "Delete Route",
         content: "<p>Delete this route?</p>"
-      });
+      }, GALAXY_DIALOG_OPTIONS);
       if (confirmed) await deleteRoute(this.selectedMapId, routeId);
     }
 
@@ -235,7 +289,7 @@ export function createGalaxyMapManagerClass(deps: any) {
       const confirmed = await Dialog.confirm({
         title: "Delete Faction",
         content: "<p>Delete this faction? Systems assigned to it become unaffiliated.</p>"
-      });
+      }, GALAXY_DIALOG_OPTIONS);
       if (confirmed) await deleteFaction(this.selectedMapId, factionId);
     }
 

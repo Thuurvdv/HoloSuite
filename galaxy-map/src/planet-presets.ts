@@ -18,8 +18,16 @@ export const PLANET_SHAPE_OPTIONS = [
   { value: "crystal", label: "Crystal" },
   { value: "cylinder", label: "Cylinder" }
 ];
+export const PLANET_FINISH_OPTIONS = [
+  { value: "smooth", label: "Smooth" },
+  { value: "matte", label: "Matte" },
+  { value: "holographic", label: "Holographic" }
+];
 export function normalizePlanetShape(value: unknown) {
   return PLANET_SHAPE_OPTIONS.some(shape => shape.value === value) ? String(value) : "sphere";
+}
+export function normalizePlanetFinish(value: unknown) {
+  return PLANET_FINISH_OPTIONS.some(finish => finish.value === value) ? String(value) : "smooth";
 }
 export function normalizePlanetPreset(value: unknown) {
   return PLANET_OPTIONS.some(p => p.value === value) ? String(value) : "auto";
@@ -35,6 +43,8 @@ export function getPlanetAppearance(system: any, preview = "") {
     texture: usesFlatColor ? null : usesCustomTexture ? system.planetTexture : `modules/galaxy-map/assets/planets/${selected.value}.png`,
     label: usesFlatColor ? "Flat color" : usesCustomTexture ? "Custom texture" : selected.label,
     color: usesFlatColor ? system.planetColor || "#58d8ff" : selected.color,
-    shape: normalizePlanetShape(system.planetShape)
+    shape: normalizePlanetShape(system.planetShape),
+    finish: normalizePlanetFinish(system.planetFinish),
+    detailStrength: Math.min(100, Math.max(0, Number(system.planetDetailStrength) || 0))
   };
 }

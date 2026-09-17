@@ -1,0 +1,134 @@
+/* Reusable 9-slice hardware shell. SVGs are intentionally standalone placeholders. */
+:is(.gmf-manager-window, .gmf-map-window, .gmf-crud-dialog) {
+  --gmf-frame-image: url("../assets/frames/galaxy-frame-cyan.svg");
+  --gmf-frame-size: 18px;
+  box-sizing: border-box;
+  border: var(--gmf-frame-size) solid transparent !important;
+  border-image-source: var(--gmf-frame-image) !important;
+  /* Do not paint the SVG's center tile: it would cover map-specific custom
+     backgrounds. Window content supplies its own themed surface. */
+  border-image-slice: 72 !important;
+  border-image-width: var(--gmf-frame-size) !important;
+  border-image-repeat: stretch !important;
+  border-radius: 20px !important;
+  background: transparent !important;
+  box-shadow: 0 24px 65px rgba(0, 0, 0, 0.68), 0 0 30px color-mix(in srgb, var(--hs-color-primary) 20%, transparent) !important;
+  overflow: hidden;
+}
+
+/* Every palette uses the same source artwork. window-chrome.ts replaces the
+   source palette with the active HoloSuite colors and caches the result. */
+
+:is(.gmf-manager-window, .gmf-map-window, .gmf-crud-dialog) > .window-header { display: none !important; }
+:is(.gmf-manager-window, .gmf-map-window, .gmf-crud-dialog) > .window-content { border-radius: 9px; }
+
+.gmf-manager__header,
+.gmf-galaxy__header,
+.gmf-dialog-header {
+  position: relative;
+  cursor: move;
+  user-select: none;
+}
+
+.gmf-manager__header::before,
+.gmf-galaxy__header::before,
+.gmf-dialog-header::before {
+  content: "";
+  position: absolute;
+  inset: 4px auto 4px 5px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--hs-color-primary);
+  box-shadow: 0 0 10px var(--hs-color-primary);
+  opacity: 0.72;
+}
+
+[data-gmf-window-drag].is-dragging { cursor: grabbing; }
+.gmf-window-actions { display: flex; align-items: center; gap: 9px; }
+
+.galaxy-map .gmf-window-close,
+.galaxy-map-framework .gmf-window-close,
+.gmf-crud-dialog .gmf-window-close {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--hs-color-danger) 58%, var(--hs-color-primary));
+  border-radius: 50% 50% 44% 56%;
+  background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--hs-color-danger) 36%, transparent), rgba(7, 16, 23, 0.92) 68%);
+  color: var(--hs-text-primary);
+  font-size: 15px;
+}
+
+.galaxy-map .gmf-window-close:hover,
+.galaxy-map-framework .gmf-window-close:hover,
+.gmf-crud-dialog .gmf-window-close:hover {
+  border-color: var(--hs-color-danger);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--hs-color-danger) 45%, transparent);
+}
+
+.gmf-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 0 0 auto;
+  min-height: 58px;
+  padding: 9px 12px 9px 16px;
+  border-bottom: 1px solid var(--hs-border-subtle);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--hs-color-primary) 12%, #02080d), rgba(3, 10, 16, 0.94) 62%);
+}
+
+.gmf-dialog-header__identity { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.gmf-dialog-header__identity > span:last-child { min-width: 0; }
+.gmf-dialog-header__identity small,
+.gmf-dialog-header__identity strong { display: block; }
+.gmf-dialog-header__identity small { color: var(--hs-color-success); font-size: 9px; letter-spacing: 0.14em; }
+.gmf-dialog-header__identity strong {
+  margin-top: 2px;
+  color: var(--hs-text-primary);
+  font-size: 16px;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gmf-dialog-header__orb {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--hs-color-primary);
+  border-radius: 47% 53% 58% 42%;
+  color: var(--hs-color-primary);
+  background: color-mix(in srgb, var(--hs-color-primary) 12%, transparent);
+  box-shadow: inset 0 0 10px color-mix(in srgb, var(--hs-color-primary) 24%, transparent), 0 0 12px color-mix(in srgb, var(--hs-color-primary) 18%, transparent);
+  transform: rotate(-5deg);
+}
+
+.gmf-crud-dialog > .window-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden;
+}
+.gmf-crud-dialog .dialog-content { min-height: 0; padding: 12px 14px; overflow: auto; }
+.gmf-crud-dialog .dialog-buttons {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--hs-border-subtle);
+  background: color-mix(in srgb, var(--hs-bg-deep) 90%, transparent);
+}
+.gmf-system-edit-dialog > .window-content { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.gmf-system-edit-dialog .dialog-content { padding: 10px 12px 4px; }
+
+@media (max-width: 620px) {
+  :is(.gmf-manager-window, .gmf-map-window, .gmf-crud-dialog) { --gmf-frame-size: 12px; }
+  .gmf-dialog-header { min-height: 50px; }
+  .gmf-dialog-header__identity small { display: none; }
+}

@@ -4,19 +4,44 @@
   min-width: 0;
   min-height: 480px;
   display: grid;
-  grid-template-rows: auto minmax(220px, 1fr) auto;
+  grid-template-rows: minmax(220px, 1fr) auto auto;
   overflow: hidden;
   border-right: 1px solid var(--gmf-line);
   background: radial-gradient(ellipse at 50% 48%, color-mix(in srgb, var(--gmf-planet-color) 12%, transparent), transparent 62%), rgba(1, 5, 13, 0.55);
 }
-.gmf-planet-heading { padding: 16px 22px 0; z-index: 1; }
-.gmf-planet-heading > button { float: right; width: auto; }
-.gmf-planet-heading h3 { margin: 5px 0; font-size: clamp(22px, 3cqw, 34px); font-weight: 500; letter-spacing: 0.025em; }
-.gmf-planet-heading > p:last-child { margin: 0; color: var(--gmf-muted); font-size: 12px; }
+.gmf-planet-name {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 4px 22px 5px;
+  color: #e8fbff;
+  font-size: clamp(20px, 3cqw, 30px);
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  text-align: center;
+  text-shadow: 0 0 12px rgba(88, 216, 255, 0.62);
+}
 .gmf-planet-canvas { position: relative; min-width: 0; min-height: 220px; overflow: hidden; }
 .gmf-planet-canvas > canvas { display: block; width: 100%; height: 100%; position: absolute; inset: 0; cursor: grab; touch-action: none; }
 .gmf-planet-canvas > canvas:active { cursor: grabbing; }
 .gmf-planet-canvas > canvas:focus-visible { outline: 1px solid var(--gmf-planet-color); outline-offset: -4px; border-radius: 8px; }
+.gmf-planet-canvas.is-location-dragover { box-shadow: inset 0 0 0 2px var(--gmf-green), inset 0 0 32px color-mix(in srgb, var(--gmf-green) 18%, transparent); }
+.gmf-planet-canvas.is-location-dragover::after {
+  content: "DROP LINKED SCENE ON SURFACE";
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  border: 1px solid var(--gmf-green);
+  border-radius: 999px;
+  color: var(--gmf-green);
+  background: rgba(1, 8, 12, 0.86);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
 .gmf-planet-fallback {
   position: absolute;
   z-index: 1;
@@ -53,14 +78,28 @@
 .gmf-planet-controls { position: relative; padding: 10px 20px 16px; background: linear-gradient(transparent, rgba(1, 5, 13, 0.75)); }
 .gmf-planet-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
 .gmf-planet-buttons button { width: auto; min-height: 32px; font-size: 12px; }
+.gmf-planet-buttons .gmf-icon-button { width: 34px !important; }
 .gmf-planet-controls [role="status"] { margin: 9px 0 0; min-height: 16px; color: var(--gmf-muted); font-size: 11px; }
-.gmf-inspect-system { width: 100%; min-height: 36px; margin-top: 12px; border-color: var(--gmf-green); color: var(--gmf-green); }
+.gmf-location-callout {
+  position: absolute;
+  z-index: 8;
+  width: 180px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+.gmf-location-callout[hidden] { display: none; }
+.gmf-location-callout.is-visible { opacity: 1; transform: translateY(0); }
+.gmf-location-callout__connector { position: absolute; top: 50%; right: 100%; width: 64px; border-top: 1px solid var(--gmf-cyan); box-shadow: 0 0 5px rgba(88, 216, 255, 0.9); }
+.gmf-location-callout.is-left .gmf-location-callout__connector { right: auto; left: 100%; }
+.gmf-location-callout > strong { display: block; overflow: hidden; padding: 2px 6px; color: var(--gmf-cyan); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-overflow: ellipsis; text-shadow: 0 0 7px rgba(88, 216, 255, 0.95); white-space: nowrap; }
+.gmf-inspect-system { width: 34px !important; min-height: 34px; margin-top: 12px; }
 @container galaxy-map (max-width: 760px) {
-  .gmf-galaxy__content:has(.gmf-planet-stage) { grid-template-rows: minmax(530px, 70vh) auto; }
+  .gmf-galaxy__content:has(.gmf-planet-stage) { grid-template-rows: minmax(530px, 1fr); }
   .gmf-planet-stage { border-right: 0; border-bottom: 1px solid var(--gmf-line); }
 }
 @container galaxy-map (max-width: 520px) {
-  .gmf-planet-heading { padding: 12px 14px 0; }
-  .gmf-planet-heading > button { float: none; margin-bottom: 12px; }
+  .gmf-planet-name { padding: 4px 14px 5px; }
   .gmf-planet-controls { padding: 8px 14px 14px; }
 }

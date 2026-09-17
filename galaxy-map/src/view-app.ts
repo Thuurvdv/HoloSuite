@@ -1,20 +1,51 @@
 import {
   MAX_ZOOM,
   MIN_ZOOM,
+  ANIMATED_CELESTIAL_STYLES,
   TRAVEL_ANIMATION_MS,
   clamp,
+  getEffectiveObjectVisibility,
   normalizeMap
 } from "./galaxy-model";
 import { buildTerritories } from "./territories";
 import { getPlanetAppearance } from "./planet-presets";
 import { getBountyIntelForSystem, openBountyIntel } from "./bounty-integration";
 import { createPlanetIntelCallout } from "./planet-intel-callout";
+import { createPlanetLocationCallout, type PlanetLocationItem } from "./planet-location-callout";
 import { escapeHtml, getHtmlElement } from "./dom-utils";
+import { activateGalaxyWindowChrome, GALAXY_DIALOG_OPTIONS } from "./window-chrome";
 
 declare const foundry: any;
 declare const Application: any;
 declare const Dialog: any;
 declare const game: any;
+
+function getSceneDropData(event: DragEvent) {
+  const TextEditorClass = (globalThis as any).TextEditor ?? (globalThis as any).foundry?.applications?.ux?.TextEditor;
+  try {
+    const data = TextEditorClass?.getDragEventData?.(event);
+    if (data && Object.keys(data).length) return data;
+  } catch { /* Fall through for older Foundry versions. */ }
+  try { return JSON.parse(event.dataTransfer?.getData("text/plain") || "{}"); }
+  catch { return {}; }
+}
+
+async function resolveDroppedDocument(event: DragEvent) {
+  const data = getSceneDropData(event);
+  const fromUuidFunction = (globalThis as any).fromUuid;
+  const document = data.uuid && fromUuidFunction ? await fromUuidFunction(data.uuid) : null;
+  if (["Scene", "JournalEntry"].includes(document?.documentName)) return document;
+  const id = String(data.sceneId || data.journalId || data.id || "");
+  if (!id) return null;
+  if (data.type === "Scene") return game.scenes?.get?.(id) ?? null;
+  if (["JournalEntry", "Journal"].includes(data.type)) return game.journal?.get?.(id) ?? null;
+  return game.scenes?.get?.(id) ?? game.journal?.get?.(id) ?? null;
+}
+
+async function resolveDroppedScene(event: DragEvent) {
+  const document = await resolveDroppedDocument(event);
+  return document?.documentName === "Scene" ? document : null;
+}
 
 function getApplicationBase() {
   const ApplicationV2 = foundry.applications?.api?.ApplicationV2;
@@ -29,6 +60,8 @@ export function createGalaxyMapViewClass(deps: any) {
     getRawMap,
     prepareMapForDisplay,
     openSystemDialog,
+    openObjectDialog,
+    upsertObject,
     openRouteDialog,
     openFactionDialog,
     openFactionManagerDialog,
@@ -36,10 +69,13 @@ export function createGalaxyMapViewClass(deps: any) {
     revealSystemToPlayers,
     revealRouteToPlayers,
     hideSystemFromPlayers,
+    setObjectVisibility,
     hideRouteFromPlayers,
     deleteSystem,
+    deleteObject,
     deleteRoute,
     setCurrentSystem,
+    setCurrentObject,
     requestTravelToSystem,
     notifySystemDiscovered,
     exportMap,
@@ -48,6 +84,10 @@ export function createGalaxyMapViewClass(deps: any) {
     notifyInfo,
     notifyError,
     saveSystemPosition,
+    saveObjectPosition,
+    savePlanetLocation,
+    removePlanetLocation,
+    unlinkPlanetScene,
     showMapToPlayers,
     openMapManager,
     clearMapView
@@ -58,6 +98,8 @@ export function createGalaxyMapViewClass(deps: any) {
     playerMode: boolean;
     selectedSystemId: string | null;
     selectedRouteId: string | null;
+    activeSystemId: string | null;
+    selectedObjectId: string | null;
     zoom: number;
     panX: number;
     panY: number;
@@ -75,6 +117,7 @@ export function createGalaxyMapViewClass(deps: any) {
     _planetGeneration = 0;
     _planetReturnFocus = false;
     _bountyIntelCallout: any = null;
+    _planetLocationCallout: any = null;
 
     static DEFAULT_OPTIONS = {
       id: "galaxy-map-view",
@@ -108,6 +151,8 @@ export function createGalaxyMapViewClass(deps: any) {
       this.playerMode = playerMode;
       this.selectedSystemId = options.selectedSystemId ?? null;
       this.selectedRouteId = options.selectedRouteId ?? null;
+      this.activeSystemId = options.activeSystemId ?? null;
+      this.selectedObjectId = options.selectedObjectId ?? null;
       this.zoom = 1;
       this.panX = 0;
       this.panY = 0;
@@ -134,6 +179,18 @@ export function createGalaxyMapViewClass(deps: any) {
         selectedSystemId: this.selectedSystemId,
         selectedRouteId: this.selectedRouteId
       }) : null;
+      if (displayMap?.systems) {
+        displayMap.systems = displayMap.systems.map((system: any) => ({
+          ...system,
+          displayType: "system",
+          factionName: "System",
+          factionColor: "#58d8ff",
+          animatedCelestial: false
+        }));
+        if (displayMap.selectedSystem) {
+          displayMap.selectedSystem = displayMap.systems.find((system: any) => system.id === displayMap.selectedSystem.id) ?? null;
+        }
+      }
       if (displayMap?.systems && this.externalFocus) {
         displayMap.systems = displayMap.systems.map((system: any) => system.id === this.externalFocus.systemId
           ? { ...system, isExternalFocus: true, externalFocus: this.externalFocus }
@@ -142,17 +199,89 @@ export function createGalaxyMapViewClass(deps: any) {
           displayMap.selectedSystem = displayMap.systems.find((system: any) => system.id === this.externalFocus.systemId);
         }
       }
-      if (displayMap?.selectedSystem) this.selectedSystemId = displayMap.selectedSystem.id;
-      const planetSystem = displayMap?.systems.find((system: any) => system.id === this.planetSystemId);
+      if (!this.activeSystemId && this.selectedSystemId && !displayMap?.selectedSystem) this.selectedSystemId = null;
+      const activeSystem = displayMap?.systems.find((system: any) => system.id === this.activeSystemId) ?? null;
+      const factionLookup = new Map((displayMap?.factions ?? []).map((faction: any) => [faction.id, faction]));
+      const systemObjects = activeSystem ? activeSystem.objects
+        .filter((object: any) => !this.playerMode || getEffectiveObjectVisibility(activeSystem, object) === "players")
+        .map((object: any) => {
+          const obscured = this.playerMode && object.status === "undiscovered";
+          const faction: any = factionLookup.get(object.factionId);
+          return {
+            ...object,
+            systemId: activeSystem.id,
+            displayName: obscured ? "???" : object.name,
+            displayDescription: obscured ? "Unresolved sensor contact. Details are not available." : object.description,
+            displayType: obscured ? "unknown" : object.kind,
+            displayStatus: obscured ? "undiscovered" : object.status,
+            factionName: faction?.name ?? "Unaffiliated",
+            factionColor: object.iconColor || faction?.color || "#58d8ff",
+            obscured,
+            gmOnly: getEffectiveObjectVisibility(activeSystem, object) === "gm",
+            isSelected: object.id === this.selectedObjectId,
+            isCurrent: displayMap?.currentLocation?.objectId === object.id,
+            animatedCelestial: ANIMATED_CELESTIAL_STYLES.includes(object.iconStyle),
+            hasJournal: Boolean(!obscured && object.journalId),
+            hasScenes: Boolean(!obscured && object.sceneIds.length),
+            showImage: Boolean(!obscured && object.image),
+            canInspectSystem: Boolean(getPlanetAppearance({ ...object, obscured }))
+          };
+        }) : [];
+      if (activeSystem && this.selectedObjectId && !systemObjects.some((object: any) => object.id === this.selectedObjectId)) this.selectedObjectId = null;
+      const selectedObject = systemObjects.find((object: any) => object.id === this.selectedObjectId) ?? null;
+      const visibleObjectIds = new Set(systemObjects.map((object: any) => object.id));
+      const systemRoutes = activeSystem ? (activeSystem.routes ?? [])
+        .filter((route: any) => (!this.playerMode || route.visibility === "players")
+          && visibleObjectIds.has(route.fromSystemId) && visibleObjectIds.has(route.toSystemId))
+        .map((route: any) => {
+          const from = systemObjects.find((object: any) => object.id === route.fromSystemId);
+          const to = systemObjects.find((object: any) => object.id === route.toSystemId);
+          return {
+            ...route, from, to,
+            fromName: from?.displayName ?? route.fromSystemId,
+            toName: to?.displayName ?? route.toSystemId,
+            isSelected: route.id === this.selectedRouteId,
+            isActive: route.id === this.selectedRouteId,
+            gmOnly: route.visibility === "gm"
+          };
+        }) : [];
+      const selectedSystemRoute = systemRoutes.find((route: any) => route.id === this.selectedRouteId) ?? null;
+      if (activeSystem) {
+        displayMap.systems = systemObjects;
+        displayMap.routes = systemRoutes;
+        displayMap.selectedSystem = selectedSystemRoute ? null : selectedObject;
+        displayMap.selectedRoute = selectedSystemRoute;
+        displayMap.currentSystem = systemObjects.find((object: any) => object.isCurrent) ?? null;
+      }
+      const planetSystem = systemObjects.find((object: any) => object.id === this.planetSystemId)
+        ?? (!activeSystem ? displayMap?.systems.find((system: any) => system.id === this.planetSystemId) : null);
       const planetAppearance = (!this.playerMode || rawMap?.visibility === "players")
         ? getPlanetAppearance(planetSystem) : null;
       if (!planetAppearance) this.planetSystemId = null;
+      const planetLocations = planetSystem && planetAppearance ? this._preparePlanetLocations(planetSystem, planetAppearance.shape) : [];
+      const linkedContentEntity = planetSystem ?? selectedObject;
+      const canPlacePlanetLocations = Boolean(game.user?.isGM && !this.playerMode && activeSystem && linkedContentEntity);
+      const linkedPlanetScenes = (linkedContentEntity?.sceneIds ?? [])
+        .map((sceneId: string) => game.scenes?.get?.(sceneId)).filter((scene: any) => scene && (game.user?.isGM || scene.testUserPermission?.(game.user, "OBSERVER")))
+        .map((scene: any) => ({ id: scene.id, uuid: scene.uuid, name: scene.name || "Linked Scene" }));
+      const journal = linkedContentEntity?.journalId ? game.journal?.get?.(linkedContentEntity.journalId) : null;
+      const linkedPlanetJournal = journal && (game.user?.isGM || journal.testUserPermission?.(game.user, "OBSERVER"))
+        ? { id: journal.id, uuid: journal.uuid, name: journal.name || "Linked Journal" } : null;
       return {
         ...context,
         map: displayMap,
+        systemView: Boolean(activeSystem && !planetAppearance),
+        activeSystem,
+        selectedObject,
         planetView: Boolean(planetAppearance),
         planetSystem,
         planetAppearance,
+        planetLocations,
+        hasPlanetLocations: planetLocations.length > 0,
+        canPlacePlanetLocations,
+        linkedPlanetScenes,
+        linkedPlanetJournal,
+        showInspector: Boolean(planetAppearance || displayMap?.selectedSystem || displayMap?.selectedRoute),
         territories: displayMap ? buildTerritories(displayMap.systems, displayMap.factions) : [],
         showTerritories: this.showTerritories,
         mapId: this.mapId,
@@ -195,6 +324,7 @@ export function createGalaxyMapViewClass(deps: any) {
       if (boundStage) boundStage.dataset.gmfMapBound = "true";
       const stage = boundStage?.matches?.(".gmf-map-stage") ? boundStage : null;
       super._attachPartListeners?.(partId, html, options);
+      activateGalaxyWindowChrome(this, html);
       this._attachPlanetListeners(html);
       html.querySelector("[data-action='toggle-territories']")?.addEventListener("click", () => {
         this.showTerritories = !this.showTerritories;
@@ -209,7 +339,8 @@ export function createGalaxyMapViewClass(deps: any) {
             return;
           }
           event.stopPropagation();
-          this.selectedSystemId = node.dataset.systemId;
+          if (this.activeSystemId) this.selectedObjectId = node.dataset.systemId;
+          else this.selectedSystemId = node.dataset.systemId;
           this.selectedRouteId = null;
           this.render({ force: true });
         });
@@ -222,7 +353,8 @@ export function createGalaxyMapViewClass(deps: any) {
         route.addEventListener("click", (event: any) => {
           event.stopPropagation();
           this.selectedRouteId = route.dataset.routeId;
-          this.selectedSystemId = null;
+          if (this.activeSystemId) this.selectedObjectId = null;
+          else this.selectedSystemId = null;
           this.render({ force: true });
         });
       });
@@ -261,19 +393,48 @@ export function createGalaxyMapViewClass(deps: any) {
       html.querySelector("[data-action='open-journal']")?.addEventListener("click", () => this._openLinkedJournal());
       html.querySelector("[data-action='open-scene']")?.addEventListener("click", () => this._openLinkedScene());
       html.querySelector("[data-action='edit-system']")?.addEventListener("click", () => {
-        if (this.selectedSystemId) openSystemDialog(this.mapId, this.selectedSystemId);
+        if (this.activeSystemId && this.selectedObjectId) openObjectDialog(this.mapId, this.activeSystemId, this.selectedObjectId);
+        else if (this.selectedSystemId) openSystemDialog(this.mapId, this.selectedSystemId);
+      });
+      html.querySelector("[data-action='open-system']")?.addEventListener("click", () => {
+        if (!this.selectedSystemId) return;
+        this.activeSystemId = this.selectedSystemId;
+        this.selectedObjectId = null;
+        this.selectedRouteId = null;
+        this.searchQuery = "";
+        this.render({ force: true });
+      });
+      html.querySelector("[data-action='add-object']")?.addEventListener("click", () => {
+        if (this.activeSystemId) openObjectDialog(this.mapId, this.activeSystemId);
+      });
+      html.querySelector("[data-action='navigate-up']")?.addEventListener("click", () => {
+        if (this.planetSystemId) {
+          this._disposePlanetRenderer();
+          this.planetSystemId = null;
+          this._planetReturnFocus = true;
+        } else if (this.activeSystemId) {
+          this.activeSystemId = null;
+          this.selectedObjectId = null;
+          this.selectedRouteId = null;
+          this.searchQuery = "";
+        } else return;
+        this.render({ force: true });
       });
       html.querySelector("[data-action='reveal-system']")?.addEventListener("click", () => {
-        if (this.selectedSystemId) revealSystemToPlayers(this.mapId, this.selectedSystemId);
+        if (this.activeSystemId && this.selectedObjectId) setObjectVisibility(this.mapId, this.activeSystemId, this.selectedObjectId, "players");
+        else if (this.selectedSystemId) revealSystemToPlayers(this.mapId, this.selectedSystemId);
       });
       html.querySelector("[data-action='hide-system']")?.addEventListener("click", () => {
-        if (this.selectedSystemId) hideSystemFromPlayers(this.mapId, this.selectedSystemId, true);
+        if (this.activeSystemId && this.selectedObjectId) setObjectVisibility(this.mapId, this.activeSystemId, this.selectedObjectId, "gm");
+        else if (this.selectedSystemId) hideSystemFromPlayers(this.mapId, this.selectedSystemId, true);
       });
       html.querySelector("[data-action='delete-system']")?.addEventListener("click", () => {
-        if (this.selectedSystemId) this._confirmDeleteSystem(this.selectedSystemId);
+        if (this.activeSystemId && this.selectedObjectId) this._confirmDeleteObject(this.activeSystemId, this.selectedObjectId);
+        else if (this.selectedSystemId) this._confirmDeleteSystem(this.selectedSystemId);
       });
       html.querySelector("[data-action='set-current-system']")?.addEventListener("click", () => {
-        if (this.selectedSystemId) setCurrentSystem(this.mapId, this.selectedSystemId);
+        if (this.activeSystemId && this.selectedObjectId) setCurrentObject(this.mapId, this.activeSystemId, this.selectedObjectId);
+        else if (this.selectedSystemId) setCurrentSystem(this.mapId, this.selectedSystemId);
       });
       html.querySelector("[data-action='travel-to-system']")?.addEventListener("click", () => {
         if (!this.selectedSystemId) return;
@@ -308,6 +469,12 @@ export function createGalaxyMapViewClass(deps: any) {
     _applyViewportTransform(html: any) {
       const viewport = html.querySelector(".gmf-map-viewport");
       if (!viewport) return;
+      const stage = html.querySelector(".gmf-map-stage");
+      if (stage) {
+        const rect = stage.getBoundingClientRect();
+        this.panX = clamp(this.panX, rect.width * (1 - this.zoom), 0);
+        this.panY = clamp(this.panY, rect.height * (1 - this.zoom), 0);
+      }
       viewport.style.setProperty("--gmf-pan-x", `${this.panX}px`);
       viewport.style.setProperty("--gmf-pan-y", `${this.panY}px`);
       viewport.style.setProperty("--gmf-zoom", String(this.zoom));
@@ -329,8 +496,11 @@ export function createGalaxyMapViewClass(deps: any) {
         root,
         stage,
         resolveItems: (systemId: string) => {
-          const system = normalizeMap(getRawMap(this.mapId)).systems.find((candidate: any) => candidate.id === systemId);
-          return system ? getBountyIntelForSystem(system) : [];
+          const map = normalizeMap(getRawMap(this.mapId));
+          const target = this.activeSystemId
+            ? map.systems.find((candidate: any) => candidate.id === this.activeSystemId)?.objects.find((object: any) => object.id === systemId)
+            : map.systems.find((candidate: any) => candidate.id === systemId);
+          return target ? getBountyIntelForSystem(target) : [];
         },
         onOpen: (bountyId: string) => openBountyIntel(bountyId)
       });
@@ -339,16 +509,20 @@ export function createGalaxyMapViewClass(deps: any) {
     _attachPlanetListeners(html: HTMLElement) {
       html.querySelector("[data-action='inspect-system']")?.addEventListener("click", () => {
         const raw = getRawMap(this.mapId);
-        const display = prepareMapForDisplay(raw, { playerMode: this.playerMode, selectedSystemId: this.selectedSystemId });
         if (this.playerMode && raw?.visibility !== "players") return;
-        if (!getPlanetAppearance(display?.selectedSystem)) return;
-        this.planetSystemId = this.selectedSystemId;
-        this.render({ force: true });
-      });
-      html.querySelector("[data-action='back-to-galaxy']")?.addEventListener("click", () => {
-        this._disposePlanetRenderer();
-        this.planetSystemId = null;
-        this._planetReturnFocus = true;
+        if (this.activeSystemId) {
+          const map = normalizeMap(raw);
+          const object = map.systems.find((system: any) => system.id === this.activeSystemId)?.objects.find((candidate: any) => candidate.id === this.selectedObjectId);
+          if (!getPlanetAppearance(object)) return;
+          this.planetSystemId = this.selectedObjectId;
+        } else {
+          // Compatibility for maps opened during migration: enter the system
+          // before resolving its primary object detail.
+          this.activeSystemId = this.selectedSystemId;
+          const map = normalizeMap(raw);
+          this.selectedObjectId = map.systems.find((system: any) => system.id === this.activeSystemId)?.primaryObjectId ?? null;
+          this.planetSystemId = this.selectedObjectId;
+        }
         this.render({ force: true });
       });
       html.querySelector("[data-action='planet-pause']")?.addEventListener("click", () => this._planetRenderer?.setPaused(!this._planetRenderer.paused));
@@ -359,6 +533,188 @@ export function createGalaxyMapViewClass(deps: any) {
         this.planetStatic = !this.planetStatic;
         this.render({ force: true });
       });
+      this._attachPlanetLocationList(html);
+      this._attachLinkedContentDrop(html);
+    }
+
+    _getPlanetObject() {
+      const map = normalizeMap(getRawMap(this.mapId));
+      return map.systems.find((system: any) => system.id === this.activeSystemId)
+        ?.objects.find((object: any) => object.id === this.planetSystemId) ?? null;
+    }
+
+    _preparePlanetLocations(object: any, shape: string): PlanetLocationItem[] {
+      return (object?.planetLocations ?? []).filter((location: any) => location.shape === shape).map((location: any) => {
+        const scene = game.scenes?.get?.(location.sceneId);
+        const accessible = Boolean(scene && (game.user?.isGM || scene.testUserPermission?.(game.user, "OBSERVER")));
+        return { ...location,
+          name: scene ? (accessible || game.user?.isGM ? scene.name || "Linked Scene" : "Restricted location") : "Missing linked scene",
+          accessible, missing: !scene, canRemove: Boolean(game.user?.isGM && !this.playerMode)
+        };
+      });
+    }
+
+    _getPlanetLocationItem(locationId: string) {
+      const object = this._getPlanetObject();
+      return this._preparePlanetLocations(object, getPlanetAppearance(object)?.shape)
+        .find(location => location.id === locationId) ?? null;
+    }
+
+    _attachPlanetLocationList(html: HTMLElement) {
+      const root = (this.element instanceof HTMLElement ? this.element : this.element?.[0]) ?? html;
+      html.querySelectorAll<HTMLElement>("[data-planet-scene-drag]").forEach(item => item.addEventListener("dragstart", (event: DragEvent) => {
+        if (!event.dataTransfer) return;
+        event.dataTransfer.setData("text/plain", JSON.stringify({ type: "Scene", id: item.dataset.planetSceneDrag, uuid: item.dataset.planetSceneUuid }));
+        event.dataTransfer.effectAllowed = "link";
+      }));
+      html.querySelectorAll<HTMLElement>("[data-unlink-planet-scene]").forEach(button => button.addEventListener("click", async event => {
+        event.preventDefault(); event.stopPropagation();
+        const sceneId = button.dataset.unlinkPlanetScene ?? "";
+        const objectId = this.planetSystemId || this.selectedObjectId;
+        if (!sceneId || !this.activeSystemId || !objectId) return;
+        const name = game.scenes?.get?.(sceneId)?.name || "Scene";
+        if (await unlinkPlanetScene(this.mapId, this.activeSystemId, objectId, sceneId)) notifyInfo(`${name} unlinked from this entity.`);
+      }));
+      html.querySelectorAll<HTMLElement>("[data-open-linked-scene]").forEach(button => button.addEventListener("click", () => {
+        const scene = game.scenes?.get?.(button.dataset.openLinkedScene ?? "");
+        if (scene?.view) scene.view(); else scene?.sheet?.render(true);
+      }));
+      html.querySelectorAll<HTMLElement>("[data-open-planet-location]").forEach(button =>
+        button.addEventListener("click", () => this._openPlanetLocation(button.dataset.openPlanetLocation ?? "")));
+      html.querySelectorAll<HTMLElement>("[data-remove-planet-location]").forEach(button =>
+        button.addEventListener("click", () => this._removePlanetLocation(button.dataset.removePlanetLocation ?? "", html)));
+      html.querySelectorAll<HTMLElement>("[data-planet-location-drag]").forEach(item => {
+        item.addEventListener("dragstart", (event: DragEvent) => {
+          if (!event.dataTransfer) return;
+          const locationId = item.dataset.planetLocationDrag ?? "";
+          event.dataTransfer.setData("application/x-gmf-surface-location", locationId);
+          event.dataTransfer.setData("text/plain", JSON.stringify({ type: "GalaxySurfaceLocation", locationId }));
+          event.dataTransfer.effectAllowed = "move";
+          root.querySelector("[data-planet-location-trash]")?.classList.add("is-armed");
+        });
+        item.addEventListener("dragend", () => root.querySelector("[data-planet-location-trash]")?.classList.remove("is-armed", "is-dragover"));
+      });
+      const trash = root.querySelector<HTMLElement>("[data-planet-location-trash]");
+      if (trash?.dataset.gmfTrashBound !== "true") {
+        if (trash) trash.dataset.gmfTrashBound = "true";
+        trash?.addEventListener("dragover", (event: DragEvent) => {
+          if (!event.dataTransfer?.types.includes("application/x-gmf-surface-location")) return;
+          event.preventDefault(); event.dataTransfer.dropEffect = "move"; trash.classList.add("is-dragover");
+        });
+        trash?.addEventListener("dragleave", () => trash.classList.remove("is-dragover"));
+        trash?.addEventListener("drop", (event: DragEvent) => {
+          event.preventDefault();
+          const locationId = event.dataTransfer?.getData("application/x-gmf-surface-location") ?? "";
+          trash.classList.remove("is-armed", "is-dragover");
+          if (locationId) void this._removePlanetLocation(locationId, html);
+        });
+      }
+      html.querySelector<HTMLElement>("[data-clear-planet-locations]")?.addEventListener("click", () => this._clearPlanetLocations(html));
+    }
+
+    _attachLinkedContentDrop(html: HTMLElement) {
+      const target = html.querySelector<HTMLElement>("[data-linked-content-drop]");
+      if (!target || !game.user?.isGM || this.playerMode) return;
+      target.addEventListener("dragover", (event: DragEvent) => {
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "link";
+        target.classList.add("is-document-dragover");
+      });
+      target.addEventListener("dragleave", event => {
+        if (!target.contains(event.relatedTarget as Node)) target.classList.remove("is-document-dragover");
+      });
+      target.addEventListener("drop", async (event: DragEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        target.classList.remove("is-document-dragover");
+        const objectId = this.planetSystemId || this.selectedObjectId;
+        if (!this.activeSystemId || !objectId) return;
+        const document = await resolveDroppedDocument(event);
+        const object = normalizeMap(getRawMap(this.mapId)).systems.find((system: any) => system.id === this.activeSystemId)
+          ?.objects.find((candidate: any) => candidate.id === objectId);
+        if (!document || !object) { notifyError("Drop a Foundry Scene or Journal here."); return; }
+        if (document.documentName === "Scene") {
+          const sceneIds = [...new Set([...(object.sceneIds ?? []), document.id])];
+          await upsertObject(this.mapId, this.activeSystemId, { ...object, sceneIds });
+          notifyInfo(`${document.name || "Scene"} linked to ${object.name}.`);
+        } else if (document.documentName === "JournalEntry") {
+          await upsertObject(this.mapId, this.activeSystemId, { ...object, journalId: document.id });
+          notifyInfo(`${document.name || "Journal"} linked to ${object.name}.`);
+        } else {
+          notifyError("Drop a Foundry Scene or Journal here."); return;
+        }
+      });
+      html.querySelector<HTMLElement>("[data-unlink-linked-journal]")?.addEventListener("click", async event => {
+        event.preventDefault(); event.stopPropagation();
+        const objectId = this.planetSystemId || this.selectedObjectId;
+        if (!this.activeSystemId || !objectId) return;
+        const object = normalizeMap(getRawMap(this.mapId)).systems.find((system: any) => system.id === this.activeSystemId)
+          ?.objects.find((candidate: any) => candidate.id === objectId);
+        if (!object) return;
+        await upsertObject(this.mapId, this.activeSystemId, { ...object, journalId: "" });
+      });
+    }
+
+    _openPlanetLocation(locationId: string) {
+      const item = this._getPlanetLocationItem(locationId);
+      const scene = item ? game.scenes?.get?.(item.sceneId) : null;
+      if (!item || !scene || !item.accessible) {
+        notifyError(item?.missing ? "That location is unavailable." : "You do not have permission to view that scene.");
+        return;
+      }
+      if (scene.view) scene.view(); else scene.sheet?.render(true);
+    }
+
+    async _removePlanetLocation(locationId: string, html: HTMLElement) {
+      if (!game.user?.isGM || this.playerMode || !this.activeSystemId || !this.planetSystemId) return;
+      const item = this._getPlanetLocationItem(locationId);
+      if (!item || !await removePlanetLocation(this.mapId, this.activeSystemId, this.planetSystemId, locationId)) return;
+      this._syncPlanetLocations(html); notifyInfo(`${item.name} removed from the surface.`);
+    }
+
+    async _clearPlanetLocations(html: HTMLElement) {
+      if (!game.user?.isGM || this.playerMode || !this.activeSystemId || !this.planetSystemId) return;
+      const object = this._getPlanetObject();
+      const locations = this._preparePlanetLocations(object, getPlanetAppearance(object)?.shape);
+      for (const location of locations) await removePlanetLocation(this.mapId, this.activeSystemId, this.planetSystemId, location.id);
+      this._syncPlanetLocations(html);
+      if (locations.length) notifyInfo(`Cleared ${locations.length} surface location${locations.length === 1 ? "" : "s"}.`);
+    }
+
+    async _placePlanetLocation(event: DragEvent, anchor: any, html: HTMLElement) {
+      if (!game.user?.isGM || this.playerMode || !this.activeSystemId || !this.planetSystemId) return;
+      const scene = await resolveDroppedScene(event);
+      if (!scene) { notifyError("Drop a Foundry Scene onto the 3D surface."); return; }
+      const object = this._getPlanetObject();
+      if (!object?.sceneIds.includes(scene.id)) {
+        notifyError(`Link ${scene.name || "this scene"} to the object before placing it on the surface.`); return;
+      }
+      const saved = await savePlanetLocation(this.mapId, this.activeSystemId, this.planetSystemId, { ...anchor, sceneId: scene.id });
+      if (!saved) return;
+      this._syncPlanetLocations(html);
+      notifyInfo(`${scene.name || "Scene"} placed on the ${anchor.shape}. Drag it again to move it.`);
+    }
+
+    _syncPlanetLocations(html: HTMLElement) {
+      const root = (this.element instanceof HTMLElement ? this.element : this.element?.[0]) ?? html;
+      const object = this._getPlanetObject();
+      const items = this._preparePlanetLocations(object, getPlanetAppearance(object)?.shape);
+      this._planetRenderer?.setLocations(object?.planetLocations ?? []);
+      const list = root.querySelector<HTMLElement>("[data-planet-location-list]");
+      if (!list) return;
+      list.innerHTML = items.length ? items.map(item => `
+        <div class="gmf-planet-location-row ${item.accessible ? "" : "is-restricted"}" ${item.canRemove ? `draggable="true" data-planet-location-drag="${escapeHtml(item.id)}" title="Drag to the trash bin to remove"` : ""}>
+          <button type="button" data-open-planet-location="${escapeHtml(item.id)}" ${item.accessible ? "" : "disabled"}><i class="fa-solid ${item.accessible ? "fa-location-dot" : "fa-lock"}"></i><span>${escapeHtml(item.name)}</span></button>
+          ${item.canRemove ? `<button type="button" data-remove-planet-location="${escapeHtml(item.id)}" title="Remove location" aria-label="Remove ${escapeHtml(item.name)}"><i class="fa-solid fa-trash"></i></button>` : ""}
+        </div>`).join("") : '<p class="gmf-planet-locations__empty">No surface locations placed.</p>';
+      this._attachPlanetLocationList(list);
+      root.querySelector<HTMLElement>("[data-planet-location-removal]")?.toggleAttribute("hidden", items.length === 0);
+    }
+
+    refreshPlanetLocations(systemId: string, objectId: string) {
+      if (this.activeSystemId !== systemId || this.planetSystemId !== objectId) return;
+      const html = this.element instanceof HTMLElement ? this.element : this.element?.[0];
+      if (html) this._syncPlanetLocations(html);
     }
 
     async focusSystem(systemId: string, options: any = {}) {
@@ -403,6 +759,23 @@ export function createGalaxyMapViewClass(deps: any) {
       return true;
     }
 
+    async focusLocation(systemId: string, objectId = "", options: any = {}) {
+      const map = normalizeMap(getRawMap(this.mapId));
+      const system = map.systems.find((candidate: any) => candidate.id === systemId);
+      const object = system?.objects.find((candidate: any) => candidate.id === objectId)
+        ?? system?.objects.find((candidate: any) => candidate.id === system.primaryObjectId);
+      if (!system || !object) return false;
+      if (this.playerMode && (system.visibility !== "players" || getEffectiveObjectVisibility(system, object) !== "players")) return false;
+      this.activeSystemId = system.id;
+      this.selectedSystemId = system.id;
+      this.selectedObjectId = object.id;
+      this.selectedRouteId = null;
+      this.planetSystemId = options.detail === true && getPlanetAppearance(object) ? object.id : null;
+      await this.render({ force: true });
+      this.bringToFront?.();
+      return true;
+    }
+
     clearSystemFocus(focusId = "") {
       if (!this.externalFocus || (focusId && this.externalFocus.id !== focusId)) return false;
       if (this._externalFocusTimeout) globalThis.clearTimeout(this._externalFocusTimeout);
@@ -426,6 +799,12 @@ export function createGalaxyMapViewClass(deps: any) {
     _getVisibleSystems() {
       const rawMap = getRawMap(this.mapId);
       if (!rawMap) return [];
+      if (this.activeSystemId) {
+        const system = normalizeMap(rawMap).systems.find((candidate: any) => candidate.id === this.activeSystemId);
+        return (system?.objects ?? [])
+          .filter((object: any) => !this.playerMode || getEffectiveObjectVisibility(system, object) === "players")
+          .map((object: any) => ({ ...object, displayName: object.status === "undiscovered" && this.playerMode ? "???" : object.name, displayType: object.kind, displayStatus: object.status, factionName: "" }));
+      }
       return prepareMapForDisplay(rawMap, {
         playerMode: this.playerMode,
         selectedSystemId: this.selectedSystemId,
@@ -461,12 +840,13 @@ export function createGalaxyMapViewClass(deps: any) {
         ?? systems.find((candidate: any) => candidate.displayName.toLocaleLowerCase().startsWith(normalizedQuery))
         ?? systems.find((candidate: any) => searchable(candidate).includes(normalizedQuery));
       if (!system) {
-        notifyInfo(`No charted system matches "${String(query).trim()}".`);
+        notifyInfo(`No charted ${this.activeSystemId ? "object" : "system"} matches "${String(query).trim()}".`);
         return;
       }
 
       this.searchQuery = String(query);
-      this.selectedSystemId = system.id;
+      if (this.activeSystemId) this.selectedObjectId = system.id;
+      else this.selectedSystemId = system.id;
       this.selectedRouteId = null;
       this._centerOnSystem(system, html, Math.max(this.zoom, 1.2));
       this.render({ force: true });
@@ -499,8 +879,10 @@ export function createGalaxyMapViewClass(deps: any) {
       const startY = event.clientY;
       const originX = this.panX;
       const originY = this.panY;
+      let moved = false;
 
       const onMove = (moveEvent: any) => {
+        moved = moved || Math.abs(moveEvent.clientX - startX) > 3 || Math.abs(moveEvent.clientY - startY) > 3;
         this.panX = originX + moveEvent.clientX - startX;
         this.panY = originY + moveEvent.clientY - startY;
         this._applyViewportTransform(html);
@@ -508,6 +890,12 @@ export function createGalaxyMapViewClass(deps: any) {
       const onUp = () => {
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
+        if (!moved) {
+          this.selectedRouteId = null;
+          if (this.activeSystemId) this.selectedObjectId = null;
+          else this.selectedSystemId = null;
+          this.render({ force: true });
+        }
       };
       window.addEventListener("pointermove", onMove);
       window.addEventListener("pointerup", onUp, { once: true });
@@ -551,7 +939,10 @@ export function createGalaxyMapViewClass(deps: any) {
         node.classList.remove("is-dragging");
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
-        if (moved) await saveSystemPosition(this.mapId, node.dataset.systemId, latest.x, latest.y);
+        if (moved) {
+          if (this.activeSystemId) await saveObjectPosition(this.mapId, this.activeSystemId, node.dataset.systemId, latest.x, latest.y);
+          else await saveSystemPosition(this.mapId, node.dataset.systemId, latest.x, latest.y);
+        }
       };
 
       window.addEventListener("pointermove", onMove);
@@ -650,6 +1041,8 @@ export function createGalaxyMapViewClass(deps: any) {
 
       if (action === "add-system") {
         openSystemDialog(this.mapId, null, { x: target.position.x, y: target.position.y });
+      } else if (action === "add-entity") {
+        if (this.activeSystemId) openObjectDialog(this.mapId, this.activeSystemId, null, { x: target.position.x, y: target.position.y });
       } else if (action === "add-route") {
         openRouteDialog(this.mapId);
       } else if (action === "manage-factions") {
@@ -662,6 +1055,8 @@ export function createGalaxyMapViewClass(deps: any) {
         exportMap(this.mapId);
       } else if (action === "edit-system") {
         openSystemDialog(this.mapId, target.id);
+      } else if (action === "edit-entity") {
+        if (this.activeSystemId) openObjectDialog(this.mapId, this.activeSystemId, target.id);
       } else if (action === "add-route-from-system") {
         openRouteDialog(this.mapId, null, { fromSystemId: target.id });
       } else if (action === "reveal-system") {
@@ -670,6 +1065,12 @@ export function createGalaxyMapViewClass(deps: any) {
         await hideSystemFromPlayers(this.mapId, target.id, true);
       } else if (action === "delete-system") {
         await this._confirmDeleteSystem(target.id);
+      } else if (action === "reveal-entity") {
+        if (this.activeSystemId) await setObjectVisibility(this.mapId, this.activeSystemId, target.id, "players");
+      } else if (action === "hide-entity") {
+        if (this.activeSystemId) await setObjectVisibility(this.mapId, this.activeSystemId, target.id, "gm");
+      } else if (action === "delete-entity") {
+        if (this.activeSystemId) await this._confirmDeleteObject(this.activeSystemId, target.id);
       } else if (action === "edit-route") {
         openRouteDialog(this.mapId, target.id);
       } else if (action === "reveal-route") {
@@ -685,15 +1086,23 @@ export function createGalaxyMapViewClass(deps: any) {
       const confirmed = await Dialog.confirm({
         title: "Delete Star System",
         content: "<p>Delete this star system and any connected routes?</p>"
-      });
+      }, GALAXY_DIALOG_OPTIONS);
       if (confirmed) await deleteSystem(this.mapId, systemId);
+    }
+
+    async _confirmDeleteObject(systemId: string, objectId: string) {
+      const confirmed = await Dialog.confirm({ title: "Delete Entity", content: "<p>Delete this entity and its linked content?</p>" });
+      if (confirmed) {
+        await deleteObject(this.mapId, systemId, objectId);
+        this.selectedObjectId = null;
+      }
     }
 
     async _confirmDeleteRoute(routeId: string) {
       const confirmed = await Dialog.confirm({
         title: "Delete Route",
         content: "<p>Delete this route?</p>"
-      });
+      }, GALAXY_DIALOG_OPTIONS);
       if (confirmed) await deleteRoute(this.mapId, routeId);
     }
 
@@ -816,8 +1225,9 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     _getSelectedRawSystem() {
-      const map = getRawMap(this.mapId);
-      return map?.systems?.find((system: any) => system.id === this.selectedSystemId) ?? null;
+      const map = normalizeMap(getRawMap(this.mapId));
+      if (this.activeSystemId) return map.systems.find((system: any) => system.id === this.activeSystemId)?.objects.find((object: any) => object.id === this.selectedObjectId) ?? null;
+      return map.systems.find((system: any) => system.id === this.selectedSystemId) ?? null;
     }
 
     async close(options: any = {}) {
@@ -833,6 +1243,8 @@ export function createGalaxyMapViewClass(deps: any) {
 
     _disposePlanetRenderer() {
       this._planetGeneration++;
+      this._planetLocationCallout?.dispose?.();
+      this._planetLocationCallout = null;
       this._planetRenderer?.dispose();
       this._planetRenderer = null;
     }
@@ -847,8 +1259,6 @@ export function createGalaxyMapViewClass(deps: any) {
       if (host) host.dataset.planetShape = appearance.shape;
       const stage = html.querySelector<HTMLElement>(".gmf-planet-stage");
       stage?.style.setProperty("--gmf-planet-color", appearance.color);
-      const label = html.querySelector("[data-planet-appearance]");
-      if (label) label.textContent = appearance.label;
     }
 
     async _mountPlanetRenderer(html: HTMLElement, appearance: any) {
@@ -859,7 +1269,14 @@ export function createGalaxyMapViewClass(deps: any) {
       const status = html.querySelector("[data-planet-status]");
       const toggle = html.querySelector("[data-action='planet-static']");
       const controls = html.querySelectorAll<HTMLButtonElement>("[data-planet-control]");
-      if (toggle) { toggle.textContent = this.planetStatic ? "Enable 3D" : "Static view"; toggle.setAttribute("aria-pressed", String(this.planetStatic)); }
+      if (toggle) {
+        const label = this.planetStatic ? "Enable 3D" : "Static view";
+        toggle.setAttribute("title", label);
+        toggle.setAttribute("aria-label", label);
+        toggle.setAttribute("aria-pressed", String(this.planetStatic));
+        const icon = toggle.querySelector("i");
+        if (icon) icon.className = this.planetStatic ? "fa-solid fa-cube" : "fa-solid fa-image";
+      }
       if (this.planetStatic) {
         if (status) status.textContent = "Static preview · Enable 3D to rotate and zoom";
         controls.forEach(b => b.disabled = true);
@@ -873,17 +1290,41 @@ export function createGalaxyMapViewClass(deps: any) {
           texture: appearance.texture,
           color: appearance.color,
           shape: appearance.shape,
+          finish: appearance.finish,
+          detailStrength: appearance.detailStrength,
+          locations: this._getPlanetObject()?.planetLocations ?? [],
+          canPlaceLocations: Boolean(game.user?.isGM && !this.playerMode),
+          onLocationDrop: (event: DragEvent, anchor: any) => void this._placePlanetLocation(event, anchor, html),
+          onInvalidLocationDrop: () => notifyError("Drop the scene directly onto the visible 3D surface."),
+          onMarkerHover: (location: any) => {
+            const item = this._getPlanetLocationItem(location.id);
+            if (item) this._planetLocationCallout?.show?.(item);
+          },
+          onMarkerLeave: () => this._planetLocationCallout?.scheduleHide?.(),
+          onMarkerPosition: (point: any) => this._planetLocationCallout?.setAnchor?.(point),
+          onMarkerOpen: (location: any) => this._openPlanetLocation(location.id),
+          onMarkerContextMenu: game.user?.isGM && !this.playerMode
+            ? (location: any) => void this._removePlanetLocation(location.id, html)
+            : null,
           isVisible: () => !(this as any).minimized && !(this as any)._minimized,
           onStatus: (text: string) => { if (status) status.textContent = text; },
           onPaused: (paused: boolean) => {
             const button = html.querySelector("[data-action='planet-pause']");
-            if (button) { button.textContent = paused ? "Resume rotation" : "Pause rotation"; button.setAttribute("aria-pressed", String(paused)); }
+            if (button) {
+              const label = paused ? "Resume rotation" : "Pause rotation";
+              button.setAttribute("title", label);
+              button.setAttribute("aria-label", label);
+              button.setAttribute("aria-pressed", String(paused));
+              const icon = button.querySelector("i");
+              if (icon) icon.className = paused ? "fa-solid fa-play" : "fa-solid fa-pause";
+            }
           },
           onStopped: () => {
             controls.forEach(b => b.disabled = true);
             if (status) status.textContent = "Static preview · Reopen this detail view to resume 3D";
           }
         });
+        this._planetLocationCallout = createPlanetLocationCallout({ host });
       } catch {
         controls.forEach(b => b.disabled = true);
         if (status) status.textContent = "3D could not be loaded. Static preview shown.";

@@ -1,6 +1,9 @@
 import {
   ANIMATED_CELESTIAL_STYLES,
+  GALAXY_SCHEMA_VERSION,
   ICON_STYLE_OPTIONS,
+  OBJECT_KINDS,
+  OBJECT_VISIBILITIES,
   ROUTE_TYPES,
   SYSTEM_STATUSES,
   SYSTEM_TYPES,
@@ -11,16 +14,20 @@ import {
   normalizeFaction,
   normalizeMap,
   normalizeNumber,
+  normalizePlanetLocation,
+  normalizePlanetLocations,
   normalizeRoute,
   normalizeSystem,
+  normalizeSystemObject,
   randomId
 } from "./galaxy-model";
 import { createGalaxyMapManagerClass } from "./manager-app";
 import { createGalaxyMapViewClass } from "./view-app";
-import { getPlanetAppearance, PLANET_OPTIONS, PLANET_SHAPE_OPTIONS } from "./planet-presets";
+import { getPlanetAppearance, PLANET_FINISH_OPTIONS, PLANET_OPTIONS, PLANET_SHAPE_OPTIONS } from "./planet-presets";
 import { evaluateTravelApproval, getTravelElectorate, TRAVEL_APPROVAL_OPTIONS } from "./travel-approval";
-import { MODULE_ID, SETTING_MAPS, SOCKET_NAME, TEMPLATE_ROOT } from "./constants";
+import { MODULE_ID, SETTING_MAPS, SETTING_SCHEMA_V1_BACKUP, SETTING_SURFACE_LOCATION_RECOVERY, SOCKET_NAME, TEMPLATE_ROOT } from "./constants";
 import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, slugify } from "./dom-utils";
+import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chrome";
 
 (() => {
   "use strict";
@@ -341,6 +348,8 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     const textureStatus = root?.querySelector("[data-texture-upload-status]");
     const appearanceInput = root?.querySelector('[name="planetPreset"]');
     const shapeInput = root?.querySelector('[name="planetShape"]');
+    const surfaceStrengthInput = root?.querySelector('[name="planetDetailStrength"]');
+    const surfaceStrengthOutput = root?.querySelector("[data-surface-strength-output]");
     const textureGuide = root?.querySelector("[data-texture-guide]");
     const texturePreviews = root?.querySelectorAll("[data-texture-guide-preview]") ?? [];
     const updateCustomTextureState = () => {
@@ -399,6 +408,9 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     textureInput?.addEventListener("change", updateTextureStatus);
     shapeInput?.addEventListener("change", () => {
       if (textureGuide) textureGuide.dataset.shape = shapeInput.value;
+    });
+    surfaceStrengthInput?.addEventListener("input", () => {
+      if (surfaceStrengthOutput) surfaceStrengthOutput.value = `${surfaceStrengthInput.value}%`;
     });
     updateCustomTextureState();
     updateTextureStatus();
@@ -481,6 +493,13 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
         : getDisplayIconStyle(displayType, system.iconStyle);
       return {
         ...system,
+        image: system.image,
+        sceneIds: [...system.sceneIds],
+        journalId: system.journalId,
+        planetPreset: system.planetPreset,
+        planetShape: system.planetShape,
+        planetTexture: system.planetTexture,
+        planetColor: system.planetColor,
         iconStyle: displayIconStyle,
         displayName: obscured ? "???" : system.name,
         displayDescription: obscured ? "Unresolved sensor contact. Details are not available." : system.description,
@@ -498,7 +517,7 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
         hasJournal: Boolean(!obscured && system.journalId),
         hasScenes: Boolean(!obscured && system.sceneIds.length),
         showImage: Boolean(!obscured && system.image),
-        canInspectSystem: Boolean(getPlanetAppearance({ ...system, iconStyle: displayIconStyle, obscured }))
+        canInspectSystem: Boolean(getPlanetAppearance({ ...system, planetPreset: system.planetPreset, planetShape: system.planetShape, planetTexture: system.planetTexture, planetColor: system.planetColor, iconStyle: displayIconStyle, obscured }))
       };
     });
 
@@ -523,7 +542,7 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     const selectedRoute = routes.find((route) => route.id === selectedRouteId) ?? null;
     const selectedSystem = selectedRoute
       ? null
-      : displaySystems.find((system) => system.id === selectedSystemId) ?? displaySystems[0] ?? null;
+      : displaySystems.find((system) => system.id === selectedSystemId) ?? null;
     if (selectedSystem) selectedSystem.isSelected = true;
     const currentSystem = displaySystems.find((system) => system.id === normalized.currentSystemId) ?? displaySystems[0] ?? null;
     const selectedTravelRoute = selectedSystem && currentSystem && selectedSystem.id !== currentSystem.id
@@ -550,7 +569,7 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
       selectedSystem,
       selectedRoute,
       currentSystem,
-      selectedType: selectedRoute ? "route" : "system",
+      selectedType: selectedRoute ? "route" : selectedSystem ? "system" : null,
       playerMode,
       isGM: game.user?.isGM ?? false,
       canEdit: game.user?.isGM && !playerMode
@@ -631,12 +650,20 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
   async function upsertSystem(mapId, systemData = {}) {
     if (!requireGM("save star systems")) return null;
     const maps = getMapStore();
-    const map = maps[mapId];
-    if (!map) {
+    if (!maps[mapId]) {
       notifyError(`Map "${mapId}" was not found.`);
       return null;
     }
-    const system = normalizeSystem(systemData);
+    const map = normalizeMap(maps[mapId]);
+    const existing = map.systems.find((candidate) => candidate.id === systemData.id);
+    const objects = systemData.objects ?? existing?.objects ?? [];
+    const primaryId = existing?.primaryObjectId || objects[0]?.id;
+    const objectFields = ["image", "sceneIds", "planetLocations", "journalId", "planetPreset", "planetShape", "planetFinish", "planetDetailStrength", "planetTexture", "planetColor"];
+    const mergedObjects = objects.map((object) => object.id !== primaryId ? object : normalizeSystemObject({
+      ...object,
+      ...Object.fromEntries(objectFields.filter((key) => systemData[key] !== undefined).map((key) => [key, systemData[key]]))
+    }));
+    const system = normalizeSystem({ ...existing, ...systemData, objects: mergedObjects });
     const index = map.systems.findIndex((candidate) => candidate.id === system.id);
     if (index >= 0) map.systems[index] = system;
     else map.systems.push(system);
@@ -645,6 +672,196 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     refreshOpenApps(mapId);
     game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
     return clone(system);
+  }
+
+  async function upsertObject(mapId, systemId, objectData = {}) {
+    if (!requireGM("save entities")) return null;
+    const maps = getMapStore();
+    if (!maps[mapId]) return null;
+    const map = normalizeMap(maps[mapId]);
+    const system = map.systems.find((candidate) => candidate.id === systemId);
+    if (!system) return null;
+    const object = normalizeSystemObject(objectData);
+    const index = system.objects.findIndex((candidate) => candidate.id === object.id);
+    if (index >= 0) system.objects[index] = object;
+    else system.objects.push(object);
+    if (!system.primaryObjectId) system.primaryObjectId = object.id;
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    return clone(object);
+  }
+
+  function updateOpenPlanetLocations(mapId, systemId, objectId) {
+    for (const app of getOpenMapViews(mapId)) app.refreshPlanetLocations?.(systemId, objectId);
+  }
+
+  async function savePlanetLocation(mapId, systemId, objectId, locationData: any = {}) {
+    if (!requireGM("place surface locations")) return null;
+    const maps = getMapStore();
+    const map = maps[mapId] ? normalizeMap(maps[mapId]) : null;
+    const system = map?.systems.find(candidate => candidate.id === systemId);
+    const object = system?.objects.find(candidate => candidate.id === objectId);
+    if (!map || !system || !object) return null;
+    const sceneId = String(locationData.sceneId || "");
+    if (!object.sceneIds.includes(sceneId)) {
+      notifyError("Only scenes linked to this object can be placed on its surface.");
+      return null;
+    }
+    const location = normalizePlanetLocation(locationData);
+    const index = object.planetLocations.findIndex(candidate => candidate.sceneId === sceneId && candidate.shape === location.shape);
+    if (index >= 0) location.id = object.planetLocations[index].id;
+    if (index >= 0) object.planetLocations[index] = location;
+    else object.planetLocations.push(location);
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    updateOpenPlanetLocations(mapId, systemId, objectId);
+    game.socket.emit(SOCKET_NAME, { action: "planet-locations", mapId, systemId, objectId });
+    return clone(location);
+  }
+
+  async function removePlanetLocation(mapId, systemId, objectId, locationId) {
+    if (!requireGM("remove surface locations")) return false;
+    const maps = getMapStore();
+    const map = maps[mapId] ? normalizeMap(maps[mapId]) : null;
+    const object = map?.systems.find(candidate => candidate.id === systemId)?.objects.find(candidate => candidate.id === objectId);
+    if (!map || !object) return false;
+    const before = object.planetLocations.length;
+    object.planetLocations = object.planetLocations.filter(candidate => candidate.id !== locationId);
+    if (object.planetLocations.length === before) return false;
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    updateOpenPlanetLocations(mapId, systemId, objectId);
+    game.socket.emit(SOCKET_NAME, { action: "planet-locations", mapId, systemId, objectId });
+    return true;
+  }
+
+  async function unlinkPlanetScene(mapId, systemId, objectId, sceneId) {
+    if (!requireGM("unlink scenes from entities")) return false;
+    const map = getRawMap(mapId);
+    const object = map?.systems.find(candidate => candidate.id === systemId)?.objects.find(candidate => candidate.id === objectId);
+    if (!object?.sceneIds.includes(sceneId)) return false;
+    return Boolean(await upsertObject(mapId, systemId, { ...object, sceneIds: object.sceneIds.filter(candidate => candidate !== sceneId) }));
+  }
+
+  async function deleteObject(mapId, systemId, objectId) {
+    if (!requireGM("delete entities")) return false;
+    const maps = getMapStore();
+    if (!maps[mapId]) return false;
+    const map = normalizeMap(maps[mapId]);
+    const system = map.systems.find((candidate) => candidate.id === systemId);
+    if (!system) return false;
+    system.objects = system.objects.filter((candidate) => candidate.id !== objectId);
+    if (system.primaryObjectId === objectId) system.primaryObjectId = system.objects[0]?.id ?? "";
+    if (map.currentLocation.objectId === objectId) map.currentLocation.objectId = system.primaryObjectId;
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    return true;
+  }
+
+  async function moveObject(mapId, objectId, destinationSystemId) {
+    if (!requireGM("move entities")) return null;
+    const maps = getMapStore();
+    if (!maps[mapId]) return null;
+    const map = normalizeMap(maps[mapId]);
+    const source = map.systems.find((system) => system.objects.some((object) => object.id === objectId));
+    const destination = map.systems.find((system) => system.id === destinationSystemId);
+    const object = source?.objects.find((candidate) => candidate.id === objectId);
+    if (!source || !destination || !object) return null;
+    source.objects = source.objects.filter((candidate) => candidate.id !== objectId);
+    destination.objects.push(object);
+    if (source.primaryObjectId === objectId) source.primaryObjectId = source.objects[0]?.id ?? "";
+    if (!destination.primaryObjectId) destination.primaryObjectId = objectId;
+    if (map.currentLocation.objectId === objectId) map.currentLocation.systemId = destination.id;
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    return clone(object);
+  }
+
+  async function setPrimaryObject(mapId, systemId, objectId) {
+    if (!requireGM("set the arrival object")) return null;
+    const maps = getMapStore();
+    if (!maps[mapId]) return null;
+    const map = normalizeMap(maps[mapId]);
+    const system = map.systems.find((candidate) => candidate.id === systemId);
+    if (!system?.objects.some((object) => object.id === objectId)) return null;
+    system.primaryObjectId = objectId;
+    if (map.currentLocation.systemId === systemId && !map.currentLocation.objectId) map.currentLocation.objectId = objectId;
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    return clone(system);
+  }
+
+  async function mergeSystems(mapId, sourceSystemId, destinationSystemId) {
+    if (!requireGM("merge star systems")) return null;
+    if (!sourceSystemId || !destinationSystemId || sourceSystemId === destinationSystemId) return null;
+    const maps = getMapStore();
+    if (!maps[mapId]) return null;
+    const map = normalizeMap(maps[mapId]);
+    const source = map.systems.find((system) => system.id === sourceSystemId);
+    const destination = map.systems.find((system) => system.id === destinationSystemId);
+    if (!source || !destination) return null;
+    const existingIds = new Set(destination.objects.map((object) => object.id));
+    destination.objects.push(...source.objects.filter((object) => !existingIds.has(object.id)));
+    if (!destination.primaryObjectId) destination.primaryObjectId = source.primaryObjectId || destination.objects[0]?.id || "";
+    map.systems = map.systems.filter((system) => system.id !== sourceSystemId);
+    const seenRoutes = new Set<string>();
+    map.routes = map.routes.map((route) => ({
+      ...route,
+      fromSystemId: route.fromSystemId === sourceSystemId ? destinationSystemId : route.fromSystemId,
+      toSystemId: route.toSystemId === sourceSystemId ? destinationSystemId : route.toSystemId
+    })).filter((route) => {
+      if (route.fromSystemId === route.toSystemId) return false;
+      const key = [route.fromSystemId, route.toSystemId].sort().join(":");
+      if (seenRoutes.has(key)) return false;
+      seenRoutes.add(key);
+      return true;
+    });
+    if (map.currentLocation.systemId === sourceSystemId) map.currentLocation.systemId = destinationSystemId;
+    map.currentSystemId = map.currentLocation.systemId;
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    return clone(destination);
+  }
+
+  async function saveObjectPosition(mapId, systemId, objectId, x, y) {
+    const maps = getMapStore();
+    if (!maps[mapId]) return null;
+    const map = normalizeMap(maps[mapId]);
+    const object = map.systems.find((system) => system.id === systemId)?.objects.find((candidate) => candidate.id === objectId);
+    if (!object) return null;
+    object.x = clamp(normalizeNumber(x, object.x), 0, 100);
+    object.y = clamp(normalizeNumber(y, object.y), 0, 100);
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    return clone(object);
+  }
+
+  async function setObjectVisibility(mapId, systemId, objectId, visibility) {
+    if (!requireGM("change object visibility")) return null;
+    const maps = getMapStore();
+    if (!maps[mapId]) return null;
+    const map = normalizeMap(maps[mapId]);
+    const object = map.systems.find((system) => system.id === systemId)?.objects.find((candidate) => candidate.id === objectId);
+    if (!object) return null;
+    object.visibility = OBJECT_VISIBILITIES.includes(visibility) ? visibility : "inherit";
+    if (object.visibility === "players" && ["undiscovered", "locked"].includes(object.status)) object.status = "known";
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    return clone(object);
   }
 
   async function deleteSystem(mapId, systemId) {
@@ -665,7 +882,7 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
   async function setCurrentSystem(mapId, systemId) {
     if (!requireGM("set current location")) return null;
     const maps = getMapStore();
-    const map = maps[mapId];
+    const map = maps[mapId] ? normalizeMap(maps[mapId]) : null;
     const system = map?.systems?.find((candidate) => candidate.id === systemId);
     if (!system) {
       notifyError(`System "${systemId}" was not found.`);
@@ -677,6 +894,23 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     refreshOpenApps(mapId);
     game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
     return clone(system);
+  }
+
+  async function setCurrentObject(mapId, systemId, objectId) {
+    if (!requireGM("set current location")) return null;
+    const maps = getMapStore();
+    if (!maps[mapId]) return null;
+    const map = normalizeMap(maps[mapId]);
+    const system = map.systems.find((candidate) => candidate.id === systemId);
+    const object = system?.objects.find((candidate) => candidate.id === objectId);
+    if (!system || !object) return null;
+    map.currentSystemId = systemId;
+    map.currentLocation = { systemId, objectId };
+    maps[mapId] = normalizeMap(map);
+    await saveMapStore(maps);
+    refreshOpenApps(mapId);
+    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
+    return clone(object);
   }
 
   async function upsertRoute(mapId, routeData = {}) {
@@ -742,6 +976,7 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     map.factions = map.factions.filter((faction) => faction.id !== factionId);
     for (const system of map.systems) {
       if (system.factionId === factionId) system.factionId = "";
+      for (const object of system.objects ?? []) if (object.factionId === factionId) object.factionId = "";
     }
     maps[mapId] = normalizeMap(map);
     await saveMapStore(maps);
@@ -1040,90 +1275,40 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     </div>`;
   }
 
+  function getSurfaceLocationManagerMarkup(data: any) {
+    const rows = (data.planetLocations ?? []).map((location: any) => {
+      const scene = game.scenes?.get?.(location.sceneId);
+      const linked = data.sceneIds.includes(location.sceneId);
+      return `<label class="gmf-surface-location-manager__row">
+        <span><i class="fa-solid fa-location-dot"></i><strong>${escapeHtml(scene?.name || "Missing scene")}</strong><small>${escapeHtml(location.shape)}${linked ? "" : " · no longer linked"}</small></span>
+        <span><input type="checkbox" name="removePlanetLocationIds" value="${escapeHtml(location.id)}" /> Remove</span>
+      </label>`;
+    }).join("");
+    return rows ? `<section class="gmf-surface-location-manager">
+      <header><h3>Surface Locations</h3><p>Mark locations for removal, then save. This includes markers on other 3D shapes or scenes that are no longer linked.</p></header>
+      <div>${rows}</div>
+    </section>` : "";
+  }
+
   function getSystemDialogContent(mapId, system = {}, defaults = {}, creating = false) {
-    const map = getRawMap(mapId);
     const data = normalizeSystem({ ...defaults, ...system });
-    const factionOptions = [
-      { value: "", label: "Unaffiliated" },
-      ...(map?.factions ?? []).map((faction) => ({ value: faction.id, label: faction.name }))
-    ];
-    const faction = (map?.factions ?? []).find((candidate) => candidate.id === data.factionId);
-    const iconColorValue = data.iconColor || faction?.color || "#58d8ff";
-    const texturePanelId = `gmf-texture-${String(data.id).replace(/[^a-z0-9_-]/gi, "") || "system"}`;
     const hiddenFields = `
       <input type="hidden" name="id" value="${escapeHtml(data.id)}" />
       <input type="hidden" name="x" value="${escapeHtml(data.x)}" />
       <input type="hidden" name="y" value="${escapeHtml(data.y)}" />`;
-    const planetWorkspace = `
-      <div class="gmf-planet-workspace__heading">
-        <div><h3>System Appearance</h3><p>Configure the rotating model shown in the system detail view.</p></div>
-      </div>
-      <div class="gmf-planet-workspace__controls">
-          <div class="gmf-form-grid">
-            <label>Appearance <select name="planetPreset">${optionList(PLANET_OPTIONS, data.planetPreset)}</select></label>
-            <label>3D Shape <select name="planetShape">${optionList(PLANET_SHAPE_OPTIONS, data.planetShape)}</select></label>
-          </div>
-          <div class="gmf-texture-upload">
-            <div class="gmf-color-appearance__fields" data-color-appearance-fields ${data.planetPreset === "color" ? "" : "hidden"}>
-              <label>Model color <input type="color" name="planetColor" value="${escapeHtml(data.planetColor)}" /></label>
-              <p class="gmf-scene-picker__hint">The selected color covers the complete 3D shape without an image texture.</p>
-            </div>
-            <div id="${texturePanelId}" class="gmf-texture-upload__fields" data-texture-upload-fields ${data.planetPreset === "custom" ? "" : "hidden"}>
-              <label>Custom texture image
-                <div class="gmf-path-field">
-                  <input type="text" name="planetTexture" value="${escapeHtml(data.planetTexture)}" placeholder="Choose PNG, JPEG, or WebP" />
-                  <button type="button" data-browse-target="planetTexture"><i class="fa-solid fa-folder-open"></i> Browse</button>
-                </div>
-              </label>
-              <p class="gmf-scene-picker__hint" data-texture-upload-status>${data.planetTexture ? "Custom texture selected · previewed beneath the guide" : "Choose an image to preview it beneath the guide"}</p>
-              <button type="button" class="gmf-button--quiet gmf-texture-upload__clear" data-clear-planet-texture>Clear custom texture</button>
-              ${getTextureGuideMarkup(data.planetShape)}
-            </div>
-          </div>
-      </div>`;
-    const contentWorkspace = `
-      <section class="gmf-content-section">
-        <header><h3>System Image</h3><p>Shown in system details when this location is selected.</p></header>
-        <label class="gmf-content-section__control">Image path
-          <div class="gmf-path-field">
-            <input type="text" name="image" value="${escapeHtml(data.image)}" />
-            <button type="button" data-browse-target="image"><i class="fa-solid fa-folder-open"></i> Browse</button>
-          </div>
-        </label>
-      </section>
-      <section class="gmf-content-section">
-        <header><h3>Linked Scenes</h3><p>Connect one or more scenes to this system for navigation and cross-module overlays.</p></header>
-        ${getLinkedDocumentPickerMarkup({ collection: game.scenes, selectedIds: data.sceneIds, inputName: "sceneIds", collectionName: "scenes", kindLabel: "Scene", iconClass: "fa-image", multiple: true })}
-      </section>
-      <section class="gmf-content-section">
-        <header><h3>Linked Journal</h3><p>Optionally attach one journal entry for lore and reference material.</p></header>
-        ${getLinkedDocumentPickerMarkup({ collection: game.journal, selectedIds: data.journalId, inputName: "journalId", collectionName: "journal", kindLabel: "Journal", iconClass: "fa-book-open", multiple: false })}
-      </section>
-      <section class="gmf-content-section">
-        <header><h3>GM Notes</h3><p>Private notes shown only to GMs.</p></header>
-        <label class="gmf-content-section__control">Notes<textarea name="notes" rows="4">${escapeHtml(data.notes)}</textarea></label>
-      </section>`;
 
     if (creating) return `
       <form class="gmf-crud-form gmf-system-form gmf-system-form--create">
         ${hiddenFields}
-        <div class="gmf-quick-create__identity">
-          <label>Name <input type="text" name="name" value="${escapeHtml(data.name)}" required autofocus /></label>
-          <label>Type <select name="type">${optionList(SYSTEM_TYPES, data.type)}</select></label>
-        </div>
-        ${getMarkerComposerMarkup(data, iconColorValue, { quick: true })}
+        <label>System name <input type="text" name="name" value="${escapeHtml(data.name)}" required autofocus /></label>
         <details class="gmf-more-options">
           <summary>More options</summary>
           <div class="gmf-more-options__content">
             <div class="gmf-form-grid">
-              <label>Faction <select name="factionId">${optionList(factionOptions, data.factionId)}</select></label>
               <label>Status <select name="status">${optionList(SYSTEM_STATUSES, data.status)}</select></label>
-            </div>
-            <div class="gmf-form-grid">
               <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
-              <label>Marker Size <input type="range" name="iconSize" value="${escapeHtml(data.iconSize)}" min="18" max="56" step="1" /></label>
             </div>
-            <label class="gmf-checkbox-label"><input type="checkbox" name="pulse" value="true" ${data.pulse ? "checked" : ""} /> Pulse Glow</label>
+            <label>Description <textarea name="description" rows="3">${escapeHtml(data.description)}</textarea></label>
           </div>
         </details>
       </form>`;
@@ -1131,32 +1316,13 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     return `
       <form class="gmf-crud-form gmf-system-form gmf-system-form--edit">
         ${hiddenFields}
-        <nav class="gmf-system-editor-tabs" role="tablist" aria-label="System editor sections">
-          <button type="button" role="tab" data-system-editor-tab="overview"><i class="fa-solid fa-circle-info" aria-hidden="true"></i>Overview</button>
-          <button type="button" role="tab" data-system-editor-tab="planet"><i class="fa-solid fa-globe" aria-hidden="true"></i>Planet</button>
-          <button type="button" role="tab" data-system-editor-tab="content"><i class="fa-solid fa-link" aria-hidden="true"></i>Content</button>
-        </nav>
-        <section class="gmf-system-editor-panel gmf-system-editor-panel--overview" role="tabpanel" data-system-editor-panel="overview">
-          <div class="gmf-overview-fields">
-            <label>Name <input type="text" name="name" value="${escapeHtml(data.name)}" required autofocus /></label>
-            <div class="gmf-form-grid">
-              <label>Type <select name="type">${optionList(SYSTEM_TYPES, data.type)}</select></label>
-              <label>Status <select name="status">${optionList(SYSTEM_STATUSES, data.status)}</select></label>
-            </div>
-            <div class="gmf-form-grid">
-              <label>Faction <select name="factionId">${optionList(factionOptions, data.factionId)}</select></label>
-              <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
-            </div>
-            <label>Description <textarea name="description" rows="3">${escapeHtml(data.description)}</textarea></label>
-          </div>
-          <div class="gmf-overview-marker"><h3>Map Appearance</h3>${getMarkerComposerMarkup(data, iconColorValue)}</div>
-        </section>
-        <section class="gmf-system-editor-panel gmf-system-editor-panel--planet" role="tabpanel" data-system-editor-panel="planet" hidden>
-          ${planetWorkspace}
-        </section>
-        <section class="gmf-system-editor-panel gmf-system-editor-panel--content" role="tabpanel" data-system-editor-panel="content" hidden>
-          ${contentWorkspace}
-        </section>
+        <label>System name <input type="text" name="name" value="${escapeHtml(data.name)}" required autofocus /></label>
+        <div class="gmf-form-grid">
+          <label>Status <select name="status">${optionList(SYSTEM_STATUSES, data.status)}</select></label>
+          <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
+        </div>
+        <label>Description <textarea name="description" rows="5">${escapeHtml(data.description)}</textarea></label>
+        <p class="gmf-form-help">Planets, stars, stations, factions, linked content, and 3D appearance are configured on entities inside this system.</p>
       </form>
     `;
   }
@@ -1241,17 +1407,24 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     const map = getRawMap(mapId);
     const system = systemId ? map?.systems?.find((candidate) => candidate.id === systemId) : null;
     renderCrudDialog({
-      title: system ? "Edit Star System" : "Create Star System",
+      title: system ? "Edit System" : "Create System",
       content: getSystemDialogContent(mapId, system ?? { id: randomId("system"), name: "New System" }, defaults, !system),
       submitLabel: system ? "Save System" : "Create System",
       width: system ? 860 : 540,
       height: system ? Math.min(760, Math.max(360, window.innerHeight - 64)) : "auto",
       dialogClass: system ? "gmf-system-edit-dialog" : "gmf-system-create-dialog",
-      onSubmit: (values) => upsertSystem(mapId, {
-        ...values,
-        sceneIds: values.sceneIds ?? [],
-        pulse: values.pulse === "true"
-      })
+      onSubmit: (values) => {
+        const removalIds = new Set((Array.isArray(values.removePlanetLocationIds)
+          ? values.removePlanetLocationIds : [values.removePlanetLocationIds]).filter(Boolean).map(String));
+        delete values.removePlanetLocationIds;
+        const primary = system ? normalizeSystem(system).objects.find((object: any) => object.id === normalizeSystem(system).primaryObjectId) : null;
+        return upsertSystem(mapId, {
+          ...values,
+          sceneIds: values.sceneIds ?? [],
+          planetLocations: (primary?.planetLocations ?? []).filter((location: any) => !removalIds.has(location.id)),
+          pulse: values.pulse === "true"
+        });
+      }
     });
   }
 
@@ -1319,7 +1492,7 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
             const confirmed = await Dialog.confirm({
               title: "Delete Faction",
               content: "<p>Delete this faction? Systems assigned to it become unaffiliated.</p>"
-            });
+            }, GALAXY_DIALOG_OPTIONS);
             if (confirmed) {
               await deleteFaction(mapId, button.dataset.dialogDeleteFaction);
               openFactionManagerDialog(mapId);
@@ -1364,23 +1537,114 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     return Object.values(getMapStore()).map(normalizeMap);
   }
 
+  function getSystem(mapId, systemId) {
+    return clone(normalizeMap(getRawMap(mapId)).systems.find((system) => system.id === String(systemId)) ?? null);
+  }
+
+  function getObject(mapId, objectId) {
+    const map = normalizeMap(getRawMap(mapId));
+    for (const system of map.systems) {
+      const object = system.objects.find((candidate) => candidate.id === String(objectId));
+      if (object) return { systemId: system.id, object: clone(object) };
+    }
+    return null;
+  }
+
   function getSceneIdsForSystem(mapId, systemId) {
     const rawMap = getRawMap(mapId);
     if (!rawMap) return [];
     const system = normalizeMap(rawMap).systems.find((candidate) => candidate.id === String(systemId));
-    return system ? [...system.sceneIds] : [];
+    return system ? [...new Set(system.objects.flatMap((object) => object.sceneIds))] : [];
+  }
+
+  function getObjectDialogContent(mapId, systemId, object: any = {}, defaults: any = {}) {
+    const map = normalizeMap(getRawMap(mapId));
+    const data = normalizeSystemObject({ ...defaults, ...object });
+    const systemOptions = map.systems.map((system) => ({ value: system.id, label: system.name }));
+    const factionOptions = [{ value: "", label: "Inherit system faction" }, ...map.factions.map((faction) => ({ value: faction.id, label: faction.name }))];
+    return `<form class="gmf-crud-form gmf-object-form">
+      <input type="hidden" name="id" value="${escapeHtml(data.id)}" />
+      <input type="hidden" name="x" value="${escapeHtml(data.x)}" />
+      <input type="hidden" name="y" value="${escapeHtml(data.y)}" />
+      <div class="gmf-form-grid">
+        <label>Name <input type="text" name="name" value="${escapeHtml(data.name)}" required autofocus /></label>
+        <label>System <select name="systemId">${optionList(systemOptions, systemId)}</select></label>
+      </div>
+      <div class="gmf-form-grid">
+        <label>Entity type <select name="kind">${optionList(OBJECT_KINDS, data.kind)}</select></label>
+        <label>Status <select name="status">${optionList(SYSTEM_STATUSES, data.status)}</select></label>
+      </div>
+      <label>Description <textarea name="description" rows="4">${escapeHtml(data.description)}</textarea></label>
+      <div class="gmf-form-grid">
+        <label>Visibility <select name="visibility">${optionList(OBJECT_VISIBILITIES, data.visibility)}</select></label>
+        <label>Faction <select name="factionId">${optionList(factionOptions, data.factionId)}</select></label>
+      </div>
+      ${getMarkerComposerMarkup({ ...data, type: data.kind }, data.iconColor || "#58d8ff")}
+      <fieldset><legend>Detail view</legend>
+        <div class="gmf-form-grid">
+          <label>Appearance <select name="planetPreset">${optionList(PLANET_OPTIONS, data.planetPreset)}</select></label>
+          <label>3D shape <select name="planetShape">${optionList(PLANET_SHAPE_OPTIONS, data.planetShape)}</select></label>
+          <label>Surface finish <select name="planetFinish">${optionList(PLANET_FINISH_OPTIONS, data.planetFinish)}</select></label>
+          <label class="gmf-surface-strength">Detail strength <span><input type="range" name="planetDetailStrength" value="${escapeHtml(data.planetDetailStrength)}" min="0" max="100" step="1" /><output data-surface-strength-output>${escapeHtml(data.planetDetailStrength)}%</output></span></label>
+        </div>
+        <label>Model color <input type="color" name="planetColor" value="${escapeHtml(data.planetColor)}" /></label>
+        <label>Custom texture <div class="gmf-path-field"><input type="text" name="planetTexture" value="${escapeHtml(data.planetTexture)}" /><button type="button" data-browse-target="planetTexture"><i class="fa-solid fa-folder-open"></i> Browse</button></div></label>
+        ${getSurfaceLocationManagerMarkup(data)}
+      </fieldset>
+      <fieldset><legend>Linked content</legend>
+        <label>Image <div class="gmf-path-field"><input type="text" name="image" value="${escapeHtml(data.image)}" /><button type="button" data-browse-target="image"><i class="fa-solid fa-folder-open"></i> Browse</button></div></label>
+        ${getLinkedDocumentPickerMarkup({ collection: game.scenes, selectedIds: data.sceneIds, inputName: "sceneIds", collectionName: "scenes", kindLabel: "Scene", iconClass: "fa-image", multiple: true })}
+        ${getLinkedDocumentPickerMarkup({ collection: game.journal, selectedIds: data.journalId, inputName: "journalId", collectionName: "journal", kindLabel: "Journal", iconClass: "fa-book-open", multiple: false })}
+      </fieldset>
+      <label>GM notes <textarea name="notes" rows="3">${escapeHtml(data.notes)}</textarea></label>
+    </form>`;
+  }
+
+  function openObjectDialog(mapId, systemId, objectId = null, defaults = {}) {
+    const map = normalizeMap(getRawMap(mapId));
+    const sourceSystem = map.systems.find((system) => system.id === systemId);
+    const existing = objectId ? sourceSystem?.objects.find((object) => object.id === objectId) : null;
+    renderCrudDialog({
+      title: existing ? `Edit ${existing.name}` : "Add Entity",
+      content: getObjectDialogContent(mapId, systemId, existing ?? { id: randomId("object"), name: "New Object" }, defaults),
+      submitLabel: existing ? "Save Entity" : "Add Entity",
+      width: 760,
+      height: Math.min(760, Math.max(420, window.innerHeight - 64)),
+      onSubmit: async (values) => {
+        const destinationSystemId = String(values.systemId || systemId);
+        if (existing && destinationSystemId !== systemId) await moveObject(mapId, existing.id, destinationSystemId);
+        const removalIds = new Set((Array.isArray(values.removePlanetLocationIds)
+          ? values.removePlanetLocationIds : [values.removePlanetLocationIds]).filter(Boolean).map(String));
+        delete values.removePlanetLocationIds;
+        return upsertObject(mapId, destinationSystemId, {
+          ...existing, ...values, sceneIds: values.sceneIds ?? [],
+          planetLocations: (existing?.planetLocations ?? []).filter((location: any) => !removalIds.has(location.id)),
+          pulse: values.pulse === "true"
+        });
+      }
+    });
+  }
+
+  function getSceneIdsForObject(mapId, objectId) {
+    const map = normalizeMap(getRawMap(mapId));
+    const object = map.systems.flatMap((system) => system.objects).find((candidate) => candidate.id === String(objectId));
+    return object ? [...object.sceneIds] : [];
+  }
+
+  function getObjectsForScene(sceneId) {
+    const targetSceneId = String(sceneId || "");
+    if (!targetSceneId) return [];
+    return getMaps().flatMap((map: any) => map.systems.flatMap((system: any) => system.objects
+      .filter((object: any) => object.sceneIds.includes(targetSceneId))
+      .map((object: any) => ({ mapId: map.id, mapTitle: map.title, systemId: system.id, systemName: system.name, object: clone(object) }))));
   }
 
   function getSystemsForScene(sceneId) {
     const targetSceneId = String(sceneId || "");
     if (!targetSceneId) return [];
     return getMaps().flatMap((map: any) => map.systems
-      .filter((system: any) => system.sceneIds.includes(targetSceneId))
-      .map((system: any) => ({
-        mapId: map.id,
-        mapTitle: map.title,
-        system: clone(system)
-      })));
+      .filter((system: any) => system.objects.some((object: any) => object.sceneIds.includes(targetSceneId)))
+      .map((system: any) => ({ mapId: map.id, mapTitle: map.title, system: clone(system) })));
   }
 
   function refreshOpenApps(mapId = null) {
@@ -1806,6 +2070,15 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     return app.focusSystem(systemId, options);
   }
 
+  async function focusLocation(mapId, location: any = {}, options: any = {}) {
+    const systemId = String(location.systemId || "");
+    const objectId = String(location.objectId || "");
+    if (!mapId || !systemId) return false;
+    const app = openMap(mapId, { playerMode: options.playerMode ?? !game.user?.isGM, broadcast: options.broadcast === true });
+    if (!app) return false;
+    return objectId && app.focusLocation ? app.focusLocation(systemId, objectId, options) : app.focusSystem?.(systemId, options);
+  }
+
   function clearSystemFocus(mapId, focusId = "") {
     let cleared = false;
     for (const app of getOpenMapViews(mapId)) {
@@ -1935,6 +2208,7 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     getRawMap,
     openMapMetadataDialog,
     openSystemDialog,
+    openObjectDialog,
     openRouteDialog,
     openFactionDialog,
     exportMap,
@@ -1942,12 +2216,16 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     deleteMap,
     createMap,
     deleteSystem,
+    deleteObject,
+    setPrimaryObject,
+    mergeSystems,
     deleteRoute,
     deleteFaction,
     openMap,
     showMapToPlayers,
     closePlayerMap,
     hideSystemFromPlayers,
+    setObjectVisibility,
     hideRouteFromPlayers,
     hideFactionFromPlayers,
     clearManagerApp: (app) => {
@@ -1960,6 +2238,8 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     getRawMap,
     prepareMapForDisplay,
     openSystemDialog,
+    openObjectDialog,
+    upsertObject,
     openRouteDialog,
     openFactionDialog,
     openFactionManagerDialog,
@@ -1969,8 +2249,10 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     hideSystemFromPlayers,
     hideRouteFromPlayers,
     deleteSystem,
+    deleteObject,
     deleteRoute,
     setCurrentSystem,
+    setCurrentObject,
     requestTravelToSystem,
     notifySystemDiscovered,
     exportMap,
@@ -1979,6 +2261,10 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     notifyInfo,
     notifyError,
     saveSystemPosition,
+    saveObjectPosition,
+    savePlanetLocation,
+    removePlanetLocation,
+    unlinkPlanetScene,
     showMapToPlayers,
     openMapManager,
     clearMapView: (app) => {
@@ -2012,11 +2298,29 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
       type: Object,
       default: {}
     });
+    game.settings.register(MODULE_ID, SETTING_SCHEMA_V1_BACKUP, {
+      scope: "world",
+      config: false,
+      type: Object,
+      default: {}
+    });
+    game.settings.register(MODULE_ID, SETTING_SURFACE_LOCATION_RECOVERY, {
+      scope: "world",
+      config: false,
+      type: Boolean,
+      default: false
+    });
 
     Handlebars.registerHelper("gmfEq", (left, right) => left === right);
     Handlebars.registerHelper("gmfJson", (value) => JSON.stringify(value, null, 2));
     Handlebars.registerHelper("gmfPercent", (value) => `${Number(value).toFixed(3)}%`);
     Handlebars.registerHelper("gmfFallback", (value, fallback) => value || fallback);
+
+    Hooks.on("renderDialog", (app, html) => {
+      const root = getHtmlElement(html);
+      const frame = root?.closest?.(".window-app, .application, .app") ?? root;
+      if (frame?.classList?.contains("galaxy-map")) activateGalaxyDialogChrome(app, html);
+    });
 
     await loadTemplates([
       `${TEMPLATE_ROOT}/map-manager.hbs`,
@@ -2028,18 +2332,23 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
 
   // HoloSuite Core is the suite launcher; keep this module out of the scene-control toolbar.
 
-  Hooks.once("ready", () => {
+  Hooks.once("ready", async () => {
     game.galaxyMap = {
       openMap,
       focusSystem,
+      focusLocation,
       clearSystemFocus,
       openMapManager,
       openGalaxyMapFromSceneControls,
       openPlayerMapChooser,
       createMap,
       getMaps,
+      getSystem,
+      getObject,
       getSceneIdsForSystem,
       getSystemsForScene,
+      getSceneIdsForObject,
+      getObjectsForScene,
       showMapToPlayers,
       closePlayerMap,
       updateMap,
@@ -2048,15 +2357,26 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
       duplicateMap,
       upsertSystem,
       deleteSystem,
+      upsertObject,
+      deleteObject,
+      moveObject,
+      setPrimaryObject,
+      mergeSystems,
       upsertRoute,
       deleteRoute,
       upsertFaction,
       deleteFaction,
       saveSystemPosition,
+      saveObjectPosition,
+      savePlanetLocation,
+      removePlanetLocation,
+      unlinkPlanetScene,
       setCurrentSystem,
+      setCurrentObject,
       revealSystemToPlayers,
       revealRouteToPlayers,
       hideSystemFromPlayers,
+      setObjectVisibility,
       hideRouteFromPlayers,
       hideFactionFromPlayers,
       notifySystemDiscovered,
@@ -2067,6 +2387,42 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
     const module = game.modules.get(MODULE_ID);
     if (module) module.api = game.galaxyMap;
     registerWithHoloSuite();
+
+    if (isPrimaryGM()) {
+      const stored = getMapStore();
+      const needsMigration = Object.values(stored).some((map: any) => Number(map?.schemaVersion || 1) < GALAXY_SCHEMA_VERSION);
+      if (needsMigration) {
+        const existingBackup = clone(game.settings.get(MODULE_ID, SETTING_SCHEMA_V1_BACKUP) ?? {});
+        if (!Object.keys(existingBackup).length) await game.settings.set(MODULE_ID, SETTING_SCHEMA_V1_BACKUP, stored);
+        const migrated = Object.fromEntries(Object.entries(stored).map(([id, map]) => [id, normalizeMap(map)]));
+        await saveMapStore(migrated);
+        notifyInfo("Galaxy maps upgraded to the Galaxy → System → Entity structure. Existing map contents were placed in System 1 and the schema v1 backup was retained.");
+      }
+      if (!game.settings.get(MODULE_ID, SETTING_SURFACE_LOCATION_RECOVERY)) {
+        const backup = clone(game.settings.get(MODULE_ID, SETTING_SCHEMA_V1_BACKUP) ?? {});
+        const recoveredStore = getMapStore();
+        let recovered = 0;
+        for (const [mapId, legacyMap] of Object.entries(backup) as [string, any][]) {
+          if (!recoveredStore[mapId]) continue;
+          const currentMap = normalizeMap(recoveredStore[mapId]);
+          for (const legacySystem of legacyMap?.systems ?? []) {
+            const locations = normalizePlanetLocations(legacySystem?.planetLocations);
+            if (!locations.length) continue;
+            const object = currentMap.systems.flatMap(system => system.objects)
+              .find(candidate => candidate.id === legacySystem.id || candidate.id === `${legacySystem.id}-object`);
+            if (!object || object.planetLocations.length) continue;
+            object.planetLocations = locations.filter(location => object.sceneIds.includes(location.sceneId));
+            recovered += object.planetLocations.length;
+          }
+          recoveredStore[mapId] = normalizeMap(currentMap);
+        }
+        if (recovered) {
+          await saveMapStore(recoveredStore);
+          notifyInfo(`Restored ${recovered} planet surface location${recovered === 1 ? "" : "s"} from the schema backup.`);
+        }
+        await game.settings.set(MODULE_ID, SETTING_SURFACE_LOCATION_RECOVERY, true);
+      }
+    }
 
     game.socket.on(SOCKET_NAME, (payload: any = {}) => {
       if (payload.action === "travel-request") {
@@ -2099,6 +2455,10 @@ import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, sl
       }
       if (payload.action === "travel-animation") {
         if (payload.coordinatorId !== game.user?.id) animateTravelOnOpenMaps(payload);
+        return;
+      }
+      if (payload.action === "planet-locations") {
+        updateOpenPlanetLocations(payload.mapId, payload.systemId, payload.objectId);
         return;
       }
       if (game.user?.isGM) return;
