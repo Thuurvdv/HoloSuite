@@ -22,7 +22,9 @@ async function loadDocs() {
     const docs = await docsResponse.json();
     const tutorials = await tutorialsResponse.json();
     const additions = tutorials.modules || {};
-    docs.modules = docs.modules.map((module) => ({ ...module, ...(additions[module.id] || {}) }));
+    docs.modules = docs.modules.map((module) => (
+      module.compactDocumentation ? module : { ...module, ...(additions[module.id] || {}) }
+    ));
     return docs;
   } catch (error) {
     console.error(error);

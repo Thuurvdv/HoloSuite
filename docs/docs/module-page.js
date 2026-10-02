@@ -24,7 +24,9 @@ async function loadDocs() {
     const docs = await docsResponse.json();
     const tutorials = await tutorialsResponse.json();
     const additions = tutorials.modules || {};
-    docs.modules = docs.modules.map((module) => ({ ...module, ...(additions[module.id] || {}) }));
+    docs.modules = docs.modules.map((module) => (
+      module.compactDocumentation ? module : { ...module, ...(additions[module.id] || {}) }
+    ));
     return docs;
   } catch (error) {
     console.error(error);
@@ -58,6 +60,10 @@ function renderModule(module) {
 
   const content = document.querySelector("[data-module-content]");
   if (!content) return;
+  if (module.compactDocumentation) {
+    renderCompactDocumentation(module, content);
+    return;
+  }
   if (module.tutorial) {
     renderTutorial(module, content);
     return;
@@ -73,6 +79,33 @@ function renderModule(module) {
     { id: "examples", title: "Examples", body: list(module.examples) }
   ];
   renderSections(content, defaultSections);
+}
+
+function renderCompactDocumentation(module, content) {
+  const documentation = module.compactDocumentation;
+  const pageSections = [
+    {
+      id: "installation",
+      title: "Installation",
+      body: paragraphs(documentation.installation?.paragraphs || [])
+        + orderedList(documentation.installation?.steps || [])
+        + paragraphs(documentation.installation?.notes || [])
+    },
+    {
+      id: "quick-start",
+      title: "Quick Start",
+      body: paragraphs(documentation.quickStart?.paragraphs || [])
+        + orderedList(documentation.quickStart?.steps || [])
+        + paragraphs(documentation.quickStart?.notes || [])
+    },
+    {
+      id: "video",
+      title: "Video",
+      body: paragraphs(documentation.video?.paragraphs || [])
+    }
+  ];
+
+  renderSections(content, pageSections);
 }
 
 function renderTutorial(module, content) {

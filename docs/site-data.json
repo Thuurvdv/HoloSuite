@@ -129,9 +129,9 @@
       "tier": "free",
       "category": "Navigation",
       "image": "assets/Galaxy%20Map%20Manager.png",
-      "pitch": "Cinematic star maps with clickable systems, travel routes, ship movement, and campaign reveals.",
+      "pitch": "Build a navigable star chart with systems, planets, routes, travel, and discoveries that unfold with the campaign.",
       "compatibility": "Foundry v12-v14",
-      "features": ["Reveal star systems over time", "Animated route movement", "Scene and journal linking"],
+      "features": ["Galaxy, system, and entity navigation", "Viewport-first editing, routes, and travel", "Custom backgrounds, markers, and 3D detail views"],
       "docsUrl": "docs/module.html?id=galaxy-map",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map"
     },

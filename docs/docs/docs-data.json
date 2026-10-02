@@ -211,49 +211,45 @@
       "category": "Navigation",
       "compatibility": "Foundry v12-v14",
       "image": "assets/Galaxy%20Map%20Manager.png",
-      "summary": "Campaign-scale holographic star maps with systems, routes, travel, reveals, and JSON import/export.",
-      "overview": "Galaxy Map gives sci-fi campaigns a Foundry-native star map. GMs build systems and routes, control visibility, reveal discoveries, and let players request travel.",
-      "features": [
-        "Interactive star maps with clickable system nodes.",
-        "Custom icons, colors, sizes, pulse effects, descriptions, multi-scene tags, journals, and factions.",
-        "Routes with travel time, fuel cost, and route type.",
-        "GM-controlled visibility and discovery notifications.",
-        "Player travel requests and ship movement animations.",
-        "Zoom, pan, resize, import, and export."
-      ],
-      "installation": [
-        "Enable HoloSuite Core and Galaxy Map.",
-        "Open Map Manager from the HoloSuite launcher.",
-        "Create a new map or import existing JSON.",
-        "Open the map and start adding systems and routes."
-      ],
-      "configuration": [
-        "Right-click empty space to add systems.",
-        "Right-click systems to create routes, reveal content, edit, or delete.",
-        "Set systems and routes as player-visible or GM-only.",
-        "Tag systems with any number of scenes and link journal entries where useful."
-      ],
-      "faq": [
-        {
-          "question": "Can players see hidden systems?",
-          "answer": "Players only see systems and routes the GM has made visible. Some systems can appear as unknown until revealed."
+      "summary": "A map for your own Galaxy.",
+      "overview": "Galaxy Map allows GM's to create an interactive map of their Galaxy.",
+      "compactDocumentation": {
+        "installation": {
+          "paragraphs": [
+            "Galaxy Map requires HoloSuite Core."
+          ],
+          "steps": [
+            "Install HoloSuite Core and Galaxy Map from Foundry's Add-on Modules screen.",
+            "Enable both modules in your world.",
+            "Open the HoloSuite launcher from the scene controls and choose Galaxy Map."
+          ],
+          "notes": [
+            "If you are opening a world made with an older version of Galaxy Map, the primary GM should enter the world first so its saved maps can be upgraded safely."
+          ]
         },
-        {
-          "question": "Can players move the party ship?",
-          "answer": "Players can request travel. The GM and active players can accept or decline depending on the workflow."
+        "quickStart": {
+          "paragraphs": [
+            "You can build and run the map without leaving the viewport."
+          ],
+          "steps": [
+            "Open Map Manager, create a map, and then open it.",
+            "Use the edit button in the viewport header to set the galaxy name, background, visibility, and player travel approval rule.",
+            "Right-click empty galaxy space to add a system. Select it to edit its details in the side panel, and drag it to place it on the map.",
+            "Open the system and right-click empty space to add planets, stars, stations, moons, or other entities. Each entity can use a bundled marker or your own image, and its optional detail view can use a preset appearance, a flat colour, or a custom texture.",
+            "Right-click a system or entity marker and choose Add Route. The route editor opens in the side panel, where you can choose its destination, visibility, travel time, fuel cost, and notes.",
+            "Set the party's current location and reveal the systems, entities, and routes the players should know about.",
+            "Players can select a reachable destination and request travel. Galaxy Map follows the approval rule set for that map: GM approval, majority vote, or unanimous agreement."
+          ],
+          "notes": [
+            "For a custom galaxy or system background, a large 16:9 image works best; 4096 x 2304 px is the recommended size. Markers stay attached to their positions on the image while the map is panned and zoomed, and the full uploaded image sets the natural zoom-out limit."
+          ]
+        },
+        "video": {
+          "paragraphs": [
+            "There is no Galaxy Map video yet. A short walkthrough is planned."
+          ]
         }
-      ],
-      "videos": [
-        {
-          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/galaxymap-clip.mp4",
-          "title": "Galaxy Map overview"
-        }
-      ],
-      "examples": [
-        "Reveal a hidden system after players decode a nav beacon.",
-        "Track the party ship location during a sector campaign.",
-        "Export a finished star map to reuse in another world."
-      ],
+      },
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map"
     },
     {
