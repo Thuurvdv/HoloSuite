@@ -61,5 +61,6 @@ export const EMPTY_BOUNTY = Object.freeze({
   claimedBy: "",
   notesGM: "",
   notesPublic: "",
-  linkedJournalId: ""
+  linkedJournalId: "",
+  sceneId: ""
 });
