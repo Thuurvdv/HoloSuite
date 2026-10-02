@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 100 100"
+   color="#58d8ff"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="black-hole.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="11.67"
+     inkscape:cx="50"
+     inkscape:cy="50"
+     inkscape:window-width="3440"
+     inkscape:window-height="1369"
+     inkscape:window-x="2552"
+     inkscape:window-y="156"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <g
+     id="glow"
+     fill="currentColor"
+     opacity=".14">
+    <circle
+       cx="50"
+       cy="50"
+       r="45"
+       id="circle1" />
+  </g>
+  <g
+     id="accretion-back"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="10"
+     opacity="0.42"
+     style="display:inline">
+    <ellipse
+       cx="50"
+       cy="50"
+       rx="46"
+       ry="19"
+       id="ellipse1" />
+  </g>
+  <g
+     id="event-horizon"
+     fill="currentColor"
+     style="display:inline">
+    <circle
+       cx="50"
+       cy="50"
+       r="20"
+       id="circle2" />
+  </g>
+  <g
+     id="photon-ring"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="3"
+     style="display:inline">
+    <circle
+       cx="50"
+       cy="50"
+       r="23"
+       id="circle3" />
+  </g>
+  <g
+     id="accretion-front"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="10"
+     stroke-dasharray="72, 74"
+     stroke-dashoffset="-35"
+     style="display:inline">
+    <ellipse
+       cx="50"
+       cy="50"
+       rx="46"
+       ry="19"
+       id="ellipse3" />
+  </g>
+</svg>
