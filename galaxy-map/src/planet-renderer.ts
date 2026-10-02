@@ -1,8 +1,8 @@
 import {
-  AmbientLight, BoxGeometry, Color, CylinderGeometry, DirectionalLight, IcosahedronGeometry, Mesh,
+  AmbientLight, BoxGeometry, CanvasTexture, Color, CylinderGeometry, DirectionalLight, IcosahedronGeometry, Mesh,
   InstancedMesh, Matrix4, MeshBasicMaterial, MeshStandardMaterial, OctahedronGeometry, PerspectiveCamera,
-  Raycaster, Scene, SphereGeometry, SRGBColorSpace, TextureLoader, TorusGeometry, Vector2, Vector3, WebGLRenderer,
-  BackSide, DoubleSide, ShaderMaterial, AdditiveBlending
+  Raycaster, Scene, SphereGeometry, Sprite, SpriteMaterial, SRGBColorSpace, TextureLoader, TorusGeometry, Vector2, Vector3, WebGLRenderer,
+  DoubleSide
 } from "three";
 
 const SURFACE_FINISHES: Record<string, { roughness: number; metalness: number; emissive?: number }> = {
@@ -12,27 +12,25 @@ const SURFACE_FINISHES: Record<string, { roughness: number; metalness: number; e
 };
 
 /** Add deterministic shader detail without generating or loading another image. */
-function configureSurfaceFinish(material: MeshStandardMaterial | MeshBasicMaterial, requestedFinish: unknown, requestedStrength: unknown) {
+function configureSurfaceFinish(material: MeshStandardMaterial | MeshBasicMaterial, requestedFinish: unknown) {
   const finish = String(requestedFinish || "smooth");
   const preset = SURFACE_FINISHES[finish] ?? SURFACE_FINISHES.smooth;
-  const strength = Math.min(0.8, Math.max(0, Number(requestedStrength) / 100 * 0.8 || 0));
   if (finish === "holographic") {
     material.transparent = true;
     material.opacity = 0.58;
     material.depthWrite = false;
     material.side = DoubleSide;
     material.onBeforeCompile = shader => {
-      shader.uniforms.gmfDetailStrength = { value: strength };
       shader.vertexShader = shader.vertexShader
         .replace("#include <common>", "#include <common>\nvarying vec3 gmfObjectPosition;")
         .replace("#include <begin_vertex>", "#include <begin_vertex>\ngmfObjectPosition = position;");
       shader.fragmentShader = shader.fragmentShader
-        .replace("#include <common>", "#include <common>\nvarying vec3 gmfObjectPosition;\nuniform float gmfDetailStrength;")
+        .replace("#include <common>", "#include <common>\nvarying vec3 gmfObjectPosition;")
         .replace("#include <map_fragment>", `#include <map_fragment>
           float gmfScan = 0.5 + 0.5 * sin((gmfObjectPosition.y + gmfObjectPosition.x * 0.12) * 38.0);
-          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.08, 0.78, 0.96), 0.38 + 0.22 * gmfDetailStrength);
+          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.08, 0.78, 0.96), 0.52);
           diffuseColor.rgb *= 0.78 + gmfScan * 0.26;
-          diffuseColor.a *= 0.72 + gmfScan * 0.18 * gmfDetailStrength;
+          diffuseColor.a *= 0.72 + gmfScan * 0.12;
         `);
     };
     material.customProgramCacheKey = () => "gmf-surface-holographic";
@@ -86,22 +84,64 @@ function remapCylinderUvs(geometry: any) {
 }
 
 function remapCrystalUvs(geometry: any) {
+  const position = geometry.getAttribute("position");
   const uv = geometry.getAttribute("uv");
-  for (let face = 0; face < 8; face++) {
-    const column = face % 4;
-    const start = face * 3;
-    if (face < 4) {
-      uv.setXY(start, (column + 0.5) / 4, 1);
-      uv.setXY(start + 1, column / 4, 0.5);
-      uv.setXY(start + 2, (column + 1) / 4, 0.5);
-    } else {
-      uv.setXY(start, column / 4, 0.5);
-      uv.setXY(start + 1, (column + 1) / 4, 0.5);
-      uv.setXY(start + 2, (column + 0.5) / 4, 0);
+  // OctahedronGeometry interleaves upper and lower triangles. Pair faces by
+  // their shared equatorial edge so every UV column is one continuous side.
+  const facePairs = [[0, 1], [3, 2], [4, 5], [7, 6]];
+  for (let column = 0; column < facePairs.length; column++) {
+    const [upperFace, lowerFace] = facePairs[column];
+    const upperStart = upperFace * 3;
+    const upperEquator = [0, 1, 2]
+      .map(offset => upperStart + offset)
+      .filter(vertex => Math.abs(position.getY(vertex)) < 0.001);
+    const left = upperEquator[0];
+    for (const face of [upperFace, lowerFace]) {
+      const start = face * 3;
+      for (let offset = 0; offset < 3; offset++) {
+        const vertex = start + offset;
+        const y = position.getY(vertex);
+        if (y > 0.001) uv.setXY(vertex, (column + 0.5) / 4, 1);
+        else if (y < -0.001) uv.setXY(vertex, (column + 0.5) / 4, 0);
+        else {
+          const isLeft = Math.abs(position.getX(vertex) - position.getX(left)) < 0.001
+            && Math.abs(position.getZ(vertex) - position.getZ(left)) < 0.001;
+          uv.setXY(vertex, (column + (isLeft ? 0 : 1)) / 4, 0.5);
+        }
+      }
     }
   }
   uv.needsUpdate = true;
   return geometry;
+}
+
+function createAppearanceGlow(preset: unknown) {
+  if (preset !== "sun" && preset !== "black-hole") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 256;
+  const context = canvas.getContext("2d")!;
+  const gradient = context.createRadialGradient(128, 128, 0, 128, 128, 128);
+  if (preset === "sun") {
+    gradient.addColorStop(0, "rgba(255, 238, 142, 0)");
+    gradient.addColorStop(0.54, "rgba(255, 224, 92, 0.16)");
+    gradient.addColorStop(0.68, "rgba(255, 201, 54, 0.58)");
+    gradient.addColorStop(1, "rgba(255, 181, 36, 0)");
+  } else {
+    gradient.addColorStop(0, "rgba(130, 38, 0, 0)");
+    gradient.addColorStop(0.7, "rgba(130, 38, 0, 0)");
+    gradient.addColorStop(0.76, "rgba(221, 83, 10, 0.96)");
+    gradient.addColorStop(0.82, "rgba(151, 43, 2, 0.44)");
+    gradient.addColorStop(0.9, "rgba(103, 25, 0, 0)");
+  }
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 256, 256);
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  const material = new SpriteMaterial({ map: texture, transparent: true, depthWrite: false, toneMapped: false });
+  const sprite = new Sprite(material);
+  sprite.position.z = -0.2;
+  sprite.scale.setScalar(preset === "sun" ? 3.2 : 2.75);
+  return { sprite, material, texture };
 }
 
 /** One local WebGL viewer, with bounded resolution and no post-processing. */
@@ -160,9 +200,11 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
   const material = finish === "holographic"
     ? new MeshBasicMaterial({ color: 0xffffff })
     : new MeshStandardMaterial({ color: 0xffffff, flatShading: shape === "asteroid" || shape === "crystal" });
-  configureSurfaceFinish(material, finish, options.detailStrength);
+  configureSurfaceFinish(material, finish);
   const planet = new Mesh(geometry, material);
   planet.rotation.set(0.12, 0.5, -0.12);
+  const appearanceGlow = createAppearanceGlow(options.appearancePreset);
+  if (appearanceGlow) scene.add(appearanceGlow.sprite);
   scene.add(planet);
   const markerGeometry = new SphereGeometry(0.052, 10, 8);
   const markerMaterial = new MeshBasicMaterial({ color: new Color(options.markerColor || "#58d8ff"), toneMapped: false });
@@ -184,20 +226,6 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
   const markerMatrix = new Matrix4();
   const markerPoint = new Vector3();
   const markerNormal = new Vector3();
-  const atmosphereMaterial = new ShaderMaterial({
-    uniforms: { tint: { value: new Color(0x8bcaff) } },
-    vertexShader: `varying vec3 surfaceNormal; varying vec3 viewDirection;
-      void main() { vec4 p = modelViewMatrix * vec4(position, 1.0);
-        surfaceNormal = normalize(normalMatrix * normal); viewDirection = -p.xyz;
-        gl_Position = projectionMatrix * p; }`,
-    fragmentShader: `uniform vec3 tint; varying vec3 surfaceNormal; varying vec3 viewDirection;
-      void main() { float rim = pow(1.0 - abs(dot(normalize(surfaceNormal), normalize(viewDirection))), 3.0);
-        gl_FragColor = vec4(tint, rim * 0.24); }`,
-    side: BackSide, transparent: true, depthWrite: false, blending: AdditiveBlending
-  });
-  const atmosphere = new Mesh(geometry, atmosphereMaterial);
-  atmosphere.scale.setScalar(1.035);
-  scene.add(atmosphere);
   scene.add(new AmbientLight(0xc2d6ff, 0.65));
   const sun = new DirectionalLight(0xfff2de, 2.4);
   sun.position.set(-3, 2, 4);
@@ -291,7 +319,6 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
       if (disposed || !renderer) return;
       const request = ++textureRequest;
       material.color.set(path ? "#ffffff" : color);
-      atmosphereMaterial.uniforms.tint.value.set(color);
       if (!path) {
         material.map = null;
         material.needsUpdate = true;
@@ -367,8 +394,9 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
       intersectionObserver.disconnect();
       effectObserver.disconnect();
       texture?.dispose();
+      appearanceGlow?.material.dispose();
+      appearanceGlow?.texture.dispose();
       material.dispose();
-      atmosphereMaterial.dispose();
       markerMaterial.dispose();
       markerHitMaterial.dispose();
       previewMaterial.dispose();

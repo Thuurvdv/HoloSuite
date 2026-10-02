@@ -7,13 +7,45 @@
   border-image-source: var(--gmf-frame-image) !important;
   /* Do not paint the SVG's center tile: it would cover map-specific custom
      backgrounds. Window content supplies its own themed surface. */
-  border-image-slice: 72 !important;
+  /* The SVG's opaque frame ends at 48px. Slicing there preserves the small
+     yellow and magenta corner details instead of shrinking them with 72px tiles. */
+  border-image-slice: 48 !important;
   border-image-width: var(--gmf-frame-size) !important;
   border-image-repeat: stretch !important;
   border-radius: 20px !important;
   background: transparent !important;
   box-shadow: 0 24px 65px rgba(0, 0, 0, 0.68), 0 0 30px color-mix(in srgb, var(--hs-color-primary) 20%, transparent) !important;
   overflow: hidden;
+}
+
+.gmf-map-window > .window-content {
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hs-color-primary) 78%, transparent), inset 0 0 12px color-mix(in srgb, var(--hs-color-primary) 24%, transparent);
+}
+
+/* Match the compact cyan resize grip used by the other HoloSuite hardware UIs. */
+:is(.gmf-manager-window, .gmf-map-window, .gmf-crud-dialog) :is(.window-resizable-handle, .window-resize-handle) {
+  width: 18px !important;
+  height: 18px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(88, 216, 255, 0.8) !important;
+  border-radius: 4px !important;
+  background: rgba(2, 13, 24, 0.94) !important;
+  background-image: none !important;
+  color: var(--gmf-cyan, #58d8ff) !important;
+  filter: none !important;
+  box-shadow: 0 0 10px rgba(88, 216, 255, 0.55), inset 0 0 7px rgba(88, 216, 255, 0.18) !important;
+}
+
+:is(.gmf-manager-window, .gmf-map-window, .gmf-crud-dialog) :is(.window-resizable-handle, .window-resize-handle) > * {
+  display: none !important;
+}
+
+:is(.gmf-manager-window, .gmf-map-window, .gmf-crud-dialog) :is(.window-resizable-handle, .window-resize-handle)::before,
+:is(.gmf-manager-window, .gmf-map-window, .gmf-crud-dialog) :is(.window-resizable-handle, .window-resize-handle)::after {
+  background: none !important;
+  border-color: var(--gmf-cyan, #58d8ff) !important;
+  filter: none !important;
 }
 
 /* Every palette uses the same source artwork. window-chrome.ts replaces the

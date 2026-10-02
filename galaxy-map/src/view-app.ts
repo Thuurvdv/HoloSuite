@@ -8,7 +8,7 @@ import {
   normalizeMap
 } from "./galaxy-model";
 import { buildTerritories } from "./territories";
-import { getPlanetAppearance } from "./planet-presets";
+import { getPlanetAppearance, isDefaultStaticPlanetAppearance } from "./planet-presets";
 import { getBountyIntelForSystem, openBountyIntel } from "./bounty-integration";
 import { createPlanetIntelCallout } from "./planet-intel-callout";
 import { createPlanetLocationCallout, type PlanetLocationItem } from "./planet-location-callout";
@@ -59,13 +59,14 @@ export function createGalaxyMapViewClass(deps: any) {
     templateRoot,
     getRawMap,
     prepareMapForDisplay,
-    openSystemDialog,
-    openObjectDialog,
+    upsertSystem,
     upsertObject,
-    openRouteDialog,
-    openFactionDialog,
-    openFactionManagerDialog,
-    openMapMetadataDialog,
+    upsertRoute,
+    upsertFaction,
+    updateMapMetadata,
+    deleteFaction,
+    getTextureGuideMarkup,
+    activateObjectEditorControls,
     revealSystemToPlayers,
     revealRouteToPlayers,
     hideSystemFromPlayers,
@@ -77,10 +78,11 @@ export function createGalaxyMapViewClass(deps: any) {
     setCurrentSystem,
     setCurrentObject,
     requestTravelToSystem,
-    notifySystemDiscovered,
+    requestTravelToObject,
     exportMap,
     getTravelRoute,
     broadcastTravelAnimation,
+    broadcastObjectTravelAnimation,
     notifyInfo,
     notifyError,
     saveSystemPosition,
@@ -88,8 +90,6 @@ export function createGalaxyMapViewClass(deps: any) {
     savePlanetLocation,
     removePlanetLocation,
     unlinkPlanetScene,
-    showMapToPlayers,
-    openMapManager,
     clearMapView
   } = deps;
 
@@ -109,15 +109,24 @@ export function createGalaxyMapViewClass(deps: any) {
     externalFocus: any;
     _externalFocusTimeout: any;
     _pendingFocusZoom: number | null;
-    searchQuery: string;
     showTerritories = true;
+    showRoutes = true;
+    hardContrast = false;
     planetSystemId: string | null = null;
     planetStatic = false;
+    _planetStaticViewKey: string | null = null;
     _planetRenderer: any = null;
     _planetGeneration = 0;
     _planetReturnFocus = false;
     _bountyIntelCallout: any = null;
     _planetLocationCallout: any = null;
+    creationPanel: any = null;
+    factionRegistry = false;
+    _selectionTimer: any = null;
+    _worldWidth = 0;
+    _worldHeight = 0;
+    _viewportResizeObserver: ResizeObserver | null = null;
+    _baseWindowHeight: number | null = null;
 
     static DEFAULT_OPTIONS = {
       id: "galaxy-map-view",
@@ -162,7 +171,6 @@ export function createGalaxyMapViewClass(deps: any) {
       this.externalFocus = null;
       this._externalFocusTimeout = null;
       this._pendingFocusZoom = null;
-      this.searchQuery = "";
     }
 
     get title() {
@@ -185,7 +193,8 @@ export function createGalaxyMapViewClass(deps: any) {
           displayType: "system",
           factionName: "System",
           factionColor: "#58d8ff",
-          animatedCelestial: false
+          animatedCelestial: false,
+          hasCustomMarker: Boolean(system.displayMarkerImage)
         }));
         if (displayMap.selectedSystem) {
           displayMap.selectedSystem = displayMap.systems.find((system: any) => system.id === displayMap.selectedSystem.id) ?? null;
@@ -201,12 +210,14 @@ export function createGalaxyMapViewClass(deps: any) {
       }
       if (!this.activeSystemId && this.selectedSystemId && !displayMap?.selectedSystem) this.selectedSystemId = null;
       const activeSystem = displayMap?.systems.find((system: any) => system.id === this.activeSystemId) ?? null;
+      if (activeSystem) displayMap.backgroundImage = activeSystem.backgroundImage || "";
       const factionLookup = new Map((displayMap?.factions ?? []).map((faction: any) => [faction.id, faction]));
       const systemObjects = activeSystem ? activeSystem.objects
         .filter((object: any) => !this.playerMode || getEffectiveObjectVisibility(activeSystem, object) === "players")
         .map((object: any) => {
           const obscured = this.playerMode && object.status === "undiscovered";
           const faction: any = factionLookup.get(object.factionId);
+          const displayMarkerImage = obscured ? "" : object.markerImage;
           return {
             ...object,
             systemId: activeSystem.id,
@@ -216,11 +227,13 @@ export function createGalaxyMapViewClass(deps: any) {
             displayStatus: obscured ? "undiscovered" : object.status,
             factionName: faction?.name ?? "Unaffiliated",
             factionColor: object.iconColor || faction?.color || "#58d8ff",
+            displayMarkerImage,
+            hasCustomMarker: Boolean(displayMarkerImage),
             obscured,
             gmOnly: getEffectiveObjectVisibility(activeSystem, object) === "gm",
             isSelected: object.id === this.selectedObjectId,
             isCurrent: displayMap?.currentLocation?.objectId === object.id,
-            animatedCelestial: ANIMATED_CELESTIAL_STYLES.includes(object.iconStyle),
+            animatedCelestial: !displayMarkerImage && ANIMATED_CELESTIAL_STYLES.includes(object.iconStyle),
             hasJournal: Boolean(!obscured && object.journalId),
             hasScenes: Boolean(!obscured && object.sceneIds.length),
             showImage: Boolean(!obscured && object.image),
@@ -246,18 +259,38 @@ export function createGalaxyMapViewClass(deps: any) {
           };
         }) : [];
       const selectedSystemRoute = systemRoutes.find((route: any) => route.id === this.selectedRouteId) ?? null;
+      const currentObject = systemObjects.find((object: any) => object.isCurrent) ?? null;
+      const selectedObjectTravelRoute = selectedObject && currentObject && selectedObject.id !== currentObject.id
+        ? systemRoutes.find((route: any) => (
+          (route.fromSystemId === currentObject.id && route.toSystemId === selectedObject.id)
+          || (route.toSystemId === currentObject.id && route.fromSystemId === selectedObject.id)
+        ))
+        : null;
+      if (selectedObject) {
+        selectedObject.canTravel = Boolean(selectedObjectTravelRoute);
+        selectedObject.isDestination = Boolean(selectedObjectTravelRoute && !selectedObject.isCurrent);
+        selectedObject.travelRouteId = selectedObjectTravelRoute?.id ?? "";
+      }
+      systemRoutes.forEach((route: any) => {
+        route.isActive = route.isSelected || route.id === selectedObjectTravelRoute?.id;
+      });
       if (activeSystem) {
         displayMap.systems = systemObjects;
         displayMap.routes = systemRoutes;
         displayMap.selectedSystem = selectedSystemRoute ? null : selectedObject;
         displayMap.selectedRoute = selectedSystemRoute;
-        displayMap.currentSystem = systemObjects.find((object: any) => object.isCurrent) ?? null;
+        displayMap.currentSystem = currentObject;
       }
       const planetSystem = systemObjects.find((object: any) => object.id === this.planetSystemId)
         ?? (!activeSystem ? displayMap?.systems.find((system: any) => system.id === this.planetSystemId) : null);
       const planetAppearance = (!this.playerMode || rawMap?.visibility === "players")
         ? getPlanetAppearance(planetSystem) : null;
       if (!planetAppearance) this.planetSystemId = null;
+      const planetStaticViewKey = planetSystem && planetAppearance ? `${planetSystem.id}:${planetAppearance.preset}` : null;
+      if (planetStaticViewKey !== this._planetStaticViewKey) {
+        this._planetStaticViewKey = planetStaticViewKey;
+        this.planetStatic = Boolean(planetStaticViewKey && isDefaultStaticPlanetAppearance(planetAppearance?.preset));
+      }
       const planetLocations = planetSystem && planetAppearance ? this._preparePlanetLocations(planetSystem, planetAppearance.shape) : [];
       const linkedContentEntity = planetSystem ?? selectedObject;
       const canPlacePlanetLocations = Boolean(game.user?.isGM && !this.playerMode && activeSystem && linkedContentEntity);
@@ -267,6 +300,23 @@ export function createGalaxyMapViewClass(deps: any) {
       const journal = linkedContentEntity?.journalId ? game.journal?.get?.(linkedContentEntity.journalId) : null;
       const linkedPlanetJournal = journal && (game.user?.isGM || journal.testUserPermission?.(game.user, "OBSERVER"))
         ? { id: journal.id, uuid: journal.uuid, name: journal.name || "Linked Journal" } : null;
+      const creationPanel = this.creationPanel ? {
+        ...this.creationPanel,
+        ...this.creationPanel.data,
+        kind: this.creationPanel.kind,
+        entityKind: this.creationPanel.data?.kind,
+        isSystem: this.creationPanel.kind === "system",
+        isEntity: this.creationPanel.kind === "entity",
+        isRoute: this.creationPanel.kind === "route",
+        isFaction: this.creationPanel.kind === "faction",
+        isMap: this.creationPanel.kind === "map",
+        mapTitle: this.creationPanel.data?.title,
+        title: this.creationPanel.kind === "map" ? "Edit Galaxy" : `${this.creationPanel.editId ? "Edit" : "Create"} ${({ system: "System", entity: "Entity", route: "Route", faction: "Faction" } as any)[this.creationPanel.kind]}`,
+        submitLabel: this.creationPanel.editId ? "Save changes" : "Create",
+        systemOptions: (activeSystem ? systemObjects : displayMap?.systems ?? [])
+          .map((endpoint: any) => ({ id: endpoint.id, name: endpoint.displayName || endpoint.name })),
+        factionOptions: (displayMap?.factions ?? []).map((faction: any) => ({ id: faction.id, name: faction.name }))
+      } : null;
       return {
         ...context,
         map: displayMap,
@@ -281,13 +331,17 @@ export function createGalaxyMapViewClass(deps: any) {
         canPlacePlanetLocations,
         linkedPlanetScenes,
         linkedPlanetJournal,
-        showInspector: Boolean(planetAppearance || displayMap?.selectedSystem || displayMap?.selectedRoute),
+        creationPanel,
+        factionRegistry: this.factionRegistry,
+        appearanceGuideMarkup: creationPanel?.isEntity ? getTextureGuideMarkup(creationPanel.planetShape || "sphere") : "",
+        showInspector: Boolean(creationPanel || this.factionRegistry || planetAppearance || displayMap?.selectedSystem || displayMap?.selectedRoute),
         territories: displayMap ? buildTerritories(displayMap.systems, displayMap.factions) : [],
         showTerritories: this.showTerritories,
+        showRoutes: this.showRoutes,
+        hardContrast: this.hardContrast,
         mapId: this.mapId,
         playerMode: this.playerMode,
         zoomPercent: Math.round(this.zoom * 100),
-        searchQuery: this.searchQuery,
         panX: this.panX,
         panY: this.panY,
         zoom: this.zoom,
@@ -303,13 +357,13 @@ export function createGalaxyMapViewClass(deps: any) {
       const html = this.element instanceof HTMLElement ? this.element : this.element?.[0];
       if (html) {
         this._attachPartListeners("main", html, options);
+        this._observeViewport(html);
         this._mountBountyIntelCallout(html);
         if (this.externalFocus && this._pendingFocusZoom !== null) {
           const system = normalizeMap(getRawMap(this.mapId)).systems.find((candidate: any) => candidate.id === this.externalFocus.systemId);
           if (system) this._centerOnSystem(system, html, this._pendingFocusZoom);
           this._pendingFocusZoom = null;
         }
-        this._applySearchState(this.searchQuery, html);
         if (context.planetView) void this._mountPlanetRenderer(html, context.planetAppearance);
         else if (this._planetReturnFocus) {
           html.querySelector("[data-action='inspect-system']")?.focus();
@@ -326,9 +380,30 @@ export function createGalaxyMapViewClass(deps: any) {
       super._attachPartListeners?.(partId, html, options);
       activateGalaxyWindowChrome(this, html);
       this._attachPlanetListeners(html);
+      this._attachCreationPanel(html);
+      const appearancePanel = html.querySelector<HTMLElement>(".gmf-object-appearance-panel");
+      if (appearancePanel) {
+        activateObjectEditorControls(appearancePanel);
+        this._attachAppearancePreview(html);
+      }
       html.querySelector("[data-action='toggle-territories']")?.addEventListener("click", () => {
         this.showTerritories = !this.showTerritories;
         this.render({ force: true });
+      });
+      html.querySelector("[data-action='toggle-routes']")?.addEventListener("click", () => {
+        this.showRoutes = !this.showRoutes;
+        this.render({ force: true });
+      });
+      html.querySelector("[data-action='edit-current-layer']")?.addEventListener("click", () => {
+        if (!game.user?.isGM || this.playerMode) return;
+        if (this.activeSystemId) this._openEditPanel("system", this.activeSystemId);
+        else this._openCreationPanel("map", normalizeMap(getRawMap(this.mapId)), this.mapId);
+      });
+      html.querySelector("[data-action='toggle-hard-contrast']")?.addEventListener("click", (event: MouseEvent) => {
+        this.hardContrast = !this.hardContrast;
+        const galaxy = html.matches?.(".gmf-galaxy") ? html : html.querySelector(".gmf-galaxy");
+        galaxy?.classList.toggle("is-hard-contrast", this.hardContrast);
+        (event.currentTarget as HTMLElement).setAttribute("aria-pressed", String(this.hardContrast));
       });
       this._applyViewportTransform(html);
 
@@ -339,12 +414,36 @@ export function createGalaxyMapViewClass(deps: any) {
             return;
           }
           event.stopPropagation();
-          if (this.activeSystemId) this.selectedObjectId = node.dataset.systemId;
-          else this.selectedSystemId = node.dataset.systemId;
+          if (this._selectionTimer) clearTimeout(this._selectionTimer);
+          this._selectionTimer = globalThis.setTimeout(() => {
+            if (this.activeSystemId) this.selectedObjectId = node.dataset.systemId;
+            else this.selectedSystemId = node.dataset.systemId;
+            this.selectedRouteId = null;
+            this.render({ force: true });
+          }, 180);
+        });
+        node.addEventListener("dblclick", (event: any) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (this._selectionTimer) clearTimeout(this._selectionTimer);
+          this._selectionTimer = null;
+          const id = node.dataset.systemId;
           this.selectedRouteId = null;
+          this.creationPanel = null;
+          if (this.activeSystemId) {
+            this.selectedObjectId = id;
+            const object = normalizeMap(getRawMap(this.mapId)).systems.find((system: any) => system.id === this.activeSystemId)
+              ?.objects.find((candidate: any) => candidate.id === id);
+            if (getPlanetAppearance(object)) this.planetSystemId = id;
+          } else {
+            this.selectedSystemId = id;
+            this.activeSystemId = id;
+            this.selectedObjectId = null;
+          }
           this.render({ force: true });
         });
         if (!this.playerMode && game.user?.isGM) {
+          node.querySelector("[data-resize-marker]")?.addEventListener("pointerdown", (event: any) => this._startMarkerResize(event, node));
           node.addEventListener("pointerdown", (event: any) => this._startSystemDrag(event, html, node));
         }
       });
@@ -355,6 +454,10 @@ export function createGalaxyMapViewClass(deps: any) {
           this.selectedRouteId = route.dataset.routeId;
           if (this.activeSystemId) this.selectedObjectId = null;
           else this.selectedSystemId = null;
+          if (!this.playerMode && game.user?.isGM) {
+            this._openEditPanel("route", route.dataset.routeId);
+            return;
+          }
           this.render({ force: true });
         });
       });
@@ -364,50 +467,20 @@ export function createGalaxyMapViewClass(deps: any) {
       html.querySelectorAll("[data-context-action]").forEach((button: any) => {
         button.addEventListener("click", (event: any) => this._handleContextAction(event, html));
       });
-      html.querySelector("[data-action='open-map-menu']")?.addEventListener("click", (event: any) => this._openStageMenuFromButton(event, html));
-      html.querySelector("[data-action='zoom-in']")?.addEventListener("click", () => this._setZoom(this.zoom + 0.15, html));
-      html.querySelector("[data-action='zoom-out']")?.addEventListener("click", () => this._setZoom(this.zoom - 0.15, html));
-      html.querySelector("[data-action='reset-view']")?.addEventListener("click", () => {
-        this.zoom = 1;
-        this.panX = 0;
-        this.panY = 0;
-        this._applyViewportTransform(html);
-      });
-      const searchInput = html.querySelector("[data-system-search]");
-      searchInput?.addEventListener("input", () => {
-        this.searchQuery = searchInput.value;
-        this._applySearchState(this.searchQuery, html);
-      });
-      searchInput?.addEventListener("keydown", (event: any) => {
-        if (event.key !== "Enter") return;
-        event.preventDefault();
-        this._focusSearchResult(searchInput.value, html);
-      });
-      html.querySelector("[data-action='run-system-search']")?.addEventListener("click", () => this._focusSearchResult(searchInput?.value ?? "", html));
-      html.querySelector("[data-action='clear-system-search']")?.addEventListener("click", () => {
-        this.searchQuery = "";
-        if (searchInput) searchInput.value = "";
-        this._applySearchState("", html);
-        searchInput?.focus();
-      });
       html.querySelector("[data-action='open-journal']")?.addEventListener("click", () => this._openLinkedJournal());
-      html.querySelector("[data-action='open-scene']")?.addEventListener("click", () => this._openLinkedScene());
       html.querySelector("[data-action='edit-system']")?.addEventListener("click", () => {
-        if (this.activeSystemId && this.selectedObjectId) openObjectDialog(this.mapId, this.activeSystemId, this.selectedObjectId);
-        else if (this.selectedSystemId) openSystemDialog(this.mapId, this.selectedSystemId);
+        if (this.activeSystemId && this.selectedObjectId) this._openEditPanel("entity", this.selectedObjectId);
+        else if (this.selectedSystemId) this._openEditPanel("system", this.selectedSystemId);
       });
       html.querySelector("[data-action='open-system']")?.addEventListener("click", () => {
         if (!this.selectedSystemId) return;
         this.activeSystemId = this.selectedSystemId;
         this.selectedObjectId = null;
         this.selectedRouteId = null;
-        this.searchQuery = "";
         this.render({ force: true });
       });
-      html.querySelector("[data-action='add-object']")?.addEventListener("click", () => {
-        if (this.activeSystemId) openObjectDialog(this.mapId, this.activeSystemId);
-      });
       html.querySelector("[data-action='navigate-up']")?.addEventListener("click", () => {
+        this.creationPanel = null;
         if (this.planetSystemId) {
           this._disposePlanetRenderer();
           this.planetSystemId = null;
@@ -416,7 +489,6 @@ export function createGalaxyMapViewClass(deps: any) {
           this.activeSystemId = null;
           this.selectedObjectId = null;
           this.selectedRouteId = null;
-          this.searchQuery = "";
         } else return;
         this.render({ force: true });
       });
@@ -441,28 +513,22 @@ export function createGalaxyMapViewClass(deps: any) {
         if (this.playerMode) requestTravelToSystem(this.mapId, this.selectedSystemId);
         else this._travelToSystem(this.selectedSystemId, html);
       });
+      html.querySelector("[data-action='travel-to-object']")?.addEventListener("click", () => {
+        if (!this.activeSystemId || !this.selectedObjectId) return;
+        if (this.playerMode) requestTravelToObject(this.mapId, this.activeSystemId, this.selectedObjectId);
+        else this._travelToObject(this.activeSystemId, this.selectedObjectId, html);
+      });
       html.querySelector("[data-action='edit-route']")?.addEventListener("click", () => {
-        if (this.selectedRouteId) openRouteDialog(this.mapId, this.selectedRouteId);
+        if (this.selectedRouteId) this._openEditPanel("route", this.selectedRouteId);
       });
       html.querySelector("[data-action='reveal-route']")?.addEventListener("click", () => {
-        if (this.selectedRouteId) revealRouteToPlayers(this.mapId, this.selectedRouteId);
+        if (this.selectedRouteId) revealRouteToPlayers(this.mapId, this.selectedRouteId, this.activeSystemId ?? "");
       });
       html.querySelector("[data-action='hide-route']")?.addEventListener("click", () => {
-        if (this.selectedRouteId) hideRouteFromPlayers(this.mapId, this.selectedRouteId, true);
+        if (this.selectedRouteId) hideRouteFromPlayers(this.mapId, this.selectedRouteId, true, this.activeSystemId ?? "");
       });
       html.querySelector("[data-action='delete-route']")?.addEventListener("click", () => {
         if (this.selectedRouteId) this._confirmDeleteRoute(this.selectedRouteId);
-      });
-      html.querySelector("[data-action='notify-discovery']")?.addEventListener("click", () => {
-        if (this.selectedSystemId) notifySystemDiscovered(this.mapId, this.selectedSystemId);
-      });
-      html.querySelector("[data-action='show-to-players']")?.addEventListener("click", () => showMapToPlayers(this.mapId));
-      html.querySelector("[data-action='edit-map']")?.addEventListener("click", () => {
-        const manager = openMapManager();
-        if (manager) {
-          manager.selectedMapId = this.mapId;
-          manager.render({ force: true });
-        }
       });
     }
 
@@ -472,8 +538,39 @@ export function createGalaxyMapViewClass(deps: any) {
       const stage = html.querySelector(".gmf-map-stage");
       if (stage) {
         const rect = stage.getBoundingClientRect();
-        this.panX = clamp(this.panX, rect.width * (1 - this.zoom), 0);
-        this.panY = clamp(this.panY, rect.height * (1 - this.zoom), 0);
+        const background = viewport.querySelector(".gmf-map-background");
+        if (background) this.zoom = Math.max(1, this.zoom);
+        const imageAspect = background?.naturalWidth && background?.naturalHeight
+          ? background.naturalWidth / background.naturalHeight : null;
+        if (imageAspect) this._adjustWindowToBackground(stage, imageAspect);
+        else if (!background) this._adjustWindowToBackground(stage, null);
+        const stageAspect = rect.width / Math.max(1, rect.height);
+        if (imageAspect && imageAspect > stageAspect) {
+          this._worldWidth = rect.width;
+          this._worldHeight = rect.width / imageAspect;
+        } else if (imageAspect) {
+          this._worldHeight = rect.height;
+          this._worldWidth = rect.height * imageAspect;
+        } else {
+          this._worldWidth = rect.width;
+          this._worldHeight = rect.height;
+        }
+        viewport.style.width = `${this._worldWidth}px`;
+        viewport.style.height = `${this._worldHeight}px`;
+
+        const scaledWidth = this._worldWidth * this.zoom;
+        const scaledHeight = this._worldHeight * this.zoom;
+        this.panX = scaledWidth <= rect.width
+          ? (rect.width - scaledWidth) / 2
+          : clamp(this.panX, rect.width - scaledWidth, 0);
+        this.panY = scaledHeight <= rect.height
+          ? (rect.height - scaledHeight) / 2
+          : clamp(this.panY, rect.height - scaledHeight, 0);
+
+        if (background && background.dataset.gmfWorldImageBound !== "true") {
+          background.dataset.gmfWorldImageBound = "true";
+          background.addEventListener("load", () => this._applyViewportTransform(html), { once: true });
+        }
       }
       viewport.style.setProperty("--gmf-pan-x", `${this.panX}px`);
       viewport.style.setProperty("--gmf-pan-y", `${this.panY}px`);
@@ -481,8 +578,37 @@ export function createGalaxyMapViewClass(deps: any) {
       html.querySelector("[data-zoom-label]")?.replaceChildren(`${Math.round(this.zoom * 100)}%`);
     }
 
+    _adjustWindowToBackground(stage: HTMLElement, imageAspect: number | null) {
+      const frame = stage.closest<HTMLElement>(".window-app, .application, .app");
+      if (!frame || !this.setPosition) return;
+      const frameRect = frame.getBoundingClientRect();
+      if (!imageAspect) {
+        if (this._baseWindowHeight && Math.abs(frameRect.height - this._baseWindowHeight) > 2) {
+          this.setPosition({ height: Math.min(this._baseWindowHeight, window.innerHeight - 24) });
+        }
+        this._baseWindowHeight = null;
+        return;
+      }
+
+      this._baseWindowHeight ??= frameRect.height;
+      const stageRect = stage.getBoundingClientRect();
+      const desiredStageHeight = clamp(stageRect.width / imageAspect, 240, window.innerHeight - 96);
+      if (Math.abs(stageRect.height - desiredStageHeight) <= 2) return;
+      const desiredWindowHeight = clamp(frameRect.height + desiredStageHeight - stageRect.height, 320, window.innerHeight - 24);
+      this.setPosition({ height: Math.round(desiredWindowHeight) });
+    }
+
+    _observeViewport(html: any) {
+      this._viewportResizeObserver?.disconnect();
+      const stage = html.querySelector(".gmf-map-stage");
+      if (!stage || typeof ResizeObserver === "undefined") return;
+      this._viewportResizeObserver = new ResizeObserver(() => this._applyViewportTransform(html));
+      this._viewportResizeObserver.observe(stage);
+    }
+
     _setZoom(value: number, html: any) {
-      this.zoom = clamp(value, MIN_ZOOM, MAX_ZOOM);
+      const minimumZoom = html.querySelector(".gmf-map-background") ? 1 : MIN_ZOOM;
+      this.zoom = clamp(value, minimumZoom, MAX_ZOOM);
       this._applyViewportTransform(html);
     }
 
@@ -791,65 +917,9 @@ export function createGalaxyMapViewClass(deps: any) {
       if (!stage) return;
       const rect = stage.getBoundingClientRect();
       this.zoom = zoom;
-      this.panX = rect.width / 2 - (Number(system.x) / 100) * rect.width * zoom;
-      this.panY = rect.height / 2 - (Number(system.y) / 100) * rect.height * zoom;
+      this.panX = rect.width / 2 - (Number(system.x) / 100) * this._worldWidth * zoom;
+      this.panY = rect.height / 2 - (Number(system.y) / 100) * this._worldHeight * zoom;
       this._applyViewportTransform(html);
-    }
-
-    _getVisibleSystems() {
-      const rawMap = getRawMap(this.mapId);
-      if (!rawMap) return [];
-      if (this.activeSystemId) {
-        const system = normalizeMap(rawMap).systems.find((candidate: any) => candidate.id === this.activeSystemId);
-        return (system?.objects ?? [])
-          .filter((object: any) => !this.playerMode || getEffectiveObjectVisibility(system, object) === "players")
-          .map((object: any) => ({ ...object, displayName: object.status === "undiscovered" && this.playerMode ? "???" : object.name, displayType: object.kind, displayStatus: object.status, factionName: "" }));
-      }
-      return prepareMapForDisplay(rawMap, {
-        playerMode: this.playerMode,
-        selectedSystemId: this.selectedSystemId,
-        selectedRouteId: this.selectedRouteId
-      })?.systems ?? [];
-    }
-
-    _applySearchState(query: string, html: any) {
-      const normalizedQuery = String(query || "").trim().toLocaleLowerCase();
-      const nodes = Array.from(html.querySelectorAll("[data-system-id]"));
-      nodes.forEach((node: any) => {
-        const searchText = String(node.dataset.searchText || "").toLocaleLowerCase();
-        const matches = Boolean(normalizedQuery && searchText.includes(normalizedQuery));
-        node.classList.toggle("is-search-match", matches);
-        node.classList.toggle("is-search-dimmed", Boolean(normalizedQuery && !matches));
-      });
-      html.querySelector("[data-action='clear-system-search']")?.toggleAttribute("hidden", !normalizedQuery);
-      return nodes.find((node: any) => node.classList.contains("is-search-match")) ?? null;
-    }
-
-    _focusSearchResult(query: string, html: any) {
-      const normalizedQuery = String(query || "").trim().toLocaleLowerCase();
-      if (!normalizedQuery) {
-        html.querySelector("[data-system-search]")?.focus();
-        return;
-      }
-      const systems = this._getVisibleSystems();
-      const searchable = (system: any) => [system.displayName, system.displayType, system.displayStatus, system.factionName]
-        .filter(Boolean)
-        .join(" ")
-        .toLocaleLowerCase();
-      const system = systems.find((candidate: any) => candidate.displayName.toLocaleLowerCase() === normalizedQuery)
-        ?? systems.find((candidate: any) => candidate.displayName.toLocaleLowerCase().startsWith(normalizedQuery))
-        ?? systems.find((candidate: any) => searchable(candidate).includes(normalizedQuery));
-      if (!system) {
-        notifyInfo(`No charted ${this.activeSystemId ? "object" : "system"} matches "${String(query).trim()}".`);
-        return;
-      }
-
-      this.searchQuery = String(query);
-      if (this.activeSystemId) this.selectedObjectId = system.id;
-      else this.selectedSystemId = system.id;
-      this.selectedRouteId = null;
-      this._centerOnSystem(system, html, Math.max(this.zoom, 1.2));
-      this.render({ force: true });
     }
 
     _onWheelZoom(event: any, html: any) {
@@ -859,7 +929,8 @@ export function createGalaxyMapViewClass(deps: any) {
 
       const rect = stage.getBoundingClientRect();
       const oldZoom = this.zoom;
-      const nextZoom = clamp(oldZoom + (event.deltaY < 0 ? 0.12 : -0.12), MIN_ZOOM, MAX_ZOOM);
+      const minimumZoom = html.querySelector(".gmf-map-background") ? 1 : MIN_ZOOM;
+      const nextZoom = clamp(oldZoom * Math.exp(-event.deltaY * 0.0015), minimumZoom, MAX_ZOOM);
       const pointerX = event.clientX - rect.left;
       const pointerY = event.clientY - rect.top;
       const worldX = (pointerX - this.panX) / oldZoom;
@@ -914,14 +985,15 @@ export function createGalaxyMapViewClass(deps: any) {
       let frame: number | null = null;
       const connectedFrom = Array.from(html.querySelectorAll(`[data-route-from="${node.dataset.systemId}"]`));
       const connectedTo = Array.from(html.querySelectorAll(`[data-route-to="${node.dataset.systemId}"]`));
-      node.classList.add("is-dragging");
 
       const onMove = (moveEvent: any) => {
         const dx = Math.abs(moveEvent.clientX - startX);
         const dy = Math.abs(moveEvent.clientY - startY);
-        moved = moved || dx > 3 || dy > 3;
+        if (!moved && dx <= 4 && dy <= 4) return;
+        moved = true;
+        node.classList.add("is-dragging");
         latest = this._pointerToMapPercent(moveEvent, html);
-        node.dataset.dragged = moved ? "true" : "false";
+        node.dataset.dragged = "true";
         if (frame) return;
         frame = requestAnimationFrame(() => {
           frame = null;
@@ -933,13 +1005,13 @@ export function createGalaxyMapViewClass(deps: any) {
 
       const onUp = async () => {
         if (frame) cancelAnimationFrame(frame);
-        node.style.left = `${latest.x}%`;
-        node.style.top = `${latest.y}%`;
-        this._updateConnectedRoutes(connectedFrom, connectedTo, latest.x, latest.y);
         node.classList.remove("is-dragging");
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
         if (moved) {
+          node.style.left = `${latest.x}%`;
+          node.style.top = `${latest.y}%`;
+          this._updateConnectedRoutes(connectedFrom, connectedTo, latest.x, latest.y);
           if (this.activeSystemId) await saveObjectPosition(this.mapId, this.activeSystemId, node.dataset.systemId, latest.x, latest.y);
           else await saveSystemPosition(this.mapId, node.dataset.systemId, latest.x, latest.y);
         }
@@ -949,12 +1021,57 @@ export function createGalaxyMapViewClass(deps: any) {
       window.addEventListener("pointerup", onUp, { once: true });
     }
 
+    _startMarkerResize(event: any, node: any) {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (this._selectionTimer) clearTimeout(this._selectionTimer);
+      this._selectionTimer = null;
+
+      const initialSize = clamp(Number(node.dataset.iconSize) || 28, 18, 56);
+      const rect = node.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const startDistance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
+      let latestSize = initialSize;
+      node.dataset.dragged = "true";
+      node.classList.add("is-resizing");
+      node.setPointerCapture?.(event.pointerId);
+
+      const onMove = (moveEvent: any) => {
+        const distance = Math.hypot(moveEvent.clientX - centerX, moveEvent.clientY - centerY);
+        latestSize = clamp(Math.round(initialSize + (distance - startDistance) / Math.max(this.zoom, 0.01)), 18, 56);
+        node.dataset.iconSize = String(latestSize);
+        node.style.setProperty("--gmf-system-size", `${latestSize}px`);
+      };
+
+      const onUp = async () => {
+        node.classList.remove("is-resizing");
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+        window.removeEventListener("pointercancel", onUp);
+        globalThis.setTimeout(() => { node.dataset.dragged = "false"; }, 0);
+        if (latestSize === initialSize) return;
+        if (this.activeSystemId) {
+          const system = normalizeMap(getRawMap(this.mapId)).systems.find((candidate: any) => candidate.id === this.activeSystemId);
+          const object = system?.objects.find((candidate: any) => candidate.id === node.dataset.systemId);
+          if (object) await upsertObject(this.mapId, this.activeSystemId, { ...object, iconSize: latestSize });
+        } else {
+          await upsertSystem(this.mapId, { id: node.dataset.systemId, iconSize: latestSize });
+        }
+      };
+
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp, { once: true });
+      window.addEventListener("pointercancel", onUp, { once: true });
+    }
+
     _pointerToMapPercent(event: any, html: any) {
       const stage = html.querySelector(".gmf-map-stage");
       const rect = stage.getBoundingClientRect();
       return {
-        x: clamp(((event.clientX - rect.left - this.panX) / this.zoom / rect.width) * 100, 0, 100),
-        y: clamp(((event.clientY - rect.top - this.panY) / this.zoom / rect.height) * 100, 0, 100)
+        x: clamp(((event.clientX - rect.left - this.panX) / this.zoom / this._worldWidth) * 100, 0, 100),
+        y: clamp(((event.clientY - rect.top - this.panY) / this.zoom / this._worldHeight) * 100, 0, 100)
       };
     }
 
@@ -971,7 +1088,7 @@ export function createGalaxyMapViewClass(deps: any) {
 
     _openContextMenu(event: any, html: any) {
       if (!game.user?.isGM || this.playerMode) return;
-      if (event.target.closest(".gmf-map-toolbar, .gmf-context-menu")) return;
+      if (event.target.closest(".gmf-context-menu")) return;
       event.preventDefault();
       event.stopPropagation();
 
@@ -1006,23 +1123,6 @@ export function createGalaxyMapViewClass(deps: any) {
       globalThis.setTimeout(() => document.addEventListener("click", this._boundContextClose, { once: true }), 0);
     }
 
-    _openStageMenuFromButton(event: any, html: any) {
-      if (!game.user?.isGM || this.playerMode) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const stage = html.querySelector(".gmf-map-stage");
-      const rect = stage?.getBoundingClientRect();
-      if (!rect) return;
-      const synthetic = {
-        clientX: rect.left + rect.width / 2,
-        clientY: rect.top + rect.height / 2,
-        target: stage,
-        preventDefault: () => {},
-        stopPropagation: () => {}
-      };
-      this._openContextMenu(synthetic, html);
-    }
-
     _hideContextMenu(html: any = null) {
       const root = html ?? this.element ?? null;
       const menu = root?.querySelector?.("[data-gmf-context-menu]") ?? root?.[0]?.querySelector?.("[data-gmf-context-menu]");
@@ -1040,25 +1140,25 @@ export function createGalaxyMapViewClass(deps: any) {
       if (!target) return;
 
       if (action === "add-system") {
-        openSystemDialog(this.mapId, null, { x: target.position.x, y: target.position.y });
+        this._openCreationPanel("system", { x: target.position.x, y: target.position.y });
       } else if (action === "add-entity") {
-        if (this.activeSystemId) openObjectDialog(this.mapId, this.activeSystemId, null, { x: target.position.x, y: target.position.y });
-      } else if (action === "add-route") {
-        openRouteDialog(this.mapId);
+        if (this.activeSystemId) this._openCreationPanel("entity", { x: target.position.x, y: target.position.y });
       } else if (action === "manage-factions") {
-        openFactionManagerDialog(this.mapId);
+        this.creationPanel = null;
+        this.factionRegistry = true;
+        this.render({ force: true });
       } else if (action === "add-faction") {
-        openFactionDialog(this.mapId);
+        this._openCreationPanel("faction");
       } else if (action === "edit-map-details") {
-        openMapMetadataDialog(this.mapId);
+        this._openCreationPanel("map", normalizeMap(getRawMap(this.mapId)), this.mapId);
       } else if (action === "export-map") {
         exportMap(this.mapId);
       } else if (action === "edit-system") {
-        openSystemDialog(this.mapId, target.id);
+        this._openEditPanel("system", target.id);
       } else if (action === "edit-entity") {
-        if (this.activeSystemId) openObjectDialog(this.mapId, this.activeSystemId, target.id);
-      } else if (action === "add-route-from-system") {
-        openRouteDialog(this.mapId, null, { fromSystemId: target.id });
+        if (this.activeSystemId) this._openEditPanel("entity", target.id);
+      } else if (action === "add-route-from-marker") {
+        this._openCreationPanel("route", { fromSystemId: target.id });
       } else if (action === "reveal-system") {
         await revealSystemToPlayers(this.mapId, target.id);
       } else if (action === "hide-system") {
@@ -1072,11 +1172,11 @@ export function createGalaxyMapViewClass(deps: any) {
       } else if (action === "delete-entity") {
         if (this.activeSystemId) await this._confirmDeleteObject(this.activeSystemId, target.id);
       } else if (action === "edit-route") {
-        openRouteDialog(this.mapId, target.id);
+        this._openEditPanel("route", target.id);
       } else if (action === "reveal-route") {
-        await revealRouteToPlayers(this.mapId, target.id);
+        await revealRouteToPlayers(this.mapId, target.id, this.activeSystemId ?? "");
       } else if (action === "hide-route") {
-        await hideRouteFromPlayers(this.mapId, target.id, true);
+        await hideRouteFromPlayers(this.mapId, target.id, true, this.activeSystemId ?? "");
       } else if (action === "delete-route") {
         await this._confirmDeleteRoute(target.id);
       }
@@ -1098,12 +1198,213 @@ export function createGalaxyMapViewClass(deps: any) {
       }
     }
 
+    _openCreationPanel(kind: string, defaults: any = {}, editId: string | null = null) {
+      if (!game.user?.isGM || this.playerMode) return;
+      const map = normalizeMap(getRawMap(this.mapId));
+      const routeEndpoints = this.activeSystemId
+        ? map.systems.find((system: any) => system.id === this.activeSystemId)?.objects ?? []
+        : map.systems;
+      if (kind === "route" && routeEndpoints.length < 2) {
+        notifyError(this.activeSystemId ? "Create at least two entities before adding a route." : "Create at least two systems before adding a route.");
+        return;
+      }
+      const fromSystemId = defaults.fromSystemId || routeEndpoints[0]?.id || "";
+      const base = kind === "map" ? { title: "Galaxy Map", subtitle: "", description: "", backgroundImage: "", visibility: "players", travelApprovalMode: "unanimous" }
+        : kind === "system" ? { name: "New System", status: "known", visibility: "gm", description: "", markerImage: "", backgroundImage: "" }
+        : kind === "entity" ? {
+          name: "New Entity", kind: "planet", status: "known", visibility: "inherit", factionId: "", description: "", notes: "",
+          iconStyle: "planet", iconColor: "#58d8ff", markerImage: "", planetPreset: "ice", planetShape: "sphere", planetFinish: "smooth",
+          planetColor: "#58d8ff", planetTexture: "", image: ""
+        }
+        : kind === "route" ? { type: "safe", visibility: "gm", travelTime: "", fuelCost: 0, notes: "" }
+        : { name: "New Faction", color: "#58d8ff", visibility: "gm", description: "" };
+      this.creationPanel = {
+        kind,
+        editId,
+        data: {
+          ...base,
+          ...defaults,
+          x: Number.isFinite(Number(defaults.x)) ? Number(defaults.x) : 50,
+          y: Number.isFinite(Number(defaults.y)) ? Number(defaults.y) : 50,
+          fromSystemId,
+          toSystemId: defaults.toSystemId || routeEndpoints.find((endpoint: any) => endpoint.id !== fromSystemId)?.id || ""
+        }
+      };
+      this.factionRegistry = false;
+      this.selectedSystemId = null;
+      this.selectedObjectId = null;
+      this.selectedRouteId = null;
+      this.render({ force: true });
+    }
+
+    _openEditPanel(kind: string, id: string) {
+      const map = normalizeMap(getRawMap(this.mapId));
+      const source = kind === "system" ? map.systems.find((system: any) => system.id === id)
+        : kind === "entity" ? map.systems.find((system: any) => system.id === this.activeSystemId)?.objects.find((object: any) => object.id === id)
+        : kind === "route" ? (this.activeSystemId
+          ? map.systems.find((system: any) => system.id === this.activeSystemId)?.routes.find((route: any) => route.id === id)
+          : map.routes.find((route: any) => route.id === id))
+        : map.factions.find((faction: any) => faction.id === id);
+      if (source) this._openCreationPanel(kind, source, id);
+    }
+
+    openEditor(kind: string, options: any = {}) {
+      if (!game.user?.isGM || this.playerMode) return false;
+      this._disposePlanetRenderer();
+      this.planetSystemId = null;
+      if (kind === "entity") {
+        this.activeSystemId = options.systemId || this.activeSystemId;
+        this.selectedSystemId = this.activeSystemId;
+      } else if (kind === "route") {
+        this.activeSystemId = options.systemId || null;
+      } else if (["map", "system", "faction"].includes(kind)) {
+        this.activeSystemId = null;
+      }
+      if (kind === "map") this._openCreationPanel("map", normalizeMap(getRawMap(this.mapId)), this.mapId);
+      else if (options.id) this._openEditPanel(kind, options.id);
+      else this._openCreationPanel(kind, options.defaults || {});
+      return true;
+    }
+
+    _attachCreationPanel(html: HTMLElement) {
+      html.querySelector("[data-action='cancel-panel-create']")?.addEventListener("click", () => {
+        this.creationPanel = null;
+        this.render({ force: true });
+      });
+      html.querySelector("[data-action='close-faction-registry']")?.addEventListener("click", () => {
+        this.factionRegistry = false;
+        this.render({ force: true });
+      });
+      html.querySelector("[data-action='add-inline-faction']")?.addEventListener("click", () => this._openCreationPanel("faction"));
+      html.querySelectorAll<HTMLElement>("[data-edit-inline-faction]").forEach(button => {
+        button.addEventListener("click", () => this._openEditPanel("faction", button.dataset.editInlineFaction || ""));
+      });
+      html.querySelectorAll<HTMLElement>("[data-delete-inline-faction]").forEach(button => {
+        button.addEventListener("click", async () => {
+          const confirmed = await Dialog.confirm({ title: "Delete Faction", content: "<p>Delete this faction? Systems assigned to it become unaffiliated.</p>" }, GALAXY_DIALOG_OPTIONS);
+          if (!confirmed) return;
+          await deleteFaction(this.mapId, button.dataset.deleteInlineFaction);
+          this.factionRegistry = true;
+          this.render({ force: true });
+        });
+      });
+      const form = html.querySelector<HTMLFormElement>("[data-panel-create-form]");
+      if (!form) return;
+      form.querySelectorAll<HTMLElement>("[data-browse-target]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          const input = form.querySelector<HTMLInputElement>(`[name='${button.dataset.browseTarget}']`);
+          const FilePickerClass = (globalThis as any).FilePicker;
+          if (!input || !FilePickerClass) return;
+          new FilePickerClass({
+            type: "image",
+            current: input.value,
+            callback: (path: string) => {
+              input.value = path;
+              input.dispatchEvent(new Event("input", { bubbles: true }));
+              input.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+          }).browse();
+        });
+      });
+      form.querySelectorAll<HTMLElement>("[data-clear-target]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          const input = form.querySelector<HTMLInputElement>(`[name='${button.dataset.clearTarget}']`);
+          if (!input) return;
+          input.value = "";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      });
+      form.addEventListener("submit", async event => {
+        event.preventDefault();
+        const kind = form.dataset.createKind || "";
+        const values = Object.fromEntries(new FormData(form).entries()) as any;
+        html.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('[form="gmf-panel-editor-form"][name]').forEach(control => {
+          if ((control instanceof HTMLInputElement) && ["checkbox", "radio"].includes(control.type) && !control.checked) return;
+          values[control.name] = control.value;
+        });
+        if (kind === "entity") {
+          values.markerImage = values.useCustomMarker === "true" ? values.markerImage ?? "" : "";
+          delete values.useCustomMarker;
+        }
+        const x = Number(values.x), y = Number(values.y);
+        const panel = this.creationPanel;
+        const existing = panel?.data ?? {};
+        if (panel?.editId) values.id = panel.editId;
+        this.creationPanel = null;
+        let saved: any = null;
+        if (kind === "map") saved = await updateMapMetadata(this.mapId, { ...existing, ...values });
+        else if (kind === "system") saved = await upsertSystem(this.mapId, { ...existing, ...values, x, y });
+        else if (kind === "entity" && this.activeSystemId) saved = await upsertObject(this.mapId, this.activeSystemId, { ...existing, ...values, x, y });
+        else if (kind === "route") {
+          if (!values.fromSystemId || !values.toSystemId || values.fromSystemId === values.toSystemId) {
+            notifyError(`Choose two different ${this.activeSystemId ? "entities" : "systems"} for the route.`);
+            this._openCreationPanel("route", { ...existing, ...values }, panel?.editId ?? null);
+            return;
+          }
+          saved = await upsertRoute(this.mapId, { ...existing, ...values }, this.activeSystemId ?? "");
+        } else if (kind === "faction") {
+          saved = await upsertFaction(this.mapId, { ...existing, ...values });
+          this.factionRegistry = true;
+        }
+        if (saved?.id) {
+          if (kind === "system") this.selectedSystemId = saved.id;
+          if (kind === "entity") this.selectedObjectId = saved.id;
+          if (kind === "route") this.selectedRouteId = saved.id;
+        }
+        this.render({ force: true });
+      });
+      globalThis.setTimeout(() => form.querySelector<HTMLElement>("[autofocus]")?.focus(), 0);
+    }
+
+    _attachAppearancePreview(html: HTMLElement) {
+      const marker = html.querySelector<HTMLElement>("[data-panel-marker-preview-system]");
+      const icon = html.querySelector<HTMLElement>("[data-panel-marker-preview-icon]");
+      const label = html.querySelector<HTMLElement>("[data-panel-marker-preview-label]");
+      if (!marker) return;
+      let renderSequence = 0;
+      const controls = ["name", "kind", "status", "iconStyle", "iconColor", "markerImage"]
+        .map(name => html.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${name}"]`));
+      const update = async () => {
+        const value = (name: string, fallback: string) => html.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${name}"]`)?.value || fallback;
+        const type = value("kind", "planet");
+        const status = value("status", "known");
+        const iconStyle = value("iconStyle", type);
+        const markerImage = value("markerImage", "").trim();
+        marker.className = `gmf-system gmf-system--${type} gmf-icon--${iconStyle} gmf-status--${status}${markerImage ? " has-custom-marker" : ""}`;
+        marker.style.setProperty("--gmf-faction-color", value("iconColor", "#58d8ff"));
+        marker.style.setProperty("--gmf-system-size", "42px");
+        if (label) label.textContent = value("name", "New Entity");
+        const sequence = ++renderSequence;
+        if (icon && markerImage) {
+          const image = document.createElement("img");
+          image.className = "gmf-custom-marker__image";
+          image.src = markerImage;
+          image.alt = "";
+          image.draggable = false;
+          icon.replaceChildren(image);
+        } else if (icon && ANIMATED_CELESTIAL_STYLES.includes(iconStyle)) {
+          const markup = await (globalThis as any).renderTemplate(`${templateRoot}/celestial-icon.hbs`, { system: { iconStyle } });
+          if (sequence === renderSequence) icon.innerHTML = markup;
+        } else if (icon) {
+          icon.innerHTML = '<span class="gmf-system__core"></span>';
+        }
+      };
+      controls.forEach(control => {
+        control?.addEventListener("input", update);
+        control?.addEventListener("change", update);
+      });
+      update();
+    }
+
     async _confirmDeleteRoute(routeId: string) {
       const confirmed = await Dialog.confirm({
         title: "Delete Route",
         content: "<p>Delete this route?</p>"
       }, GALAXY_DIALOG_OPTIONS);
-      if (confirmed) await deleteRoute(this.mapId, routeId);
+      if (confirmed) await deleteRoute(this.mapId, routeId, this.activeSystemId ?? "");
     }
 
     async _travelToSystem(destinationSystemId: string, html: any) {
@@ -1130,6 +1431,32 @@ export function createGalaxyMapViewClass(deps: any) {
       broadcastTravelAnimation(this.mapId, from.id, to.id);
       await this._animateShipTravel(from, to, html);
       await setCurrentSystem(this.mapId, to.id);
+      notifyInfo(`Arrived at ${to.name}.`);
+    }
+
+    async _travelToObject(systemId: string, destinationObjectId: string, html: any) {
+      const map = normalizeMap(getRawMap(this.mapId));
+      const system = map.systems.find((candidate: any) => candidate.id === systemId);
+      const from = system?.objects.find((object: any) => object.id === map.currentLocation.objectId);
+      const to = system?.objects.find((object: any) => object.id === destinationObjectId);
+      if (!system || !to) return;
+      if (!from || map.currentLocation.systemId !== system.id) {
+        await setCurrentObject(this.mapId, system.id, to.id);
+        notifyInfo(`Current location set to ${to.name}.`);
+        return;
+      }
+      if (from.id === to.id) {
+        notifyInfo(`${to.name} is already the current location.`);
+        return;
+      }
+      const route = getTravelRoute({ routes: system.routes }, from.id, to.id);
+      if (!route) {
+        notifyError(`No direct route from ${from.name} to ${to.name}.`);
+        return;
+      }
+      broadcastObjectTravelAnimation(this.mapId, system.id, from.id, to.id);
+      await this._animateShipTravel(from, to, html);
+      await setCurrentObject(this.mapId, system.id, to.id);
       notifyInfo(`Arrived at ${to.name}.`);
     }
 
@@ -1184,46 +1511,6 @@ export function createGalaxyMapViewClass(deps: any) {
       journal.sheet?.render(true);
     }
 
-    _openLinkedScene() {
-      const system = this._getSelectedRawSystem();
-      const scenes = (system?.sceneIds ?? []).map((id: string) => game.scenes?.get(id)).filter(Boolean);
-      if (!scenes.length) {
-        notifyError("No available scene is linked to this system.");
-        return;
-      }
-      if (scenes.length === 1) {
-        this._viewLinkedScene(scenes[0]);
-        return;
-      }
-      const options = scenes.map((scene: any) => `<option value="${escapeHtml(scene.id)}">${escapeHtml(scene.name || scene.id)}</option>`).join("");
-      new Dialog({
-        title: `Go to Scene · ${system.name}`,
-        content: `<form class="gmf-scene-choice-form"><label>Linked scene<select name="sceneId" autofocus>${options}</select></label><p>Choose which linked scene to open.</p></form>`,
-        render: (html: any) => getHtmlElement(html)?.querySelector('[name="sceneId"]')?.focus(),
-        buttons: {
-          cancel: { icon: '<i class="fa-solid fa-xmark"></i>', label: "Cancel" },
-          open: {
-            icon: '<i class="fa-solid fa-arrow-up-right-from-square"></i>',
-            label: "Go to Scene",
-            callback: (html: any) => {
-              const sceneId = getHtmlElement(html)?.querySelector('[name="sceneId"]')?.value;
-              this._viewLinkedScene(game.scenes?.get(sceneId));
-            }
-          }
-        },
-        default: "open"
-      }, {
-        classes: ["galaxy-map", "gmf-crud-dialog", "gmf-scene-choice-dialog"],
-        width: 400
-      }).render(true);
-    }
-
-    _viewLinkedScene(scene: any) {
-      if (!scene) return;
-      if (scene?.view) scene.view();
-      else scene?.sheet?.render(true);
-    }
-
     _getSelectedRawSystem() {
       const map = normalizeMap(getRawMap(this.mapId));
       if (this.activeSystemId) return map.systems.find((system: any) => system.id === this.activeSystemId)?.objects.find((object: any) => object.id === this.selectedObjectId) ?? null;
@@ -1237,6 +1524,8 @@ export function createGalaxyMapViewClass(deps: any) {
       this._hideContextMenu();
       if (this._externalFocusTimeout) globalThis.clearTimeout(this._externalFocusTimeout);
       this._externalFocusTimeout = null;
+      this._viewportResizeObserver?.disconnect();
+      this._viewportResizeObserver = null;
       clearMapView(this);
       return super.close(options);
     }
@@ -1256,7 +1545,10 @@ export function createGalaxyMapViewClass(deps: any) {
         fallback.style.backgroundColor = appearance.color;
       }
       const host = html.querySelector<HTMLElement>("[data-planet-canvas]");
-      if (host) host.dataset.planetShape = appearance.shape;
+      if (host) {
+        host.dataset.planetShape = appearance.shape;
+        host.dataset.planetPreset = appearance.preset;
+      }
       const stage = html.querySelector<HTMLElement>(".gmf-planet-stage");
       stage?.style.setProperty("--gmf-planet-color", appearance.color);
     }
@@ -1289,6 +1581,7 @@ export function createGalaxyMapViewClass(deps: any) {
         this._planetRenderer = createPlanetRenderer(host, {
           texture: appearance.texture,
           color: appearance.color,
+          appearancePreset: appearance.preset,
           shape: appearance.shape,
           finish: appearance.finish,
           detailStrength: appearance.detailStrength,

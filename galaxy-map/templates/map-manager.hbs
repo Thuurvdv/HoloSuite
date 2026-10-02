@@ -68,10 +68,6 @@
                 <i class="fa-solid fa-pen-to-square"></i>
                 Edit
               </button>
-              <button type="button" class="gmf-button gmf-button--quiet" data-action="close-player-map">
-                <i class="fa-solid fa-eye-slash"></i>
-                Close Player View
-              </button>
               <details class="gmf-overflow-menu">
                 <summary title="More map actions"><i class="fa-solid fa-ellipsis"></i><span>More</span></summary>
                 <div class="gmf-overflow-menu__panel">
@@ -114,7 +110,10 @@
               <section class="gmf-crud-section" role="tabpanel" aria-label="Systems">
                 <div class="gmf-crud-list">
                   {{#each selectedMap.systems as |system|}}
-                    <article class="gmf-crud-row gmf-system-tree">
+                    <article class="gmf-crud-row gmf-system-tree {{#if system.isExpanded}}is-expanded{{/if}}" data-system-accordion="{{system.id}}">
+                      <button type="button" class="gmf-system-tree__toggle" data-toggle-system="{{system.id}}" aria-expanded="{{#if system.isExpanded}}true{{else}}false{{/if}}" aria-controls="gmf-system-objects-{{system.id}}" title="{{#if system.isExpanded}}Collapse{{else}}Expand{{/if}} {{system.name}}">
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                      </button>
                       <div class="gmf-crud-row__identity">
                         <strong>{{system.name}}</strong>
                         <span class="gmf-row-tags">
@@ -125,7 +124,6 @@
                       <span class="gmf-visibility-state gmf-visibility-state--{{system.visibility}}"><i class="fa-solid {{#if (gmfEq system.visibility "players")}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>{{system.visibility}}</span>
                       <div class="gmf-row-actions">
                         <button type="button" data-create-object="{{system.id}}" title="Add entity" aria-label="Add entity to {{system.name}}"><i class="fa-solid fa-circle-plus"></i></button>
-                        <button type="button" data-merge-system="{{system.id}}" title="Merge into another system" aria-label="Merge {{system.name}} into another system"><i class="fa-solid fa-code-merge"></i></button>
                         <button type="button" data-edit-system="{{system.id}}" title="Edit system" aria-label="Edit {{system.name}}"><i class="fa-solid fa-pen"></i></button>
                         {{#if (gmfEq system.visibility "players")}}
                           <button type="button" data-hide-system="{{system.id}}" title="Hide from players" aria-label="Hide {{system.name}} from players"><i class="fa-solid fa-eye-slash"></i></button>
@@ -134,12 +132,11 @@
                         {{/if}}
                         <button type="button" class="gmf-button--danger" data-delete-system="{{system.id}}" title="Delete system" aria-label="Delete {{system.name}}"><i class="fa-solid fa-trash"></i></button>
                       </div>
-                      <div class="gmf-object-tree">
+                      {{#if system.isExpanded}}<div class="gmf-object-tree" id="gmf-system-objects-{{system.id}}">
                         {{#each system.objects as |object|}}
                           <div class="gmf-object-tree__row">
                             <span><i class="fa-solid fa-circle-dot"></i><strong>{{object.name}}</strong><small>{{object.kind}} · {{object.status}}</small></span>
                             <div class="gmf-row-actions">
-                              <button type="button" data-primary-object="{{object.id}}" data-object-system="{{system.id}}" title="{{#if (gmfEq object.id system.primaryObjectId)}}Arrival entity{{else}}Set as arrival entity{{/if}}" aria-pressed="{{#if (gmfEq object.id system.primaryObjectId)}}true{{else}}false{{/if}}"><i class="fa-solid fa-location-crosshairs"></i></button>
                               <button type="button" data-edit-object="{{object.id}}" data-object-system="{{system.id}}" title="Edit entity"><i class="fa-solid fa-pen"></i></button>
                               <button type="button" class="gmf-button--danger" data-delete-object="{{object.id}}" data-object-system="{{system.id}}" title="Delete entity"><i class="fa-solid fa-trash"></i></button>
                             </div>
@@ -147,7 +144,7 @@
                         {{else}}
                           <p class="gmf-empty-inline">No entities in this system.</p>
                         {{/each}}
-                      </div>
+                      </div>{{/if}}
                     </article>
                   {{else}}
                     <p class="gmf-empty-inline">No systems yet. Add a system to begin charting this map.</p>
@@ -163,17 +160,17 @@
                     <article class="gmf-crud-row">
                       <div class="gmf-crud-row__identity">
                         <strong>{{route.fromName}} <i class="fa-solid fa-arrow-right-long"></i> {{route.toName}}</strong>
-                        <span class="gmf-row-tags"><span>{{route.type}}</span><span>{{gmfFallback route.travelTime "Unknown transit time"}}</span><span>Fuel {{route.fuelCost}}</span></span>
+                        <span class="gmf-row-tags"><span>{{route.scopeLabel}}</span><span>{{route.type}}</span><span>{{gmfFallback route.travelTime "Unknown transit time"}}</span><span>Fuel {{route.fuelCost}}</span></span>
                       </div>
                       <span class="gmf-visibility-state gmf-visibility-state--{{route.visibility}}"><i class="fa-solid {{#if (gmfEq route.visibility "players")}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>{{route.visibility}}</span>
                       <div class="gmf-row-actions">
-                        <button type="button" data-edit-route="{{route.id}}" title="Edit route" aria-label="Edit route from {{route.fromName}} to {{route.toName}}"><i class="fa-solid fa-pen"></i></button>
+                        <button type="button" data-edit-route="{{route.id}}" data-route-system="{{route.systemId}}" title="Edit route" aria-label="Edit route from {{route.fromName}} to {{route.toName}}"><i class="fa-solid fa-pen"></i></button>
                         {{#if (gmfEq route.visibility "players")}}
-                          <button type="button" data-hide-route="{{route.id}}" title="Hide from players" aria-label="Hide route from players"><i class="fa-solid fa-eye-slash"></i></button>
+                          <button type="button" data-hide-route="{{route.id}}" data-route-system="{{route.systemId}}" title="Hide from players" aria-label="Hide route from players"><i class="fa-solid fa-eye-slash"></i></button>
                         {{else}}
-                          <button type="button" data-show-route="{{route.id}}" title="Show to players" aria-label="Show route to players"><i class="fa-solid fa-eye"></i></button>
+                          <button type="button" data-show-route="{{route.id}}" data-route-system="{{route.systemId}}" title="Show to players" aria-label="Show route to players"><i class="fa-solid fa-eye"></i></button>
                         {{/if}}
-                        <button type="button" class="gmf-button--danger" data-delete-route="{{route.id}}" title="Delete route" aria-label="Delete route"><i class="fa-solid fa-trash"></i></button>
+                        <button type="button" class="gmf-button--danger" data-delete-route="{{route.id}}" data-route-system="{{route.systemId}}" title="Delete route" aria-label="Delete route"><i class="fa-solid fa-trash"></i></button>
                       </div>
                     </article>
                   {{else}}

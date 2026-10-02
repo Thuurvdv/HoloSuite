@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "Tarpon Motel";
+  src: url("../assets/fonts/TarponMotel.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kosova";
+  src: url("../assets/fonts/Kosova.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   --hs-bg: #05070d;
   --hs-bg-deep: #03070b;
@@ -15,7 +31,8 @@
   --hs-muted: #8fb5bf;
   --hs-dim: #5f7f89;
   --hs-radius: 6px;
-  --hs-font-ui: "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif;
+  --hs-font-ui: "Tarpon Motel", "Segoe UI", system-ui, sans-serif;
+  --hs-font-display: "Kosova", "Tarpon Motel", "Segoe UI", system-ui, sans-serif;
   --hs-font-mono: "Cascadia Mono", "Roboto Mono", "Consolas", monospace;
   --hs-glow-cyan: 0 0 16px rgba(105, 232, 255, 0.26);
   --hs-glow-green: 0 0 16px rgba(98, 255, 182, 0.22);

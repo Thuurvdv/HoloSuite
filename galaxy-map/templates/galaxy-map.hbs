@@ -7,7 +7,7 @@
     <p>The requested map no longer exists in world settings.</p>
   </section>
 {{else}}
-  <section class="gmf-galaxy">
+  <section class="gmf-galaxy {{#if hardContrast}}is-hard-contrast{{/if}}">
     <div class="gmf-galaxy__backdrop"></div>
     <div class="gmf-frame-drag-strip" data-gmf-window-drag title="Drag window" aria-hidden="true"></div>
     <header class="gmf-galaxy__header" data-gmf-window-drag>
@@ -18,7 +18,10 @@
         </div>
       </div>
       <div class="gmf-actions">
+        <button type="button" class="gmf-icon-button gmf-contrast-toggle" data-action="toggle-hard-contrast" title="Hard contrast" aria-label="Hard contrast" aria-pressed="{{#if hardContrast}}true{{else}}false{{/if}}"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        {{#unless planetView}}<button type="button" class="gmf-icon-button gmf-route-toggle" data-action="toggle-routes" title="Routes" aria-label="Routes" aria-pressed="{{#if showRoutes}}true{{else}}false{{/if}}"><i class="fa-solid fa-route"></i></button>{{/unless}}
         {{#if systemView}}<button type="button" class="gmf-icon-button gmf-faction-toggle" data-action="toggle-territories" title="Faction regions" aria-label="Faction regions" aria-pressed="{{#if showTerritories}}true{{else}}false{{/if}}"><i class="fa-solid fa-layer-group"></i></button>{{/if}}
+        {{#if map.canEdit}}{{#unless planetView}}<button type="button" class="gmf-icon-button gmf-layer-edit" data-action="edit-current-layer" title="{{#if systemView}}Edit System{{else}}Edit Galaxy{{/if}}" aria-label="{{#if systemView}}Edit System{{else}}Edit Galaxy{{/if}}"><i class="fa-solid fa-pen"></i></button>{{/unless}}{{/if}}
         <button type="button" class="gmf-window-close" data-action="close-window" title="Close" aria-label="Close Galaxy Map"><i class="fa-solid fa-xmark"></i></button>
       </div>
     </header>
@@ -41,9 +44,10 @@
             <p data-planet-status role="status">Preparing model…</p>
           </footer>
         </main>
-        {{> "modules/galaxy-map/templates/system-details.hbs" system=planetSystem map=map playerMode=playerMode planetView=true objectView=true linkedScenes=linkedPlanetScenes linkedJournal=linkedPlanetJournal canEditLinks=canPlacePlanetLocations}}
+        {{#if creationPanel.isEntity}}{{> "modules/galaxy-map/templates/object-appearance-panel.hbs" creation=creationPanel appearanceGuideMarkup=appearanceGuideMarkup}}{{/if}}
+        {{> "modules/galaxy-map/templates/system-details.hbs" creation=creationPanel factionRegistry=factionRegistry system=planetSystem map=map playerMode=playerMode planetView=true objectView=true linkedScenes=linkedPlanetScenes linkedJournal=linkedPlanetJournal canEditLinks=canPlacePlanetLocations}}
       {{else}}
-      <main class="gmf-map-stage" aria-label="{{#if systemView}}Interactive system chart{{else}}Interactive galaxy map{{/if}}">
+      <main class="gmf-map-stage {{#if map.backgroundImage}}gmf-map-stage--custom-background{{/if}}" aria-label="{{#if systemView}}Interactive system chart{{else}}Interactive galaxy map{{/if}}">
         <div class="gmf-map-viewport" style="--gmf-pan-x: {{panX}}px; --gmf-pan-y: {{panY}}px; --gmf-zoom: {{zoom}};">
           {{#if map.backgroundImage}}<img class="gmf-map-background" src="{{map.backgroundImage}}" alt="" aria-hidden="true" />{{/if}}
           {{#if systemView}}{{#if showTerritories}}
@@ -58,7 +62,7 @@
               {{/each}}
             </div>
           {{/if}}{{/if}}
-          <svg class="gmf-routes" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {{#if showRoutes}}<svg class="gmf-routes" viewBox="0 0 100 100" preserveAspectRatio="none">
             {{#each map.routes as |route|}}
               <line class="gmf-route-hit"
                 x1="{{route.from.x}}" y1="{{route.from.y}}"
@@ -74,29 +78,36 @@
                 data-route-from="{{route.fromSystemId}}"
                 data-route-to="{{route.toSystemId}}" />
             {{/each}}
-          </svg>
+          </svg>{{/if}}
 
           <div class="gmf-system-layer">
             {{#each map.systems as |system|}}
               <button type="button"
-                class="gmf-system {{#if ../systemView}}gmf-system--{{system.displayType}} gmf-icon--{{system.iconStyle}} {{#if system.animatedCelestial}}gmf-system--animated-celestial{{/if}}{{else}}gmf-system--galaxy-node{{/if}} gmf-status--{{system.displayStatus}} {{#if system.isSelected}}is-selected{{/if}} {{#if system.isCurrent}}is-current{{/if}} {{#if system.isDestination}}is-destination{{/if}} {{#if system.hasAlert}}has-alert{{/if}} {{#if system.obscured}}is-obscured{{/if}} {{#if system.gmOnly}}gmf-gm-only{{/if}} {{#unless system.pulse}}gmf-no-pulse{{/unless}} {{#if system.isExternalFocus}}is-external-focus gmf-focus--{{system.externalFocus.kind}}{{/if}}"
+                class="gmf-system {{#if system.hasCustomMarker}}has-custom-marker{{/if}} {{#if ../systemView}}gmf-system--{{system.displayType}} gmf-icon--{{system.iconStyle}} {{#if system.animatedCelestial}}gmf-system--animated-celestial{{/if}}{{else}}gmf-system--galaxy-node{{/if}} gmf-status--{{system.displayStatus}} {{#if system.isSelected}}is-selected{{/if}} {{#if system.isCurrent}}is-current{{/if}} {{#if system.isDestination}}is-destination{{/if}} {{#if system.hasAlert}}has-alert{{/if}} {{#if system.obscured}}is-obscured{{/if}} {{#if system.gmOnly}}gmf-gm-only{{/if}} {{#unless system.pulse}}gmf-no-pulse{{/unless}} {{#if system.isExternalFocus}}is-external-focus gmf-focus--{{system.externalFocus.kind}}{{/if}}"
                 style="left: {{gmfPercent system.x}}; top: {{gmfPercent system.y}}; --gmf-faction-color: {{system.factionColor}}; --gmf-system-size: {{system.iconSize}}px; {{#if system.isExternalFocus}}--gmf-focus-color: {{system.externalFocus.color}};{{/if}}"
                 data-system-id="{{system.id}}"
+                data-icon-size="{{system.iconSize}}"
                 data-search-text="{{system.displayName}} {{system.displayType}} {{system.displayStatus}} {{system.factionName}}"
                 aria-label="{{system.displayName}}, {{system.displayType}}, {{system.displayStatus}}{{#if system.isCurrent}}, current location{{/if}}{{#if system.hasAlert}}, alert{{/if}}"
                 aria-pressed="{{#if system.isSelected}}true{{else}}false{{/if}}">
                 <span class="gmf-system__halo"></span>
-                {{#if ../systemView}}
-                  {{#if system.animatedCelestial}}
+                {{#if system.hasCustomMarker}}
+                  <img class="gmf-custom-marker__image" src="{{system.displayMarkerImage}}" alt="" draggable="false" />
+                {{else}}
+                  {{#if ../systemView}}
+                    {{#if system.animatedCelestial}}
                     {{> "modules/galaxy-map/templates/celestial-icon.hbs" system=system}}
+                    {{else}}
+                    <span class="gmf-system__core"></span>
+                    {{/if}}
                   {{else}}
                     <span class="gmf-system__core"></span>
                   {{/if}}
-                {{else}}
-                  <span class="gmf-system__core"></span>
                 {{/if}}
-                {{#if ../systemView}}<span class="gmf-system__type-glyph" aria-hidden="true"></span>{{/if}}
+                {{#if ../systemView}}{{#unless system.hasCustomMarker}}{{#unless system.animatedCelestial}}<span class="gmf-system__type-glyph" aria-hidden="true"></span>{{/unless}}{{/unless}}{{/if}}
                 <span class="gmf-system__selection" aria-hidden="true"></span>
+                {{#if ../map.canEdit}}{{#if system.isSelected}}<span class="gmf-system__resize-handle" data-resize-marker title="Drag to resize marker" aria-hidden="true"></span>{{/if}}{{/if}}
+                {{#if system.isCurrent}}<span class="gmf-current-location-marker" aria-hidden="true"></span>{{/if}}
                 {{#if system.hasAlert}}<span class="gmf-system__alert" title="{{system.alertLabel}}"><i class="fa-solid fa-triangle-exclamation"></i></span>{{/if}}
                 {{#if system.isExternalFocus}}
                   <span class="gmf-external-focus" aria-hidden="true">
@@ -114,16 +125,13 @@
         <div class="gmf-intel-layer" data-intel-layer aria-live="polite"></div>
 
         {{#if map.canEdit}}
-          <div class="gmf-map-hint">
-            {{#if systemView}}Drag entities to arrange this system. Right-click empty space to add an entity.{{else}}Drag systems to reposition. Click routes to inspect, or right-click the map for editing actions.{{/if}}
-          </div>
           {{#if systemView}}
           <nav class="gmf-context-menu" data-gmf-context-menu hidden>
             <button type="button" data-context-action="add-entity" data-context-show="stage"><i class="fa-solid fa-plus"></i>Add Entity</button>
             <button type="button" data-context-action="manage-factions" data-context-show="stage"><i class="fa-solid fa-flag"></i>Manage Factions</button>
             <button type="button" data-context-action="add-faction" data-context-show="stage"><i class="fa-solid fa-plus"></i>Add Faction</button>
             <button type="button" data-context-action="edit-entity" data-context-show="system"><i class="fa-solid fa-pen"></i>Edit Entity</button>
-            <button type="button" data-context-action="add-entity" data-context-show="system"><i class="fa-solid fa-plus"></i>Add Entity</button>
+            <button type="button" data-context-action="add-route-from-marker" data-context-show="system"><i class="fa-solid fa-route"></i>Add Route</button>
             <button type="button" data-context-action="reveal-entity" data-context-show="system"><i class="fa-solid fa-eye"></i>Reveal Entity</button>
             <button type="button" data-context-action="hide-entity" data-context-show="system"><i class="fa-solid fa-eye-slash"></i>Hide Entity</button>
             <button type="button" data-context-action="delete-entity" data-context-show="system"><i class="fa-solid fa-trash"></i>Delete Entity</button>
@@ -132,10 +140,6 @@
             <button type="button" data-context-action="add-system" data-context-show="stage">
               <i class="fa-solid fa-plus"></i>
               Add System
-            </button>
-            <button type="button" data-context-action="add-route" data-context-show="stage">
-              <i class="fa-solid fa-route"></i>
-              Add Route
             </button>
             <button type="button" data-context-action="manage-factions" data-context-show="stage">
               <i class="fa-solid fa-flag"></i>
@@ -161,9 +165,9 @@
               <i class="fa-solid fa-plus"></i>
               Add System
             </button>
-            <button type="button" data-context-action="add-route-from-system" data-context-show="system">
+            <button type="button" data-context-action="add-route-from-marker" data-context-show="system">
               <i class="fa-solid fa-route"></i>
-              Add Route From Here
+              Add Route
             </button>
             <button type="button" data-context-action="reveal-system" data-context-show="system">
               <i class="fa-solid fa-eye"></i>
@@ -194,14 +198,11 @@
               Delete Route
             </button>
           </nav>{{/if}}
-        {{else}}
-          <div class="gmf-map-hint">
-            Drag empty space to pan. Scroll to zoom.
-          </div>
         {{/if}}
       </main>
 
-      {{#if showInspector}}{{> "modules/galaxy-map/templates/system-details.hbs" system=map.selectedSystem route=map.selectedRoute map=map playerMode=playerMode objectView=systemView linkedScenes=linkedPlanetScenes linkedJournal=linkedPlanetJournal canEditLinks=canPlacePlanetLocations}}{{/if}}
+      {{#if creationPanel.isEntity}}{{> "modules/galaxy-map/templates/object-appearance-panel.hbs" creation=creationPanel appearanceGuideMarkup=appearanceGuideMarkup}}{{/if}}
+      {{#if showInspector}}{{> "modules/galaxy-map/templates/system-details.hbs" creation=creationPanel factionRegistry=factionRegistry system=map.selectedSystem route=map.selectedRoute map=map playerMode=playerMode objectView=systemView linkedScenes=linkedPlanetScenes linkedJournal=linkedPlanetJournal canEditLinks=canPlacePlanetLocations}}{{/if}}
       {{/if}}
     </div>
   </section>

@@ -75,6 +75,14 @@
   aspect-ratio: 0.78;
   border-radius: 50% / 10%;
 }
+.gmf-planet-canvas[data-planet-preset="black-hole"] .gmf-planet-fallback {
+  box-shadow:
+    inset -35px -15px 50px rgba(0, 0, 0, 0.82),
+    inset 3px 2px 10px rgba(255, 178, 92, 0.16),
+    0 0 0 2px rgba(221, 83, 10, 0.9),
+    0 0 8px rgba(221, 83, 10, 0.88),
+    0 0 18px rgba(151, 43, 2, 0.52);
+}
 .gmf-planet-controls { position: relative; padding: 10px 20px 16px; background: linear-gradient(transparent, rgba(1, 5, 13, 0.75)); }
 .gmf-planet-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
 .gmf-planet-buttons button { width: auto; min-height: 32px; font-size: 12px; }
@@ -94,7 +102,26 @@
 .gmf-location-callout__connector { position: absolute; top: 50%; right: 100%; width: 64px; border-top: 1px solid var(--gmf-cyan); box-shadow: 0 0 5px rgba(88, 216, 255, 0.9); }
 .gmf-location-callout.is-left .gmf-location-callout__connector { right: auto; left: 100%; }
 .gmf-location-callout > strong { display: block; overflow: hidden; padding: 2px 6px; color: var(--gmf-cyan); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-overflow: ellipsis; text-shadow: 0 0 7px rgba(88, 216, 255, 0.95); white-space: nowrap; }
-.gmf-inspect-system { width: 34px !important; min-height: 34px; margin-top: 12px; }
+.gmf-inspector-navigation-actions { display: flex; align-items: center; gap: 7px; margin-top: 12px; }
+.gmf-inspector-navigation-actions .gmf-icon-button { width: 34px !important; min-height: 34px; }
+.gmf-inspect-system { width: 34px !important; min-height: 34px; }
+.gmf-navigation-icon {
+  display: block;
+  width: 27px;
+  height: 27px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  -webkit-mask: center / contain no-repeat;
+}
+.gmf-navigation-icon--planet {
+  mask-image: url("../assets/icons/goToPlanetIcon.svg");
+  -webkit-mask-image: url("../assets/icons/goToPlanetIcon.svg");
+  transform: translateY(-1px);
+}
+.gmf-navigation-icon--system {
+  mask-image: url("../assets/icons/GoToSystemIcon.svg");
+  -webkit-mask-image: url("../assets/icons/GoToSystemIcon.svg");
+}
 @container galaxy-map (max-width: 760px) {
   .gmf-galaxy__content:has(.gmf-planet-stage) { grid-template-rows: minmax(530px, 1fr); }
   .gmf-planet-stage { border-right: 0; border-bottom: 1px solid var(--gmf-line); }

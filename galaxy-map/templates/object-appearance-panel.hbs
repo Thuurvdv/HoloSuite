@@ -1,0 +1,45 @@
+<section class="gmf-object-appearance-panel" aria-label="Marker and 3D appearance editor">
+  <header class="gmf-system-panel__top">
+    <p class="gmf-kicker">Visual wizard</p>
+    <h3>Marker &amp; 3D Appearance</h3>
+  </header>
+
+  <div class="gmf-appearance-wizard">
+    <section class="gmf-appearance-wizard__section gmf-appearance-wizard__marker">
+      <h4>Map marker</h4>
+      <div class="gmf-panel-create__grid">
+        <label>Marker style<select name="iconStyle" form="gmf-panel-editor-form">
+          <option value="planet" {{#if (gmfEq creation.iconStyle "planet")}}selected{{/if}}>Planet</option><option value="terrestrial" {{#if (gmfEq creation.iconStyle "terrestrial")}}selected{{/if}}>Terrestrial</option><option value="gas-giant" {{#if (gmfEq creation.iconStyle "gas-giant")}}selected{{/if}}>Gas Giant</option><option value="ice-world" {{#if (gmfEq creation.iconStyle "ice-world")}}selected{{/if}}>Ice World</option><option value="volcanic" {{#if (gmfEq creation.iconStyle "volcanic")}}selected{{/if}}>Volcanic</option><option value="artificial" {{#if (gmfEq creation.iconStyle "artificial")}}selected{{/if}}>Artificial</option><option value="ringed" {{#if (gmfEq creation.iconStyle "ringed")}}selected{{/if}}>Ringed</option><option value="star" {{#if (gmfEq creation.iconStyle "star")}}selected{{/if}}>Star</option><option value="black-hole" {{#if (gmfEq creation.iconStyle "black-hole")}}selected{{/if}}>Black Hole</option><option value="station" {{#if (gmfEq creation.iconStyle "station")}}selected{{/if}}>Station</option><option value="diamond" {{#if (gmfEq creation.iconStyle "diamond")}}selected{{/if}}>Diamond</option><option value="void" {{#if (gmfEq creation.iconStyle "void")}}selected{{/if}}>Void</option>
+        </select></label>
+        <label>Marker color<input type="color" name="iconColor" value="{{creation.iconColor}}" form="gmf-panel-editor-form" /></label>
+      </div>
+      <label class="gmf-custom-marker-toggle"><input type="checkbox" name="useCustomMarker" value="true" form="gmf-panel-editor-form" data-use-custom-marker {{#if creation.markerImage}}checked{{/if}} /> Use custom marker image</label>
+      <label data-custom-marker-field>Custom marker image<div class="gmf-path-field"><input type="text" name="markerImage" value="{{creation.markerImage}}" form="gmf-panel-editor-form" placeholder="Select an image" {{#unless creation.markerImage}}disabled{{/unless}} /><button type="button" data-browse-target="markerImage" title="Browse custom marker" aria-label="Browse custom marker" {{#unless creation.markerImage}}disabled{{/unless}}><i class="fa-solid fa-folder-open"></i></button><button type="button" data-clear-target="markerImage" title="Clear custom marker" aria-label="Clear custom marker" {{#unless creation.markerImage}}disabled{{/unless}}><i class="fa-solid fa-xmark"></i></button></div></label>
+      <div class="gmf-marker-preview gmf-galaxy" data-panel-marker-preview aria-label="Live marker preview">
+        <div class="gmf-marker-preview__stage"><span class="gmf-system gmf-system--{{creation.entityKind}} gmf-icon--{{creation.iconStyle}} gmf-status--{{creation.status}} {{#if creation.markerImage}}has-custom-marker{{/if}}" data-panel-marker-preview-system style="--gmf-faction-color: {{creation.iconColor}}; --gmf-system-size: 42px;"><span class="gmf-system__halo"></span><span data-panel-marker-preview-icon>{{#if creation.markerImage}}<img class="gmf-custom-marker__image" src="{{creation.markerImage}}" alt="" draggable="false" />{{else}}<span class="gmf-system__core"></span>{{/if}}</span><span class="gmf-system__type-glyph"></span></span></div>
+        <span class="gmf-marker-preview__label" data-panel-marker-preview-label>{{creation.name}}</span>
+      </div>
+    </section>
+
+    <section class="gmf-appearance-wizard__section">
+      <h4>3D model</h4>
+      <div class="gmf-panel-create__grid">
+        <label>Appearance<select name="planetPreset" form="gmf-panel-editor-form"><option value="ice" {{#if (gmfEq creation.planetPreset "ice")}}selected{{/if}}>Ice Planet</option><option value="alien" {{#if (gmfEq creation.planetPreset "alien")}}selected{{/if}}>Alien Planet</option><option value="earth" {{#if (gmfEq creation.planetPreset "earth")}}selected{{/if}}>Earth Planet</option><option value="lush" {{#if (gmfEq creation.planetPreset "lush")}}selected{{/if}}>Lush Planet</option><option value="desert" {{#if (gmfEq creation.planetPreset "desert")}}selected{{/if}}>Desert Planet</option><option value="gas-giant" {{#if (gmfEq creation.planetPreset "gas-giant")}}selected{{/if}}>Gas Giant</option><option value="volcanic" {{#if (gmfEq creation.planetPreset "volcanic")}}selected{{/if}}>Volcanic Planet</option><option value="moon" {{#if (gmfEq creation.planetPreset "moon")}}selected{{/if}}>Moon</option><option value="sun" {{#if (gmfEq creation.planetPreset "sun")}}selected{{/if}}>Sun</option><option value="techno" {{#if (gmfEq creation.planetPreset "techno")}}selected{{/if}}>Techno Planet</option><option value="prison" {{#if (gmfEq creation.planetPreset "prison")}}selected{{/if}}>Prison</option><option value="black-hole" {{#if (gmfEq creation.planetPreset "black-hole")}}selected{{/if}}>Black Hole</option><option value="anomaly" {{#if (gmfEq creation.planetPreset "anomaly")}}selected{{/if}}>Anomaly</option><option value="asteroid" {{#if (gmfEq creation.planetPreset "asteroid")}}selected{{/if}}>Asteroid</option><option value="donut-planet" {{#if (gmfEq creation.planetPreset "donut-planet")}}selected{{/if}}>Donut Planet</option><option value="cube" {{#if (gmfEq creation.planetPreset "cube")}}selected{{/if}}>Cube</option><option value="color" {{#if (gmfEq creation.planetPreset "color")}}selected{{/if}}>Flat color</option><option value="custom" {{#if (gmfEq creation.planetPreset "custom")}}selected{{/if}}>Custom texture</option><option value="none" {{#if (gmfEq creation.planetPreset "none")}}selected{{/if}}>No detail view</option></select></label>
+        <label>Shape<select name="planetShape" form="gmf-panel-editor-form" {{#if (gmfEq creation.planetPreset "none")}}disabled{{/if}}><option value="sphere" {{#if (gmfEq creation.planetShape "sphere")}}selected{{/if}}>Sphere</option><option value="cube" {{#if (gmfEq creation.planetShape "cube")}}selected{{/if}}>Cube</option><option value="donut" {{#if (gmfEq creation.planetShape "donut")}}selected{{/if}}>Donut</option><option value="asteroid" {{#if (gmfEq creation.planetShape "asteroid")}}selected{{/if}}>Asteroid</option><option value="crystal" {{#if (gmfEq creation.planetShape "crystal")}}selected{{/if}}>Crystal</option><option value="cylinder" {{#if (gmfEq creation.planetShape "cylinder")}}selected{{/if}}>Cylinder</option></select></label>
+      </div>
+      <div class="gmf-panel-create__grid">
+        <label>Finish<select name="planetFinish" form="gmf-panel-editor-form" {{#if (gmfEq creation.planetPreset "none")}}disabled{{/if}}><option value="smooth" {{#if (gmfEq creation.planetFinish "smooth")}}selected{{/if}}>Smooth</option><option value="matte" {{#if (gmfEq creation.planetFinish "matte")}}selected{{/if}}>Matte</option><option value="holographic" {{#if (gmfEq creation.planetFinish "holographic")}}selected{{/if}}>Holographic</option></select></label>
+        <label>Model color<input type="color" name="planetColor" value="{{creation.planetColor}}" form="gmf-panel-editor-form" {{#unless (gmfEq creation.planetPreset "color")}}disabled{{/unless}} /></label>
+      </div>
+      <div data-texture-upload-fields>
+        <label>Custom texture<div class="gmf-path-field"><input type="text" name="planetTexture" value="{{creation.planetTexture}}" form="gmf-panel-editor-form" /><button type="button" data-browse-target="planetTexture" title="Browse custom texture" aria-label="Browse custom texture"><i class="fa-solid fa-folder-open"></i></button><button type="button" data-clear-target="planetTexture" title="Clear custom texture" aria-label="Clear custom texture"><i class="fa-solid fa-xmark"></i></button></div></label>
+      </div>
+      <label>Object image<div class="gmf-path-field"><input type="text" name="image" value="{{creation.image}}" form="gmf-panel-editor-form" /><button type="button" data-browse-target="image" title="Browse object image" aria-label="Browse object image"><i class="fa-solid fa-folder-open"></i></button><button type="button" data-clear-target="image" title="Clear object image" aria-label="Clear object image"><i class="fa-solid fa-xmark"></i></button></div></label>
+    </section>
+
+    <section class="gmf-appearance-wizard__section gmf-appearance-wizard__guides" data-texture-guide-section {{#unless (gmfEq creation.planetPreset "custom")}}hidden{{/unless}}>
+      <h4>Texture placement guide</h4>
+      {{{appearanceGuideMarkup}}}
+    </section>
+  </div>
+</section>

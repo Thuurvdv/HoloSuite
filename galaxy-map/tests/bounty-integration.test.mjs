@@ -11,12 +11,10 @@ globalThis.game = {
 
 const {
   getBountyIntelForSystem,
-  hasBountyBoardIntegration,
   openBountyIntel
 } = await import("../src/bounty-integration.ts");
 
 test("the optional integration is inert when Bounty Board is unavailable", () => {
-  assert.equal(hasBountyBoardIntegration(), false);
   assert.deepEqual(getBountyIntelForSystem({ sceneIds: ["scene-a"] }), []);
   assert.equal(openBountyIntel("bounty-a"), false);
 });
@@ -24,9 +22,9 @@ test("the optional integration is inert when Bounty Board is unavailable", () =>
 test("API discovery tolerates initialization order without enabling a disabled module", () => {
   moduleState.active = undefined;
   moduleState.api = { getBountiesForScene: () => [] };
-  assert.equal(hasBountyBoardIntegration(), true);
+  assert.deepEqual(getBountyIntelForSystem({ sceneIds: ["scene-a"] }), []);
   moduleState.active = false;
-  assert.equal(hasBountyBoardIntegration(), false);
+  assert.equal(openBountyIntel("bounty-a"), false);
   moduleState.api = null;
 });
 
@@ -72,11 +70,18 @@ test("the hover HUD is delayed, stable, disposable, and uses bounded image proce
   assert.match(callout, /setTimeout\([\s\S]*90\)/);
   assert.match(callout, /scheduleHide = \(delay = 180\)/);
   assert.match(callout, /AbortController/);
-  assert.match(callout, /data-intel-previous[\s\S]*data-intel-next/);
+  assert.match(callout, /data-intel-list/);
+  assert.match(callout, /items\.forEach\(\(item, index\)/);
+  assert.match(callout, /meta\.textContent = item\.reward \|\| ""/);
+  assert.doesNotMatch(callout, /\[item\.statusLabel, item\.reward\]/);
+  assert.doesNotMatch(callout, /data-intel-previous|data-intel-next/);
   assert.match(processor, /MAX_CACHE_ENTRIES = 40/);
   assert.match(processor, /MAX_WORKING_SIZE = 192/);
   assert.match(processor, /Math\.hypot\(gx, gy\)/);
   assert.match(css, /\.gmf-galaxy \.gmf-intel-callout/);
-  assert.match(css, /\.gmf-galaxy \.gmf-intel-callout__body[\s\S]*height: auto !important;[\s\S]*min-height: 78px !important/);
+  assert.match(css, /gmf-intel-stack-in/);
+  assert.match(css, /gmf-intel-callout__connector[\s\S]*top: 50%/);
+  assert.match(css, /gmf-intel-callout__stack[\s\S]*gap: 4px/);
+  assert.match(css, /\.gmf-galaxy \.gmf-intel-callout__body[\s\S]*height: auto !important;/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
