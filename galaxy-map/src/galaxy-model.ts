@@ -17,7 +17,8 @@ export const ICON_STYLE_OPTIONS = [
   { value: "diamond", label: "Diamond" }, { value: "void", label: "Void" }
 ];
 export const ICON_STYLES = ICON_STYLE_OPTIONS.map((option) => option.value);
-export const ANIMATED_CELESTIAL_STYLES = ["planet", "terrestrial", "gas-giant", "ice-world", "volcanic", "artificial", "ringed", "star", "black-hole", "station", "diamond", "void"];
+// Every built-in marker style has animated layers; custom marker images do not.
+export const ANIMATED_CELESTIAL_STYLES = ICON_STYLES;
 export const MIN_ZOOM = 0.2;
 export const MAX_ZOOM = 10;
 export const TRAVEL_ANIMATION_MS = 2400;
@@ -90,7 +91,7 @@ export function normalizeSystemObject(object: any = {}) {
     iconColor: normalizeOptionalColor(object.iconColor), iconSize: clamp(normalizeNumber(object.iconSize, 28), 18, 56),
     markerImage: String(object.markerImage || "").trim(),
     iconStyle: ICON_STYLES.includes(object.iconStyle) ? object.iconStyle : kind === "star" ? "star" : kind === "station" ? "station" : "planet",
-    pulse: object.pulse === false ? false : true, planetPreset, planetShape,
+    pulse: object.pulse !== false, planetPreset, planetShape,
     planetFinish: normalizePlanetFinish(object.planetFinish),
     planetTexture, planetColor: normalizeOptionalColor(object.planetColor) || "#58d8ff"
   };
@@ -103,8 +104,8 @@ export function normalizeSystem(system: any = {}) {
   const routes = (Array.isArray(system.routes) ? system.routes : []).map(normalizeRoute)
     .filter(route => route.fromSystemId !== route.toSystemId && objectIds.has(route.fromSystemId) && objectIds.has(route.toSystemId));
   const primaryObjectId = objects.some((object: any) => object.id === system.primaryObjectId) ? String(system.primaryObjectId) : objects[0]?.id ?? "";
-  // Transitional read facade for 1.x callers. Canonical object data lives in
-  // `objects`; these fields can be removed once the deprecated API is retired.
+  // Old 1.x API callers read these fields straight off the system. The real data
+  // lives on the objects; drop these once nothing reads them anymore.
   const primary = objects.find((object: any) => object.id === primaryObjectId) ?? normalizeSystemObject(system);
   const normalized: any = {
     id: String(system.id || randomId("system")), name: String(system.name || "Unnamed System"),
@@ -115,7 +116,7 @@ export function normalizeSystem(system: any = {}) {
     backgroundImage: String(system.backgroundImage || "").trim(),
     iconColor: normalizeOptionalColor(system.iconColor), iconSize: clamp(normalizeNumber(system.iconSize, 30), 18, 56),
     markerImage: String(system.markerImage || "").trim(),
-    iconStyle: ICON_STYLES.includes(system.iconStyle) ? system.iconStyle : "star", pulse: system.pulse === false ? false : true,
+    iconStyle: ICON_STYLES.includes(system.iconStyle) ? system.iconStyle : "star", pulse: system.pulse !== false,
     primaryObjectId, objects, routes
   };
   for (const [key, value] of Object.entries({

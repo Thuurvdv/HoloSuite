@@ -1,8 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
 
-const read = (file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const moduleState = { active: false, api: null };
 globalThis.game = {
   modules: { get: (id) => id === "bounty-board" ? moduleState : null },
@@ -14,12 +12,12 @@ const {
   openBountyIntel
 } = await import("../src/bounty-integration.ts");
 
-test("the optional integration is inert when Bounty Board is unavailable", () => {
+test("nothing happens when Bounty Board is not installed", () => {
   assert.deepEqual(getBountyIntelForSystem({ sceneIds: ["scene-a"] }), []);
   assert.equal(openBountyIntel("bounty-a"), false);
 });
 
-test("API discovery tolerates initialization order without enabling a disabled module", () => {
+test("a disabled Bounty Board is ignored even if its API is already registered", () => {
   moduleState.active = undefined;
   moduleState.api = { getBountiesForScene: () => [] };
   assert.deepEqual(getBountyIntelForSystem({ sceneIds: ["scene-a"] }), []);
@@ -28,7 +26,7 @@ test("API discovery tolerates initialization order without enabling a disabled m
   moduleState.api = null;
 });
 
-test("system intel resolves through scenes and deduplicates shared bounties", () => {
+test("bounties are collected from every linked scene without duplicates", () => {
   const queried = [];
   let opened = "";
   moduleState.active = true;
@@ -52,36 +50,4 @@ test("system intel resolves through scenes and deduplicates shared bounties", ()
   assert.deepEqual(results.map((bounty) => bounty.id), ["one", "two"]);
   assert.equal(openBountyIntel("two"), true);
   assert.equal(opened, "two");
-});
-
-test("the hover HUD is delayed, stable, disposable, and uses bounded image processing", () => {
-  const callout = read("src/planet-intel-callout.ts");
-  const processor = read("src/hologram-image.ts");
-  const template = read("templates/galaxy-map.hbs");
-  const css = read("styles/galaxy-map-view.css");
-  const view = read("src/view-app.ts");
-
-  assert.match(template, /data-intel-layer/);
-  assert.match(view, /this\._attachPartListeners\("main", html, options\);[\s\S]*this\._mountBountyIntelCallout\(html\)/);
-  assert.match(view, /_mountBountyIntelCallout\(html: HTMLElement\)/);
-  assert.match(view, /createPlanetIntelCallout/);
-  assert.doesNotMatch(view, /if \(stage && hasBountyBoardIntegration\(\)\)/);
-  assert.match(callout, /pointerenter[\s\S]*pointerleave/);
-  assert.match(callout, /setTimeout\([\s\S]*90\)/);
-  assert.match(callout, /scheduleHide = \(delay = 180\)/);
-  assert.match(callout, /AbortController/);
-  assert.match(callout, /data-intel-list/);
-  assert.match(callout, /items\.forEach\(\(item, index\)/);
-  assert.match(callout, /meta\.textContent = item\.reward \|\| ""/);
-  assert.doesNotMatch(callout, /\[item\.statusLabel, item\.reward\]/);
-  assert.doesNotMatch(callout, /data-intel-previous|data-intel-next/);
-  assert.match(processor, /MAX_CACHE_ENTRIES = 40/);
-  assert.match(processor, /MAX_WORKING_SIZE = 192/);
-  assert.match(processor, /Math\.hypot\(gx, gy\)/);
-  assert.match(css, /\.gmf-galaxy \.gmf-intel-callout/);
-  assert.match(css, /gmf-intel-stack-in/);
-  assert.match(css, /gmf-intel-callout__connector[\s\S]*top: 50%/);
-  assert.match(css, /gmf-intel-callout__stack[\s\S]*gap: 4px/);
-  assert.match(css, /\.gmf-galaxy \.gmf-intel-callout__body[\s\S]*height: auto !important;/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
 });

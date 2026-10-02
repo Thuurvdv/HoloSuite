@@ -1,5 +1,9 @@
-# Galaxy Map ideas
+# Galaxy Map roadmap
 
-## User preferences
+## Done
 
-- 2026-09-07: Implemented flexible travel approval with per-map GM-only, majority, and unanimous modes, plus approval thresholds and visible pending participants.
+- Per-map travel approval: GM approval, majority vote or unanimous agreement, with a live tally of who still has to vote.
+
+## Planned
+
+- A short video walkthrough.

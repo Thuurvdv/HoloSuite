@@ -1,15 +1,8 @@
-declare const foundry: any;
-declare const Application: any;
 declare const Dialog: any;
 
 import { activateGalaxyWindowChrome, GALAXY_DIALOG_OPTIONS } from "./window-chrome";
-
-function getApplicationBase() {
-  const ApplicationV2 = foundry.applications?.api?.ApplicationV2;
-  const HandlebarsApplicationMixin = foundry.applications?.api?.HandlebarsApplicationMixin;
-  if (ApplicationV2 && HandlebarsApplicationMixin) return HandlebarsApplicationMixin(ApplicationV2);
-  return Application;
-}
+import { getApplicationBase } from "./app-base";
+import { escapeHtml } from "./dom-utils";
 
 export function createGalaxyMapManagerClass(deps: any) {
   const {
@@ -66,7 +59,7 @@ export function createGalaxyMapManagerClass(deps: any) {
     }
 
     async _prepareContext(options: any) {
-      const context = await super._prepareContext?.(options) ?? {};
+      const context = await super._prepareContext(options);
       const maps = getMaps().sort((a: any, b: any) => a.title.localeCompare(b.title));
       if (!this.selectedMapId || !maps.some((map: any) => map.id === this.selectedMapId)) {
         this.selectedMapId = maps[0]?.id ?? null;
@@ -95,7 +88,7 @@ export function createGalaxyMapManagerClass(deps: any) {
     }
 
     _attachPartListeners(partId: string, html: any, options: any) {
-      super._attachPartListeners?.(partId, html, options);
+      super._attachPartListeners(partId, html, options);
       activateGalaxyWindowChrome(this, html);
       html.querySelector("[data-action='create-map']")?.addEventListener("click", () => this._onCreateMap());
       html.querySelector("[data-action='edit-map-metadata']")?.addEventListener("click", () => {
@@ -201,7 +194,7 @@ export function createGalaxyMapManagerClass(deps: any) {
           const map = getRawMap(mapId);
           const confirmed = await Dialog.confirm({
             title: "Delete Galaxy Map",
-            content: `<p>Delete <strong>${map?.title ?? mapId}</strong>? This cannot be undone.</p>`
+            content: `<p>Delete <strong>${escapeHtml(map?.title ?? mapId)}</strong>? This cannot be undone.</p>`
           }, GALAXY_DIALOG_OPTIONS);
           if (!confirmed) return;
           await deleteMap(mapId);

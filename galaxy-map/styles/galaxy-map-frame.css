@@ -1,14 +1,12 @@
-/* Reusable 9-slice hardware shell. SVGs are intentionally standalone placeholders. */
+/* 9-slice window frame shared by the manager, map and dialogs. */
 :is(.gmf-manager-window, .gmf-map-window, .gmf-crud-dialog) {
   --gmf-frame-image: url("../assets/frames/galaxy-frame-cyan.svg");
   --gmf-frame-size: 18px;
   box-sizing: border-box;
   border: var(--gmf-frame-size) solid transparent !important;
   border-image-source: var(--gmf-frame-image) !important;
-  /* Do not paint the SVG's center tile: it would cover map-specific custom
-     backgrounds. Window content supplies its own themed surface. */
-  /* The SVG's opaque frame ends at 48px. Slicing there preserves the small
-     yellow and magenta corner details instead of shrinking them with 72px tiles. */
+  /* No "fill": the centre tile would cover custom map backgrounds. The frame art
+     ends at 48px, so slicing there keeps the small corner details intact. */
   border-image-slice: 48 !important;
   border-image-width: var(--gmf-frame-size) !important;
   border-image-repeat: stretch !important;

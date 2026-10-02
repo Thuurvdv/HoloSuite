@@ -921,7 +921,7 @@
   inset: max(1px, calc(var(--gmf-system-size, 28px) * 0.05));
 }
 
-/* Standardized external SVG artwork. Every source layer uses currentColor. */
+/* Marker SVG layers all use currentColor, so the palette is set here. */
 .gmf-galaxy .gmf-art { color: var(--gmf-celestial-color); }
 .gmf-galaxy .gmf-art--back { color: color-mix(in srgb, var(--gmf-celestial-color) 12%, #091018); }
 .gmf-galaxy .gmf-art--base { color: color-mix(in srgb, var(--gmf-celestial-color) 26%, #162431); }
@@ -1505,12 +1505,16 @@
   place-items: center;
   width: 26px;
   height: 26px;
-  /* Font Awesome's rocket points up-right by default; compensate so its nose
-     follows the route instead of travelling with a diagonal visual offset. */
-  transform: translate(-50%, -50%) rotate(calc(var(--gmf-ship-angle, 0deg) + 45deg));
+  /* Rotate the carrier along the route so its exhaust stays directly behind
+     the ship. The Font Awesome artwork correction belongs on the icon only. */
+  transform: translate(-50%, -50%) rotate(var(--gmf-ship-angle, 0deg));
   color: #f8feff;
   text-shadow: 0 0 8px rgba(88, 216, 255, 0.95);
   transition: left 1.85s cubic-bezier(0.2, 0.8, 0.2, 1), top 1.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gmf-travel-ship > i {
+  transform: rotate(45deg);
 }
 
 .gmf-travel-ship::before {

@@ -126,9 +126,11 @@ test("idle routes stay still while active routes animate and reduced motion cove
   assert.match(effectsCss, /prefers-reduced-motion[\s\S]*gmf-art-spin--slow/);
 });
 
-test("the travel rocket compensates for its artwork angle and faces along its route", () => {
+test("the travel rocket faces along its route without rotating its exhaust off-axis", () => {
   const viewCss = read("styles/galaxy-map-view.css");
-  assert.match(viewCss, /gmf-travel-ship[\s\S]*rotate\(calc\(var\(--gmf-ship-angle, 0deg\) \+ 45deg\)\)/);
+  assert.match(viewCss, /\.gmf-travel-ship\s*\{[\s\S]*rotate\(var\(--gmf-ship-angle, 0deg\)\)/);
+  assert.match(viewCss, /\.gmf-travel-ship\s*>\s*i\s*\{[\s\S]*rotate\(45deg\)/);
+  assert.match(viewCss, /\.gmf-travel-ship::before\s*\{[\s\S]*right:\s*16px/);
 });
 
 test("default planet markers and type-derived marker fallbacks remain presentation-only", () => {

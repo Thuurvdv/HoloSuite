@@ -2,7 +2,7 @@
 
 Galaxy Map turns a Foundry world into a navigable star chart. Build a galaxy, open individual systems, place planets and stations, connect destinations with routes, and reveal the map as the campaign grows. GMs work directly in the viewport, while players see only what their crew has discovered.
 
-![Galaxy Map Manager](../images/Galaxy%20Map%20Manager.png)
+![Galaxy Map Manager](https://raw.githubusercontent.com/Thuurvdv/MageTowerFoundryModules/main/images/Galaxy%20Map%20Manager.png)
 
 ## Installation
 

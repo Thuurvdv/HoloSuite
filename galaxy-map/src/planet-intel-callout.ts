@@ -117,7 +117,7 @@ export function createPlanetIntelCallout({ root, stage, resolveItems, onOpen }: 
     try {
       resolved = await resolveItems(node.dataset.systemId ?? "");
     } catch {
-      // Optional integrations must fail closed without disturbing map interaction.
+      // Bounty Board is optional. If its API throws, show nothing and keep the map usable.
     }
     if (currentRequest !== request || activeNode !== node) return;
     if (!resolved.length) return hide();

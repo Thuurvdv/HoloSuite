@@ -1,6 +1,5 @@
-declare const document: any;
-
-const FRAME_SOURCE = "/modules/galaxy-map/assets/frames/galaxy-frame-cyan.svg";
+// Relative so it still resolves when the server runs under a route prefix.
+const FRAME_SOURCE = "modules/galaxy-map/assets/frames/galaxy-frame-cyan.svg";
 let frameSourceRequest: Promise<string> | null = null;
 const themedFrameUrls = new Map<string, string>();
 let frameThemeObserver: MutationObserver | null = null;
@@ -61,10 +60,10 @@ async function applyGalaxyFramePalette(frame: HTMLElement) {
 }
 
 function observeGalaxyFrameTheme() {
-  if (frameThemeObserver || typeof MutationObserver === "undefined") return;
+  if (frameThemeObserver) return;
   frameThemeObserver = new MutationObserver(() => {
-    document.querySelectorAll(".gmf-manager-window, .gmf-map-window, .gmf-crud-dialog")
-      .forEach((frame: HTMLElement) => void applyGalaxyFramePalette(frame));
+    document.querySelectorAll<HTMLElement>(".gmf-manager-window, .gmf-map-window, .gmf-crud-dialog")
+      .forEach(frame => void applyGalaxyFramePalette(frame));
   });
   const settings = { attributes: true, attributeFilter: ["data-holosuite-theme", "data-holosuite-device-style"] };
   frameThemeObserver.observe(document.documentElement, settings);
@@ -91,10 +90,10 @@ export function activateGalaxyWindowChrome(app: any, value: any) {
     observeGalaxyFrameTheme();
     void applyGalaxyFramePalette(frame);
   }
-  const dragHandles = Array.from(root?.querySelectorAll?.("[data-gmf-window-drag]") ?? []) as HTMLElement[];
+  const dragHandles = Array.from(root?.querySelectorAll<HTMLElement>("[data-gmf-window-drag]") ?? []);
   if (!root || !frame || !dragHandles.length) return;
 
-  root.querySelectorAll?.("[data-action='close-window']").forEach((button: HTMLElement) => {
+  root.querySelectorAll<HTMLElement>("[data-action='close-window']").forEach(button => {
     if (button.dataset.gmfCloseBound === "true") return;
     button.dataset.gmfCloseBound = "true";
     button.addEventListener("click", () => app.close?.());
@@ -104,34 +103,35 @@ export function activateGalaxyWindowChrome(app: any, value: any) {
     if (dragHandle.dataset.gmfDragBound === "true") continue;
     dragHandle.dataset.gmfDragBound = "true";
     dragHandle.addEventListener("pointerdown", (event: PointerEvent) => {
-    if (event.button !== 0) return;
-    const target = event.target as Element | null;
-    if (target?.closest?.("button, input, select, textarea, a, [data-action]")) return;
-    const bounds = frame.getBoundingClientRect();
-    const startX = event.clientX;
-    const startY = event.clientY;
-    const startLeft = bounds.left;
-    const startTop = bounds.top;
-    app.bringToTop?.();
-    dragHandle.setPointerCapture?.(event.pointerId);
-    dragHandle.classList.add("is-dragging");
+      if (event.button !== 0) return;
+      const target = event.target as Element | null;
+      if (target?.closest?.("button, input, select, textarea, a, [data-action]")) return;
+      const bounds = frame.getBoundingClientRect();
+      const startX = event.clientX;
+      const startY = event.clientY;
+      const startLeft = bounds.left;
+      const startTop = bounds.top;
+      // ApplicationV2 windows use bringToFront; v1 dialogs use bringToTop.
+      (app.bringToFront ?? app.bringToTop)?.call(app);
+      dragHandle.setPointerCapture?.(event.pointerId);
+      dragHandle.classList.add("is-dragging");
 
-    const move = (moveEvent: PointerEvent) => {
-      const width = frame.getBoundingClientRect().width;
-      const height = frame.getBoundingClientRect().height;
-      const left = Math.max(0, Math.min(window.innerWidth - Math.min(width, 80), startLeft + moveEvent.clientX - startX));
-      const top = Math.max(0, Math.min(window.innerHeight - Math.min(height, 48), startTop + moveEvent.clientY - startY));
-      app.setPosition?.({ left, top });
-    };
-    const finish = () => {
-      dragHandle.classList.remove("is-dragging");
-      dragHandle.removeEventListener("pointermove", move);
-      dragHandle.removeEventListener("pointerup", finish);
-      dragHandle.removeEventListener("pointercancel", finish);
-    };
-    dragHandle.addEventListener("pointermove", move);
-    dragHandle.addEventListener("pointerup", finish);
-    dragHandle.addEventListener("pointercancel", finish);
+      const move = (moveEvent: PointerEvent) => {
+        const width = frame.getBoundingClientRect().width;
+        const height = frame.getBoundingClientRect().height;
+        const left = Math.max(0, Math.min(window.innerWidth - Math.min(width, 80), startLeft + moveEvent.clientX - startX));
+        const top = Math.max(0, Math.min(window.innerHeight - Math.min(height, 48), startTop + moveEvent.clientY - startY));
+        app.setPosition?.({ left, top });
+      };
+      const finish = () => {
+        dragHandle.classList.remove("is-dragging");
+        dragHandle.removeEventListener("pointermove", move);
+        dragHandle.removeEventListener("pointerup", finish);
+        dragHandle.removeEventListener("pointercancel", finish);
+      };
+      dragHandle.addEventListener("pointermove", move);
+      dragHandle.addEventListener("pointerup", finish);
+      dragHandle.addEventListener("pointercancel", finish);
     });
   }
 }

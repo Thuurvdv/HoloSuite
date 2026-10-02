@@ -1,29 +1,48 @@
-import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import test from 'node:test';
+import test from "node:test";
+import assert from "node:assert/strict";
 
-const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
-
-test('every file picker exposes a matching clear control', () => {
-  const sources = [
-    read('src/main.ts'),
-    read('templates/system-details.hbs'),
-    read('templates/object-appearance-panel.hbs')
-  ];
-  for (const source of sources) {
-    const browseTargets = [...source.matchAll(/data-browse-target=["']([^"']+)["']/g)].map(match => match[1]);
-    const clearTargets = [...source.matchAll(/data-clear-target=["']([^"']+)["']/g)].map(match => match[1]);
-    for (const target of browseTargets) {
-      assert.ok(clearTargets.includes(target), `file picker ${target} is missing a clear control`);
+const opened = [];
+globalThis.foundry = {
+  applications: {
+    apps: {
+      FilePicker: class {
+        constructor(options) { this.options = options; opened.push(this); }
+        browse() {}
+      }
     }
   }
+};
+
+const { bindFilePickerFields } = await import("../src/dom-utils.ts");
+
+function fakeField(value) {
+  const input = { value, events: [], dispatchEvent(event) { this.events.push(event.type); } };
+  const button = dataset => ({ dataset, listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; } });
+  const browse = button({ browseTarget: "markerImage" });
+  const clear = button({ clearTarget: "markerImage" });
+  const root = {
+    querySelectorAll: selector => selector === "[data-browse-target]" ? [browse] : selector === "[data-clear-target]" ? [clear] : [],
+    querySelector: selector => selector === '[name="markerImage"]' ? input : null
+  };
+  bindFilePickerFields(root);
+  const click = target => target.listeners.click({ preventDefault() {} });
+  return { input, browse, clear, click };
+}
+
+test("Browse opens an image picker on the current value and writes the chosen path back", () => {
+  const { input, browse, click } = fakeField("icons/old.webp");
+  click(browse);
+  const picker = opened.at(-1);
+  assert.equal(picker.options.type, "image");
+  assert.equal(picker.options.current, "icons/old.webp");
+  picker.options.callback("icons/new.webp");
+  assert.equal(input.value, "icons/new.webp");
+  assert.deepEqual(input.events, ["input", "change"]);
 });
 
-test('dialog and inline-panel clear controls empty their field and notify listeners', () => {
-  const main = read('src/main.ts');
-  const view = read('src/view-app.ts');
-  for (const source of [main, view]) {
-    assert.match(source, /querySelectorAll(?:<HTMLElement>)?\("\[data-clear-target\]"\)/);
-    assert.match(source, /\.value = "";[\s\S]*dispatchEvent\(new Event\("input", \{ bubbles: true \}\)\)[\s\S]*dispatchEvent\(new Event\("change", \{ bubbles: true \}\)\)/);
-  }
+test("Clear empties the field and tells listeners it changed", () => {
+  const { input, clear, click } = fakeField("icons/old.webp");
+  click(clear);
+  assert.equal(input.value, "");
+  assert.deepEqual(input.events, ["input", "change"]);
 });

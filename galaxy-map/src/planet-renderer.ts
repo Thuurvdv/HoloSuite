@@ -325,7 +325,7 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
         texture?.dispose();
         texture = null;
         host.dataset.planetReady = "true";
-        options.onStatus?.(`${finish.replace("-", " ")} finish · Drag to rotate ${shape} · Scroll to zoom`);
+        options.onStatus?.(`Drag to rotate the ${shape}, scroll to zoom.`);
         draw(); schedule();
         return;
       }
@@ -356,7 +356,7 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
         const recommendedSize = shape === "cube" ? "2048×1536" : shape === "cylinder" ? "2048×2048" : "2048×1024";
         options.onStatus?.(Math.abs(ratio - expectedRatio) > 0.1
           ? `Surface loaded. ${recommendedSize} gives the best fit for this shape.`
-          : `${finish.replace("-", " ")} finish · Drag to rotate ${shape} · Scroll to zoom`);
+          : `Drag to rotate the ${shape}, scroll to zoom.`);
         host.dataset.planetReady = "true";
         draw(); schedule();
       } catch {

@@ -1,4 +1,5 @@
-// @ts-nocheck
+declare const foundry: any;
+
 export function slugify(value: unknown): string {
   return String(value || "galaxy-map")
     .toLowerCase()
@@ -8,7 +9,7 @@ export function slugify(value: unknown): string {
 
 export function downloadJson(filename: string, data: unknown): void {
   const json = JSON.stringify(data, null, 2);
-  const saveFile = globalThis.saveDataToFile;
+  const saveFile = (globalThis as any).saveDataToFile;
   if (typeof saveFile === "function") {
     saveFile(json, "application/json", filename);
     return;
@@ -22,7 +23,7 @@ export function downloadJson(filename: string, data: unknown): void {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  globalThis.setTimeout(() => URL.revokeObjectURL(url), 0);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export function escapeHtml(value: unknown): string {
@@ -31,28 +32,43 @@ export function escapeHtml(value: unknown): string {
   return div.innerHTML;
 }
 
-export function optionList(options: Array<string | { value: string; label: string }>, selected: unknown): string {
-  return options.map((option) => {
-    const value = typeof option === "string" ? option : option.value;
-    const label = typeof option === "string"
-      ? option.split(/[-_]/).map((word) => word.toLowerCase() === "gm" ? "GM" : `${word.charAt(0).toUpperCase()}${word.slice(1)}`).join(" ")
-      : option.label;
-    return `<option value="${escapeHtml(value)}" ${value === selected ? "selected" : ""}>${escapeHtml(label)}</option>`;
-  }).join("");
-}
-
+/** Dialog render hooks hand over jQuery on v12; everything else passes the element. */
 export function getHtmlElement(html: any): any {
   return html?.[0] ?? html ?? null;
 }
 
-export function getFormValues(html: any): any {
-  const element = getHtmlElement(html);
-  const form = element?.matches?.("form") ? element : element?.querySelector("form");
-  const values: Record<string, any> = {};
-  for (const [name, value] of new FormData(form).entries()) {
-    if (values[name] === undefined) values[name] = value;
-    else if (Array.isArray(values[name])) values[name].push(value);
-    else values[name] = [values[name], value];
-  }
-  return values;
+function notifyChanged(input: HTMLInputElement) {
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+/** Wires every Browse and Clear button under `root` to the input named in its data attribute. */
+export function bindFilePickerFields(root: ParentNode) {
+  const findInput = (name?: string) => (name ? root.querySelector<HTMLInputElement>(`[name="${name}"]`) : null);
+  root.querySelectorAll<HTMLElement>("[data-browse-target]").forEach(button => {
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      const input = findInput(button.dataset.browseTarget);
+      if (!input) return;
+      // v13 moved FilePicker into a namespace; v12 only has the global.
+      const FilePickerClass = foundry.applications?.apps?.FilePicker ?? (globalThis as any).FilePicker;
+      new FilePickerClass({
+        type: "image",
+        current: input.value,
+        callback: (path: string) => {
+          input.value = path;
+          notifyChanged(input);
+        }
+      }).browse();
+    });
+  });
+  root.querySelectorAll<HTMLElement>("[data-clear-target]").forEach(button => {
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      const input = findInput(button.dataset.clearTarget);
+      if (!input) return;
+      input.value = "";
+      notifyChanged(input);
+    });
+  });
 }

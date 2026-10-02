@@ -105,10 +105,9 @@ body[data-holosuite-theme="violet"] {
   --hs-glow-green: 0 0 16px rgba(125, 255, 196, 0.2);
 }
 
-/* ── Window root styles ─────────────────────────────────────────────────────
+/* Window root styles
    All module window/app classes share this single selector block.
-   CSS nesting is used to avoid repeating the list for every sub-rule.
-   ─────────────────────────────────────────────────────────────────────────── */
+   CSS nesting is used to avoid repeating the list for every sub-rule. */
 :where(
   .bounty-board-window,
   .bounty-editor-window,
@@ -236,10 +235,9 @@ body[data-holosuite-theme="violet"] {
   }
 }
 
-/* ── Button base styles ─────────────────────────────────────────────────────
+/* Button base styles
    Note: these use the inner "shell" class names (not the outer window names)
-   so that button styling applies wherever the shell component is rendered.
-   ─────────────────────────────────────────────────────────────────────────── */
+   so that button styling applies wherever the shell component is rendered. */
 :where(
   .bounty-board-window,
   .bounty-editor-window,
@@ -316,7 +314,7 @@ body[data-holosuite-theme="violet"] {
   opacity: var(--hs-disabled-opacity);
 }
 
-/* ── Form field base styles ─────────────────────────────────────────────────── */
+/* Form field base styles */
 :where(
   .bounty-board-window,
   .bounty-editor-window,
@@ -355,7 +353,7 @@ body[data-holosuite-theme="violet"] {
   outline: none;
 }
 
-/* ── Kicker label styles ─────────────────────────────────────────────────────── */
+/* Kicker label styles */
 :where(
   .bounty-board-window,
   .bounty-editor-window,
@@ -376,7 +374,7 @@ body[data-holosuite-theme="violet"] {
   text-transform: uppercase;
 }
 
-/* ── Card and panel styles ─────────────────────────────────────────────────── */
+/* Card and panel styles */
 :where(
   .bb-card,
   .bb-chat-card,

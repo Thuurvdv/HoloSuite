@@ -21,7 +21,7 @@ function getBountyBoardApi() {
   }
 }
 
-/** Resolve optional bounty intel through the canonical System -> Scene relationship. */
+/** Bounties are found through the scenes linked to a system's entities. */
 export function getBountyIntelForSystem(system: any): BountyIntel[] {
   const api = getBountyBoardApi();
   if (!api || !Array.isArray(system?.sceneIds)) return [];
