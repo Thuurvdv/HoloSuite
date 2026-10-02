@@ -7,7 +7,14 @@ export function slugify(value: unknown): string {
 }
 
 export function downloadJson(filename: string, data: unknown): void {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const json = JSON.stringify(data, null, 2);
+  const saveFile = globalThis.saveDataToFile;
+  if (typeof saveFile === "function") {
+    saveFile(json, "application/json", filename);
+    return;
+  }
+
+  const blob = new Blob([json], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -15,7 +22,7 @@ export function downloadJson(filename: string, data: unknown): void {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  globalThis.setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export function escapeHtml(value: unknown): string {

@@ -1,9 +1,8 @@
-import { normalizePlanetFinish, normalizePlanetPreset, normalizePlanetShape } from "./planet-presets.ts";
+import { normalizePlanetFinish, normalizePlanetPreset, normalizePlanetPresetForShape, normalizePlanetShape } from "./planet-presets.ts";
 import { normalizeTravelApprovalMode } from "./travel-approval.ts";
 
 export const GALAXY_SCHEMA_VERSION = 3;
 export const SYSTEM_TYPES = ["core", "colony", "frontier", "ruins", "restricted", "unknown"];
-export const LEGACY_SYSTEM_TYPES = [...SYSTEM_TYPES, "station", "anomaly"];
 export const OBJECT_KINDS = ["star", "planet", "moon", "station", "asteroid", "anomaly", "black-hole", "other"];
 export const SYSTEM_STATUSES = ["undiscovered", "known", "visited", "danger", "locked"];
 export const ROUTE_TYPES = ["safe", "dangerous", "restricted", "smuggler", "unknown"];
@@ -18,9 +17,9 @@ export const ICON_STYLE_OPTIONS = [
   { value: "diamond", label: "Diamond" }, { value: "void", label: "Void" }
 ];
 export const ICON_STYLES = ICON_STYLE_OPTIONS.map((option) => option.value);
-export const ANIMATED_CELESTIAL_STYLES = ["planet", "terrestrial", "gas-giant", "ice-world", "volcanic", "artificial", "ringed", "star", "black-hole", "station"];
-export const MIN_ZOOM = 1;
-export const MAX_ZOOM = 2;
+export const ANIMATED_CELESTIAL_STYLES = ["planet", "terrestrial", "gas-giant", "ice-world", "volcanic", "artificial", "ringed", "star", "black-hole", "station", "diamond", "void"];
+export const MIN_ZOOM = 0.2;
+export const MAX_ZOOM = 10;
 export const TRAVEL_ANIMATION_MS = 2400;
 export const TRAVEL_REQUEST_TIMEOUT_MS = 60_000;
 
@@ -75,8 +74,10 @@ function inferObjectKind(value: any = {}) {
 export function normalizeSystemObject(object: any = {}) {
   const sceneIds = normalizeIdList(object.sceneIds === undefined ? object.sceneId : object.sceneIds);
   const planetTexture = String(object.planetTexture || "").trim();
+  const planetShape = normalizePlanetShape(object.planetShape);
   const requestedPlanetPreset = normalizePlanetPreset(object.planetPreset);
-  const planetPreset = planetTexture && !["none", "color"].includes(requestedPlanetPreset) ? "custom" : requestedPlanetPreset;
+  const compatiblePlanetPreset = normalizePlanetPresetForShape(requestedPlanetPreset, planetShape);
+  const planetPreset = planetTexture && !["none", "color"].includes(compatiblePlanetPreset) ? "custom" : compatiblePlanetPreset;
   const kind = inferObjectKind(object);
   const normalized: any = {
     id: String(object.id || randomId("object")), name: String(object.name || "Unnamed Object"), kind,
@@ -85,12 +86,12 @@ export function normalizeSystemObject(object: any = {}) {
     visibility: normalizeObjectVisibility(object.visibility), factionId: String(object.factionId || ""),
     description: String(object.description || ""), image: String(object.image || ""), sceneIds,
     planetLocations: normalizePlanetLocations(object.planetLocations).filter(location => sceneIds.includes(location.sceneId)),
-    journalId: String(object.journalId || ""), notes: String(object.notes || ""),
+    journalId: String(object.journalId || ""), notes: String(object.notes || "").trim(),
     iconColor: normalizeOptionalColor(object.iconColor), iconSize: clamp(normalizeNumber(object.iconSize, 28), 18, 56),
+    markerImage: String(object.markerImage || "").trim(),
     iconStyle: ICON_STYLES.includes(object.iconStyle) ? object.iconStyle : kind === "star" ? "star" : kind === "station" ? "station" : "planet",
-    pulse: object.pulse === false ? false : true, planetPreset, planetShape: normalizePlanetShape(object.planetShape),
+    pulse: object.pulse === false ? false : true, planetPreset, planetShape,
     planetFinish: normalizePlanetFinish(object.planetFinish),
-    planetDetailStrength: clamp(normalizeNumber(object.planetDetailStrength, 45), 0, 100),
     planetTexture, planetColor: normalizeOptionalColor(object.planetColor) || "#58d8ff"
   };
   return normalized;
@@ -110,15 +111,17 @@ export function normalizeSystem(system: any = {}) {
     x: clamp(normalizeNumber(system.x, 50), 0, 100), y: clamp(normalizeNumber(system.y, 50), 0, 100),
     type: SYSTEM_TYPES.includes(system.type) ? system.type : "unknown", factionId: String(system.factionId || ""),
     status: SYSTEM_STATUSES.includes(system.status) ? system.status : "known", description: String(system.description || ""),
-    visibility: normalizeVisibility(system.visibility, "players"), notes: String(system.notes || ""),
+    visibility: normalizeVisibility(system.visibility, "players"), notes: String(system.notes || "").trim(),
+    backgroundImage: String(system.backgroundImage || "").trim(),
     iconColor: normalizeOptionalColor(system.iconColor), iconSize: clamp(normalizeNumber(system.iconSize, 30), 18, 56),
+    markerImage: String(system.markerImage || "").trim(),
     iconStyle: ICON_STYLES.includes(system.iconStyle) ? system.iconStyle : "star", pulse: system.pulse === false ? false : true,
     primaryObjectId, objects, routes
   };
   for (const [key, value] of Object.entries({
     image: primary.image, sceneIds: [...primary.sceneIds], planetLocations: [...primary.planetLocations], journalId: primary.journalId,
     planetPreset: primary.planetPreset, planetShape: primary.planetShape,
-    planetFinish: primary.planetFinish, planetDetailStrength: primary.planetDetailStrength,
+    planetFinish: primary.planetFinish,
     planetTexture: primary.planetTexture, planetColor: primary.planetColor
   })) Object.defineProperty(normalized, key, { value, enumerable: false, configurable: true });
   return normalized;
@@ -254,8 +257,4 @@ export function normalizeMap(input: any = {}) {
   };
 }
 
-export function getSystemObject(system: any, objectId = "") {
-  if (!system) return null;
-  return system.objects?.find((object: any) => object.id === objectId) ?? system.objects?.find((object: any) => object.id === system.primaryObjectId) ?? system.objects?.[0] ?? null;
-}
 export function getEffectiveObjectVisibility(system: any, object: any) { return object?.visibility === "inherit" ? system?.visibility ?? "gm" : object?.visibility ?? "gm"; }

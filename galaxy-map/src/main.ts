@@ -11,6 +11,7 @@ import {
   TRAVEL_REQUEST_TIMEOUT_MS,
   VISIBILITIES,
   clamp,
+  getEffectiveObjectVisibility,
   normalizeFaction,
   normalizeMap,
   normalizeNumber,
@@ -23,10 +24,11 @@ import {
 } from "./galaxy-model";
 import { createGalaxyMapManagerClass } from "./manager-app";
 import { createGalaxyMapViewClass } from "./view-app";
-import { getPlanetAppearance, PLANET_FINISH_OPTIONS, PLANET_OPTIONS, PLANET_SHAPE_OPTIONS } from "./planet-presets";
+import { createPlayerMapChooserClass } from "./player-map-chooser-app";
+import { getPlanetAppearance, getPlanetOptionsForShape, normalizePlanetPresetForShape, PLANET_FINISH_OPTIONS, PLANET_SHAPE_OPTIONS } from "./planet-presets";
 import { evaluateTravelApproval, getTravelElectorate, TRAVEL_APPROVAL_OPTIONS } from "./travel-approval";
 import { MODULE_ID, SETTING_MAPS, SETTING_SCHEMA_V1_BACKUP, SETTING_SURFACE_LOCATION_RECOVERY, SOCKET_NAME, TEMPLATE_ROOT } from "./constants";
-import { downloadJson, escapeHtml, getFormValues, getHtmlElement, optionList, slugify } from "./dom-utils";
+import { downloadJson, escapeHtml, getHtmlElement, optionList, slugify } from "./dom-utils";
 import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chrome";
 
 (() => {
@@ -35,6 +37,7 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
   let managerApp = null;
   const openMaps = new Map();
   let playerMapApp = null;
+  let playerMapChooserApp = null;
   const pendingTravelRequests = new Map();
   const promptedTravelRequests = new Set();
   const travelRequestPrompts = new Map();
@@ -163,31 +166,35 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
         }).browse();
       });
     });
-    const editorTabs = Array.from(root?.querySelectorAll("[data-system-editor-tab]") ?? []);
-    const editorPanels = Array.from(root?.querySelectorAll("[data-system-editor-panel]") ?? []);
-    const selectEditorTab = (tabId: string, focus = false) => {
-      closeDocumentPicker();
-      editorTabs.forEach((tab: HTMLElement) => {
-        const active = tab.dataset.systemEditorTab === tabId;
-        tab.classList.toggle("is-active", active);
-        tab.setAttribute("aria-selected", String(active));
-        tab.tabIndex = active ? 0 : -1;
-        if (active && focus) tab.focus();
-      });
-      editorPanels.forEach((panel: HTMLElement) => { panel.hidden = panel.dataset.systemEditorPanel !== tabId; });
-    };
-    editorTabs.forEach((tab: HTMLElement, index) => {
-      tab.addEventListener("click", () => selectEditorTab(tab.dataset.systemEditorTab ?? "overview"));
-      tab.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    root?.querySelectorAll("[data-clear-target]").forEach((button) => {
+      button.addEventListener("click", (event) => {
         event.preventDefault();
-        const direction = event.key === 'ArrowRight' ? 1 : -1;
-        const next = editorTabs[(index + direction + editorTabs.length) % editorTabs.length] as HTMLElement;
-        selectEditorTab(next.dataset.systemEditorTab ?? "overview", true);
+        const target = root.querySelector(`[name="${button.dataset.clearTarget}"]`);
+        if (!target) return;
+        target.value = "";
+        target.dispatchEvent(new Event("input", { bubbles: true }));
+        target.dispatchEvent(new Event("change", { bubbles: true }));
       });
     });
-    if (editorTabs.length) selectEditorTab("overview");
-
+    root?.querySelectorAll("[data-use-custom-marker]").forEach((toggle: HTMLInputElement) => {
+      const scope = toggle.closest("form") ?? root;
+      const field: HTMLElement | null = scope?.querySelector("[data-custom-marker-field]") ?? null;
+      const input: HTMLInputElement | null = field?.querySelector('[name="markerImage"]') ?? null;
+      const buttons = field?.querySelectorAll<HTMLButtonElement>("button") ?? [];
+      const sync = () => {
+        const enabled = toggle.checked;
+        field?.classList.toggle("is-disabled", !enabled);
+        if (input) input.disabled = !enabled;
+        buttons.forEach(button => { button.disabled = !enabled; });
+        if (!enabled && input?.value) {
+          input.value = "";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      };
+      toggle.addEventListener("change", sync);
+      sync();
+    });
     root?.querySelectorAll("[data-marker-preview]").forEach((preview: HTMLElement) => {
       const form = preview.closest("form");
       const styleInput: HTMLSelectElement | null = form?.querySelector('[name="iconStyle"]') ?? null;
@@ -196,6 +203,7 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       const colorInput: HTMLInputElement | null = form?.querySelector('[name="iconColor"]') ?? null;
       const sizeInput: HTMLInputElement | null = form?.querySelector('[name="iconSize"]') ?? null;
       const pulseInput: HTMLInputElement | null = form?.querySelector('[name="pulse"]') ?? null;
+      const markerImageInput: HTMLInputElement | null = form?.querySelector('[name="markerImage"]') ?? null;
       const nameInput: HTMLInputElement | null = form?.querySelector('[name="name"]') ?? null;
       const marker: HTMLElement | null = preview.querySelector("[data-marker-preview-system]");
       const icon = preview.querySelector("[data-marker-preview-icon]");
@@ -206,19 +214,27 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
         const type = typeInput?.value ?? "unknown";
         const status = statusInput?.value ?? "known";
         const iconStyle = getDisplayIconStyle(type, styleInput?.value ?? "planet");
-        marker.className = `gmf-system gmf-system--${type} gmf-icon--${iconStyle} gmf-status--${status}${pulseInput?.checked ? " is-marker-preview-pulsing" : " gmf-no-pulse"}`;
+        const markerImage = markerImageInput?.value.trim() ?? "";
+        marker.className = `gmf-system gmf-system--${type} gmf-icon--${iconStyle} gmf-status--${status}${markerImage ? " has-custom-marker" : ""}${pulseInput?.checked ? " is-marker-preview-pulsing" : " gmf-no-pulse"}`;
         marker.style.setProperty("--gmf-faction-color", colorInput?.value || "#58d8ff");
         marker.style.setProperty("--gmf-system-size", `${sizeInput?.value || 28}px`);
         if (label) label.textContent = nameInput?.value.trim() || "New System";
         const sequence = ++renderSequence;
-        if (ANIMATED_CELESTIAL_STYLES.includes(iconStyle)) {
+        if (markerImage) {
+          const image = document.createElement("img");
+          image.className = "gmf-custom-marker__image";
+          image.src = markerImage;
+          image.alt = "";
+          image.draggable = false;
+          icon.replaceChildren(image);
+        } else if (ANIMATED_CELESTIAL_STYLES.includes(iconStyle)) {
           const markup = await renderTemplate(`${TEMPLATE_ROOT}/celestial-icon.hbs`, { system: { iconStyle } });
           if (sequence === renderSequence) icon.innerHTML = markup;
         } else {
           icon.innerHTML = '<span class="gmf-system__core"></span>';
         }
       };
-      for (const control of [styleInput, typeInput, statusInput, colorInput, sizeInput, pulseInput, nameInput]) {
+      for (const control of [styleInput, typeInput, statusInput, colorInput, sizeInput, pulseInput, markerImageInput, nameInput]) {
         control?.addEventListener("input", updateMarkerPreview);
         control?.addEventListener("change", updateMarkerPreview);
       }
@@ -263,7 +279,7 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
           results.append(message);
         } else if (matches.length > 50) {
           const message = window.document.createElement("p");
-          message.textContent = `${matches.length - 50} more results — refine your search.`;
+          message.textContent = `${matches.length - 50} more results. Refine your search.`;
           results.append(message);
         }
       };
@@ -344,19 +360,33 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     });
     const texturePanel = root?.querySelector("[data-texture-upload-fields]");
     const textureInput = root?.querySelector('[name="planetTexture"]');
-    const colorPanel = root?.querySelector("[data-color-appearance-fields]");
-    const textureStatus = root?.querySelector("[data-texture-upload-status]");
-    const appearanceInput = root?.querySelector('[name="planetPreset"]');
-    const shapeInput = root?.querySelector('[name="planetShape"]');
-    const surfaceStrengthInput = root?.querySelector('[name="planetDetailStrength"]');
-    const surfaceStrengthOutput = root?.querySelector("[data-surface-strength-output]");
+    const appearanceInput = root?.querySelector<HTMLSelectElement>('[name="planetPreset"]');
+    const shapeInput = root?.querySelector<HTMLSelectElement>('[name="planetShape"]');
+    const finishInput = root?.querySelector('[name="planetFinish"]');
+    const colorInput = root?.querySelector('[name="planetColor"]');
     const textureGuide = root?.querySelector("[data-texture-guide]");
+    const textureGuideSection = root?.querySelector("[data-texture-guide-section]");
     const texturePreviews = root?.querySelectorAll("[data-texture-guide-preview]") ?? [];
+    const updateAppearanceOptions = () => {
+      if (!appearanceInput || !shapeInput) return;
+      const selected = normalizePlanetPresetForShape(appearanceInput.value, shapeInput.value);
+      appearanceInput.replaceChildren(...getPlanetOptionsForShape(shapeInput.value).map(option => {
+        const element = document.createElement("option");
+        element.value = option.value;
+        element.textContent = option.label;
+        return element;
+      }));
+      appearanceInput.value = selected;
+    };
     const updateCustomTextureState = () => {
       const custom = appearanceInput?.value === "custom";
+      const noDetail = appearanceInput?.value === "none";
       if (texturePanel) texturePanel.hidden = !custom;
-      if (colorPanel) colorPanel.hidden = appearanceInput?.value !== "color";
+      if (textureGuideSection) textureGuideSection.hidden = !custom;
       if (textureInput) textureInput.required = custom;
+      if (shapeInput) shapeInput.disabled = noDetail;
+      if (finishInput) finishInput.disabled = noDetail;
+      if (colorInput) colorInput.disabled = appearanceInput?.value !== "color";
       return custom;
     };
     const updateTexturePreview = () => {
@@ -364,16 +394,13 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       const path = textureInput?.value?.trim();
       if (path) {
         textureGuide.dataset.hasTexture = "true";
-        if (textureStatus) textureStatus.textContent = "Loading custom texture preview…";
         texturePreviews.forEach((preview: HTMLImageElement) => {
           preview.hidden = false;
           preview.onload = () => {
             if (textureInput?.value?.trim() !== path) return;
-            if (textureStatus) textureStatus.textContent = "Custom texture selected · visible beneath the guide";
           };
           preview.onerror = () => {
             preview.hidden = true;
-            if (textureInput?.value?.trim() === path && textureStatus) textureStatus.textContent = "Custom texture selected, but its preview could not be loaded";
           };
           preview.src = path;
         });
@@ -388,9 +415,6 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       }
     };
     const updateTextureStatus = () => {
-      if (textureStatus) textureStatus.textContent = textureInput?.value?.trim()
-        ? "Loading custom texture preview…"
-        : "Choose an image to preview it beneath the guide";
       updateTexturePreview();
     };
     appearanceInput?.addEventListener("change", () => {
@@ -400,57 +424,16 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
         textureInput.dispatchEvent(new Event("change", { bubbles: true }));
       }
     });
-    root?.querySelector("[data-clear-planet-texture]")?.addEventListener("click", () => {
-      if (!textureInput) return;
-      textureInput.value = "";
-      textureInput.dispatchEvent(new Event("change", { bubbles: true }));
-    });
     textureInput?.addEventListener("change", updateTextureStatus);
     shapeInput?.addEventListener("change", () => {
       if (textureGuide) textureGuide.dataset.shape = shapeInput.value;
+      updateAppearanceOptions();
+      updateCustomTextureState();
     });
-    surfaceStrengthInput?.addEventListener("input", () => {
-      if (surfaceStrengthOutput) surfaceStrengthOutput.value = `${surfaceStrengthInput.value}%`;
-    });
+    updateAppearanceOptions();
     updateCustomTextureState();
     updateTextureStatus();
 
-  }
-
-  function renderCrudDialog({ title, content, submitLabel = "Save", onSubmit, render = activateCrudDialog, width = 700, height = "auto", dialogClass = "" }) {
-    new Dialog({
-      title,
-      content,
-      render,
-      buttons: {
-        cancel: {
-          icon: '<i class="fa-solid fa-xmark"></i>',
-          label: "Cancel"
-        },
-        save: {
-          icon: '<i class="fa-solid fa-floppy-disk"></i>',
-          label: submitLabel,
-          callback: (html) => {
-            const root = getHtmlElement(html);
-            const form = root?.matches?.("form") ? root : root?.querySelector("form");
-            const invalid = form ? Array.from(form.elements).find((control: any) => control.willValidate && !control.checkValidity()) as HTMLElement : null;
-            if (invalid) {
-              const panel: HTMLElement | null = invalid.closest("[data-system-editor-panel]");
-              if (panel?.dataset.systemEditorPanel) root.querySelector(`[data-system-editor-tab="${panel.dataset.systemEditorPanel}"]`)?.click();
-              (invalid as any).reportValidity();
-              invalid.focus();
-              return false;
-            }
-            return onSubmit(getFormValues(html));
-          }
-        }
-      },
-      default: "save"
-    }, {
-      classes: ["galaxy-map", "gmf-crud-dialog", dialogClass].filter(Boolean),
-      width,
-      height
-    }).render(true);
   }
 
   function getRawMap(mapId) {
@@ -491,6 +474,7 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       const displayIconStyle = obscured
         ? "diamond"
         : getDisplayIconStyle(displayType, system.iconStyle);
+      const displayMarkerImage = obscured ? "" : system.markerImage;
       return {
         ...system,
         image: system.image,
@@ -501,6 +485,8 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
         planetTexture: system.planetTexture,
         planetColor: system.planetColor,
         iconStyle: displayIconStyle,
+        displayMarkerImage,
+        hasCustomMarker: Boolean(displayMarkerImage),
         displayName: obscured ? "???" : system.name,
         displayDescription: obscured ? "Unresolved sensor contact. Details are not available." : system.description,
         displayType,
@@ -511,7 +497,7 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
         isCurrent: system.id === normalized.currentSystemId,
         isSelected: system.id === selectedSystemId,
         gmOnly: system.visibility === "gm",
-        animatedCelestial: ANIMATED_CELESTIAL_STYLES.includes(displayIconStyle),
+        animatedCelestial: !displayMarkerImage && ANIMATED_CELESTIAL_STYLES.includes(displayIconStyle),
         hasAlert: ["danger", "locked"].includes(obscured ? "undiscovered" : system.status),
         alertLabel: system.status === "danger" ? "Hazard advisory" : system.status === "locked" ? "Restricted access" : "",
         hasJournal: Boolean(!obscured && system.journalId),
@@ -613,7 +599,8 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       subtitle: metadata.subtitle,
       description: metadata.description,
       backgroundImage: metadata.backgroundImage,
-      visibility: metadata.visibility
+      visibility: metadata.visibility,
+      travelApprovalMode: metadata.travelApprovalMode
     });
   }
 
@@ -658,7 +645,7 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     const existing = map.systems.find((candidate) => candidate.id === systemData.id);
     const objects = systemData.objects ?? existing?.objects ?? [];
     const primaryId = existing?.primaryObjectId || objects[0]?.id;
-    const objectFields = ["image", "sceneIds", "planetLocations", "journalId", "planetPreset", "planetShape", "planetFinish", "planetDetailStrength", "planetTexture", "planetColor"];
+    const objectFields = ["image", "sceneIds", "planetLocations", "journalId", "planetPreset", "planetShape", "planetFinish", "planetTexture", "planetColor"];
     const mergedObjects = objects.map((object) => object.id !== primaryId ? object : normalizeSystemObject({
       ...object,
       ...Object.fromEntries(objectFields.filter((key) => systemData[key] !== undefined).map((key) => [key, systemData[key]]))
@@ -799,40 +786,6 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     return clone(system);
   }
 
-  async function mergeSystems(mapId, sourceSystemId, destinationSystemId) {
-    if (!requireGM("merge star systems")) return null;
-    if (!sourceSystemId || !destinationSystemId || sourceSystemId === destinationSystemId) return null;
-    const maps = getMapStore();
-    if (!maps[mapId]) return null;
-    const map = normalizeMap(maps[mapId]);
-    const source = map.systems.find((system) => system.id === sourceSystemId);
-    const destination = map.systems.find((system) => system.id === destinationSystemId);
-    if (!source || !destination) return null;
-    const existingIds = new Set(destination.objects.map((object) => object.id));
-    destination.objects.push(...source.objects.filter((object) => !existingIds.has(object.id)));
-    if (!destination.primaryObjectId) destination.primaryObjectId = source.primaryObjectId || destination.objects[0]?.id || "";
-    map.systems = map.systems.filter((system) => system.id !== sourceSystemId);
-    const seenRoutes = new Set<string>();
-    map.routes = map.routes.map((route) => ({
-      ...route,
-      fromSystemId: route.fromSystemId === sourceSystemId ? destinationSystemId : route.fromSystemId,
-      toSystemId: route.toSystemId === sourceSystemId ? destinationSystemId : route.toSystemId
-    })).filter((route) => {
-      if (route.fromSystemId === route.toSystemId) return false;
-      const key = [route.fromSystemId, route.toSystemId].sort().join(":");
-      if (seenRoutes.has(key)) return false;
-      seenRoutes.add(key);
-      return true;
-    });
-    if (map.currentLocation.systemId === sourceSystemId) map.currentLocation.systemId = destinationSystemId;
-    map.currentSystemId = map.currentLocation.systemId;
-    maps[mapId] = normalizeMap(map);
-    await saveMapStore(maps);
-    refreshOpenApps(mapId);
-    game.socket.emit(SOCKET_NAME, { action: "refresh", mapId });
-    return clone(destination);
-  }
-
   async function saveObjectPosition(mapId, systemId, objectId, x, y) {
     const maps = getMapStore();
     if (!maps[mapId]) return null;
@@ -913,7 +866,7 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     return clone(object);
   }
 
-  async function upsertRoute(mapId, routeData = {}) {
+  async function upsertRoute(mapId, routeData = {}, systemId = "") {
     if (!requireGM("save routes")) return null;
     const maps = getMapStore();
     const map = maps[mapId];
@@ -921,14 +874,20 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       notifyError(`Map "${mapId}" was not found.`);
       return null;
     }
+    const routeOwner = systemId ? map.systems?.find((system) => system.id === systemId) : map;
+    if (!routeOwner) {
+      notifyError(`System "${systemId}" was not found.`);
+      return null;
+    }
+    if (!Array.isArray(routeOwner.routes)) routeOwner.routes = [];
     const route = normalizeRoute(routeData);
     if (!route.fromSystemId || !route.toSystemId || route.fromSystemId === route.toSystemId) {
       notifyError("Routes require two different systems.");
       return null;
     }
-    const index = map.routes.findIndex((candidate) => candidate.id === route.id);
-    if (index >= 0) map.routes[index] = route;
-    else map.routes.push(route);
+    const index = routeOwner.routes.findIndex((candidate) => candidate.id === route.id);
+    if (index >= 0) routeOwner.routes[index] = route;
+    else routeOwner.routes.push(route);
     maps[mapId] = normalizeMap(map);
     await saveMapStore(maps);
     refreshOpenApps(mapId);
@@ -936,12 +895,14 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     return clone(route);
   }
 
-  async function deleteRoute(mapId, routeId) {
+  async function deleteRoute(mapId, routeId, systemId = "") {
     if (!requireGM("delete routes")) return false;
     const maps = getMapStore();
     const map = maps[mapId];
     if (!map) return false;
-    map.routes = map.routes.filter((route) => route.id !== routeId);
+    const routeOwner = systemId ? map.systems?.find((system) => system.id === systemId) : map;
+    if (!routeOwner) return false;
+    routeOwner.routes = (routeOwner.routes ?? []).filter((route) => route.id !== routeId);
     maps[mapId] = normalizeMap(map);
     await saveMapStore(maps);
     refreshOpenApps(mapId);
@@ -1062,11 +1023,12 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     return clone(system);
   }
 
-  async function revealRouteToPlayers(mapId, routeId) {
+  async function revealRouteToPlayers(mapId, routeId, systemId = "") {
     if (!requireGM("reveal routes")) return null;
     const maps = getMapStore();
     const map = maps[mapId];
-    const route = map?.routes?.find((candidate) => candidate.id === routeId);
+    const routeOwner = systemId ? map?.systems?.find((system) => system.id === systemId) : map;
+    const route = routeOwner?.routes?.find((candidate) => candidate.id === routeId);
     if (!route) {
       notifyError(`Route "${routeId}" was not found.`);
       return null;
@@ -1081,11 +1043,12 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     return clone(route);
   }
 
-  async function hideRouteFromPlayers(mapId, routeId, hidden = true) {
+  async function hideRouteFromPlayers(mapId, routeId, hidden = true, systemId = "") {
     if (!requireGM(hidden ? "hide routes" : "reveal routes")) return null;
     const maps = getMapStore();
     const map = maps[mapId];
-    const route = map?.routes?.find((candidate) => candidate.id === routeId);
+    const routeOwner = systemId ? map?.systems?.find((system) => system.id === systemId) : map;
+    const route = routeOwner?.routes?.find((candidate) => candidate.id === routeId);
     if (!route) {
       notifyError(`Route "${routeId}" was not found.`);
       return null;
@@ -1167,7 +1130,7 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
             <span class="gmf-uv-pole gmf-uv-pole--south">Distorted pole · 15%</span>
             <i class="gmf-uv-seam">wrap seam</i>
           </div>
-          <figcaption><strong>2048×1024 · 2:1</strong> Uses the full 8×4 grid—there are no required circles or fixed crater positions. Left and right join; place recognizable features near the equator and expect organic distortion.</figcaption>
+          <figcaption><strong>2048×1024 · 2:1</strong> Uses the full 8×4 grid. There are no required circles or fixed crater positions. Left and right join; place recognizable features near the equator and expect organic distortion.</figcaption>
         </figure>
         <figure data-guide-shape="donut">
           <div class="gmf-uv-map gmf-uv-map--donut" aria-hidden="true">
@@ -1201,17 +1164,17 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
             <span class="gmf-uv-cap gmf-uv-cap--bottom">Bottom<br>25% × 25%</span>
             <i class="gmf-uv-row-label is-top">25%</i><i class="gmf-uv-row-label is-middle">50%</i><i class="gmf-uv-row-label is-bottom">25%</i>
           </div>
-          <figcaption><strong>2048×2048 · 1:1</strong> The middle 50% (y=25–75%) is the side. Each cap is a 512px circle: top at x=12.5–37.5%, y=0–25%; bottom at x=62.5–87.5%, y=75–100%.</figcaption>
+          <figcaption><strong>2048×2048 · 1:1</strong> The middle 50% is the side. Each cap is a 512px circle.</figcaption>
         </figure>
         <figure data-guide-shape="crystal">
           <div class="gmf-uv-map gmf-uv-map--crystal" aria-hidden="true">
             <img class="gmf-uv-texture-preview" data-texture-guide-preview alt="" draggable="false" hidden />
             <b class="gmf-uv-guide-grid"></b>
-            ${Array.from({ length: 8 }, (_, index) => `<span class="is-face-${index + 1}">Face ${index + 1}</span>`).join("")}
+            ${Array.from({ length: 4 }, (_, index) => `<span class="is-face-${index + 1}">Side ${index + 1}<br>upper</span>`).join("")}
+            ${Array.from({ length: 4 }, (_, index) => `<span class="is-face-${index + 5}">Side ${index + 1}<br>lower</span>`).join("")}
             <i class="gmf-uv-grid-label is-columns">4 columns · 512px each</i>
-            <i class="gmf-uv-grid-label is-rows">NO GAP · center seam y=512</i>
           </div>
-          <figcaption><strong>2048×1024 · 2:1</strong> Divide the image into four 512×512 columns. Each column is one diamond containing two faces: Faces 1–4 point down from the top edge; Faces 5–8 point up from the bottom edge. Their bases meet exactly at y=512—leave no gap. Only the tinted triangles are used; the untinted corner halves are ignored.</figcaption>
+          <figcaption><strong>2048×1024 · 2:1</strong> Divide the image into four 512×512 columns. Each column is one continuous crystal side: its upper triangle sits directly above its matching lower triangle.</figcaption>
         </figure>
       </div>
     `;
@@ -1249,9 +1212,9 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     const iconStyle = getDisplayIconStyle(data.type, data.iconStyle);
     return `<div class="gmf-marker-preview gmf-galaxy" data-marker-preview aria-label="Live map marker preview">
       <div class="gmf-marker-preview__stage">
-        <span class="gmf-system gmf-system--${escapeHtml(data.type)} gmf-icon--${escapeHtml(iconStyle)} gmf-status--${escapeHtml(data.status)} ${data.pulse ? "is-marker-preview-pulsing" : "gmf-no-pulse"}" data-marker-preview-system style="--gmf-faction-color: ${escapeHtml(color)}; --gmf-system-size: ${escapeHtml(data.iconSize)}px;">
+        <span class="gmf-system gmf-system--${escapeHtml(data.type)} gmf-icon--${escapeHtml(iconStyle)} gmf-status--${escapeHtml(data.status)} ${data.markerImage ? "has-custom-marker" : ""} ${data.pulse ? "is-marker-preview-pulsing" : "gmf-no-pulse"}" data-marker-preview-system style="--gmf-faction-color: ${escapeHtml(color)}; --gmf-system-size: ${escapeHtml(data.iconSize)}px;">
           <span class="gmf-system__halo"></span>
-          <span data-marker-preview-icon><span class="gmf-system__core"></span></span>
+          <span data-marker-preview-icon>${data.markerImage ? `<img class="gmf-custom-marker__image" src="${escapeHtml(data.markerImage)}" alt="" draggable="false" />` : `<span class="gmf-system__core"></span>`}</span>
           <span class="gmf-system__type-glyph" aria-hidden="true"></span>
         </span>
       </div>
@@ -1269,7 +1232,9 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
         ${quick ? "" : `<div class="gmf-form-grid">
           <label>Marker Size <input type="range" name="iconSize" value="${escapeHtml(data.iconSize)}" min="18" max="56" step="1" /></label>
           <label class="gmf-checkbox-label"><input type="checkbox" name="pulse" value="true" ${data.pulse ? "checked" : ""} /> Pulse Glow</label>
-        </div>`}
+        </div>
+        <label class="gmf-custom-marker-toggle"><input type="checkbox" name="useCustomMarker" value="true" data-use-custom-marker ${data.markerImage ? "checked" : ""} /> Use custom marker image</label>
+        <label data-custom-marker-field>Custom Marker Image <div class="gmf-path-field"><input type="text" name="markerImage" value="${escapeHtml(data.markerImage)}" placeholder="Select an image" ${data.markerImage ? "" : "disabled"} /><button type="button" data-browse-target="markerImage" ${data.markerImage ? "" : "disabled"}><i class="fa-solid fa-folder-open"></i> Browse</button><button type="button" data-clear-target="markerImage" title="Clear custom marker" aria-label="Clear custom marker" ${data.markerImage ? "" : "disabled"}><i class="fa-solid fa-xmark"></i></button></div></label>`}
       </div>
       ${getMarkerPreviewMarkup(data, color)}
     </div>`;
@@ -1322,15 +1287,29 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
           <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
         </div>
         <label>Description <textarea name="description" rows="5">${escapeHtml(data.description)}</textarea></label>
-        <p class="gmf-form-help">Planets, stars, stations, factions, linked content, and 3D appearance are configured on entities inside this system.</p>
+        <label>Custom Marker Image
+          <div class="gmf-path-field">
+            <input type="text" name="markerImage" value="${escapeHtml(data.markerImage)}" placeholder="Uses the standard system marker when empty" />
+            <button type="button" data-browse-target="markerImage"><i class="fa-solid fa-folder-open"></i> Browse</button>
+            <button type="button" data-clear-target="markerImage" title="Clear custom marker" aria-label="Clear custom marker"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </label>
+        <label class="gmf-help-label" data-help="Recommended: 4096×2304 WebP (16:9), or at least 3840 px wide.">System Background Image
+          <div class="gmf-path-field">
+            <input type="text" name="backgroundImage" value="${escapeHtml(data.backgroundImage)}" placeholder="Uses the generated starfield when empty" />
+            <button type="button" data-browse-target="backgroundImage"><i class="fa-solid fa-folder-open"></i> Browse</button>
+            <button type="button" data-clear-target="backgroundImage" title="Clear background image" aria-label="Clear background image"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </label>
       </form>
     `;
   }
 
-  function getRouteDialogContent(mapId, route: any = {}, defaults: any = {}) {
+  function getRouteDialogContent(mapId, route: any = {}, defaults: any = {}, systemId = "") {
     const map = getRawMap(mapId);
     const routeDefaults = { ...defaults, ...route };
-    const systems = map?.systems ?? [];
+    const system = systemId ? map?.systems?.find((candidate) => candidate.id === systemId) : null;
+    const systems = system ? system.objects ?? [] : map?.systems ?? [];
     if (!routeDefaults.fromSystemId) routeDefaults.fromSystemId = systems[0]?.id ?? "";
     if (!routeDefaults.toSystemId) routeDefaults.toSystemId = systems.find((system) => system.id !== routeDefaults.fromSystemId)?.id ?? "";
     if (routeDefaults.fromSystemId && !routeDefaults.toSystemId) {
@@ -1380,137 +1359,17 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
         <label>Title <input type="text" name="title" value="${escapeHtml(data.title)}" /></label>
         <label>Subtitle <input type="text" name="subtitle" value="${escapeHtml(data.subtitle)}" /></label>
         <label>Description <textarea name="description">${escapeHtml(data.description)}</textarea></label>
-        <label>Background Image
+        <label class="gmf-help-label" data-help="Recommended: 4096×2304 WebP (16:9), or at least 3840 px wide.">Background Image
           <div class="gmf-path-field">
             <input type="text" name="backgroundImage" value="${escapeHtml(data.backgroundImage)}" />
             <button type="button" data-browse-target="backgroundImage"><i class="fa-solid fa-folder-open"></i> Browse</button>
+            <button type="button" data-clear-target="backgroundImage" title="Clear background image" aria-label="Clear background image"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </label>
         <label>Visibility <select name="visibility">${optionList(VISIBILITIES, data.visibility)}</select></label>
-        <label>Player Travel Approval <select name="travelApprovalMode">${optionList(TRAVEL_APPROVAL_OPTIONS, data.travelApprovalMode)}</select></label>
-        <p class="gmf-form-help">GM approval asks only the primary online GM. Majority counts the requester as an approval and passes at more than half of active participants. Unanimous asks every other active participant and cancels on any decline.</p>
+        <label class="gmf-help-label" data-help="GM approval asks only the primary online GM. Majority counts the requester as an approval and passes at more than half of active participants. Unanimous asks every other active participant and cancels on any decline.">Player Travel Approval <select name="travelApprovalMode">${optionList(TRAVEL_APPROVAL_OPTIONS, data.travelApprovalMode)}</select></label>
       </form>
     `;
-  }
-
-  function openMapMetadataDialog(mapId) {
-    const map = getRawMap(mapId);
-    if (!map) return;
-    renderCrudDialog({
-      title: "Edit Galaxy Map",
-      content: getMapMetadataDialogContent(map),
-      onSubmit: (values) => updateMapMetadata(mapId, values)
-    });
-  }
-
-  function openSystemDialog(mapId, systemId = null, defaults = {}) {
-    const map = getRawMap(mapId);
-    const system = systemId ? map?.systems?.find((candidate) => candidate.id === systemId) : null;
-    renderCrudDialog({
-      title: system ? "Edit System" : "Create System",
-      content: getSystemDialogContent(mapId, system ?? { id: randomId("system"), name: "New System" }, defaults, !system),
-      submitLabel: system ? "Save System" : "Create System",
-      width: system ? 860 : 540,
-      height: system ? Math.min(760, Math.max(360, window.innerHeight - 64)) : "auto",
-      dialogClass: system ? "gmf-system-edit-dialog" : "gmf-system-create-dialog",
-      onSubmit: (values) => {
-        const removalIds = new Set((Array.isArray(values.removePlanetLocationIds)
-          ? values.removePlanetLocationIds : [values.removePlanetLocationIds]).filter(Boolean).map(String));
-        delete values.removePlanetLocationIds;
-        const primary = system ? normalizeSystem(system).objects.find((object: any) => object.id === normalizeSystem(system).primaryObjectId) : null;
-        return upsertSystem(mapId, {
-          ...values,
-          sceneIds: values.sceneIds ?? [],
-          planetLocations: (primary?.planetLocations ?? []).filter((location: any) => !removalIds.has(location.id)),
-          pulse: values.pulse === "true"
-        });
-      }
-    });
-  }
-
-  function openRouteDialog(mapId, routeId = null, defaults = {}) {
-    const map = getRawMap(mapId);
-    if ((map?.systems?.length ?? 0) < 2) {
-      notifyError("Create at least two systems before adding a route.");
-      return;
-    }
-    const route = routeId ? map.routes.find((candidate) => candidate.id === routeId) : null;
-    renderCrudDialog({
-      title: route ? "Edit Route" : "Create Route",
-      content: getRouteDialogContent(mapId, route ?? { id: randomId("route") }, defaults),
-      submitLabel: route ? "Save Route" : "Create Route",
-      onSubmit: (values) => upsertRoute(mapId, values)
-    });
-  }
-
-  function openFactionDialog(mapId, factionId = null) {
-    const map = getRawMap(mapId);
-    const faction = factionId ? map?.factions?.find((candidate) => candidate.id === factionId) : null;
-    renderCrudDialog({
-      title: faction ? "Edit Faction" : "Create Faction",
-      content: getFactionDialogContent(faction ?? { id: randomId("faction"), name: "New Faction" }),
-      submitLabel: faction ? "Save Faction" : "Create Faction",
-      onSubmit: (values) => upsertFaction(mapId, values)
-    });
-  }
-
-  function openFactionManagerDialog(mapId) {
-    const map = getRawMap(mapId);
-    if (!map) return;
-    const rows = normalizeMap(map).factions.map((faction) => `
-      <article class="gmf-dialog-row">
-        <div>
-          <strong><span class="gmf-color-dot" style="--gmf-faction-color: ${escapeHtml(faction.color)};"></span>${escapeHtml(faction.name)}</strong>
-          <span>${escapeHtml(faction.color)} - ${escapeHtml(faction.visibility)}</span>
-        </div>
-        <div class="gmf-row-actions">
-          <button type="button" data-dialog-edit-faction="${escapeHtml(faction.id)}" title="Edit faction"><i class="fa-solid fa-pen"></i></button>
-          <button type="button" data-dialog-delete-faction="${escapeHtml(faction.id)}" title="Delete faction"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      </article>
-    `).join("") || '<p class="gmf-empty-inline">No factions yet.</p>';
-
-    new Dialog({
-      title: "Manage Factions",
-      content: `
-        <section class="gmf-dialog-manager">
-          <div class="gmf-dialog-manager__bar">
-            <p>Factions tint systems and help organize territory on the map.</p>
-            <button type="button" data-dialog-add-faction><i class="fa-solid fa-plus"></i> Add Faction</button>
-          </div>
-          <div class="gmf-dialog-list">${rows}</div>
-        </section>
-      `,
-      render: (html) => {
-        const root = getHtmlElement(html);
-        root.querySelector("[data-dialog-add-faction]")?.addEventListener("click", () => openFactionDialog(mapId));
-        root.querySelectorAll("[data-dialog-edit-faction]").forEach((button) => {
-          button.addEventListener("click", () => openFactionDialog(mapId, button.dataset.dialogEditFaction));
-        });
-        root.querySelectorAll("[data-dialog-delete-faction]").forEach((button) => {
-          button.addEventListener("click", async () => {
-            const confirmed = await Dialog.confirm({
-              title: "Delete Faction",
-              content: "<p>Delete this faction? Systems assigned to it become unaffiliated.</p>"
-            }, GALAXY_DIALOG_OPTIONS);
-            if (confirmed) {
-              await deleteFaction(mapId, button.dataset.dialogDeleteFaction);
-              openFactionManagerDialog(mapId);
-            }
-          });
-        });
-      },
-      buttons: {
-        close: {
-          icon: '<i class="fa-solid fa-check"></i>',
-          label: "Done"
-        }
-      },
-      default: "close"
-    }, {
-      classes: ["galaxy-map", "gmf-crud-dialog"],
-      width: 560
-    }).render(true);
   }
 
   function prepareMapForManager(map) {
@@ -1525,11 +1384,25 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
         ...system,
         factionName: factionsById.get(system.factionId)?.name ?? "Unaffiliated"
       })),
-      routes: normalized.routes.map((route) => ({
-        ...route,
-        fromName: systemsById.get(route.fromSystemId)?.name ?? route.fromSystemId,
-        toName: systemsById.get(route.toSystemId)?.name ?? route.toSystemId
-      }))
+      routes: [
+        ...normalized.routes.map((route) => ({
+          ...route,
+          systemId: "",
+          scopeLabel: "Galaxy route",
+          fromName: systemsById.get(route.fromSystemId)?.name ?? route.fromSystemId,
+          toName: systemsById.get(route.toSystemId)?.name ?? route.toSystemId
+        })),
+        ...normalized.systems.flatMap((system) => {
+          const objectsById = new Map<string, any>(system.objects.map((object) => [object.id, object]));
+          return system.routes.map((route) => ({
+            ...route,
+            systemId: system.id,
+            scopeLabel: `Inside ${system.name}`,
+            fromName: objectsById.get(route.fromSystemId)?.name ?? route.fromSystemId,
+            toName: objectsById.get(route.toSystemId)?.name ?? route.toSystemId
+          }));
+        })
+      ]
     };
   }
 
@@ -1582,47 +1455,24 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       ${getMarkerComposerMarkup({ ...data, type: data.kind }, data.iconColor || "#58d8ff")}
       <fieldset><legend>Detail view</legend>
         <div class="gmf-form-grid">
-          <label>Appearance <select name="planetPreset">${optionList(PLANET_OPTIONS, data.planetPreset)}</select></label>
-          <label>3D shape <select name="planetShape">${optionList(PLANET_SHAPE_OPTIONS, data.planetShape)}</select></label>
-          <label>Surface finish <select name="planetFinish">${optionList(PLANET_FINISH_OPTIONS, data.planetFinish)}</select></label>
-          <label class="gmf-surface-strength">Detail strength <span><input type="range" name="planetDetailStrength" value="${escapeHtml(data.planetDetailStrength)}" min="0" max="100" step="1" /><output data-surface-strength-output>${escapeHtml(data.planetDetailStrength)}%</output></span></label>
+          <label>Appearance <select name="planetPreset">${optionList(getPlanetOptionsForShape(data.planetShape), normalizePlanetPresetForShape(data.planetPreset, data.planetShape))}</select></label>
+          <label>3D shape <select name="planetShape" ${data.planetPreset === "none" ? "disabled" : ""}>${optionList(PLANET_SHAPE_OPTIONS, data.planetShape)}</select></label>
+          <label>Surface finish <select name="planetFinish" ${data.planetPreset === "none" ? "disabled" : ""}>${optionList(PLANET_FINISH_OPTIONS, data.planetFinish)}</select></label>
         </div>
-        <label>Model color <input type="color" name="planetColor" value="${escapeHtml(data.planetColor)}" /></label>
-        <label>Custom texture <div class="gmf-path-field"><input type="text" name="planetTexture" value="${escapeHtml(data.planetTexture)}" /><button type="button" data-browse-target="planetTexture"><i class="fa-solid fa-folder-open"></i> Browse</button></div></label>
+        <label>Model color <input type="color" name="planetColor" value="${escapeHtml(data.planetColor)}" ${data.planetPreset === "color" ? "" : "disabled"} /></label>
+        <div data-texture-upload-fields>
+        <label>Custom texture <div class="gmf-path-field"><input type="text" name="planetTexture" value="${escapeHtml(data.planetTexture)}" /><button type="button" data-browse-target="planetTexture"><i class="fa-solid fa-folder-open"></i> Browse</button><button type="button" data-clear-target="planetTexture" title="Clear custom texture" aria-label="Clear custom texture"><i class="fa-solid fa-xmark"></i></button></div></label>
+        <section class="gmf-texture-guide-section" data-texture-guide-section ${data.planetPreset === "custom" ? "" : "hidden"}>${getTextureGuideMarkup(data.planetShape)}</section>
+        </div>
         ${getSurfaceLocationManagerMarkup(data)}
       </fieldset>
       <fieldset><legend>Linked content</legend>
-        <label>Image <div class="gmf-path-field"><input type="text" name="image" value="${escapeHtml(data.image)}" /><button type="button" data-browse-target="image"><i class="fa-solid fa-folder-open"></i> Browse</button></div></label>
+        <label>Image <div class="gmf-path-field"><input type="text" name="image" value="${escapeHtml(data.image)}" /><button type="button" data-browse-target="image"><i class="fa-solid fa-folder-open"></i> Browse</button><button type="button" data-clear-target="image" title="Clear object image" aria-label="Clear object image"><i class="fa-solid fa-xmark"></i></button></div></label>
         ${getLinkedDocumentPickerMarkup({ collection: game.scenes, selectedIds: data.sceneIds, inputName: "sceneIds", collectionName: "scenes", kindLabel: "Scene", iconClass: "fa-image", multiple: true })}
         ${getLinkedDocumentPickerMarkup({ collection: game.journal, selectedIds: data.journalId, inputName: "journalId", collectionName: "journal", kindLabel: "Journal", iconClass: "fa-book-open", multiple: false })}
       </fieldset>
       <label>GM notes <textarea name="notes" rows="3">${escapeHtml(data.notes)}</textarea></label>
     </form>`;
-  }
-
-  function openObjectDialog(mapId, systemId, objectId = null, defaults = {}) {
-    const map = normalizeMap(getRawMap(mapId));
-    const sourceSystem = map.systems.find((system) => system.id === systemId);
-    const existing = objectId ? sourceSystem?.objects.find((object) => object.id === objectId) : null;
-    renderCrudDialog({
-      title: existing ? `Edit ${existing.name}` : "Add Entity",
-      content: getObjectDialogContent(mapId, systemId, existing ?? { id: randomId("object"), name: "New Object" }, defaults),
-      submitLabel: existing ? "Save Entity" : "Add Entity",
-      width: 760,
-      height: Math.min(760, Math.max(420, window.innerHeight - 64)),
-      onSubmit: async (values) => {
-        const destinationSystemId = String(values.systemId || systemId);
-        if (existing && destinationSystemId !== systemId) await moveObject(mapId, existing.id, destinationSystemId);
-        const removalIds = new Set((Array.isArray(values.removePlanetLocationIds)
-          ? values.removePlanetLocationIds : [values.removePlanetLocationIds]).filter(Boolean).map(String));
-        delete values.removePlanetLocationIds;
-        return upsertObject(mapId, destinationSystemId, {
-          ...existing, ...values, sceneIds: values.sceneIds ?? [],
-          planetLocations: (existing?.planetLocations ?? []).filter((location: any) => !removalIds.has(location.id)),
-          pulse: values.pulse === "true"
-        });
-      }
-    });
   }
 
   function getSceneIdsForObject(mapId, objectId) {
@@ -1647,12 +1497,45 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       .map((system: any) => ({ mapId: map.id, mapTitle: map.title, system: clone(system) })));
   }
 
-  function refreshOpenApps(mapId = null) {
-    if (managerApp?.rendered) managerApp.render({ force: true });
-    for (const [id, app] of openMaps.entries()) {
-      if (!mapId || id === mapId) app.render({ force: true });
+  function getAppFrame(app) {
+    const element = getAppHtml(app);
+    return element?.closest?.(".window-app, .application, .app") ?? element;
+  }
+
+  function snapshotWindowStack(apps) {
+    return apps.map((app) => {
+      const frame = getAppFrame(app);
+      if (!frame) return null;
+      const computedZIndex = Number.parseInt(globalThis.getComputedStyle?.(frame)?.zIndex ?? "", 10);
+      return { app, zIndex: frame.style.zIndex || (Number.isFinite(computedZIndex) ? String(computedZIndex) : "") };
+    }).filter(Boolean);
+  }
+
+  function restoreWindowStack(stack) {
+    for (const entry of stack) {
+      const frame = getAppFrame(entry.app);
+      if (!frame?.isConnected || !entry.zIndex) continue;
+      frame.style.zIndex = entry.zIndex;
     }
-    if (playerMapApp?.rendered && (!mapId || playerMapApp.mapId === mapId)) playerMapApp.render({ force: true });
+  }
+
+  async function refreshOpenApps(mapId = null) {
+    const mapApps = [...openMaps.entries()]
+      .filter(([id, app]) => app?.rendered && (!mapId || id === mapId))
+      .map(([, app]) => app);
+    if (playerMapApp?.rendered && (!mapId || playerMapApp.mapId === mapId)) mapApps.push(playerMapApp);
+
+    const apps = [managerApp?.rendered ? managerApp : null, ...mapApps].filter(Boolean);
+    const windowStack = snapshotWindowStack(apps);
+    const renders = apps.map((app) => Promise.resolve(app.render({ force: true })));
+
+    // Rendering a background Application can make Foundry assign it the newest
+    // z-index. Restore the existing stack so data refreshes never surface the
+    // Map Manager over the viewport that initiated the update.
+    restoreWindowStack(windowStack);
+    await Promise.allSettled(renders);
+    restoreWindowStack(windowStack);
+    globalThis.requestAnimationFrame?.(() => restoreWindowStack(windowStack));
   }
 
   function getOpenMapViews(mapId) {
@@ -1745,6 +1628,66 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     return request;
   }
 
+  function buildObjectTravelRequest(mapId, systemId, destinationObjectId) {
+    const rawMap = getRawMap(mapId);
+    if (!rawMap) {
+      notifyError(`Map "${mapId}" was not found.`);
+      return null;
+    }
+    const map = normalizeMap(rawMap);
+    const system = map.systems.find(candidate => candidate.id === systemId);
+    const from = system?.objects.find(object => object.id === map.currentLocation.objectId);
+    const to = system?.objects.find(object => object.id === destinationObjectId);
+    if (!system || map.currentLocation.systemId !== system.id || !from) {
+      notifyError("The current location is not inside this system.");
+      return null;
+    }
+    if (!to) {
+      notifyError(`Destination "${destinationObjectId}" was not found.`);
+      return null;
+    }
+    if (from.id === to.id) {
+      notifyInfo(`${to.name} is already the current location.`);
+      return null;
+    }
+    if (map.visibility !== "players" || system.visibility !== "players"
+      || getEffectiveObjectVisibility(system, from) !== "players"
+      || getEffectiveObjectVisibility(system, to) !== "players") {
+      notifyError("That travel destination is not visible to players.");
+      return null;
+    }
+    const route = getTravelRoute({ routes: system.routes }, from.id, to.id);
+    if (!route || route.visibility !== "players") {
+      notifyError(`No player-visible direct route from ${from.name} to ${to.name}.`);
+      return null;
+    }
+    const primaryGM = getPrimaryGM();
+    if (!primaryGM) {
+      notifyError("A GM must be online to approve player travel.");
+      return null;
+    }
+    const electorate = getTravelElectorate(getActiveUsers(), game.user.id, primaryGM, map.travelApprovalMode);
+    return {
+      action: "travel-request",
+      travelScope: "object",
+      requestId: randomId("travel"), mapId, mapTitle: map.title, systemId: system.id,
+      fromObjectId: from.id, fromName: from.name, toObjectId: to.id, toName: to.name,
+      routeId: route.id, routeType: route.type, travelTime: route.travelTime, fuelCost: route.fuelCost,
+      requesterId: game.user.id, requesterName: game.user.name,
+      approvalMode: electorate.approvalMode, voterIds: electorate.voterIds,
+      voterNames: electorate.voterNames, requiredApprovals: electorate.requiredApprovals,
+      participantCount: electorate.participantCount
+    };
+  }
+
+  function requestTravelToObject(mapId, systemId, destinationObjectId) {
+    const request = buildObjectTravelRequest(mapId, systemId, destinationObjectId);
+    if (!request) return null;
+    game.socket.emit(SOCKET_NAME, request);
+    notifyInfo(`Travel request sent: ${request.fromName} to ${request.toName}.`);
+    return request;
+  }
+
   function promptForTravelRequest(payload) {
     if (!payload?.requestId || payload.requesterId === game.user?.id) return;
     if (!payload.voterIds?.includes(game.user?.id)) return;
@@ -1810,7 +1753,8 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       }
     }, {
       classes: ["galaxy-map", "gmf-crud-dialog"],
-      width: 420
+      width: 420,
+      height: Math.max(320, Math.min(440, window.innerHeight - 80))
     });
     travelRequestPrompts.set(payload.requestId, {
       root: null,
@@ -1881,11 +1825,23 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     if (!rawMap) return null;
     const currentMap = normalizeMap(rawMap);
     const requester = getActiveUsers().find(user => user.id === payload.requesterId && !user.isGM);
-    const from = currentMap.systems.find(system => system.id === currentMap.currentSystemId);
-    const to = currentMap.systems.find(system => system.id === payload.toSystemId);
-    const route = from && to ? getTravelRoute(currentMap, from.id, to.id) : null;
+    const objectTravel = payload.travelScope === "object";
+    const travelSystem = objectTravel ? currentMap.systems.find(system => system.id === payload.systemId) : null;
+    const from = objectTravel
+      ? travelSystem?.objects.find(object => object.id === currentMap.currentLocation.objectId)
+      : currentMap.systems.find(system => system.id === currentMap.currentSystemId);
+    const to = objectTravel
+      ? travelSystem?.objects.find(object => object.id === payload.toObjectId)
+      : currentMap.systems.find(system => system.id === payload.toSystemId);
+    const route = from && to ? getTravelRoute(objectTravel ? { routes: travelSystem?.routes ?? [] } : currentMap, from.id, to.id) : null;
+    const invalidObjectTravel = objectTravel && (!travelSystem
+      || currentMap.currentLocation.systemId !== travelSystem.id
+      || travelSystem.visibility !== "players"
+      || getEffectiveObjectVisibility(travelSystem, from) !== "players"
+      || getEffectiveObjectVisibility(travelSystem, to) !== "players");
+    const invalidSystemTravel = !objectTravel && (from?.visibility !== "players" || to?.visibility !== "players");
     if (!requester || currentMap.visibility !== "players" || !from || !to || from.id === to.id
-      || from.visibility !== "players" || to.visibility !== "players" || !route || route.visibility !== "players") return null;
+      || invalidObjectTravel || invalidSystemTravel || !route || route.visibility !== "players") return null;
     const mode = currentMap.travelApprovalMode;
     const primaryGM = getPrimaryGM();
     const electorate = getTravelElectorate(getActiveUsers(), payload.requesterId, primaryGM, mode);
@@ -1898,9 +1854,13 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       requestId: String(payload.requestId).slice(0, 80),
       mapId: currentMap.id,
       mapTitle: currentMap.title,
-      fromSystemId: from.id,
+      travelScope: objectTravel ? "object" : "system",
+      systemId: objectTravel ? travelSystem.id : "",
+      fromSystemId: objectTravel ? travelSystem.id : from.id,
+      fromObjectId: objectTravel ? from.id : "",
       fromName: from.name,
-      toSystemId: to.id,
+      toSystemId: objectTravel ? travelSystem.id : to.id,
+      toObjectId: objectTravel ? to.id : "",
       toName: to.name,
       routeId: route.id,
       routeType: route.type,
@@ -1921,13 +1881,22 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
 
   function animateTravelOnOpenMaps(payload) {
     const map = normalizeMap(getRawMap(payload.mapId));
-    const from = map.systems.find((system) => system.id === payload.fromSystemId);
-    const to = map.systems.find((system) => system.id === payload.toSystemId);
+    const objectTravel = payload.travelScope === "object";
+    const travelSystem = objectTravel ? map.systems.find((system) => system.id === payload.systemId) : null;
+    const from = objectTravel
+      ? travelSystem?.objects.find((object) => object.id === payload.fromObjectId)
+      : map.systems.find((system) => system.id === payload.fromSystemId);
+    const to = objectTravel
+      ? travelSystem?.objects.find((object) => object.id === payload.toObjectId)
+      : map.systems.find((system) => system.id === payload.toSystemId);
     if (!from || !to) return;
     getOpenMapViews(payload.mapId).forEach((app) => {
       const html = getAppHtml(app);
       if (!html) return;
-      app.selectedSystemId = to.id;
+      if (objectTravel) {
+        if (app.activeSystemId !== travelSystem.id) return;
+        app.selectedObjectId = to.id;
+      } else app.selectedSystemId = to.id;
       app.selectedRouteId = null;
       app._animateShipTravel?.(from, to, html);
     });
@@ -1943,6 +1912,15 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     });
   }
 
+  function broadcastObjectTravelAnimation(mapId, systemId, fromObjectId, toObjectId) {
+    game.socket.emit(SOCKET_NAME, {
+      action: "travel-animation",
+      travelScope: "object",
+      mapId, systemId, fromObjectId, toObjectId,
+      coordinatorId: game.user?.id
+    });
+  }
+
   async function approveTravelRequest(pending) {
     pendingTravelRequests.delete(pending.requestId);
     if (pending.timeoutId) globalThis.clearTimeout(pending.timeoutId);
@@ -1954,8 +1932,12 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       action: "travel-approved",
       requestId: pending.requestId,
       mapId: pending.mapId,
+      travelScope: pending.travelScope,
+      systemId: pending.systemId,
       fromSystemId: pending.fromSystemId,
       toSystemId: pending.toSystemId,
+      fromObjectId: pending.fromObjectId,
+      toObjectId: pending.toObjectId,
       fromName: pending.fromName,
       toName: pending.toName,
       coordinatorId: game.user.id
@@ -1963,7 +1945,10 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     game.socket.emit(SOCKET_NAME, payload);
     animateTravelOnOpenMaps(payload);
     notifyInfo(`Travel approved: ${pending.fromName} to ${pending.toName}.`);
-    globalThis.setTimeout(() => setCurrentSystem(pending.mapId, pending.toSystemId), TRAVEL_ANIMATION_MS);
+    globalThis.setTimeout(() => {
+      if (pending.travelScope === "object") setCurrentObject(pending.mapId, pending.systemId, pending.toObjectId);
+      else setCurrentSystem(pending.mapId, pending.toSystemId);
+    }, TRAVEL_ANIMATION_MS);
   }
 
   function rejectTravelRequest(pending, { voterName = "", reason = "" } = {}) {
@@ -2095,9 +2080,7 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
   }
 
   function openPlayerMapChooser() {
-    const visibleMaps = getMaps()
-      .filter((map) => map.visibility === "players")
-      .sort((a, b) => a.title.localeCompare(b.title));
+    const visibleMaps = getVisiblePlayerMaps();
 
     if (!visibleMaps.length) {
       notifyInfo("No galaxy map is currently visible to players.");
@@ -2106,39 +2089,13 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
 
     if (visibleMaps.length === 1) return openMap(visibleMaps[0].id, { playerMode: true });
 
-    const choices = visibleMaps.map((map) => `
-      <button type="button" class="gmf-player-map-choice" data-player-open-map="${escapeHtml(map.id)}">
-        <span class="gmf-player-map-choice__title">${escapeHtml(map.title)}</span>
-        <span class="gmf-player-map-choice__meta">${escapeHtml(map.subtitle || map.description || "Player-visible galaxy map")}</span>
-      </button>
-    `).join("");
+    if (!playerMapChooserApp) playerMapChooserApp = new PlayerMapChooser();
+    playerMapChooserApp.render({ force: true });
+    return playerMapChooserApp;
+  }
 
-    let dialog = null;
-    dialog = new Dialog({
-      title: "Choose Galaxy Map",
-      content: `<section class="gmf-player-map-chooser">${choices}</section>`,
-      render: (html) => {
-        const root = getHtmlElement(html);
-        root?.querySelectorAll("[data-player-open-map]").forEach((button) => {
-          button.addEventListener("click", () => {
-            openMap(button.dataset.playerOpenMap, { playerMode: true });
-            dialog?.close();
-          });
-        });
-      },
-      buttons: {
-        close: {
-          icon: '<i class="fa-solid fa-xmark"></i>',
-          label: "Close"
-        }
-      },
-      default: "close"
-    }, {
-      classes: ["galaxy-map", "gmf-crud-dialog", "gmf-map-chooser-dialog"],
-      width: 460
-    });
-    dialog.render(true);
-    return dialog;
+  function getVisiblePlayerMaps() {
+    return getMaps().filter((map) => map.visibility === "players").sort((a, b) => a.title.localeCompare(b.title));
   }
 
   function openGalaxyMapFromSceneControls() {
@@ -2195,35 +2152,21 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     notifyInfo("Map broadcast sent to players.");
   }
 
-  function closePlayerMap() {
-    if (!requireGM("close player galaxy maps")) return;
-    game.socket.emit(SOCKET_NAME, { action: "close" });
-    notifyInfo("Close-map signal sent to players.");
-  }
-
   const GalaxyMapManager = createGalaxyMapManagerClass({
     templateRoot: TEMPLATE_ROOT,
     getMaps,
     prepareMapForManager,
     getRawMap,
-    openMapMetadataDialog,
-    openSystemDialog,
-    openObjectDialog,
-    openRouteDialog,
-    openFactionDialog,
     exportMap,
     duplicateMap,
     deleteMap,
     createMap,
     deleteSystem,
     deleteObject,
-    setPrimaryObject,
-    mergeSystems,
     deleteRoute,
     deleteFaction,
     openMap,
     showMapToPlayers,
-    closePlayerMap,
     hideSystemFromPlayers,
     setObjectVisibility,
     hideRouteFromPlayers,
@@ -2233,17 +2176,27 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     }
   });
 
+  const PlayerMapChooser = createPlayerMapChooserClass({
+    templateRoot: TEMPLATE_ROOT,
+    getVisibleMaps: getVisiblePlayerMaps,
+    openMap,
+    clearChooser: (app) => {
+      if (playerMapChooserApp === app) playerMapChooserApp = null;
+    }
+  });
+
   const GalaxyMapView = createGalaxyMapViewClass({
     templateRoot: TEMPLATE_ROOT,
     getRawMap,
     prepareMapForDisplay,
-    openSystemDialog,
-    openObjectDialog,
+    upsertSystem,
     upsertObject,
-    openRouteDialog,
-    openFactionDialog,
-    openFactionManagerDialog,
-    openMapMetadataDialog,
+    upsertRoute,
+    upsertFaction,
+    updateMapMetadata,
+    deleteFaction,
+    getTextureGuideMarkup,
+    activateObjectEditorControls: activateCrudDialog,
     revealSystemToPlayers,
     revealRouteToPlayers,
     hideSystemFromPlayers,
@@ -2254,10 +2207,11 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     setCurrentSystem,
     setCurrentObject,
     requestTravelToSystem,
-    notifySystemDiscovered,
+    requestTravelToObject,
     exportMap,
     getTravelRoute,
     broadcastTravelAnimation,
+    broadcastObjectTravelAnimation,
     notifyInfo,
     notifyError,
     saveSystemPosition,
@@ -2265,8 +2219,6 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
     savePlanetLocation,
     removePlanetLocation,
     unlinkPlanetScene,
-    showMapToPlayers,
-    openMapManager,
     clearMapView: (app) => {
       if (app.playerMode && playerMapApp === app) playerMapApp = null;
       for (const [key, openApp] of openMaps.entries()) {
@@ -2326,7 +2278,9 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       `${TEMPLATE_ROOT}/map-manager.hbs`,
       `${TEMPLATE_ROOT}/galaxy-map.hbs`,
       `${TEMPLATE_ROOT}/celestial-icon.hbs`,
-      `${TEMPLATE_ROOT}/system-details.hbs`
+      `${TEMPLATE_ROOT}/object-appearance-panel.hbs`,
+      `${TEMPLATE_ROOT}/system-details.hbs`,
+      `${TEMPLATE_ROOT}/player-map-chooser.hbs`
     ]);
   });
 
@@ -2350,7 +2304,6 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       getSceneIdsForObject,
       getObjectsForScene,
       showMapToPlayers,
-      closePlayerMap,
       updateMap,
       updateMapMetadata,
       deleteMap,
@@ -2361,7 +2314,6 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       deleteObject,
       moveObject,
       setPrimaryObject,
-      mergeSystems,
       upsertRoute,
       deleteRoute,
       upsertFaction,
@@ -2379,8 +2331,8 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
       setObjectVisibility,
       hideRouteFromPlayers,
       hideFactionFromPlayers,
-      notifySystemDiscovered,
       requestTravelToSystem,
+      requestTravelToObject,
       importMapData,
       exportMap
     };
@@ -2466,7 +2418,6 @@ import { activateGalaxyDialogChrome, GALAXY_DIALOG_OPTIONS } from "./window-chro
         playerMapApp?.close();
         openMap(payload.mapId, { playerMode: true, broadcast: true });
       }
-      if (payload.action === "close") playerMapApp?.close();
       if (payload.action === "refresh" && playerMapApp?.mapId === payload.mapId) {
         playerMapApp.render({ force: true });
       }

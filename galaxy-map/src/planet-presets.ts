@@ -1,10 +1,22 @@
 export const PLANET_PRESETS = [
-  { value: "cartoon", label: "Cartoon · Acid Seas", color: "#af91ff" },
-  { value: "adventure", label: "Painterly · Golden Frontier", color: "#69e7dc" },
-  { value: "realistic", label: "Realistic · Blue Marble", color: "#78caff" }
+  { value: "ice", label: "Ice Planet", color: "#bfeaff", texture: "Ice-planet.webp" },
+  { value: "alien", label: "Alien Planet", color: "#9de56f", texture: "Alien-planet.webp" },
+  { value: "earth", label: "Earth Planet", color: "#78caff", texture: "Earth-planet.webp" },
+  { value: "lush", label: "Lush Planet", color: "#7dffbd", texture: "Lush-planet.webp" },
+  { value: "desert", label: "Desert Planet", color: "#d9a45c", texture: "Desert-planet.webp" },
+  { value: "gas-giant", label: "Gas Giant", color: "#e7bd82", texture: "GasGiant.webp" },
+  { value: "volcanic", label: "Volcanic Planet", color: "#ff7043", texture: "Volcanic-planet.webp" },
+  { value: "moon", label: "Moon", color: "#c7d0d8", texture: "Moon.webp" },
+  { value: "sun", label: "Sun", color: "#ffd36a", texture: "sun-planet.webp" },
+  { value: "techno", label: "Techno Planet", color: "#65e7ff", texture: "Techno-planet.webp" },
+  { value: "prison", label: "Prison", color: "#9fc7d6", texture: "Prison.webp" },
+  { value: "black-hole", label: "Black Hole", color: "#9d7cff", texture: "BlackHole.webp" },
+  { value: "anomaly", label: "Anomaly", color: "#e88cff", texture: "Anomaly.webp" },
+  { value: "asteroid", label: "Asteroid", color: "#a7a39c", texture: "Asteroid.webp" },
+  { value: "donut-planet", label: "Donut Planet", color: "#f0a6d2", texture: "Donut-planet.webp" },
+  { value: "cube", label: "Cube", color: "#76d7ff", texture: "Cube-planet.webp" }
 ];
 export const PLANET_OPTIONS = [
-  { value: "auto", label: "Automatic texture" },
   ...PLANET_PRESETS,
   { value: "color", label: "Flat color" },
   { value: "custom", label: "Custom texture" },
@@ -30,7 +42,30 @@ export function normalizePlanetFinish(value: unknown) {
   return PLANET_FINISH_OPTIONS.some(finish => finish.value === value) ? String(value) : "smooth";
 }
 export function normalizePlanetPreset(value: unknown) {
-  return PLANET_OPTIONS.some(p => p.value === value) ? String(value) : "auto";
+  if (value === "auto") return "ice";
+  return PLANET_OPTIONS.some(p => p.value === value) ? String(value) : "ice";
+}
+const UNIVERSAL_PLANET_OPTIONS = new Set(["color", "custom", "none"]);
+const SHAPE_PLANET_PRESETS: Record<string, string[]> = {
+  sphere: PLANET_PRESETS.map(preset => preset.value).filter(value => !["prison", "anomaly", "cube", "donut-planet"].includes(value)),
+  cube: ["cube"],
+  donut: ["donut-planet"],
+  asteroid: ["asteroid"],
+  crystal: ["anomaly"],
+  cylinder: ["prison"]
+};
+export function getPlanetOptionsForShape(value: unknown) {
+  const allowed = new Set(SHAPE_PLANET_PRESETS[normalizePlanetShape(value)] ?? SHAPE_PLANET_PRESETS.sphere);
+  return PLANET_OPTIONS.filter(option => allowed.has(option.value) || UNIVERSAL_PLANET_OPTIONS.has(option.value));
+}
+export function normalizePlanetPresetForShape(preset: unknown, shape: unknown) {
+  const normalized = normalizePlanetPreset(preset);
+  const options = getPlanetOptionsForShape(shape);
+  if (options.some(option => option.value === normalized)) return normalized;
+  return options.find(option => !UNIVERSAL_PLANET_OPTIONS.has(option.value))?.value ?? "color";
+}
+export function isDefaultStaticPlanetAppearance(preset: unknown) {
+  return preset === "black-hole";
 }
 export function getPlanetAppearance(system: any, preview = "") {
   if (!system || system.obscured || system.planetPreset === "none") return null;
@@ -40,11 +75,11 @@ export function getPlanetAppearance(system: any, preview = "") {
   const usesCustomTexture = !preview && preset === "custom" && Boolean(system.planetTexture);
   const usesFlatColor = !preview && preset === "color";
   return {
-    texture: usesFlatColor ? null : usesCustomTexture ? system.planetTexture : `modules/galaxy-map/assets/planets/${selected.value}.png`,
+    texture: usesFlatColor ? null : usesCustomTexture ? system.planetTexture : `modules/galaxy-map/assets/planets/${selected.texture}`,
     label: usesFlatColor ? "Flat color" : usesCustomTexture ? "Custom texture" : selected.label,
+    preset: usesFlatColor ? "color" : usesCustomTexture ? "custom" : selected.value,
     color: usesFlatColor ? system.planetColor || "#58d8ff" : selected.color,
     shape: normalizePlanetShape(system.planetShape),
-    finish: normalizePlanetFinish(system.planetFinish),
-    detailStrength: Math.min(100, Math.max(0, Number(system.planetDetailStrength) || 0))
+    finish: normalizePlanetFinish(system.planetFinish)
   };
 }

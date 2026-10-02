@@ -17,24 +17,16 @@ export function createGalaxyMapManagerClass(deps: any) {
     getMaps,
     prepareMapForManager,
     getRawMap,
-    openMapMetadataDialog,
-    openSystemDialog,
-    openObjectDialog,
-    openRouteDialog,
-    openFactionDialog,
     exportMap,
     duplicateMap,
     deleteMap,
     createMap,
     deleteSystem,
     deleteObject,
-    setPrimaryObject,
-    mergeSystems,
     deleteRoute,
     deleteFaction,
     openMap,
     showMapToPlayers,
-    closePlayerMap,
     hideSystemFromPlayers,
     hideRouteFromPlayers,
     hideFactionFromPlayers,
@@ -43,8 +35,8 @@ export function createGalaxyMapManagerClass(deps: any) {
 
   return class GalaxyMapManager extends getApplicationBase() {
     selectedMapId: string | null;
-    jsonDraft: string;
     activeTab: "systems" | "routes" | "factions";
+    expandedSystemId: string | null | undefined;
 
     static DEFAULT_OPTIONS = {
       id: "galaxy-map-manager",
@@ -69,8 +61,8 @@ export function createGalaxyMapManagerClass(deps: any) {
     constructor(options: any = {}) {
       super(options);
       this.selectedMapId = options.selectedMapId ?? null;
-      this.jsonDraft = "";
       this.activeTab = ["systems", "routes", "factions"].includes(options.activeTab) ? options.activeTab : "systems";
+      this.expandedSystemId = options.expandedSystemId;
     }
 
     async _prepareContext(options: any) {
@@ -80,6 +72,15 @@ export function createGalaxyMapManagerClass(deps: any) {
         this.selectedMapId = maps[0]?.id ?? null;
       }
       const selectedMap = this.selectedMapId ? prepareMapForManager(getRawMap(this.selectedMapId)) : null;
+      if (selectedMap) {
+        const systemIds = new Set(selectedMap.systems.map((system: any) => system.id));
+        if (this.expandedSystemId && !systemIds.has(this.expandedSystemId)) this.expandedSystemId = undefined;
+        if (this.expandedSystemId === undefined) this.expandedSystemId = selectedMap.systems[0]?.id ?? null;
+        selectedMap.systems = selectedMap.systems.map((system: any) => ({
+          ...system,
+          isExpanded: system.id === this.expandedSystemId
+        }));
+      }
       return {
         ...context,
         maps,
@@ -98,16 +99,16 @@ export function createGalaxyMapManagerClass(deps: any) {
       activateGalaxyWindowChrome(this, html);
       html.querySelector("[data-action='create-map']")?.addEventListener("click", () => this._onCreateMap());
       html.querySelector("[data-action='edit-map-metadata']")?.addEventListener("click", () => {
-        if (this.selectedMapId) openMapMetadataDialog(this.selectedMapId);
+        this._openViewportEditor("map");
       });
       html.querySelector("[data-action='create-system']")?.addEventListener("click", () => {
-        if (this.selectedMapId) openSystemDialog(this.selectedMapId);
+        this._openViewportEditor("system");
       });
       html.querySelector("[data-action='create-route']")?.addEventListener("click", () => {
-        if (this.selectedMapId) openRouteDialog(this.selectedMapId);
+        this._openViewportEditor("route");
       });
       html.querySelector("[data-action='create-faction']")?.addEventListener("click", () => {
-        if (this.selectedMapId) openFactionDialog(this.selectedMapId);
+        this._openViewportEditor("faction");
       });
       html.querySelectorAll("[data-manager-tab]").forEach((button: any) => {
         button.addEventListener("click", () => {
@@ -117,23 +118,24 @@ export function createGalaxyMapManagerClass(deps: any) {
           this.render({ force: true });
         });
       });
+      html.querySelectorAll("[data-toggle-system]").forEach((button: any) => {
+        button.addEventListener("click", () => {
+          const systemId = button.dataset.toggleSystem;
+          this.expandedSystemId = this.expandedSystemId === systemId ? null : systemId;
+          this.render({ force: true });
+        });
+      });
       html.querySelectorAll("[data-edit-system]").forEach((button: any) => {
-        button.addEventListener("click", () => openSystemDialog(this.selectedMapId, button.dataset.editSystem));
+        button.addEventListener("click", () => this._openViewportEditor("system", { id: button.dataset.editSystem }));
       });
       html.querySelectorAll("[data-create-object]").forEach((button: any) => {
-        button.addEventListener("click", () => openObjectDialog(this.selectedMapId, button.dataset.createObject));
+        button.addEventListener("click", () => this._openViewportEditor("entity", { systemId: button.dataset.createObject }));
       });
       html.querySelectorAll("[data-edit-object]").forEach((button: any) => {
-        button.addEventListener("click", () => openObjectDialog(this.selectedMapId, button.dataset.objectSystem, button.dataset.editObject));
+        button.addEventListener("click", () => this._openViewportEditor("entity", { systemId: button.dataset.objectSystem, id: button.dataset.editObject }));
       });
       html.querySelectorAll("[data-delete-object]").forEach((button: any) => {
         button.addEventListener("click", () => this._confirmDeleteObject(button.dataset.objectSystem, button.dataset.deleteObject));
-      });
-      html.querySelectorAll("[data-primary-object]").forEach((button: any) => {
-        button.addEventListener("click", () => setPrimaryObject(this.selectedMapId, button.dataset.objectSystem, button.dataset.primaryObject));
-      });
-      html.querySelectorAll("[data-merge-system]").forEach((button: any) => {
-        button.addEventListener("click", () => this._openMergeSystem(button.dataset.mergeSystem));
       });
       html.querySelectorAll("[data-show-system]").forEach((button: any) => {
         button.addEventListener("click", () => hideSystemFromPlayers(this.selectedMapId, button.dataset.showSystem, false));
@@ -145,19 +147,19 @@ export function createGalaxyMapManagerClass(deps: any) {
         button.addEventListener("click", () => this._confirmDeleteSystem(button.dataset.deleteSystem));
       });
       html.querySelectorAll("[data-edit-route]").forEach((button: any) => {
-        button.addEventListener("click", () => openRouteDialog(this.selectedMapId, button.dataset.editRoute));
+        button.addEventListener("click", () => this._openViewportEditor("route", { id: button.dataset.editRoute, systemId: button.dataset.routeSystem }));
       });
       html.querySelectorAll("[data-show-route]").forEach((button: any) => {
-        button.addEventListener("click", () => hideRouteFromPlayers(this.selectedMapId, button.dataset.showRoute, false));
+        button.addEventListener("click", () => hideRouteFromPlayers(this.selectedMapId, button.dataset.showRoute, false, button.dataset.routeSystem));
       });
       html.querySelectorAll("[data-hide-route]").forEach((button: any) => {
-        button.addEventListener("click", () => hideRouteFromPlayers(this.selectedMapId, button.dataset.hideRoute, true));
+        button.addEventListener("click", () => hideRouteFromPlayers(this.selectedMapId, button.dataset.hideRoute, true, button.dataset.routeSystem));
       });
       html.querySelectorAll("[data-delete-route]").forEach((button: any) => {
-        button.addEventListener("click", () => this._confirmDeleteRoute(button.dataset.deleteRoute));
+        button.addEventListener("click", () => this._confirmDeleteRoute(button.dataset.deleteRoute, button.dataset.routeSystem));
       });
       html.querySelectorAll("[data-edit-faction]").forEach((button: any) => {
-        button.addEventListener("click", () => openFactionDialog(this.selectedMapId, button.dataset.editFaction));
+        button.addEventListener("click", () => this._openViewportEditor("faction", { id: button.dataset.editFaction }));
       });
       html.querySelectorAll("[data-show-faction]").forEach((button: any) => {
         button.addEventListener("click", () => hideFactionFromPlayers(this.selectedMapId, button.dataset.showFaction, false));
@@ -174,7 +176,7 @@ export function createGalaxyMapManagerClass(deps: any) {
       html.querySelectorAll("[data-select-map]").forEach((button: any) => {
         button.addEventListener("click", () => {
           this.selectedMapId = button.dataset.selectMap;
-          this.jsonDraft = "";
+          this.expandedSystemId = undefined;
           this.render({ force: true });
         });
       });
@@ -189,7 +191,6 @@ export function createGalaxyMapManagerClass(deps: any) {
           const map = await duplicateMap(button.dataset.duplicateMap);
           if (map) {
             this.selectedMapId = map.id;
-            this.jsonDraft = "";
             this.render({ force: true });
           }
         });
@@ -205,11 +206,9 @@ export function createGalaxyMapManagerClass(deps: any) {
           if (!confirmed) return;
           await deleteMap(mapId);
           if (this.selectedMapId === mapId) this.selectedMapId = null;
-          this.jsonDraft = "";
           this.render({ force: true });
         });
       });
-      html.querySelector("[data-action='close-player-map']")?.addEventListener("click", () => closePlayerMap());
     }
 
     async _onCreateMap() {
@@ -232,9 +231,13 @@ export function createGalaxyMapManagerClass(deps: any) {
       });
       if (map) {
         this.selectedMapId = map.id;
-        this.jsonDraft = "";
         this.render({ force: true });
       }
+    }
+
+    _openViewportEditor(kind: string, options: any = {}) {
+      if (!this.selectedMapId) return;
+      openMap(this.selectedMapId)?.openEditor?.(kind, options);
     }
 
     async _confirmDeleteSystem(systemId: string) {
@@ -253,36 +256,12 @@ export function createGalaxyMapManagerClass(deps: any) {
       if (confirmed) await deleteObject(this.selectedMapId, systemId, objectId);
     }
 
-    _openMergeSystem(sourceSystemId: string) {
-      const map = getRawMap(this.selectedMapId);
-      const source = map?.systems?.find((system: any) => system.id === sourceSystemId);
-      const destinations = (map?.systems ?? []).filter((system: any) => system.id !== sourceSystemId);
-      if (!source || !destinations.length) return;
-      const options = destinations.map((system: any) => `<option value="${system.id}">${system.name}</option>`).join("");
-      new Dialog({
-        title: `Merge ${source.name}`,
-        content: `<form class="gmf-crud-form"><p>All ${source.objects?.length ?? 0} entities will move to the destination. Routes will be redirected; internal and duplicate routes will be removed.</p><label>Destination system<select name="destinationSystemId">${options}</select></label></form>`,
-        buttons: {
-          cancel: { icon: '<i class="fa-solid fa-xmark"></i>', label: "Cancel" },
-          merge: {
-            icon: '<i class="fa-solid fa-code-merge"></i>', label: "Merge Systems",
-            callback: (html: any) => {
-              const root = html instanceof HTMLElement ? html : html?.[0];
-              const destinationSystemId = root?.querySelector('[name="destinationSystemId"]')?.value;
-              if (destinationSystemId) mergeSystems(this.selectedMapId, sourceSystemId, destinationSystemId);
-            }
-          }
-        },
-        default: "cancel"
-      }, { classes: ["galaxy-map", "gmf-crud-dialog"], width: 500 }).render(true);
-    }
-
-    async _confirmDeleteRoute(routeId: string) {
+    async _confirmDeleteRoute(routeId: string, systemId = "") {
       const confirmed = await Dialog.confirm({
         title: "Delete Route",
         content: "<p>Delete this route?</p>"
       }, GALAXY_DIALOG_OPTIONS);
-      if (confirmed) await deleteRoute(this.selectedMapId, routeId);
+      if (confirmed) await deleteRoute(this.selectedMapId, routeId, systemId);
     }
 
     async _confirmDeleteFaction(factionId: string) {

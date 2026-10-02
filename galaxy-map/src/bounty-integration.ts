@@ -21,10 +21,6 @@ function getBountyBoardApi() {
   }
 }
 
-export function hasBountyBoardIntegration() {
-  return Boolean(getBountyBoardApi());
-}
-
 /** Resolve optional bounty intel through the canonical System -> Scene relationship. */
 export function getBountyIntelForSystem(system: any): BountyIntel[] {
   const api = getBountyBoardApi();

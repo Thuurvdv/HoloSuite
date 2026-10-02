@@ -19,19 +19,10 @@ export function createPlanetIntelCallout({ root, stage, resolveItems, onOpen }: 
   callout.hidden = true;
   callout.innerHTML = `
     <span class="gmf-intel-callout__connector" aria-hidden="true"></span>
-    <button type="button" class="gmf-intel-callout__body" data-intel-open>
-      <span class="gmf-intel-callout__portrait"><img alt="" data-intel-image hidden /><i class="fa-solid fa-crosshairs" data-intel-fallback></i></span>
-      <span class="gmf-intel-callout__copy"><small data-intel-kicker>ACTIVE BOUNTY</small><strong data-intel-name></strong><span data-intel-meta></span></span>
-    </button>
-    <footer class="gmf-intel-callout__nav" data-intel-nav hidden>
-      <button type="button" data-intel-previous aria-label="Previous bounty"><i class="fa-solid fa-chevron-left"></i></button>
-      <span data-intel-count></span>
-      <button type="button" data-intel-next aria-label="Next bounty"><i class="fa-solid fa-chevron-right"></i></button>
-    </footer>`;
+    <div class="gmf-intel-callout__stack" data-intel-list role="group" aria-label="Matching bounties"></div>`;
   layer.append(callout);
 
   let items: BountyIntel[] = [];
-  let itemIndex = 0;
   let activeNode: HTMLElement | null = null;
   let hideTimer: ReturnType<typeof setTimeout> | null = null;
   let showTimer: ReturnType<typeof setTimeout> | null = null;
@@ -49,6 +40,7 @@ export function createPlanetIntelCallout({ root, stage, resolveItems, onOpen }: 
     hideTimer = null;
     activeNode = null;
     items = [];
+    portraitRequest++;
     callout.hidden = true;
     callout.classList.remove("is-visible", "is-left");
   };
@@ -63,7 +55,8 @@ export function createPlanetIntelCallout({ root, stage, resolveItems, onOpen }: 
     if (!activeNode || callout.hidden) return;
     const stageRect = stage.getBoundingClientRect();
     const nodeRect = activeNode.getBoundingClientRect();
-    const width = callout.offsetWidth || 242;
+    callout.style.setProperty("--gmf-intel-stack-height", `${Math.max(80, stageRect.height - 72)}px`);
+    const width = callout.offsetWidth || 224;
     const height = callout.offsetHeight || 126;
     const placeLeft = nodeRect.right - stageRect.left + width + 24 > stageRect.width;
     const left = placeLeft ? nodeRect.left - stageRect.left - width - 18 : nodeRect.right - stageRect.left + 18;
@@ -72,43 +65,48 @@ export function createPlanetIntelCallout({ root, stage, resolveItems, onOpen }: 
     callout.style.left = `${Math.max(8, left)}px`;
     callout.style.top = `${top}px`;
   };
-  const renderItem = () => {
-    const item = items[itemIndex];
-    if (!item) return hide();
-    const name = callout.querySelector("[data-intel-name]");
-    const kicker = callout.querySelector("[data-intel-kicker]");
-    const meta = callout.querySelector("[data-intel-meta]");
-    const nav: HTMLElement | null = callout.querySelector("[data-intel-nav]");
-    const count = callout.querySelector("[data-intel-count]");
-    const image: HTMLImageElement | null = callout.querySelector("[data-intel-image]");
-    const fallback: HTMLElement | null = callout.querySelector("[data-intel-fallback]");
-    if (name) name.textContent = item.name;
-    if (kicker) kicker.textContent = `BOUNTY // ${(item.statusLabel || "INTEL").toUpperCase()}`;
-    if (meta) meta.textContent = [item.statusLabel, item.reward].filter(Boolean).join(" // ");
-    if (nav) nav.hidden = items.length < 2;
-    if (count) count.textContent = `${String(itemIndex + 1).padStart(2, "0")} / ${String(items.length).padStart(2, "0")}`;
+  const renderItems = () => {
+    const list: HTMLElement | null = callout.querySelector("[data-intel-list]");
+    if (!list || !items.length) return hide();
+    list.replaceChildren();
     const currentPortraitRequest = ++portraitRequest;
-    if (image) {
-      image.hidden = true;
-      image.removeAttribute("src");
-    }
-    if (fallback) fallback.hidden = false;
-    if (item.image && image) {
-      image.src = item.image;
-      image.classList.add("is-css-fallback");
-      image.hidden = false;
-      if (fallback) fallback.hidden = true;
-      image.onerror = () => {
-        if (currentPortraitRequest !== portraitRequest) return;
-        image.hidden = true;
-        if (fallback) fallback.hidden = false;
-      };
-      void getHologramPortrait(item.image, item.id).then((source) => {
-        if (!source || currentPortraitRequest !== portraitRequest || items[itemIndex]?.id !== item.id) return;
-        image.classList.remove("is-css-fallback");
-        image.src = source;
-      });
-    }
+    items.forEach((item, index) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "gmf-intel-callout__body";
+      card.dataset.intelOpen = item.id;
+      card.style.setProperty("--gmf-intel-index", String(index));
+      card.style.setProperty("--gmf-intel-delay", `${index * 55}ms`);
+      card.innerHTML = `
+        <span class="gmf-intel-callout__portrait"><img alt="" hidden /><i class="fa-solid fa-crosshairs"></i></span>
+        <span class="gmf-intel-callout__copy"><small></small><strong></strong><span></span></span>`;
+      const name = card.querySelector("strong");
+      const kicker = card.querySelector("small");
+      const meta = card.querySelector(".gmf-intel-callout__copy > span");
+      const image: HTMLImageElement | null = card.querySelector("img");
+      const fallback: HTMLElement | null = card.querySelector("i");
+      if (name) name.textContent = item.name;
+      if (kicker) kicker.textContent = `BOUNTY // ${(item.statusLabel || "INTEL").toUpperCase()}`;
+      if (meta) meta.textContent = item.reward || "";
+      card.addEventListener("click", () => onOpen(item.id), { signal });
+      if (item.image && image) {
+        image.src = item.image;
+        image.classList.add("is-css-fallback");
+        image.hidden = false;
+        if (fallback) fallback.hidden = true;
+        image.onerror = () => {
+          if (currentPortraitRequest !== portraitRequest) return;
+          image.hidden = true;
+          if (fallback) fallback.hidden = false;
+        };
+        void getHologramPortrait(item.image, item.id).then((source) => {
+          if (!source || currentPortraitRequest !== portraitRequest || !card.isConnected) return;
+          image.classList.remove("is-css-fallback");
+          image.src = source;
+        });
+      }
+      list.append(card);
+    });
     position();
   };
   const show = async (node: HTMLElement) => {
@@ -124,9 +122,8 @@ export function createPlanetIntelCallout({ root, stage, resolveItems, onOpen }: 
     if (currentRequest !== request || activeNode !== node) return;
     if (!resolved.length) return hide();
     items = resolved;
-    itemIndex = 0;
     callout.hidden = false;
-    renderItem();
+    renderItems();
     requestAnimationFrame(() => {
       position();
       callout.classList.add("is-visible");
@@ -152,18 +149,6 @@ export function createPlanetIntelCallout({ root, stage, resolveItems, onOpen }: 
   callout.addEventListener("pointerenter", cancelHide, { signal });
   callout.addEventListener("pointerleave", () => scheduleHide(), { signal });
   callout.addEventListener("click", (event) => event.stopPropagation(), { signal });
-  callout.querySelector("[data-intel-open]")?.addEventListener("click", () => {
-    const item = items[itemIndex];
-    if (item) onOpen(item.id);
-  }, { signal });
-  callout.querySelector("[data-intel-previous]")?.addEventListener("click", () => {
-    itemIndex = (itemIndex - 1 + items.length) % items.length;
-    renderItem();
-  }, { signal });
-  callout.querySelector("[data-intel-next]")?.addEventListener("click", () => {
-    itemIndex = (itemIndex + 1) % items.length;
-    renderItem();
-  }, { signal });
   stage.addEventListener("wheel", () => requestAnimationFrame(position), { signal });
   window.addEventListener("resize", position, { signal });
 
