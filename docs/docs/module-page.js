@@ -102,6 +102,7 @@ function renderCompactDocumentation(module, content) {
       id: "video",
       title: "Video",
       body: paragraphs(documentation.video?.paragraphs || [])
+        + (documentation.video?.items?.length ? videos(documentation.video.items, module.name) : "")
     }
   ];
 

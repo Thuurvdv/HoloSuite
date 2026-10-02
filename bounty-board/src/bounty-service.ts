@@ -43,6 +43,7 @@ export type BountyData = {
   notesGM: string;
   notesPublic: string;
   linkedJournalId: string;
+  sceneId: string;
 };
 
 export type BountyFilters = {
@@ -165,7 +166,8 @@ export function normalizeBounty(source: Partial<BountyData> & Record<string, any
     claimedBy: normalizeString(source.claimedBy),
     notesGM: normalizeString(source.notesGM),
     notesPublic: normalizeString(source.notesPublic),
-    linkedJournalId: normalizeString(source.linkedJournalId)
+    linkedJournalId: normalizeString(source.linkedJournalId),
+    sceneId: normalizeString(source.sceneId)
   };
 }
 
@@ -250,6 +252,24 @@ export function getAllBounties({ includeHidden = game.user?.isGM === true } = {}
 export function getBounty(id: string): BountyData | null {
   const bounty = getBountyStore()[id];
   return bounty ? normalizeBounty(bounty) : null;
+}
+
+export function getBountiesForScene(sceneId: string) {
+  const normalizedSceneId = normalizeString(sceneId);
+  if (!normalizedSceneId || !game.scenes?.get(normalizedSceneId)) return [];
+  const isGM = game.user?.isGM === true;
+  if (!isGM && !isBoardVisibleToPlayers()) return [];
+  return getAllBounties({ includeHidden: isGM })
+    .filter((bounty) => bounty.sceneId === normalizedSceneId)
+    .map((bounty) => ({
+      id: bounty.id,
+      name: bounty.targetName || bounty.title,
+      image: bounty.image,
+      status: bounty.status,
+      statusLabel: getStatusLabel(bounty.status),
+      reward: getRewardLabel(bounty),
+      sceneId: bounty.sceneId
+    }));
 }
 
 export function validateBounty(data: Partial<BountyData>) {

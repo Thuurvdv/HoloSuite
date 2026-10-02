@@ -141,9 +141,9 @@
       "tier": "free",
       "category": "Contracts",
       "image": "assets/BountyBoard.jpg",
-      "pitch": "A sci-fi contract terminal for creating, publishing, claiming, and resolving jobs.",
+      "pitch": "Publish bounties, track their progress, and connect targets directly to locations in Galaxy Map.",
       "compatibility": "Foundry v12-v14",
-      "features": ["Post campaign contracts", "Track rewards and target details", "Player browsing with GM management"],
+      "features": ["Publish and manage campaign contracts", "Player browsing, filters, and contract requests", "Scene-linked bounty intel in Galaxy Map"],
       "docsUrl": "docs/module.html?id=bounty-board",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board"
     },

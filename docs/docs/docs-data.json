@@ -259,46 +259,47 @@
       "category": "Contracts",
       "compatibility": "Foundry v12-v14",
       "image": "assets/BountyBoard.jpg",
-      "summary": "A sci-fi contract terminal for posting, browsing, updating, and resolving bounty jobs.",
-      "overview": "Bounty Board gives GMs a modern or sci-fi job board where players can browse available contracts. It is built for bounty hunting, mercenary work, and mission-hub campaign structures.",
-      "features": [
-        "Create and manage bounty contracts.",
-        "Let players browse available jobs.",
-        "Track target details, rewards, descriptions, and conditions.",
-        "Update or remove bounties as the story changes."
-      ],
-      "installation": [
-        "Enable HoloSuite Core and Bounty Board.",
-        "Open Bounty Board from the HoloSuite launcher.",
-        "Create contracts with the details players need.",
-        "Post or update jobs as the campaign moves through hubs and factions."
-      ],
-      "configuration": [
-        "Define target name, reward, job description, and conditions.",
-        "Keep old jobs visible or remove them when completed.",
-        "Use the board as an in-world contract terminal."
-      ],
-      "faq": [
-        {
-          "question": "Who manages bounties?",
-          "answer": "The GM controls bounty creation, updates, and removal."
+      "summary": "Bounty Board is an application that allows the GM to add targets, their info and reward to a list. GMs can publish and update bounties as the story changes, while players browse the live board and request the work that interests them.",
+      "overview": "Bounty Board is an application that allows the GM to add targets, their info and reward to a list. GMs can publish and update bounties as the story changes, while players browse the live board and request the work that interests them.",
+      "compactDocumentation": {
+        "installation": {
+          "paragraphs": [
+            "Bounty Board requires HoloSuite Core. Galaxy Map is optional and only needed for the map integration."
+          ],
+          "steps": [
+            "Install HoloSuite Core and Bounty Board from Foundry's Add-on Modules screen.",
+            "Enable both modules in your world.",
+            "Open the HoloSuite launcher from the scene controls and choose Bounty Board."
+          ]
         },
-        {
-          "question": "Can players browse jobs?",
-          "answer": "Yes. Players can browse available contracts when the board is available to them."
+        "quickStart": {
+          "paragraphs": [
+            "The GM manages the contracts, while players see only the bounties that have been published."
+          ],
+          "steps": [
+            "Open Bounty Board as a GM and choose New Contract.",
+            "Add the contract ID, title, target, reward, threat level, and description. You can also add an image, faction, location, tags, a longer dossier, and a linked Journal.",
+            "Enable Published to Players and save the contract. The terminal options let you show or hide the entire board and manage several filtered contracts at once.",
+            "Players can search and filter the board, open a contract's details, and choose Request Contract. A request posts to chat for the GM; it does not assign the contract automatically.",
+            "Use Assign, Complete, Mark Failed, Hide, or Archive to keep each contract in step with the campaign.",
+            "To connect a contract to Galaxy Map, enable both modules and choose a Foundry Scene under Location / Scene in the bounty editor. Link that same Scene to a Galaxy Map system or entity. Published bounty intel then appears when the marker is hovered, and selecting the card opens the full contract in Bounty Board. Unpublished or otherwise hidden contracts stay private."
+          ],
+          "notes": [
+            "Bounty Board works normally when Galaxy Map is not installed or enabled."
+          ]
+        },
+        "video": {
+          "paragraphs": [
+            "Watch the short Bounty Board overview."
+          ],
+          "items": [
+            {
+              "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/BountyBoard-clip.mp4",
+              "title": "Bounty Board overview video"
+            }
+          ]
         }
-      ],
-      "videos": [
-        {
-          "src": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/BountyBoard-clip.mp4",
-          "title": "Bounty Board overview"
-        }
-      ],
-      "examples": [
-        "Create a bounty board in a space station hub.",
-        "Offer several faction contracts before a session.",
-        "Update a bounty after the target escapes or the reward changes."
-      ],
+      },
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board"
     },
     {
