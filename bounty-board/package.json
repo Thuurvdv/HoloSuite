@@ -4,7 +4,9 @@
   "version": "1.0.6",
   "type": "module",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "test": "node --experimental-loader ./tests/ts-loader.mjs --test tests/*.test.mjs",
+    "verify": "npm run test && npm run build"
   },
   "devDependencies": {
     "vite": "^5.2.0",
