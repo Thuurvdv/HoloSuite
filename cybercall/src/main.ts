@@ -1849,18 +1849,14 @@ function registerWithHoloSuite() {
     moduleId: MODULE_ID,
     title: "CyberCall",
     tier: "free",
-    version: "1.0.10",
-    updated: "2026-09-04",
+    version: "1.0.11",
+    updated: "2026-10-03",
     icon: "fa-solid fa-satellite-dish",
     entries: [
       {
-        title: "Make CyberCall sound like your world",
-        summary: "GMs can add a set of ringtones for the world. Each player can pick their favorite and adjust its volume without changing the rest of Foundry's interface sounds.",
+        title: "Keep writing while messages update",
+        summary: "CyberCall now keeps your unfinished message, selected contact, and cursor position when the conversation refreshes, so an incoming update no longer clears what you were typing.",
         tags: ["Foundry v12-v14"]
-      },
-      {
-        title: "Ringtones behave more reliably",
-        summary: "Choosing a sound, browsing for a file, and playing it now work consistently across supported Foundry versions, with a clearer setup screen and an audible default."
       }
     ]
   });
