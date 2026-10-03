@@ -1,0 +1,118 @@
+<span class="gmf-celestial gmf-celestial--{{system.iconStyle}}" aria-hidden="true">
+  <svg class="gmf-celestial__svg" viewBox="0 0 100 100" focusable="false">
+    {{#if (gmfEq system.iconStyle "planet")}}
+      <use class="gmf-art gmf-art--back" href="modules/galaxy-map/assets/celestial-icons/planet.svg#back" />
+      <use class="gmf-art gmf-art--base" href="modules/galaxy-map/assets/celestial-icons/planet.svg#base" />
+      <use class="gmf-art gmf-art--surface" href="modules/galaxy-map/assets/celestial-icons/planet.svg#surface" />
+      <g class="gmf-celestial__surface gmf-art-drift--terrain"><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/planet.svg#terrain-strip" /><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/planet.svg#terrain-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--clouds"><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/planet.svg#cloud-strip" /><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/planet.svg#cloud-strip" transform="translate(100 0)" /></g>
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/planet.svg#highlight" />
+      <use class="gmf-art gmf-art--accent gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/planet.svg#accent" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "terrestrial")}}
+      <use class="gmf-art gmf-art--back" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#back" />
+      <use class="gmf-art gmf-art--base" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#base" />
+      <use class="gmf-art gmf-art--surface" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#ocean" />
+      <g class="gmf-celestial__surface gmf-art-drift--terrain"><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#terrain-strip" /><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#terrain-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--detail"><use class="gmf-art gmf-art--detail" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#terrain-detail-strip" /><use class="gmf-art gmf-art--detail" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#terrain-detail-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--clouds"><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#cloud-strip" /><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#cloud-strip" transform="translate(100 0)" /></g>
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#highlight" />
+      <use class="gmf-art gmf-art--accent gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/terrestrial.svg#accent" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "gas-giant")}}
+      <use class="gmf-art gmf-art--back" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#back" />
+      <use class="gmf-art gmf-art--base" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#base" />
+      <use class="gmf-art gmf-art--surface" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#surface" />
+      <g class="gmf-celestial__surface gmf-art-drift--bands"><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#bands-strip" /><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#bands-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--detail"><use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#bands-detail-strip" /><use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#bands-detail-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--storms"><use class="gmf-art gmf-art--accent" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#storm-strip" /><use class="gmf-art gmf-art--accent" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#storm-strip" transform="translate(100 0)" /></g>
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#highlight" />
+      <use class="gmf-art gmf-art--accent gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/gas-giant.svg#accent" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "ice-world")}}
+      <use class="gmf-art gmf-art--back" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#back" />
+      <use class="gmf-art gmf-art--base" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#base" />
+      <use class="gmf-art gmf-art--surface" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#surface" />
+      <g class="gmf-celestial__surface gmf-art-drift--ice"><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#ice-sheet-strip" /><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#ice-sheet-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--cracks"><use class="gmf-art gmf-art--dark" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#crack-strip" /><use class="gmf-art gmf-art--dark" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#crack-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--frost"><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#frost" /><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#frost" transform="translate(100 0)" /></g>
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/ice-world.svg#highlight" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "volcanic")}}
+      <use class="gmf-art gmf-art--back" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#back" />
+      <use class="gmf-art gmf-art--base" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#base" />
+      <use class="gmf-art gmf-art--surface" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#surface" />
+      <g class="gmf-celestial__surface gmf-art-drift--terrain"><use class="gmf-art gmf-art--dark" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#crust-strip" /><use class="gmf-art gmf-art--dark" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#crust-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--detail"><use class="gmf-art gmf-art--accent" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#fissure-strip" /><use class="gmf-art gmf-art--accent" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#fissure-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--terrain"><use class="gmf-art gmf-art--highlight gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#lava-glow" /><use class="gmf-art gmf-art--highlight gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#lava-glow" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--clouds"><use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#smoke-strip" /><use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#smoke-strip" transform="translate(100 0)" /></g>
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#highlight" />
+      <use class="gmf-art gmf-art--accent gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/volcanic.svg#accent" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "artificial")}}
+      <use class="gmf-art gmf-art--back" href="modules/galaxy-map/assets/celestial-icons/artificial.svg#back" />
+      <use class="gmf-art gmf-art--base" href="modules/galaxy-map/assets/celestial-icons/artificial.svg#base" />
+      <use class="gmf-art gmf-art--surface" href="modules/galaxy-map/assets/celestial-icons/artificial.svg#surface" />
+      <g class="gmf-celestial__surface gmf-art-drift--terrain"><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/artificial.svg#panel-strip" /><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/artificial.svg#panel-strip" transform="translate(100 0)" /></g>
+      <g class="gmf-celestial__surface gmf-art-drift--detail"><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/artificial.svg#circuit-strip" /><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/artificial.svg#circuit-strip" transform="translate(100 0)" /></g>
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/artificial.svg#rim" />
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/artificial.svg#highlight" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "ringed")}}
+      <g class="gmf-art-spin--slow"><use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/ringed.svg#ring-back" /></g>
+      <use class="gmf-art gmf-art--back" href="modules/galaxy-map/assets/celestial-icons/ringed.svg#back" />
+      <use class="gmf-art gmf-art--base" href="modules/galaxy-map/assets/celestial-icons/ringed.svg#base" />
+      <use class="gmf-art gmf-art--surface" href="modules/galaxy-map/assets/celestial-icons/ringed.svg#surface" />
+      <g class="gmf-art-spin--slow"><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/ringed.svg#ring-front" /></g>
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/ringed.svg#highlight" />
+      <use class="gmf-art gmf-art--accent gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/ringed.svg#accent" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "star")}}
+      <use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/star.svg#glow" />
+      <g class="gmf-art-spin--slow"><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/star.svg#corona-outer" /></g>
+      <g class="gmf-art-spin--reverse"><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/star.svg#corona-inner" /></g>
+      <use class="gmf-art gmf-art--primary gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/star.svg#core" />
+      <use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/star.svg#core-detail" />
+      <use class="gmf-art gmf-art--accent gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/star.svg#flares" />
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/star.svg#highlight" />
+      <use class="gmf-art gmf-art--accent" href="modules/galaxy-map/assets/celestial-icons/star.svg#accent" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "black-hole")}}
+      <use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/black-hole.svg#glow" />
+      <g class="gmf-art-spin--slow"><use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/black-hole.svg#accretion-back" /></g>
+      <use class="gmf-art gmf-art--void" href="modules/galaxy-map/assets/celestial-icons/black-hole.svg#event-horizon" />
+      <use class="gmf-art gmf-art--highlight gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/black-hole.svg#photon-ring" />
+      <g class="gmf-art-spin--slow"><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/black-hole.svg#accretion-front" /></g>
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "station")}}
+      <use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/station.svg#glow" />
+      <g class="gmf-art-spin--slow"><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/station.svg#outer-ring" /></g>
+      <g class="gmf-art-spin--reverse"><use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/station.svg#inner-ring" /></g>
+      <use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/station.svg#spokes" />
+      <use class="gmf-art gmf-art--base" href="modules/galaxy-map/assets/celestial-icons/station.svg#body" />
+      <use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/station.svg#hub" />
+      <use class="gmf-art gmf-art--highlight gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/station.svg#core" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "diamond")}}
+      <use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/diamond.svg#glow" />
+      <use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/diamond.svg#body" />
+      <use class="gmf-art gmf-art--dark" href="modules/galaxy-map/assets/celestial-icons/diamond.svg#facet-dark" />
+      <use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/diamond.svg#facet-mid" />
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/diamond.svg#facet-light" />
+      <use class="gmf-art gmf-art--accent gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/diamond.svg#core" />
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/diamond.svg#highlight" />
+      <use class="gmf-art gmf-art--accent" href="modules/galaxy-map/assets/celestial-icons/diamond.svg#accent" />
+    {{/if}}
+    {{#if (gmfEq system.iconStyle "void")}}
+      <use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/void.svg#glow" />
+      <g class="gmf-art-spin--slow"><use class="gmf-art gmf-art--secondary" href="modules/galaxy-map/assets/celestial-icons/void.svg#outer-distortion" /><use class="gmf-art gmf-art--primary" href="modules/galaxy-map/assets/celestial-icons/void.svg#outer-ring" /></g>
+      <g class="gmf-art-spin--reverse"><use class="gmf-art gmf-art--accent" href="modules/galaxy-map/assets/celestial-icons/void.svg#inner-ring" /></g>
+      <use class="gmf-art gmf-art--void" href="modules/galaxy-map/assets/celestial-icons/void.svg#void-core" />
+      <g class="gmf-art-spin--slow"><use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/void.svg#particles" /></g>
+      <use class="gmf-art gmf-art--secondary gmf-art-pulse" href="modules/galaxy-map/assets/celestial-icons/void.svg#distortion-lines" />
+      <use class="gmf-art gmf-art--highlight" href="modules/galaxy-map/assets/celestial-icons/void.svg#highlight" />
+      <use class="gmf-art gmf-art--accent" href="modules/galaxy-map/assets/celestial-icons/void.svg#accent" />
+    {{/if}}
+    <circle class="gmf-celestial__frame" cx="50" cy="50" r="48.75" fill="none" />
+  </svg>
+</span>

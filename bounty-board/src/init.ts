@@ -1,11 +1,12 @@
 import { MODULE_ID, MODULE_TITLE, TEMPLATE_ROOT } from "./bounty-constants";
-import { openBountyBoard } from "./bounty-board-app";
+import { openBounty, openBountyBoard } from "./bounty-board-app";
 import {
   archiveBounty,
   claimBounty,
   deleteBounty,
   getAllBounties,
   getBounty,
+  getBountiesForScene,
   publishBounty,
   registerSettings,
   setBoardVisibleToPlayers,
@@ -45,6 +46,8 @@ const LOCALIZATION_FALLBACKS: Record<string, string> = {
   "BOUNTYBOARD.Empty.Unavailable": "The bounty board is currently unavailable.",
   "BOUNTYBOARD.Empty.NoMatches": "No contracts match the current filters.",
   "BOUNTYBOARD.Editor.ContractId": "Contract ID",
+  "BOUNTYBOARD.Editor.Scene": "Location / Scene",
+  "BOUNTYBOARD.Editor.NoScene": "No linked scene",
   "BOUNTYBOARD.Card.ContractId": "Contract identifier",
   "BOUNTYBOARD.Card.Target": "Target",
   "BOUNTYBOARD.Card.Reward": "Reward",
@@ -93,6 +96,8 @@ function exposeApi() {
     open: openBountyBoard,
     getAllBounties,
     getBounty,
+    getBountiesForScene,
+    openBounty,
     upsertBounty,
     deleteBounty,
     publishBounty,
@@ -104,7 +109,7 @@ function exposeApi() {
     // Patreon/premium gating can wrap open() or selected GM actions here.
     // Random bounty generator can call upsertBounty() with generated data.
     // Faction reputation systems can listen for completed/failed state changes.
-    // Galaxy map integration can use location metadata.
+    // Galaxy Map consumes the permission-filtered Scene query above when installed.
     // CyberCall contact integration can add claimant/contact actions.
     // Security camera and crime scene modules can attach evidence links via notes or future document ids.
   };

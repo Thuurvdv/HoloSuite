@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="300"
+   height="300"
+   viewBox="0 0 300 300"
+   version="1.1"
+   id="svg27"
+   sodipodi:docname="frame-9slice.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview27"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="3.89"
+     inkscape:cx="79.048843"
+     inkscape:cy="136.63239"
+     inkscape:window-width="3440"
+     inkscape:window-height="1369"
+     inkscape:window-x="2552"
+     inkscape:window-y="156"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg27" />
+  <defs
+     id="defs10">
+    <linearGradient
+       id="center"
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#f8fafb"
+         id="stop1" />
+      <stop
+         offset="0.55"
+         stop-color="#e7ecef"
+         id="stop2" />
+      <stop
+         offset="1"
+         stop-color="#d3dde1"
+         id="stop3" />
+    </linearGradient>
+    <linearGradient
+       id="edge"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#ffffff"
+         id="stop4" />
+      <stop
+         offset="0.45"
+         stop-color="#dce5e9"
+         id="stop5" />
+      <stop
+         offset="1"
+         stop-color="#aebdc4"
+         id="stop6" />
+    </linearGradient>
+    <linearGradient
+       id="teal"
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="0">
+      <stop
+         offset="0"
+         stop-color="#147dba"
+         stop-opacity="0"
+         id="stop7" />
+      <stop
+         offset="0.25"
+         stop-color="#147dba"
+         id="stop8" />
+      <stop
+         offset="0.75"
+         stop-color="#087b8b"
+         id="stop9" />
+      <stop
+         offset="1"
+         stop-color="#087b8b"
+         stop-opacity="0"
+         id="stop10" />
+    </linearGradient>
+  </defs>
+  <!-- 72-unit slice boundaries match Core's border-image configuration. -->
+  <rect
+     width="300"
+     height="300"
+     fill="url(#center)"
+     id="rect10"
+     x="0"
+     y="0"
+     style="display:none" />
+  <rect
+     x="72"
+     y="69.172234"
+     width="156"
+     height="162.68381"
+     fill="#edf1f3"
+     id="rect11"
+     style="display:inline;fill:#b1bfc6;fill-opacity:1;stroke:none;stroke-width:1.0212" />
+  <!-- Stretchable edge cells. -->
+  <path
+     d="M 72,0 H 228 V 72 H 72 Z m 0,228 h 156 v 72 H 72 Z"
+     fill="url(#edge)"
+     id="path11"
+     style="display:inline" />
+  <path
+     d="M0 72h72v156H0z M228 72h72v156h-72z"
+     fill="#d8e1e5"
+     id="path12" />
+  <path
+     d="M72 58h156M72 242h156M58 72v156M242 72v156"
+     fill="none"
+     stroke="#71858f"
+     stroke-width="2"
+     opacity=".62"
+     id="path13" />
+  <path
+     d="M51 96v108M249 96v108"
+     stroke="#087b8b"
+     stroke-width="3"
+     opacity=".7"
+     id="path15" />
+  <!-- Fixed rounded corporate corner caps. -->
+  <path
+     d="M28 1h44v71H1V28A27 27 0 0 1 28 1z"
+     fill="url(#edge)"
+     stroke="#71858f"
+     stroke-width="2"
+     id="path16"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="M228 1h44a27 27 0 0 1 27 27v44h-71z"
+     fill="url(#edge)"
+     stroke="#71858f"
+     stroke-width="2"
+     id="path17"
+     style="stroke-linejoin:round;stroke-linecap:round" />
+  <path
+     d="M1 228h71v71H28a27 27 0 0 1-27-27z"
+     fill="url(#edge)"
+     stroke="#71858f"
+     stroke-width="2"
+     id="path18"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 228,228 h 71 v 44 a 27,27 0 0 1 -27,27 h -44 z"
+     fill="url(#edge)"
+     stroke="#71858f"
+     stroke-width="2"
+     id="path19"
+     style="display:inline;stroke-linecap:round;stroke-linejoin:round" />
+  <!-- Restrained hardware details remain inside fixed corner cells. -->
+  <g
+     fill="#f8fafb"
+     stroke="#526b74"
+     stroke-width="1.5"
+     id="g23">
+    <circle
+       cx="29"
+       cy="29"
+       r="7"
+       id="circle20" />
+    <circle
+       cx="271"
+       cy="29"
+       r="7"
+       id="circle21" />
+    <circle
+       cx="29"
+       cy="271"
+       r="7"
+       id="circle22" />
+    <circle
+       cx="271"
+       cy="271"
+       r="7"
+       id="circle23" />
+  </g>
+  <g
+     fill="#087b8b"
+     id="g27">
+    <circle
+       cx="29"
+       cy="29"
+       r="2"
+       id="circle24" />
+    <circle
+       cx="271"
+       cy="29"
+       r="2"
+       id="circle25" />
+    <circle
+       cx="29"
+       cy="271"
+       r="2"
+       id="circle26" />
+    <circle
+       cx="271"
+       cy="271"
+       r="2"
+       id="circle27" />
+  </g>
+  <rect
+     x="2"
+     y="2"
+     width="296"
+     height="296"
+     rx="26"
+     fill="none"
+     stroke="#53656f"
+     stroke-width="3"
+     id="rect27" />
+</svg>

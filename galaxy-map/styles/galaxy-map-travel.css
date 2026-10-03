@@ -1,0 +1,50 @@
+.gmf-route-visual {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 54px;
+  color: var(--gmf-cyan);
+}
+
+.gmf-route-visual span {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(88, 216, 255, 0.8));
+}
+
+.gmf-route-visual span:last-child {
+  transform: scaleX(-1);
+}
+
+.gmf-travel-ship {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  /* Rotate the carrier along the route so its exhaust stays directly behind
+     the ship. The Font Awesome artwork correction belongs on the icon only. */
+  transform: translate(-50%, -50%) rotate(var(--gmf-ship-angle, 0deg));
+  color: #f8feff;
+  text-shadow: 0 0 8px rgba(88, 216, 255, 0.95);
+  transition: left 1.85s cubic-bezier(0.2, 0.8, 0.2, 1), top 1.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gmf-travel-ship > i {
+  transform: rotate(45deg);
+}
+
+.gmf-travel-ship::before {
+  content: "";
+  position: absolute;
+  right: 16px;
+  width: 34px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(88, 216, 255, 0.9));
+  filter: blur(0.2px);
+}
+
+.gmf-travel-ship.is-arrived {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}

@@ -35,6 +35,9 @@ jobs:
       - name: Sync shared styles
         run: npm run sync:styles
 
+      - name: Test module
+        run: npm run test -w ${{ steps.meta.outputs.module_id }} --if-present
+
       - name: Build module
         run: npm run build -w ${{ steps.meta.outputs.module_id }}
 
@@ -56,8 +59,8 @@ jobs:
 
           mkdir -p "staging/$MODULE_ID"
 
-          # Foundry manifest and download URLs point to this specific versioned release.
-          MANIFEST_URL="https://github.com/$REPO/releases/download/$TAG/module.json"
+          # Keep the update manifest stable while the archive stays pinned to this release.
+          MANIFEST_URL="https://raw.githubusercontent.com/$REPO/main/$MODULE_ID/module.json"
           DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$MODULE_ID.zip"
 
           jq \

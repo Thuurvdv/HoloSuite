@@ -19,6 +19,16 @@
   }
 }
 
+@keyframes gmf-current-location-bob {
+  0%,
+  100% {
+    transform: translate(-50%, 1px);
+  }
+  50% {
+    transform: translate(-50%, -4px);
+  }
+}
+
 @keyframes gmf-glitch {
   0%,
   100% {
@@ -35,16 +45,112 @@
   }
 }
 
-@keyframes gmf-current-ping {
+@keyframes gmf-route-draw {
+  from {
+    stroke-dashoffset: 160;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes gmf-alert-ring {
+  0%,
+  45% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  55% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes gmf-external-focus-pulse {
+  0% {
+    opacity: 1;
+    transform: scale(0.76);
+  }
+  72%,
+  100% {
+    opacity: 0.12;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes gmf-external-focus-scan {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gmf-celestial-surface-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes gmf-celestial-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gmf-celestial-star-pulse {
   0%,
   100% {
-    opacity: 0.4;
+    opacity: 0.84;
     transform: scale(0.94);
   }
   50% {
     opacity: 1;
-    transform: scale(1.12);
+    transform: scale(1.08);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gmf-galaxy .gmf-route,
+  .gmf-galaxy .gmf-system__halo,
+  .gmf-galaxy .gmf-current-location-marker,
+  .gmf-galaxy .gmf-system.has-alert::before,
+  .gmf-galaxy .gmf-external-focus,
+  .gmf-galaxy .gmf-external-focus::after,
+  .gmf-galaxy .gmf-system.is-obscured .gmf-system__label,
+  .gmf-galaxy .gmf-celestial__surface,
+  .gmf-galaxy .gmf-art-pulse,
+  .gmf-galaxy .gmf-art-spin--slow,
+  .gmf-galaxy .gmf-art-spin--reverse,
+  .gmf-galaxy .gmf-system--anomaly .gmf-system__type-glyph::before {
+    animation: none !important;
+  }
+}
+
+:where(:root, body)[data-holosuite-debug-no-effects="true"] .gmf-galaxy :where(
+  .gmf-route,
+  .gmf-system__halo,
+  .gmf-current-location-marker,
+  .gmf-system.has-alert::before,
+  .gmf-external-focus,
+  .gmf-external-focus::after,
+  .gmf-system.is-obscured .gmf-system__label,
+  .gmf-celestial__surface,
+  .gmf-art-pulse,
+  .gmf-art-spin--slow,
+  .gmf-art-spin--reverse,
+  .gmf-system--anomaly .gmf-system__type-glyph::before,
+  .gmf-intel-callout,
+  .gmf-intel-callout__connector,
+  .gmf-intel-callout__portrait::after,
+  .gmf-intel-callout__portrait img
+) {
+  animation: none !important;
+  transition: none !important;
 }
 
 @media (max-width: 900px) {

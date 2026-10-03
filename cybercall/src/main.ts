@@ -370,6 +370,87 @@ function restoreMessageScrollState(app: any, element: HTMLElement) {
   });
 }
 
+function getMessageComposerStateKey(element: HTMLElement) {
+  const root = element.querySelector("[data-cybercall-active-thread]") as HTMLElement | null;
+  const threadId = String(root?.dataset?.cybercallActiveThread ?? "");
+  if (threadId) return `thread:${threadId}`;
+  if (element.querySelector("form[data-cybercall-group-form]")) return "new-group";
+  return "new-message";
+}
+
+function captureMessageComposerState(app: any) {
+  const element = getElement(app);
+  if (!(element instanceof HTMLElement)) return null;
+
+  const groupForm = element.querySelector("form[data-cybercall-group-form]") as HTMLFormElement | null;
+  if (groupForm) {
+    const groupName = groupForm.elements.namedItem("groupName") as HTMLInputElement | null;
+    return {
+      key: getMessageComposerStateKey(element),
+      groupName: groupName?.value ?? "",
+      memberUserIds: [...groupForm.querySelectorAll<HTMLInputElement>('input[name="memberUserIds"]:checked')]
+        .map((input) => input.value)
+    };
+  }
+
+  const form = element.querySelector("form[data-cybercall-message-form]") as HTMLFormElement | null;
+  if (!form) return null;
+  const body = form.elements.namedItem("body") as HTMLTextAreaElement | null;
+  const getValue = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null)?.value ?? "";
+  return {
+    key: getMessageComposerStateKey(element),
+    body: body?.value ?? "",
+    contactId: getValue("contactId"),
+    replyAs: getValue("replyAs"),
+    sendAs: getValue("sendAs"),
+    bodyWasFocused: document.activeElement === body,
+    selectionStart: body?.selectionStart ?? null,
+    selectionEnd: body?.selectionEnd ?? null
+  };
+}
+
+function restoreMessageComposerState(app: any, element: HTMLElement) {
+  const state = app?._cybercallMessageComposerState;
+  delete app._cybercallMessageComposerState;
+  if (!state || state.key !== getMessageComposerStateKey(element)) return;
+
+  const groupForm = element.querySelector("form[data-cybercall-group-form]") as HTMLFormElement | null;
+  if (groupForm) {
+    const groupName = groupForm.elements.namedItem("groupName") as HTMLInputElement | null;
+    if (groupName) groupName.value = state.groupName ?? "";
+    const selectedMembers = new Set(state.memberUserIds ?? []);
+    groupForm.querySelectorAll<HTMLInputElement>('input[name="memberUserIds"]').forEach((input) => {
+      input.checked = selectedMembers.has(input.value);
+    });
+    return;
+  }
+
+  const form = element.querySelector("form[data-cybercall-message-form]") as HTMLFormElement | null;
+  if (!form) return;
+  const restoreValue = (name: string, value: string) => {
+    const control = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null;
+    if (control && [...(control instanceof HTMLSelectElement ? control.options : [])].some((option) => option.value === value)) {
+      control.value = value;
+    }
+  };
+  restoreValue("contactId", state.contactId);
+  restoreValue("replyAs", state.replyAs);
+  restoreValue("sendAs", state.sendAs);
+
+  const body = form.elements.namedItem("body") as HTMLTextAreaElement | null;
+  if (!body) return;
+  body.value = state.body ?? "";
+  if (state.bodyWasFocused) {
+    requestAnimationFrame(() => {
+      if (!body.isConnected) return;
+      body.focus({ preventScroll: true });
+      if (state.selectionStart !== null && state.selectionEnd !== null) {
+        body.setSelectionRange(state.selectionStart, state.selectionEnd);
+      }
+    });
+  }
+}
+
 function bindCallControls(app: any, html: any = null) {
   const element = getElement(app, html);
   if (!element) return;
@@ -944,6 +1025,7 @@ function bindMessagesControls(app: any, html: any = null) {
   if (!element) return;
 
   restoreMessageScrollState(app, element);
+  restoreMessageComposerState(app, element);
 
   element.querySelectorAll("[data-cybercall-npc-link-drop]").forEach((dropTarget) => {
     dropTarget.addEventListener("dragover", (event) => {
@@ -1085,7 +1167,7 @@ function bindMessagesControls(app: any, html: any = null) {
     composingNewGroup = false;
     form.elements.body.value = "";
     await markActiveThreadRead();
-    await refreshMessages({ scrollToBottom: true });
+    await refreshMessages({ scrollToBottom: true, preserveDraft: false });
   });
 
   markActiveThreadRead();
@@ -1395,6 +1477,9 @@ async function openCallPanel() {
 
 async function refreshMessages(options: any = {}) {
   if (!activePhone || activePhone.mode !== "messages") return;
+  activePhone._cybercallMessageComposerState = options.preserveDraft === false
+    ? null
+    : captureMessageComposerState(activePhone);
   activePhone._cybercallMessageScrollState = {
     ...captureMessageScrollState(activePhone),
     scrollToBottom: options.scrollToBottom === true
@@ -1764,19 +1849,14 @@ function registerWithHoloSuite() {
     moduleId: MODULE_ID,
     title: "CyberCall",
     tier: "free",
-    version: "1.0.10",
-    updated: "2026-09-04",
+    version: "1.0.11",
+    updated: "2026-10-03",
     icon: "fa-solid fa-satellite-dish",
     entries: [
       {
-        title: "Custom ringtones and volume controls",
-        summary: "GMs can add multiple world ringtones, while each user can choose a per-world ringtone and set its volume relative to Foundry's Interface volume.",
-        tags: ["CyberCall", "Ringtones", "Audio", "Settings"]
-      },
-      {
-        title: "Foundry v12–v14 audio compatibility",
-        summary: "Ringtone selection, file browsing, and playback now behave consistently across supported Foundry versions, with clearer configuration contrast and an audible default.",
-        tags: ["CyberCall", "Compatibility", "Foundry v12", "Foundry v14"]
+        title: "Keep writing while messages update",
+        summary: "CyberCall now keeps your unfinished message, selected contact, and cursor position when the conversation refreshes, so an incoming update no longer clears what you were typing.",
+        tags: ["Foundry v12-v14"]
       }
     ]
   });

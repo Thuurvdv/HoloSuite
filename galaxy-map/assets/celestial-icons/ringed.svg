@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 100 100"
+   color="#58d8ff"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="ringed.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="11.67"
+     inkscape:cx="50"
+     inkscape:cy="50"
+     inkscape:window-width="3440"
+     inkscape:window-height="1369"
+     inkscape:window-x="2552"
+     inkscape:window-y="156"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="surface" />
+  <g
+     id="ring-back"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="9"
+     opacity="0.42"
+     transform="matrix(0.9417801,0,0,1.1415822,3.6822085,-7.3790284)">
+    <ellipse
+       cx="50"
+       cy="50"
+       rx="48"
+       ry="18"
+       transform="rotate(-15,50,50)"
+       id="ellipse1" />
+  </g>
+  <g
+     id="back"
+     fill="currentColor"
+     opacity=".2">
+    <circle
+       cx="50"
+       cy="50"
+       r="37"
+       id="circle1" />
+  </g>
+  <g
+     id="base"
+     fill="currentColor"
+     opacity=".4">
+    <circle
+       cx="50"
+       cy="50"
+       r="35"
+       id="circle2" />
+  </g>
+  <g
+     id="surface"
+     fill="currentColor"
+     opacity=".68">
+    <circle
+       cx="50"
+       cy="50"
+       r="33"
+       id="circle3" />
+  </g>
+  <g
+     id="ring-front"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="9"
+     stroke-dasharray="78, 80"
+     stroke-dashoffset="-38"
+     transform="matrix(0.9417801,0,0,1.1415822,3.6822085,-7.3790284)">
+    <ellipse
+       cx="50"
+       cy="50"
+       rx="48"
+       ry="18"
+       transform="rotate(-15,50,50)"
+       id="ellipse3" />
+  </g>
+  <g
+     id="highlight"
+     fill="currentColor"
+     opacity="0.9"
+     style="display:inline">
+    <ellipse
+       cx="38"
+       cy="34"
+       rx="10"
+       ry="4"
+       transform="rotate(-25,38,34)"
+       id="ellipse4" />
+  </g>
+  <g
+     id="accent"
+     fill="currentColor"
+     style="display:inline">
+    <circle
+       cx="67"
+       cy="67"
+       r="3"
+       id="circle4" />
+  </g>
+</svg>

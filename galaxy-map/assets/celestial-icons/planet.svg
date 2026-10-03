@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" color="#58d8ff">
+  <g id="back" fill="currentColor" opacity=".22"><circle cx="50" cy="50" r="49"/></g>
+  <g id="base" fill="currentColor" opacity=".42"><circle cx="50" cy="50" r="46"/></g>
+  <g id="surface" fill="currentColor" opacity=".72"><circle cx="50" cy="50" r="44"/></g>
+  <g id="terrain-strip" fill="currentColor">
+    <path d="M-5 21 9 13l15 7 5 15-12 10-17-4ZM36 10l18 3 9 13-7 13-17-2-8-12ZM70 42l14-9 19 8v25L90 72l-7 18-16-12-8-20Z"/>
+    <path d="m20 66 17-10 14 9-5 17-17 7-14-12Zm36 8 10-7 9 9-8 10Z" opacity=".62"/>
+  </g>
+  <g id="cloud-strip" fill="currentColor" opacity=".5">
+    <path d="M-8 29c20-10 34 7 54-1s38-5 61 4v7c-24-8-38 6-61-1S13 35-8 44Zm14 34c21-12 36 7 55-1s32-6 48 5v7c-18-7-31 8-49 1S26 68 6 76Z"/>
+  </g>
+  <g id="highlight" fill="currentColor" opacity=".9"><ellipse cx="35" cy="27" rx="13" ry="5" transform="rotate(-25 35 27)"/></g>
+  <g id="accent" fill="currentColor"><circle cx="72" cy="72" r="4"/></g>
+</svg>

@@ -24,6 +24,8 @@
   "BOUNTYBOARD.Empty.Unavailable": "The bounty board is currently unavailable.",
   "BOUNTYBOARD.Empty.NoMatches": "No contracts match the current filters.",
   "BOUNTYBOARD.Editor.ContractId": "Contract ID",
+  "BOUNTYBOARD.Editor.Scene": "Location / Scene",
+  "BOUNTYBOARD.Editor.NoScene": "No linked scene",
   "BOUNTYBOARD.Card.ContractId": "Contract identifier",
   "BOUNTYBOARD.Card.Target": "Target",
   "BOUNTYBOARD.Card.Reward": "Reward",

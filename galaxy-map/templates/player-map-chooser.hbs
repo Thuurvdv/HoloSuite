@@ -1,0 +1,14 @@
+<section class="gmf-manager gmf-map-chooser">
+  <header class="gmf-manager__header" data-gmf-window-drag>
+    <div><p class="gmf-kicker">Galaxy Map Framework</p><h2>Choose Galaxy Map</h2></div>
+    <button type="button" class="gmf-window-close" data-action="close-window" title="Close" aria-label="Close map chooser"><i class="fa-solid fa-xmark"></i></button>
+  </header>
+  <div class="gmf-player-map-chooser" aria-label="Available galaxy maps">
+    {{#each maps}}
+      <button type="button" class="gmf-player-map-choice" data-player-open-map="{{id}}">
+        <span class="gmf-player-map-choice__title">{{title}}</span>
+        <span class="gmf-player-map-choice__meta">{{gmfFallback subtitle description}}</span>
+      </button>
+    {{/each}}
+  </div>
+</section>

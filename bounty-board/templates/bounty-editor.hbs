@@ -76,6 +76,15 @@
         </select>
       </label>
       <label>
+        <span>{{localize "BOUNTYBOARD.Editor.Scene"}}</span>
+        <select name="sceneId">
+          <option value="">{{localize "BOUNTYBOARD.Editor.NoScene"}}</option>
+          {{#each scenes as |scene|}}
+            <option value="{{scene.id}}" {{#if (bbEq ../bounty.sceneId scene.id)}}selected{{/if}}>{{scene.name}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>
         <span>Claimed By</span>
         <input type="text" name="claimedBy" value="{{bounty.claimedBy}}" />
       </label>

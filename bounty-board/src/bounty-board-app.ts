@@ -51,6 +51,7 @@ function formatLocalized(key: string, data: Record<string, string | number>, fal
 export class BountyBoardApp extends BaseApplication {
   filters: BountyFilters;
   expanded: Set<string>;
+  focusBountyId: string | null;
 
   static DEFAULT_OPTIONS = {
     id: "bounty-board-app",
@@ -103,6 +104,7 @@ export class BountyBoardApp extends BaseApplication {
       search: ""
     };
     this.expanded = new Set();
+    this.focusBountyId = null;
   }
 
   async _prepareContext(options: any) {
@@ -154,6 +156,17 @@ export class BountyBoardApp extends BaseApplication {
     });
     this.#applySearchFilter();
     this._bindBountyToggles(html);
+    if (this.focusBountyId) {
+      const bountyId = this.focusBountyId;
+      this.focusBountyId = null;
+      requestAnimationFrame(() => {
+        const card = this._findBountyCard(bountyId);
+        if (!card) return;
+        card.tabIndex = -1;
+        card.scrollIntoView({ block: "center", behavior: "smooth" });
+        card.focus({ preventScroll: true });
+      });
+    }
   }
 
   _bindBountyToggles(root: ParentNode) {
@@ -269,6 +282,13 @@ export class BountyBoardApp extends BaseApplication {
 
   #hasActiveFilters() {
     return Object.values(this.filters).some((value) => value.trim().length > 0);
+  }
+
+  focusBounty(bountyId: string) {
+    this.filters = { status: "", threatLevel: "", faction: "", tag: "", search: "" };
+    this.expanded.add(bountyId);
+    this.focusBountyId = bountyId;
+    this.render({ force: true });
   }
 
   async close(options: any = {}) {
@@ -407,6 +427,18 @@ export function openBountyBoard() {
   if (!boardApp) boardApp = new BountyBoardApp();
   boardApp.render({ force: true });
   return boardApp;
+}
+
+export function openBounty(bountyId: string) {
+  const id = String(bountyId || "");
+  const isGM = game.user?.isGM === true;
+  if (!id || (!isGM && !isBoardVisibleToPlayers())) return false;
+  const visible = getAllBounties({ includeHidden: isGM }).some((bounty) => bounty.id === id);
+  if (!visible) return false;
+  if (!boardApp) boardApp = new BountyBoardApp();
+  boardApp.focusBounty(id);
+  boardApp.bringToFront?.();
+  return true;
 }
 
 export async function refreshBountyBoard(bounty: any = null) {

@@ -1,4 +1,6 @@
-// @ts-nocheck
+declare const foundry: any;
+declare const FilePicker: any;
+
 export function slugify(value: unknown): string {
   return String(value || "galaxy-map")
     .toLowerCase()
@@ -7,7 +9,14 @@ export function slugify(value: unknown): string {
 }
 
 export function downloadJson(filename: string, data: unknown): void {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const json = JSON.stringify(data, null, 2);
+  const saveFile = (globalThis as any).saveDataToFile;
+  if (typeof saveFile === "function") {
+    saveFile(json, "application/json", filename);
+    return;
+  }
+
+  const blob = new Blob([json], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -15,7 +24,7 @@ export function downloadJson(filename: string, data: unknown): void {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export function escapeHtml(value: unknown): string {
@@ -24,54 +33,65 @@ export function escapeHtml(value: unknown): string {
   return div.innerHTML;
 }
 
-export function optionList(options: Array<string | { value: string; label: string }>, selected: unknown): string {
-  return options.map((option) => {
-    const value = typeof option === "string" ? option : option.value;
-    const label = typeof option === "string" ? option : option.label;
-    return `<option value="${escapeHtml(value)}" ${value === selected ? "selected" : ""}>${escapeHtml(label)}</option>`;
-  }).join("");
-}
-
-export function documentOptions(collection: any, selectedId: unknown): string {
-  const documents = collection?.contents ?? [];
-  return [
-    { value: "", label: "None" },
-    ...documents.map((doc) => ({ value: doc.id, label: doc.name }))
-  ].map((option) => `<option value="${escapeHtml(option.value)}" ${option.value === selectedId ? "selected" : ""}>${escapeHtml(option.label)}</option>`).join("");
-}
-
-export function documentCheckboxes(collection: any, selectedIds: unknown, name: string): string {
-  const documents = collection?.contents ?? [];
-  const selected = new Set(Array.isArray(selectedIds) ? selectedIds.map(String) : selectedIds ? [String(selectedIds)] : []);
-  const knownIds = new Set(documents.map((doc) => String(doc.id)));
-  const options = [
-    ...documents.map((doc) => ({ value: String(doc.id), label: String(doc.name || doc.id), missing: false })),
-    ...[...selected]
-      .filter((id) => !knownIds.has(id))
-      .map((id) => ({ value: id, label: `Missing scene (${id})`, missing: true }))
-  ];
-
-  if (!options.length) return '<p class="gmf-scene-picker__empty">No scenes exist in this world yet.</p>';
-  return options.map((option) => `
-    <label class="gmf-scene-picker__option ${option.missing ? "is-missing" : ""}">
-      <input type="checkbox" name="${escapeHtml(name)}" value="${escapeHtml(option.value)}" ${selected.has(option.value) ? "checked" : ""} />
-      <span>${escapeHtml(option.label)}</span>
-    </label>
-  `).join("");
-}
-
+/** Dialog render hooks hand over jQuery on v12; everything else passes the element. */
 export function getHtmlElement(html: any): any {
   return html?.[0] ?? html ?? null;
 }
 
-export function getFormValues(html: any): any {
-  const element = getHtmlElement(html);
-  const form = element?.matches?.("form") ? element : element?.querySelector("form");
-  const values: Record<string, any> = {};
-  for (const [name, value] of new FormData(form).entries()) {
-    if (values[name] === undefined) values[name] = value;
-    else if (Array.isArray(values[name])) values[name].push(value);
-    else values[name] = [values[name], value];
-  }
-  return values;
+function notifyChanged(input: HTMLInputElement) {
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+type FilePickerConstructor = new (options: {
+  type: string;
+  current: string;
+  callback: (path: string) => void;
+}) => { browse: () => unknown };
+
+/** Resolve Foundry's configured picker across the v12 wrapper and v13/v14 class exports. */
+export function getFilePickerClass(scope: any = globalThis): FilePickerConstructor | null {
+  const namespacedPicker = scope.foundry?.applications?.apps?.FilePicker;
+  const configuredPicker = namespacedPicker?.implementation;
+  if (typeof configuredPicker === "function") return configuredPicker as FilePickerConstructor;
+  if (typeof namespacedPicker === "function") return namespacedPicker as FilePickerConstructor;
+
+  // Foundry v12 exposes FilePicker as a global lexical binding. In some system
+  // environments it is deliberately absent from globalThis, so check it directly.
+  const legacyPicker = typeof FilePicker === "function" ? FilePicker : scope.FilePicker;
+  return typeof legacyPicker === "function" ? legacyPicker as FilePickerConstructor : null;
+}
+
+/** Wires every Browse and Clear button under `root` to the input named in its data attribute. */
+export function bindFilePickerFields(root: ParentNode) {
+  const findInput = (name?: string) => (name ? root.querySelector<HTMLInputElement>(`[name="${name}"]`) : null);
+  root.querySelectorAll<HTMLElement>("[data-browse-target]").forEach(button => {
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      const input = findInput(button.dataset.browseTarget);
+      if (!input) return;
+      const FilePickerClass = getFilePickerClass();
+      if (!FilePickerClass) {
+        console.error("galaxy-map | Foundry FilePicker is unavailable.");
+        return;
+      }
+      new FilePickerClass({
+        type: "image",
+        current: input.value,
+        callback: (path: string) => {
+          input.value = path;
+          notifyChanged(input);
+        }
+      }).browse();
+    });
+  });
+  root.querySelectorAll<HTMLElement>("[data-clear-target]").forEach(button => {
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      const input = findInput(button.dataset.clearTarget);
+      if (!input) return;
+      input.value = "";
+      notifyChanged(input);
+    });
+  });
 }

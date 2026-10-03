@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 100 100"
+   color="#58d8ff"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="artificial.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs8" />
+  <sodipodi:namedview
+     id="namedview8"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="11.67"
+     inkscape:cx="50"
+     inkscape:cy="50"
+     inkscape:window-width="3440"
+     inkscape:window-height="1369"
+     inkscape:window-x="2552"
+     inkscape:window-y="156"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg8" />
+  <g
+     id="back"
+     fill="currentColor"
+     opacity=".18">
+    <circle
+       cx="50"
+       cy="50"
+       r="49"
+       id="circle1" />
+  </g>
+  <g
+     id="base"
+     fill="currentColor"
+     opacity=".34">
+    <circle
+       cx="50"
+       cy="50"
+       r="46"
+       id="circle2" />
+  </g>
+  <g
+     id="surface"
+     fill="currentColor"
+     opacity=".5">
+    <circle
+       cx="50"
+       cy="50"
+       r="44"
+       id="circle3" />
+  </g>
+  <g
+     id="panel-strip"
+     fill="currentColor"
+     opacity=".74">
+    <path
+       d="M5 13h23v17H5Zm39 2h28v20H44ZM17 42h24v22H17Zm39 4h31v21H56ZM8 72h28v17H8Zm45 3h30v14H53Z"
+       id="path3" />
+  </g>
+  <g
+     id="circuit-strip"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="3"
+     stroke-linejoin="bevel"
+     transform="matrix(0.51312612,0,0,0.0550319,25.157747,33.753451)">
+    <path
+       d="M -5,20 H 25 V 34 H 49 V 16 h 34 v 17 h 22 M -5,52 H 21 V 43 H 45 V 63 H 69 V 48 h 36 M -5,81 H 34 V 69 H 56 V 85 H 86 V 72 h 19"
+       id="path4" />
+    <path
+       d="M -4.6509789,134.16868 H 25.349021 v 14 h 24 v -18 h 34 v 17 h 21.999999 m -109.9999989,19 H 21.349021 v -9 h 24 v 20 h 24 v -15 h 35.999999 m -109.9999989,33 H 34.349021 v -12 h 22 v 16 h 30 v -13 h 18.999999"
+       id="path4-9" />
+    <path
+       d="M -4.2585392,376.60811 H 25.741461 v 14 h 24 v -18 h 34 v 17 h 21.999999 m -109.9999992,19 H 21.741461 v -9 h 24 v 20 h 24 v -15 h 35.999999 m -109.9999992,33 H 34.741461 v -12 h 22 v 16 h 30 v -13 h 18.999999"
+       id="path4-9-3" />
+    <path
+       d="M -9.3853037,561.94892 H 20.614696 v 14 h 24 v -18 h 34 v 17 H 100.6147 m -110.0000037,19 H 16.614696 v -9 h 24 v 20 h 24 v -15 H 100.6147 m -110.0000037,33 H 29.614696 v -12 h 22 v 16 h 30 v -13 H 100.6147"
+       id="path4-9-3-2" />
+    <path
+       d="M 6.4809481,698.44371 H 36.480947 v 14 h 24 v -18 h 34 v 17 h 22.000003 m -110.0000019,19 H 32.480947 v -9 h 24 v 20 h 24 v -15 h 36.000003 m -110.0000019,33 H 45.480947 v -12 h 22 v 16 h 30 v -13 h 19.000003"
+       id="path4-9-3-2-0" />
+    <path
+       d="M -8.3866703,-318.61849 H 21.61333 v 14 h 24 v -18 h 34 v 17 h 22 m -110.0000003,19 H 17.61333 v -9 h 24 v 20 h 24 v -15 h 36 m -110.0000003,33 H 30.61333 v -12 h 22 v 16 h 30 v -13 h 19"
+       id="path4-9-3-2-6" />
+    <path
+       d="M 3.6988006,-223.54238 H 33.698801 v 14 h 24 v -18 h 34 v 17 H 113.6988 m -109.9999994,19 H 29.698801 v -9 h 24 v 20 h 24 v -15 H 113.6988 m -109.9999994,33 H 42.698801 v -12 h 22 v 16 h 30 v -13 H 113.6988"
+       id="path4-9-3-2-6-7" />
+    <path
+       d="m -19.528617,-92.762103 h 30 v 14 h 24 v -18 h 34 v 17 h 22 m -110,19 H 6.4713834 v -9 H 30.471383 v 20 h 24 v -15 h 36 m -110,33 h 39 v -12 h 22 v 16 h 30 v -13 h 19"
+       id="path4-9-3-2-6-4" />
+    <path
+       d="m -14.618946,795.06138 h 30 v 14 h 24 v -18 h 34 v 17 h 22 m -110,19 h 26 v -9 h 24 v 20 h 24 v -15 h 36 m -110,33 h 39 v -12 h 22 v 16 h 30 v -13 h 19"
+       id="path4-9-3-2-6-2" />
+  </g>
+  <g
+     id="rim"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="3">
+    <circle
+       cx="50"
+       cy="50"
+       r="43"
+       id="circle8" />
+  </g>
+  <g
+     id="highlight"
+     fill="currentColor"
+     opacity=".88">
+    <ellipse
+       cx="35"
+       cy="24"
+       rx="12"
+       ry="4"
+       transform="rotate(-24 35 24)"
+       id="ellipse8" />
+  </g>
+</svg>

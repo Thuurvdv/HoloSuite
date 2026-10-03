@@ -10,7 +10,7 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        inlineDynamicImports: true
+        chunkFileNames: "chunks/[name]-[hash].js"
       }
     }
   }

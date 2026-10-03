@@ -1,124 +1,264 @@
-<aside class="gmf-system-panel">
-  {{#if route}}
-    <div class="gmf-system-panel__top">
-      <p class="gmf-kicker">Travel Route</p>
-      <h3>{{route.fromName}} to {{route.toName}}</h3>
-      <div class="gmf-chip-row">
-        <span class="gmf-chip">{{route.type}}</span>
-        <span class="gmf-chip">{{route.travelTime}}</span>
-        <span class="gmf-chip">Fuel {{route.fuelCost}}</span>
-        {{#if route.gmOnly}}<span class="gmf-chip gmf-chip--gm">GM Only</span>{{/if}}
+<aside class="gmf-system-panel" aria-label="Navigation inspector">
+  <div class="gmf-system-panel__scroll">
+  {{#if factionRegistry}}
+    <header class="gmf-system-panel__top">
+      <p class="gmf-kicker">Galaxy organization</p>
+      <h3>Manage Factions</h3>
+    </header>
+    <div class="gmf-inspector-actions">
+      <button type="button" class="gmf-icon-button" data-action="add-inline-faction" title="Add Faction" aria-label="Add Faction"><i class="fa-solid fa-plus"></i></button>
+      <button type="button" class="gmf-icon-button" data-action="close-faction-registry" title="Close" aria-label="Close faction manager"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <section class="gmf-dialog-list">
+      {{#each map.factions}}
+        <article class="gmf-dialog-row">
+          <div><strong><span class="gmf-color-dot" style="--gmf-faction-color: {{color}};"></span>{{name}}</strong><span>{{visibility}}</span></div>
+          <div class="gmf-row-actions">
+            <button type="button" class="gmf-icon-button" data-edit-inline-faction="{{id}}" title="Edit {{name}}" aria-label="Edit {{name}}"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" class="gmf-icon-button" data-delete-inline-faction="{{id}}" title="Delete {{name}}" aria-label="Delete {{name}}"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </article>
+      {{else}}<p class="gmf-empty-copy">No factions yet.</p>{{/each}}
+    </section>
+  {{else}}
+  {{#if creation}}
+    <header class="gmf-system-panel__top">
+      <p class="gmf-kicker">Inline creation</p>
+      <h3>{{creation.title}}</h3>
+    </header>
+    <form id="gmf-panel-editor-form" class="gmf-panel-create" data-panel-create-form data-create-kind="{{creation.kind}}">
+      <input type="hidden" name="x" value="{{creation.x}}" />
+      <input type="hidden" name="y" value="{{creation.y}}" />
+      {{#if creation.isMap}}
+        <label>Title<input type="text" name="title" value="{{creation.mapTitle}}" required autofocus /></label>
+        <label>Subtitle<input type="text" name="subtitle" value="{{creation.subtitle}}" /></label>
+        <label>Description<textarea name="description" rows="4">{{creation.description}}</textarea></label>
+        <label class="gmf-help-label" data-help="Recommended: 4096×2304 WebP (16:9), or at least 3840 px wide.">Background Image
+          <span class="gmf-path-field">
+            <input type="text" name="backgroundImage" value="{{creation.backgroundImage}}" placeholder="Generated starfield" />
+            <button type="button" class="gmf-icon-button" data-browse-target="backgroundImage" title="Browse images" aria-label="Browse galaxy background"><i class="fa-solid fa-folder-open"></i></button>
+            <button type="button" class="gmf-icon-button" data-clear-target="backgroundImage" title="Clear galaxy background" aria-label="Clear galaxy background"><i class="fa-solid fa-xmark"></i></button>
+          </span>
+        </label>
+        <div class="gmf-panel-create__grid">
+          <label>Visibility<select name="visibility"><option value="gm" {{#if (gmfEq creation.visibility "gm")}}selected{{/if}}>GM only</option><option value="players" {{#if (gmfEq creation.visibility "players")}}selected{{/if}}>Players</option></select></label>
+          <label>Player Travel Approval<select name="travelApprovalMode"><option value="gm" {{#if (gmfEq creation.travelApprovalMode "gm")}}selected{{/if}}>GM approval</option><option value="majority" {{#if (gmfEq creation.travelApprovalMode "majority")}}selected{{/if}}>Majority vote</option><option value="unanimous" {{#if (gmfEq creation.travelApprovalMode "unanimous")}}selected{{/if}}>Unanimous agreement</option></select></label>
+        </div>
+      {{/if}}
+      {{#if creation.isSystem}}
+        <label>Name<input type="text" name="name" value="{{creation.name}}" required autofocus /></label>
+        <div class="gmf-panel-create__grid">
+          <label>Status<select name="status"><option value="known" {{#if (gmfEq creation.status "known")}}selected{{/if}}>Known</option><option value="undiscovered" {{#if (gmfEq creation.status "undiscovered")}}selected{{/if}}>Undiscovered</option><option value="visited" {{#if (gmfEq creation.status "visited")}}selected{{/if}}>Visited</option><option value="danger" {{#if (gmfEq creation.status "danger")}}selected{{/if}}>Danger</option><option value="locked" {{#if (gmfEq creation.status "locked")}}selected{{/if}}>Locked</option></select></label>
+          <label>Visibility<select name="visibility"><option value="gm" {{#if (gmfEq creation.visibility "gm")}}selected{{/if}}>GM only</option><option value="players" {{#if (gmfEq creation.visibility "players")}}selected{{/if}}>Players</option></select></label>
+        </div>
+        <label>Description<textarea name="description" rows="4">{{creation.description}}</textarea></label>
+        <label>Custom Marker Image
+          <span class="gmf-path-field">
+            <input type="text" name="markerImage" value="{{creation.markerImage}}" placeholder="Uses the standard system marker" />
+            <button type="button" class="gmf-icon-button" data-browse-target="markerImage" title="Browse custom marker" aria-label="Browse custom marker"><i class="fa-solid fa-folder-open"></i></button>
+            <button type="button" class="gmf-icon-button" data-clear-target="markerImage" title="Clear custom marker" aria-label="Clear custom marker"><i class="fa-solid fa-xmark"></i></button>
+          </span>
+        </label>
+        <label class="gmf-help-label" data-help="Recommended: 4096×2304 WebP (16:9), or at least 3840 px wide.">System Background
+          <span class="gmf-path-field">
+            <input type="text" name="backgroundImage" value="{{creation.backgroundImage}}" placeholder="Generated starfield" />
+            <button type="button" class="gmf-icon-button" data-browse-target="backgroundImage" title="Browse images" aria-label="Browse system background"><i class="fa-solid fa-folder-open"></i></button>
+            <button type="button" class="gmf-icon-button" data-clear-target="backgroundImage" title="Clear system background" aria-label="Clear system background"><i class="fa-solid fa-xmark"></i></button>
+          </span>
+        </label>
+      {{/if}}
+      {{#if creation.isEntity}}
+        <label>Name<input type="text" name="name" value="{{creation.name}}" required autofocus /></label>
+        <div class="gmf-panel-create__grid">
+          <label>Type<select name="kind"><option value="planet" {{#if (gmfEq creation.entityKind "planet")}}selected{{/if}}>Planet</option><option value="star" {{#if (gmfEq creation.entityKind "star")}}selected{{/if}}>Star</option><option value="station" {{#if (gmfEq creation.entityKind "station")}}selected{{/if}}>Space Station</option><option value="moon" {{#if (gmfEq creation.entityKind "moon")}}selected{{/if}}>Moon</option><option value="asteroid" {{#if (gmfEq creation.entityKind "asteroid")}}selected{{/if}}>Asteroid</option><option value="anomaly" {{#if (gmfEq creation.entityKind "anomaly")}}selected{{/if}}>Anomaly</option><option value="black-hole" {{#if (gmfEq creation.entityKind "black-hole")}}selected{{/if}}>Black Hole</option><option value="other" {{#if (gmfEq creation.entityKind "other")}}selected{{/if}}>Other</option></select></label>
+          <label>Status<select name="status"><option value="known" {{#if (gmfEq creation.status "known")}}selected{{/if}}>Known</option><option value="undiscovered" {{#if (gmfEq creation.status "undiscovered")}}selected{{/if}}>Undiscovered</option><option value="visited" {{#if (gmfEq creation.status "visited")}}selected{{/if}}>Visited</option><option value="danger" {{#if (gmfEq creation.status "danger")}}selected{{/if}}>Danger</option><option value="locked" {{#if (gmfEq creation.status "locked")}}selected{{/if}}>Locked</option></select></label>
+        </div>
+        <div class="gmf-panel-create__grid">
+          <label>Visibility<select name="visibility"><option value="inherit" {{#if (gmfEq creation.visibility "inherit")}}selected{{/if}}>Inherit System</option><option value="gm" {{#if (gmfEq creation.visibility "gm")}}selected{{/if}}>GM only</option><option value="players" {{#if (gmfEq creation.visibility "players")}}selected{{/if}}>Players</option></select></label>
+          <label>Faction<select name="factionId"><option value="">Unaffiliated</option>{{#each creation.factionOptions}}<option value="{{id}}" {{#if (gmfEq id ../creation.factionId)}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
+        </div>
+        <label>Description<textarea name="description" rows="4">{{creation.description}}</textarea></label>
+        <label>GM notes<textarea name="notes" rows="3">{{creation.notes}}</textarea></label>
+      {{/if}}
+      {{#if creation.isRoute}}
+        <div class="gmf-panel-create__grid">
+          <label>From<select name="fromSystemId">{{#each creation.systemOptions}}<option value="{{id}}" {{#if (gmfEq id ../creation.fromSystemId)}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
+          <label>To<select name="toSystemId">{{#each creation.systemOptions}}<option value="{{id}}" {{#if (gmfEq id ../creation.toSystemId)}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
+        </div>
+        <div class="gmf-panel-create__grid">
+          <label>Type<select name="type"><option value="safe" {{#if (gmfEq creation.type "safe")}}selected{{/if}}>Safe</option><option value="dangerous" {{#if (gmfEq creation.type "dangerous")}}selected{{/if}}>Dangerous</option><option value="restricted" {{#if (gmfEq creation.type "restricted")}}selected{{/if}}>Restricted</option><option value="smuggler" {{#if (gmfEq creation.type "smuggler")}}selected{{/if}}>Smuggler</option><option value="unknown" {{#if (gmfEq creation.type "unknown")}}selected{{/if}}>Unknown</option></select></label>
+          <label>Visibility<select name="visibility"><option value="gm" {{#if (gmfEq creation.visibility "gm")}}selected{{/if}}>GM only</option><option value="players" {{#if (gmfEq creation.visibility "players")}}selected{{/if}}>Players</option></select></label>
+        </div>
+        <div class="gmf-panel-create__grid">
+          <label>Travel Time<input type="text" name="travelTime" value="{{creation.travelTime}}" /></label>
+          <label>Fuel Cost<input type="number" name="fuelCost" min="0" step="1" value="{{creation.fuelCost}}" /></label>
+        </div>
+        <label>Notes<textarea name="notes" rows="4">{{creation.notes}}</textarea></label>
+      {{/if}}
+      {{#if creation.isFaction}}
+        <label>Name<input type="text" name="name" value="{{creation.name}}" required autofocus /></label>
+        <div class="gmf-panel-create__grid">
+          <label>Color<input type="color" name="color" value="{{creation.color}}" /></label>
+          <label>Visibility<select name="visibility"><option value="gm" {{#if (gmfEq creation.visibility "gm")}}selected{{/if}}>GM only</option><option value="players" {{#if (gmfEq creation.visibility "players")}}selected{{/if}}>Players</option></select></label>
+        </div>
+        <label>Description<textarea name="description" rows="4">{{creation.description}}</textarea></label>
+      {{/if}}
+      <div class="gmf-panel-create__actions">
+        <button type="button" class="gmf-icon-button" data-action="cancel-panel-create" title="Cancel" aria-label="Cancel"><i class="fa-solid fa-xmark"></i></button>
+        <button type="submit" class="gmf-icon-button" title="{{creation.submitLabel}}" aria-label="{{creation.submitLabel}}"><i class="fa-solid fa-check"></i></button>
       </div>
+    </form>
+  {{else}}
+  {{#if route}}
+    <header class="gmf-system-panel__top">
+      <p class="gmf-kicker">{{#if objectView}}Location Route{{else}}Travel Route{{/if}}</p>
+      <h3>{{route.fromName}} <i class="fa-solid fa-arrow-right-long"></i> {{route.toName}}</h3>
+      {{#if objectView}}<div class="gmf-status-icons" aria-label="Route information">
+        <span title="Route type: {{route.type}}" aria-label="Route type: {{route.type}}"><i class="fa-solid fa-route"></i></span>
+        <span title="{{gmfFallback route.travelTime "Transit time unknown"}}" aria-label="{{gmfFallback route.travelTime "Transit time unknown"}}"><i class="fa-solid fa-clock"></i></span>
+        <span title="Fuel {{route.fuelCost}}" aria-label="Fuel {{route.fuelCost}}"><i class="fa-solid fa-gas-pump"></i></span>
+        {{#if route.gmOnly}}<span title="GM Only" aria-label="GM Only"><i class="fa-solid fa-eye-slash"></i></span>{{/if}}
+      </div>{{/if}}
+    </header>
+
+    <div class="gmf-route-visual" aria-hidden="true">
+      <span></span><i class="fa-solid fa-chevron-right"></i><span></span>
     </div>
 
-    <div class="gmf-system-panel__section">
+    <section class="gmf-system-panel__section">
       <h4>Transit Data</h4>
       <p>{{gmfFallback route.notes "No route intelligence has been recorded."}}</p>
-    </div>
+    </section>
 
-    {{#if map.canEdit}}
-      <div class="gmf-link-actions">
-        <button type="button" data-action="edit-route">
-          <i class="fa-solid fa-pen"></i>
-          Edit Route
-        </button>
-        <button type="button" data-action="reveal-route">
-          <i class="fa-solid fa-eye"></i>
-          Reveal Route
-        </button>
-        <button type="button" data-action="hide-route">
-          <i class="fa-solid fa-eye-slash"></i>
-          Hide Route
-        </button>
-        <button type="button" data-action="delete-route">
-          <i class="fa-solid fa-trash"></i>
-          Delete
-        </button>
+    {{#if map.canEdit}}{{#unless objectView}}
+      <div class="gmf-inspector-actions">
+        <button type="button" class="gmf-icon-button" data-action="edit-route" title="Edit Route" aria-label="Edit Route"><i class="fa-solid fa-pen"></i></button>
+        <details class="gmf-action-menu">
+          <summary title="More route actions" aria-label="More route actions"><i class="fa-solid fa-ellipsis"></i></summary>
+          <div class="gmf-action-menu__panel">
+            {{#if route.gmOnly}}
+              <button type="button" class="gmf-icon-button" data-action="reveal-route" title="Reveal Route" aria-label="Reveal Route"><i class="fa-solid fa-eye"></i><span>Reveal Route</span></button>
+            {{else}}
+              <button type="button" class="gmf-icon-button" data-action="hide-route" title="Hide Route" aria-label="Hide Route"><i class="fa-solid fa-eye-slash"></i><span>Hide Route</span></button>
+            {{/if}}
+            <button type="button" class="gmf-icon-button" data-action="delete-route" title="Delete Route" aria-label="Delete Route"><i class="fa-solid fa-trash"></i><span>Delete Route</span></button>
+          </div>
+        </details>
       </div>
-    {{/if}}
+    {{/unless}}{{/if}}
   {{else}}
     {{#if system}}
-      <div class="gmf-system-panel__top" style="--gmf-faction-color: {{system.factionColor}};">
+      <header class="gmf-system-panel__top" style="--gmf-faction-color: {{system.factionColor}};">
         <p class="gmf-kicker">{{system.factionName}}</p>
         <h3>{{system.displayName}}</h3>
-        <div class="gmf-chip-row">
-          <span class="gmf-chip">{{system.displayType}}</span>
-          <span class="gmf-chip gmf-chip--status">{{system.displayStatus}}</span>
-          {{#if system.isCurrent}}<span class="gmf-chip gmf-chip--current">Current</span>{{/if}}
-          {{#if system.gmOnly}}<span class="gmf-chip gmf-chip--gm">GM Only</span>{{/if}}
-        </div>
-      </div>
+        {{#if objectView}}<div class="gmf-status-icons" aria-label="Location state">
+          <span title="Type: {{system.displayType}}" aria-label="Type: {{system.displayType}}"><i class="fa-solid fa-cube"></i></span>
+          <span title="Status: {{system.displayStatus}}" aria-label="Status: {{system.displayStatus}}"><i class="fa-solid fa-signal"></i></span>
+          {{#if system.isCurrent}}<span title="Current location" aria-label="Current location"><i class="fa-solid fa-location-crosshairs"></i></span>{{/if}}
+          {{#if system.isDestination}}<span title="Destination" aria-label="Destination"><i class="fa-solid fa-crosshairs"></i></span>{{/if}}
+          {{#if system.hasAlert}}<span title="Alert" aria-label="Alert"><i class="fa-solid fa-triangle-exclamation"></i></span>{{/if}}
+          {{#if system.obscured}}<span title="Unknown" aria-label="Unknown"><i class="fa-solid fa-question"></i></span>{{/if}}
+          {{#if system.gmOnly}}<span title="Hidden from players" aria-label="Hidden from players"><i class="fa-solid fa-eye-slash"></i></span>{{/if}}
+        </div>{{/if}}
+      </header>
 
-      {{#if system.image}}
-        {{#unless system.obscured}}
-          <img class="gmf-system-panel__image" src="{{system.image}}" alt="{{system.name}}" />
+      {{#unless planetView}}
+      <div class="gmf-inspector-visual {{#if system.showImage}}gmf-inspector-visual--image{{/if}}" style="--gmf-faction-color: {{system.factionColor}};">
+        {{#if system.showImage}}
+          <img src="{{system.image}}" alt="{{system.name}}" />
+        {{/if}}
+        {{#unless system.showImage}}
+          <div class="gmf-inspector-visual__marker {{#if system.hasCustomMarker}}has-custom-marker{{/if}} gmf-system--{{system.displayType}} gmf-icon--{{system.iconStyle}} gmf-status--{{system.displayStatus}}" style="--gmf-system-size: 92px;">
+            <span class="gmf-system__halo"></span>
+            {{#if system.hasCustomMarker}}
+              <img class="gmf-custom-marker__image" src="{{system.displayMarkerImage}}" alt="" draggable="false" />
+            {{else}}{{#if system.animatedCelestial}}
+              {{> "modules/galaxy-map/templates/celestial-icon.hbs" system=system}}
+            {{else}}
+              <span class="gmf-system__core"></span>
+            {{/if}}{{/if}}
+            {{#unless system.hasCustomMarker}}{{#unless system.animatedCelestial}}<span class="gmf-system__type-glyph" aria-hidden="true"></span>{{/unless}}{{/unless}}
+          </div>
         {{/unless}}
-      {{/if}}
-
-      <div class="gmf-system-panel__section">
-        <h4>Survey</h4>
-        <p>{{gmfFallback system.displayDescription "No survey text has been recorded."}}</p>
       </div>
+
+      {{#if objectView}}
+        <div class="gmf-inspector-navigation-actions">
+          {{#if system.canInspectSystem}}<button type="button" class="gmf-icon-button gmf-inspect-system" data-action="inspect-system" title="Inspect {{system.displayType}}" aria-label="Inspect {{system.displayType}}"><span class="gmf-navigation-icon gmf-navigation-icon--planet" aria-hidden="true"></span></button>{{/if}}
+          {{#if system.canTravel}}{{#unless system.obscured}}<button type="button" class="gmf-icon-button gmf-travel-to-object" data-action="travel-to-object" title="{{#if playerMode}}Request travel to {{system.displayName}}{{else}}Travel to {{system.displayName}}{{/if}}" aria-label="{{#if playerMode}}Request travel to {{system.displayName}}{{else}}Travel to {{system.displayName}}{{/if}}"><i class="fa-solid fa-route"></i></button>{{/unless}}{{/if}}
+        </div>
+      {{else}}
+        <button type="button" class="gmf-icon-button gmf-inspect-system" data-action="open-system" title="Open System" aria-label="Open System"><span class="gmf-navigation-icon gmf-navigation-icon--system" aria-hidden="true"></span></button>
+      {{/if}}
+      {{/unless}}
+
+      <section class="gmf-system-panel__section">
+        <h4>Analysis</h4>
+        <p>{{gmfFallback system.displayDescription "No analysis has been recorded."}}</p>
+      </section>
+
+      {{#if objectView}}
+      {{#unless system.obscured}}
+        <details class="gmf-system-panel__section gmf-linked-content" open data-linked-content-drop>
+          <summary><span>Linked Content</span><small>{{linkedScenes.length}}{{#if linkedJournal}} + journal{{/if}}</small></summary>
+          <div class="gmf-linked-content__list">
+            {{#if linkedJournal}}
+              <div class="gmf-linked-content__item">
+                <button type="button" data-action="open-journal" title="Open {{linkedJournal.name}}"><i class="fa-solid fa-book-open"></i><span>{{linkedJournal.name}}</span></button>
+                {{#if canEditLinks}}<button type="button" data-unlink-linked-journal title="Unlink journal" aria-label="Unlink {{linkedJournal.name}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+              </div>
+            {{/if}}
+            {{#each linkedScenes as |scene|}}
+              <div class="gmf-linked-content__item" {{#if ../canEditLinks}}draggable="true" data-planet-scene-drag="{{scene.id}}" data-planet-scene-uuid="{{scene.uuid}}" title="Drag onto the planet to place this Scene"{{/if}}>
+                <button type="button" data-open-linked-scene="{{scene.id}}" title="Open {{scene.name}}"><i class="fa-solid fa-image"></i><span>{{scene.name}}</span></button>
+                {{#if ../canEditLinks}}<button type="button" data-unlink-planet-scene="{{scene.id}}" title="Unlink scene" aria-label="Unlink {{scene.name}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+              </div>
+            {{/each}}
+            {{#unless linkedJournal}}{{#unless linkedScenes.length}}<p class="gmf-empty-copy">No linked content.</p>{{/unless}}{{/unless}}
+          </div>
+          {{#if canEditLinks}}<div class="gmf-linked-content__drop-hint"><i class="fa-solid fa-arrow-down"></i> Drop a Scene or Journal here to link it</div>{{/if}}
+        </details>
+      {{/unless}}
+      {{/if}}
 
       {{#unless playerMode}}
-        <div class="gmf-system-panel__section gmf-system-panel__section--gm">
+      {{#if system.notes}}
+        <section class="gmf-system-panel__section gmf-system-panel__section--gm">
           <h4>GM Notes</h4>
-          <p>{{gmfFallback system.notes "No GM notes."}}</p>
-        </div>
+          <p>{{system.notes}}</p>
+        </section>
+      {{/if}}
       {{/unless}}
 
-      {{#unless system.obscured}}
-        {{#if system.journalId}}
-          <div class="gmf-link-actions">
-            <button type="button" data-action="open-journal">
-              <i class="fa-solid fa-book-open"></i>
-              Journal
-            </button>
-          </div>
-        {{/if}}
-      {{/unless}}
-
-      {{#if system.canTravel}}
-        {{#unless system.obscured}}
-          <div class="gmf-link-actions gmf-link-actions--stacked">
-            <button type="button" data-action="travel-to-system">
-              <i class="fa-solid fa-rocket"></i>
-              {{#if playerMode}}Request Travel{{else}}Travel To{{/if}}
-            </button>
-          </div>
+      <div class="gmf-inspector-actions">
+        {{#unless planetView}}
+          {{#unless objectView}}{{#if system.canTravel}}
+            {{#unless system.obscured}}
+            <div class="gmf-inspector-actions__primary">
+              <button type="button" class="gmf-icon-button" data-action="travel-to-system" title="{{#if playerMode}}Request Travel{{else}}Travel to System{{/if}}" aria-label="{{#if playerMode}}Request Travel{{else}}Travel to System{{/if}}"><i class="fa-solid fa-route"></i></button>
+            </div>
+            {{/unless}}
+          {{/if}}{{/unless}}
         {{/unless}}
-      {{/if}}
-
-      {{#if map.canEdit}}
-        <div class="gmf-link-actions gmf-link-actions--stacked">
-          <button type="button" data-action="edit-system">
-            <i class="fa-solid fa-pen"></i>
-            Edit System
-          </button>
-          {{#unless system.isCurrent}}
-            <button type="button" data-action="set-current-system">
-              <i class="fa-solid fa-location-crosshairs"></i>
-              Set Current
-            </button>
-          {{/unless}}
-          <button type="button" data-action="reveal-system">
-            <i class="fa-solid fa-eye"></i>
-            Reveal System
-          </button>
-          <button type="button" data-action="hide-system">
-            <i class="fa-solid fa-eye-slash"></i>
-            Hide System
-          </button>
-          <button type="button" data-action="notify-discovery">
-            <i class="fa-solid fa-bell"></i>
-            Notify Discovery
-          </button>
-          <button type="button" data-action="delete-system">
-            <i class="fa-solid fa-trash"></i>
-            Delete
-          </button>
+        {{#if map.canEdit}}
+        <div class="gmf-inspector-actions__secondary">
+            {{#if planetView}}<button type="button" class="gmf-icon-button" data-action="edit-system" title="Edit Location" aria-label="Edit Location"><i class="fa-solid fa-pen"></i></button>{{/if}}
+            <details class="gmf-action-menu">
+              <summary title="GM Actions" aria-label="GM Actions"><i class="fa-solid fa-ellipsis"></i></summary>
+              <div class="gmf-action-menu__panel">
+                {{#unless planetView}}<button type="button" class="gmf-icon-button" data-action="edit-system" title="Edit {{#if objectView}}Location{{else}}System{{/if}}" aria-label="Edit {{#if objectView}}Location{{else}}System{{/if}}"><i class="fa-solid fa-pen"></i><span>Edit {{#if objectView}}Location{{else}}System{{/if}}</span></button>{{/unless}}
+                {{#unless system.isCurrent}}<button type="button" class="gmf-icon-button" data-action="set-current-system" title="Set Current Location" aria-label="Set Current Location"><i class="fa-solid fa-location-crosshairs"></i><span>Set Current</span></button>{{/unless}}
+                {{#if system.gmOnly}}
+                  <button type="button" class="gmf-icon-button" data-action="reveal-system" title="Reveal to Players" aria-label="Reveal to Players"><i class="fa-solid fa-eye"></i><span>Reveal</span></button>
+                {{else}}
+                  <button type="button" class="gmf-icon-button" data-action="hide-system" title="Hide from Players" aria-label="Hide from Players"><i class="fa-solid fa-eye-slash"></i><span>Hide</span></button>
+                {{/if}}
+                <button type="button" class="gmf-icon-button" data-action="delete-system" title="Delete {{#if objectView}}Location{{else}}System{{/if}}" aria-label="Delete {{#if objectView}}Location{{else}}System{{/if}}"><i class="fa-solid fa-trash"></i><span>Delete</span></button>
+              </div>
+            </details>
         </div>
-      {{/if}}
+        {{/if}}
+      </div>
     {{else}}
       <div class="gmf-empty">
         <i class="fa-solid fa-location-crosshairs"></i>
@@ -126,4 +266,7 @@
       </div>
     {{/if}}
   {{/if}}
+  {{/if}}
+  {{/if}}
+  </div>
 </aside>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" color="#58d8ff">
+  <g id="glow" fill="currentColor" opacity=".12"><circle cx="50" cy="50" r="47"/></g>
+  <g id="outer-distortion" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="9 7" opacity=".5"><circle cx="50" cy="50" r="43"/></g>
+  <g id="outer-ring" fill="none" stroke="currentColor" stroke-width="6"><ellipse cx="50" cy="50" rx="38" ry="31" transform="rotate(-20 50 50)"/></g>
+  <g id="inner-ring" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="8 5" opacity=".72"><circle cx="50" cy="50" r="27"/></g>
+  <g id="void-core" fill="currentColor"><circle cx="50" cy="50" r="20"/></g>
+  <g id="particles" fill="currentColor"><circle cx="19" cy="31" r="2"/><circle cx="77" cy="25" r="2.5"/><circle cx="84" cy="66" r="2"/><circle cx="26" cy="78" r="2.5"/></g>
+  <g id="distortion-lines" fill="none" stroke="currentColor" stroke-width="2" opacity=".55"><path d="M7 47c14-9 20 8 33 0m20 5c13-8 20 8 34-1M23 14c7 12-5 18 3 28m50 18c8 12-4 18 2 28"/></g>
+  <g id="highlight" fill="currentColor" opacity=".8"><path d="M31 31c8-8 17-11 27-8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></g>
+  <g id="accent" fill="currentColor"><circle cx="63" cy="42" r="3"/></g>
+</svg>

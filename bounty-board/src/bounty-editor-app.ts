@@ -12,8 +12,12 @@ const ApplicationV2 = foundry.applications?.api?.ApplicationV2 ?? Application;
 const HandlebarsApplicationMixin = foundry.applications?.api?.HandlebarsApplicationMixin;
 const BaseApplication = HandlebarsApplicationMixin ? HandlebarsApplicationMixin(ApplicationV2) : ApplicationV2;
 
-function getDocuments(collection: any) {
-  return (collection?.contents ?? []).map((document) => ({ id: document.id, name: document.name }));
+function getDocuments(collection: any, selectedId = "", missingLabel = "Missing document") {
+  const documents = (collection?.contents ?? []).map((document) => ({ id: String(document.id), name: String(document.name ?? document.id) }));
+  if (selectedId && !documents.some((document) => document.id === selectedId)) {
+    documents.push({ id: selectedId, name: `${missingLabel} (${selectedId})` });
+  }
+  return documents;
 }
 
 function parseForm(form: HTMLFormElement): Record<string, any> {
@@ -35,7 +39,8 @@ function parseForm(form: HTMLFormElement): Record<string, any> {
     image: String(formData.get("image") ?? ""),
     published: formData.get("published") === "on",
     claimedBy: String(formData.get("claimedBy") ?? ""),
-    linkedJournalId: String(formData.get("linkedJournalId") ?? "")
+    linkedJournalId: String(formData.get("linkedJournalId") ?? ""),
+    sceneId: String(formData.get("sceneId") ?? "")
   };
 }
 
@@ -89,7 +94,8 @@ export class BountyEditorApp extends BaseApplication {
       },
       statuses: Object.values(BOUNTY_STATUSES),
       threatLevels: THREAT_LEVELS,
-      journals: getDocuments(game.journal),
+      journals: getDocuments(game.journal, bounty.linkedJournalId, "Missing journal"),
+      scenes: getDocuments(game.scenes, bounty.sceneId, "Missing scene"),
       canEdit: game.user?.isGM === true
     };
   }

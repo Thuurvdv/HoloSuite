@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" color="#58d8ff">
+  <g id="glow" fill="currentColor" opacity=".14"><circle cx="50" cy="50" r="46"/></g>
+  <g id="body" fill="currentColor"><path d="m50 5 39 42-39 48L11 47Z"/></g>
+  <g id="facet-dark" fill="currentColor" opacity=".35"><path d="M11 47 50 56 50 95Zm39 9 39-9-39 48Z"/></g>
+  <g id="facet-mid" fill="currentColor" opacity=".58"><path d="M11 47 34 22l16 34Zm39 9 16-34 23 25Z"/></g>
+  <g id="facet-light" fill="currentColor" opacity=".82"><path d="m34 22 16-17 16 17-16 34Z"/></g>
+  <g id="core" fill="currentColor" opacity=".5"><path d="m50 34 17 16-17 18-17-18Z"/></g>
+  <g id="highlight" fill="currentColor" opacity=".92"><path d="m38 25 12-13 7 8-14 17Z"/></g>
+  <g id="accent" fill="currentColor"><circle cx="50" cy="50" r="4"/></g>
+</svg>

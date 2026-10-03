@@ -1,86 +1,43 @@
 # Galaxy Map
 
-Galaxy Map is a system-agnostic Foundry VTT module for campaign-scale star maps. It gives your sci-fi game a holographic, space-opera-inspired galaxy map where star systems are clickable, routes are traversable, and discoveries unfold over the course of a campaign. Everything runs inside Foundry with no external services.
+Galaxy Map turns a Foundry world into a navigable star chart. Build a galaxy, open individual systems, place planets and stations, connect destinations with routes, and reveal the map as the campaign grows. GMs work directly in the viewport, while players see only what their crew has discovered.
 
-![Galaxy Map Manager](../images/Galaxy%20Map%20Manager.png)
+![Galaxy Map Manager](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/images/Galaxy%20Map%20Manager.png)
 
-## What Does It Do?
+## What's New in 2.0
 
-- Provides an interactive star map that the GM builds and the players explore over time.
-- Star systems are clickable nodes with custom icons, colors, sizes, and pulse effects. Each system can hold a description, multiple tagged Foundry scenes, a linked journal entry, and faction affiliation.
-- Routes connect systems and display travel time, fuel cost, and route type. Players can travel along routes with a ship animation.
-- The GM controls which systems and routes are visible to players. Hidden systems can be revealed one at a time for dramatic discovery moments, complete with a "New System Discovered" notification.
-- Players can request travel to a system, prompting the GM and other players to accept or decline.
-- A current location marker tracks where the party is on the map.
-- Maps can be zoomed, panned, and the window can be resized to fit your setup.
-- Full JSON import and export for sharing maps between worlds.
+Galaxy Map 2.0 rebuilds the map around a real galaxy, system, and location hierarchy. Systems now open into their own local maps, where planets, stations, moons, anomalies, and other destinations can have routes, linked Foundry content, custom markers, and optional 3D detail views.
 
-## Tutorial: Using Galaxy Map as a DM
+Editing now happens directly in the map viewport, travel can require GM approval, a majority vote, or unanimous agreement, and existing maps are upgraded automatically when the primary GM enters the world. The Map Manager also supports JSON import and export for moving maps between worlds.
 
-### Getting Started
+## Installation
 
-1. Enable **Galaxy Map** & **Holosuite-core** in your Foundry world.
-2. Open the **Map Manager** from the HoloSuite launcher.
-3. In the Map Manager, click **Create Map** to start a new map, or **Import JSON** to load an exported map.
-4. Click **Open** on a map to view it.
+Galaxy Map requires HoloSuite Core.
 
-### Building Your Own Map
+1. Install **HoloSuite Core** and **Galaxy Map** from Foundry's Add-on Modules screen.
+2. Enable both modules in your world.
+3. Open the HoloSuite launcher from the scene controls and choose **Galaxy Map**.
 
-1. In the Map Manager, click **New Map** and give it a name and optional description.
-2. Open the map. Right-click on empty space to add your first star system.
-3. Fill in the system name, description, and optional image. Choose an icon style, color, size, and whether it pulses.
-4. Add more systems by right-clicking empty space again.
-5. To create a route, right-click a system and choose **Create Route From Here**, then select the destination system. Fill in the route type, travel time, fuel cost, and notes.
-6. Drag systems around to arrange the map. Positions are saved automatically.
-7. Right-click systems or routes to edit, reveal, or delete them.
+For manual installation, use this manifest URL:
 
-### Managing Visibility
+`https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/galaxy-map/module.json`
 
-- By default, new systems are visible to players. You can change any system or route to GM-only through its edit form.
-- To reveal a hidden system during a session, right-click it and choose **Reveal System**. It becomes visible to players immediately.
-- Click **Notify Discovery** to push a "New System Discovered" notification to all players at the same time.
-- Undiscovered systems that are set to player-visible show up as "???" on the player map until you choose to reveal their details.
+If you are opening a world made with an older version of Galaxy Map, the primary GM should enter the world first so its saved maps can be upgraded safely.
 
-### Travel
+## Quick Start
 
-1. Click on a system that is connected to the party's current location by a direct route.
-2. Click **Travel To** in the system details panel. The ship marker animates along the route to the destination.
-3. Players can also request travel. When they do, you and all other active players receive an accept/decline prompt. If everyone accepts, the ship moves. If anyone declines, travel is cancelled.
+You can build and run the map without leaving the viewport.
 
-### Showing the Map to Players
+1. Open **Map Manager**, create a map, and then open it.
+2. Use the edit button in the viewport header to set the galaxy name, background, visibility, and player travel approval rule.
+3. Right-click empty galaxy space to add a system. Select it to edit its details in the side panel, and drag it to place it on the map.
+4. Open the system and right-click empty space to add planets, stars, stations, moons, or other locations. Each location can use a bundled marker or your own image, and its optional detail view can use a preset appearance, a flat colour, or a custom texture.
+5. Right-click a system or location marker and choose **Add Route**. The route editor opens in the side panel, where you can choose its destination, visibility, travel time, fuel cost, and notes.
+6. Set the party's current location and reveal the systems, locations, and routes the players should know about.
+7. Players can select a reachable destination and request travel. Galaxy Map follows the approval rule set for that map: GM approval, majority vote, or unanimous agreement.
 
-- Click **Show** in the Map Manager or use a macro to push the map to all player screens.
-- Players see only systems, routes, and factions that you have made visible. GM-only content stays hidden.
-- Close all player map windows from the Map Manager when you are done.
+For a custom galaxy or system background, a large 16:9 image works best; **4096 x 2304 px** is the recommended size. Markers stay attached to their positions on the image while the map is panned and zoomed, and the full uploaded image sets the natural zoom-out limit.
 
-## Tutorial: Using Galaxy Map as a Player
+## Video
 
-### Viewing the Map
-
-1. Open **Galaxy Map** from the HoloSuite launcher.
-2. A map chooser opens showing all maps the GM has shared with players. Pick one to view.
-3. Click on any visible star system to see its details: name, description, faction, and linked journal entry.
-4. Click on route lines between systems to see travel details like travel time and fuel cost.
-5. Use the scroll wheel to zoom in and out. Click and drag on empty space to pan around the map.
-
-### Requesting Travel
-
-1. Click on a system that is connected to your current location by a visible route.
-2. Click **Request Travel** in the system details panel.
-3. The GM and all other active players receive a prompt to accept or decline.
-4. If everyone accepts, the ship animates along the route to the new system.
-5. If anyone declines, the travel request is cancelled.
-
-### Things to Know
-
-- You can only see systems and routes the GM has revealed. Hidden content does not appear on your map.
-- Some systems may show as "???" until the GM reveals their details.
-- You cannot add, edit, or move systems and routes. Map building is a GM tool.
-- Scene associations are organizational tags for the GM and are not buttons in the system details panel.
-
-## Scene Tag API
-
-Normalized system data stores scene associations in `system.sceneIds` as an array of Foundry scene IDs. Existing maps that used the older `system.sceneId` field are converted automatically when read or saved.
-
-- `game.galaxyMap.getSceneIdsForSystem(mapId, systemId)` returns the scene ID array for one system.
-- `game.galaxyMap.getSystemsForScene(sceneId)` returns every matching `{ mapId, mapTitle, system }` association across galaxy maps.
+There is no Galaxy Map video yet. A short walkthrough is planned.

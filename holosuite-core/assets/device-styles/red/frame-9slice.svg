@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="300"
+   height="300"
+   viewBox="0 0 300 300"
+   version="1.1"
+   id="svg33"
+   sodipodi:docname="frame-9slice.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview33"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="4"
+     inkscape:cx="34.875"
+     inkscape:cy="233.625"
+     inkscape:window-width="3440"
+     inkscape:window-height="1369"
+     inkscape:window-x="2552"
+     inkscape:window-y="156"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg33" />
+  <defs
+     id="defs12">
+    <linearGradient
+       id="center"
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#21050c"
+         id="stop1" />
+      <stop
+         offset="0.48"
+         stop-color="#090103"
+         id="stop2" />
+      <stop
+         offset="1"
+         stop-color="#160005"
+         id="stop3" />
+    </linearGradient>
+    <linearGradient
+       id="plate"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#49101c"
+         id="stop4" />
+      <stop
+         offset="0.18"
+         stop-color="#270811"
+         id="stop5" />
+      <stop
+         offset="0.72"
+         stop-color="#120307"
+         id="stop6" />
+      <stop
+         offset="1"
+         stop-color="#300914"
+         id="stop7" />
+    </linearGradient>
+    <linearGradient
+       id="rail"
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="0">
+      <stop
+         offset="0"
+         stop-color="#6f0b20"
+         id="stop8" />
+      <stop
+         offset="0.45"
+         stop-color="#ff304f"
+         id="stop9" />
+      <stop
+         offset="0.55"
+         stop-color="#ffd6dc"
+         id="stop10" />
+      <stop
+         offset="1"
+         stop-color="#6f0b20"
+         id="stop11" />
+    </linearGradient>
+    <filter
+       id="glow"
+       x="-0.055555556"
+       y="-0.055555556"
+       width="1.1111111"
+       height="1.1111111">
+      <feGaussianBlur
+         stdDeviation="2.5"
+         result="blur"
+         id="feGaussianBlur11" />
+      <feMerge
+         id="feMerge12">
+        <feMergeNode
+           in="blur"
+           id="feMergeNode11" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode12" />
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- The 72-unit guides are the CSS border-image slice boundaries. -->
+  <path
+     id="rect12"
+     style="display:inline"
+     d="M 23.072994,-0.22097087 2.2663527,20.062232 -0.04419417,19.411841 V 277.95676 L 21.623775,299.77903 H 278.54956 l 21.40625,-23.16992 V 20.788795 L 276.96558,-0.22097087 Z" />
+  <rect
+     x="72"
+     y="72"
+     width="156"
+     height="156"
+     fill="#070103"
+     id="rect13"
+     style="display:none" />
+  <!-- Stretchable edge cells. -->
+  <path
+     d="M 72,0 H 228 V 72 H 72 Z m 0,228 h 156 v 72 H 72 Z"
+     fill="url(#plate)"
+     id="path13"
+     style="display:none" />
+  <path
+     d="M 0,72 H 72 V 228 H 0 Z m 228,0 h 72 v 156 h -72 z"
+     fill="#19050a"
+     id="path14"
+     style="display:inline" />
+  <path
+     d="M72 55h156M72 62h156M72 238h156M72 245h156"
+     stroke="#ff304f"
+     stroke-width="2"
+     opacity=".72"
+     id="path15" />
+  <path
+     d="M 55,72 V 228 M 62,72 V 228 M 238,72 v 156 m 7,-156 v 156"
+     stroke="#ff304f"
+     stroke-width="2"
+     opacity="0.72"
+     id="path16"
+     style="display:inline" />
+  <path
+     d="M 96,48 H 204 M 96,252 h 108"
+     stroke="url(#rail)"
+     stroke-width="5"
+     filter="url(#glow)"
+     id="path17"
+     style="display:none" />
+  <path
+     d="M 48,96 V 204 M 252,96 v 108"
+     stroke="#ff304f"
+     stroke-width="5"
+     filter="url(#glow)"
+     id="path18"
+     style="display:none" />
+  <!-- Fixed corner cells: asymmetric armored plates with clipped outer corners. -->
+  <path
+     d="M 20,0 H 72 V 72 H 0 V 20 Z"
+     fill="url(#plate)"
+     stroke="#ff5b70"
+     stroke-width="2"
+     id="path19"
+     style="display:none" />
+  <path
+     d="m 228,0 h 52 l 20,20 v 52 h -72 z"
+     fill="url(#plate)"
+     stroke="#ff5b70"
+     stroke-width="2"
+     id="path20"
+     style="display:none" />
+  <path
+     d="m 0,228 h 72 v 72 H 20 L 0,280 Z"
+     fill="url(#plate)"
+     stroke="#ff5b70"
+     stroke-width="2"
+     id="path21"
+     style="display:none" />
+  <path
+     d="m 228,228 h 72 v 52 l -20,20 h -52 z"
+     fill="url(#plate)"
+     stroke="#ff5b70"
+     stroke-width="2"
+     id="path22"
+     style="display:none" />
+  <!-- Inner bevel follows the slice boundary and stays crisp at every size. -->
+  <path
+     d="M 72,61 H 31 L 11,41 m 217,20 h 41 L 289,41 M 72,239 H 31 l -20,20 m 217,-20 h 41 l 20,20"
+     fill="none"
+     stroke="#7b1728"
+     stroke-width="7"
+     id="path23"
+     style="display:none" />
+  <path
+     d="M 72,67 H 34 L 17,50 m 211,17 h 38 L 283,50 M 72,233 H 34 l -17,17 m 211,-17 h 38 l 17,17"
+     fill="none"
+     stroke="#ff304f"
+     stroke-width="2"
+     filter="url(#glow)"
+     id="path24"
+     style="display:none" />
+  <!-- Corner hardware. -->
+  <g
+     fill="#080103"
+     stroke="#d69ca5"
+     stroke-width="1.5"
+     id="g27"
+     style="display:none">
+    <circle
+       cx="29"
+       cy="29"
+       r="8"
+       id="circle24" />
+    <circle
+       cx="271"
+       cy="29"
+       r="8"
+       id="circle25" />
+    <circle
+       cx="29"
+       cy="271"
+       r="8"
+       id="circle26" />
+    <circle
+       cx="271"
+       cy="271"
+       r="8"
+       id="circle27" />
+  </g>
+  <g
+     fill="#ff304f"
+     id="g31">
+    <circle
+       cx="29"
+       cy="29"
+       r="2.5"
+       id="circle28" />
+    <circle
+       cx="271"
+       cy="29"
+       r="2.5"
+       id="circle29" />
+    <circle
+       cx="29"
+       cy="271"
+       r="2.5"
+       id="circle30" />
+    <circle
+       cx="271"
+       cy="271"
+       r="2.5"
+       id="circle31" />
+  </g>
+  <path
+     d="M 12,55 H 39 L 51,67 H 12 Z m 237,178 h 39 v 12 h -27 z"
+     fill="#330a14"
+     stroke="#8c2435"
+     id="path31"
+     style="display:none" />
+  <path
+     d="m 18,60 h 17 m 230,180 h 17"
+     stroke="#ffcf66"
+     stroke-width="4"
+     filter="url(#glow)"
+     id="path32"
+     style="display:none" />
+  <!-- Outer silhouette. -->
+  <path
+     d="m 20,2 h 260 l 18,18 v 260 l -18,18 H 20 L 2,280 V 20 Z"
+     fill="none"
+     stroke="#ff304f"
+     stroke-width="4"
+     id="path33"
+     style="display:inline" />
+</svg>

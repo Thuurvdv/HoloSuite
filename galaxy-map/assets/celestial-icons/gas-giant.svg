@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" color="#58d8ff">
+  <g id="back" fill="currentColor" opacity=".2"><circle cx="50" cy="50" r="49"/></g>
+  <g id="base" fill="currentColor" opacity=".4"><circle cx="50" cy="50" r="46"/></g>
+  <g id="surface" fill="currentColor" opacity=".72"><circle cx="50" cy="50" r="44"/></g>
+  <g id="bands-strip" fill="currentColor" opacity=".82"><path d="M-5 18h110v10H-5Zm0 20h110v8H-5Zm0 18h110v12H-5Zm0 23h110v8H-5Z"/></g>
+  <g id="bands-detail-strip" fill="currentColor" opacity=".48"><path d="M-8 29c18-8 35 8 56 0s41-7 61 2v7c-25-8-41 7-62 0s-34-4-55 5Zm0 39c20-9 37 8 60 0s42-6 57 4v7c-19-8-36 8-58 0s-37-4-57 4Z"/></g>
+  <g id="storm-strip" fill="currentColor"><ellipse cx="72" cy="61" rx="14" ry="8"/><ellipse cx="74" cy="61" rx="7" ry="3" opacity=".46"/></g>
+  <g id="highlight" fill="currentColor" opacity=".9"><ellipse cx="34" cy="24" rx="13" ry="5" transform="rotate(-24 34 24)"/></g>
+  <g id="accent" fill="currentColor"><circle cx="25" cy="43" r="3"/></g>
+</svg>
