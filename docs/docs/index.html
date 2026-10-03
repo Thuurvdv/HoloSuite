@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="../assets/MTS_Logo_nobg.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -9,7 +10,7 @@
     <title>HoloSuite Documentation | Mage Tower Studios</title>
     <meta
       name="description"
-      content="Search HoloSuite documentation for FoundryVTT modules, installation, configuration, examples, and FAQs."
+      content="Search HoloSuite documentation for FoundryVTT modules: installation, quick start guides, and demo videos."
     >
     <link rel="canonical" href="https://www.magetowerstudios.com/docs/">
     <meta property="og:title" content="HoloSuite Documentation">
@@ -18,33 +19,31 @@
     <meta property="og:url" content="https://www.magetowerstudios.com/docs/">
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="docs.css">
+    <link rel="stylesheet" href="../site-nav.css">
+    <link rel="stylesheet" href="docs-theme.css">
   </head>
-  <body>
+  <body id="top">
     <header class="site-header">
       <a class="brand" href="../" aria-label="HoloSuite home">
-        <img src="../assets/MTS_Logo.png" alt="" class="brand-mark" width="42" height="42">
+        <img src="../assets/MTS_Logo_nobg.png" alt="" class="brand-mark" width="42" height="42">
         <span>Mage Tower Studios</span>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="../#experiences">Experiences</a>
+        <a href="../">HoloSuite</a>
         <a href="../#modules">Modules</a>
         <a href="../#premium">Premium</a>
-        <a href="./">Docs</a>
+        <a href="./" aria-current="page">Docs</a>
         <a href="../#community">Community</a>
+        <a href="../about.html">About me</a>
+        <a href="#top" aria-label="Back to top of this page">↑ Top</a>
       </nav>
     </header>
 
     <main>
-      <section class="docs-hero">
-        <p class="eyebrow">HoloSuite documentation</p>
-        <h1>Find the right setup, workflow, or module answer.</h1>
-        <p>
-          Search across HoloSuite modules for overviews, installation notes,
-          configuration steps, examples, and common questions.
-        </p>
+      <section class="docs-hero" aria-label="Search documentation">
         <label class="docs-search">
           <span>Search documentation</span>
-          <input type="search" data-doc-search placeholder="Search modules, features, workflows..." autocomplete="off">
+          <input type="search" data-doc-search placeholder="Search modules..." autocomplete="off">
         </label>
       </section>
 

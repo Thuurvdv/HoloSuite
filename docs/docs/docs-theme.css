@@ -1,0 +1,42 @@
+/* Colour-only overrides; documentation content and layout remain separate. */
+body {
+  --bg: #070d19;
+  --bg-soft: #0b1423;
+  --surface: #101e30;
+  --surface-strong: #15253a;
+  --text: #f0f7ff;
+  --muted: #b9c8da;
+  --cyan: #20d9ff;
+  --pink: #ff4fa3;
+  --line: rgba(32,217,255,.24);
+  --line-strong: rgba(32,217,255,.58);
+  background: var(--bg);
+}
+.docs-hero, .doc-module-hero { background: linear-gradient(110deg,rgba(32,217,255,.08),rgba(255,79,163,.08)),var(--bg-soft); }
+.docs-hero { background: var(--bg-soft); padding-block: clamp(32px, 5vw, 56px); }
+.docs-hero .docs-search { margin: 0 auto; text-align: center; }
+.eyebrow { color: var(--pink); }
+.docs-hero h1, .doc-module-hero h1 {
+  color: var(--cyan);
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+.docs-hero p, .doc-module-hero p, .doc-section p, .doc-section li { color: #cedaec; }
+.docs-sidebar, .doc-toc, .docs-card, .doc-section { background: #101b2c; }
+.docs-search input { background: #070d19; }
+.docs-search input:focus { border-color: var(--cyan); outline: 2px solid var(--cyan); outline-offset: 2px; }
+.docs-card:hover { border-color: var(--cyan); }
+.doc-module-visual > img {
+  object-fit: contain;
+  background: var(--bg);
+}
+.docs-card-body h2, .docs-card-body h3 { font-size: 1.2rem; line-height: 1.25; }
+.doc-nav-list a:hover, .doc-toc a:hover { background: rgba(32,217,255,.1); color: var(--cyan); }
+.button.primary { background: var(--cyan); color: #071321; }
+.button.secondary { background: #101a2b; border-color: var(--line-strong); }
+.doc-actions a[href*="patreon.com"] { background: #1c1325; border-color: var(--pink); color: var(--pink); }
+.doc-section li::marker, .doc-table-wrap th { color: var(--cyan); }
+.doc-callout:not(.doc-callout--warning):not(.doc-callout--danger) { background: rgba(32,217,255,.06); }
+/* Preserve amber/red warning semantics. */
+a:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }

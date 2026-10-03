@@ -1,5 +1,6 @@
 node_modules/
 .tmp-tests/
+/docs/assets/featured-modules/README.md
 *.log
 *.zip
 .env

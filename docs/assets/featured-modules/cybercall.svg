@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #000;
+        fill-rule: evenodd;
+      }
+
+      .cls-1 {
+        stroke-width: 8px;
+      }
+
+      .cls-2 {
+        stroke-width: 4px;
+      }
+    </style>
+  </defs>
+  <path id="Rechthoek_1" data-name="Rechthoek 1" class="cls-1" d="M41,56H23a8,8,0,0,1-8-8V16a8,8,0,0,1,8-8H41a8,8,0,0,1,8,8V48A8,8,0,0,1,41,56Z"/>
+  <path id="Rechthoek_1-2" data-name="Rechthoek 1" class="cls-1" d="M8,41V23a8,8,0,0,1,8-8H48a8,8,0,0,1,8,8V41a8,8,0,0,1-8,8H16A8,8,0,0,1,8,41Z"/>
+  <path id="Lijn_1" data-name="Lijn 1" class="cls-2" d="M19.006,28.872l0.09-1,24.9,2.252-0.09,1Z"/>
+</svg>

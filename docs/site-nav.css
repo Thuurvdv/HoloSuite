@@ -1,0 +1,11 @@
+/* Shared navigation across the homepage, documentation and static pages. */
+.site-header { background: rgba(7,13,25,.96); border-bottom: 1px solid #20d9ff; border-image: linear-gradient(90deg,#20d9ff,#ff4fa3) 1; flex-wrap: wrap; gap: 10px 24px; }
+.site-header nav { flex-wrap: wrap; gap: 4px; }
+.site-header nav a { min-height: 44px; display: inline-flex; align-items: center; color: #c4d1e2; border-radius: 4px; border: 1px solid transparent; }
+.site-header nav a[aria-current] { color: #20d9ff; background: rgba(32,217,255,.08); border-color: #20d9ff; }
+.site-header nav a[href$="#premium"] { color: #ff4fa3; }
+.site-header nav a:hover { color: #20d9ff; background: rgba(32,217,255,.1); }
+.site-header nav a:focus-visible { outline: 2px solid #20d9ff; outline-offset: 2px; }
+@media (max-width: 1100px) { .site-header { position: static; } }
+@media (max-width: 760px) { .site-header nav { justify-content: flex-start; overflow: visible; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
