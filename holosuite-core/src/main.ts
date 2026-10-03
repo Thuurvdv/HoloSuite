@@ -18,6 +18,8 @@ const SETTING_DISABLE_VISUAL_EFFECTS_FOR_DEBUGGING = "disableVisualEffectsForDeb
 const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
 const SETTING_DEVICE_STYLE = "deviceStyle";
 const SETTING_FORCE_DEVICE_STYLE = "forceDeviceStyle";
+const SETTING_FORM_FACTOR = "formFactor";
+const SETTING_APP_ORDER = "appOrder";
 const SETTING_THEME = "theme";
 const SETTING_WHATS_NEW_LAST_SEEN = "whatsNewLastSeen";
 const KEYBINDING_OPEN_LAUNCHER = "openLauncher";
@@ -27,14 +29,37 @@ const WHATS_NEW_CATALOG_PATH = `modules/${MODULE_ID}/data/whats-new.json`;
 const WHATS_NEW_UPDATES_SINCE = Date.UTC(2026, 7, 1);
 
 const DEVICE_STYLE_CHOICES = {
-  base: "Base",
-  "space-police": "Space Police"
+  base: "HoloSuite",
+  "space-police": "Space Police",
+  red: "RED",
+  corporate: "Corporate"
 } as const;
 
 const FORCED_DEVICE_STYLE_CHOICES = {
   "": "Allow User Choice",
-  base: "Base",
-  "space-police": "Space Police"
+  base: "HoloSuite",
+  "space-police": "Space Police",
+  red: "RED",
+  corporate: "Corporate"
+} as const;
+
+// RED and Corporate are still being developed. Keep their implementation available
+// for later, but expose only the released themes in this version.
+const RELEASED_DEVICE_STYLE_CHOICES = {
+  base: DEVICE_STYLE_CHOICES.base,
+  "space-police": DEVICE_STYLE_CHOICES["space-police"]
+} as const;
+
+const RELEASED_FORCED_DEVICE_STYLE_CHOICES = {
+  "": FORCED_DEVICE_STYLE_CHOICES[""],
+  base: FORCED_DEVICE_STYLE_CHOICES.base,
+  "space-police": FORCED_DEVICE_STYLE_CHOICES["space-police"]
+} as const;
+
+const FORM_FACTOR_CHOICES = {
+  phone: "Phone",
+  datapad: "Datapad",
+  computer: "Computer"
 } as const;
 
 const THEME_CHOICES = {
@@ -44,6 +69,7 @@ const THEME_CHOICES = {
 } as const;
 
 type HoloSuiteDeviceStyle = keyof typeof DEVICE_STYLE_CHOICES;
+type HoloSuiteFormFactor = keyof typeof FORM_FACTOR_CHOICES;
 type HoloSuiteTheme = keyof typeof THEME_CHOICES;
 
 const registeredApps = new Map<string, HoloSuiteAppRegistration>();
@@ -58,6 +84,8 @@ let coreReady = false;
 let apiOnlyRuntimeState: boolean | null = null;
 let whatsNewCatalogLoaded = false;
 let whatsNewCatalogPromise: Promise<void> | null = null;
+let launcherReorderMode = false;
+let suppressAppClickUntil = 0;
 
 type LauncherView = "apps" | "whats-new" | "settings";
 type WhatsNewTab = "updates" | "releases";
@@ -146,10 +174,9 @@ function normalizeWhatsNewEntry(entry: HoloSuiteWhatsNewEntry): HoloSuiteWhatsNe
   const title = String(entry?.title ?? "").trim();
   if (!title) return null;
 
-  const tags = safeArray(entry?.tags)
-    .map((tag) => String(tag ?? "").trim())
-    .filter(Boolean)
-    .slice(0, 4);
+  const hasFoundryCompatibilityTag = safeArray(entry?.tags)
+    .some((tag) => /^foundry\b/i.test(String(tag ?? "").trim()));
+  const tags = hasFoundryCompatibilityTag ? ["Foundry v12–14"] : [];
 
   return {
     title,
@@ -470,7 +497,7 @@ function registerSettings(): void {
     scope: "client",
     config: true,
     type: String,
-    choices: DEVICE_STYLE_CHOICES,
+    choices: RELEASED_DEVICE_STYLE_CHOICES,
     default: "base",
     restricted: false,
     onChange: () => {
@@ -485,13 +512,39 @@ function registerSettings(): void {
     scope: "world",
     config: true,
     type: String,
-    choices: FORCED_DEVICE_STYLE_CHOICES,
+    choices: RELEASED_FORCED_DEVICE_STYLE_CHOICES,
     default: "",
     restricted: true,
     onChange: () => {
       applySavedDeviceStyle();
       launcherApp?.refreshCurrentView();
     }
+  });
+
+  game.settings.register(MODULE_ID, SETTING_FORM_FACTOR, {
+    name: "HoloSuite Form Factor",
+    hint: "Choose the launcher shape for this user: phone, wide datapad, or large computer display.",
+    scope: "client",
+    config: false,
+    type: String,
+    choices: FORM_FACTOR_CHOICES,
+    default: "phone",
+    restricted: false,
+    onChange: () => {
+      applySavedFormFactor();
+      launcherApp?.refreshCurrentView();
+      launcherApp?.resizeForFormFactor();
+    }
+  });
+
+  game.settings.register(MODULE_ID, SETTING_APP_ORDER, {
+    name: "HoloSuite App Order",
+    hint: "Stores this user's custom launcher order.",
+    scope: "client",
+    config: false,
+    type: Array,
+    default: [],
+    restricted: false
   });
 
   game.settings.register(MODULE_ID, SETTING_THEME, {
@@ -619,12 +672,12 @@ function registerKeybindings(): void {
 }
 
 function normalizeDeviceStyle(value: unknown): HoloSuiteDeviceStyle {
-  return Object.hasOwn(DEVICE_STYLE_CHOICES, String(value)) ? String(value) as HoloSuiteDeviceStyle : "base";
+  return Object.hasOwn(RELEASED_DEVICE_STYLE_CHOICES, String(value)) ? String(value) as HoloSuiteDeviceStyle : "base";
 }
 
 function getForcedDeviceStyle(): HoloSuiteDeviceStyle | null {
   const value = String(safeGetSetting(MODULE_ID, SETTING_FORCE_DEVICE_STYLE) ?? "");
-  return Object.hasOwn(DEVICE_STYLE_CHOICES, value) ? value as HoloSuiteDeviceStyle : null;
+  return Object.hasOwn(RELEASED_DEVICE_STYLE_CHOICES, value) ? value as HoloSuiteDeviceStyle : null;
 }
 
 function getUserDeviceStyle(): HoloSuiteDeviceStyle {
@@ -637,6 +690,33 @@ function getEffectiveDeviceStyle(): HoloSuiteDeviceStyle {
 
 function normalizeTheme(value: unknown): HoloSuiteTheme {
   return Object.hasOwn(THEME_CHOICES, String(value)) ? String(value) as HoloSuiteTheme : "default";
+}
+
+function normalizeFormFactor(value: unknown): HoloSuiteFormFactor {
+  void value;
+  return "phone";
+}
+
+function getFormFactor(): HoloSuiteFormFactor {
+  return normalizeFormFactor(safeGetSetting(MODULE_ID, SETTING_FORM_FACTOR));
+}
+
+function getFormFactorDimensions(formFactor = getFormFactor()): { width: number; height: number } {
+  const preferred = formFactor === "computer"
+    ? { width: 980, height: 720 }
+    : formFactor === "datapad"
+      ? { width: 760, height: 680 }
+      : { width: 483, height: 736 };
+  return {
+    width: Math.min(preferred.width, Math.max(420, window.innerWidth - 32)),
+    height: Math.min(preferred.height, Math.max(560, window.innerHeight - 48))
+  };
+}
+
+function getSavedAppOrder(): string[] {
+  return safeArray(safeGetSetting(MODULE_ID, SETTING_APP_ORDER))
+    .map((id) => String(id ?? "").trim())
+    .filter((id, index, ids) => Boolean(id) && ids.indexOf(id) === index);
 }
 
 function applyDeviceStyle(value: unknown): void {
@@ -657,12 +737,23 @@ function applyTheme(value: unknown): void {
   }
 }
 
+function applyFormFactor(value: unknown): void {
+  const formFactor = normalizeFormFactor(value);
+  for (const target of [document.documentElement, document.body].filter(Boolean)) {
+    target.setAttribute("data-holosuite-form-factor", formFactor);
+  }
+}
+
 function applySavedDeviceStyle(): void {
   applyDeviceStyle(getEffectiveDeviceStyle());
 }
 
 function applySavedTheme(): void {
   applyTheme(safeGetSetting(MODULE_ID, SETTING_THEME));
+}
+
+function applySavedFormFactor(): void {
+  applyFormFactor(getFormFactor());
 }
 
 function getFoundryGeneration(): number | null {
@@ -820,9 +911,20 @@ function renderAppIcon(app: HoloSuiteAppRegistration): string {
 
 function renderAppsView(): string {
   const isGM = game.user?.isGM === true;
+  const savedOrder = getSavedAppOrder();
+  const orderIndex = new Map(savedOrder.map((id, index) => [id, index]));
   const apps = [...registeredApps.values()]
     .filter(isAppVisibleToCurrentUser)
-    .sort((left, right) => left.title.localeCompare(right.title));
+    .sort((left, right) => {
+      const leftIndex = orderIndex.get(left.id);
+      const rightIndex = orderIndex.get(right.id);
+      if (leftIndex !== undefined || rightIndex !== undefined) {
+        if (leftIndex === undefined) return 1;
+        if (rightIndex === undefined) return -1;
+        return leftIndex - rightIndex;
+      }
+      return left.title.localeCompare(right.title);
+    });
   const deckLabel = isGM ? "GM Command Deck" : "Player Link";
   const screenTitle = isGM ? "Apps" : "Commlink";
   const emptyLabel = isGM
@@ -865,6 +967,13 @@ function renderAppsView(): string {
     <div class="holosuite-app-grid">
       ${apps.length ? appCards : `<p class="holosuite-empty">${escapeHtml(emptyLabel)}</p>`}
     </div>
+    ${apps.length > 1 ? `
+      <div class="holosuite-reorder-help" aria-live="polite">
+        <span class="holosuite-reorder-help-idle"><i class="fa-solid fa-hand-pointer"></i> Press and hold an app to rearrange</span>
+        <span class="holosuite-reorder-help-active"><i class="fa-solid fa-arrows-up-down-left-right"></i> Drag apps into place</span>
+        <button type="button" data-holosuite-action="reorder-done">Done</button>
+      </div>
+    ` : ""}
   `;
 }
 
@@ -934,8 +1043,6 @@ function getFilteredReleases(filter: WhatsNewFilter): HoloSuiteWhatsNewRegistrat
 function renderWhatsNewCards(items: HoloSuiteWhatsNewRegistration[], emptyLabel: string): string {
   return items.length
     ? items.map((update) => {
-      const installed = isModuleInstalled(update.moduleId);
-      const tierLabel = update.tier === "premium" ? "Premium" : "Free";
       const icon = update.icon || (update.tier === "premium" ? "fa-solid fa-gem" : "fa-solid fa-cube");
       const entries = update.entries.map((entry) => `
         <li>
@@ -963,12 +1070,6 @@ function renderWhatsNewCards(items: HoloSuiteWhatsNewRegistration[], emptyLabel:
             <span class="holosuite-whats-new-icon" data-holosuite-app-icon="${escapeHtml(update.moduleId)}"><i class="${escapeHtml(icon)}"></i></span>
             <div>
               <h3>${escapeHtml(update.title)}</h3>
-              <p>
-                <span>${escapeHtml(tierLabel)}</span>
-                ${update.version ? `<span>v${escapeHtml(update.version)}</span>` : ""}
-                ${update.updated ? `<span>${escapeHtml(update.updated)}</span>` : ""}
-                <span>${installed ? "Installed" : "Not installed"}</span>
-              </p>
             </div>
           </header>
           <ul>${entries}</ul>
@@ -1009,11 +1110,11 @@ function renderSettingsView(): string {
   const overrideNotice = forcedStyle ? `
     <div class="holosuite-settings-notice">
       <i class="fa-solid fa-lock"></i>
-      <span>The GM is overriding the HoloSuite theme for this world. Your personal choice is paused until the override is removed.</span>
+      <span>The GM is overriding the HoloSuite visual theme for this world. Your personal choice is paused until the override is removed.</span>
     </div>
   ` : "";
 
-  const options = Object.entries(DEVICE_STYLE_CHOICES).map(([id, label]) => `
+  const options = Object.entries(RELEASED_DEVICE_STYLE_CHOICES).map(([id, label]) => `
     <button
       type="button"
       class="holosuite-theme-choice ${id === effectiveStyle ? "is-active" : ""}"
@@ -1023,7 +1124,6 @@ function renderSettingsView(): string {
     >
       <span class="holosuite-theme-preview holosuite-theme-preview--${escapeHtml(id)}"></span>
       <strong>${escapeHtml(label)}</strong>
-      <span>${id === "base" ? "Classic HoloSuite cyan interface." : "Space Police tactical hardware and amber controls."}</span>
     </button>
   `).join("");
 
@@ -1039,7 +1139,7 @@ function renderSettingsView(): string {
       <div class="holosuite-settings-field">
         <div>
           <span class="holosuite-kicker">Theme</span>
-          <strong>${escapeHtml(DEVICE_STYLE_CHOICES[effectiveStyle])}</strong>
+          <strong>${escapeHtml(RELEASED_DEVICE_STYLE_CHOICES[effectiveStyle as keyof typeof RELEASED_DEVICE_STYLE_CHOICES])}</strong>
         </div>
       </div>
       <div class="holosuite-theme-choices">
@@ -1079,10 +1179,197 @@ function renderLauncherHtml(
   `;
 }
 
+function setLauncherReorderMode(root: HTMLElement, enabled: boolean): void {
+  launcherReorderMode = enabled;
+  root.classList.toggle("is-reordering-apps", enabled);
+}
+
+async function persistAppOrder(grid: HTMLElement): Promise<void> {
+  const order = [...grid.querySelectorAll<HTMLElement>("[data-holosuite-app]")]
+    .map((tile) => tile.dataset.holosuiteApp ?? "")
+    .filter(Boolean);
+  await game.settings.set(MODULE_ID, SETTING_APP_ORDER, order);
+}
+
+const REORDER_SLOT_HYSTERESIS_PX = 12;
+
+function getClosestReorderSlot(
+  slots: DOMRect[],
+  clientX: number,
+  clientY: number,
+  currentIndex: number
+): number {
+  if (slots.length === 0) return 0;
+
+  const distanceToSlot = (slot: DOMRect) => Math.hypot(
+    clientX - (slot.left + slot.width / 2),
+    clientY - (slot.top + slot.height / 2)
+  );
+  const safeCurrentIndex = Math.min(Math.max(currentIndex, 0), slots.length - 1);
+  const currentDistance = distanceToSlot(slots[safeCurrentIndex]);
+  let closestIndex = safeCurrentIndex;
+  let closestDistance = currentDistance;
+
+  slots.forEach((slot, index) => {
+    const distance = distanceToSlot(slot);
+    if (distance < closestDistance) {
+      closestIndex = index;
+      closestDistance = distance;
+    }
+  });
+
+  // Keep the current slot until the pointer is clearly closer to another one.
+  // This dead zone prevents a reflow or tiny pointer movement from swapping back.
+  if (closestIndex !== safeCurrentIndex
+    && closestDistance + REORDER_SLOT_HYSTERESIS_PX >= currentDistance) {
+    return safeCurrentIndex;
+  }
+  return closestIndex;
+}
+
+function moveReorderPlaceholder(
+  grid: HTMLElement,
+  tile: HTMLElement,
+  placeholder: HTMLElement,
+  targetIndex: number
+): void {
+  const remainingTiles = [...grid.querySelectorAll<HTMLElement>("[data-holosuite-app]")]
+    .filter((candidate) => candidate !== tile);
+  const before = remainingTiles[targetIndex] ?? null;
+
+  if (before) {
+    if (placeholder.nextElementSibling !== before) grid.insertBefore(placeholder, before);
+  } else if (placeholder.nextElementSibling) {
+    grid.append(placeholder);
+  }
+}
+
+function bindAppReordering(root: HTMLElement): void {
+  const grid = root.querySelector<HTMLElement>(".holosuite-app-grid");
+  if (!grid) return;
+  setLauncherReorderMode(root, launcherReorderMode);
+
+  root.querySelector<HTMLElement>("[data-holosuite-action='reorder-done']")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setLauncherReorderMode(root, false);
+  });
+
+  grid.querySelectorAll<HTMLElement>("[data-holosuite-app]").forEach((tile) => {
+    let holdTimer: number | null = null;
+    let activePointer: number | null = null;
+    let dragging = false;
+    let pressX = 0;
+    let pressY = 0;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    let placeholder: HTMLElement | null = null;
+    let reorderSlots: DOMRect[] = [];
+    let currentSlotIndex = 0;
+
+    const beginDragging = (pointerId: number) => {
+      const rect = tile.getBoundingClientRect();
+      const tiles = [...grid.querySelectorAll<HTMLElement>("[data-holosuite-app]")];
+      reorderSlots = tiles.map((candidate) => candidate.getBoundingClientRect());
+      currentSlotIndex = Math.max(0, tiles.indexOf(tile));
+      setLauncherReorderMode(root, true);
+      dragging = true;
+      suppressAppClickUntil = Date.now() + 700;
+      dragOffsetX = pressX - rect.left;
+      dragOffsetY = pressY - rect.top;
+      placeholder = document.createElement("div");
+      placeholder.className = "holosuite-app-placeholder";
+      placeholder.style.height = `${rect.height}px`;
+      placeholder.setAttribute("aria-hidden", "true");
+      tile.before(placeholder);
+      tile.style.height = `${rect.height}px`;
+      tile.style.left = `${rect.left}px`;
+      tile.style.top = `${rect.top}px`;
+      tile.style.width = `${rect.width}px`;
+      tile.classList.add("is-being-reordered");
+      try { tile.setPointerCapture(pointerId); } catch { /* Pointer may already have been released. */ }
+    };
+
+    tile.addEventListener("pointerdown", (event) => {
+      if (!event.isPrimary || event.button !== 0) return;
+      activePointer = event.pointerId;
+      pressX = event.clientX;
+      pressY = event.clientY;
+      if (launcherReorderMode) {
+        event.preventDefault();
+        beginDragging(event.pointerId);
+      } else {
+        holdTimer = window.setTimeout(() => beginDragging(event.pointerId), 550);
+      }
+    });
+
+    tile.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== activePointer) return;
+      if (!dragging) {
+        if (Math.hypot(event.clientX - pressX, event.clientY - pressY) > 8 && holdTimer !== null) {
+          window.clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+        return;
+      }
+      event.preventDefault();
+      tile.style.left = `${event.clientX - dragOffsetX}px`;
+      tile.style.top = `${event.clientY - dragOffsetY}px`;
+
+      const gridRect = grid.getBoundingClientRect();
+      if (placeholder && event.clientX >= gridRect.left && event.clientX <= gridRect.right
+        && event.clientY >= gridRect.top && event.clientY <= gridRect.bottom) {
+        const targetIndex = getClosestReorderSlot(
+          reorderSlots,
+          event.clientX,
+          event.clientY,
+          currentSlotIndex
+        );
+        if (targetIndex !== currentSlotIndex) {
+          moveReorderPlaceholder(grid, tile, placeholder, targetIndex);
+          currentSlotIndex = targetIndex;
+        }
+      }
+    });
+
+    const finishPointer = (event: PointerEvent) => {
+      if (event.pointerId !== activePointer) return;
+      if (holdTimer !== null) window.clearTimeout(holdTimer);
+      holdTimer = null;
+      activePointer = null;
+      if (!dragging) return;
+      event.preventDefault();
+      dragging = false;
+      reorderSlots = [];
+      placeholder?.replaceWith(tile);
+      placeholder = null;
+      tile.classList.remove("is-being-reordered");
+      tile.style.removeProperty("height");
+      tile.style.removeProperty("left");
+      tile.style.removeProperty("top");
+      tile.style.removeProperty("width");
+      suppressAppClickUntil = Date.now() + 450;
+      void persistAppOrder(grid);
+    };
+
+    tile.addEventListener("pointerup", finishPointer);
+    tile.addEventListener("pointercancel", finishPointer);
+    tile.addEventListener("contextmenu", (event) => {
+      if (!launcherReorderMode) return;
+      event.preventDefault();
+    });
+  });
+}
+
 function bindLauncherControls(root: HTMLElement | null): void {
   if (!root) return;
   root.querySelectorAll<HTMLElement>("[data-holosuite-app]").forEach((button) => {
     button.addEventListener("click", (event) => {
+      if (launcherReorderMode || Date.now() < suppressAppClickUntil) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       openRegisteredApp((event.currentTarget as HTMLElement).dataset.holosuiteApp ?? "");
     });
   });
@@ -1113,6 +1400,12 @@ function bindLauncherControls(root: HTMLElement | null): void {
       launcherApp?.setDeviceStyle(normalizeDeviceStyle(style));
     });
   });
+  root.querySelectorAll<HTMLElement>("[data-holosuite-form-factor-choice]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const formFactor = (event.currentTarget as HTMLElement).dataset.holosuiteFormFactorChoice;
+      launcherApp?.setFormFactor(normalizeFormFactor(formFactor));
+    });
+  });
   root.querySelectorAll<HTMLElement>("[data-holosuite-filter]").forEach((button) => {
     button.addEventListener("click", (event) => {
       const filter = (event.currentTarget as HTMLElement).dataset.holosuiteFilter;
@@ -1129,6 +1422,7 @@ function bindLauncherControls(root: HTMLElement | null): void {
     button.addEventListener("pointerdown", handleLauncherCloseEvent, { capture: true });
     button.addEventListener("click", handleLauncherCloseEvent, { capture: true });
   });
+  bindAppReordering(root);
 }
 
 function normalizeWhatsNewFilter(value: unknown): WhatsNewFilter {
@@ -1242,6 +1536,8 @@ function collectCoreDiagnostics(): Record<string, unknown> {
         client: getUserDeviceStyle(),
         forced: getForcedDeviceStyle()
       },
+      formFactor: getFormFactor(),
+      appOrder: getSavedAppOrder(),
       colorTheme: normalizeTheme(safeGetSetting(MODULE_ID, SETTING_THEME))
     },
     foundry: {
@@ -1452,6 +1748,7 @@ class HoloSuiteLauncher extends LegacyApplication {
   activateListeners(html) {
     super.activateListeners(html);
     bindLauncherControls(unwrapHtmlElement(html));
+    this.resizeForFormFactor();
   }
 
   async _renderHTML() {
@@ -1471,9 +1768,11 @@ class HoloSuiteLauncher extends LegacyApplication {
     else target.innerHTML = String(result ?? "");
 
     bindLauncherControls(target);
+    this.resizeForFormFactor();
   }
 
   async close(options = {}) {
+    launcherReorderMode = false;
     launcherApp = null;
     return super.close(options);
   }
@@ -1525,12 +1824,14 @@ class HoloSuiteLauncher extends LegacyApplication {
   }
 
   showWhatsNew(): void {
+    launcherReorderMode = false;
     this.currentView = "whats-new";
     markWhatsNewSeen();
     if (!this.updateRenderedView()) this.render(false);
   }
 
   showSettings(): void {
+    launcherReorderMode = false;
     this.currentView = "settings";
     if (!this.updateRenderedView()) this.render(false);
   }
@@ -1541,6 +1842,25 @@ class HoloSuiteLauncher extends LegacyApplication {
     this.currentView = "settings";
     applySavedDeviceStyle();
     this.refreshCurrentView();
+  }
+
+  async setFormFactor(formFactor: HoloSuiteFormFactor): Promise<void> {
+    await game.settings.set(MODULE_ID, SETTING_FORM_FACTOR, formFactor);
+    this.currentView = "settings";
+    applySavedFormFactor();
+    this.resizeForFormFactor();
+    this.refreshCurrentView();
+  }
+
+  resizeForFormFactor(): void {
+    const dimensions = getFormFactorDimensions();
+    const element = unwrapHtmlElement((this as any).element)?.closest<HTMLElement>("#holosuite-launcher, .holosuite-launcher-window")
+      ?? unwrapHtmlElement((this as any).element);
+    element?.style.setProperty("--hs-launcher-width", `${dimensions.width}px`);
+    element?.style.setProperty("--hs-launcher-height", `${dimensions.height}px`);
+    element?.style.setProperty("width", `${dimensions.width}px`, "important");
+    element?.style.setProperty("height", `${dimensions.height}px`, "important");
+    try { (this as any).setPosition?.(dimensions); } catch { /* CSS sizing remains the fallback across Foundry generations. */ }
   }
 
   refreshCurrentView(): void {
@@ -1670,6 +1990,7 @@ Hooks.once("ready", () => {
   applyFoundryGenerationMarker();
   applySavedDeviceStyle();
   applySavedTheme();
+  applySavedFormFactor();
   if (isApiOnlyMode()) {
     console.warn(`${MODULE_ID} | API-only diagnostic mode is enabled on this browser.`);
   } else {
