@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-02",
+  "updated": "2026-10-03",
   "modules": [
     {
       "moduleId": "holosuite-hacking",
@@ -61,14 +61,14 @@
       "moduleId": "cybercall",
       "title": "CyberCall",
       "tier": "free",
-      "version": "1.0.9",
-      "updated": "2026-09-02",
+      "version": "1.0.11",
+      "updated": "2026-10-03",
       "icon": "fa-solid fa-phone-volume",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall",
       "entries": [
         {
-          "title": "Calls now use character names",
-          "summary": "CyberCall shows character names in calls, contacts, messages, and group chats. If someone has no character assigned, it simply falls back to their username.",
+          "title": "Keep writing while messages update",
+          "summary": "CyberCall now keeps your unfinished message and cursor position when the conversation refreshes, so an incoming update no longer clears what you were typing.",
           "tags": ["Foundry v12-v14"]
         }
       ]
@@ -77,14 +77,14 @@
       "moduleId": "bounty-board",
       "title": "Bounty Board",
       "tier": "free",
-      "version": "1.0.6",
-      "updated": "2026-09-02",
+      "version": "1.0.7",
+      "updated": "2026-10-03",
       "icon": "fa-solid fa-crosshairs",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board",
       "entries": [
         {
-          "title": "Long bounty lists are easier to browse",
-          "summary": "The title, search, and filters now stay put while the contracts scroll, so you do not lose your place on a busy board.",
+          "title": "Put contracts on the Galaxy Map",
+          "summary": "Choose a scene for a contract and link that scene to a Galaxy Map location. Published bounty details then appear on the map, where you can open the full contract directly.",
           "tags": ["Foundry v12-v14"]
         }
       ]
@@ -129,14 +129,14 @@
       "moduleId": "holosuite-core",
       "title": "HoloSuite Core",
       "tier": "free",
-      "version": "1.0.12",
-      "updated": "2026-09-09",
+      "version": "1.0.13",
+      "updated": "2026-10-03",
       "icon": "fa-solid fa-mobile-screen",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
       "entries": [
         {
-          "title": "Blueprint is now in the launcher",
-          "summary": "If HoloSuite Blueprint is installed, you can open it alongside your other apps from the HoloSuite launcher.",
+          "title": "Arrange the launcher your way",
+          "summary": "Press and hold an app, drag it where you want it, and HoloSuite remembers the order for you. Moving apps is steadier now, too, so tiles no longer jump back and forth while you drag.",
           "tags": ["Foundry v12-v14"]
         }
       ]
