@@ -87,7 +87,6 @@
 .gmf-planet-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
 .gmf-planet-buttons button { width: auto; min-height: 32px; font-size: 12px; }
 .gmf-planet-buttons .gmf-icon-button { width: 34px !important; }
-.gmf-planet-controls [role="status"] { margin: 9px 0 0; min-height: 16px; color: var(--gmf-muted); font-size: 11px; }
 .gmf-location-callout {
   position: absolute;
   z-index: 8;

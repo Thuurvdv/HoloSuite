@@ -10,6 +10,17 @@ test("JSON export uses Foundry's native file saver", () => {
   assert.match(domUtils, /saveFile\(json, "application\/json", filename\)/);
 });
 
+test("module controls resist system-level icon and dropdown overrides", () => {
+  const framework = read("styles/galaxy-map-framework.css");
+
+  assert.match(framework, /:is\(\.galaxy-map-framework, \.gmf-crud-dialog\) select \{/);
+  assert.match(framework, /color-scheme: dark/);
+  assert.match(framework, /select :is\(option, optgroup\)/);
+  assert.match(framework, /:is\(\.gmf-icon-button, \.gmf-window-close\) > i/);
+  assert.match(framework, /margin: 0 !important/);
+  assert.match(framework, /line-height: 1 !important/);
+});
+
 test("manual system merging is retired without removing automatic schema migration", () => {
   const main = read("src/main.ts");
   const manager = read("src/manager-app.ts");
@@ -48,6 +59,11 @@ test("manager uses one compact master-detail action surface and real content tab
   const frameCss = read("styles/galaxy-map-frame.css");
 
   assert.match(template, /data-select-map=/);
+  assert.match(template, /data-action="import-map"/);
+  assert.match(manager, /data-action='import-map'[\s\S]*_onImportMap\(\)/);
+  assert.match(manager, /input\.accept = "\.json,application\/json"/);
+  assert.match(manager, /JSON\.parse\(await file\.text\(\)\)/);
+  assert.match(manager, /await importMapData\(data\)/);
   assert.doesNotMatch(template, /gmf-map-card__buttons/);
   assert.match(template, /data-manager-tab="systems"/);
   assert.match(template, /data-manager-tab="routes"/);
@@ -145,6 +161,18 @@ test("default planet markers and type-derived marker fallbacks remain presentati
   assert.match(presenters, /typeIconFallbacks/);
   assert.match(celestial, /iconStyle "planet"/);
   assert.match(celestial, /gmf-art-drift--clouds/);
+});
+
+test("planet controls never reserve space for renderer status labels", () => {
+  const template = read("templates/galaxy-map.hbs");
+  const view = read("src/view-app.ts");
+  const renderer = read("src/planet-renderer.ts");
+  const css = read("styles/planet-view.css");
+
+  assert.doesNotMatch(template, /data-planet-status|Preparing model/);
+  assert.doesNotMatch(view, /data-planet-status|onStatus/);
+  assert.doesNotMatch(renderer, /onStatus|Surface loaded|Loading planet surface/);
+  assert.doesNotMatch(css, /gmf-planet-controls \[role="status"\]/);
 });
 
 test("system polish removes rotating frames and offers direct linked-scene controls", () => {

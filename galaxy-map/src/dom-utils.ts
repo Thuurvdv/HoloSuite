@@ -1,4 +1,5 @@
 declare const foundry: any;
+declare const FilePicker: any;
 
 export function slugify(value: unknown): string {
   return String(value || "galaxy-map")
@@ -42,6 +43,25 @@ function notifyChanged(input: HTMLInputElement) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
+type FilePickerConstructor = new (options: {
+  type: string;
+  current: string;
+  callback: (path: string) => void;
+}) => { browse: () => unknown };
+
+/** Resolve Foundry's configured picker across the v12 wrapper and v13/v14 class exports. */
+export function getFilePickerClass(scope: any = globalThis): FilePickerConstructor | null {
+  const namespacedPicker = scope.foundry?.applications?.apps?.FilePicker;
+  const configuredPicker = namespacedPicker?.implementation;
+  if (typeof configuredPicker === "function") return configuredPicker as FilePickerConstructor;
+  if (typeof namespacedPicker === "function") return namespacedPicker as FilePickerConstructor;
+
+  // Foundry v12 exposes FilePicker as a global lexical binding. In some system
+  // environments it is deliberately absent from globalThis, so check it directly.
+  const legacyPicker = typeof FilePicker === "function" ? FilePicker : scope.FilePicker;
+  return typeof legacyPicker === "function" ? legacyPicker as FilePickerConstructor : null;
+}
+
 /** Wires every Browse and Clear button under `root` to the input named in its data attribute. */
 export function bindFilePickerFields(root: ParentNode) {
   const findInput = (name?: string) => (name ? root.querySelector<HTMLInputElement>(`[name="${name}"]`) : null);
@@ -50,8 +70,11 @@ export function bindFilePickerFields(root: ParentNode) {
       event.preventDefault();
       const input = findInput(button.dataset.browseTarget);
       if (!input) return;
-      // v13 moved FilePicker into a namespace; v12 only has the global.
-      const FilePickerClass = foundry.applications?.apps?.FilePicker ?? (globalThis as any).FilePicker;
+      const FilePickerClass = getFilePickerClass();
+      if (!FilePickerClass) {
+        console.error("galaxy-map | Foundry FilePicker is unavailable.");
+        return;
+      }
       new FilePickerClass({
         type: "image",
         current: input.value,

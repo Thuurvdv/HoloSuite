@@ -10,6 +10,7 @@ export function createGalaxyMapManagerClass(deps: any) {
     getMaps,
     prepareMapForManager,
     getRawMap,
+    importMapData,
     exportMap,
     duplicateMap,
     deleteMap,
@@ -23,6 +24,7 @@ export function createGalaxyMapManagerClass(deps: any) {
     hideSystemFromPlayers,
     hideRouteFromPlayers,
     hideFactionFromPlayers,
+    notifyError,
     clearManagerApp
   } = deps;
 
@@ -166,6 +168,7 @@ export function createGalaxyMapManagerClass(deps: any) {
       html.querySelector("[data-action='export-map']")?.addEventListener("click", () => {
         if (this.selectedMapId) exportMap(this.selectedMapId);
       });
+      html.querySelector("[data-action='import-map']")?.addEventListener("click", () => this._onImportMap());
       html.querySelectorAll("[data-select-map]").forEach((button: any) => {
         button.addEventListener("click", () => {
           this.selectedMapId = button.dataset.selectMap;
@@ -202,6 +205,32 @@ export function createGalaxyMapManagerClass(deps: any) {
           this.render({ force: true });
         });
       });
+    }
+
+    _onImportMap() {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json,application/json";
+      input.addEventListener("change", async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+
+        try {
+          const data = JSON.parse(await file.text());
+          if (!data || typeof data !== "object" || Array.isArray(data)) {
+            throw new Error("The selected file does not contain a Galaxy Map object.");
+          }
+          const map = await importMapData(data);
+          if (!map) return;
+          this.selectedMapId = map.id;
+          this.expandedSystemId = undefined;
+          this.render({ force: true });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "The selected file could not be read.";
+          notifyError(`Could not import map: ${message}`);
+        }
+      }, { once: true });
+      input.click();
     }
 
     async _onCreateMap() {

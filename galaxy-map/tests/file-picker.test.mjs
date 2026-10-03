@@ -5,15 +5,17 @@ const opened = [];
 globalThis.foundry = {
   applications: {
     apps: {
-      FilePicker: class {
-        constructor(options) { this.options = options; opened.push(this); }
-        browse() {}
+      FilePicker: {
+        implementation: class {
+          constructor(options) { this.options = options; opened.push(this); }
+          browse() {}
+        }
       }
     }
   }
 };
 
-const { bindFilePickerFields } = await import("../src/dom-utils.ts");
+const { bindFilePickerFields, getFilePickerClass } = await import("../src/dom-utils.ts");
 
 function fakeField(value) {
   const input = { value, events: [], dispatchEvent(event) { this.events.push(event.type); } };
@@ -45,4 +47,57 @@ test("Clear empties the field and tells listeners it changed", () => {
   click(clear);
   assert.equal(input.value, "");
   assert.deepEqual(input.events, ["input", "change"]);
+});
+
+test("v12 uses the configured implementation exposed by its FilePicker wrapper", () => {
+  class ConfiguredFilePicker {}
+  class LegacyFilePicker {}
+  const scope = {
+    foundry: { applications: { apps: { FilePicker: { implementation: ConfiguredFilePicker } } } },
+    FilePicker: LegacyFilePicker
+  };
+
+  assert.equal(getFilePickerClass(scope), ConfiguredFilePicker);
+});
+
+test("legacy installations fall back to the global FilePicker", () => {
+  class LegacyFilePicker {}
+  const scope = {
+    foundry: { applications: { apps: { FilePicker: {} } } },
+    FilePicker: LegacyFilePicker
+  };
+
+  assert.equal(getFilePickerClass(scope), LegacyFilePicker);
+});
+
+test("the browse handler uses v12's bare FilePicker binding when it is absent from the namespace", () => {
+  const originalFoundry = globalThis.foundry;
+  const originalFilePicker = globalThis.FilePicker;
+  class V12FilePicker {
+    constructor(options) { this.options = options; opened.push(this); }
+    browse() {}
+  }
+
+  try {
+    globalThis.foundry = { applications: { apps: { FilePicker: {} } } };
+    globalThis.FilePicker = V12FilePicker;
+    const { browse, click } = fakeField("icons/v12.webp");
+    click(browse);
+    assert.equal(opened.at(-1).constructor, V12FilePicker);
+  } finally {
+    globalThis.foundry = originalFoundry;
+    if (originalFilePicker === undefined) delete globalThis.FilePicker;
+    else globalThis.FilePicker = originalFilePicker;
+  }
+});
+
+test("v13 and v14 support the namespaced FilePicker constructor", () => {
+  class NamespacedFilePicker {}
+  class LegacyFilePicker {}
+  const scope = {
+    foundry: { applications: { apps: { FilePicker: NamespacedFilePicker } } },
+    FilePicker: LegacyFilePicker
+  };
+
+  assert.equal(getFilePickerClass(scope), NamespacedFilePicker);
 });

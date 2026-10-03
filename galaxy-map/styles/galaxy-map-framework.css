@@ -4,3 +4,32 @@
 @import url("./galaxy-map-effects.css");
 @import url("./planet-view.css");
 @import url("./galaxy-map-frame.css");
+
+/* Systems can apply global form styles with greater specificity. Keep Galaxy Map
+   controls readable in v12 while these scoped rules remain safe for v13/v14. */
+:is(.galaxy-map-framework, .gmf-crud-dialog) select {
+  border-color: rgba(88, 216, 255, 0.44) !important;
+  background: #081522 !important;
+  color: #e9fbff !important;
+  color-scheme: dark;
+  -webkit-text-fill-color: #e9fbff;
+}
+
+:is(.galaxy-map-framework, .gmf-crud-dialog) select :is(option, optgroup) {
+  background: #081522 !important;
+  color: #e9fbff !important;
+  -webkit-text-fill-color: #e9fbff;
+}
+
+/* Some v12 systems add a trailing icon margin to every button. Reset it on
+   Galaxy Map's round controls so the glyph stays geometrically centered. */
+:is(.galaxy-map-framework, .gmf-crud-dialog) :is(.gmf-icon-button, .gmf-window-close) > i {
+  display: block !important;
+  width: 1em !important;
+  height: 1em !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  transform: none !important;
+}

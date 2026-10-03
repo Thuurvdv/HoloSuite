@@ -1483,7 +1483,6 @@ export function createGalaxyMapViewClass(deps: any) {
       if (!host || !appearance) return;
       this._setPlanetFallback(html, appearance);
       const generation = this._planetGeneration;
-      const status = html.querySelector("[data-planet-status]");
       const toggle = html.querySelector("[data-action='planet-static']");
       const controls = html.querySelectorAll<HTMLButtonElement>("[data-planet-control]");
       if (toggle) {
@@ -1495,7 +1494,6 @@ export function createGalaxyMapViewClass(deps: any) {
         if (icon) icon.className = this.planetStatic ? "fa-solid fa-cube" : "fa-solid fa-image";
       }
       if (this.planetStatic) {
-        if (status) status.textContent = "Static preview. Turn on 3D to rotate and zoom.";
         controls.forEach(b => b.disabled = true);
         return;
       }
@@ -1525,7 +1523,6 @@ export function createGalaxyMapViewClass(deps: any) {
             ? (location: any) => void this._removePlanetLocation(location.id, html)
             : null,
           isVisible: () => !this.minimized,
-          onStatus: (text: string) => { if (status) status.textContent = text; },
           onPaused: (paused: boolean) => {
             const button = html.querySelector("[data-action='planet-pause']");
             if (button) {
@@ -1539,13 +1536,11 @@ export function createGalaxyMapViewClass(deps: any) {
           },
           onStopped: () => {
             controls.forEach(b => b.disabled = true);
-            if (status) status.textContent = "Static preview. Reopen this view to turn 3D back on.";
           }
         });
         this._planetLocationCallout = createPlanetLocationCallout({ host });
       } catch {
         controls.forEach(b => b.disabled = true);
-        if (status) status.textContent = "3D could not be loaded. Static preview shown.";
       }
     }
   };

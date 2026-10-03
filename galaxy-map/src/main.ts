@@ -233,6 +233,7 @@ const GalaxyMapManager = createGalaxyMapManagerClass({
   getMaps,
   prepareMapForManager,
   getRawMap,
+  importMapData,
   exportMap,
   duplicateMap,
   deleteMap,
@@ -247,6 +248,7 @@ const GalaxyMapManager = createGalaxyMapManagerClass({
   setObjectVisibility,
   hideRouteFromPlayers,
   hideFactionFromPlayers,
+  notifyError,
   clearManagerApp: (app) => {
     if (managerApp === app) managerApp = null;
   }

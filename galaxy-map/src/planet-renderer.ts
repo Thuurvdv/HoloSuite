@@ -325,11 +325,9 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
         texture?.dispose();
         texture = null;
         host.dataset.planetReady = "true";
-        options.onStatus?.(`Drag to rotate the ${shape}, scroll to zoom.`);
         draw(); schedule();
         return;
       }
-      options.onStatus?.("Loading planet surface…");
       let next: any = null;
       try {
         next = await new TextureLoader().loadAsync(path);
@@ -351,17 +349,10 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
         material.needsUpdate = true;
         texture?.dispose();
         texture = next;
-        const ratio = image.width / image.height;
-        const expectedRatio = shape === "cube" ? 4 / 3 : shape === "cylinder" ? 1 : 2;
-        const recommendedSize = shape === "cube" ? "2048×1536" : shape === "cylinder" ? "2048×2048" : "2048×1024";
-        options.onStatus?.(Math.abs(ratio - expectedRatio) > 0.1
-          ? `Surface loaded. ${recommendedSize} gives the best fit for this shape.`
-          : `Drag to rotate the ${shape}, scroll to zoom.`);
         host.dataset.planetReady = "true";
         draw(); schedule();
       } catch {
         if (next && next !== texture) next.dispose();
-        if (!disposed && request === textureRequest) options.onStatus?.("Texture unavailable. Choose another image or a flat color in Edit Location.");
       }
     },
     setPaused(value: boolean) {
@@ -562,7 +553,6 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
     listen(canvas, "webglcontextlost", (event: Event) => {
       event.preventDefault();
       api.dispose();
-      options.onStatus?.("3D rendering interrupted. Static preview shown; reopen the planet to retry.");
     });
     resizeObserver.observe(host);
     intersectionObserver.observe(host);
@@ -577,7 +567,6 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
     void api.setTexture(options.texture, options.color);
   } catch {
     api.dispose();
-    options.onStatus?.("3D is unavailable on this device. Static planet preview shown.");
   }
   return api;
 }
