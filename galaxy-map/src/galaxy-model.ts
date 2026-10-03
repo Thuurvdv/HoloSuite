@@ -1,5 +1,6 @@
 import { normalizePlanetFinish, normalizePlanetPreset, normalizePlanetPresetForShape, normalizePlanetShape } from "./planet-presets.ts";
 import { normalizeTravelApprovalMode } from "./travel-approval.ts";
+import type { GalaxyLocation } from "./galaxy-types";
 
 export const GALAXY_SCHEMA_VERSION = 3;
 export const SYSTEM_TYPES = ["core", "colony", "frontier", "ruins", "restricted", "unknown"];
@@ -72,7 +73,7 @@ function inferObjectKind(value: any = {}) {
   return "other";
 }
 
-export function normalizeSystemObject(object: any = {}) {
+export function normalizeLocation(object: any = {}): GalaxyLocation {
   const sceneIds = normalizeIdList(object.sceneIds === undefined ? object.sceneId : object.sceneIds);
   const planetTexture = String(object.planetTexture || "").trim();
   const planetShape = normalizePlanetShape(object.planetShape);
@@ -98,15 +99,19 @@ export function normalizeSystemObject(object: any = {}) {
   return normalized;
 }
 
+// Kept as an API alias so existing worlds and integrations do not need to
+// change their stored `objects` schema while the UI uses Location terminology.
+export const normalizeSystemObject = normalizeLocation;
+
 export function normalizeSystem(system: any = {}) {
-  const objects = Array.isArray(system.objects) ? system.objects.map(normalizeSystemObject) : [];
+  const objects = Array.isArray(system.objects) ? system.objects.map(normalizeLocation) : [];
   const objectIds = new Set(objects.map((object: any) => object.id));
   const routes = (Array.isArray(system.routes) ? system.routes : []).map(normalizeRoute)
     .filter(route => route.fromSystemId !== route.toSystemId && objectIds.has(route.fromSystemId) && objectIds.has(route.toSystemId));
   const primaryObjectId = objects.some((object: any) => object.id === system.primaryObjectId) ? String(system.primaryObjectId) : objects[0]?.id ?? "";
   // Old 1.x API callers read these fields straight off the system. The real data
   // lives on the objects; drop these once nothing reads them anymore.
-  const primary = objects.find((object: any) => object.id === primaryObjectId) ?? normalizeSystemObject(system);
+  const primary = objects.find((object: any) => object.id === primaryObjectId) ?? normalizeLocation(system);
   const normalized: any = {
     id: String(system.id || randomId("system")), name: String(system.name || "Unnamed System"),
     x: clamp(normalizeNumber(system.x, 50), 0, 100), y: clamp(normalizeNumber(system.y, 50), 0, 100),
@@ -146,7 +151,7 @@ function migrateLegacyEntity(legacy: any = {}) {
   const objectId = String(legacy.id || legacy.objectId || randomId("object"));
   const kind = inferObjectKind(legacy);
   return {
-    ...legacy, id: objectId, name: String(legacy.name || "Unnamed Entity"), kind, x: legacy.x, y: legacy.y,
+    ...legacy, id: objectId, name: String(legacy.name || "Unnamed Location"), kind, x: legacy.x, y: legacy.y,
     visibility: legacy.visibility,
     iconColor: legacy.iconColor, iconSize: legacy.iconSize,
     iconStyle: legacy.iconStyle === "planet" && kind !== "planet" ? (kind === "station" ? "station" : kind === "star" ? "star" : "diamond") : legacy.iconStyle,

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09",
+  "updated": "2026-10-02",
   "modules": [
     {
       "moduleId": "holosuite-hacking",
@@ -11,19 +11,17 @@
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking",
       "entries": [
         {
-          "title": "More ways to make hacking checks",
-          "summary": "Use supported game-system skill rolls, select a new roll from the character sheet, or configure custom dice with best-or-worst results and high-or-low success rules.",
-          "tags": ["Hacking", "Skill Checks", "Character Sheets", "Dice"]
+          "title": "Roll hacking checks your way",
+          "summary": "Use a skill from the character sheet or set up your own dice rules. You can decide whether high or low rolls succeed and whether the best or worst die counts.",
+          "tags": ["Foundry v12-v14"]
         },
         {
-          "title": "Quick Hack and reusable challenges",
-          "summary": "GMs can choose a difficulty immediately with Quick Hack or save complete hacking challenges for compatible HoloSuite content such as terminal logins, files, messages, and cameras.",
-          "tags": ["Hacking", "Quick Hack", "Terminal", "Minigames"]
+          "title": "Start quickly or save a challenge for later",
+          "summary": "Need a check right now? Pick a difficulty with Quick Hack. For bigger moments, save a full challenge and reuse it in terminals, files, messages, or security cameras."
         },
         {
-          "title": "Broader system and skill support",
-          "summary": "Native checks now support D&D 5e, Pathfinder 2e, Starfinder 2e, Call of Cthulhu 7e, and Cyberpunk RED, with clearer skill choices and setup guidance.",
-          "tags": ["Hacking", "Game Systems", "Skills", "Foundry v12-v14"]
+          "title": "Works with more game systems",
+          "summary": "Built-in skill checks now work with D&D 5e, Pathfinder 2e, Starfinder 2e, Call of Cthulhu 7e, and Cyberpunk RED, with clearer setup along the way."
         }
       ]
     },
@@ -31,15 +29,15 @@
       "moduleId": "galaxy-map",
       "title": "Galaxy Map",
       "tier": "free",
-      "version": "1.0.5",
-      "updated": "2026-08-10",
+      "version": "2.0.0",
+      "updated": "2026-10-02",
       "icon": "fa-solid fa-galaxy",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map",
       "entries": [
         {
-          "title": "Multiple scenes per star system",
-          "summary": "Galaxy Map systems can now link to multiple Foundry scenes, making it easier to organize and navigate locations across a campaign.",
-          "tags": ["Galaxy Map", "Scenes", "Navigation", "Campaigns"]
+          "title": "Galaxy Map 2.0 is here",
+          "summary": "Build your galaxy directly on the map, open systems to add planets and stations, connect destinations with routes, and let the crew request travel together. Older maps are upgraded when the primary GM opens the world.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     },
@@ -53,9 +51,9 @@
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/security-cameras",
       "entries": [
         {
-          "title": "Phantom token projections cleaned up",
-          "summary": "Camera feeds now filter token projections more reliably, preventing stale or hidden phantom tokens from appearing in live security views.",
-          "tags": ["Cameras", "Tokens", "Bug Fix", "Foundry v12-v14"]
+          "title": "Cleaner camera feeds",
+          "summary": "Hidden or outdated token projections no longer linger in a live camera feed, so players only see what is really there.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     },
@@ -69,9 +67,9 @@
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall",
       "entries": [
         {
-          "title": "Character names throughout CyberCall",
-          "summary": "Calls, contacts, messages, and group conversations now use assigned character names, with usernames retained as a fallback when no character is assigned.",
-          "tags": ["CyberCall", "Characters", "Calls", "Messages"]
+          "title": "Calls now use character names",
+          "summary": "CyberCall shows character names in calls, contacts, messages, and group chats. If someone has no character assigned, it simply falls back to their username.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     },
@@ -85,9 +83,9 @@
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board",
       "entries": [
         {
-          "title": "Smoother contract browsing",
-          "summary": "The Bounty Board title and filters now stay in place while long contract lists scroll independently, keeping search controls available even on a busy board.",
-          "tags": ["Bounties", "Filters", "Scrolling", "Interface"]
+          "title": "Long bounty lists are easier to browse",
+          "summary": "The title, search, and filters now stay put while the contracts scroll, so you do not lose your place on a busy board.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     },
@@ -101,14 +99,13 @@
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-critical-cutin",
       "entries": [
         {
-          "title": "Critical cut-ins for more dice",
-          "summary": "Choose from standard and registered dice, decide whether high or low results are positive, and configure separate success and failure thresholds for each character.",
-          "tags": ["Critical Cut-In", "Dice", "Thresholds", "Customization"]
+          "title": "More control over critical cut-ins",
+          "summary": "Choose the die, decide whether high or low results are good, and give each character their own success and failure thresholds.",
+          "tags": ["Foundry v12-v14"]
         },
         {
-          "title": "More reliable cut-in detection",
-          "summary": "Improved Foundry 14 support and prevented old chat rolls, damage rolls, discarded dice, and rerolls from triggering unwanted animations.",
-          "tags": ["Critical Cut-In", "Bug Fix", "Foundry v12-v14", "Chat"]
+          "title": "Fewer accidental cut-ins",
+          "summary": "Old chat rolls, damage rolls, discarded dice, and rerolls no longer set off an animation when they should not."
         }
       ]
     },
@@ -122,9 +119,9 @@
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/csi-toolkit",
       "entries": [
         {
-          "title": "Evidence images open from item cards",
-          "summary": "Evidence image controls now open their full image previews from CSI item cards, making case-board evidence easier to inspect at the table.",
-          "tags": ["CSI", "Evidence", "Images", "Foundry v12-v14"]
+          "title": "Open evidence right from its card",
+          "summary": "Click an evidence image on a CSI item card to open the full preview while you are working through the case.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     },
@@ -138,9 +135,9 @@
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
       "entries": [
         {
-          "title": "Blueprint joins the HoloSuite launcher",
-          "summary": "HoloSuite Core now includes launcher styling for HoloSuite Blueprint and announces its premium 1.0.0 release in What's New.",
-          "tags": ["Core", "Blueprint", "What's New", "Foundry v12-v14"]
+          "title": "Blueprint is now in the launcher",
+          "summary": "If HoloSuite Blueprint is installed, you can open it alongside your other apps from the HoloSuite launcher.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     }
@@ -156,9 +153,9 @@
       "url": "https://patreon.com/MageTowerStudios",
       "entries": [
         {
-          "title": "Tactical blueprints join HoloSuite",
-          "summary": "Turn Foundry Scenes into multi-floor tactical schematics with generated or custom layouts, rooms, markers, freehand planning, player presentations, PNG export, and published previews inside HoloSuite Terminal.",
-          "tags": ["Blueprint", "New Premium Module", "Tactical Maps", "Foundry v12-v13"]
+          "title": "Build tactical blueprints from your scenes",
+          "summary": "Turn a Foundry scene into a clean, multi-floor schematic. Add rooms, markers, and freehand notes, share a player view, export a PNG, or publish it inside HoloSuite Terminal.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     },
@@ -172,9 +169,9 @@
       "url": "https://github.com/Thuurvdv/holosuite-vending-machines",
       "entries": [
         {
-          "title": "Configurable vending machines join HoloSuite",
-          "summary": "Build scene-linked vending machines with Alien Market, Neon, Executive Terminal, or Corporate Kiosk styling, limited stock, item-currency purchases, and Region-based access controls.",
-          "tags": ["Vending Machines", "New Module", "Regions", "Foundry v12-v14"]
+          "title": "Build vending machines that fit your world",
+          "summary": "Place a shop in a scene, choose its look, stock it with items, set prices and limits, and control who can use it through Foundry Regions.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     },
@@ -188,9 +185,9 @@
       "url": "https://patreon.com/MageTowerStudios",
       "entries": [
         {
-          "title": "Interactive sci-fi terminals join HoloSuite",
-          "summary": "Turn terminals into playable locations with configurable mail, files, camera feeds, utilities, authentication, hacking, permissions, encounter-driven downloads, and distinct visual themes.",
-          "tags": ["Terminals", "Hacking", "Files", "Foundry v12-v14"]
+          "title": "Turn a terminal into a place players can explore",
+          "summary": "Fill terminals with mail, files, cameras, and useful tools. Add logins, permissions, hacking challenges, downloads, and a look that suits the location.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     },
@@ -204,9 +201,9 @@
       "url": "https://patreon.com/MageTowerStudios",
       "entries": [
         {
-          "title": "Cinematic scanner pulses join HoloSuite",
-          "summary": "Reveal GM-placed scan targets with a table-ready scanner pulse, visibility controls, range handling, and system-agnostic target data.",
-          "tags": ["Scanner", "Targets", "Cinematic", "Foundry v12-v14"]
+          "title": "Give hidden targets a proper scanner reveal",
+          "summary": "Place secrets for the crew to find, then reveal them with a cinematic scanner pulse. You control visibility and range, and it works with any game system.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     },
@@ -220,9 +217,9 @@
       "url": "https://patreon.com/MageTowerStudios",
       "entries": [
         {
-          "title": "Ship loadouts join HoloSuite",
-          "summary": "Create system-agnostic ship profiles with equipment slots, power allocation, damage tracking, ship-image pins, and player-facing install or activation permissions.",
-          "tags": ["Ships", "Loadouts", "Power", "Foundry v12-v14"]
+          "title": "Keep every ship loadout in one place",
+          "summary": "Build a ship profile, place equipment in its slots, manage power and damage, and choose what the crew is allowed to install or switch on.",
+          "tags": ["Foundry v12-v14"]
         }
       ]
     }

@@ -111,7 +111,7 @@
   {{else}}
   {{#if route}}
     <header class="gmf-system-panel__top">
-      <p class="gmf-kicker">{{#if objectView}}Entity Route{{else}}Travel Route{{/if}}</p>
+      <p class="gmf-kicker">{{#if objectView}}Location Route{{else}}Travel Route{{/if}}</p>
       <h3>{{route.fromName}} <i class="fa-solid fa-arrow-right-long"></i> {{route.toName}}</h3>
       {{#if objectView}}<div class="gmf-status-icons" aria-label="Route information">
         <span title="Route type: {{route.type}}" aria-label="Route type: {{route.type}}"><i class="fa-solid fa-route"></i></span>
@@ -151,7 +151,7 @@
       <header class="gmf-system-panel__top" style="--gmf-faction-color: {{system.factionColor}};">
         <p class="gmf-kicker">{{system.factionName}}</p>
         <h3>{{system.displayName}}</h3>
-        {{#if objectView}}<div class="gmf-status-icons" aria-label="Entity state">
+        {{#if objectView}}<div class="gmf-status-icons" aria-label="Location state">
           <span title="Type: {{system.displayType}}" aria-label="Type: {{system.displayType}}"><i class="fa-solid fa-cube"></i></span>
           <span title="Status: {{system.displayStatus}}" aria-label="Status: {{system.displayStatus}}"><i class="fa-solid fa-signal"></i></span>
           {{#if system.isCurrent}}<span title="Current location" aria-label="Current location"><i class="fa-solid fa-location-crosshairs"></i></span>{{/if}}
@@ -242,18 +242,18 @@
         {{/unless}}
         {{#if map.canEdit}}
         <div class="gmf-inspector-actions__secondary">
-            {{#if planetView}}<button type="button" class="gmf-icon-button" data-action="edit-system" title="Edit Entity" aria-label="Edit Entity"><i class="fa-solid fa-pen"></i></button>{{/if}}
+            {{#if planetView}}<button type="button" class="gmf-icon-button" data-action="edit-system" title="Edit Location" aria-label="Edit Location"><i class="fa-solid fa-pen"></i></button>{{/if}}
             <details class="gmf-action-menu">
               <summary title="GM Actions" aria-label="GM Actions"><i class="fa-solid fa-ellipsis"></i></summary>
               <div class="gmf-action-menu__panel">
-                {{#unless planetView}}<button type="button" class="gmf-icon-button" data-action="edit-system" title="Edit {{#if objectView}}Entity{{else}}System{{/if}}" aria-label="Edit {{#if objectView}}Entity{{else}}System{{/if}}"><i class="fa-solid fa-pen"></i><span>Edit {{#if objectView}}Entity{{else}}System{{/if}}</span></button>{{/unless}}
+                {{#unless planetView}}<button type="button" class="gmf-icon-button" data-action="edit-system" title="Edit {{#if objectView}}Location{{else}}System{{/if}}" aria-label="Edit {{#if objectView}}Location{{else}}System{{/if}}"><i class="fa-solid fa-pen"></i><span>Edit {{#if objectView}}Location{{else}}System{{/if}}</span></button>{{/unless}}
                 {{#unless system.isCurrent}}<button type="button" class="gmf-icon-button" data-action="set-current-system" title="Set Current Location" aria-label="Set Current Location"><i class="fa-solid fa-location-crosshairs"></i><span>Set Current</span></button>{{/unless}}
                 {{#if system.gmOnly}}
                   <button type="button" class="gmf-icon-button" data-action="reveal-system" title="Reveal to Players" aria-label="Reveal to Players"><i class="fa-solid fa-eye"></i><span>Reveal</span></button>
                 {{else}}
                   <button type="button" class="gmf-icon-button" data-action="hide-system" title="Hide from Players" aria-label="Hide from Players"><i class="fa-solid fa-eye-slash"></i><span>Hide</span></button>
                 {{/if}}
-                <button type="button" class="gmf-icon-button" data-action="delete-system" title="Delete {{#if objectView}}Entity{{else}}System{{/if}}" aria-label="Delete {{#if objectView}}Entity{{else}}System{{/if}}"><i class="fa-solid fa-trash"></i><span>Delete</span></button>
+                <button type="button" class="gmf-icon-button" data-action="delete-system" title="Delete {{#if objectView}}Location{{else}}System{{/if}}" aria-label="Delete {{#if objectView}}Location{{else}}System{{/if}}"><i class="fa-solid fa-trash"></i><span>Delete</span></button>
               </div>
             </details>
         </div>

@@ -2677,14 +2677,13 @@ function ka() {
     icon: "fa-solid fa-satellite-dish",
     entries: [
       {
-        title: "Custom ringtones and volume controls",
-        summary: "GMs can add multiple world ringtones, while each user can choose a per-world ringtone and set its volume relative to Foundry's Interface volume.",
-        tags: ["CyberCall", "Ringtones", "Audio", "Settings"]
+        title: "Make CyberCall sound like your world",
+        summary: "GMs can add a set of ringtones for the world. Each player can pick their favorite and adjust its volume without changing the rest of Foundry's interface sounds.",
+        tags: ["Foundry v12-v14"]
       },
       {
-        title: "Foundry v12–v14 audio compatibility",
-        summary: "Ringtone selection, file browsing, and playback now behave consistently across supported Foundry versions, with clearer configuration contrast and an audible default.",
-        tags: ["CyberCall", "Compatibility", "Foundry v12", "Foundry v14"]
+        title: "Ringtones behave more reliably",
+        summary: "Choosing a sound, browsing for a file, and playing it now work consistently across supported Foundry versions, with a clearer setup screen and an audible default."
       }
     ]
   }), !0) : !1;

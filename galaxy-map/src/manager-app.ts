@@ -243,8 +243,8 @@ export function createGalaxyMapManagerClass(deps: any) {
 
     async _confirmDeleteObject(systemId: string, objectId: string) {
       const confirmed = await Dialog.confirm({
-        title: "Delete Entity",
-        content: "<p>Delete this entity and its linked content from the system?</p>"
+        title: "Delete Location",
+        content: "<p>Delete this location and its linked content from the system?</p>"
       });
       if (confirmed) await deleteObject(this.selectedMapId, systemId, objectId);
     }

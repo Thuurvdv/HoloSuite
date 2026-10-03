@@ -1,10 +1,10 @@
-var Oe = Object.defineProperty;
-var Re = (e, i, t) => i in e ? Oe(e, i, { enumerable: !0, configurable: !0, writable: !0, value: t }) : e[i] = t;
-var E = (e, i, t) => Re(e, typeof i != "symbol" ? i + "" : i, t);
-const Fe = [4, 6, 8, 10, 12, 20, 100];
-function $e(e = 20) {
+var Ee = Object.defineProperty;
+var Re = (e, i, t) => i in e ? Ee(e, i, { enumerable: !0, configurable: !0, writable: !0, value: t }) : e[i] = t;
+var O = (e, i, t) => Re(e, typeof i != "symbol" ? i + "" : i, t);
+const $e = [4, 6, 8, 10, 12, 20, 100];
+function Fe(e = 20) {
   var r, a, c;
-  const i = z(e), t = /* @__PURE__ */ new Set([...Fe, i]), n = ((c = (a = (r = globalThis.CONFIG) == null ? void 0 : r.Dice) == null ? void 0 : a.fulfillment) == null ? void 0 : c.dice) ?? {};
+  const i = z(e), t = /* @__PURE__ */ new Set([...$e, i]), n = ((c = (a = (r = globalThis.CONFIG) == null ? void 0 : r.Dice) == null ? void 0 : a.fulfillment) == null ? void 0 : c.dice) ?? {};
   for (const o of Object.keys(n)) {
     const l = /^d([1-9]\d*)$/i.exec(o);
     if (!l) continue;
@@ -24,7 +24,7 @@ function z(e) {
 function ge(e) {
   return e === "low" ? "low" : "high";
 }
-const h = "holosuite-critical-cutin", me = "HoloSuite Critical Cut-In", $ = `module.${h}`, _e = `modules/${h}/templates/player-config.hbs`, u = {
+const h = "holosuite-critical-cutin", me = "HoloSuite Critical Cut-In", F = `module.${h}`, _e = `modules/${h}/templates/player-config.hbs`, u = {
   enabled: "enabled",
   dieSides: "dieSides",
   rollDirection: "rollDirection",
@@ -166,15 +166,15 @@ function q() {
 function v() {
   return z(f(u.dieSides));
 }
-function B() {
+function K() {
   return ge(f(u.rollDirection)) === "low";
 }
 function pe(e, i) {
   const t = Number(e);
-  return Number.isInteger(t) && t >= 1 && t <= v() ? t : i === "success" === B() ? 1 : v();
+  return Number.isInteger(t) && t >= 1 && t <= v() ? t : i === "success" === K() ? 1 : v();
 }
 function ye(e, i, t) {
-  return t === "success" === B() ? e <= i : e >= i;
+  return t === "success" === K() ? e <= i : e >= i;
 }
 function V() {
   const e = f(u.playerConfigs);
@@ -188,7 +188,7 @@ function L(...e) {
 }
 const x = [], I = /* @__PURE__ */ new Set();
 let H = !1;
-function O(e) {
+function E(e) {
   const i = document.createElement("div");
   return i.textContent = String(e ?? ""), i.innerHTML;
 }
@@ -228,7 +228,7 @@ function Ve(e) {
   }
 }
 function je(e) {
-  const i = e.accentColor || "#69e8ff", t = ["strike", "breach", "signal"].includes(e.animationStyle) ? e.animationStyle : "strike", n = e.triggerKind === "failure" ? "failure" : "success", r = e.imagePath ? `<img class="hcci-portrait" src="${O(e.imagePath)}" alt="">` : '<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>', a = e.imagePath ? [0, 1, 2, 3].map((d) => `<div class="hcci-fracture hcci-fracture-${d + 1}" style="background-image: url('${O(e.imagePath)}')"></div>`).join("") : "", c = Math.max(1, String(e.overlayText ?? "").length), o = e.textEnabled && e.overlayText ? `<div class="hcci-title" style="--hcci-title-chars: ${c}">${O(e.overlayText)}</div>` : "", l = e.actorName || e.userName || "", s = document.createElement("div");
+  const i = e.accentColor || "#69e8ff", t = ["strike", "breach", "signal"].includes(e.animationStyle) ? e.animationStyle : "strike", n = e.triggerKind === "failure" ? "failure" : "success", r = e.imagePath ? `<img class="hcci-portrait" src="${E(e.imagePath)}" alt="">` : '<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>', a = e.imagePath ? [0, 1, 2, 3].map((d) => `<div class="hcci-fracture hcci-fracture-${d + 1}" style="background-image: url('${E(e.imagePath)}')"></div>`).join("") : "", c = Math.max(1, String(e.overlayText ?? "").length), o = e.textEnabled && e.overlayText ? `<div class="hcci-title" style="--hcci-title-chars: ${c}">${E(e.overlayText)}</div>` : "", l = e.actorName || e.userName || "", s = document.createElement("div");
   return s.className = `hcci-overlay hcci-style-${t} hcci-kind-${n}`, s.style.setProperty("--hcci-accent", i), s.innerHTML = `
     <div class="hcci-flash"></div>
     <div class="hcci-noise"></div>
@@ -258,7 +258,7 @@ function je(e) {
       </div>
       <div class="hcci-copy">
         ${o}
-        ${l ? `<div class="hcci-subtitle">${O(l)}</div>` : ""}
+        ${l ? `<div class="hcci-subtitle">${E(l)}</div>` : ""}
       </div>
     </section>
   `, s;
@@ -270,7 +270,7 @@ async function ze(e) {
   const n = qe(e.audioPath, e.volume);
   await new Promise((r) => window.setTimeout(r, Math.max(250, i - 250))), Ve(await n), t.classList.add("hcci-exiting"), await new Promise((r) => window.setTimeout(r, 250)), t.remove(), document.body.classList.remove("hcci-screen-shake");
 }
-async function Be() {
+async function Ke() {
   if (!H) {
     for (H = !0; x.length; ) {
       const e = x.shift();
@@ -287,11 +287,11 @@ function D(e) {
       const i = I.values().next().value;
       I.size > 100 && i && I.delete(i);
     }
-    x.push(e), x.length > 3 && x.splice(1, x.length - 3), Be();
+    x.push(e), x.length > 3 && x.splice(1, x.length - 3), Ke();
   }
 }
 const C = /* @__PURE__ */ new Set(), j = /* @__PURE__ */ new Set();
-function Ke(e) {
+function Be(e) {
   return !!(e != null && e.id) && j.has(e.id);
 }
 function m(e) {
@@ -463,7 +463,7 @@ function se() {
   const i = (((t = game.users) == null ? void 0 : t.filter((r) => r.active && r.isGM)) ?? []).sort((r, a) => r.id.localeCompare(a.id))[0];
   return ((n = game.user) == null ? void 0 : n.isGM) && (!i || i.id === game.user.id);
 }
-function F(e) {
+function $(e) {
   C.add(e);
   const i = C.values().next().value;
   C.size > 200 && i && C.delete(i);
@@ -474,7 +474,7 @@ function Ae(e) {
   const i = Te(e), t = Ce(e, i), n = k(t, i, "success"), r = k(t, i, "failure"), a = ce(e, r.threshold, "failure"), c = a ? null : ce(e, n.threshold, "success"), o = a ?? c;
   if (!o) return !1;
   const s = Se(e, o, i, t, a ? r : n);
-  return s ? (F(e.id), L("Triggering cut-in.", s), (d = game.socket) == null || d.emit($, { type: "play", payload: s }), D(s), !0) : (F(e.id), !0);
+  return s ? ($(e.id), L("Triggering cut-in.", s), (d = game.socket) == null || d.emit(F, { type: "play", payload: s }), D(s), !0) : ($(e.id), !0);
 }
 function tt(e, i) {
   var g;
@@ -482,7 +482,7 @@ function tt(e, i) {
   const t = Te(e), n = Ce(e, t), r = k(n, t, "success"), a = k(n, t, "failure"), c = le(e, i, a.threshold, "failure"), o = c ? null : le(e, i, r.threshold, "success"), l = c ?? o;
   if (!l) return !1;
   const d = Se(e, l, t, n, c ? a : r);
-  return d ? (F(e.id), L("Triggering cut-in from rendered chat card.", d), (g = game.socket) == null || g.emit($, { type: "play", payload: d }), D(d), !0) : (F(e.id), !0);
+  return d ? ($(e.id), L("Triggering cut-in from rendered chat card.", d), (g = game.socket) == null || g.emit(F, { type: "play", payload: d }), D(d), !0) : ($(e.id), !0);
 }
 function G(e, i) {
   e != null && e.id && globalThis.setTimeout(() => {
@@ -501,9 +501,9 @@ function it() {
     f(u.enabled) && se() && (Ae(t) || (G(t, 100), G(t, 500), G(t, 1500)));
   });
   const e = (t, n) => {
-    f(u.enabled) && (Ke(t) || se() && tt(t, n));
+    f(u.enabled) && (Be(t) || se() && tt(t, n));
   };
-  Hooks.on("renderChatMessage", e), Hooks.on("renderChatMessageHTML", e), (i = game.socket) == null || i.on($, (t) => {
+  Hooks.on("renderChatMessage", e), Hooks.on("renderChatMessageHTML", e), (i = game.socket) == null || i.on(F, (t) => {
     (t == null ? void 0 : t.type) === "play" && f(u.enabled) && D(t.payload);
   });
 }
@@ -537,7 +537,7 @@ function nt(e, i = {}) {
 }
 function ue(e) {
   var i;
-  (i = game.socket) == null || i.emit($, { type: "play", payload: e }), D(e);
+  (i = game.socket) == null || i.emit(F, { type: "play", payload: e }), D(e);
 }
 function Ne() {
   var e, i, t;
@@ -577,7 +577,7 @@ function xe(e) {
     constructor(n = {}) {
       const r = rt(new.target.defaultOptions ?? {}, n);
       super(de(r));
-      E(this, "_v1Options");
+      O(this, "_v1Options");
       this._v1Options = r;
     }
     static get defaultOptions() {
@@ -719,8 +719,8 @@ function ht() {
 class Ie extends lt {
   constructor(t = {}) {
     super(t);
-    E(this, "activeTabs");
-    E(this, "rollRuleChange", null);
+    O(this, "activeTabs");
+    O(this, "rollRuleChange", null);
     this.activeTabs = /* @__PURE__ */ new Map();
   }
   static get defaultOptions() {
@@ -760,8 +760,8 @@ class Ie extends lt {
     return {
       moduleId: h,
       dieSides: v(),
-      dice: $e(v()),
-      lowRollsGood: B(),
+      dice: Fe(v()),
+      lowRollsGood: K(),
       threshold: f(u.threshold) ?? 0,
       failureThreshold: f(u.failureThreshold) ?? 0,
       effectiveThreshold: R(),
@@ -831,7 +831,7 @@ class Ie extends lt {
     });
   }
   async _updateObject(t) {
-    var g, p, y, b, _, K, U, Q;
+    var g, p, y, b, _, B, U, Q;
     if (this.rollRuleChange) return;
     const n = t.currentTarget;
     if (!n.reportValidity()) return;
@@ -856,7 +856,7 @@ class Ie extends lt {
       const A = S.dataset.hcciRow, w = (y = S.querySelector("[data-hcci-panel].is-active")) == null ? void 0 : y.dataset.hcciPanel;
       w && this.activeTabs.set(A, w), c[A] = o(S, "success"), c[A].failure = o(S, "failure");
     }
-    const l = Number(((b = n.querySelector('[name="threshold"]')) == null ? void 0 : b.value) ?? R()), s = Number(((_ = n.querySelector('[name="failureThreshold"]')) == null ? void 0 : _.value) ?? q()), d = Number(((K = n.querySelector('[name="duration"]')) == null ? void 0 : K.value) ?? f(u.duration));
+    const l = Number(((b = n.querySelector('[name="threshold"]')) == null ? void 0 : b.value) ?? R()), s = Number(((_ = n.querySelector('[name="failureThreshold"]')) == null ? void 0 : _.value) ?? q()), d = Number(((B = n.querySelector('[name="duration"]')) == null ? void 0 : B.value) ?? f(u.duration));
     await M(u.dieSides, r), await M(u.rollDirection, a), await M(u.threshold, Math.min(r, Math.max(0, l))), await M(u.failureThreshold, Math.min(r, Math.max(0, s))), await M(u.duration, Math.min(8e3, Math.max(800, d))), await ae(c), (U = ui.notifications) == null || U.info("Critical Cut-In configuration saved."), (Q = this.element) == null || Q.removeClass("hcci-config-dirty"), this.render(!1);
   }
 }
@@ -890,19 +890,18 @@ function Le() {
     icon: "fa-solid fa-bolt-lightning",
     entries: [
       {
-        title: "Critical cut-ins for more dice",
-        summary: "Choose from standard and registered dice, decide whether high or low results are positive, and configure separate success and failure thresholds for each character.",
-        tags: ["Critical Cut-In", "Dice", "Thresholds", "Customization"]
+        title: "More control over critical cut-ins",
+        summary: "Choose the die, decide whether high or low results are good, and give each character their own success and failure thresholds.",
+        tags: ["Foundry v12-v14"]
       },
       {
-        title: "More reliable cut-in detection",
-        summary: "Improved Foundry 14 support and prevented old chat rolls, damage rolls, discarded dice, and rerolls from triggering unwanted animations.",
-        tags: ["Critical Cut-In", "Bug Fix", "Foundry v12-v14", "Chat"]
+        title: "Fewer accidental cut-ins",
+        summary: "Old chat rolls, damage rolls, discarded dice, and rerolls no longer set off an animation when they should not."
       }
     ]
   }), console.log(`${h} | Registered with HoloSuite.`), !0) : !1;
 }
-function Ee() {
+function Oe() {
   const e = {
     playCutinForUser(t, n = {}) {
       var a;
@@ -919,10 +918,10 @@ function Ee() {
   return i && (i.api = e), game.holosuiteCriticalCutin = e, e;
 }
 Hooks.once("init", async () => {
-  He(Ie), Ee(), await loadTemplates([`modules/${h}/templates/player-config.hbs`]);
+  He(Ie), Oe(), await loadTemplates([`modules/${h}/templates/player-config.hbs`]);
 });
 Hooks.once("ready", () => {
-  Ee(), it(), Le(), console.log(`${h} | Ready. API available at game.modules.get("${h}").api`);
+  Oe(), it(), Le(), console.log(`${h} | Ready. API available at game.modules.get("${h}").api`);
 });
 Hooks.on("hotReload", () => {
   Le();

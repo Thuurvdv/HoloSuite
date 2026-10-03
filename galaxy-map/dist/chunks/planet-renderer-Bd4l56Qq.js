@@ -22146,7 +22146,7 @@ function Hh(i, e) {
         const j = I.width / I.height, ie = g === "cube" ? 4 / 3 : g === "cylinder" ? 1 : 2, Y = g === "cube" ? "2048×1536" : g === "cylinder" ? "2048×2048" : "2048×1024";
         (p = e.onStatus) == null || p.call(e, Math.abs(j - ie) > 0.1 ? `Surface loaded. ${Y} gives the best fit for this shape.` : `Drag to rotate the ${g}, scroll to zoom.`), i.dataset.planetReady = "true", Se(), st();
       } catch {
-        He && He !== o && He.dispose(), !t && P === a && ((C = e.onStatus) == null || C.call(e, "Texture unavailable. Choose another image or a flat color in Edit Entity."));
+        He && He !== o && He.dispose(), !t && P === a && ((C = e.onStatus) == null || C.call(e, "Texture unavailable. Choose another image or a flat color in Edit Location."));
       }
     },
     setPaused(se) {

@@ -361,7 +361,7 @@ export function createPlanetRenderer(host: HTMLElement, options: any) {
         draw(); schedule();
       } catch {
         if (next && next !== texture) next.dispose();
-        if (!disposed && request === textureRequest) options.onStatus?.("Texture unavailable. Choose another image or a flat color in Edit Entity.");
+        if (!disposed && request === textureRequest) options.onStatus?.("Texture unavailable. Choose another image or a flat color in Edit Location.");
       }
     },
     setPaused(value: boolean) {

@@ -2,7 +2,6 @@ import {
   MAX_ZOOM,
   MIN_ZOOM,
   ANIMATED_CELESTIAL_STYLES,
-  TRAVEL_ANIMATION_MS,
   clamp,
   getEffectiveObjectVisibility,
   normalizeMap
@@ -15,6 +14,7 @@ import { createPlanetLocationCallout, type PlanetLocationItem } from "./planet-l
 import { bindFilePickerFields, escapeHtml } from "./dom-utils";
 import { activateGalaxyWindowChrome, GALAXY_DIALOG_OPTIONS } from "./window-chrome";
 import { getApplicationBase } from "./app-base";
+import { animateShipTravel } from "./travel-animation";
 
 declare const foundry: any;
 declare const Dialog: any;
@@ -300,7 +300,7 @@ export function createGalaxyMapViewClass(deps: any) {
         isFaction: this.creationPanel.kind === "faction",
         isMap: this.creationPanel.kind === "map",
         mapTitle: this.creationPanel.data?.title,
-        title: this.creationPanel.kind === "map" ? "Edit Galaxy" : `${this.creationPanel.editId ? "Edit" : "Create"} ${({ system: "System", entity: "Entity", route: "Route", faction: "Faction" } as any)[this.creationPanel.kind]}`,
+        title: this.creationPanel.kind === "map" ? "Edit Galaxy" : `${this.creationPanel.editId ? "Edit" : "Create"} ${({ system: "System", entity: "Location", route: "Route", faction: "Faction" } as any)[this.creationPanel.kind]}`,
         submitLabel: this.creationPanel.editId ? "Save changes" : "Create",
         systemOptions: (activeSystem ? systemObjects : displayMap?.systems ?? [])
           .map((endpoint: any) => ({ id: endpoint.id, name: endpoint.displayName || endpoint.name })),
@@ -631,7 +631,7 @@ export function createGalaxyMapViewClass(deps: any) {
           if (!getPlanetAppearance(object)) return;
           this.planetSystemId = this.selectedObjectId;
         } else {
-          // From the galaxy view, inspecting a system opens its primary entity.
+          // From the galaxy view, inspecting a system opens its primary location.
           this.activeSystemId = this.selectedSystemId;
           const map = normalizeMap(raw);
           this.selectedObjectId = map.systems.find((system: any) => system.id === this.activeSystemId)?.primaryObjectId ?? null;
@@ -687,7 +687,7 @@ export function createGalaxyMapViewClass(deps: any) {
         const objectId = this.planetSystemId || this.selectedObjectId;
         if (!sceneId || !this.activeSystemId || !objectId) return;
         const name = game.scenes?.get?.(sceneId)?.name || "Scene";
-        if (await unlinkPlanetScene(this.mapId, this.activeSystemId, objectId, sceneId)) notifyInfo(`${name} unlinked from this entity.`);
+        if (await unlinkPlanetScene(this.mapId, this.activeSystemId, objectId, sceneId)) notifyInfo(`${name} unlinked from this location.`);
       }));
       html.querySelectorAll<HTMLElement>("[data-open-linked-scene]").forEach(button => button.addEventListener("click", () => {
         const scene = game.scenes?.get?.(button.dataset.openLinkedScene ?? "");
@@ -1178,7 +1178,7 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     async _confirmDeleteObject(systemId: string, objectId: string) {
-      const confirmed = await Dialog.confirm({ title: "Delete Entity", content: "<p>Delete this entity and its linked content?</p>" });
+      const confirmed = await Dialog.confirm({ title: "Delete Location", content: "<p>Delete this location and its linked content?</p>" });
       if (confirmed) {
         await deleteObject(this.mapId, systemId, objectId);
         this.selectedObjectId = null;
@@ -1192,14 +1192,14 @@ export function createGalaxyMapViewClass(deps: any) {
         ? map.systems.find((system: any) => system.id === this.activeSystemId)?.objects ?? []
         : map.systems;
       if (kind === "route" && routeEndpoints.length < 2) {
-        notifyError(this.activeSystemId ? "Create at least two entities before adding a route." : "Create at least two systems before adding a route.");
+        notifyError(this.activeSystemId ? "Create at least two locations before adding a route." : "Create at least two systems before adding a route.");
         return;
       }
       const fromSystemId = defaults.fromSystemId || routeEndpoints[0]?.id || "";
       const base = kind === "map" ? { title: "Galaxy Map", subtitle: "", description: "", backgroundImage: "", visibility: "players", travelApprovalMode: "unanimous" }
         : kind === "system" ? { name: "New System", status: "known", visibility: "gm", description: "", markerImage: "", backgroundImage: "" }
         : kind === "entity" ? {
-          name: "New Entity", kind: "planet", status: "known", visibility: "inherit", factionId: "", description: "", notes: "",
+          name: "New Location", kind: "planet", status: "known", visibility: "inherit", factionId: "", description: "", notes: "",
           iconStyle: "planet", iconColor: "#58d8ff", markerImage: "", planetPreset: "ice", planetShape: "sphere", planetFinish: "smooth",
           planetColor: "#58d8ff", planetTexture: "", image: ""
         }
@@ -1301,7 +1301,7 @@ export function createGalaxyMapViewClass(deps: any) {
         else if (kind === "entity" && this.activeSystemId) saved = await upsertObject(this.mapId, this.activeSystemId, { ...existing, ...values, x, y });
         else if (kind === "route") {
           if (!values.fromSystemId || !values.toSystemId || values.fromSystemId === values.toSystemId) {
-            notifyError(`Choose two different ${this.activeSystemId ? "entities" : "systems"} for the route.`);
+            notifyError(`Choose two different ${this.activeSystemId ? "locations" : "systems"} for the route.`);
             this._openCreationPanel("route", { ...existing, ...values }, panel?.editId ?? null);
             return;
           }
@@ -1337,7 +1337,7 @@ export function createGalaxyMapViewClass(deps: any) {
         marker.className = `gmf-system gmf-system--${type} gmf-icon--${iconStyle} gmf-status--${status}${markerImage ? " has-custom-marker" : ""}`;
         marker.style.setProperty("--gmf-faction-color", value("iconColor", "#58d8ff"));
         marker.style.setProperty("--gmf-system-size", "42px");
-        if (label) label.textContent = value("name", "New Entity");
+        if (label) label.textContent = value("name", "New Location");
         const sequence = ++renderSequence;
         if (icon && markerImage) {
           const image = document.createElement("img");
@@ -1422,43 +1422,7 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     _animateShipTravel(from: any, to: any, html: any) {
-      const layer = html.querySelector("[data-ship-layer]");
-      const stage = html.querySelector(".gmf-map-stage");
-      if (!layer || !stage) return Promise.resolve();
-
-      const rect = stage.getBoundingClientRect();
-      const dx = (to.x - from.x) * rect.width / 100;
-      const dy = (to.y - from.y) * rect.height / 100;
-      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-      const ship = document.createElement("div");
-      ship.className = "gmf-travel-ship";
-      ship.innerHTML = '<i class="fa-solid fa-rocket"></i>';
-      ship.style.left = `${from.x}%`;
-      ship.style.top = `${from.y}%`;
-      ship.style.setProperty("--gmf-ship-angle", `${angle}deg`);
-      layer.replaceChildren(ship);
-
-      return new Promise<void>((resolve) => {
-        let done = false;
-        const finish = () => {
-          if (done) return;
-          done = true;
-          ship.removeEventListener("transitionend", finish);
-          ship.classList.add("is-arrived");
-          globalThis.setTimeout(() => {
-            ship.remove();
-            resolve();
-          }, 260);
-        };
-        ship.addEventListener("transitionend", finish, { once: true });
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            ship.style.left = `${to.x}%`;
-            ship.style.top = `${to.y}%`;
-          });
-        });
-        globalThis.setTimeout(finish, TRAVEL_ANIMATION_MS);
-      });
+      return animateShipTravel(from, to, html);
     }
 
     _openLinkedJournal() {

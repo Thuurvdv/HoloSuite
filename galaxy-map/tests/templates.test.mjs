@@ -10,7 +10,7 @@ const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), "ut
 Handlebars.registerHelper("gmfEq", (a, b) => a === b);
 Handlebars.registerHelper("gmfFallback", (a, b) => a || b);
 Handlebars.registerHelper("gmfPercent", a => `${a}%`);
-for (const name of ["system-details", "celestial-icon", "object-appearance-panel"]) {
+for (const name of ["system-details", "celestial-icon", "object-appearance-panel", "map-context-menu"]) {
   Handlebars.registerPartial(`modules/galaxy-map/templates/${name}.hbs`, read(`templates/${name}.hbs`));
 }
 const galaxyMap = Handlebars.compile(read("templates/galaxy-map.hbs"));

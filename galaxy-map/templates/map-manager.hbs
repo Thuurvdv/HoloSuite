@@ -118,12 +118,12 @@
                         <strong>{{system.name}}</strong>
                         <span class="gmf-row-tags">
                           <span>{{system.status}}</span>
-                          <span>{{system.objects.length}} entities</span>
+                          <span>{{system.objects.length}} locations</span>
                         </span>
                       </div>
                       <span class="gmf-visibility-state gmf-visibility-state--{{system.visibility}}"><i class="fa-solid {{#if (gmfEq system.visibility "players")}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>{{system.visibility}}</span>
                       <div class="gmf-row-actions">
-                        <button type="button" data-create-object="{{system.id}}" title="Add entity" aria-label="Add entity to {{system.name}}"><i class="fa-solid fa-circle-plus"></i></button>
+                        <button type="button" data-create-object="{{system.id}}" title="Add location" aria-label="Add location to {{system.name}}"><i class="fa-solid fa-circle-plus"></i></button>
                         <button type="button" data-edit-system="{{system.id}}" title="Edit system" aria-label="Edit {{system.name}}"><i class="fa-solid fa-pen"></i></button>
                         {{#if (gmfEq system.visibility "players")}}
                           <button type="button" data-hide-system="{{system.id}}" title="Hide from players" aria-label="Hide {{system.name}} from players"><i class="fa-solid fa-eye-slash"></i></button>
@@ -137,12 +137,12 @@
                           <div class="gmf-object-tree__row">
                             <span><i class="fa-solid fa-circle-dot"></i><strong>{{object.name}}</strong><small>{{object.kind}} · {{object.status}}</small></span>
                             <div class="gmf-row-actions">
-                              <button type="button" data-edit-object="{{object.id}}" data-object-system="{{system.id}}" title="Edit entity"><i class="fa-solid fa-pen"></i></button>
-                              <button type="button" class="gmf-button--danger" data-delete-object="{{object.id}}" data-object-system="{{system.id}}" title="Delete entity"><i class="fa-solid fa-trash"></i></button>
+                              <button type="button" data-edit-object="{{object.id}}" data-object-system="{{system.id}}" title="Edit location"><i class="fa-solid fa-pen"></i></button>
+                              <button type="button" class="gmf-button--danger" data-delete-object="{{object.id}}" data-object-system="{{system.id}}" title="Delete location"><i class="fa-solid fa-trash"></i></button>
                             </div>
                           </div>
                         {{else}}
-                          <p class="gmf-empty-inline">No entities in this system.</p>
+                          <p class="gmf-empty-inline">No locations in this system.</p>
                         {{/each}}
                       </div>{{/if}}
                     </article>

@@ -14,11 +14,11 @@ test('routed destinations inside a system expose travel beside inspect', () => {
 });
 
 test('GM and player object travel reuse routes, animation, and approval', () => {
-  const main = read('src/main.ts');
+  const travel = read('src/travel-service.ts');
   const view = read('src/view-app.ts');
-  assert.match(main, /function requestTravelToObject[\s\S]*travelScope: "object"/);
-  assert.match(main, /pending\.travelScope === "object"[\s\S]*setCurrentObject/);
-  assert.match(main, /function broadcastObjectTravelAnimation/);
+  assert.match(travel, /function requestTravelToObject[\s\S]*travelScope: "object"/);
+  assert.match(travel, /pending\.travelScope === "object"[\s\S]*setCurrentObject/);
+  assert.match(travel, /broadcastObjectTravelAnimation/);
   assert.match(view, /data-action='travel-to-object'[\s\S]*requestTravelToObject[\s\S]*_travelToObject/);
   assert.match(view, /async _travelToObject[\s\S]*getTravelRoute\(\{ routes: system\.routes \}[\s\S]*_animateShipTravel[\s\S]*setCurrentObject/);
 });

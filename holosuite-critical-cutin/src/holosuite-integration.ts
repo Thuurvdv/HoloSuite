@@ -33,14 +33,13 @@ export function registerHoloSuiteIntegration() {
     icon: "fa-solid fa-bolt-lightning",
     entries: [
       {
-        title: "Critical cut-ins for more dice",
-        summary: "Choose from standard and registered dice, decide whether high or low results are positive, and configure separate success and failure thresholds for each character.",
-        tags: ["Critical Cut-In", "Dice", "Thresholds", "Customization"]
+        title: "More control over critical cut-ins",
+        summary: "Choose the die, decide whether high or low results are good, and give each character their own success and failure thresholds.",
+        tags: ["Foundry v12-v14"]
       },
       {
-        title: "More reliable cut-in detection",
-        summary: "Improved Foundry 14 support and prevented old chat rolls, damage rolls, discarded dice, and rerolls from triggering unwanted animations.",
-        tags: ["Critical Cut-In", "Bug Fix", "Foundry v12-v14", "Chat"]
+        title: "Fewer accidental cut-ins",
+        summary: "Old chat rolls, damage rolls, discarded dice, and rerolls no longer set off an animation when they should not."
       }
     ]
   });

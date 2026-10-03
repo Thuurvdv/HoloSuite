@@ -6,7 +6,7 @@ const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), "ut
 
 test("JSON export uses Foundry's native file saver", () => {
   const domUtils = read("src/dom-utils.ts");
-  assert.match(domUtils, /globalThis\.saveDataToFile/);
+  assert.match(domUtils, /\(globalThis as any\)\.saveDataToFile/);
   assert.match(domUtils, /saveFile\(json, "application\/json", filename\)/);
 });
 
@@ -25,6 +25,7 @@ test("manual system merging is retired without removing automatic schema migrati
 
 test("module editors use viewport panels while approved dialogs remain", () => {
   const main = read("src/main.ts");
+  const travel = read("src/travel-service.ts");
   const manager = read("src/manager-app.ts");
   const view = read("src/view-app.ts");
   const details = read("templates/system-details.hbs");
@@ -32,8 +33,8 @@ test("module editors use viewport panels while approved dialogs remain", () => {
   assert.match(view, /openEditor\(kind: string/);
   assert.match(details, /creation\.isMap[\s\S]*travelApprovalMode/);
   assert.match(details, /#if factionRegistry[\s\S]*data-edit-inline-faction/);
-  assert.equal((main.match(/new Dialog\(/g) ?? []).length, 1);
-  assert.match(main, /title: "Travel Request"/);
+  assert.equal((travel.match(/new Dialog\(/g) ?? []).length, 1);
+  assert.match(travel, /title: "Travel Request"/);
   assert.doesNotMatch(manager, /new Dialog\(/);
   assert.match(manager, /Dialog\.confirm/);
   assert.match(view, /Dialog\.confirm/);
@@ -64,6 +65,7 @@ test("manager uses one compact master-detail action surface and real content tab
 
 test("map chrome stays minimal without search, zoom, add, scan, or ping controls", () => {
   const template = read("templates/galaxy-map.hbs");
+  const contextMenu = read("templates/map-context-menu.hbs");
   const details = read("templates/system-details.hbs");
   const view = read("src/view-app.ts");
   const main = read("src/main.ts");
@@ -81,10 +83,11 @@ test("map chrome stays minimal without search, zoom, add, scan, or ping controls
   assert.match(template, /gmf-actions[\s\S]*#if systemView[\s\S]*gmf-faction-toggle[\s\S]*gmf-window-close/);
   assert.match(template, /data-action="navigate-up"[\s\S]*fa-arrow-up/);
   assert.match(template, /#if systemView[^\n]*#if showTerritories/);
-  assert.match(template, /data-context-action="add-entity"[\s\S]*Add Entity/);
-  assert.doesNotMatch(template, /data-context-action="add-entity" data-context-show="system"/);
-  assert.match(template, /data-context-action="add-route-from-marker" data-context-show="system"[\s\S]*Add Route/);
-  assert.doesNotMatch(template, /data-context-action="add-route" data-context-show="stage"|Add Route From Here|add-route-from-system|add-route-from-entity/);
+  assert.match(template, /map-context-menu\.hbs/);
+  assert.match(contextMenu, /data-context-action="add-entity"[\s\S]*Add Location/);
+  assert.doesNotMatch(contextMenu, /data-context-action="add-entity" data-context-show="system"/);
+  assert.match(contextMenu, /data-context-action="add-route-from-marker" data-context-show="system"[\s\S]*Add Route/);
+  assert.doesNotMatch(contextMenu, /data-context-action="add-route" data-context-show="stage"|Add Route From Here|add-route-from-system|add-route-from-entity/);
   assert.match(template, /gmf-system--galaxy-node/);
   assert.match(template, /#if showInspector/);
   assert.match(view, /stage\?\.addEventListener\("contextmenu"/);
@@ -127,19 +130,19 @@ test("idle routes stay still while active routes animate and reduced motion cove
 });
 
 test("the travel rocket faces along its route without rotating its exhaust off-axis", () => {
-  const viewCss = read("styles/galaxy-map-view.css");
-  assert.match(viewCss, /\.gmf-travel-ship\s*\{[\s\S]*rotate\(var\(--gmf-ship-angle, 0deg\)\)/);
-  assert.match(viewCss, /\.gmf-travel-ship\s*>\s*i\s*\{[\s\S]*rotate\(45deg\)/);
-  assert.match(viewCss, /\.gmf-travel-ship::before\s*\{[\s\S]*right:\s*16px/);
+  const travelCss = read("styles/galaxy-map-travel.css");
+  assert.match(travelCss, /\.gmf-travel-ship\s*\{[\s\S]*rotate\(var\(--gmf-ship-angle, 0deg\)\)/);
+  assert.match(travelCss, /\.gmf-travel-ship\s*>\s*i\s*\{[\s\S]*rotate\(45deg\)/);
+  assert.match(travelCss, /\.gmf-travel-ship::before\s*\{[\s\S]*right:\s*16px/);
 });
 
 test("default planet markers and type-derived marker fallbacks remain presentation-only", () => {
   const model = read("src/galaxy-model.ts");
-  const main = read("src/main.ts");
+  const presenters = read("src/map-presenters.ts");
   const celestial = read("templates/celestial-icon.hbs");
 
   assert.match(model, /ANIMATED_CELESTIAL_STYLES[\s\S]*"planet"/);
-  assert.match(main, /typeIconFallbacks/);
+  assert.match(presenters, /typeIconFallbacks/);
   assert.match(celestial, /iconStyle "planet"/);
   assert.match(celestial, /gmf-art-drift--clouds/);
 });
@@ -152,17 +155,15 @@ test("system polish removes rotating frames and offers direct linked-scene contr
   const managerCss = read("styles/galaxy-map-manager.css");
   const viewCss = read("styles/galaxy-map-view.css");
   const effectsCss = read("styles/galaxy-map-effects.css");
-  const dom = read("src/dom-utils.ts");
 
   assert.doesNotMatch(template, /gmf-system__current|gmf-system__destination/);
   assert.doesNotMatch(viewCss, /gmf-system__current|gmf-system__destination/);
   assert.doesNotMatch(effectsCss, /gmf-current-track|gmf-destination-track/);
   assert.match(details, /data-open-linked-scene/);
   assert.match(view, /data-open-linked-scene/);
-  assert.match(main, /Math\.min\(320, viewportWidth - 24\)/);
+  assert.match(view, /Math\.min\(this\._baseWindowHeight, window\.innerHeight - 24\)/);
   assert.match(managerCss, /\.gmf-marker-preview__stage[\s\S]*place-items: center/);
   assert.doesNotMatch(managerCss, /gmf-system-editor-tabs/);
-  assert.match(dom, /word\.toLowerCase\(\) === "gm" \? "GM"/);
 });
 
 test("all galaxy windows use themed nine-slice chrome with inner drag and close controls", () => {

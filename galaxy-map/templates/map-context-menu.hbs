@@ -1,0 +1,30 @@
+{{#if systemView}}
+  <nav class="gmf-context-menu" data-gmf-context-menu hidden>
+    <button type="button" data-context-action="add-entity" data-context-show="stage"><i class="fa-solid fa-plus"></i>Add Location</button>
+    <button type="button" data-context-action="manage-factions" data-context-show="stage"><i class="fa-solid fa-flag"></i>Manage Factions</button>
+    <button type="button" data-context-action="add-faction" data-context-show="stage"><i class="fa-solid fa-plus"></i>Add Faction</button>
+    <button type="button" data-context-action="edit-entity" data-context-show="system"><i class="fa-solid fa-pen"></i>Edit Location</button>
+    <button type="button" data-context-action="add-route-from-marker" data-context-show="system"><i class="fa-solid fa-route"></i>Add Route</button>
+    <button type="button" data-context-action="reveal-entity" data-context-show="system"><i class="fa-solid fa-eye"></i>Reveal Location</button>
+    <button type="button" data-context-action="hide-entity" data-context-show="system"><i class="fa-solid fa-eye-slash"></i>Hide Location</button>
+    <button type="button" data-context-action="delete-entity" data-context-show="system"><i class="fa-solid fa-trash"></i>Delete Location</button>
+  </nav>
+{{else}}
+  <nav class="gmf-context-menu" data-gmf-context-menu hidden>
+    <button type="button" data-context-action="add-system" data-context-show="stage"><i class="fa-solid fa-plus"></i>Add System</button>
+    <button type="button" data-context-action="manage-factions" data-context-show="stage"><i class="fa-solid fa-flag"></i>Manage Factions</button>
+    <button type="button" data-context-action="add-faction" data-context-show="stage"><i class="fa-solid fa-plus"></i>Add Faction</button>
+    <button type="button" data-context-action="edit-map-details" data-context-show="stage"><i class="fa-solid fa-pen-to-square"></i>Edit Map Details</button>
+    <button type="button" data-context-action="export-map" data-context-show="stage"><i class="fa-solid fa-file-export"></i>Export Map</button>
+    <button type="button" data-context-action="edit-system" data-context-show="system"><i class="fa-solid fa-pen"></i>Edit System</button>
+    <button type="button" data-context-action="add-system" data-context-show="system"><i class="fa-solid fa-plus"></i>Add System</button>
+    <button type="button" data-context-action="add-route-from-marker" data-context-show="system"><i class="fa-solid fa-route"></i>Add Route</button>
+    <button type="button" data-context-action="reveal-system" data-context-show="system"><i class="fa-solid fa-eye"></i>Reveal System</button>
+    <button type="button" data-context-action="hide-system" data-context-show="system"><i class="fa-solid fa-eye-slash"></i>Hide System</button>
+    <button type="button" data-context-action="delete-system" data-context-show="system"><i class="fa-solid fa-trash"></i>Delete System</button>
+    <button type="button" data-context-action="edit-route" data-context-show="route"><i class="fa-solid fa-pen"></i>Edit Route</button>
+    <button type="button" data-context-action="reveal-route" data-context-show="route"><i class="fa-solid fa-eye"></i>Reveal Route</button>
+    <button type="button" data-context-action="hide-route" data-context-show="route"><i class="fa-solid fa-eye-slash"></i>Hide Route</button>
+    <button type="button" data-context-action="delete-route" data-context-show="route"><i class="fa-solid fa-trash"></i>Delete Route</button>
+  </nav>
+{{/if}}

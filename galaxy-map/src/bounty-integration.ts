@@ -21,7 +21,7 @@ function getBountyBoardApi() {
   }
 }
 
-/** Bounties are found through the scenes linked to a system's entities. */
+/** Bounties are found through the scenes linked to a system's locations. */
 export function getBountyIntelForSystem(system: any): BountyIntel[] {
   const api = getBountyBoardApi();
   if (!api || !Array.isArray(system?.sceneIds)) return [];

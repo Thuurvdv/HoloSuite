@@ -27,5 +27,5 @@ test("manifest and package versions stay aligned", () => {
   const manifest = JSON.parse(read("module.json"));
   const pkg = JSON.parse(read("package.json"));
   assert.equal(manifest.version, pkg.version);
-  assert.equal(manifest.version, "1.1.0");
+  assert.equal(manifest.version, "2.0.0");
 });
