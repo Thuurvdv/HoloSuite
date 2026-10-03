@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --experimental-loader ./tests/ts-loader.mjs --test tests/*.test.mjs",
     "verify": "npm run test && npm run build"
   },
   "devDependencies": {
