@@ -2,7 +2,13 @@
 
 Galaxy Map turns a Foundry world into a navigable star chart. Build a galaxy, open individual systems, place planets and stations, connect destinations with routes, and reveal the map as the campaign grows. GMs work directly in the viewport, while players see only what their crew has discovered.
 
-![Galaxy Map Manager](https://raw.githubusercontent.com/Thuurvdv/MageTowerFoundryModules/main/images/Galaxy%20Map%20Manager.png)
+![Galaxy Map Manager](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/images/Galaxy%20Map%20Manager.png)
+
+## What's New in 2.0
+
+Galaxy Map 2.0 rebuilds the map around a real galaxy, system, and location hierarchy. Systems now open into their own local maps, where planets, stations, moons, anomalies, and other destinations can have routes, linked Foundry content, custom markers, and optional 3D detail views.
+
+Editing now happens directly in the map viewport, travel can require GM approval, a majority vote, or unanimous agreement, and existing maps are upgraded automatically when the primary GM enters the world. The Map Manager also supports JSON import and export for moving maps between worlds.
 
 ## Installation
 
@@ -11,6 +17,10 @@ Galaxy Map requires HoloSuite Core.
 1. Install **HoloSuite Core** and **Galaxy Map** from Foundry's Add-on Modules screen.
 2. Enable both modules in your world.
 3. Open the HoloSuite launcher from the scene controls and choose **Galaxy Map**.
+
+For manual installation, use this manifest URL:
+
+`https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/galaxy-map/module.json`
 
 If you are opening a world made with an older version of Galaxy Map, the primary GM should enter the world first so its saved maps can be upgraded safely.
 

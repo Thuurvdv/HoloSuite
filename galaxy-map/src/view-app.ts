@@ -370,7 +370,7 @@ export function createGalaxyMapViewClass(deps: any) {
       activateGalaxyWindowChrome(this, html);
       this._attachPlanetListeners(html);
       this._attachCreationPanel(html);
-      const appearancePanel = html.querySelector<HTMLElement>(".gmf-object-appearance-panel");
+      const appearancePanel = (html as ParentNode).querySelector<HTMLElement>(".gmf-object-appearance-panel");
       if (appearancePanel) {
         activateObjectEditorControls(appearancePanel);
         this._attachAppearancePreview(html);
@@ -675,7 +675,7 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     _attachPlanetLocationList(html: HTMLElement) {
-      const root = this.element ?? html;
+      const root = (this.element ?? html) as HTMLElement;
       html.querySelectorAll<HTMLElement>("[data-planet-scene-drag]").forEach(item => item.addEventListener("dragstart", (event: DragEvent) => {
         if (!event.dataTransfer) return;
         event.dataTransfer.setData("text/plain", JSON.stringify({ type: "Scene", id: item.dataset.planetSceneDrag, uuid: item.dataset.planetSceneUuid }));
@@ -810,7 +810,7 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     _syncPlanetLocations(html: HTMLElement) {
-      const root = this.element ?? html;
+      const root = (this.element ?? html) as HTMLElement;
       const object = this._getPlanetObject();
       const items = this._preparePlanetLocations(object, getPlanetAppearance(object)?.shape);
       this._planetRenderer?.setLocations(object?.planetLocations ?? []);

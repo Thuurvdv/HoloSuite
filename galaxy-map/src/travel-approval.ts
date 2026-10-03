@@ -27,9 +27,9 @@ export function getTravelElectorate(activeUsers: any[], requesterId: string, pri
 
 export function evaluateTravelApproval(pending: any) {
   const mode = normalizeTravelApprovalMode(pending?.approvalMode);
-  const voterIds = [...new Set((pending?.voterIds ?? []).map(String))];
-  const accepted = new Set([...(pending?.accepted ?? [])].map(String));
-  const declined = new Set([...(pending?.declined ?? [])].map(String));
+  const voterIds = [...new Set<string>((pending?.voterIds ?? []).map((id: unknown) => String(id)))];
+  const accepted = new Set<string>([...(pending?.accepted ?? [])].map((id: unknown) => String(id)));
+  const declined = new Set<string>([...(pending?.declined ?? [])].map((id: unknown) => String(id)));
   const requesterApproval = mode === "gm" ? 0 : 1;
   const required = Math.max(1, Number(pending?.requiredApprovals) || (mode === "unanimous" ? voterIds.length + 1 : 1));
   const acceptedCount = requesterApproval + voterIds.filter(id => accepted.has(id)).length;

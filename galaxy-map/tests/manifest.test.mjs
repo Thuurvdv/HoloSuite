@@ -7,7 +7,21 @@ const read = path => fs.readFileSync(url(path), "utf8");
 const manifest = JSON.parse(read("module.json"));
 
 test("module.json and package.json carry the same version", () => {
-  assert.equal(manifest.version, JSON.parse(read("package.json")).version);
+  const packageVersion = JSON.parse(read("package.json")).version;
+  const lockVersion = JSON.parse(read("../package-lock.json")).packages["galaxy-map"].version;
+  assert.equal(manifest.version, packageVersion);
+  assert.equal(manifest.version, lockVersion);
+});
+
+test("release metadata points to the HoloSuite repository and matching versioned archive", () => {
+  assert.equal(manifest.url, "https://github.com/Thuurvdv/HoloSuite/tree/main/galaxy-map");
+  assert.equal(manifest.manifest, "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/galaxy-map/module.json");
+  assert.equal(
+    manifest.download,
+    `https://github.com/Thuurvdv/HoloSuite/releases/download/galaxy-map-v${manifest.version}/galaxy-map.zip`
+  );
+  assert.equal(manifest.compatibility.minimum, "12");
+  assert.equal(manifest.compatibility.verified, "14");
 });
 
 test("every stylesheet in the manifest exists, including its imports", () => {
