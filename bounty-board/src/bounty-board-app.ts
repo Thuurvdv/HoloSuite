@@ -7,6 +7,7 @@ import {
   getAllBounties,
   getFilterOptions,
   isBoardVisibleToPlayers,
+  linkBountyTarget,
   markBountyCompleted,
   prepareBountyForDisplay,
   publishBounty,
@@ -21,6 +22,7 @@ import { BountyEditorApp } from "./bounty-editor-app";
 declare const foundry: any;
 declare const Application: any;
 declare const game: any;
+declare const ui: any;
 declare const Dialog: any;
 declare const ImagePopout: any;
 declare const renderTemplate: any;
@@ -52,6 +54,7 @@ export class BountyBoardApp extends BaseApplication {
   filters: BountyFilters;
   expanded: Set<string>;
   focusBountyId: string | null;
+  _targetDropController?: AbortController;
 
   static DEFAULT_OPTIONS = {
     id: "bounty-board-app",
@@ -84,7 +87,8 @@ export class BountyBoardApp extends BaseApplication {
       showFiltered: BountyBoardApp.#onShowFiltered,
       hideFiltered: BountyBoardApp.#onHideFiltered,
       toggleBoardVisibility: BountyBoardApp.#onToggleBoardVisibility,
-      clearFilters: BountyBoardApp.#onClearFilters
+      clearFilters: BountyBoardApp.#onClearFilters,
+      unlinkTarget: BountyBoardApp.#onUnlinkTarget
     }
   };
 
@@ -140,6 +144,23 @@ export class BountyBoardApp extends BaseApplication {
   _onRender(context: any, options: any) {
     super._onRender?.(context, options);
     const html = this.element;
+    this._targetDropController?.abort();
+    if (game.user?.isGM) {
+      this._targetDropController = new AbortController();
+      const { signal } = this._targetDropController;
+      html.addEventListener("dragover", (event: DragEvent) => {
+        const card = (event.target as Element)?.closest?.(".bb-card[data-bounty-id]");
+        if (!card) return;
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+        card.classList.add("bb-target-drop-active");
+      }, { signal });
+      html.addEventListener("dragleave", (event: DragEvent) => {
+        const card = (event.target as Element)?.closest?.(".bb-card[data-bounty-id]");
+        if (card && !card.contains(event.relatedTarget as Node)) card.classList.remove("bb-target-drop-active");
+      }, { signal });
+      html.addEventListener("drop", (event: DragEvent) => this._onTargetDrop(event), { signal });
+    }
     html.querySelector(".bb-filters")?.addEventListener("submit", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -194,6 +215,26 @@ export class BountyBoardApp extends BaseApplication {
         icon?.classList.toggle("fa-chevron-down", !expanded);
       });
     });
+  }
+
+  async _onTargetDrop(event: DragEvent) {
+    const card = (event.target as Element)?.closest?.<HTMLElement>(".bb-card[data-bounty-id]");
+    if (!card || !game.user?.isGM) return;
+    event.preventDefault(); event.stopPropagation();
+    card.classList.remove("bb-target-drop-active");
+    try {
+      const editor = foundry.applications?.ux?.TextEditor?.implementation ?? (globalThis as any).TextEditor;
+      const data = editor?.getDragEventData ? editor.getDragEventData(event) : JSON.parse(event.dataTransfer?.getData("text/plain") || "{}");
+      const updated = await linkBountyTarget(card.dataset.bountyId || "", data);
+      if (updated) await this._refreshBountyCard(updated.id, updated);
+    } catch (error) { ui.notifications?.warn?.(error.message); }
+  }
+
+  static async #onUnlinkTarget(this: BountyBoardApp, event: Event) {
+    try {
+      const updated = await linkBountyTarget(getBountyIdFromEvent(event), null);
+      if (updated) await this._refreshBountyCard(updated.id, updated);
+    } catch (error) { ui.notifications?.warn?.(error.message); }
   }
 
   _findBountyCard(bountyId: string) {
@@ -292,6 +333,7 @@ export class BountyBoardApp extends BaseApplication {
   }
 
   async close(options: any = {}) {
+    this._targetDropController?.abort();
     if (boardApp === this) boardApp = null;
     return super.close(options);
   }
@@ -436,8 +478,14 @@ export function openBounty(bountyId: string) {
   const visible = getAllBounties({ includeHidden: isGM }).some((bounty) => bounty.id === id);
   if (!visible) return false;
   if (!boardApp) boardApp = new BountyBoardApp();
-  boardApp.focusBounty(id);
-  boardApp.bringToFront?.();
+  const app = boardApp;
+  const reveal = () => {
+    app.focusBounty(id);
+    app.bringToFront?.();
+  };
+  // Finish restoring a minimized window before rerendering its focused contract.
+  if (app.rendered) Promise.resolve(app.maximize?.()).then(reveal);
+  else reveal();
   return true;
 }
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-03",
+  "updated": "2026-10-14",
   "modules": [
     {
       "moduleId": "holosuite-hacking",
@@ -77,14 +77,14 @@
       "moduleId": "bounty-board",
       "title": "Bounty Board",
       "tier": "free",
-      "version": "1.0.7",
-      "updated": "2026-10-03",
+      "version": "1.1.0",
+      "updated": "2026-10-14",
       "icon": "fa-solid fa-crosshairs",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board",
       "entries": [
         {
-          "title": "Put contracts on the Galaxy Map",
-          "summary": "Choose a scene for a contract and link that scene to a Galaxy Map location. Published bounty details then appear on the map, where you can open the full contract directly.",
+          "title": "Link contracts to their targets",
+          "summary": "Drag an Actor or Token onto a bounty to link its target. Galactic Records can then show the live rewards for that person or vessel without copying contract data.",
           "tags": ["Foundry v12-v14"]
         }
       ]
@@ -129,20 +129,36 @@
       "moduleId": "holosuite-core",
       "title": "HoloSuite Core",
       "tier": "free",
-      "version": "1.0.13",
-      "updated": "2026-10-03",
+      "version": "1.1.0",
+      "updated": "2026-10-14",
       "icon": "fa-solid fa-mobile-screen",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
       "entries": [
         {
-          "title": "Arrange the launcher your way",
-          "summary": "Press and hold an app, drag it where you want it, and HoloSuite remembers the order for you. Moving apps is steadier now, too, so tiles no longer jump back and forth while you drag.",
+          "title": "Cleaner names in the launcher",
+          "summary": "App tiles no longer repeat the HoloSuite name. Galactic Records also has its own icon and colors across Foundry v12-v14.",
           "tags": ["Foundry v12-v14"]
         }
       ]
     }
   ],
   "releases": [
+    {
+      "moduleId": "holosuite-galactic-records",
+      "title": "Galactic Records",
+      "tier": "premium",
+      "version": "1.0.0",
+      "updated": "2026-10-14",
+      "icon": "fa-solid fa-database",
+      "url": "https://patreon.com/MageTowerStudios",
+      "entries": [
+        {
+          "title": "Keep your world's records in one place",
+          "summary": "Turn Actors and Tokens into a searchable database of people, vessels, and organizations. Add warrants, known associates, assets, and last-seen details, then decide what players are allowed to find.",
+          "tags": ["Foundry v12-v14"]
+        }
+      ]
+    },
     {
       "moduleId": "holosuite-blueprint",
       "title": "HoloSuite Blueprint",

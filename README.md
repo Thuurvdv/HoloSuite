@@ -1,19 +1,28 @@
-# HoloSuite
+# HoloSuite Core
 
-HoloSuite is a collection of Foundry VTT modules built for sci-fi, cyberpunk, and space-opera tabletop games. Each module adds a specific tool to your sessions, and they all connect through a shared launcher called HoloSuite Core.
+HoloSuite Core gives GMs one launcher for opening the other HoloSuite modules.
 
-![HoloSuite](images/HoloSuite.jpg)
+## Installation
 
-## The Modules
+1. In Foundry's Setup screen, open **Add-on Modules → Install Module**, search for **HoloSuite Core**, and click **Install**.
+2. Open your world as a GM. In **Manage Modules**, enable HoloSuite Core, then save and reload.
+3. Install and enable the other HoloSuite modules you want to use.
+4. Open HoloSuite from its button in the scene controls.
 
-- **[HoloSuite Core](holosuite-core/README.md)** - A free in-world phone launcher that gives the GM one-click access to every installed HoloSuite app.
-- **[CyberCall](cybercall/README.md)** - Holographic communication overlays with caller portraits, signal effects, ringtones, and player-to-GM calling.
-- **[Security Cameras](security-cameras/README.md)** - A surveillance camera system with live and static feeds, cyberpunk overlays, and GM-to-player broadcasting.
-- **[CSI Toolkit](csi-toolkit/README.md)** - Interactive case boards for investigations, with draggable evidence cards, connection lines, timelines, and collaborative player editing.
-- **[Galaxy Map](galaxy-map/README.md)** - Cinematic star maps with clickable systems, travel routes, ship animations, and discovery notifications.
-- **[Bounty Board](bounty-board/README.md)** - A bounty contract board for posting and browsing sci-fi jobs and contracts.
-- **[Critical Cut-In](holosuite-critical-cutin/README.md)** - Cinematic critical hit animations triggered by natural d20 rolls, with per-character images, sounds, and overlay text.
-- **[HoloSuite Hacking](holosuite-hacking/README.md)** - Interactive hacking minigames where skill checks determine puzzle difficulty. Includes Node Intrusion and Signal Alignment.
-- **[HoloSuite Performance Check](holosuite-performance-check/README.md)** - A standalone local profiler for measuring module hooks, browser long tasks, timers, sockets, DOM activity, and reproducible Foundry test environments. It intentionally does not require HoloSuite Core.
+## Quick Start
 
-Pulse Scanner is distributed separately as a premium HoloSuite module.
+1. Reload the world after changing modules so every app can register with Core.
+2. Open HoloSuite from the scene-control button, the configured keybinding, the module settings menu, or a macro that calls `game.holosuite.openLauncher()`.
+3. Choose **Apps** and select a tile. GMs see every registered app; players see only apps that allow player access.
+4. Open **Settings** inside the launcher to choose a device style.
+5. Use Foundry's module settings for world-wide themes, player access, and debugging options.
+
+HoloSuite Core is a launcher, not a data store. Contacts, cases, maps, terminals, and other content remain in the modules that created them.
+
+## Video
+
+[Watch the HoloSuite Core overview](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/HoloSuite-clip.mp4).
+
+## Legal
+
+HoloSuite Core is released under the [GNU Lesser General Public License](LICENSE).

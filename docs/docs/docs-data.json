@@ -265,6 +265,25 @@
       "moduleActionLabel": "Get Premium Access"
     },
     {
+      "id": "holosuite-galactic-records",
+      "name": "Galactic Records",
+      "tier": "premium",
+      "category": "Database",
+      "compatibility": "Foundry v12-v14",
+      "image": "assets/GalacticRecords.png",
+      "summary": "Turn your Actors and Tokens into a searchable sci-fi database for people, vessels, and organizations.",
+      "installation": [
+        "Subscribe to Mage Tower Studios on Patreon at a tier that includes the premium modules.",
+        "Link that Patreon account to the Foundry account used by your server, then check Subscribed Content in your Foundry profile.",
+        "In Foundry's Setup screen, open Add-on Modules > Install Module. Find Galactic Records under Premium Content and click Install. Install HoloSuite Core too if you do not have it.",
+        "Open your world as a GM. In Manage Modules, enable HoloSuite Core and Galactic Records, then save and reload.",
+        "Open Galactic Records from the HoloSuite launcher."
+      ],
+      "videos": [],
+      "moduleUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
+      "moduleActionLabel": "Get Premium Access"
+    },
+    {
       "id": "pulse-scanner",
       "name": "Pulse Scanner",
       "tier": "premium",

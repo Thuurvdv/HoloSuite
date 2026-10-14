@@ -1,32 +1,26 @@
 # Bounty Board
 
-Bounty Board gives your group one place for contracts, targets, and rewards. GMs can publish and update jobs as the story changes, while players browse the live board and request the work that interests them.
-
-![Bounty Board](../images/BountyBoard.jpg)
+Post contracts for players to browse, claim, and complete from a sci-fi job board.
 
 ## Installation
 
-Bounty Board requires HoloSuite Core. Galaxy Map is optional and only needed for the map integration.
-
-1. Install **HoloSuite Core** and **Bounty Board** from Foundry's Add-on Modules screen.
-2. Enable both modules in your world.
-3. Open the HoloSuite launcher from the scene controls and choose **Bounty Board**.
+1. In Foundry's Setup screen, open **Add-on Modules → Install Module**, search for **Bounty Board**, and click **Install**. Install HoloSuite Core too if you do not have it.
+2. Open your world as a GM. In **Manage Modules**, enable HoloSuite Core and Bounty Board, then save and reload.
+3. Open Bounty Board from the HoloSuite launcher.
 
 ## Quick Start
 
-The GM manages the contracts, while players see only the jobs that have been published.
-
 1. Open Bounty Board as a GM and choose **New Contract**.
-2. Add the contract ID, title, target, reward, threat level, and description. You can also add an image, faction, location, tags, a longer dossier, and a linked Journal.
-3. Enable **Published to Players** and save the contract. The terminal options let you show or hide the entire board and manage several filtered contracts at once.
-4. Players can search and filter the board, open a contract's details, and choose **Request Contract**. A request posts to chat for the GM; it does not assign the contract automatically.
-5. Use **Assign**, **Complete**, **Mark Failed**, **Hide**, or **Archive** to keep each contract in step with the campaign.
-6. To connect a contract to Galaxy Map, enable both modules and choose a Foundry Scene under **Location / Scene** in the bounty editor. Link that same Scene to a Galaxy Map system or entity. Published bounty intel then appears when the marker is hovered, and selecting the card opens the full contract in Bounty Board. Unpublished or otherwise hidden contracts stay private.
-
-Bounty Board works normally when Galaxy Map is not installed or enabled.
+2. Enter a contract ID, title, target, reward, currency, threat level, and public description.
+3. Add any optional faction, location, tags, image, dossier, linked Journal, or claimed-by details you need.
+4. Enable **Published to Players** and save, or save it privately and publish it later from the card.
+5. Players can open the board, search or filter its contracts, expand a card, and choose **Request Contract**.
+6. Use **Assign**, **Complete**, or **Mark Failed** as the job moves through your campaign.
 
 ## Video
 
-Watch the short Bounty Board overview.
+[Watch the Bounty Board overview](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/BountyBoard-clip.mp4).
 
-[Bounty Board overview video](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/BountyBoard-clip.mp4)
+## Legal
+
+Bounty Board is released under the [GNU General Public License](LICENSE).

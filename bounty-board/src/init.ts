@@ -7,6 +7,8 @@ import {
   getAllBounties,
   getBounty,
   getBountiesForScene,
+  getBountiesForActor,
+  linkBountyTarget,
   publishBounty,
   registerSettings,
   setBoardVisibleToPlayers,
@@ -21,6 +23,11 @@ declare const Handlebars: any;
 declare const loadTemplates: any;
 
 const LOCALIZATION_FALLBACKS: Record<string, string> = {
+  "BOUNTYBOARD.Link.DropHint": "Drop Actor / Token onto this bounty to link its target",
+  "BOUNTYBOARD.Link.Unlink": "Unlink target",
+  "BOUNTYBOARD.Link.Invalid": "Drop a world Actor or Token onto a bounty.",
+  "BOUNTYBOARD.Link.MissingBounty": "Bounty not found.",
+
   "BOUNTYBOARD.Header.ContractTerminal": "Contract Terminal",
   "BOUNTYBOARD.Header.Title": "Bounty Board",
   "BOUNTYBOARD.Header.ActiveContracts": "{count} ACTIVE CONTRACTS",
@@ -97,6 +104,8 @@ function exposeApi() {
     getAllBounties,
     getBounty,
     getBountiesForScene,
+    getBountiesForActor,
+    linkBountyTarget,
     openBounty,
     upsertBounty,
     deleteBounty,

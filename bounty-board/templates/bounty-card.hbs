@@ -58,6 +58,10 @@
       <section class="bb-target-block">
         <span class="bb-data-label">{{localize "BOUNTYBOARD.Card.Target"}}</span>
         <h4 class="bb-card-target">{{bounty.targetName}}</h4>
+        {{#if isGM}}<div class="bb-target-link">
+          {{#if bounty.linkedActorUuid}}<span><i class="fa-solid fa-link" aria-hidden="true"></i> {{bounty.linkedActorName}}</span><button type="button" data-action="unlinkTarget" title="{{localize 'BOUNTYBOARD.Link.Unlink'}}" aria-label="{{localize 'BOUNTYBOARD.Link.Unlink'}}"><i class="fa-solid fa-link-slash" aria-hidden="true"></i></button>
+          {{else}}<span>{{localize "BOUNTYBOARD.Link.DropHint"}}</span>{{/if}}
+        </div>{{/if}}
         {{#if bounty.description}}<p class="bb-card-description">{{bounty.description}}</p>{{/if}}
       </section>
 

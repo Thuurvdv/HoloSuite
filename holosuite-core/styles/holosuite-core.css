@@ -1261,9 +1261,9 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 116, 214, 255;
 }
 
-.holosuite-app-tile[data-holosuite-app="police-file"] {
-  --hs-app-accent: #d7e3ff;
-  --hs-app-accent-rgb: 215, 227, 255;
+.holosuite-app-tile[data-holosuite-app="holosuite-galactic-records"] {
+  --hs-app-accent: #046bdf;
+  --hs-app-accent-rgb: 4, 107, 223;
 }
 
 .holosuite-app-tile:has(.holosuite-app-count) {
@@ -1446,11 +1446,16 @@ img.hs-frame-header {
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-critical-cutin.svg");
 }
 
-.holosuite-app-icon[data-holosuite-app-icon="holo-assistant"]::before,
-.holosuite-app-icon[data-holosuite-app-icon="police-file"]::before {
+.holosuite-app-icon[data-holosuite-app-icon="holo-assistant"]::before {
   --hs-device-app-icon: url("../assets/device-styles/space-police/icons/app.svg");
   mask-image: url("../assets/device-styles/space-police/icons/app.svg");
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/app.svg");
+}
+
+.holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"]::before {
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/galactic-records.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/galactic-records.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/galactic-records.svg");
 }
 
 .holosuite-dock button[data-holosuite-action="close"] {
@@ -1908,9 +1913,9 @@ img.hs-frame-header {
   --hs-app-accent-rgb: 116, 214, 255;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="police-file"] {
-  --hs-app-accent: #d7e3ff;
-  --hs-app-accent-rgb: 215, 227, 255;
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-galactic-records"] {
+  --hs-app-accent: #046bdf;
+  --hs-app-accent-rgb: 4, 107, 223;
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile:has(.holosuite-app-count) {
@@ -2099,10 +2104,10 @@ img.hs-frame-header {
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/app.svg");
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="police-file"]::before {
-  --hs-space-police-icon: url("../assets/device-styles/space-police/icons/app.svg");
-  mask-image: url("../assets/device-styles/space-police/icons/app.svg");
-  -webkit-mask-image: url("../assets/device-styles/space-police/icons/app.svg");
+:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"]::before {
+  --hs-space-police-icon: url("../assets/device-styles/space-police/icons/galactic-records.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/galactic-records.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/galactic-records.svg");
 }
 
 @supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
@@ -2270,6 +2275,29 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   display: block !important;
   mask-image: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg") !important;
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg") !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-galactic-records"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-galactic-records"] {
+  --hs-app-accent: #046bdf !important;
+  --hs-app-accent-rgb: 4, 107, 223 !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"] {
+  color: #046bdf !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"] i,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"] i {
+  display: none !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"]::before,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"]::before {
+  display: block !important;
+  mask-image: url("../assets/device-styles/space-police/icons/galactic-records.svg") !important;
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/galactic-records.svg") !important;
 }
 
 .holosuite-core-diagnostics-window .window-content {

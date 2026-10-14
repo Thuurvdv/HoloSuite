@@ -55,5 +55,9 @@
   "BOUNTYBOARD.Action.Hide": "Hide",
   "BOUNTYBOARD.Action.Archive": "Archive",
   "BOUNTYBOARD.Action.Delete": "Delete",
-  "BOUNTYBOARD.Action.Request": "Request contract"
+  "BOUNTYBOARD.Action.Request": "Request contract",
+  "BOUNTYBOARD.Link.DropHint": "Drop Actor / Token onto this bounty to link its target",
+  "BOUNTYBOARD.Link.Unlink": "Unlink target",
+  "BOUNTYBOARD.Link.Invalid": "Drop a world Actor or Token onto a bounty.",
+  "BOUNTYBOARD.Link.MissingBounty": "Bounty not found."
 }
