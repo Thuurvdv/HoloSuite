@@ -1,7 +1,7 @@
 {
   "stats": [
     { "label": "Free Modules", "value": 10, "suffix": "" },
-    { "label": "Premium Modules", "value": 3, "suffix": "" },
+    { "label": "Premium Modules", "value": 4, "suffix": "" },
     { "label": "Foundry", "value": 12, "prefix": "v", "suffix": "+" }
   ],
   "featuredModules": [
@@ -14,6 +14,7 @@
     { "id": "holosuite-blueprint", "icon": "Blueprint.svg" },
     { "id": "galaxy-map", "variant": "navigation", "icon": "GalaxyMap.svg" },
     { "id": "holosuite-terminal", "variant": "industrial", "icon": "icon-terminal.svg" },
+    { "id": "holosuite-galactic-records", "variant": "industrial", "icon": "galactic-records.svg" },
     { "id": "pulse-scanner", "variant": "scanner", "icon": "pulseScanner.svg" },
     { "id": "security-cameras", "variant": "surveillance", "icon": "security-cameras.svg" },
     { "id": "bounty-board", "variant": "contracts", "icon": "BountyBoardIcon.svg" },
@@ -167,6 +168,19 @@
       "compatibility": "Foundry v12-v14",
       "features": ["Mail, files, cameras, and utility apps", "Passwords, permissions, and optional hacking", "Four desktop styles and six interface themes"],
       "docsUrl": "docs/module.html?id=holosuite-terminal",
+      "moduleUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
+      "moduleActionLabel": "Get Premium Access"
+    },
+    {
+      "id": "holosuite-galactic-records",
+      "name": "Galactic Records",
+      "tier": "premium",
+      "category": "Database",
+      "image": "assets/GalacticRecords.png",
+      "pitch": "Turn your campaign's Actors and Tokens into a searchable sci-fi database for people, vessels, and organizations.",
+      "compatibility": "Foundry v12-v14",
+      "features": ["People, vessel, and organization records", "Linked warrants, cases, associates, assets, and locations", "Permission-safe player searches"],
+      "docsUrl": "docs/module.html?id=holosuite-galactic-records",
       "moduleUrl": "https://patreon.com/MageTowerStudios?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
       "moduleActionLabel": "Get Premium Access"
     },

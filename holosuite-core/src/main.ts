@@ -268,6 +268,10 @@ function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration |
   };
 }
 
+function appDisplayTitle(title: string): string {
+  return title.replace(/^HoloSuite\s*:?\s*/i, "").trim() || title;
+}
+
 function renderOpenLauncherControl(controls: unknown): void {
   if (isApiOnlyMode()) return;
   const isGM = game.user?.isGM === true;
@@ -943,7 +947,7 @@ function renderAppsView(): string {
   `;
 
   const appCards = apps.map((app) => {
-      const title = app.title;
+      const title = appDisplayTitle(app.title);
       const description = isGM && app.description ? `<p>${escapeHtml(app.description)}</p>` : "";
       const badgeLabel = !isGM ? getAppBadgeLabel(app.id) : "";
       return `

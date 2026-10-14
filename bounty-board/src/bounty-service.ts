@@ -43,6 +43,7 @@ export type BountyData = {
   notesGM: string;
   notesPublic: string;
   linkedJournalId: string;
+  linkedActorUuid: string;
   sceneId: string;
 };
 
@@ -167,6 +168,7 @@ export function normalizeBounty(source: Partial<BountyData> & Record<string, any
     notesGM: normalizeString(source.notesGM),
     notesPublic: normalizeString(source.notesPublic),
     linkedJournalId: normalizeString(source.linkedJournalId),
+    linkedActorUuid: normalizeString(source.linkedActorUuid),
     sceneId: normalizeString(source.sceneId)
   };
 }
@@ -176,10 +178,17 @@ export function prepareBountyForDisplay(bounty: Partial<BountyData>) {
   const linkedJournal = normalized.linkedJournalId ? game.journal?.get(normalized.linkedJournalId) ?? null : null;
   const publicLinks = game.settings.get(MODULE_ID, SETTING_PUBLIC_DOCUMENT_LINKS) === true;
   const user = game.user;
+  const resolve = foundry.utils.fromUuidSync ?? (globalThis as any).fromUuidSync;
+  let target = null;
+  if (user?.isGM && normalized.linkedActorUuid) {
+    try { target = resolve?.(normalized.linkedActorUuid); }
+    catch { /* A deleted or invalid reference must not prevent the card from rendering. */ }
+  }
   const canSeeJournal = Boolean(linkedJournal && (user?.isGM || publicLinks || linkedJournal.testUserPermission?.(user, "OBSERVER")));
 
   return {
     ...normalized,
+    linkedActorName: target?.name || normalized.targetName,
     displayId: normalized.contractId,
     statusLabel: getStatusLabel(normalized.status),
     rewardLabel: getRewardLabel(normalized),
@@ -252,6 +261,42 @@ export function getAllBounties({ includeHidden = game.user?.isGM === true } = {}
 export function getBounty(id: string): BountyData | null {
   const bounty = getBountyStore()[id];
   return bounty ? normalizeBounty(bounty) : null;
+}
+
+/** Minimal, viewer-filtered reward data for optional module integrations. */
+export function getBountiesForActor(actorUuid: string) {
+  if (!actorUuid || (!game.user?.isGM && !isBoardVisibleToPlayers())) return [];
+  return getAllBounties({ includeHidden: game.user?.isGM === true })
+    .filter(bounty => bounty.linkedActorUuid === actorUuid)
+    .map(({ id, rewardAmount, rewardCurrency, status }) => ({ id, rewardAmount, rewardCurrency, status }));
+}
+
+function linkMessage(key: string, fallback: string) {
+  const text = game.i18n?.localize?.(`BOUNTYBOARD.Link.${key}`);
+  return text && text !== `BOUNTYBOARD.Link.${key}` ? text : fallback;
+}
+
+let pendingTargetLink = Promise.resolve();
+export function linkBountyTarget(id: string, data: any) {
+  const operation = pendingTargetLink.then(async () => {
+    if (!requireGM("link bounty targets")) return null;
+    if (!getBounty(id)) throw new Error(linkMessage("MissingBounty", "Bounty not found."));
+    let linkedActorUuid = "";
+    if (data !== null) {
+      if (!["Actor", "Token"].includes(data?.type) || !data.uuid) throw new Error(linkMessage("Invalid", "Drop a world Actor or Token onto a bounty."));
+      const resolve = foundry.utils.fromUuid ?? (globalThis as any).fromUuid;
+      const doc = await resolve(data.uuid);
+      const actor = doc?.documentName === "Token" ? doc.actor : doc?.documentName === "Actor" ? doc : null;
+      if (!actor || actor.pack || !actor.uuid || (!actor.isToken && game.actors.get(actor.id) !== actor)) {
+        throw new Error(linkMessage("Invalid", "Drop a world Actor or Token onto a bounty."));
+      }
+      // Linked tokens share their world Actor; unlinked tokens retain their synthetic Actor UUID.
+      linkedActorUuid = actor.uuid;
+    }
+    return updateBountyState(id, { linkedActorUuid });
+  });
+  pendingTargetLink = operation.then(() => {}, () => {});
+  return operation;
 }
 
 export function getBountiesForScene(sceneId: string) {

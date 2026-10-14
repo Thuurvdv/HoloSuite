@@ -1213,3 +1213,8 @@
     transition: none;
   }
 }
+
+.bounty-board-window .bb-card.bb-target-drop-active { outline: 3px solid var(--bb-cyan, #69e8ff); outline-offset: -3px; }
+.bounty-board-window .bb-target-link { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--bb-cyan, #69e8ff); }
+.bounty-board-window .bb-target-link > span { overflow-wrap: anywhere; }
+.bounty-board-window .bb-target-link > button { width: 30px; min-height: 30px; flex: 0 0 30px; padding: 3px; }

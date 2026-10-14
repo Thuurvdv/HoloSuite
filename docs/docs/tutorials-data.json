@@ -18,6 +18,18 @@
         ]
       }
     },
+    "holosuite-galactic-records": {
+      "quickStart": {
+        "steps": [
+          "Open Galactic Records from HoloSuite Core.",
+          "Drag an Actor, Token, or Actor folder onto New Record. If you are viewing People, Vessels, or Organizations, new records use that type automatically.",
+          "Open a record and use Edit section to add the details you want. Save each section when you are done.",
+          "Drag other records into Associates or Assets to link them. You can also drag a Scene into Last Seen.",
+          "Open the cog inside Galactic Records to choose what appears on cards and whether wanted levels appear over tokens.",
+          "If players should use the database, enable Allow players to search records in Foundry's module settings. They only receive information their user is allowed to see."
+        ]
+      }
+    },
     "cybercall": {
       "quickStart": {
         "steps": [

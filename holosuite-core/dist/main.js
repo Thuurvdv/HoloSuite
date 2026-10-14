@@ -210,6 +210,9 @@ function Ct(e) {
   };
 }
 function Tt(e) {
+  return e.replace(/^HoloSuite\s*:?\s*/i, "").trim() || e;
+}
+function Lt(e) {
   var r;
   if (p()) return;
   const t = ((r = game.user) == null ? void 0 : r.isGM) === !0;
@@ -221,11 +224,11 @@ function Tt(e) {
     button: !0,
     visible: !0,
     onClick: Me,
-    onChange: At
+    onChange: Ht
   }), o = be(e, n(), ["tiles", "tile"]);
   be(e, n(), ["tokens", "token"], { allowFallback: !o });
 }
-function Lt() {
+function $t() {
   var e;
   return !p() && (((e = game.user) == null ? void 0 : e.isGM) === !0 || !U());
 }
@@ -239,7 +242,7 @@ function y(e) {
   const t = e, n = ((o = t == null ? void 0 : t.get) == null ? void 0 : o.call(t, 0)) ?? (t == null ? void 0 : t[0]);
   return n instanceof HTMLElement ? n : null;
 }
-function $t(e) {
+function Dt(e) {
   var s;
   const t = new Set(document.querySelectorAll("#holosuite-launcher, .holosuite-launcher-window"));
   if (t.size <= 1) return;
@@ -255,21 +258,21 @@ function Re() {
 function le() {
   return document.querySelector("#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone") !== null;
 }
-function Dt() {
+function Nt() {
   i = null, C = null, R = !1;
 }
-function Nt(e) {
+function At(e) {
   const t = e.find((n) => typeof n == "boolean");
   return typeof t == "boolean" ? t : null;
 }
 function Me() {
   return Fe = Date.now(), L.toggleLauncher();
 }
-function At(...e) {
-  const t = Nt(e);
+function Ht(...e) {
+  const t = At(e);
   return t === !1 ? (z(), null) : t === null && Date.now() - Fe < 100 ? null : L.openLauncher();
 }
-function Ht(e) {
+function It(e) {
   var s;
   if (p()) return;
   const t = ((s = game.user) == null ? void 0 : s.isGM) === !0;
@@ -285,7 +288,7 @@ function Ht(e) {
     a.preventDefault(), a.stopPropagation(), Me();
   }), o.appendChild(r);
 }
-function It(e, t) {
+function Ft(e, t) {
   var s;
   const n = y(t);
   if (!n) return;
@@ -299,7 +302,7 @@ function It(e, t) {
   }).filter((a) => a !== null);
   for (const a of r) (s = a.parentElement) == null || s.append(a);
 }
-function Ft() {
+function Ot() {
   game.settings.register(l, x, {
     name: "Debugging: API-Only Mode (This Browser)",
     hint: "Diagnostic only. Keeps Core's registration API active while disabling its launcher, scene-control UI, sidebar cleanup, and What's New catalog work on this browser.",
@@ -308,7 +311,7 @@ function Ft() {
     type: Boolean,
     default: !1,
     restricted: !1,
-    onChange: (e) => Ot(e)
+    onChange: (e) => kt(e)
   }), game.settings.register(l, B, {
     name: "Debugging: Disable HoloSuite Core CSS (This Browser)",
     hint: "Diagnostic only. Temporarily removes Core's shared tokens and launcher styles from this browser. HoloSuite interfaces will appear unstyled. Leave this off during normal play.",
@@ -423,7 +426,7 @@ async function Te() {
     console.warn(`${l} | Could not rebuild scene controls after changing API-only mode.`, o);
   }
 }
-function Ot(e = w(l, x)) {
+function kt(e = w(l, x)) {
   const t = e === !0;
   if (Oe = t, t) {
     document.querySelectorAll(
@@ -444,7 +447,7 @@ function Ve(e = w(l, G)) {
     t ? n.setAttribute(ve, "true") : n.removeAttribute(ve);
   t && console.warn(`${l} | Core visual effects are disabled on this browser for debugging.`);
 }
-function kt() {
+function _t() {
   var e, t;
   (t = (e = game.keybindings) == null ? void 0 : e.register) == null || t.call(e, l, dt, {
     name: "Open HoloSuite",
@@ -453,7 +456,7 @@ function kt() {
     restricted: !1,
     onDown: () => {
       var n, o, r, s;
-      return p() ? ((o = (n = ui.notifications) == null ? void 0 : n.warn) == null || o.call(n, "HoloSuite Core is in API-only diagnostic mode on this browser."), !1) : Lt() ? (L.toggleLauncher(), !0) : ((s = (r = ui.notifications) == null ? void 0 : r.warn) == null || s.call(r, "HoloSuite is disabled for players in this world."), !1);
+      return p() ? ((o = (n = ui.notifications) == null ? void 0 : n.warn) == null || o.call(n, "HoloSuite Core is in API-only diagnostic mode on this browser."), !1) : $t() ? (L.toggleLauncher(), !0) : ((s = (r = ui.notifications) == null ? void 0 : r.warn) == null || s.call(r, "HoloSuite is disabled for players in this world."), !1);
     }
   });
 }
@@ -479,7 +482,7 @@ function de(e) {
 function he() {
   return de(w(l, ne));
 }
-function _t(e = he()) {
+function Pt(e = he()) {
   const t = e === "computer" ? { width: 980, height: 720 } : e === "datapad" ? { width: 760, height: 680 } : { width: 483, height: 736 };
   return {
     width: Math.min(t.width, Math.max(420, window.innerWidth - 32)),
@@ -489,7 +492,7 @@ function _t(e = he()) {
 function Ge() {
   return v(w(l, oe)).map((e) => String(e ?? "").trim()).filter((e, t, n) => !!e && n.indexOf(e) === t);
 }
-function Pt(e) {
+function Rt(e) {
   const t = ce(e), n = [document.documentElement, document.body].filter(Boolean);
   for (const o of n)
     t === "base" ? o.removeAttribute("data-holosuite-device-style") : o.setAttribute("data-holosuite-device-style", t);
@@ -499,19 +502,19 @@ function qe(e) {
   for (const o of n)
     t === "default" ? o.removeAttribute("data-holosuite-theme") : o.setAttribute("data-holosuite-theme", t);
 }
-function Rt(e) {
+function Mt(e) {
   const t = de();
   for (const n of [document.documentElement, document.body].filter(Boolean))
     n.setAttribute("data-holosuite-form-factor", t);
 }
 function W() {
-  Pt(xe());
+  Rt(xe());
 }
-function Mt() {
+function Wt() {
   qe(w(l, re));
 }
 function fe() {
-  Rt(he());
+  Mt(he());
 }
 function Ue() {
   var t, n, o;
@@ -537,7 +540,7 @@ function Ye(e) {
   var t;
   return ((t = game.user) == null ? void 0 : t.isGM) === !0 ? !0 : U() ? !1 : e.playerVisible !== !1;
 }
-async function Wt(e) {
+async function Vt(e) {
   var n, o, r, s;
   const t = H.get(e);
   return t ? Ye(t) ? t.open() : ((s = (r = ui.notifications) == null ? void 0 : r.warn) == null || s.call(r, `${t.title} is not available from the player view.`), null) : ((o = (n = ui.notifications) == null ? void 0 : n.warn) == null || o.call(n, `HoloSuite app "${e}" is not registered.`), null);
@@ -546,7 +549,7 @@ function Xe(e, t = {}) {
   const n = _e(e);
   return !n || M(n) < ft ? null : t.replace === !1 && T.has(n.moduleId) ? T.get(n.moduleId) ?? null : (T.set(n.moduleId, n), p() || i == null || i.render(!1), n);
 }
-function Vt(e, t = {}) {
+function xt(e, t = {}) {
   const n = _e(e);
   return n ? t.replace === !1 && I.has(n.moduleId) ? I.get(n.moduleId) ?? null : (I.set(n.moduleId, n), p() || i == null || i.render(!1), n) : null;
 }
@@ -561,7 +564,7 @@ async function Je() {
           Xe(r, { replace: !1 });
         const o = v(t == null ? void 0 : t.releases);
         for (const r of o)
-          Vt(r, { replace: !1 });
+          xt(r, { replace: !1 });
         Ce = !0;
       } catch (e) {
         console.warn(`${l} | Could not load bundled what's new catalog.`, e);
@@ -607,7 +610,7 @@ function Ke(e) {
     </div>
   `;
 }
-function xt(e) {
+function Bt(e) {
   return `
     <span class="holosuite-app-icon" data-holosuite-app-icon="${d(e.id)}">
       <i class="${d(e.icon)}"></i>
@@ -630,10 +633,10 @@ function Qe() {
       </div>
     </section>
   `, u = o.map((f) => {
-    const g = f.title, E = e && f.description ? `<p>${d(f.description)}</p>` : "", S = e ? "" : yt(f.id);
+    const g = Tt(f.title), E = e && f.description ? `<p>${d(f.description)}</p>` : "", S = e ? "" : yt(f.id);
     return `
         <button type="button" class="holosuite-app-tile" data-holosuite-app="${d(f.id)}">
-          ${xt(f)}
+          ${Bt(f)}
           <span class="holosuite-app-title">${d(g)}</span>
           ${E}
           ${S ? `<span class="holosuite-app-count">${d(S)}</span>` : ""}
@@ -660,7 +663,7 @@ function Qe() {
     ` : ""}
   `;
 }
-function Bt(e) {
+function Gt(e) {
   return `
     <nav class="holosuite-whats-new-filters" aria-label="What's New filters">
       ${[
@@ -678,7 +681,7 @@ function Bt(e) {
     </nav>
   `;
 }
-function Gt(e) {
+function qt(e) {
   return `
     <nav class="holosuite-whats-new-tabs" aria-label="What's New tabs">
       ${[
@@ -697,13 +700,13 @@ function Gt(e) {
     </nav>
   `;
 }
-function qt(e) {
+function Ut(e) {
   return [...T.values()].filter((t) => e === "installed" ? Pe(t.moduleId) : e === "free" || e === "premium" ? t.tier === e : !0).sort(ie);
 }
-function Ut(e) {
+function zt(e) {
   return [...I.values()].filter((t) => e === "installed" ? Pe(t.moduleId) : e === "free" || e === "premium" ? t.tier === e : !0).sort(ie);
 }
-function zt(e, t) {
+function jt(e, t) {
   return e.length ? e.map((n) => {
     const o = n.icon || (n.tier === "premium" ? "fa-solid fa-gem" : "fa-solid fa-cube"), r = n.entries.map((a) => {
       var c;
@@ -739,7 +742,7 @@ function zt(e, t) {
   }).join("") : `<p class="holosuite-empty">${d(t)}</p>`;
 }
 function Ze(e, t) {
-  const n = qt(e), o = Ut(e), r = t === "releases" ? o : n, s = t === "releases" ? "No releases match this filter yet." : "No updates match this filter yet.";
+  const n = Ut(e), o = zt(e), r = t === "releases" ? o : n, s = t === "releases" ? "No releases match this filter yet." : "No updates match this filter yet.";
   return `
     <div class="holosuite-screen-heading">
       <div>
@@ -747,10 +750,10 @@ function Ze(e, t) {
         <h2>What's New</h2>
       </div>
     </div>
-    ${Gt(t)}
-    ${Bt(e)}
+    ${qt(t)}
+    ${Gt(e)}
     <div class="holosuite-whats-new-list">
-      ${zt(r, s)}
+      ${jt(r, s)}
     </div>
   `;
 }
@@ -815,12 +818,12 @@ function Le(e = "apps", t = "all", n = "releases") {
 function X(e, t) {
   D = t, e.classList.toggle("is-reordering-apps", t);
 }
-async function jt(e) {
+async function Yt(e) {
   const t = [...e.querySelectorAll("[data-holosuite-app]")].map((n) => n.dataset.holosuiteApp ?? "").filter(Boolean);
   await game.settings.set(l, oe, t);
 }
-const Yt = 12;
-function Xt(e, t, n, o) {
+const Xt = 12;
+function Jt(e, t, n, o) {
   if (e.length === 0) return 0;
   const r = (m) => Math.hypot(
     t - (m.left + m.width / 2),
@@ -830,13 +833,13 @@ function Xt(e, t, n, o) {
   return e.forEach((m, f) => {
     const g = r(m);
     g < u && (c = f, u = g);
-  }), c !== s && u + Yt >= a ? s : c;
+  }), c !== s && u + Xt >= a ? s : c;
 }
-function Jt(e, t, n, o) {
+function Kt(e, t, n, o) {
   const s = [...e.querySelectorAll("[data-holosuite-app]")].filter((a) => a !== t)[o] ?? null;
   s ? n.nextElementSibling !== s && e.insertBefore(n, s) : n.nextElementSibling && e.append(n);
 }
-function Kt(e) {
+function Qt(e) {
   var n;
   const t = e.querySelector(".holosuite-app-grid");
   t && (X(e, D), (n = e.querySelector("[data-holosuite-action='reorder-done']")) == null || n.addEventListener("click", (o) => {
@@ -862,17 +865,17 @@ function Kt(e) {
       h.preventDefault(), o.style.left = `${h.clientX - m}px`, o.style.top = `${h.clientY - f}px`;
       const b = t.getBoundingClientRect();
       if (g && h.clientX >= b.left && h.clientX <= b.right && h.clientY >= b.top && h.clientY <= b.bottom) {
-        const N = Xt(
+        const N = Jt(
           E,
           h.clientX,
           h.clientY,
           S
         );
-        N !== S && (Jt(t, o, g, N), S = N);
+        N !== S && (Kt(t, o, g, N), S = N);
       }
     });
     const pe = (h) => {
-      h.pointerId === s && (r !== null && window.clearTimeout(r), r = null, s = null, a && (h.preventDefault(), a = !1, E = [], g == null || g.replaceWith(o), g = null, o.classList.remove("is-being-reordered"), o.style.removeProperty("height"), o.style.removeProperty("left"), o.style.removeProperty("top"), o.style.removeProperty("width"), Z = Date.now() + 450, jt(t)));
+      h.pointerId === s && (r !== null && window.clearTimeout(r), r = null, s = null, a && (h.preventDefault(), a = !1, E = [], g == null || g.replaceWith(o), g = null, o.classList.remove("is-being-reordered"), o.style.removeProperty("height"), o.style.removeProperty("left"), o.style.removeProperty("top"), o.style.removeProperty("width"), Z = Date.now() + 450, Yt(t)));
     };
     o.addEventListener("pointerup", pe), o.addEventListener("pointercancel", pe), o.addEventListener("contextmenu", (h) => {
       D && h.preventDefault();
@@ -886,7 +889,7 @@ function J(e) {
         n.preventDefault(), n.stopPropagation();
         return;
       }
-      Wt(n.currentTarget.dataset.holosuiteApp ?? "");
+      Vt(n.currentTarget.dataset.holosuiteApp ?? "");
     });
   }), e.querySelectorAll("[data-holosuite-action='whats-new']").forEach((t) => {
     t.addEventListener("click", (n) => {
@@ -912,22 +915,22 @@ function J(e) {
   }), e.querySelectorAll("[data-holosuite-filter]").forEach((t) => {
     t.addEventListener("click", (n) => {
       const o = n.currentTarget.dataset.holosuiteFilter;
-      i == null || i.setWhatsNewFilter(Qt(o));
+      i == null || i.setWhatsNewFilter(Zt(o));
     });
   }), e.querySelectorAll("[data-holosuite-whats-new-tab]").forEach((t) => {
     t.addEventListener("click", (n) => {
       const o = n.currentTarget.dataset.holosuiteWhatsNewTab;
-      i == null || i.setWhatsNewTab(Zt(o));
+      i == null || i.setWhatsNewTab(en(o));
     });
   }), e.querySelectorAll("[data-holosuite-action='close']").forEach((t) => {
     t.addEventListener("pointerdown", $e, { capture: !0 }), t.addEventListener("click", $e, { capture: !0 });
-  }), Kt(e));
+  }), Qt(e));
 }
-function Qt(e) {
+function Zt(e) {
   const t = String(e ?? "");
   return t === "free" || t === "premium" || t === "installed" ? t : "all";
 }
-function Zt(e) {
+function en(e) {
   return String(e ?? "") === "releases" ? "releases" : "updates";
 }
 function $e(e) {
@@ -951,7 +954,7 @@ async function z() {
     n != null && n.isConnected && n.remove(), i || Re();
   }, 0);
 }
-function en() {
+function tn() {
   var n;
   const e = game.modules;
   return v((e == null ? void 0 : e.contents) ?? Array.from(((n = e == null ? void 0 : e.values) == null ? void 0 : n.call(e)) ?? [])).filter((o) => (o == null ? void 0 : o.active) === !0).map((o) => ({
@@ -960,7 +963,7 @@ function en() {
     version: String(o.version ?? "")
   })).sort((o, r) => o.id.localeCompare(r.id));
 }
-function tn() {
+function nn() {
   const e = Array.from(
     document.querySelectorAll(`link[${O}]`)
   );
@@ -974,14 +977,14 @@ function tn() {
     };
   });
 }
-function nn() {
+function on() {
   var n;
   const e = game.messages, t = Number((e == null ? void 0 : e.size) ?? ((n = e == null ? void 0 : e.contents) == null ? void 0 : n.length) ?? 0);
   return Number.isFinite(t) ? t : 0;
 }
 function ge() {
   var c, u, m;
-  const e = w(l, B) === !0, t = p(), n = w(l, G) === !0, o = tn(), r = en(), s = game.release, a = game.system;
+  const e = w(l, B) === !0, t = p(), n = w(l, G) === !0, o = nn(), r = tn(), s = game.release, a = game.system;
   return {
     schemaVersion: 1,
     generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
@@ -1019,7 +1022,7 @@ function ge() {
       isGM: ((m = game.user) == null ? void 0 : m.isGM) === !0
     },
     workload: {
-      chatMessages: nn(),
+      chatMessages: on(),
       renderedChatMessages: document.querySelectorAll(".chat-message").length,
       domElements: document.getElementsByTagName("*").length,
       openApplicationWindows: document.querySelectorAll(".window-app, .application").length
@@ -1040,7 +1043,7 @@ function ge() {
 function tt() {
   return JSON.stringify(ge(), null, 2);
 }
-async function on() {
+async function rn() {
   var t, n, o, r, s, a;
   const e = tt();
   try {
@@ -1055,7 +1058,7 @@ async function on() {
     console.warn(`${l} | Could not copy diagnostics.`, c), (a = (s = ui.notifications) == null ? void 0 : s.error) == null || a.call(s, "Could not copy diagnostics. Use Download JSON instead.");
   }
 }
-function rn() {
+function sn() {
   const e = new Blob([tt()], { type: "application/json" }), t = URL.createObjectURL(e), n = document.createElement("a"), o = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-");
   n.href = t, n.download = `holosuite-core-diagnostics-${o}.json`, n.click(), window.setTimeout(() => URL.revokeObjectURL(t), 0);
 }
@@ -1091,7 +1094,7 @@ function De() {
 }
 function Ne(e, t) {
   var n, o, r;
-  e && ((n = e.querySelector("[data-action='refresh']")) == null || n.addEventListener("click", () => t.render(!1)), (o = e.querySelector("[data-action='copy']")) == null || o.addEventListener("click", () => void on()), (r = e.querySelector("[data-action='download']")) == null || r.addEventListener("click", rn));
+  e && ((n = e.querySelector("[data-action='refresh']")) == null || n.addEventListener("click", () => t.render(!1)), (o = e.querySelector("[data-action='copy']")) == null || o.addEventListener("click", () => void rn()), (r = e.querySelector("[data-action='download']")) == null || r.addEventListener("click", sn));
 }
 class nt extends ke {
   static get defaultOptions() {
@@ -1213,7 +1216,7 @@ class V extends ke {
   }
   resizeForFormFactor() {
     var r, s;
-    const n = _t(), o = ((r = y(this.element)) == null ? void 0 : r.closest("#holosuite-launcher, .holosuite-launcher-window")) ?? y(this.element);
+    const n = Pt(), o = ((r = y(this.element)) == null ? void 0 : r.closest("#holosuite-launcher, .holosuite-launcher-window")) ?? y(this.element);
     o == null || o.style.setProperty("--hs-launcher-width", `${n.width}px`), o == null || o.style.setProperty("--hs-launcher-height", `${n.height}px`), o == null || o.style.setProperty("width", `${n.width}px`, "important"), o == null || o.style.setProperty("height", `${n.height}px`, "important");
     try {
       (s = this.setPosition) == null || s.call(this, n);
@@ -1279,13 +1282,13 @@ const L = {
       } catch (n) {
         console.warn(`${l} | Recreating launcher after render failure.`, n), i = new V(), await i.render(!0);
       }
-      return $t(i), i;
+      return Dt(i), i;
     })().finally(() => {
       C = null;
     }), C);
   },
   async toggleLauncher() {
-    return C || (ee(i) ? (await z(), null) : (le() && Re(), Dt(), L.openLauncher()));
+    return C || (ee(i) ? (await z(), null) : (le() && Re(), Nt(), L.openLauncher()));
   }
 };
 function ot() {
@@ -1299,13 +1302,13 @@ function ot() {
   Hooks.callAll(`${l}.apiReady`, L);
 }
 Hooks.once("init", () => {
-  ze(), Ft(), We(), Ve(), kt(), ot();
+  ze(), Ot(), We(), Ve(), _t(), ot();
 });
-Hooks.on("getSceneControlButtons", Tt);
-Hooks.on("renderSceneControls", (e, t) => Ht(t));
+Hooks.on("getSceneControlButtons", Lt);
+Hooks.on("renderSceneControls", (e, t) => It(t));
 Hooks.on("renderSidebar", ae);
 Hooks.on("renderSidebarTab", ae);
-Hooks.on("renderSettingsConfig", It);
+Hooks.on("renderSettingsConfig", Ft);
 Hooks.once("ready", () => {
-  Q = !0, ot(), ze(), W(), Mt(), fe(), p() ? console.warn(`${l} | API-only diagnostic mode is enabled on this browser.`) : (ae(), Je()), console.log(`${l} | Ready. API available at game.modules.get("${l}").api`);
+  Q = !0, ot(), ze(), W(), Wt(), fe(), p() ? console.warn(`${l} | API-only diagnostic mode is enabled on this browser.`) : (ae(), Je()), console.log(`${l} | Ready. API available at game.modules.get("${l}").api`);
 });
