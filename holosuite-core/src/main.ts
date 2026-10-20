@@ -264,7 +264,8 @@ function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration |
     playerVisible: app.playerVisible !== false,
     description: String(app.description ?? "").trim(),
     featureId: String(app.featureId ?? id).trim() || id,
-    open: app.open
+    open: app.open,
+    contextActions: (app.contextActions ?? []).filter(action => action?.label && typeof action.callback === "function")
   };
 }
 
@@ -1365,9 +1366,77 @@ function bindAppReordering(root: HTMLElement): void {
   });
 }
 
+let closeAppContextMenu: (() => void) | null = null;
+
+function showAppContextMenu(appId: string, anchor: HTMLElement, x: number, y: number): void {
+  const app = registeredApps.get(appId);
+  if (!app || !isAppVisibleToCurrentUser(app) || !app.contextActions?.length) return;
+  closeAppContextMenu?.();
+  const menu = document.createElement("div");
+  menu.className = "holosuite-app-context-menu";
+  menu.setAttribute("role", "menu");
+  menu.setAttribute("aria-label", app.title);
+  Object.assign(menu.style, { position: "fixed", zIndex: "100000", background: "#091923", border: "1px solid #58c8d5", borderRadius: "5px", padding: "5px", minWidth: "200px", boxShadow: "0 8px 30px #0009" });
+  const controller = new AbortController();
+  const close = () => { controller.abort(); menu.remove(); closeAppContextMenu = null; };
+  closeAppContextMenu = close;
+  const actions = [{ label: `Open ${app.title}`, callback: () => openRegisteredApp(appId) }, ...app.contextActions];
+  for (const action of actions) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("role", "menuitem");
+    button.textContent = action.label;
+    Object.assign(button.style, { display: "block", width: "100%", textAlign: "left", color: "#d8faff", background: "#102c38", border: "1px solid #315967", padding: "8px 12px", margin: "3px 0" });
+    button.addEventListener("click", async () => {
+      close();
+      anchor.focus();
+      if (!isAppVisibleToCurrentUser(app)) return;
+      try { await action.callback(); }
+      catch (error) { console.error(`${MODULE_ID} | App action failed`, error); ui.notifications?.error?.(`Could not complete ${action.label}.`); }
+    });
+    menu.appendChild(button);
+  }
+  document.body.appendChild(menu);
+  const bounds = menu.getBoundingClientRect();
+  menu.style.left = `${Math.max(4, Math.min(x, window.innerWidth - bounds.width - 4))}px`;
+  menu.style.top = `${Math.max(4, Math.min(y, window.innerHeight - bounds.height - 4))}px`;
+  menu.querySelector<HTMLButtonElement>("button")?.focus();
+  document.addEventListener("pointerdown", event => { if (!menu.contains(event.target as Node)) close(); }, { capture: true, signal: controller.signal });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); anchor.focus(); }
+    else if (event.key === "Tab") close();
+    else if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+      event.preventDefault(); event.stopPropagation();
+      const buttons = Array.from(menu.querySelectorAll("button"));
+      const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+      const next = event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + buttons.length) % buttons.length;
+      buttons[next]?.focus();
+    }
+  }, { capture: true, signal: controller.signal });
+}
+
 function bindLauncherControls(root: HTMLElement | null): void {
   if (!root) return;
+  closeAppContextMenu?.();
   root.querySelectorAll<HTMLElement>("[data-holosuite-app]").forEach((button) => {
+    const appId = button.dataset.holosuiteApp ?? "";
+    if (registeredApps.get(appId)?.contextActions?.length) {
+      button.setAttribute("aria-haspopup", "menu");
+      button.title = `${button.title || registeredApps.get(appId)?.title} — Right-click for options`;
+      button.addEventListener("contextmenu", event => {
+        if (launcherReorderMode) return;
+        event.preventDefault(); event.stopPropagation();
+        const rect = button.getBoundingClientRect();
+        showAppContextMenu(appId, button, event.clientX || rect.left, event.clientY || rect.bottom);
+      });
+      button.addEventListener("keydown", event => {
+        if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
+        if (launcherReorderMode) return;
+        event.preventDefault(); event.stopPropagation();
+        const rect = button.getBoundingClientRect();
+        showAppContextMenu(appId, button, rect.left, rect.bottom);
+      });
+    }
     button.addEventListener("click", (event) => {
       if (launcherReorderMode || Date.now() < suppressAppClickUntil) {
         event.preventDefault();
@@ -1446,6 +1515,7 @@ function handleLauncherCloseEvent(event: Event): void {
 }
 
 async function requestLauncherClose(): Promise<void> {
+  closeAppContextMenu?.();
   if (launcherCloseInProgress) return;
   launcherCloseInProgress = true;
 

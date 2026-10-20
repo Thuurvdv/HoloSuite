@@ -289,16 +289,15 @@
       "tier": "premium",
       "category": "Scanner",
       "compatibility": "Foundry v12-v14",
-      "image": "assets/PulseScanner-preview.png",
-      "summary": "Scan Scene Regions for hidden targets with animated pulses and matching signal types.",
+      "image": "assets/PulseScannerNew.webp",
+      "summary": "Give player characters scanners that send cinematic pulses across the scene, detecting matching targets and nearby tokens through a fast scanner wheel.",
       "installation": [
         "Subscribe to my Mage Tower Studios Patreon at a tier that includes the premium modules.",
         "On the Foundry VTT website, sign in to the account that owns the license used by your server. Link your subscribed Patreon account in your profile.",
         "Check Subscribed Content in your Foundry profile. If your access is missing, refresh the Patreon link and check your subscription tier.",
-        "In Foundry's Setup screen, open Add-on Modules > Install Module. Find Pulse Scanner under Premium Content and click Install. Install HoloSuite Core here too if you do not have it.",
+        "In Foundry’s Setup screen, open Add-on Modules > Install Module. Find Pulse Scanner under Premium Content and click Install. Install HoloSuite Core here too if you do not have it.",
         "Launch your world as a GM. Open Game Settings > Manage Modules, enable HoloSuite Core and Pulse Scanner, and save.",
-        "Use scenes with Foundry Scene Regions for linked scan targets.",
-        "Open Pulse Scanner from the HoloSuite launcher."
+        "Open Pulse Scanner from the HoloSuite launcher. GMs see the target and scanner manager; players see the scanner wheel for their token."
       ],
       "videos": [
         {

@@ -189,10 +189,14 @@
       "name": "Pulse Scanner",
       "tier": "premium",
       "category": "Scanner",
-      "image": "assets/PulseScanner-preview.png",
-      "pitch": "Give actors scanners that send out animated pulses and reveal matching targets placed by the GM.",
+      "image": "assets/PulseScannerNew.webp",
+      "pitch": "Give player characters scanners that send cinematic pulses across the scene, detecting matching targets and nearby tokens through a fast scanner wheel.",
       "compatibility": "Foundry v12-v14",
-      "features": ["Animated pulse scans", "Hidden and revealed target signatures", "Scanner range and charge limits"],
+      "features": [
+        "Five pulse animations and a player scanner wheel",
+        "One target across multiple region areas",
+        "Scanner previews, recharge, shortcuts, and hotbar macros"
+      ],
       "docsUrl": "docs/module.html?id=pulse-scanner",
       "moduleUrl": "https://patreon.com/MageTowerStudios",
       "moduleActionLabel": "Get Premium Access",

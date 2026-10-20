@@ -7,6 +7,7 @@ export interface HoloSuiteAppRegistration {
   description?: string;
   featureId?: string;
   open: () => unknown | Promise<unknown>;
+  contextActions?: { label: string; callback: () => unknown | Promise<unknown> }[];
 }
 
 export type HoloSuiteWhatsNewTier = "free" | "premium";
