@@ -19,6 +19,8 @@ HoloSuite Core gives GMs one launcher for opening the other HoloSuite modules.
 
 HoloSuite Core is a launcher, not a data store. Contacts, cases, maps, terminals, and other content remain in the modules that created them.
 
+Supported app tiles also have a right-click menu. For example, Pulse Scanner offers **Create hotbar macro**. Keyboard users can focus the tile and press **Shift+F10**.
+
 ## Video
 
 [Watch the HoloSuite Core overview](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/HoloSuite-clip.mp4).

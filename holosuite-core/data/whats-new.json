@@ -1,6 +1,36 @@
 {
-  "updated": "2026-10-14",
+  "updated": "2026-10-20",
   "modules": [
+    {
+      "moduleId": "pulse-scanner",
+      "title": "Pulse Scanner",
+      "tier": "premium",
+      "version": "2.0.0",
+      "updated": "2026-10-20",
+      "icon": "fa-solid fa-wave-square",
+      "url": "https://www.magetowerstudios.com/docs/module.html?id=pulse-scanner",
+      "entries": [
+        {
+          "title": "Pulse Scanner 2.0 is here",
+          "summary": "The manager has a new look and a simpler setup: choose what the target is, place it in a region, and give it a name. Scanners are grouped by character, with quick previews and recharge buttons.",
+          "tags": [
+            "Foundry v12-v14"
+          ]
+        },
+        {
+          "title": "Pick your scanner and send out a pulse",
+          "summary": "Players now choose scanners from a quick-access wheel. Try five pulse animations, follow scent trails, and spot nearby tokens with temporary outlines. Recharge from the wheel and let the table know through chat."
+        },
+        {
+          "title": "One region can hold several secrets",
+          "summary": "Put three secret doors in one region and link them to one target. A scan only highlights the areas it reaches, so finding one door no longer gives away the others."
+        },
+        {
+          "title": "Open your scanner without digging through menus",
+          "summary": "Set a keyboard shortcut or right-click Pulse Scanner in the HoloSuite launcher to create a hotbar macro. Opening the scanner does not spend a charge."
+        }
+      ]
+    },
     {
       "moduleId": "holosuite-hacking",
       "title": "HoloSuite Hacking",
@@ -13,7 +43,9 @@
         {
           "title": "Roll hacking checks your way",
           "summary": "Use a skill from the character sheet or set up your own dice rules. You can decide whether high or low rolls succeed and whether the best or worst die counts.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         },
         {
           "title": "Start quickly or save a challenge for later",
@@ -37,7 +69,9 @@
         {
           "title": "Galaxy Map 2.0 is here",
           "summary": "Build your galaxy directly on the map, open systems to add planets and stations, connect destinations with routes, and let the crew request travel together. Older maps are upgraded when the primary GM opens the world.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     },
@@ -53,7 +87,9 @@
         {
           "title": "Cleaner camera feeds",
           "summary": "Hidden or outdated token projections no longer linger in a live camera feed, so players only see what is really there.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     },
@@ -69,7 +105,9 @@
         {
           "title": "Keep writing while messages update",
           "summary": "CyberCall now keeps your unfinished message and cursor position when the conversation refreshes, so an incoming update no longer clears what you were typing.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     },
@@ -85,7 +123,9 @@
         {
           "title": "Link contracts to their targets",
           "summary": "Drag an Actor or Token onto a bounty to link its target. Galactic Records can then show the live rewards for that person or vessel without copying contract data.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     },
@@ -101,7 +141,9 @@
         {
           "title": "More control over critical cut-ins",
           "summary": "Choose the die, decide whether high or low results are good, and give each character their own success and failure thresholds.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         },
         {
           "title": "Fewer accidental cut-ins",
@@ -121,7 +163,9 @@
         {
           "title": "Open evidence right from its card",
           "summary": "Click an evidence image on a CSI item card to open the full preview while you are working through the case.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     },
@@ -129,15 +173,17 @@
       "moduleId": "holosuite-core",
       "title": "HoloSuite Core",
       "tier": "free",
-      "version": "1.1.0",
-      "updated": "2026-10-14",
+      "version": "1.2.0",
+      "updated": "2026-10-20",
       "icon": "fa-solid fa-mobile-screen",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
       "entries": [
         {
-          "title": "Cleaner names in the launcher",
-          "summary": "App tiles no longer repeat the HoloSuite name. Galactic Records also has its own icon and colors across Foundry v12-v14.",
-          "tags": ["Foundry v12-v14"]
+          "title": "More options from the launcher",
+          "summary": "Right-click supported app buttons for useful shortcuts. Pulse Scanner can now create a hotbar macro straight from its launcher button. You can also open the menu with Shift+F10.",
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     }
@@ -155,7 +201,9 @@
         {
           "title": "Keep your world's records in one place",
           "summary": "Turn Actors and Tokens into a searchable database of people, vessels, and organizations. Add warrants, known associates, assets, and last-seen details, then decide what players are allowed to find.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     },
@@ -171,7 +219,9 @@
         {
           "title": "Build tactical blueprints from your scenes",
           "summary": "Turn a Foundry scene into a clean, multi-floor schematic. Add rooms, markers, and freehand notes, share a player view, export a PNG, or publish it inside HoloSuite Terminal.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     },
@@ -187,7 +237,9 @@
         {
           "title": "Build vending machines that fit your world",
           "summary": "Place a shop in a scene, choose its look, stock it with items, set prices and limits, and control who can use it through Foundry Regions.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     },
@@ -203,7 +255,9 @@
         {
           "title": "Turn a terminal into a place players can explore",
           "summary": "Fill terminals with mail, files, cameras, and useful tools. Add logins, permissions, hacking challenges, downloads, and a look that suits the location.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     },
@@ -211,15 +265,29 @@
       "moduleId": "pulse-scanner",
       "title": "Pulse Scanner",
       "tier": "premium",
-      "version": "1.0.1",
-      "updated": "2026-07-22",
+      "version": "2.0.0",
+      "updated": "2026-10-20",
       "icon": "fa-solid fa-wave-square",
-      "url": "https://patreon.com/MageTowerStudios",
+      "url": "https://www.magetowerstudios.com/docs/module.html?id=pulse-scanner",
       "entries": [
         {
-          "title": "Give hidden targets a proper scanner reveal",
-          "summary": "Place secrets for the crew to find, then reveal them with a cinematic scanner pulse. You control visibility and range, and it works with any game system.",
-          "tags": ["Foundry v12-v14"]
+          "title": "Pulse Scanner 2.0 is here",
+          "summary": "The manager has a new look and a simpler setup: choose what the target is, place it in a region, and give it a name. Scanners are grouped by character, with quick previews and recharge buttons.",
+          "tags": [
+            "Foundry v12-v14"
+          ]
+        },
+        {
+          "title": "Pick your scanner and send out a pulse",
+          "summary": "Players now choose scanners from a quick-access wheel. Try five pulse animations, follow scent trails, and spot nearby tokens with temporary outlines. Recharge from the wheel and let the table know through chat."
+        },
+        {
+          "title": "One region can hold several secrets",
+          "summary": "Put three secret doors in one region and link them to one target. A scan only highlights the areas it reaches, so finding one door no longer gives away the others."
+        },
+        {
+          "title": "Open your scanner without digging through menus",
+          "summary": "Set a keyboard shortcut or right-click Pulse Scanner in the HoloSuite launcher to create a hotbar macro. Opening the scanner does not spend a charge."
         }
       ]
     },
@@ -235,7 +303,9 @@
         {
           "title": "Keep every ship loadout in one place",
           "summary": "Build a ship profile, place equipment in its slots, manage power and damage, and choose what the crew is allowed to install or switch on.",
-          "tags": ["Foundry v12-v14"]
+          "tags": [
+            "Foundry v12-v14"
+          ]
         }
       ]
     }

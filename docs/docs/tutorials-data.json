@@ -198,15 +198,130 @@
     },
     "pulse-scanner": {
       "quickStart": {
+        "paragraphs": [
+          "Pulse Scanner is system-agnostic and supports Foundry VTT v12–v14. HoloSuite Core is required. Use the updated Core build for the launcher’s Create hotbar macro option."
+        ],
         "steps": [
-          "On the active Scene, draw a Region around the hidden passage, object, or area.",
-          "Open Pulse Scanner as GM, stay on Targets, and choose New Target.",
-          "Link the Region, choose a signal and type, set Reticle/Icon/Region ping, visibility, status, color, integrity when relevant, and description, then save.",
-          "Open Scanners, select the player’s Actor, choose scanner name, signal, range in scene units, and charges, then Grant Scanner.",
-          "As the player, control an owned token, open Pulse Scanner, select the grant, and scan inside range.",
-          "Use the manager to Reveal, Hide, Resolve, or recharge the scanner as the investigation changes."
+          "On the active scene, use Foundry’s Region tools to draw an area around a secret door, clue, object, or other scan target.",
+          "Open Pulse Scanner as GM. On Targets, click Add target, choose What is it?, select the region under Where is it?, and enter a name. The type suggests a signal, marker, and color. Click Create target.",
+          "On Scanners, expand Give scanner at the top. Choose a player character, a matching signal, and the range in scene units. The list includes characters owned by a player or assigned to a player’s user account.",
+          "Leave the scanner unlimited, or enable Limited charges and set its capacity. Expand Name and appearance to rename it or choose a pulse animation, then click Give scanner.",
+          "Select one token on the map and click Preview beside an assigned scanner to try it. You can also preview the settings in Give scanner before assigning it. Previews stay local, use no charges, and keep the manager open.",
+          "As a player, select an owned token, open Pulse Scanner, and choose a scanner from the wheel. A scan spends one charge when charges are limited and highlights matching areas within range."
+        ],
+        "callouts": [
+          {
+            "title": "Match the signal",
+            "text": "A Structural scanner detects Structural targets. The target form warns when no assigned scanner uses the target’s signal. Enable player scanning in the module settings if players cannot scan."
+          }
         ]
-      }
+      },
+      "sections": [
+        {
+          "id": "target-manager",
+          "title": "Managing targets",
+          "paragraphs": [
+            "The Targets tab keeps the essentials visible: type, region, and name. Search by name, region, or signal, and filter active or resolved targets. Move the manager with the top-middle grip; the integrated Close button is at the top right.",
+            "Expand Detection and player notes to change the signal, note visibility, or notes. Expand Appearance and advanced options for the map marker, color, and integrity on breakable targets. Changes apply when you save.",
+            "Choose Scanner Reticle, Type Icon, Region Outline, or Scent Cloud for the map marker. Scent targets default to a softly drifting cloud clipped to the detected area.",
+            "Use Preview on map to try the target with player label settings. For a region with multiple areas, select exactly one token first. The preview uses its matching scanner range, or the default scanner range when it has none. Single-area targets can be previewed without selecting a token.",
+            "Right-click a target in the list and choose Delete to remove it immediately. Under Target actions, Mark resolved excludes it from future scans; Enable scanning again restores detection. These actions apply to the saved target without changing its note visibility."
+          ]
+        },
+        {
+          "id": "multi-area-regions",
+          "title": "One target, multiple areas",
+          "paragraphs": [
+            "One target can link to one Scene Region containing several separate shapes. For three secret doors, draw three rectangles in the same region and create one Hidden Passage target linked to that region.",
+            "Each area is checked separately against scan range. Only reached areas receive pings, labels, outlines, or scent effects. Empty space between distant shapes does not trigger detection. Scanner previews use the same detection rules.",
+            "All areas share the target’s name, signal, notes, appearance, integrity, and resolved state. Use separate targets and regions when doors need independent states. Existing links work without migration; duplicate targets on the same region are not automatically removed."
+          ]
+        },
+        {
+          "id": "scanners-and-animations",
+          "title": "Scanners and pulse animations",
+          "paragraphs": [
+            "Assigned scanners are grouped by character. Use Edit scanner to change the name, signal, range, charges, or pulse animation. Recharge refills a limited scanner. New limited scanners start fully charged; unlimited scanners need no recharge.",
+            "Choose from five pulse animations: Classic Radar, Echo Rings, Sonar Sweep, Grid Burst, and Glitch Pulse. Animation changes the scan’s appearance; the signal and range determine what it detects.",
+            "Scanner access belongs to the character’s actor, so there is no scanner Item to create or equip. A character can have multiple scanners with different signals and settings."
+          ]
+        },
+        {
+          "id": "player-controls",
+          "title": "Player controls and recharge",
+          "paragraphs": [
+            "Hover or focus a scanner on the wheel to inspect its name, signal, range, animation, and charges. Click it to scan. Opening the wheel alone does not spend charges. A character with one scanner gets a compact layout.",
+            "Arrow keys cycle through scanners. Enter or Space activates the selected scanner; number keys select and activate matching wheel positions. Click outside, right-click, or press Escape to close the wheel.",
+            "Empty scanners can be selected but cannot scan. Use Recharge in the center to refill the selected scanner. A successful recharge posts a chat message naming the character and scanner. Full scanners show Fully charged; unlimited scanners have no recharge button.",
+            "Players can scan only from tokens they own. If no token is selected, opening Pulse Scanner uses the assigned character’s token only when exactly one is on the current scene. If the choice is ambiguous, select a token explicitly."
+          ]
+        },
+        {
+          "id": "shortcuts-and-macros",
+          "title": "Shortcut and hotbar macro",
+          "steps": [
+            "In Foundry’s Configure Controls > Pulse Scanner, bind Open Pulse Scanner to your preferred key. The shortcut is unassigned by default. It opens the wheel for players and the manager for GMs.",
+            "Right-click Pulse Scanner in the HoloSuite launcher and choose Create hotbar macro. You can also focus the launcher button and press Shift+F10 to open its menu.",
+            "The macro sheet opens. Drag the macro from Foundry’s Macros directory onto your hotbar. Repeating Create hotbar macro reuses your generated macro instead of creating duplicates."
+          ],
+          "paragraphs": [
+            "Players need Foundry’s Create Macros and Use Script Macros permissions for the macro option. The shortcut and macro follow the same token-selection and player-scanning rules as the launcher.",
+            "Existing script macros can call: await game.pulseScanner.openScanner();"
+          ]
+        },
+        {
+          "id": "scanner-signals",
+          "title": "Scanner signals",
+          "bullets": [
+            "Structural: walls, supports, hidden passages, and weak construction.",
+            "Arcane: magical signatures, wards, enchantments, and ley traces.",
+            "Thermal: heat sources, engines, and recent activity.",
+            "Forensic: residue, fingerprints, evidence, and traces.",
+            "Tech: devices, transmitters, and electronic signatures.",
+            "Biological: organic matter, toxins, parasites, and living organisms.",
+            "Scent: lingering odors, spoor, chemical traces, and trails."
+          ],
+          "paragraphs": [
+            "The target’s Detected by setting determines which signal finds it. Nearby token outlines are controlled separately and can appear in every signal mode."
+          ]
+        },
+        {
+          "id": "player-visibility",
+          "title": "Player visibility and settings",
+          "paragraphs": [
+            "Player notes set to Hidden are omitted from player scan results. Names follow the world’s player-label setting independently of note visibility. Shown notes appear when player labels are enabled. Hiding notes does not prevent detection.",
+            "In Configure Settings > Pulse Scanner, adjust player scan permissions, label and integrity visibility, highlight duration, and scan sound. Integrity bars apply to breakable targets when enabled.",
+            "Target data is stored on the scene for module operation. Hidden notes are a presentation control, not secure storage against users inspecting client-side scene data."
+          ]
+        },
+        {
+          "id": "token-detection",
+          "title": "Token detection",
+          "paragraphs": [
+            "Scans can outline other tokens in range without regions or target setup. The scanning token is excluded. In Configure Settings > Pulse Scanner > Token Detection, choose one of the following modes."
+          ],
+          "bullets": [
+            "Visible tokens: the default; respects each viewer’s token visibility.",
+            "Through walls — non-hidden tokens: includes tokens outside the viewer’s vision, but excludes hidden GM tokens for players.",
+            "Off — region targets only: disables token outlines."
+          ],
+          "callouts": [
+            {
+              "title": "Temporary outlines",
+              "text": "Outlines follow the token artwork, move with the token, and fade automatically. They do not change token visibility or reveal actor data. Opaque portraits outline their image boundary; video or unavailable artwork uses a rectangular fallback."
+            }
+          ]
+        },
+        {
+          "id": "advanced-notes",
+          "title": "Advanced notes",
+          "paragraphs": [
+            "Reveal, hide, import, and export helpers remain available through game.pulseScanner. The scan API returns one result per detected target, with transient scanAreas for the reached areas. Those contacts are not saved as additional targets.",
+            "The local pulse-scanner.scanComplete hook supplies sceneId, userId, and anonymous x/y points for detected region areas. It includes no target names, notes, or actor references. Token contacts are not included. Empty successful scans emit an empty points list; denied scans do not emit.",
+            "Rendering is limited to 80 region contacts and up to 80 token contacts per pulse. Up to 12 detected scent areas render as clouds; additional scent hits fall back to outlines."
+          ]
+        }
+      ]
     }
   }
 }

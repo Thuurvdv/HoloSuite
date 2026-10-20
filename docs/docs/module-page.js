@@ -62,6 +62,9 @@ function renderModule(module) {
   renderSections(content, [
     { id: "installation", title: "Installation", body: installationBody(module) },
     { id: "quick-start", title: "Quick Start", body: quickStartBody(module.quickStart) },
+    ...(module.sections || []).map((item) => ({
+      id: item.id, title: item.title, body: detailSectionBody(item)
+    })),
     { id: "videos", title: "Video", body: videos(module.videos, module.name) }
   ].filter((item) => item.body));
 }
@@ -71,6 +74,13 @@ function quickStartBody(quickStart) {
   return paragraphs(quickStart.paragraphs || [])
     + orderedList(quickStart.steps || [])
     + renderCallouts(quickStart.callouts);
+}
+
+function detailSectionBody(item) {
+  return paragraphs(item.paragraphs || [])
+    + orderedList(item.steps || [])
+    + (item.bullets?.length ? `<ul>${item.bullets.map((text) => `<li>${escapeHtml(text)}</li>`).join("")}</ul>` : "")
+    + renderCallouts(item.callouts);
 }
 
 function installationBody(module) {
