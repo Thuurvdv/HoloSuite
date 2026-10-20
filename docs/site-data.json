@@ -134,7 +134,7 @@
       "name": "HoloSuite Vending Machines",
       "tier": "free",
       "category": "Commerce",
-      "image": "assets/VendingMachines.webp",
+      "image": "assets/VendingMachinesNew.webp",
       "pitch": "Stock vending machines, link them to Scene Regions, and let players buy items with their actor's currency.",
       "compatibility": "Foundry v12-v14",
       "features": ["Limited stock and multi-item baskets", "Linked Region access and player prompts", "Four machine styles with system-agnostic currency support"],
@@ -219,14 +219,8 @@
     {
       "name": "Discord",
       "icon": "DC",
-      "description": "Community support and development discussion. Link coming soon.",
-      "url": ""
-    },
-    {
-      "name": "Reddit",
-      "icon": "RD",
-      "description": "Share releases and sci-fi FoundryVTT updates. Link coming soon.",
-      "url": ""
+      "description": "Community support and development discussion.",
+      "url": "https://discord.gg/QKFgxmUqcN"
     }
   ]
 }
