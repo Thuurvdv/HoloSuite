@@ -5,10 +5,14 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "test": "node --test"
+    "test": "node --test src/*.test.mjs",
+    "pretest": "tsc src/camera-model.ts src/region-geometry.ts src/frame-crop.ts src/token-projection.ts --target ES2022 --module ES2022 --moduleResolution Bundler --outDir ../.tmp-tests --skipLibCheck",
+    "test:browser": "node tests/browser-smoke.mjs"
   },
   "devDependencies": {
     "vite": "^5.2.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "esbuild": "^0.21.5",
+    "handlebars": "^4.7.9"
   }
 }

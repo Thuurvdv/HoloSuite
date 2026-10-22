@@ -1,17 +1,18 @@
 <section class="security-camera-manager">
   <aside class="security-camera-monitor-list">
     <header>
-      <span class="security-camera-kicker">Network</span>
-      <h2>Cameras</h2>
+      <h2><span class="security-camera-network-icon" aria-hidden="true"></span> Camera Network</h2>
+      <span class="security-camera-count" aria-label="Registered cameras">{{cameras.length}}</span>
     </header>
 
     <div class="security-camera-list">
       {{#if hasCameras}}
         {{#each cameras}}
-          <button type="button" class="security-camera-list-item {{#if isSelected}}active{{/if}}" data-security-camera-id="{{id}}">
-            <span>{{name}}</span>
-            <small>{{location}}</small>
-            <i>{{status}}</i>
+          <button type="button" class="security-camera-list-item {{statusClass}} {{#if isSelected}}active{{/if}}" aria-pressed="{{#if isSelected}}true{{else}}false{{/if}}" data-security-camera-id="{{id}}">
+            <i class="fa-solid fa-video security-camera-device-icon" aria-hidden="true"></i>
+            <span class="security-camera-device-name" title="{{name}}">{{name}}</span>
+            <small title="{{location}}">{{location}}</small>
+            <span class="security-camera-device-status">{{status}}</span>
           </button>
         {{/each}}
       {{else}}
@@ -20,9 +21,9 @@
     </div>
 
     <div class="security-camera-list-actions">
-      <button type="button" data-security-camera-action="new">New</button>
-      <button type="button" data-security-camera-action="duplicate">Duplicate</button>
-      <button type="button" data-security-camera-action="delete">Delete</button>
+      <button type="button" data-security-camera-action="new"><i class="fa-solid fa-plus" aria-hidden="true"></i> New</button>
+      <button type="button" data-security-camera-action="duplicate"><i class="fa-solid fa-copy" aria-hidden="true"></i> Duplicate</button>
+      <button type="button" data-security-camera-action="delete"><i class="fa-solid fa-trash-can" aria-hidden="true"></i> Delete</button>
     </div>
   </aside>
 
@@ -36,14 +37,17 @@
         <strong>{{selectedCamera.status}}</strong>
       </header>
 
+      <div class="security-camera-monitor-display">
       <div class="security-camera-preview-frame">
         {{#if selectedCamera.canDisplayImage}}
           <img src="{{selectedCamera.image}}" alt="{{selectedCamera.name}}">
         {{else}}
-          <div class="security-camera-placeholder">{{#if selectedCamera.isLive}}LIVE CANVAS FEED{{else}}{{selectedCamera.signalLabel}}{{/if}}</div>
+          <div class="security-camera-placeholder">{{selectedCamera.signalLabel}}</div>
         {{/if}}
       </div>
 
+      <div class="security-camera-monitor-readout"><span>{{selectedCamera.id}}</span><span>{{selectedCamera.feedSource}}</span></div>
+      </div>
       <dl>
         <dt>Location</dt>
         <dd>{{selectedCamera.location}}</dd>
@@ -52,16 +56,16 @@
         <dt>Source</dt>
         <dd>{{selectedCamera.feedSource}}</dd>
         <dt>Region</dt>
-        <dd>{{#if selectedCamera.hasRegion}}{{selectedCamera.regionX}}, {{selectedCamera.regionY}} / {{selectedCamera.regionWidth}}x{{selectedCamera.regionHeight}}{{else}}No region{{/if}}</dd>
+        <dd>{{selectedCamera.regionName}}</dd>
         <dt>Mode</dt>
         <dd>{{selectedCamera.displayMode}}</dd>
         <dt>Notes</dt>
-        <dd>{{#if selectedCamera.notes}}{{selectedCamera.notes}}{{else}}No notes recorded.{{/if}}</dd>
+        <dd>{{#if selectedCamera.notes}}{{selectedCamera.notes}}{{else}}No notes.{{/if}}</dd>
       </dl>
 
       <div class="security-camera-preview-actions">
-        <button type="button" data-security-camera-action="show">Show to Players</button>
-        <button type="button" data-security-camera-action="close-feed">Close Feeds</button>
+        <button type="button" data-security-camera-action="show"><i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> Show Saved Feed</button>
+        <button type="button" data-security-camera-action="close-feed"><i class="fa-solid fa-stop" aria-hidden="true"></i> Close Feeds</button>
       </div>
     </section>
   {{else}}
@@ -72,11 +76,14 @@
 
   <form class="security-camera-editor" data-security-camera-form>
     <header>
-      <span class="security-camera-kicker">Manager</span>
-      <h2>{{#if isNewCamera}}ADDING Camera{{else}}Edit Camera{{/if}}</h2>
+      <span class="security-camera-kicker"><i class="fa-solid fa-sliders" aria-hidden="true"></i> Configuration</span>
+      <h2>{{#if isNewCamera}}Add Camera{{else}}Edit Camera{{/if}}</h2>
     </header>
 
-    <input type="hidden" name="originalId" value="{{editorCamera.id}}">
+    <div class="security-camera-editor-scroll">
+    <fieldset class="security-camera-field-group"><legend>Camera identity</legend>
+    <p class="security-camera-dirty" data-camera-dirty {{#unless editorDirty}}hidden{{/unless}}>Unsaved changes</p>
+    <input type="hidden" name="originalId" value="{{originalEditorId}}">
 
     <label>
       ID
@@ -89,8 +96,15 @@
     </label>
 
     <label>
+      Location
+      <input type="text" name="location" value="{{editorCamera.location}}">
+    </label>
+
+    </fieldset>
+    <fieldset class="security-camera-field-group"><legend>Scene connection</legend>
+    <label>
       Scene
-      <select name="sceneId">
+      <select name="sceneId" {{#unless editorCamera.isLive}}disabled{{/unless}}>
         {{#each sceneChoices}}
           <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
         {{/each}}
@@ -99,18 +113,15 @@
 
     <label>
       Scene Region
-      <select name="regionId">
+      <select name="regionId" {{#unless editorCamera.isLive}}disabled{{/unless}}>
         {{#each regionChoices}}
           <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
         {{/each}}
       </select>
     </label>
 
-    <label>
-      Location
-      <input type="text" name="location" value="{{editorCamera.location}}">
-    </label>
-
+    </fieldset>
+    <fieldset class="security-camera-field-group"><legend>Feed settings</legend>
     <label>
       Feed Source
       <select name="feedSource" data-security-camera-feed-source>
@@ -124,7 +135,7 @@
       Static Image
       <span class="security-camera-path-row">
         <input type="text" name="image" value="{{editorCamera.image}}">
-        <button type="button" data-security-camera-action="browse-image">Browse</button>
+        <button type="button" data-security-camera-action="browse-image"><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Browse</button>
       </span>
     </label>
 
@@ -153,14 +164,16 @@
 
     <label>
       Notes
-      <textarea name="notes" rows="4">{{editorCamera.notes}}</textarea>
+      <textarea name="notes" rows="3">{{editorCamera.notes}}</textarea>
     </label>
 
+    </fieldset>
+    </div>
     <div class="security-camera-editor-actions">
-      <button type="submit">Save Camera</button>
-      <button type="button" data-security-camera-action="pan-region">Pan to Region</button>
-      <button type="button" data-security-camera-action="show">Show to Players</button>
-      <button type="button" data-security-camera-action="close-feed">Close Feeds</button>
+      <button type="submit" class="security-camera-primary"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save Camera</button>
+      <button type="button" data-security-camera-action="pan-region"><i class="fa-solid fa-crosshairs" aria-hidden="true"></i> Pan to Region</button>
+      <button type="button" data-security-camera-action="save-show"><i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> Save &amp; Show</button>
+      <button type="button" data-security-camera-action="close-feed"><i class="fa-solid fa-stop" aria-hidden="true"></i> Close Feeds</button>
     </div>
   </form>
 </section>

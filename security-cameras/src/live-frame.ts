@@ -1,18 +1,12 @@
+import { createFrameCache } from "./frame-cache";
+import { drawSceneTile, getSceneDrawOrder, getTileGeometry, sceneDocuments } from "./scene-compositor";
 import type { SecurityCamera } from "./camera-model";
 import {
-  DEFAULT_CAMERA,
   DEFAULT_CAMERA_REGION_HEIGHT,
   DEFAULT_CAMERA_REGION_WIDTH,
   normalizeNullableNumber,
   normalizePositiveNumber
 } from "./camera-model";
-import {
-  clampCrop,
-  getCameraCrop as getCameraCropRect,
-  getCropForSceneImage as getSceneImageCropRect,
-  getFullSourceCrop,
-  getScaledOutputSize
-} from "./frame-crop";
 import {
   getBoundsIntersection,
   getTokenData,
@@ -22,7 +16,6 @@ import {
 
 const LIVE_FRAME_INTERVAL_MS = 1250;
 const LIVE_FRAME_MAX_WIDTH = 960;
-const LIVE_FRAME_WEBP_QUALITY = 0.62;
 const STATIC_FRAME_WEBP_QUALITY = 0.72;
 const TOKEN_MARKER_MIN_SIZE = 18;
 
@@ -43,57 +36,25 @@ interface CaptureLiveFrameOptions {
 
 export function createLiveFrameController(dependencies: LiveFrameDependencies) {
   const imageCache = new Map<string, Promise<any>>();
+  const videoCache = new Map<string, HTMLVideoElement>();
+  const frameCache = createFrameCache();
+  const videoIdleTimers = new Map<string, number>();
+  function touchVideo(path: string) {
+    if (!videoCache.has(path)) return;
+    window.clearTimeout(videoIdleTimers.get(path));
+    videoIdleTimers.set(path, window.setTimeout(() => {
+      const video = videoCache.get(path);
+      if (video) { video.pause(); video.removeAttribute("src"); video.load(); }
+      videoCache.delete(path);
+      imageCache.delete(path);
+      videoIdleTimers.delete(path);
+    }, 10000));
+  }
   let broadcastProducer: any = null;
 
   function isCameraLive(camera: any) {
     const normalized = dependencies.normalizeCamera(camera);
     return normalized.feedSource === "live" && normalized.status !== "offline" && normalized.status !== "restricted";
-  }
-
-  function canCaptureLiveCamera(camera: any) {
-    if (!canvas?.ready || !canvas?.app?.renderer) return false;
-    if (camera.sceneId && canvas.scene?.id !== camera.sceneId) return false;
-    return true;
-  }
-
-  function getRenderedCanvasSnapshot() {
-    const renderer = canvas?.app?.renderer;
-    const targets = [
-      canvas?.app?.stage,
-      canvas?.stage
-    ].filter(Boolean);
-
-    try {
-      for (const target of targets) {
-        const extracted = renderer?.extract?.canvas?.(target);
-        if (extracted?.width && extracted?.height) return extracted;
-      }
-    } catch (error) {
-      console.warn(`${dependencies.moduleId} | PIXI canvas extraction failed, using renderer view fallback.`, error);
-    }
-
-    return renderer?.view ?? canvas?.app?.view ?? null;
-  }
-
-  function getCameraCrop(sourceCanvas: any, camera: any) {
-    const cameraWithRegion = dependencies.applyLinkedRegionBounds(dependencies.normalizeCamera(camera));
-    const sceneWidth = canvas.dimensions?.width ?? canvas.scene?.width ?? 0;
-    const sceneHeight = canvas.dimensions?.height ?? canvas.scene?.height ?? 0;
-    const sceneSize = sceneWidth && sceneHeight ? { width: sceneWidth, height: sceneHeight } : null;
-
-    return getCameraCropRect(sourceCanvas, cameraWithRegion, sceneSize, () => {
-      if (canvas.stage?.worldTransform?.apply && typeof PIXI !== "undefined") {
-        const topLeft = canvas.stage.worldTransform.apply(new PIXI.Point(cameraWithRegion.regionX, cameraWithRegion.regionY));
-        const bottomRight = canvas.stage.worldTransform.apply(new PIXI.Point(cameraWithRegion.regionX + cameraWithRegion.regionWidth, cameraWithRegion.regionY + cameraWithRegion.regionHeight));
-        return {
-          sx: topLeft.x,
-          sy: topLeft.y,
-          sw: bottomRight.x - topLeft.x,
-          sh: bottomRight.y - topLeft.y
-        };
-      }
-      return null;
-    });
   }
 
   function getSceneDimensions(sceneId = "") {
@@ -120,37 +81,50 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     };
   }
 
-  function getCropForSceneImage(image: any, camera: any) {
-    const cameraWithRegion = dependencies.applyLinkedRegionBounds(dependencies.normalizeCamera(camera));
-    if (!Number.isFinite(cameraWithRegion.regionX) || !Number.isFinite(cameraWithRegion.regionY)) {
-      return getFullSourceCrop({ width: image.naturalWidth, height: image.naturalHeight });
-    }
-
-    const sceneDimensions = getSceneDimensions(cameraWithRegion.sceneId);
-    return getSceneImageCropRect({ width: image.naturalWidth, height: image.naturalHeight }, cameraWithRegion, sceneDimensions);
-  }
-
-  function loadImage(path: string) {
+  function loadImage(path: string): Promise<any> {
     if (!path) return Promise.resolve(null);
-    if (imageCache.has(path)) return imageCache.get(path)!;
-
-    const promise = new Promise((resolve) => {
-      const finish = (image: any) => resolve(image);
-      const fallback = () => {
-        const image = new Image();
-        image.onload = () => finish(image);
-        image.onerror = () => finish(null);
-        image.src = path;
+    const cached = imageCache.get(path);
+    if (cached) { touchVideo(path); return cached; }
+    const video = /\.(webm|mp4|m4v|ogv|ogg)(?:[?#]|$)/i.test(path);
+    const promise = new Promise<any>((resolve) => {
+      const media: any = video ? document.createElement("video") : new Image();
+      let settled = false;
+      const timeout = window.setTimeout(() => finish(null), 8000);
+      const finish = (result: any) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeout);
+        media.onload = media.onloadeddata = media.onerror = null;
+        if (!result) {
+          imageCache.delete(path);
+          if (video) { media.pause(); media.removeAttribute("src"); media.load(); videoCache.delete(path); }
+        }
+        resolve(result);
       };
-
-      const image = new Image();
-      image.crossOrigin = "anonymous";
-      image.onload = () => finish(image);
-      image.onerror = fallback;
-      image.src = path;
+      media.crossOrigin = "anonymous";
+      media.onerror = () => finish(null);
+      if (video) {
+        media.muted = true;
+        media.loop = true;
+        media.playsInline = true;
+        media.preload = "auto";
+        media.onloadeddata = () => {
+          media.play().catch(() => { /* A paused video still supplies its decoded first frame. */ });
+          touchVideo(path);
+          finish(media);
+        };
+        videoCache.set(path, media);
+      } else media.onload = () => finish(media);
+      media.src = path;
     });
-
     imageCache.set(path, promise);
+    // Bound image/video resources even when users cycle through many scenes.
+    while (imageCache.size > 96) {
+      const oldest = imageCache.keys().next().value!;
+      imageCache.delete(oldest);
+      const video = videoCache.get(oldest);
+      if (video) { video.pause(); video.removeAttribute("src"); video.load(); videoCache.delete(oldest); }
+    }
     return promise;
   }
 
@@ -196,23 +170,62 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
   }
 
   async function captureSceneBackgroundFrame(camera: any = {}, options: CaptureLiveFrameOptions = {}) {
-    const sceneBackground = dependencies.getSceneBackgroundPath(camera.sceneId);
-    const imagePath = sceneBackground || camera.image;
-    const image = await loadImage(imagePath);
-    if (!image?.naturalWidth || !image?.naturalHeight) return "";
-
-    const crop = clampCrop(getCropForSceneImage(image, camera), {
-      width: image.naturalWidth,
-      height: image.naturalHeight
-    });
-    const { width, height } = getScaledOutputSize(crop, LIVE_FRAME_MAX_WIDTH);
+    const scene = dependencies.getSceneById(camera.sceneId);
+    if (!scene) return "";
+    const dimensions = getSceneDimensions(camera.sceneId);
+    const region = Number.isFinite(camera.regionX) && Number.isFinite(camera.regionY)
+      ? { x: camera.regionX, y: camera.regionY, width: camera.regionWidth, height: camera.regionHeight }
+      : dimensions;
+    // Keep the requested scene rectangle intact, including padding outside the background.
+    const scale = Math.min(1, LIVE_FRAME_MAX_WIDTH / region.width, LIVE_FRAME_MAX_WIDTH / region.height);
+    const width = Math.max(1, Math.round(region.width * scale));
+    const height = Math.max(1, Math.round(region.height * scale));
     const output = document.createElement("canvas");
     output.width = width;
     output.height = height;
     const context = output.getContext("2d");
-    context?.drawImage(image, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, width, height);
-    await drawTokensOnFrame(context, camera, width, height);
-
+    if (!context) return "";
+    context.fillStyle = String(scene.backgroundColor ?? "#010505");
+    context.fillRect(0, 0, width, height);
+    const imagePath = dependencies.getSceneBackgroundPath(camera.sceneId) || camera.image;
+    const image = await loadImage(imagePath);
+    if (imagePath && !image) throw new Error("Camera background could not be loaded.");
+    const cameraWithRegion = { ...camera, regionX: region.x, regionY: region.y, regionWidth: region.width, regionHeight: region.height };
+    const tiles = sceneDocuments(scene.tiles ?? scene._source?.tiles);
+    if (typeof scene.foreground === "string" && scene.foreground) tiles.push({
+      x: dimensions.x, y: dimensions.y, width: dimensions.width, height: dimensions.height,
+      elevation: scene.foregroundElevation ?? Number.MAX_SAFE_INTEGER, sort: -Number.MAX_SAFE_INTEGER,
+      texture: { src: scene.foreground }
+    });
+    const entries = getSceneDrawOrder(tiles, getCameraTokenDocuments(scene, cameraWithRegion));
+    const sceneTransform = () => context.setTransform(width / region.width, 0, 0, height / region.height,
+      -region.x * width / region.width, -region.y * height / region.height);
+    sceneTransform();
+    if (image) context.drawImage(image, dimensions.x, dimensions.y, dimensions.width, dimensions.height);
+    for (const entry of entries) {
+      if (entry.kind === "token") {
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        await drawTokensOnFrame(context, cameraWithRegion, width, height, [entry.document]);
+        continue;
+      }
+      const data: any = getTokenData(entry.document);
+      const initialGeometry = getTileGeometry(entry.document);
+      if (!initialGeometry || !initialGeometry.alpha) continue;
+      if ((!data.texture?.fit || data.texture.fit === "fill") && !getBoundsIntersection(initialGeometry.bounds, region)) continue;
+      const path = String(data.texture?.src ?? data.img ?? "");
+      if (!path) continue;
+      const media = await loadImage(path);
+      if (!media) throw new Error("A camera tile could not be loaded. Check its media path and access.");
+      if (media.tagName === "VIDEO") {
+        media.loop = data.video?.loop !== false;
+        if (data.video?.autoplay === false) media.pause();
+        else if (media.paused && !media.ended) media.play().catch(() => {});
+      }
+      const geometry = getTileGeometry(entry.document, media)!;
+      if (!getBoundsIntersection(geometry.bounds, region)) continue;
+      sceneTransform();
+      drawSceneTile(context, media, geometry);
+    }
     return canvasToFrameUrl(output, "image/webp", STATIC_FRAME_WEBP_QUALITY, options);
   }
 
@@ -228,12 +241,6 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
 
   function getSceneTokenDocuments(scene: any) {
     if (!scene) return [];
-    if (scene.id && canvas?.scene?.id === scene.id) {
-      return (canvas.tokens?.placeables ?? [])
-        .map((token: any) => token?.document)
-        .filter(Boolean);
-    }
-
     const candidates = [
       getEmbeddedDocumentCollection(scene, "Token"),
       scene.tokens,
@@ -297,7 +304,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     ).trim();
   }
 
-  async function drawTokensOnFrame(context: CanvasRenderingContext2D | null, camera: any, frameWidth: number, frameHeight: number) {
+  async function drawTokensOnFrame(context: CanvasRenderingContext2D | null, camera: any, frameWidth: number, frameHeight: number, documents?: any[]) {
     if (!context) return;
     const scene = dependencies.getSceneById(camera.sceneId);
     if (!scene) return;
@@ -313,7 +320,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
 
     const gridSize = getSceneGridSize(scene);
     const sceneDimensions = getSceneDimensions(cameraWithRegion.sceneId);
-    for (const tokenDocument of getCameraTokenDocuments(scene, cameraWithRegion)) {
+    for (const tokenDocument of documents ?? getCameraTokenDocuments(scene, cameraWithRegion)) {
       if (!shouldDrawToken(tokenDocument)) continue;
       const bounds = getTokenDocumentBounds(tokenDocument, gridSize);
       const tokenVisibility = getVisibleTokenBounds(bounds, region, sceneDimensions);
@@ -338,7 +345,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
 
   function getCameraTokenDocuments(scene: any, camera: SecurityCamera) {
     const region = dependencies.getRegionDocument?.(camera.regionId, camera.sceneId);
-    if (region && "tokens" in Object(region)) return normalizeTokenCollection(region.tokens);
+    if (region && canvas?.scene?.id === scene.id && "tokens" in Object(region)) return normalizeTokenCollection(region.tokens);
     return getSceneTokenDocuments(scene);
   }
 
@@ -353,30 +360,10 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     };
   }
 
-  function getVisibleTokenBounds(bounds: any, region: any, sceneDimensions: any) {
+  function getVisibleTokenBounds(bounds: any, region: any, _sceneDimensions: any) {
     if (!bounds) return null;
     const visibleBounds = getBoundsIntersection(bounds, region);
-    if (visibleBounds) return { sourceBounds: bounds, visibleBounds };
-
-    const offsetX = normalizeNullableNumber(sceneDimensions?.x) ?? 0;
-    const offsetY = normalizeNullableNumber(sceneDimensions?.y) ?? 0;
-    if (!offsetX && !offsetY) return null;
-
-    const withoutOffset = {
-      ...bounds,
-      x: bounds.x - offsetX,
-      y: bounds.y - offsetY
-    };
-    const visibleWithoutOffset = getBoundsIntersection(withoutOffset, region);
-    if (visibleWithoutOffset) return { sourceBounds: withoutOffset, visibleBounds: visibleWithoutOffset };
-
-    const withOffset = {
-      ...bounds,
-      x: bounds.x + offsetX,
-      y: bounds.y + offsetY
-    };
-    const visibleWithOffset = getBoundsIntersection(withOffset, region);
-    return visibleWithOffset ? { sourceBounds: withOffset, visibleBounds: visibleWithOffset } : null;
+    return visibleBounds ? { sourceBounds: bounds, visibleBounds } : null;
   }
 
   function drawTokenMarker(context: CanvasRenderingContext2D, tokenDocument: any, dx: number, dy: number, dw: number, dh: number) {
@@ -406,61 +393,32 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     context.fillText(label, cx, cy + 0.5);
   }
 
-  function isMostlyBlackCanvas(sourceCanvas: HTMLCanvasElement) {
-    const context = sourceCanvas.getContext("2d", { willReadFrequently: true });
-    if (!context) return false;
-
-    const sampleWidth = Math.min(48, sourceCanvas.width);
-    const sampleHeight = Math.min(48, sourceCanvas.height);
-    const imageData = context.getImageData(0, 0, sampleWidth, sampleHeight).data;
-    let total = 0;
-    const pixels = imageData.length / 4;
-
-    for (let index = 0; index < imageData.length; index += 4) {
-      total += imageData[index] + imageData[index + 1] + imageData[index + 2];
-    }
-
-    return total / (pixels * 3) < 3;
-  }
-
-  async function captureCanvasFrame(camera = {}, options: CaptureLiveFrameOptions = {}) {
-    const sourceCanvas = getRenderedCanvasSnapshot();
-    if (!sourceCanvas?.width || !sourceCanvas?.height) return "";
-
-    const crop = clampCrop(getCameraCrop(sourceCanvas, camera), sourceCanvas);
-    const { width, height } = getScaledOutputSize(crop, LIVE_FRAME_MAX_WIDTH);
-    const output = document.createElement("canvas");
-    output.width = width;
-    output.height = height;
-    const context = output.getContext("2d");
-    context?.drawImage(sourceCanvas, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, width, height);
-
-    if (isMostlyBlackCanvas(output)) return "";
-
-    return canvasToFrameUrl(output, "image/webp", LIVE_FRAME_WEBP_QUALITY, options);
-  }
-
-  async function captureLiveFrame(camera: any = {}, options: CaptureLiveFrameOptions = {}) {
-    let frame = await captureSceneBackgroundFrame(camera, options);
-    if (!frame && canCaptureLiveCamera(camera)) frame = await captureCanvasFrame(camera, options);
-    return frame;
+  async function captureLiveFrame(camera: any = {}, _options: CaptureLiveFrameOptions = {}) {
+    const normalized = dependencies.applyLinkedRegionBounds(dependencies.normalizeCamera(camera));
+    if (!isCameraLive(normalized)) return "";
+    const scene = dependencies.getSceneById(normalized.sceneId);
+    // Resolve an unassigned camera before caching, so scene switches cannot reuse the old frame.
+    const resolved = { ...normalized, sceneId: scene?.id ?? normalized.sceneId };
+    return frameCache.get(JSON.stringify(resolved), () => captureSceneBackgroundFrame(resolved, { preferDataUrl: true }));
   }
 
   async function updateLiveFrameTarget(target: any, options: { broadcast?: boolean; requireRendered?: boolean } = {}) {
     if (!isCameraLive(target?.camera)) return;
+    const generation = target.liveFrameGeneration;
     const frame = await captureLiveFrame(target.camera, {
       preferDataUrl: Boolean(dependencies.broadcastLiveFrame)
     });
-    if (!frame) return;
-    if (!canRefreshTarget(target, options)) return;
+    if (generation !== target.liveFrameGeneration || !canRefreshTarget(target, options)) return;
+    if (!frame) { target.onFrameError?.(); return; }
     await target.updateLiveFrame?.(frame);
+    if (generation !== target.liveFrameGeneration || !canRefreshTarget(target, options)) return;
     if (options.broadcast !== false) {
       dependencies.broadcastLiveFrame?.(dependencies.normalizeCamera(target.camera), frame);
     }
   }
 
   function canRefreshTarget(target: any, options: { requireRendered?: boolean } = {}) {
-    if (document.visibilityState === "hidden") return false;
+    if (!target || target.liveFrameStopped || document.visibilityState === "hidden") return false;
     if (options.requireRendered && target?.rendered === false) return false;
     return true;
   }
@@ -468,13 +426,20 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
   function queueLiveFrameUpdate(target: any, options: { broadcast?: boolean; requireRendered?: boolean } = {}) {
     if (!canRefreshTarget(target, options) || target?.liveFrameRefreshPending) return;
     target.liveFrameRefreshPending = true;
-    updateLiveFrameTarget(target, options).finally(() => {
-      target.liveFrameRefreshPending = false;
+    const generation = target.liveFrameGeneration;
+    updateLiveFrameTarget(target, options).catch(error => {
+      if (generation !== target.liveFrameGeneration) return;
+      target.onFrameError?.(error);
+      console.warn(`${dependencies.moduleId} | Camera refresh failed; retrying on next tick.`, error);
+    }).finally(() => {
+      if (generation === target.liveFrameGeneration) target.liveFrameRefreshPending = false;
     });
   }
 
   function stopRefreshTarget(target: any) {
     if (!target) return;
+    target.liveFrameStopped = true;
+    target.liveFrameGeneration = (target.liveFrameGeneration ?? 0) + 1;
     if (target.liveFrameTimer) window.clearInterval(target.liveFrameTimer);
     if (target.liveFrameVisibilityHandler) document.removeEventListener("visibilitychange", target.liveFrameVisibilityHandler);
     target.liveFrameTimer = null;
@@ -486,6 +451,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     stopLocalLiveRefresh(app);
     if (!isCameraLive(app?.camera)) return;
     if (!dependencies.isFrameProducer()) return;
+    app.liveFrameStopped = false;
 
     app.liveFrameVisibilityHandler = () => queueLiveFrameUpdate(app, {
       broadcast: false,
@@ -515,15 +481,18 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
 
     broadcastProducer = {
       camera: dependencies.normalizeCamera(camera),
+      liveFrameStopped: false,
+      liveFrameGeneration: 0,
       liveFrameRefreshPending: false,
       liveFrameTimer: null,
       liveFrameVisibilityHandler: null
     };
-    broadcastProducer.liveFrameVisibilityHandler = () => queueLiveFrameUpdate(broadcastProducer);
+    const producer = broadcastProducer;
+    producer.liveFrameVisibilityHandler = () => queueLiveFrameUpdate(producer);
     document.addEventListener("visibilitychange", broadcastProducer.liveFrameVisibilityHandler);
     queueLiveFrameUpdate(broadcastProducer);
     broadcastProducer.liveFrameTimer = window.setInterval(() => {
-      queueLiveFrameUpdate(broadcastProducer);
+      queueLiveFrameUpdate(producer);
     }, LIVE_FRAME_INTERVAL_MS);
   }
 
@@ -534,6 +503,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
 
   return {
     captureLiveFrame,
+    invalidateFrames: () => frameCache.clear(),
     startBroadcastLiveRefresh,
     startLocalLiveRefresh,
     stopBroadcastLiveRefresh,

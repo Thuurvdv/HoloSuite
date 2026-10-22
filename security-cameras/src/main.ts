@@ -1,3 +1,4 @@
+import { canUserAccessCamera, cameraRevision } from "./camera-access";
 import { createHoloSuiteSocket } from "../../shared/src/index";
 import {
   DEFAULT_CAMERA,
@@ -29,6 +30,11 @@ let activeMonitor = null;
 let activeFeed = null;
 let selectedCameraId = "";
 let editingCameraId = "";
+let broadcastCameraId = "";
+let broadcastGeneration = 0;
+let feedGeneration = 0;
+let editorDirty = false;
+let editorDraft: any = null;
 const REMOTE_LIVE_FRAME_INTERVAL_MS = 1250;
 
 function normalizeCamera(cameraData = {}, options = {}) {
@@ -46,7 +52,7 @@ function getSceneName(sceneId) {
 
 function getSceneBackgroundPath(sceneId = "") {
   const scene = getSceneById(sceneId);
-  return String(scene?.background?.src ?? scene?.img ?? scene?.thumb ?? "").trim();
+  return String(scene?.background?.src ?? scene?.img ?? "").trim();
 }
 
 function getSceneChoices(selectedSceneId = "") {
@@ -96,10 +102,6 @@ function getRegionDocument(regionId = "", sceneId = "") {
   if (!regionId) return null;
   const scene = getSceneById(sceneId);
   return scene?.regions?.get?.(regionId) ?? null;
-}
-
-function getSelectedRegionDocument() {
-  return canvas?.regions?.controlled?.[0]?.document ?? null;
 }
 
 function getRegionBounds(region) {
@@ -154,7 +156,7 @@ function prepareChoices(choices, selectedValue) {
 function prepareCamera(cameraData = {}) {
   const camera = normalizeCamera(cameraData);
   const timestamp = new Date().toLocaleString();
-  const isOnline = camera.status === "online";
+  const isOnline = camera.status === "online" || camera.status === "clean";
   const isOffline = camera.status === "offline";
   const isCorrupted = camera.status === "corrupted";
   const isRestricted = camera.status === "restricted";
@@ -163,6 +165,7 @@ function prepareCamera(cameraData = {}) {
   return {
     ...camera,
     sceneName: getSceneName(camera.sceneId),
+    regionName: getRegionDocument(camera.regionId, camera.sceneId)?.name || (camera.regionId ? "Region unavailable" : "No region"),
     sceneBackground: getSceneBackgroundPath(camera.sceneId),
     regionAspect: camera.regionWidth && camera.regionHeight ? `${camera.regionWidth} / ${camera.regionHeight}` : "16 / 9",
     timestamp,
@@ -202,7 +205,24 @@ function getCamera(cameraId) {
 }
 
 async function saveCameraStore(cameras) {
+  const previous = getDeepClone(getCameraStore());
   await game.settings.set(MODULE_ID, "cameras", cameras);
+  liveFrameController.invalidateFrames();
+  for (const id of Object.keys(previous)) {
+    if (JSON.stringify(previous[id]) === JSON.stringify(cameras[id])) continue;
+    emitSocketMessage({ action: "cameraChanged", gmUserId: game.user.id, cameraId: id,
+      camera: cameras[id] ? normalizeCamera(cameras[id]) : null });
+    if (activeFeed?.camera?.id === id) {
+      if (cameras[id]) await openLocalFeed(cameras[id]);
+      else await closeLocalFeed();
+    }
+    if (broadcastCameraId === id) {
+      broadcastGeneration++;
+      liveFrameController.stopBroadcastLiveRefresh();
+      if (cameras[id]) liveFrameController.startBroadcastLiveRefresh(cameras[id]);
+      else broadcastCameraId = "";
+    }
+  }
   await refreshMonitor();
 }
 
@@ -311,13 +331,13 @@ function readCameraForm(form) {
     camera: normalizeCamera({
       id,
       name: formData.get("name"),
-      sceneId: formData.get("sceneId"),
+      sceneId: form.elements.sceneId.value,
       location: formData.get("location"),
       image: formData.get("image"),
       feedSource: formData.get("feedSource"),
       status: formData.get("status"),
       displayMode: formData.get("displayMode"),
-      regionId: formData.get("regionId"),
+      regionId: form.elements.regionId.value,
       regionX: formData.get("regionX"),
       regionY: formData.get("regionY"),
       regionWidth: formData.get("regionWidth"),
@@ -330,6 +350,7 @@ function readCameraForm(form) {
 async function saveCameraFromForm(form) {
   if (!requireGM("save security cameras")) return null;
 
+  if (!form?.reportValidity()) return null;
   const { originalId, camera } = readCameraForm(form);
   const validation = validateCameraData(camera);
   if (!validation.ok) {
@@ -339,50 +360,19 @@ async function saveCameraFromForm(form) {
 
   const savedCamera = applyLinkedRegionBounds(validation.camera);
   const cameras = getDeepClone(getCameraStore());
+  if (originalId !== savedCamera.id && Object.hasOwn(cameras, savedCamera.id)) {
+    ui.notifications?.warn?.("That camera ID is already in use. Choose a unique ID.");
+    return null;
+  }
   if (originalId && originalId !== savedCamera.id) delete cameras[originalId];
+  editorDirty = false;
+  editorDraft = null;
   cameras[savedCamera.id] = savedCamera;
   selectedCameraId = savedCamera.id;
   editingCameraId = savedCamera.id;
   await saveCameraStore(cameras);
   ui.notifications?.info?.("Security camera saved.");
   return savedCamera;
-}
-
-async function useSelectedSceneRegion(form) {
-  if (!requireGM("assign camera regions")) return null;
-  if (!canvas?.ready || !canvas?.scene) {
-    ui.notifications?.warn?.("Open the target scene before assigning a camera region.");
-    return null;
-  }
-
-  const region = getSelectedRegionDocument();
-  if (!region) {
-    ui.notifications?.warn?.("Select one Foundry Scene Region to use as the camera region.");
-    return null;
-  }
-
-  const bounds = getRegionBounds(region);
-  if (!bounds) {
-    ui.notifications?.warn?.("The selected Scene Region does not have readable bounds.");
-    return null;
-  }
-
-  const { originalId, camera } = readCameraForm(form);
-  const cameraWithRegion = normalizeCamera({
-    ...camera,
-    ...bounds,
-    id: camera.id || originalId || createCameraId(),
-    sceneId: canvas.scene.id,
-    regionId: region.id
-  });
-  const cameras = getDeepClone(getCameraStore());
-  if (originalId && originalId !== cameraWithRegion.id) delete cameras[originalId];
-  cameras[cameraWithRegion.id] = cameraWithRegion;
-  selectedCameraId = cameraWithRegion.id;
-  editingCameraId = cameraWithRegion.id;
-  await saveCameraStore(cameras);
-  ui.notifications?.info?.("Security camera linked to the selected Scene Region.");
-  return cameraWithRegion;
 }
 
 function panToCameraRegion(cameraId = selectedCameraId) {
@@ -418,9 +408,9 @@ function getMonitorContext() {
   if (editingCameraId === null) editingCameraId = selectedCameraId;
 
   const selectedCamera = getCamera(selectedCameraId);
-  const editorCamera = editingCameraId === ""
+  const editorCamera = editorDraft ?? (editingCameraId === ""
     ? createEmptyCameraDraft()
-    : getCamera(editingCameraId) ?? createEmptyCameraDraft();
+    : getCamera(editingCameraId) ?? createEmptyCameraDraft());
 
   const preparedEditorCamera = prepareCamera(editorCamera);
 
@@ -431,6 +421,7 @@ function getMonitorContext() {
     })),
     selectedCamera: selectedCamera ? prepareCamera(selectedCamera) : null,
     editorCamera: preparedEditorCamera,
+    originalEditorId: editorDraft?.originalId ?? editorCamera.id,
     sceneChoices: getSceneChoices(editorCamera.sceneId),
     regionChoices: getRegionChoices(editorCamera.sceneId, editorCamera.regionId),
     feedSourceChoices: prepareChoices(FEED_SOURCE_CHOICES, editorCamera.feedSource),
@@ -439,12 +430,13 @@ function getMonitorContext() {
     showStaticImageField: editorCamera.feedSource === "image",
     hasCameras: cameras.length > 0,
     isNewCamera: !editorCamera.id,
+    editorDirty,
   };
 }
 
 function browseForImage(form) {
   if (typeof FilePicker === "undefined") {
-    ui.notifications?.warn?.("Foundry FilePicker is not available.");
+    ui.notifications?.warn?.("The file browser is unavailable.");
     return;
   }
   const input = form?.elements?.image;
@@ -452,29 +444,94 @@ function browseForImage(form) {
     type: "image",
     current: input?.value ?? "",
     callback: (path) => {
-      if (input) input.value = path;
+      if (input) { input.value = path; input.dispatchEvent(new Event("input", { bubbles: true })); }
     }
   });
   picker.browse();
+}
+
+function allowDiscardCameraChanges() {
+  if (!editorDirty) return true;
+  if (!window.confirm("Discard unsaved camera changes?")) return false;
+  editorDirty = false;
+  editorDraft = null;
+  return true;
+}
+
+function stopMonitorPreview(app: any) {
+  liveFrameController.stopLocalLiveRefresh(app);
 }
 
 function bindMonitorControls(app: any, html: any = null) {
   const element = getElement(app, html);
   if (!element) return;
   const form = element.querySelector("[data-security-camera-form]");
+  stopMonitorPreview(app);
+  app.camera = getCamera(selectedCameraId);
+  app.lastFrameAt = null;
+  app.frameError = false;
+  const preview = element.querySelector(".security-camera-preview-frame");
+  if (app.camera?.feedSource === "live" && !["offline", "restricted"].includes(app.camera.status) && preview) {
+    preview.replaceChildren();
+    const image = document.createElement("img");
+    image.alt = app.camera.name;
+    image.hidden = true;
+    preview.append(image);
+    const waiting = document.createElement("div");
+    waiting.className = "security-camera-placeholder";
+    waiting.textContent = "Waiting for first frame";
+    preview.append(waiting);
+    app.updateLiveFrame = async (frame: string) => {
+      image.src = frame;
+      image.hidden = false;
+      waiting.hidden = true;
+      app.lastFrameAt = Date.now();
+      app.frameError = false;
+    };
+    liveFrameController.startLocalLiveRefresh(app);
+  }
+  const markDirty = () => {
+    editorDirty = true;
+    const draft = readCameraForm(form);
+    editorDraft = { ...draft.camera, originalId: draft.originalId };
+    const indicator = element.querySelector("[data-camera-dirty]");
+    if (indicator) indicator.hidden = false;
+  };
+  form?.addEventListener("input", markDirty);
+  form?.addEventListener("change", markDirty);
+  form?.elements?.sceneId?.addEventListener("change", () => {
+    const select = form.elements.regionId;
+    select.replaceChildren(...getRegionChoices(form.elements.sceneId.value).map(choice => new Option(choice.name, choice.id)));
+    for (const name of ["regionX", "regionY"]) form.elements[name].value = "";
+    form.elements.regionWidth.value = DEFAULT_CAMERA_REGION_WIDTH;
+    form.elements.regionHeight.value = DEFAULT_CAMERA_REGION_HEIGHT;
+    markDirty();
+  });
+  form?.elements?.regionId?.addEventListener("change", () => {
+    if (!form.elements.regionId.value) {
+      for (const name of ["regionX", "regionY"]) form.elements[name].value = "";
+    }
+    markDirty();
+  });
 
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     await saveCameraFromForm(form);
   });
 
-  form?.elements?.feedSource?.addEventListener("change", () => {
+  const updateFeedSourceFields = () => {
+    const isLive = form.elements.feedSource.value === "live";
+    form.elements.sceneId.disabled = !isLive;
+    form.elements.regionId.disabled = !isLive;
     const imageField = form.querySelector("[data-security-camera-static-image-field]");
     if (imageField) imageField.hidden = form.elements.feedSource.value !== "image";
-  });
+  };
+  updateFeedSourceFields();
+  form?.elements?.feedSource?.addEventListener("change", updateFeedSourceFields);
 
   element.querySelectorAll("[data-security-camera-id]").forEach((button) => {
     button.addEventListener("click", async (event) => {
+      if (!allowDiscardCameraChanges()) return;
       selectedCameraId = event.currentTarget.dataset.securityCameraId;
       editingCameraId = selectedCameraId;
       await app.render(true);
@@ -484,6 +541,7 @@ function bindMonitorControls(app: any, html: any = null) {
   element.querySelectorAll("[data-security-camera-action]").forEach((button) => {
     button.addEventListener("click", async (event) => {
       const action = event.currentTarget.dataset.securityCameraAction;
+      if (["new", "duplicate", "delete"].includes(action) && !allowDiscardCameraChanges()) return;
       if (action === "new") {
         await createNewCamera();
         return;
@@ -509,7 +567,13 @@ function bindMonitorControls(app: any, html: any = null) {
         return;
       }
 
-      if (action === "show") {
+      if (action === "show" || action === "save-show") {
+        if (action === "save-show") {
+          const saved = await saveCameraFromForm(form);
+          if (!saved) return;
+          await showFeed(saved.id);
+          return;
+        }
         await showFeed(selectedCameraId);
         return;
       }
@@ -543,7 +607,8 @@ function applyFeedDisplayMode(app: any) {
       contentHeight = maxHeight;
       width = contentHeight * aspect;
     }
-    const height = Math.round(contentHeight + 112);
+    const height = Math.round(contentHeight + 190);
+    width += 48;
     app.setPosition?.({
       left: Math.max(12, window.innerWidth - width - 24),
       top: Math.max(12, window.innerHeight - height - 84),
@@ -565,6 +630,42 @@ function bindFeedControls(app: any, html: any = null) {
   applyFeedDisplayMode(app);
   liveFrameController.startLocalLiveRefresh(app);
   startRemoteLiveRefresh(app);
+  if (app.liveFrame && !app.lastFrameAt) app.lastFrameAt = Date.now();
+  const handle = element.querySelector<HTMLElement>("[data-security-camera-drag]");
+  app.feedDragController?.abort();
+  handle?.addEventListener("pointerdown", (event: PointerEvent) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    app.bringToFront?.();
+    const bounds = element.getBoundingClientRect();
+    app.feedDragController?.abort();
+    const controller = app.feedDragController = new AbortController();
+    const drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: bounds.left, top: bounds.top };
+    document.addEventListener("pointermove", (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId !== drag.pointerId) return;
+      move(drag.left + moveEvent.clientX - drag.x, drag.top + moveEvent.clientY - drag.y);
+    }, { signal: controller.signal });
+    const endDrag = (endEvent: PointerEvent) => {
+      if (endEvent.pointerId === drag.pointerId) controller.abort();
+    };
+    document.addEventListener("pointerup", endDrag, { signal: controller.signal });
+    document.addEventListener("pointercancel", endDrag, { signal: controller.signal });
+  });
+  const move = (left: number, top: number) => app.setPosition?.({
+    left: Math.max(0, Math.min(window.innerWidth - 80, left)),
+    top: Math.max(0, Math.min(window.innerHeight - 40, top))
+  });
+  handle?.addEventListener("keydown", (event: KeyboardEvent) => {
+    const direction = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
+    if (!direction) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const bounds = element.getBoundingClientRect();
+    const step = event.shiftKey ? 40 : 10;
+    move(bounds.left + direction[0] * step, bounds.top + direction[1] * step);
+  });
+  element.querySelector("[data-security-camera-close]")?.addEventListener("click", () => app.close());
 }
 
 const liveFrameController = createLiveFrameController({
@@ -575,6 +676,7 @@ const liveFrameController = createLiveFrameController({
       action: "updateFeedFrame",
       gmUserId: game.user.id,
       cameraId: camera.id,
+      revision: cameraRevision(normalizeCamera(camera)),
       liveFrame
     });
   },
@@ -597,10 +699,14 @@ const { SecurityMonitor, CameraFeed } = createSecurityCameraAppClasses({
   bindFeedControls,
   getElement,
   liveFrameController,
+  allowDiscardCameraChanges,
   clearActiveMonitor: (app) => {
+    stopMonitorPreview(app);
     if (activeMonitor === app) activeMonitor = null;
   },
   clearActiveFeed: (app) => {
+    app.feedDragController?.abort();
+    stopRemoteLiveRefresh(app);
     if (activeFeed === app) activeFeed = null;
   }
 });
@@ -621,22 +727,26 @@ async function openMonitor() {
 async function closeMonitor() {
   if (!activeMonitor) return;
   const monitor = activeMonitor;
-  activeMonitor = null;
   await monitor.close();
 }
 
 async function openLocalFeed(cameraData: any, options: any = {}) {
   const camera = normalizeCamera(cameraData);
-  await closeLocalFeed();
-  activeFeed = new CameraFeed(camera, {
-    liveFrame: options.liveFrame ?? ""
-  });
-  await activeFeed.render(true);
-  applyFeedDisplayMode(activeFeed);
-  return activeFeed;
+  const previous = activeFeed;
+  const generation = ++feedGeneration;
+  activeFeed = null;
+  if (previous) await previous.close();
+  if (generation !== feedGeneration) return null;
+  const feed = new CameraFeed(camera, { liveFrame: options.liveFrame ?? "" });
+  activeFeed = feed;
+  await feed.render(true);
+  if (generation !== feedGeneration) { await feed.close({}); return null; }
+  applyFeedDisplayMode(feed);
+  return feed;
 }
 
 async function closeLocalFeed() {
+  feedGeneration++;
   if (!activeFeed) return;
   const feed = activeFeed;
   activeFeed = null;
@@ -652,9 +762,13 @@ async function showFeed(cameraId) {
     return null;
   }
 
-  const liveFrame = await liveFrameController.captureLiveFrame(camera, {
-    preferDataUrl: true
-  });
+  const generation = ++broadcastGeneration;
+  liveFrameController.stopBroadcastLiveRefresh();
+  broadcastCameraId = camera.id;
+  let liveFrame = "";
+  try { liveFrame = await liveFrameController.captureLiveFrame(camera, { preferDataUrl: true }); }
+  catch (error) { console.warn(`${MODULE_ID} | Initial frame unavailable.`, error); }
+  if (generation !== broadcastGeneration || cameraRevision(getCamera(camera.id)) !== cameraRevision(camera)) return null;
 
   emitSocketMessage({
     action: "showFeed",
@@ -680,9 +794,8 @@ async function openCameraFeed(cameraId, options: any = {}) {
 
   let liveFrame = String(options.liveFrame ?? "");
   if (game.user?.isGM && !liveFrame) {
-    liveFrame = await liveFrameController.captureLiveFrame(camera, {
-      preferDataUrl: true
-    });
+    try { liveFrame = await liveFrameController.captureLiveFrame(camera, { preferDataUrl: true }); }
+    catch (error) { console.warn(`${MODULE_ID} | Initial frame unavailable.`, error); }
   }
   return openLocalFeed(camera, { liveFrame });
 }
@@ -704,7 +817,7 @@ function startRemoteLiveRefresh(app) {
   if (!isRemoteLiveCamera(app?.camera)) return;
   requestRemoteLiveFrame(app.camera.id);
   app.remoteLiveFrameTimer = window.setInterval(() => {
-    requestRemoteLiveFrame(app.camera.id);
+    if (document.visibilityState !== "hidden" && (!app.lastFrameAt || Date.now() - app.lastFrameAt > REMOTE_LIVE_FRAME_INTERVAL_MS)) requestRemoteLiveFrame(app.camera.id);
   }, REMOTE_LIVE_FRAME_INTERVAL_MS);
 }
 
@@ -716,9 +829,7 @@ function stopRemoteLiveRefresh(app) {
 
 function hasCameraAccess(userId, cameraId) {
   const camera = getCamera(cameraId);
-  if (!camera) return false;
-  if (game.user?.isGM || game.users?.get?.(userId)?.isGM) return true;
-  return camera.status !== "offline" && camera.status !== "restricted";
+  return canUserAccessCamera(game.users?.get?.(userId), camera);
 }
 
 function closeFeedForEveryone() {
@@ -727,6 +838,8 @@ function closeFeedForEveryone() {
     action: "closeFeed",
     gmUserId: game.user.id
   });
+  broadcastGeneration++;
+  broadcastCameraId = "";
   liveFrameController.stopBroadcastLiveRefresh();
   closeLocalFeed();
 }
@@ -742,21 +855,42 @@ async function handleSocketMessage(message) {
 
   if (message.action === "requestLiveFrame") {
     if (!game.user?.isGM) return;
+    const producer = (game.users?.contents ?? []).filter(user => user.isGM && user.active).sort((a, b) => a.id.localeCompare(b.id))[0];
+    if (producer && producer.id !== game.user.id) return;
     const cameraId = String(message.cameraId ?? "");
     const userId = String(message.userId ?? "");
     const camera = getCamera(cameraId);
-    if (!camera || !userId || !hasCameraAccess(userId, cameraId)) return;
+    if (!camera || !game.users?.get?.(userId)?.active || camera.feedSource !== "live" || !hasCameraAccess(userId, cameraId)) return;
     const liveFrame = await liveFrameController.captureLiveFrame(camera, {
       preferDataUrl: true
     });
-    if (!liveFrame) return;
+    if (!liveFrame || !hasCameraAccess(userId, cameraId) || cameraRevision(getCamera(cameraId)) !== cameraRevision(camera)) return;
     emitSocketMessage({
       action: "updateFeedFrame",
       gmUserId: game.user.id,
       cameraId,
       recipientUserId: userId,
+      revision: cameraRevision(camera),
       liveFrame
     });
+    return;
+  }
+
+  if (message.action === "cameraChanged") {
+    if (!isGMSent || (game.user?.isGM && message.gmUserId === game.user.id)) return;
+    const validation = message.camera ? validateCameraData(message.camera, { requireId: true }) : null;
+    if (message.camera && (!validation?.ok || validation.camera.id !== message.cameraId)) return;
+    liveFrameController.invalidateFrames();
+    if (broadcastCameraId === message.cameraId) {
+      broadcastGeneration++;
+      liveFrameController.stopBroadcastLiveRefresh();
+      if (validation) liveFrameController.startBroadcastLiveRefresh(validation.camera);
+      else broadcastCameraId = "";
+    }
+    if (activeFeed?.camera?.id === message.cameraId) {
+      if (validation) await openLocalFeed(validation.camera);
+      else await closeLocalFeed();
+    }
     return;
   }
 
@@ -784,6 +918,8 @@ async function handleSocketMessage(message) {
     if (recipientUserId && recipientUserId !== game.user?.id) return;
     const cameraId = String(message.cameraId ?? "");
     if (!cameraId || activeFeed?.camera?.id !== cameraId) return;
+    if (message.revision !== cameraRevision(normalizeCamera(activeFeed.camera))) return;
+    if (["offline", "restricted"].includes(activeFeed.camera.status)) return;
     if (typeof message.liveFrame !== "string" || !message.liveFrame) return;
     await activeFeed.updateLiveFrame?.(message.liveFrame);
     return;
@@ -796,7 +932,24 @@ async function handleSocketMessage(message) {
   }
 }
 
+function applyVideoEffectIntensity(value: unknown) {
+  const number = Number(value);
+  const intensity = Number.isFinite(number) ? Math.max(0, Math.min(200, number)) / 100 : .5;
+  document.documentElement.style.setProperty("--security-camera-effect-intensity", String(intensity));
+  document.documentElement.classList.toggle("security-camera-effects-disabled", intensity === 0);
+}
+
 function registerSettings() {
+  game.settings.register(MODULE_ID, "videoEffectIntensity", {
+    name: "Video Effect Intensity",
+    hint: "Adjust static, scanlines, tint, flicker, and glitches for all viewers. Default: 50%. Use 0% to turn effects off or 100% for the original strength. Clean cameras have no effects.",
+    scope: "world",
+    config: true,
+    type: Number,
+    range: { min: 0, max: 200, step: 10 },
+    default: 50,
+    onChange: applyVideoEffectIntensity
+  });
   game.settings.register(MODULE_ID, "cameras", {
     name: "Security Cameras",
     hint: "World-level camera feed definitions for the Security Cameras module.",
@@ -852,48 +1005,16 @@ function registerWithHoloSuite() {
   return true;
 }
 
-function addSceneControlButton(controls) {
-  if (!game.user?.isGM) return;
-
-  const openCameraManager = () => openMonitor();
-  const tool = {
-    name: "security-cameras",
-    title: "Security Camera Manager",
-    icon: "fas fa-video",
-    button: true,
-    visible: true,
-    onClick: openCameraManager,
-    onChange: openCameraManager
-  };
-
-  if (!Array.isArray(controls)) {
-    const tokenControls = controls.tokens ?? controls.token;
-    if (!tokenControls?.tools) return;
-
-    if (Array.isArray(tokenControls.tools)) {
-      tokenControls.tools.push(tool);
-      return;
-    }
-
-    const order = Object.keys(tokenControls.tools).length;
-    tokenControls.tools["security-cameras"] = { ...tool, order };
-    return;
-  }
-
-  const tokenControls = controls.find((control) => control.name === "token");
-  if (!tokenControls?.tools) return;
-  tokenControls.tools.push(tool);
-}
-
 Hooks.once("init", () => {
   registerSettings();
 });
 
-// HoloSuite Core is the suite launcher; keep this module out of the scene-control toolbar.
-
 Hooks.once("ready", () => {
+  applyVideoEffectIntensity(game.settings.get(MODULE_ID, "videoEffectIntensity"));
   registerApi();
   registerWithHoloSuite();
-  game.socket?.on?.(SOCKET_NAME, handleSocketMessage);
+  game.socket?.on?.(SOCKET_NAME, (message) => {
+    handleSocketMessage(message).catch(error => console.warn(`${MODULE_ID} | Camera message failed.`, error));
+  });
   console.log(`${MODULE_ID} | Ready. Use game.securityCameras.openMonitor()`);
 });

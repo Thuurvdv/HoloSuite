@@ -18,7 +18,8 @@
   ],
   "styles": [
     "styles/holosuite-tokens.css",
-    "styles/security-camera-system.css"
+    "styles/security-camera-system.css",
+    "styles/security-camera-manager.css"
   ],
   "packs": [],
   "languages": [],

@@ -32,6 +32,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     bindFeedControls,
     getElement,
     liveFrameController,
+    allowDiscardCameraChanges,
     clearActiveMonitor,
     clearActiveFeed
   } = deps;
@@ -53,6 +54,8 @@ export function createSecurityCameraAppClasses(deps: any) {
   }
 
   function setLiveFrame(app: any, frame: string) {
+    app.lastFrameAt = Date.now();
+    app.frameError = false;
     if (app.liveFrame === frame) return;
     releaseLiveFrameUrl(app);
     app.liveFrame = frame;
@@ -92,6 +95,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     }
 
     async close(options: any) {
+      if (!allowDiscardCameraChanges()) return this;
       clearActiveMonitor(this);
       return super.close(options);
     }
@@ -224,6 +228,7 @@ export function createSecurityCameraAppClasses(deps: any) {
       }
 
       async close(options: any) {
+        if (!allowDiscardCameraChanges()) return this;
         clearActiveMonitor(this);
         return super.close(options);
       }

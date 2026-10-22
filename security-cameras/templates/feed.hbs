@@ -1,6 +1,7 @@
 <section class="security-camera-feed {{camera.statusClass}} {{camera.sourceClass}} {{camera.displayClass}}">
   <div class="security-camera-feed-static" aria-hidden="true"></div>
   <div class="security-camera-feed-scanline" aria-hidden="true"></div>
+  <button type="button" class="security-camera-feed-drag" data-security-camera-drag aria-label="Move camera feed" title="Drag to move; use arrow keys when focused"><span aria-hidden="true"></span></button>
 
   <header class="security-camera-feed-header">
     <div>
@@ -37,5 +38,6 @@
 
   <footer class="security-camera-feed-footer">
     <span>ID {{camera.id}}</span>
+    <button type="button" class="security-camera-feed-close" data-security-camera-close aria-label="Close camera feed" title="Close camera feed"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
   </footer>
 </section>
