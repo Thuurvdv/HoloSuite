@@ -7,13 +7,14 @@ const { createLiveFrameController } = await import(`data:text/javascript;base64,
 const helper = await build({ stdin: { contents: 'export * from "./scene-compositor.ts"; export * from "./frame-cache.ts"; export * from "./camera-access.ts";', resolveDir: new URL(".", import.meta.url).pathname.replace(/^\/([A-Z]:)/i, "$1") }, bundle: true, write: false, format: "esm", platform: "node" });
 const { getTileGeometry, getSceneDrawOrder, createFrameCache, canUserAccessCamera } = await import(`data:text/javascript;base64,${Buffer.from(helper.outputFiles[0].text).toString("base64")}`);
 
-function setup({ background = "", active = false, deferred = false, getPerformance = undefined } = {}) {
-  const draws = [], transforms = [], pending = [], intervals = new Map();
+function setup({ background = "", active = false, deferred = false, getPerformance = undefined, generation = 13 } = {}) {
+  const draws = [], transforms = [], translations = [], pending = [], intervals = new Map();
   let timerId = 0, encoded = 0;
   const scene = { id: "scene", width: 800, height: 600, grid: { size: 100 }, dimensions: { sceneX: 100, sceneY: 200, sceneWidth: 800, sceneHeight: 600 }, tiles: [], tokens: [] };
   globalThis.canvas = { scene: active ? scene : { id: "other" }, dimensions: scene.dimensions };
+  globalThis.game = { release: { generation } };
   globalThis.window = { setTimeout, clearTimeout, setInterval: fn => { intervals.set(++timerId, fn); return timerId; }, clearInterval: id => intervals.delete(id) };
-  const context = { fillRect() {}, setTransform: (...args) => transforms.push(args), save() {}, restore() {}, translate() {}, rotate() {}, scale() {}, drawImage: (image, ...args) => draws.push({ src: image.src, args }), beginPath() {}, arc() {}, fill() {}, stroke() {}, fillText() {} };
+  const context = { fillRect() {}, setTransform: (...args) => transforms.push(args), save() {}, restore() {}, translate: (...args) => translations.push(args), rotate() {}, scale() {}, drawImage: (image, ...args) => draws.push({ src: image.src, args }), beginPath() {}, arc() {}, fill() {}, stroke() {}, fillText() {} };
   const canvases = [];
   globalThis.document = { visibilityState: "visible", addEventListener() {}, removeEventListener() {}, createElement: () => {
     const canvas = { getContext: () => context, toDataURL: () => { encoded++; return "data:image/webp;base64,frame"; } };
@@ -28,7 +29,7 @@ function setup({ background = "", active = false, deferred = false, getPerforman
   const broadcasts = [];
   const controller = createLiveFrameController({ normalizeCamera: camera => camera, applyLinkedRegionBounds: camera => camera, getSceneById: id => id && id !== scene.id ? { ...scene, id } : scene, getSceneBackgroundPath: () => background, moduleId: "test", isFrameProducer: () => true, getPerformance, broadcastLiveFrame: (...args) => broadcasts.push(args) });
   const camera = { id: "camera", sceneId: "scene", feedSource: "live", status: "online", regionX: 100, regionY: 200, regionWidth: 400, regionHeight: 300 };
-  return { scene, controller, camera, draws, transforms, pending, broadcasts, intervals, canvases, get encoded() { return encoded; } };
+  return { scene, controller, camera, draws, transforms, translations, pending, broadcasts, intervals, canvases, get encoded() { return encoded; } };
 }
 
 for (const active of [false, true]) test(`tiles render with a background on ${active ? "active" : "inactive"} scenes`, async () => {
@@ -122,6 +123,48 @@ test("rotation, mirroring, opacity and texture fit preserve geometry", () => {
   assert.ok(Math.abs(geometry.bounds.height - 200) < 0.001);
   const fit = getTileGeometry({ width: 100, height: 100, texture: { fit: "contain" } }, { naturalWidth: 200, naturalHeight: 100 });
   assert.equal(fit.height, 50);
+});
+
+test("v14 tiles use document coordinates as their anchor without a second center offset", () => {
+  const geometry = getTileGeometry({ x: 300, y: 400, width: 200, height: 100,
+    texture: { anchorX: .5, anchorY: .5 } }, undefined, 14);
+  assert.equal(geometry.cx, 300);
+  assert.equal(geometry.cy, 400);
+  assert.deepEqual(geometry.bounds, { x: 200, y: 350, width: 200, height: 100 });
+});
+
+test("v12/v13 and v14 tile transforms agree for equivalent positions and texture settings", () => {
+  for (const texture of [
+    { anchorX: .5, anchorY: .5 }, { anchorX: 0, anchorY: 0 }, { anchorX: 1, anchorY: 1 },
+    { anchorX: .25, anchorY: .75, scaleX: -1, scaleY: 2, fit: "contain" }
+  ]) {
+    for (const rotation of [0, 33, 90]) {
+      const tile = { width: 200, height: 100, rotation, texture };
+      const media = { naturalWidth: 300, naturalHeight: 200 };
+      const anchored = getTileGeometry({ ...tile, x: 300, y: 400 }, media, 14);
+      for (const generation of [12, 13]) {
+        assert.deepEqual(anchored, getTileGeometry({ ...tile, x: 200, y: 350 }, media, generation));
+      }
+    }
+  }
+});
+
+test("v14 scene foregrounds retain their scene position and alignment with tokens", async () => {
+  const env = setup({ generation: 14 });
+  env.scene.foreground = "foreground.png";
+  env.scene.tokens = [{ x: 150, y: 250, width: 1, height: 1, texture: { src: "token.png" } }];
+  await env.controller.captureLiveFrame(env.camera);
+  assert.deepEqual(env.draws.map(draw => draw.src), ["token.png", "foreground.png"]);
+  assert.deepEqual(env.draws[1].args, [-400, -300, 800, 600]);
+  assert.deepEqual(env.translations, [[500, 500]]);
+});
+
+test("v14 tiles overlapping a camera region are not culled using the old coordinate convention", async () => {
+  const env = setup({ generation: 14 });
+  env.scene.tiles = [{ x: 500, y: 300, width: 200, height: 100, texture: { src: "edge.png" } }];
+  await env.controller.captureLiveFrame(env.camera);
+  assert.deepEqual(env.draws.map(draw => draw.src), ["edge.png"]);
+  assert.deepEqual(env.translations, [[500, 300]]);
 });
 
 test("access checks use the requester, not the GM executing the handler", () => {
