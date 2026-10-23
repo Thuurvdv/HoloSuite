@@ -42,6 +42,26 @@ export function createSecurityCameraAppClasses(deps: any) {
   const LegacyApplication = getLegacyApplicationBase();
   const useApplicationV2 = shouldUseApplicationV2();
 
+  const monitorScrollSelectors = [".security-camera-list", ".window-content"];
+
+  function rememberMonitorScroll(app: any) {
+    const element = getElement(app);
+    if (!element?.querySelector) return;
+    app.monitorScroll = monitorScrollSelectors.map(selector => ({
+      selector,
+      top: (element.matches?.(selector) ? element : element.querySelector(selector))?.scrollTop ?? 0
+    }));
+  }
+
+  function restoreMonitorScroll(app: any, html: any = null) {
+    const element = getElement(app, html);
+    if (!element?.querySelector) return;
+    for (const { selector, top } of app.monitorScroll ?? []) {
+      const target = element.matches?.(selector) ? element : element.querySelector(selector);
+      if (target) target.scrollTop = top;
+    }
+  }
+
   function isObjectUrl(value: string) {
     return typeof value === "string" && value.startsWith("blob:");
   }
@@ -77,6 +97,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     }
 
     getData() {
+      rememberMonitorScroll(this);
       return getMonitorContext();
     }
 
@@ -92,6 +113,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     activateListeners(html: any) {
       super.activateListeners(html);
       bindMonitorControls(this, html);
+      restoreMonitorScroll(this, html);
     }
 
     async close(options: any) {
@@ -205,6 +227,7 @@ export function createSecurityCameraAppClasses(deps: any) {
       };
 
       async _prepareContext(options: any) {
+        rememberMonitorScroll(this);
         return {
           ...(await super._prepareContext(options)),
           ...getMonitorContext()
@@ -225,6 +248,7 @@ export function createSecurityCameraAppClasses(deps: any) {
       _onRender(context: any, options: any) {
         super._onRender?.(context, options);
         bindMonitorControls(this);
+        restoreMonitorScroll(this);
       }
 
       async close(options: any) {

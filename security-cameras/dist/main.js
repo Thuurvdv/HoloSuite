@@ -30,13 +30,13 @@ function Ot(e, t = {}) {
     }
   };
 }
-const dt = /* @__PURE__ */ new Set(["online", "clean", "offline", "corrupted", "restricted"]), mt = /* @__PURE__ */ new Set(["live", "image"]), Qe = /* @__PURE__ */ new Set(["window", "picture-in-picture"]), xe = 1200, Ee = 675, Ut = [
+const dt = /* @__PURE__ */ new Set(["online", "clean", "offline", "corrupted", "restricted"]), mt = /* @__PURE__ */ new Set(["live", "image"]), Qe = /* @__PURE__ */ new Set(["window", "picture-in-picture"]), xe = 1200, Ee = 675, Tt = [
   { value: "online", label: "Online" },
   { value: "clean", label: "Clean" },
   { value: "offline", label: "Offline" },
   { value: "corrupted", label: "Corrupted" },
   { value: "restricted", label: "Restricted" }
-], Tt = [
+], Ut = [
   { value: "window", label: "Window" },
   { value: "picture-in-picture", label: "Picture-in-Picture" }
 ], _t = [
@@ -67,7 +67,7 @@ function X(e) {
   const t = Number(e);
   return Number.isFinite(t) ? t : null;
 }
-function J(e, t) {
+function K(e, t) {
   const i = Number(e);
   return Number.isFinite(i) && i > 0 ? i : t;
 }
@@ -90,8 +90,8 @@ function Xe(e = {}, t = {}) {
     regionId: String(i.regionId ?? "").trim(),
     regionX: X(i.regionX),
     regionY: X(i.regionY),
-    regionWidth: J(i.regionWidth, xe),
-    regionHeight: J(i.regionHeight, Ee),
+    regionWidth: K(i.regionWidth, xe),
+    regionHeight: K(i.regionHeight, Ee),
     notes: String(i.notes ?? "").trim()
   };
 }
@@ -113,15 +113,15 @@ function Bt(e = {}) {
   const t = gt(e), i = Array.isArray(t.points) ? t.points : [];
   if (i.length >= 4) {
     const c = [], m = [];
-    for (let p = 0; p < i.length; p += 2)
-      c.push(Number(i[p])), m.push(Number(i[p + 1]));
-    const h = Math.min(...c), g = Math.min(...m), v = Math.max(...c), w = Math.max(...m);
-    if ([h, g, v, w].every(Number.isFinite))
+    for (let C = 0; C < i.length; C += 2)
+      c.push(Number(i[C])), m.push(Number(i[C + 1]));
+    const g = Math.min(...c), f = Math.min(...m), b = Math.max(...c), S = Math.max(...m);
+    if ([g, f, b, S].every(Number.isFinite))
       return {
-        x: h,
-        y: g,
-        width: v - h,
-        height: w - g
+        x: g,
+        y: f,
+        width: b - g,
+        height: S - f
       };
   }
   const r = X(t.x) ?? 0, n = X(t.y) ?? 0, s = X(t.radiusX ?? t.radius), o = X(t.radiusY ?? t.radius);
@@ -132,7 +132,7 @@ function Bt(e = {}) {
       width: s * 2,
       height: o * 2
     };
-  const l = J(t.width, 0), y = J(t.height, 0);
+  const l = K(t.width, 0), y = K(t.height, 0);
   return !l || !y ? null : { x: r, y: n, width: l, height: y };
 }
 function Vt(e) {
@@ -147,7 +147,7 @@ function Vt(e) {
   };
 }
 function je(e) {
-  const t = gt(e), i = J(t.width, xe), r = J(t.height, Ee);
+  const t = gt(e), i = K(t.width, xe), r = K(t.height, Ee);
   return !i || !r ? null : {
     regionX: X(t.x) ?? 0,
     regionY: X(t.y) ?? 0,
@@ -160,12 +160,12 @@ function Wt(e) {
   return t ? je(t) : null;
 }
 function at(e, t) {
-  const i = e.cameras.map((g) => `
-    <button type="button" class="security-camera-list-item ${t(g.statusClass)} ${g.isSelected ? "active" : ""}" aria-pressed="${!!g.isSelected}" data-security-camera-id="${t(g.id)}">
+  const i = e.cameras.map((f) => `
+    <button type="button" class="security-camera-list-item ${t(f.statusClass)} ${f.isSelected ? "active" : ""}" aria-pressed="${!!f.isSelected}" data-security-camera-id="${t(f.id)}">
       <i class="fa-solid fa-video security-camera-device-icon" aria-hidden="true"></i>
-      <span class="security-camera-device-name" title="${t(g.name)}">${t(g.name)}</span>
-      <small title="${t(g.location)}">${t(g.location)}</small>
-      <span class="security-camera-device-status">${t(g.status)}</span>
+      <span class="security-camera-device-name" title="${t(f.name)}">${t(f.name)}</span>
+      <small title="${t(f.location)}">${t(f.location)}</small>
+      <span class="security-camera-device-status">${t(f.status)}</span>
     </button>
   `).join(""), r = e.selectedCamera, n = r ? `
     <section class="security-camera-monitor-preview ${t(r.statusClass)}">
@@ -195,7 +195,7 @@ function at(e, t) {
         <button type="button" data-security-camera-action="close-feed"><i class="fa-solid fa-stop" aria-hidden="true"></i> Close Feeds</button>
       </div>
     </section>
-  ` : '<section class="security-camera-monitor-preview"><div class="security-camera-empty">No camera selected.</div></section>', s = e.editorCamera, o = e.sceneChoices.map((g) => `<option value="${t(g.id)}" ${g.selected ? "selected" : ""}>${t(g.name)}</option>`).join(""), l = e.regionChoices.map((g) => `<option value="${t(g.id)}" ${g.selected ? "selected" : ""}>${t(g.name)}</option>`).join(""), y = e.feedSourceChoices.map((g) => `<option value="${t(g.value)}" ${g.selected ? "selected" : ""}>${t(g.label)}</option>`).join(""), c = e.statusChoices.map((g) => `<option value="${t(g.value)}" ${g.selected ? "selected" : ""}>${t(g.label)}</option>`).join(""), m = e.displayModeChoices.map((g) => `<option value="${t(g.value)}" ${g.selected ? "selected" : ""}>${t(g.label)}</option>`).join(""), h = `<label data-security-camera-static-image-field ${e.showStaticImageField ? "" : "hidden"}>Static Image <span class="security-camera-path-row"><input type="text" name="image" value="${t(s.image)}"><button type="button" data-security-camera-action="browse-image"><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Browse</button></span></label>`;
+  ` : '<section class="security-camera-monitor-preview"><div class="security-camera-empty">No camera selected.</div></section>', s = e.editorCamera, o = e.sceneChoices.map((f) => `<option value="${t(f.id)}" ${f.selected ? "selected" : ""}>${t(f.name)}</option>`).join(""), l = e.regionChoices.map((f) => `<option value="${t(f.id)}" ${f.selected ? "selected" : ""}>${t(f.name)}</option>`).join(""), y = e.feedSourceChoices.map((f) => `<option value="${t(f.value)}" ${f.selected ? "selected" : ""}>${t(f.label)}</option>`).join(""), c = e.statusChoices.map((f) => `<option value="${t(f.value)}" ${f.selected ? "selected" : ""}>${t(f.label)}</option>`).join(""), m = e.displayModeChoices.map((f) => `<option value="${t(f.value)}" ${f.selected ? "selected" : ""}>${t(f.label)}</option>`).join(""), g = `<label data-security-camera-static-image-field ${e.showStaticImageField ? "" : "hidden"}>Static Image <span class="security-camera-path-row"><input type="text" name="image" value="${t(s.image)}"><button type="button" data-security-camera-action="browse-image"><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Browse</button></span></label>`;
   return `
     <section class="security-camera-manager">
       <aside class="security-camera-monitor-list">
@@ -224,7 +224,7 @@ function at(e, t) {
         </fieldset>
         <fieldset class="security-camera-field-group"><legend>Feed settings</legend>
         <label>Feed Source <select name="feedSource">${y}</select></label>
-        ${h}
+        ${g}
         <label>Status <select name="status">${c}</select></label>
         <label>Display Mode <select name="displayMode">${m}</select></label>
         <input type="hidden" name="regionX" value="${t(s.regionX ?? "")}">
@@ -287,7 +287,7 @@ function Xt() {
   return globalThis.Application ?? (e == null ? void 0 : e.Application) ?? (t == null ? void 0 : t.ApplicationV1) ?? globalThis.FormApplication ?? (e == null ? void 0 : e.FormApplication) ?? (t == null ? void 0 : t.FormApplication) ?? (t == null ? void 0 : t.ApplicationV2);
 }
 function jt(e) {
-  var D, Z, le, De;
+  var De, ve, a, w;
   const {
     moduleId: t,
     monitorTemplatePath: i,
@@ -299,20 +299,39 @@ function jt(e) {
     bindFeedControls: y,
     getElement: c,
     liveFrameController: m,
-    allowDiscardCameraChanges: h,
-    clearActiveMonitor: g,
-    clearActiveFeed: v
-  } = e, w = (Z = (D = foundry == null ? void 0 : foundry.applications) == null ? void 0 : D.api) == null ? void 0 : Z.ApplicationV2, p = (De = (le = foundry == null ? void 0 : foundry.applications) == null ? void 0 : le.api) == null ? void 0 : De.HandlebarsApplicationMixin, S = Xt(), I = zt();
-  function R(M) {
-    return typeof M == "string" && M.startsWith("blob:");
+    allowDiscardCameraChanges: g,
+    clearActiveMonitor: f,
+    clearActiveFeed: b
+  } = e, S = (ve = (De = foundry == null ? void 0 : foundry.applications) == null ? void 0 : De.api) == null ? void 0 : ve.ApplicationV2, C = (w = (a = foundry == null ? void 0 : foundry.applications) == null ? void 0 : a.api) == null ? void 0 : w.HandlebarsApplicationMixin, I = Xt(), A = zt(), O = [".security-camera-list", ".window-content"];
+  function T(u) {
+    const d = c(u);
+    d != null && d.querySelector && (u.monitorScroll = O.map((h) => {
+      var v, p;
+      return {
+        selector: h,
+        top: ((p = (v = d.matches) != null && v.call(d, h) ? d : d.querySelector(h)) == null ? void 0 : p.scrollTop) ?? 0
+      };
+    }));
   }
-  function O(M) {
-    R(M == null ? void 0 : M.liveFrameObjectUrl) && typeof URL < "u" && URL.revokeObjectURL(M.liveFrameObjectUrl), M && (M.liveFrameObjectUrl = null);
+  function j(u, d = null) {
+    var v;
+    const h = c(u, d);
+    if (h != null && h.querySelector)
+      for (const { selector: p, top: F } of u.monitorScroll ?? []) {
+        const x = (v = h.matches) != null && v.call(h, p) ? h : h.querySelector(p);
+        x && (x.scrollTop = F);
+      }
   }
-  function j(M, a) {
-    M.lastFrameAt = Date.now(), M.frameError = !1, M.liveFrame !== a && (O(M), M.liveFrame = a, M.liveFrameObjectUrl = R(a) ? a : null);
+  function P(u) {
+    return typeof u == "string" && u.startsWith("blob:");
   }
-  class B extends S {
+  function V(u) {
+    P(u == null ? void 0 : u.liveFrameObjectUrl) && typeof URL < "u" && URL.revokeObjectURL(u.liveFrameObjectUrl), u && (u.liveFrameObjectUrl = null);
+  }
+  function H(u, d) {
+    u.lastFrameAt = Date.now(), u.frameError = !1, u.liveFrame !== d && (V(u), u.liveFrame = d, u.liveFrameObjectUrl = P(d) ? d : null);
+  }
+  class E extends I {
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
         id: "security-camera-monitor",
@@ -326,30 +345,30 @@ function jt(e) {
       });
     }
     getData() {
-      return s();
+      return T(this), s();
     }
-    async _renderInner(a) {
+    async _renderInner(d) {
       try {
-        return await super._renderInner(a);
-      } catch (f) {
-        return console.warn(`${t} | Monitor template render failed, using inline fallback.`, f), $(at(a, n));
+        return await super._renderInner(d);
+      } catch (h) {
+        return console.warn(`${t} | Monitor template render failed, using inline fallback.`, h), $(at(d, n));
       }
     }
-    activateListeners(a) {
-      super.activateListeners(a), l(this, a);
+    activateListeners(d) {
+      super.activateListeners(d), l(this, d), j(this, d);
     }
-    async close(a) {
-      return h() ? (g(this), super.close(a)) : this;
+    async close(d) {
+      return g() ? (f(this), super.close(d)) : this;
     }
   }
-  class G extends S {
-    constructor(f, u = {}) {
-      super(u);
+  class D extends I {
+    constructor(h, v = {}) {
+      super(v);
       z(this, "camera");
       z(this, "liveFrame");
       z(this, "liveFrameObjectUrl");
       z(this, "liveFrameTimer");
-      this.camera = o(f), this.liveFrame = u.liveFrame ?? "", this.liveFrameObjectUrl = R(this.liveFrame) ? this.liveFrame : null, this.liveFrameTimer = null;
+      this.camera = o(h), this.liveFrame = v.liveFrame ?? "", this.liveFrameObjectUrl = P(this.liveFrame) ? this.liveFrame : null, this.liveFrameTimer = null;
     }
     static get defaultOptions() {
       return foundry.utils.mergeObject(super.defaultOptions, {
@@ -372,59 +391,59 @@ function jt(e) {
         }
       };
     }
-    async _renderInner(f) {
+    async _renderInner(h) {
       try {
-        return await super._renderInner(f);
-      } catch (u) {
-        return console.warn(`${t} | Feed template render failed, using inline fallback.`, u), $(st({
+        return await super._renderInner(h);
+      } catch (v) {
+        return console.warn(`${t} | Feed template render failed, using inline fallback.`, v), $(st({
           ...this.camera,
           liveFrame: this.liveFrame
         }, n));
       }
     }
-    activateListeners(f) {
-      super.activateListeners(f), y(this, f);
+    activateListeners(h) {
+      super.activateListeners(h), y(this, h);
     }
-    async updateLiveFrame(f) {
-      var C, F;
-      j(this, f);
-      const u = c(this), d = (C = u == null ? void 0 : u.querySelector) == null ? void 0 : C.call(u, "[data-security-camera-live-frame]"), b = (F = u == null ? void 0 : u.querySelector) == null ? void 0 : F.call(u, "[data-security-camera-live-waiting]");
-      if (d) {
-        d.getAttribute("src") !== f && (d.src = f), d.hidden = !1, b && (b.hidden = !0);
+    async updateLiveFrame(h) {
+      var x, N;
+      H(this, h);
+      const v = c(this), p = (x = v == null ? void 0 : v.querySelector) == null ? void 0 : x.call(v, "[data-security-camera-live-frame]"), F = (N = v == null ? void 0 : v.querySelector) == null ? void 0 : N.call(v, "[data-security-camera-live-waiting]");
+      if (p) {
+        p.getAttribute("src") !== h && (p.src = h), p.hidden = !1, F && (F.hidden = !0);
         return;
       }
       await this.render(!0);
     }
-    async close(f) {
-      return m.stopLocalLiveRefresh(this), O(this), v(this), super.close(f);
+    async close(h) {
+      return m.stopLocalLiveRefresh(this), V(this), b(this), super.close(h);
     }
   }
-  function Q() {
-    var M;
-    return !I || !w || !p ? null : (M = class extends p(w) {
-      async _prepareContext(f) {
-        return {
-          ...await super._prepareContext(f),
+  function ee() {
+    var u;
+    return !A || !S || !C ? null : (u = class extends C(S) {
+      async _prepareContext(h) {
+        return T(this), {
+          ...await super._prepareContext(h),
           ...s()
         };
       }
-      async _renderHTML(f, u) {
+      async _renderHTML(h, v) {
         try {
-          return await super._renderHTML(f, u);
-        } catch (d) {
-          console.warn(`${t} | Monitor template render failed, using inline fallback.`, d);
-          const b = document.createElement("template");
-          return b.innerHTML = at(f, n).trim(), b.content;
+          return await super._renderHTML(h, v);
+        } catch (p) {
+          console.warn(`${t} | Monitor template render failed, using inline fallback.`, p);
+          const F = document.createElement("template");
+          return F.innerHTML = at(h, n).trim(), F.content;
         }
       }
-      _onRender(f, u) {
-        var d;
-        (d = super._onRender) == null || d.call(this, f, u), l(this);
+      _onRender(h, v) {
+        var p;
+        (p = super._onRender) == null || p.call(this, h, v), l(this), j(this);
       }
-      async close(f) {
-        return h() ? (g(this), super.close(f)) : this;
+      async close(h) {
+        return g() ? (f(this), super.close(h)) : this;
       }
-    }, z(M, "DEFAULT_OPTIONS", {
+    }, z(u, "DEFAULT_OPTIONS", {
       id: "security-camera-monitor",
       tag: "section",
       classes: ["security-camera-window"],
@@ -436,26 +455,26 @@ function jt(e) {
         width: 1060,
         height: 760
       }
-    }), z(M, "PARTS", {
+    }), z(u, "PARTS", {
       main: {
         template: i
       }
-    }), M);
+    }), u);
   }
-  function x() {
-    var M;
-    return !I || !w || !p ? null : (M = class extends p(w) {
-      constructor(u, d = {}) {
-        super(d);
+  function de() {
+    var u;
+    return !A || !S || !C ? null : (u = class extends C(S) {
+      constructor(v, p = {}) {
+        super(p);
         z(this, "camera");
         z(this, "liveFrame");
         z(this, "liveFrameObjectUrl");
         z(this, "liveFrameTimer");
-        this.camera = o(u), this.liveFrame = d.liveFrame ?? "", this.liveFrameObjectUrl = R(this.liveFrame) ? this.liveFrame : null, this.liveFrameTimer = null;
+        this.camera = o(v), this.liveFrame = p.liveFrame ?? "", this.liveFrameObjectUrl = P(this.liveFrame) ? this.liveFrame : null, this.liveFrameTimer = null;
       }
-      async _prepareContext(u) {
+      async _prepareContext(v) {
         return this.camera = o(this.camera), {
-          ...await super._prepareContext(u),
+          ...await super._prepareContext(v),
           camera: {
             ...this.camera,
             liveFrame: this.liveFrame,
@@ -463,36 +482,36 @@ function jt(e) {
           }
         };
       }
-      async _renderHTML(u, d) {
+      async _renderHTML(v, p) {
         try {
-          return await super._renderHTML(u, d);
-        } catch (b) {
-          console.warn(`${t} | Feed template render failed, using inline fallback.`, b);
-          const C = document.createElement("template");
-          return C.innerHTML = st({
+          return await super._renderHTML(v, p);
+        } catch (F) {
+          console.warn(`${t} | Feed template render failed, using inline fallback.`, F);
+          const x = document.createElement("template");
+          return x.innerHTML = st({
             ...this.camera,
             liveFrame: this.liveFrame
-          }, n).trim(), C.content;
+          }, n).trim(), x.content;
         }
       }
-      _onRender(u, d) {
-        var b;
-        (b = super._onRender) == null || b.call(this, u, d), y(this);
+      _onRender(v, p) {
+        var F;
+        (F = super._onRender) == null || F.call(this, v, p), y(this);
       }
-      async updateLiveFrame(u) {
-        var F, k;
-        j(this, u);
-        const d = c(this), b = (F = d == null ? void 0 : d.querySelector) == null ? void 0 : F.call(d, "[data-security-camera-live-frame]"), C = (k = d == null ? void 0 : d.querySelector) == null ? void 0 : k.call(d, "[data-security-camera-live-waiting]");
-        if (b) {
-          b.getAttribute("src") !== u && (b.src = u), b.hidden = !1, C && (C.hidden = !0);
+      async updateLiveFrame(v) {
+        var N, G;
+        H(this, v);
+        const p = c(this), F = (N = p == null ? void 0 : p.querySelector) == null ? void 0 : N.call(p, "[data-security-camera-live-frame]"), x = (G = p == null ? void 0 : p.querySelector) == null ? void 0 : G.call(p, "[data-security-camera-live-waiting]");
+        if (F) {
+          F.getAttribute("src") !== v && (F.src = v), F.hidden = !1, x && (x.hidden = !0);
           return;
         }
         await this.render(!0);
       }
-      async close(u) {
-        return m.stopLocalLiveRefresh(this), O(this), v(this), super.close(u);
+      async close(v) {
+        return m.stopLocalLiveRefresh(this), V(this), b(this), super.close(v);
       }
-    }, z(M, "DEFAULT_OPTIONS", {
+    }, z(u, "DEFAULT_OPTIONS", {
       id: "security-camera-feed",
       tag: "section",
       classes: ["security-camera-feed-window"],
@@ -504,15 +523,15 @@ function jt(e) {
         width: 720,
         height: 520
       }
-    }), z(M, "PARTS", {
+    }), z(u, "PARTS", {
       main: {
         template: r
       }
-    }), M);
+    }), u);
   }
   return {
-    SecurityMonitor: Q() ?? B,
-    CameraFeed: x() ?? G
+    SecurityMonitor: ee() ?? E,
+    CameraFeed: de() ?? D
   };
 }
 function Gt(e = 1e3, t = 32) {
@@ -567,48 +586,48 @@ async function Ht(e) {
 function Jt(e = 64 * 1024 * 1024, t = 3e3) {
   const i = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new WeakMap(), n = /* @__PURE__ */ new Map();
   let s = /* @__PURE__ */ new Set(), o = null;
-  function l(m, h) {
-    h.pins || (i.delete(m), h.video ? (h.media.pause(), h.media.removeAttribute("src"), h.media.load()) : h.media.src = "");
+  function l(m, g) {
+    g.pins || (i.delete(m), g.video ? (g.media.pause(), g.media.removeAttribute("src"), g.media.load()) : g.media.src = "");
   }
   function y() {
-    const m = new Set([...n.values()].flatMap((g) => [...g]));
-    let h = [...i.values()].reduce((g, v) => g + v.bytes, 0);
-    for (const [g, v] of [...i].sort((w, p) => w[1].usedAt - p[1].usedAt)) {
-      if (v.pins || m.has(v)) continue;
-      const w = Date.now() - v.usedAt >= t;
-      w && v.video && v.media.pause(), (h > e || i.size > 48 || w) && (h -= v.bytes, l(g, v));
+    const m = new Set([...n.values()].flatMap((f) => [...f]));
+    let g = [...i.values()].reduce((f, b) => f + b.bytes, 0);
+    for (const [f, b] of [...i].sort((S, C) => S[1].usedAt - C[1].usedAt)) {
+      if (b.pins || m.has(b)) continue;
+      const S = Date.now() - b.usedAt >= t;
+      S && b.video && b.media.pause(), (g > e || i.size > 48 || S) && (g -= b.bytes, l(f, b));
     }
     o !== null && window.clearTimeout(o), o = i.size ? window.setTimeout(y, t) : null;
   }
   function c(m) {
-    let h = i.get(m);
-    if (h)
-      return h.usedAt = Date.now(), h;
-    const g = /\.(webm|mp4|m4v|ogv|ogg)(?:[?#]|$)/i.test(m), v = g ? document.createElement("video") : new Image();
-    h = { media: v, video: g, bytes: 0, usedAt: Date.now(), pins: 0, promise: null };
-    const w = h;
-    return w.promise = new Promise((p) => {
-      let S = !1;
-      const I = async (O) => {
-        S || (S = !0, window.clearTimeout(R), v.onload = v.onloadeddata = v.onerror = null, O ? w.bytes = (v.naturalWidth || v.videoWidth || 0) * (v.naturalHeight || v.videoHeight || 0) * 4 : i.delete(m), !O && g && (v.pause(), v.removeAttribute("src"), v.load()), O && !g && r.set(v, await Ht(m)), p(O));
-      }, R = window.setTimeout(() => I(null), 8e3);
-      v.crossOrigin = "anonymous", v.onerror = () => I(null), g ? (v.muted = !0, v.loop = !0, v.playsInline = !0, v.preload = "auto", v.onloadeddata = () => I(v)) : v.onload = () => I(v), v.src = m;
-    }), i.set(m, w), w;
+    let g = i.get(m);
+    if (g)
+      return g.usedAt = Date.now(), g;
+    const f = /\.(webm|mp4|m4v|ogv|ogg)(?:[?#]|$)/i.test(m), b = f ? document.createElement("video") : new Image();
+    g = { media: b, video: f, bytes: 0, usedAt: Date.now(), pins: 0, promise: null };
+    const S = g;
+    return S.promise = new Promise((C) => {
+      let I = !1;
+      const A = async (T) => {
+        I || (I = !0, window.clearTimeout(O), b.onload = b.onloadeddata = b.onerror = null, T ? S.bytes = (b.naturalWidth || b.videoWidth || 0) * (b.naturalHeight || b.videoHeight || 0) * 4 : i.delete(m), !T && f && (b.pause(), b.removeAttribute("src"), b.load()), T && !f && r.set(b, await Ht(m)), C(T));
+      }, O = window.setTimeout(() => A(null), 8e3);
+      b.crossOrigin = "anonymous", b.onerror = () => A(null), f ? (b.muted = !0, b.loop = !0, b.playsInline = !0, b.preload = "auto", b.onloadeddata = () => A(b)) : b.onload = () => A(b), b.src = m;
+    }), i.set(m, S), S;
   }
   return {
     beginFrame(m) {
-      const h = /* @__PURE__ */ new Set();
+      const g = /* @__PURE__ */ new Set();
       return {
-        async load(g) {
-          if (!g) return null;
-          const v = c(g);
-          return h.has(v) || (h.add(v), v.pins++), v.promise;
+        async load(f) {
+          if (!f) return null;
+          const b = c(f);
+          return g.has(b) || (g.add(b), b.pins++), b.promise;
         },
         finish() {
-          m && s.has(m) && n.set(m, new Set(h));
-          for (const g of h)
-            g.pins--, g.usedAt = Date.now();
-          h.clear(), y();
+          m && s.has(m) && n.set(m, new Set(g));
+          for (const f of g)
+            f.pins--, f.usedAt = Date.now();
+          g.clear(), y();
         }
       };
     },
@@ -620,13 +639,13 @@ function Jt(e = 64 * 1024 * 1024, t = 3e3) {
     },
     retainOwners(m) {
       s = m;
-      for (const g of n.keys()) m.has(g) || n.delete(g);
-      const h = new Set([...n.values()].flatMap((g) => [...g]));
-      for (const g of i.values()) g.video && !g.pins && !h.has(g) && g.media.pause();
+      for (const f of n.keys()) m.has(f) || n.delete(f);
+      const g = new Set([...n.values()].flatMap((f) => [...f]));
+      for (const f of i.values()) f.video && !f.pins && !g.has(f) && f.media.pause();
     },
     clear() {
       n.clear();
-      for (const [m, h] of i) l(m, h);
+      for (const [m, g] of i) l(m, g);
       o !== null && window.clearTimeout(o), o = null;
     }
   };
@@ -653,14 +672,14 @@ function Kt(e) {
     c.lastStarted = Date.now(), c.pending = !0;
     const m = c.generation;
     try {
-      const h = await e.capture(c.camera);
-      if (!h || m !== c.generation) return;
-      for (const g of [...c.consumers.values()]) {
+      const g = await e.capture(c.camera);
+      if (!g || m !== c.generation) return;
+      for (const f of [...c.consumers.values()]) {
         if (m !== c.generation) break;
-        !r(g) || g.lastFrame === h || (await g.deliver(h), g.lastFrame = h);
+        !r(f) || f.lastFrame === g || (await f.deliver(g), f.lastFrame = g);
       }
-    } catch (h) {
-      e.error(h);
+    } catch (g) {
+      e.error(g);
     } finally {
       c.pending = !1, n() || e.idle(), c.rerun && (c.rerun = !1, o(c));
     }
@@ -676,20 +695,20 @@ function Kt(e) {
     i !== null && window.clearInterval(i), i = t.size ? window.setInterval(l, Math.min(250, e.interval())) : null, t.size || e.idle();
   }
   return document.addEventListener("visibilitychange", l), {
-    subscribe(c, m, h, g = () => !0, v = !1) {
-      const w = String(c.id), p = JSON.stringify(c);
-      let S = t.get(w);
-      if (!S)
-        S = { camera: c, version: p, generation: 0, pending: !1, rerun: !1, lastStarted: -1 / 0, consumers: /* @__PURE__ */ new Map() }, t.set(w, S), y();
-      else if (S.version !== p) {
-        S.camera = c, S.version = p, S.generation++;
-        for (const I of S.consumers.values()) I.lastFrame = void 0;
+    subscribe(c, m, g, f = () => !0, b = !1) {
+      const S = String(c.id), C = JSON.stringify(c);
+      let I = t.get(S);
+      if (!I)
+        I = { camera: c, version: C, generation: 0, pending: !1, rerun: !1, lastStarted: -1 / 0, consumers: /* @__PURE__ */ new Map() }, t.set(S, I), y();
+      else if (I.version !== C) {
+        I.camera = c, I.version = C, I.generation++;
+        for (const A of I.consumers.values()) A.lastFrame = void 0;
       }
-      S.consumers.set(m, { deliver: h, active: g, background: v }), s(), o(S);
+      I.consumers.set(m, { deliver: g, active: f, background: b }), s(), o(I);
     },
     unsubscribe(c) {
-      for (const [m, h] of t)
-        h.consumers.delete(c), h.consumers.size || (h.generation++, t.delete(m));
+      for (const [m, g] of t)
+        g.consumers.delete(c), g.consumers.size || (g.generation++, t.delete(m));
       s(), y();
     },
     invalidate(c) {
@@ -713,19 +732,19 @@ function Qt(e = "balanced", t = !0) {
   return { ...Ge[String(e)] ?? Ge.balanced, animateVideo: t };
 }
 function Zt(e, t = 100) {
-  const i = he(e);
+  const i = ge(e);
   if (!i) return null;
   const r = X(i.x), n = X(i.y);
   return !Number.isFinite(r) || !Number.isFinite(n) ? null : {
     x: r,
     y: n,
-    width: J(i.width, 1) * t,
-    height: J(i.height, 1) * t
+    width: K(i.width, 1) * t,
+    height: K(i.height, 1) * t
   };
 }
-function he(e) {
+function ge(e) {
   if (!e) return null;
-  if (e.document) return he(e.document);
+  if (e.document) return ge(e.document);
   if (typeof e.toObject == "function") {
     const t = e.toObject();
     if (t && typeof t == "object") return t;
@@ -744,7 +763,7 @@ function ei(e, t, i) {
     dh: e.height / t.height * i.height
   };
 }
-const T = (e, t = 0) => Number.isFinite(Number(e)) ? Number(e) : t;
+const U = (e, t = 0) => Number.isFinite(Number(e)) ? Number(e) : t;
 function ti(e) {
   if (!e) return [];
   const t = e.contents ?? (typeof e.values == "function" ? Array.from(e.values()) : e);
@@ -752,45 +771,45 @@ function ti(e) {
 }
 function ii(e, t) {
   return [
-    ...e.map((i) => ({ kind: "tile", document: i, data: he(i) })),
-    ...t.map((i) => ({ kind: "token", document: i, data: he(i) }))
+    ...e.map((i) => ({ kind: "tile", document: i, data: ge(i) })),
+    ...t.map((i) => ({ kind: "token", document: i, data: ge(i) }))
   ].filter((i) => i.data && !i.data.hidden).sort((i, r) => {
     const n = i.data, s = r.data;
-    return T(n.elevation, n.overhead ? 1 : 0) - T(s.elevation, s.overhead ? 1 : 0) || (i.kind === "tile" ? 0 : 1) - (r.kind === "tile" ? 0 : 1) || T(n.sort) - T(s.sort);
+    return U(n.elevation, n.overhead ? 1 : 0) - U(s.elevation, s.overhead ? 1 : 0) || (i.kind === "tile" ? 0 : 1) - (r.kind === "tile" ? 0 : 1) || U(n.sort) - U(s.sort);
   });
 }
 function ot(e, t) {
-  var O, j, B, G, Q;
-  const i = he(e);
+  var T, j, P, V, H;
+  const i = ge(e);
   if (!i || i.hidden || !(i.width > 0) || !(i.height > 0)) return null;
-  let r = T(i.width), n = T(i.height);
-  const s = (t == null ? void 0 : t.naturalWidth) || (t == null ? void 0 : t.videoWidth) || r, o = (t == null ? void 0 : t.naturalHeight) || (t == null ? void 0 : t.videoHeight) || n, l = ((O = i.texture) == null ? void 0 : O.fit) ?? "fill", y = l === "cover" ? Math.max(r / s, n / o) : l === "contain" ? Math.min(r / s, n / o) : l === "width" ? r / s : l === "height" ? n / o : null;
+  let r = U(i.width), n = U(i.height);
+  const s = (t == null ? void 0 : t.naturalWidth) || (t == null ? void 0 : t.videoWidth) || r, o = (t == null ? void 0 : t.naturalHeight) || (t == null ? void 0 : t.videoHeight) || n, l = ((T = i.texture) == null ? void 0 : T.fit) ?? "fill", y = l === "cover" ? Math.max(r / s, n / o) : l === "contain" ? Math.min(r / s, n / o) : l === "width" ? r / s : l === "height" ? n / o : null;
   y !== null && (r = s * y, n = o * y);
-  const c = T((j = i.texture) == null ? void 0 : j.anchorX, 0.5), m = T((B = i.texture) == null ? void 0 : B.anchorY, 0.5), h = T((G = i.texture) == null ? void 0 : G.scaleX, 1), g = T((Q = i.texture) == null ? void 0 : Q.scaleY, 1), v = T(i.rotation) * Math.PI / 180, w = T(i.x) + T(i.width) * T(i.anchorX, 0.5), p = T(i.y) + T(i.height) * T(i.anchorY, 0.5), S = [
+  const c = U((j = i.texture) == null ? void 0 : j.anchorX, 0.5), m = U((P = i.texture) == null ? void 0 : P.anchorY, 0.5), g = U((V = i.texture) == null ? void 0 : V.scaleX, 1), f = U((H = i.texture) == null ? void 0 : H.scaleY, 1), b = U(i.rotation) * Math.PI / 180, S = U(i.x) + U(i.width) * U(i.anchorX, 0.5), C = U(i.y) + U(i.height) * U(i.anchorY, 0.5), I = [
     [-r * c, -n * m],
     [r * (1 - c), -n * m],
     [r * (1 - c), n * (1 - m)],
     [-r * c, n * (1 - m)]
-  ].map(([x, D]) => ({
-    x: w + x * h * Math.cos(v) - D * g * Math.sin(v),
-    y: p + x * h * Math.sin(v) + D * g * Math.cos(v)
-  })), I = Math.min(...S.map((x) => x.x)), R = Math.min(...S.map((x) => x.y));
+  ].map(([E, D]) => ({
+    x: S + E * g * Math.cos(b) - D * f * Math.sin(b),
+    y: C + E * g * Math.sin(b) + D * f * Math.cos(b)
+  })), A = Math.min(...I.map((E) => E.x)), O = Math.min(...I.map((E) => E.y));
   return {
     width: r,
     height: n,
     anchorX: c,
     anchorY: m,
-    scaleX: h,
-    scaleY: g,
-    rotation: v,
-    cx: w,
-    cy: p,
-    alpha: Math.max(0, Math.min(1, T(i.alpha, 1))),
+    scaleX: g,
+    scaleY: f,
+    rotation: b,
+    cx: S,
+    cy: C,
+    alpha: Math.max(0, Math.min(1, U(i.alpha, 1))),
     bounds: {
-      x: I,
-      y: R,
-      width: Math.max(...S.map((x) => x.x)) - I,
-      height: Math.max(...S.map((x) => x.y)) - R
+      x: A,
+      y: O,
+      width: Math.max(...I.map((E) => E.x)) - A,
+      height: Math.max(...I.map((E) => E.y)) - O
     }
   };
 }
@@ -812,112 +831,112 @@ function ni(e) {
   };
   let y = 0;
   const c = /* @__PURE__ */ new Map(), m = (a) => `${y}:${c.get(a) ?? 0}`;
-  function h(a) {
-    const f = e.normalizeCamera(a);
-    return f.feedSource === "live" && f.status !== "offline" && f.status !== "restricted";
+  function g(a) {
+    const w = e.normalizeCamera(a);
+    return w.feedSource === "live" && w.status !== "offline" && w.status !== "restricted";
   }
-  function g(a = "") {
-    var b, C, F, k, U;
-    const f = e.getSceneById(a), d = (f == null ? void 0 : f.id) && ((b = canvas == null ? void 0 : canvas.scene) == null ? void 0 : b.id) === f.id ? canvas.dimensions : f == null ? void 0 : f.dimensions;
+  function f(a = "") {
+    var h, v, p, F, x;
+    const w = e.getSceneById(a), d = (w == null ? void 0 : w.id) && ((h = canvas == null ? void 0 : canvas.scene) == null ? void 0 : h.id) === w.id ? canvas.dimensions : w == null ? void 0 : w.dimensions;
     return {
-      x: X((d == null ? void 0 : d.sceneX) ?? ((C = d == null ? void 0 : d.sceneRect) == null ? void 0 : C.x)) ?? 0,
-      y: X((d == null ? void 0 : d.sceneY) ?? ((F = d == null ? void 0 : d.sceneRect) == null ? void 0 : F.y)) ?? 0,
-      width: J(
-        (d == null ? void 0 : d.sceneWidth) ?? ((k = d == null ? void 0 : d.sceneRect) == null ? void 0 : k.width) ?? (d == null ? void 0 : d.width) ?? (f == null ? void 0 : f.width),
+      x: X((d == null ? void 0 : d.sceneX) ?? ((v = d == null ? void 0 : d.sceneRect) == null ? void 0 : v.x)) ?? 0,
+      y: X((d == null ? void 0 : d.sceneY) ?? ((p = d == null ? void 0 : d.sceneRect) == null ? void 0 : p.y)) ?? 0,
+      width: K(
+        (d == null ? void 0 : d.sceneWidth) ?? ((F = d == null ? void 0 : d.sceneRect) == null ? void 0 : F.width) ?? (d == null ? void 0 : d.width) ?? (w == null ? void 0 : w.width),
         xe
       ),
-      height: J(
-        (d == null ? void 0 : d.sceneHeight) ?? ((U = d == null ? void 0 : d.sceneRect) == null ? void 0 : U.height) ?? (d == null ? void 0 : d.height) ?? (f == null ? void 0 : f.height),
+      height: K(
+        (d == null ? void 0 : d.sceneHeight) ?? ((x = d == null ? void 0 : d.sceneRect) == null ? void 0 : x.height) ?? (d == null ? void 0 : d.height) ?? (w == null ? void 0 : w.height),
         Ee
       )
     };
   }
-  async function v(a, f) {
-    if (!a.toBlob) return a.toDataURL("image/webp", f);
-    const u = (b) => new Promise((C, F) => {
+  async function b(a, w) {
+    if (!a.toBlob) return a.toDataURL("image/webp", w);
+    const u = (h) => new Promise((v, p) => {
       try {
-        a.toBlob(C, b, f);
-      } catch (k) {
-        F(k);
+        a.toBlob(v, h, w);
+      } catch (F) {
+        p(F);
       }
     }), d = await u("image/webp") ?? await u("image/png");
     if (!d) throw new Error("Could not encode the camera frame.");
-    return new Promise((b, C) => {
-      const F = new FileReader();
-      F.onload = () => b(String(F.result)), F.onerror = () => C(F.error ?? new Error("Could not read the camera frame.")), F.readAsDataURL(d);
+    return new Promise((h, v) => {
+      const p = new FileReader();
+      p.onload = () => h(String(p.result)), p.onerror = () => v(p.error ?? new Error("Could not read the camera frame.")), p.readAsDataURL(d);
     });
   }
-  async function w(a, f, u) {
+  async function S(a, w, u) {
     var we, be, pe, Se, Ce;
     const d = e.getSceneById(a.sceneId);
     if (!d) return "";
-    const b = g(a.sceneId), C = Number.isFinite(a.regionX) && Number.isFinite(a.regionY) ? { x: a.regionX, y: a.regionY, width: a.regionWidth, height: a.regionHeight } : b, F = l(), k = Math.min(1, F.maxDimension / C.width, F.maxDimension / C.height), U = Math.max(1, Math.round(C.width * k)), Y = Math.max(1, Math.round(C.height * k)), te = n.pop() ?? document.createElement("canvas");
-    te.width = U, te.height = Y;
-    const N = te.getContext("2d");
-    if (!N) return "";
-    const ne = t.beginFrame(o.has(a.id) ? a.id : void 0);
-    let ie = !1;
-    const re = async (ue, ae = !0) => {
-      const V = await ne.load(ue);
-      return (V == null ? void 0 : V.tagName) === "VIDEO" ? F.animateVideo && ae && (document.visibilityState !== "hidden" || s.size > 0) ? (ie = !0, V.play().catch(() => {
-      })) : V.pause() : V && t.isAnimated(V) && (ie = !0), V;
+    const h = f(a.sceneId), v = Number.isFinite(a.regionX) && Number.isFinite(a.regionY) ? { x: a.regionX, y: a.regionY, width: a.regionWidth, height: a.regionHeight } : h, p = l(), F = Math.min(1, p.maxDimension / v.width, p.maxDimension / v.height), x = Math.max(1, Math.round(v.width * F)), N = Math.max(1, Math.round(v.height * F)), G = n.pop() ?? document.createElement("canvas");
+    G.width = x, G.height = N;
+    const L = G.getContext("2d");
+    if (!L) return "";
+    const re = t.beginFrame(o.has(a.id) ? a.id : void 0);
+    let te = !1;
+    const ie = async (ce, ne = !0) => {
+      const W = await re.load(ce);
+      return (W == null ? void 0 : W.tagName) === "VIDEO" ? p.animateVideo && ne && (document.visibilityState !== "hidden" || s.size > 0) ? (te = !0, W.play().catch(() => {
+      })) : W.pause() : W && t.isAnimated(W) && (te = !0), W;
     };
     try {
-      N.fillStyle = String(d.backgroundColor ?? "#010505"), N.fillRect(0, 0, U, Y);
-      const ue = e.getSceneBackgroundPath(a.sceneId) || a.image, ae = await re(ue);
-      if (ue && !ae) throw new Error("Camera background could not be loaded.");
-      const V = ti(d.tiles ?? ((we = d._source) == null ? void 0 : we.tiles));
-      typeof d.foreground == "string" && d.foreground && V.push({
-        x: b.x,
-        y: b.y,
-        width: b.width,
-        height: b.height,
+      L.fillStyle = String(d.backgroundColor ?? "#010505"), L.fillRect(0, 0, x, N);
+      const ce = e.getSceneBackgroundPath(a.sceneId) || a.image, ne = await ie(ce);
+      if (ce && !ne) throw new Error("Camera background could not be loaded.");
+      const W = ti(d.tiles ?? ((we = d._source) == null ? void 0 : we.tiles));
+      typeof d.foreground == "string" && d.foreground && W.push({
+        x: h.x,
+        y: h.y,
+        width: h.width,
+        height: h.height,
         elevation: d.foregroundElevation ?? Number.MAX_SAFE_INTEGER,
         sort: -Number.MAX_SAFE_INTEGER,
         texture: { src: d.foreground }
       });
-      const fe = ii(V, j(d, a)), kt = p(d), it = () => N.setTransform(
-        U / C.width,
+      const me = ii(W, j(d, a)), kt = C(d), it = () => L.setTransform(
+        x / v.width,
         0,
         0,
-        Y / C.height,
-        -C.x * U / C.width,
-        -C.y * Y / C.height
+        N / v.height,
+        -v.x * x / v.width,
+        -v.y * N / v.height
       );
-      it(), ae && N.drawImage(ae, b.x, b.y, b.width, b.height);
-      for (const Le of fe) {
+      it(), ne && L.drawImage(ne, h.x, h.y, h.width, h.height);
+      for (const Le of me) {
         if (Le.kind === "token") {
-          N.setTransform(1, 0, 0, 1, 0, 0), await O(N, Le.document, Le.data, C, kt, U, Y, re);
+          L.setTransform(1, 0, 0, 1, 0, 0), await T(L, Le.document, Le.data, v, kt, x, N, ie);
           continue;
         }
-        const se = Le.data, We = ot(se);
-        if (!We || !We.alpha || (!((be = se.texture) != null && be.fit) || se.texture.fit === "fill") && !Ye(We.bounds, C)) continue;
-        const rt = String(((pe = se.texture) == null ? void 0 : pe.src) ?? se.img ?? "");
+        const ae = Le.data, We = ot(ae);
+        if (!We || !We.alpha || (!((be = ae.texture) != null && be.fit) || ae.texture.fit === "fill") && !Ye(We.bounds, v)) continue;
+        const rt = String(((pe = ae.texture) == null ? void 0 : pe.src) ?? ae.img ?? "");
         if (!rt) continue;
-        const Ie = await re(rt, ((Se = se.video) == null ? void 0 : Se.autoplay) !== !1);
+        const Ie = await ie(rt, ((Se = ae.video) == null ? void 0 : Se.autoplay) !== !1);
         if (!Ie) throw new Error("A camera tile could not be loaded. Check its media path and access.");
-        Ie.tagName === "VIDEO" && (Ie.loop = ((Ce = se.video) == null ? void 0 : Ce.loop) !== !1);
-        const nt = ot(se, Ie);
-        Ye(nt.bounds, C) && (it(), ri(N, Ie, nt));
+        Ie.tagName === "VIDEO" && (Ie.loop = ((Ce = ae.video) == null ? void 0 : Ce.loop) !== !1);
+        const nt = ot(ae, Ie);
+        Ye(nt.bounds, v) && (it(), ri(L, Ie, nt));
       }
-      const Rt = await v(te, F.quality);
-      return u === m(a.sceneId) && (ie ? r.add(f) : r.delete(f)), Rt;
+      const Rt = await b(G, p.quality);
+      return u === m(a.sceneId) && (te ? r.add(w) : r.delete(w)), Rt;
     } finally {
-      ne.finish(), n.length < 2 && n.push(te);
+      re.finish(), n.length < 2 && n.push(G);
     }
   }
-  function p(a) {
-    var u, d, b, C, F, k;
-    const f = (a == null ? void 0 : a.id) && ((u = canvas == null ? void 0 : canvas.scene) == null ? void 0 : u.id) === a.id;
-    return J(
-      f ? ((d = canvas == null ? void 0 : canvas.dimensions) == null ? void 0 : d.size) ?? ((b = canvas == null ? void 0 : canvas.grid) == null ? void 0 : b.size) ?? ((C = a == null ? void 0 : a.grid) == null ? void 0 : C.size) : ((F = a == null ? void 0 : a.dimensions) == null ? void 0 : F.size) ?? ((k = a == null ? void 0 : a.grid) == null ? void 0 : k.size),
+  function C(a) {
+    var u, d, h, v, p, F;
+    const w = (a == null ? void 0 : a.id) && ((u = canvas == null ? void 0 : canvas.scene) == null ? void 0 : u.id) === a.id;
+    return K(
+      w ? ((d = canvas == null ? void 0 : canvas.dimensions) == null ? void 0 : d.size) ?? ((h = canvas == null ? void 0 : canvas.grid) == null ? void 0 : h.size) ?? ((v = a == null ? void 0 : a.grid) == null ? void 0 : v.size) : ((p = a == null ? void 0 : a.dimensions) == null ? void 0 : p.size) ?? ((F = a == null ? void 0 : a.grid) == null ? void 0 : F.size),
       100
     );
   }
-  function S(a) {
+  function I(a) {
     if (!a) return [];
-    const f = [
-      () => I(a, "Token"),
+    const w = [
+      () => A(a, "Token"),
       () => a.tokens,
       () => {
         var u;
@@ -932,68 +951,68 @@ function ni(e) {
         return (u = a.toObject) == null ? void 0 : u.call(a).tokens;
       }
     ];
-    for (const u of f) {
+    for (const u of w) {
       const d = u();
-      if (d != null) return R(d);
+      if (d != null) return O(d);
     }
     return [];
   }
-  function I(a, f) {
+  function A(a, w) {
     var u;
     try {
-      return (u = a == null ? void 0 : a.getEmbeddedCollection) == null ? void 0 : u.call(a, f);
+      return (u = a == null ? void 0 : a.getEmbeddedCollection) == null ? void 0 : u.call(a, w);
     } catch (d) {
-      return console.warn(`${e.moduleId} | Could not read ${f} collection for inactive scene.`, d), null;
+      return console.warn(`${e.moduleId} | Could not read ${w} collection for inactive scene.`, d), null;
     }
   }
-  function R(a) {
+  function O(a) {
     return a ? (Array.isArray(a == null ? void 0 : a.contents) ? a.contents : Array.isArray(a) ? a : typeof a.values == "function" ? Array.from(a.values()) : Array.from(a ?? [])).map((u) => Array.isArray(u) ? u[1] : u).map((u) => (u == null ? void 0 : u.document) ?? u).filter(Boolean) : [];
   }
-  async function O(a, f, u, d, b, C, F, k) {
-    var be, pe, Se, Ce, ue, ae, V;
-    const U = Zt(u, b);
-    if (!U) return;
-    const Y = Ye(U, d);
-    if (!Y) return;
-    const te = String(((be = f.getTextureSrc) == null ? void 0 : be.call(f)) ?? ((pe = u.texture) == null ? void 0 : pe.src) ?? u.img ?? ((Se = f.actor) == null ? void 0 : Se.img) ?? ((Ce = f.baseActor) == null ? void 0 : Ce.img) ?? ((V = (ae = (ue = f.actor) == null ? void 0 : ue.prototypeToken) == null ? void 0 : ae.texture) == null ? void 0 : V.src) ?? "").trim(), N = await k(te), { dx: ne, dy: ie, dw: re, dh: we } = ei(Y, d, { width: C, height: F });
+  async function T(a, w, u, d, h, v, p, F) {
+    var be, pe, Se, Ce, ce, ne, W;
+    const x = Zt(u, h);
+    if (!x) return;
+    const N = Ye(x, d);
+    if (!N) return;
+    const G = String(((be = w.getTextureSrc) == null ? void 0 : be.call(w)) ?? ((pe = u.texture) == null ? void 0 : pe.src) ?? u.img ?? ((Se = w.actor) == null ? void 0 : Se.img) ?? ((Ce = w.baseActor) == null ? void 0 : Ce.img) ?? ((W = (ne = (ce = w.actor) == null ? void 0 : ce.prototypeToken) == null ? void 0 : ne.texture) == null ? void 0 : W.src) ?? "").trim(), L = await F(G), { dx: re, dy: te, dw: ie, dh: we } = ei(N, d, { width: v, height: p });
     a.save();
     try {
-      if (a.globalAlpha = X(u.alpha) ?? 1, N != null && N.naturalWidth && (N != null && N.naturalHeight)) {
-        const fe = B(N, U, Y);
-        a.drawImage(N, fe.sx, fe.sy, fe.sw, fe.sh, ne, ie, re, we);
-      } else G(a, u, ne, ie, re, we);
+      if (a.globalAlpha = X(u.alpha) ?? 1, L != null && L.naturalWidth && (L != null && L.naturalHeight)) {
+        const me = P(L, x, N);
+        a.drawImage(L, me.sx, me.sy, me.sw, me.sh, re, te, ie, we);
+      } else V(a, u, re, te, ie, we);
     } finally {
       a.restore();
     }
   }
-  function j(a, f) {
-    var d, b;
-    const u = (d = e.getRegionDocument) == null ? void 0 : d.call(e, f.regionId, f.sceneId);
-    return u && ((b = canvas == null ? void 0 : canvas.scene) == null ? void 0 : b.id) === a.id && "tokens" in Object(u) ? R(u.tokens) : S(a);
+  function j(a, w) {
+    var d, h;
+    const u = (d = e.getRegionDocument) == null ? void 0 : d.call(e, w.regionId, w.sceneId);
+    return u && ((h = canvas == null ? void 0 : canvas.scene) == null ? void 0 : h.id) === a.id && "tokens" in Object(u) ? O(u.tokens) : I(a);
   }
-  function B(a, f, u) {
-    const d = a.naturalWidth / f.width, b = a.naturalHeight / f.height;
+  function P(a, w, u) {
+    const d = a.naturalWidth / w.width, h = a.naturalHeight / w.height;
     return {
-      sx: Math.max(0, (u.x - f.x) * d),
-      sy: Math.max(0, (u.y - f.y) * b),
+      sx: Math.max(0, (u.x - w.x) * d),
+      sy: Math.max(0, (u.y - w.y) * h),
       sw: Math.min(a.naturalWidth, u.width * d),
-      sh: Math.min(a.naturalHeight, u.height * b)
+      sh: Math.min(a.naturalHeight, u.height * h)
     };
   }
-  function G(a, f, u, d, b, C) {
-    const F = he(f), k = Math.max(ct, b), U = Math.max(ct, C), Y = u + (b - k) / 2, te = d + (C - U) / 2, N = Math.min(k, U) / 2, ne = Y + k / 2, ie = te + U / 2;
-    a.beginPath(), a.arc(ne, ie, N, 0, Math.PI * 2), a.fillStyle = "rgba(10, 18, 24, 0.82)", a.fill(), a.lineWidth = Math.max(2, Math.min(k, U) * 0.08), a.strokeStyle = "rgba(72, 220, 255, 0.95)", a.stroke();
-    const re = String((F == null ? void 0 : F.name) ?? (f == null ? void 0 : f.name) ?? "").trim().slice(0, 2).toUpperCase();
-    re && (a.font = `700 ${Math.max(10, Math.round(N * 0.72))}px sans-serif`, a.textAlign = "center", a.textBaseline = "middle", a.fillStyle = "rgba(224, 252, 255, 0.96)", a.fillText(re, ne, ie + 0.5));
+  function V(a, w, u, d, h, v) {
+    const p = ge(w), F = Math.max(ct, h), x = Math.max(ct, v), N = u + (h - F) / 2, G = d + (v - x) / 2, L = Math.min(F, x) / 2, re = N + F / 2, te = G + x / 2;
+    a.beginPath(), a.arc(re, te, L, 0, Math.PI * 2), a.fillStyle = "rgba(10, 18, 24, 0.82)", a.fill(), a.lineWidth = Math.max(2, Math.min(F, x) * 0.08), a.strokeStyle = "rgba(72, 220, 255, 0.95)", a.stroke();
+    const ie = String((p == null ? void 0 : p.name) ?? (w == null ? void 0 : w.name) ?? "").trim().slice(0, 2).toUpperCase();
+    ie && (a.font = `700 ${Math.max(10, Math.round(L * 0.72))}px sans-serif`, a.textAlign = "center", a.textBaseline = "middle", a.fillStyle = "rgba(224, 252, 255, 0.96)", a.fillText(ie, re, te + 0.5));
   }
-  async function Q(a = {}, f = {}) {
+  async function H(a = {}, w = {}) {
     const u = e.applyLinkedRegionBounds(e.normalizeCamera(a));
-    if (!h(u)) return "";
-    const d = e.getSceneById(u.sceneId), b = { ...u, sceneId: (d == null ? void 0 : d.id) ?? u.sceneId }, C = l(), F = JSON.stringify([b.sceneId, b, C]), k = m(b.sceneId), U = r.has(F) ? C.interval * 0.8 : 1 / 0, Y = await i.get(F, () => w(b, F, k), U);
-    return k === m(b.sceneId) ? Y : "";
+    if (!g(u)) return "";
+    const d = e.getSceneById(u.sceneId), h = { ...u, sceneId: (d == null ? void 0 : d.id) ?? u.sceneId }, v = l(), p = JSON.stringify([h.sceneId, h, v]), F = m(h.sceneId), x = r.has(p) ? v.interval * 0.8 : 1 / 0, N = await i.get(p, () => S(h, p, F), x);
+    return F === m(h.sceneId) ? N : "";
   }
-  const x = Kt({
-    capture: Q,
+  const E = Kt({
+    capture: H,
     interval: () => l().interval,
     idle: () => t.pauseVideos(),
     active(a) {
@@ -1001,68 +1020,68 @@ function ni(e) {
     },
     error: (a) => console.warn(`${e.moduleId} | Camera refresh failed; retrying.`, a)
   }), D = {};
-  function Z(a) {
-    x.unsubscribe(a);
+  function ee(a) {
+    E.unsubscribe(a);
   }
-  function le(a) {
-    Z(a), !(!h(a == null ? void 0 : a.camera) || !e.isFrameProducer()) && x.subscribe(a.camera, a, (f) => {
+  function de(a) {
+    ee(a), !(!g(a == null ? void 0 : a.camera) || !e.isFrameProducer()) && E.subscribe(a.camera, a, (w) => {
       var u;
-      return (u = a.updateLiveFrame) == null ? void 0 : u.call(a, f);
+      return (u = a.updateLiveFrame) == null ? void 0 : u.call(a, w);
     }, () => {
       var u, d;
-      const f = ((u = a.element) == null ? void 0 : u[0]) ?? a.element;
-      return a.rendered !== !1 && !a.minimized && !a._minimized && (!f || !f.hidden && ((d = f.style) == null ? void 0 : d.display) !== "none");
+      const w = ((u = a.element) == null ? void 0 : u[0]) ?? a.element;
+      return a.rendered !== !1 && !a.minimized && !a._minimized && (!w || !w.hidden && ((d = w.style) == null ? void 0 : d.display) !== "none");
     });
   }
   function De(a) {
-    x.unsubscribe(D), !(!h(a) || !e.isFrameProducer()) && x.subscribe(a, D, (f) => {
+    E.unsubscribe(D), !(!g(a) || !e.isFrameProducer()) && E.subscribe(a, D, (w) => {
       var u;
-      return (u = e.broadcastLiveFrame) == null ? void 0 : u.call(e, e.normalizeCamera(a), f);
+      return (u = e.broadcastLiveFrame) == null ? void 0 : u.call(e, e.normalizeCamera(a), w);
     });
   }
-  function M(a) {
+  function ve(a) {
     if (a) {
       c.set(a, (c.get(a) ?? 0) + 1);
-      const f = `[${JSON.stringify(a)},`;
-      i.invalidate((u) => u.startsWith(f));
-      for (const u of r) u.startsWith(f) && r.delete(u);
+      const w = `[${JSON.stringify(a)},`;
+      i.invalidate((u) => u.startsWith(w));
+      for (const u of r) u.startsWith(w) && r.delete(u);
     } else
       y++, c.clear(), i.clear(), r.clear();
-    x.invalidate(a);
+    E.invalidate(a);
   }
   return {
-    captureLiveFrame: Q,
-    invalidateFrames: M,
+    captureLiveFrame: H,
+    invalidateFrames: ve,
     reconfigure() {
-      t.pauseVideos(), M(), x.reconfigure();
+      t.pauseVideos(), ve(), E.reconfigure();
     },
-    wake: x.wake,
+    wake: E.wake,
     startBroadcastLiveRefresh: De,
-    stopBroadcastLiveRefresh: () => x.unsubscribe(D),
-    startLocalLiveRefresh: le,
-    stopLocalLiveRefresh: Z,
-    subscribeRemote(a, f, u, d) {
-      !h(a) || !e.isFrameProducer() || (s.add(f), x.subscribe(a, f, u, d, !0));
+    stopBroadcastLiveRefresh: () => E.unsubscribe(D),
+    startLocalLiveRefresh: de,
+    stopLocalLiveRefresh: ee,
+    subscribeRemote(a, w, u, d) {
+      !g(a) || !e.isFrameProducer() || (s.add(w), E.subscribe(a, w, u, d, !0));
     },
     unsubscribeRemote(a) {
-      s.delete(a), x.unsubscribe(a);
+      s.delete(a), E.unsubscribe(a);
     },
     clearRemoteViewers() {
-      for (const a of s) x.unsubscribe(a);
+      for (const a of s) E.unsubscribe(a);
       s.clear();
     }
   };
 }
-const E = "security-cameras", ht = `module.${E}`, ai = `modules/${E}/templates/monitor.hbs`, si = `modules/${E}/templates/feed.hbs`;
+const k = "security-cameras", ht = `module.${k}`, ai = `modules/${k}/templates/monitor.hbs`, si = `modules/${k}/templates/feed.hbs`;
 function oi() {
-  return Qt(game.settings.get(E, "cameraQuality"), game.settings.get(E, "animateVideoTiles") !== !1);
+  return Qt(game.settings.get(k, "cameraQuality"), game.settings.get(k, "animateVideoTiles") !== !1);
 }
 function qe() {
-  const e = Number(game.settings.get(E, "videoEffectIntensity")), t = Number.isFinite(e) ? Math.max(0, Math.min(200, e)) / 100 : 0.5, i = document.documentElement;
-  i.style.setProperty("--security-camera-effect-intensity", String(t)), i.classList.toggle("security-camera-effects-disabled", t === 0), i.classList.toggle("security-camera-reduced-effects", !!game.settings.get(E, "reducedEffects"));
+  const e = Number(game.settings.get(k, "videoEffectIntensity")), t = Number.isFinite(e) ? Math.max(0, Math.min(200, e)) / 100 : 0.5, i = document.documentElement;
+  i.style.setProperty("--security-camera-effect-intensity", String(t)), i.classList.toggle("security-camera-effects-disabled", t === 0), i.classList.toggle("security-camera-reduced-effects", !!game.settings.get(k, "reducedEffects"));
 }
 function ci(e) {
-  game.settings.register(E, "cameraQuality", {
+  game.settings.register(k, "cameraQuality", {
     name: "Camera Quality",
     hint: "Low: 480px every 2.5 seconds. Balanced: 640px every 1.5 seconds. High: 960px every 1.25 seconds. Lower settings reduce capture and network work for everyone.",
     scope: "world",
@@ -1071,7 +1090,7 @@ function ci(e) {
     default: "balanced",
     choices: { low: "Low", balanced: "Balanced", high: "High" },
     onChange: e
-  }), game.settings.register(E, "animateVideoTiles", {
+  }), game.settings.register(k, "animateVideoTiles", {
     name: "Animate Video Tiles",
     hint: "Play video backgrounds and tiles in live feeds. Turn this off to use still frames and reduce work on the GM's machine.",
     scope: "world",
@@ -1079,7 +1098,7 @@ function ci(e) {
     type: Boolean,
     default: !0,
     onChange: e
-  }), game.settings.register(E, "reducedEffects", {
+  }), game.settings.register(k, "reducedEffects", {
     name: "Reduced Screen Effects",
     hint: "Remove animated screen effects and image filters on this computer. Camera status and access restrictions still apply.",
     scope: "client",
@@ -1087,7 +1106,7 @@ function ci(e) {
     type: Boolean,
     default: !1,
     onChange: qe
-  }), game.settings.register(E, "videoEffectIntensity", {
+  }), game.settings.register(k, "videoEffectIntensity", {
     name: "Video Effect Intensity",
     hint: "Adjust static, scanlines, tint, flicker, and glitches for all viewers. Default: 50%. Use 0% to turn effects off or 100% for the original strength. Clean cameras have no effects.",
     scope: "world",
@@ -1096,7 +1115,7 @@ function ci(e) {
     range: { min: 0, max: 200, step: 10 },
     default: 50,
     onChange: qe
-  }), game.settings.register(E, "cameras", {
+  }), game.settings.register(k, "cameras", {
     name: "Security Cameras",
     hint: "Saved camera feeds for this world.",
     scope: "world",
@@ -1109,7 +1128,7 @@ function ke() {
   var e;
   return (e = foundry == null ? void 0 : foundry.utils) != null && e.randomID ? foundry.utils.randomID() : crypto != null && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
-function ve(e) {
+function ye(e) {
   var t;
   return (t = foundry == null ? void 0 : foundry.utils) != null && t.deepClone ? foundry.utils.deepClone(e) : JSON.parse(JSON.stringify(e));
 }
@@ -1119,16 +1138,16 @@ function yt(e) {
   const t = document.createElement("div");
   return t.innerText = String(e), t.innerHTML;
 }
-const vt = Ot(E, {
+const vt = Ot(k, {
   socketName: ht,
   title: "Security Cameras"
 });
-let P = null, A = null, L = "", ee = "", ye = "", Ae = 0, Oe = 0, $e = !1, de = null;
-const li = 1e4, H = /* @__PURE__ */ new Map();
-function K(e = {}, t = {}) {
+let B = null, M = null, R = "", Z = "", he = "", Ae = 0, Oe = 0, $e = !1, le = null;
+const li = 1e4, J = /* @__PURE__ */ new Map();
+function Q(e = {}, t = {}) {
   return Xe(e, { ...t, createId: ke });
 }
-function Te(e = {}, t = {}) {
+function Ue(e = {}, t = {}) {
   return Pt(e, { ...t, createId: ke });
 }
 function di(e) {
@@ -1184,8 +1203,8 @@ function Ze(e = "", t = "") {
 function gi(e) {
   var o, l, y, c;
   const t = (e == null ? void 0 : e.object) ?? ((y = (l = (o = canvas == null ? void 0 : canvas.regions) == null ? void 0 : o.placeables) == null ? void 0 : l.find) == null ? void 0 : y.call(l, (m) => {
-    var h;
-    return ((h = m.document) == null ? void 0 : h.id) === (e == null ? void 0 : e.id);
+    var g;
+    return ((g = m.document) == null ? void 0 : g.id) === (e == null ? void 0 : e.id);
   })), i = t == null ? void 0 : t.bounds;
   if (i != null && i.width && (i != null && i.height))
     return je(i);
@@ -1204,7 +1223,7 @@ function Be(e) {
 }
 function He() {
   const e = canvas == null ? void 0 : canvas.scene;
-  return K({
+  return Q({
     id: "",
     name: "",
     sceneId: (e == null ? void 0 : e.id) ?? "",
@@ -1222,9 +1241,9 @@ function ze(e, t) {
     selected: i.value === t
   }));
 }
-function Ue(e = {}) {
+function Te(e = {}) {
   var y;
-  const t = K(e), i = (/* @__PURE__ */ new Date()).toLocaleString(), r = t.status === "online" || t.status === "clean", n = t.status === "offline", s = t.status === "corrupted", o = t.status === "restricted", l = t.feedSource === "live";
+  const t = Q(e), i = (/* @__PURE__ */ new Date()).toLocaleString(), r = t.status === "online" || t.status === "clean", n = t.status === "offline", s = t.status === "corrupted", o = t.status === "restricted", l = t.feedSource === "live";
   return {
     ...t,
     sceneName: di(t.sceneId),
@@ -1247,55 +1266,55 @@ function Ue(e = {}) {
     displayClass: `security-camera-display-${t.displayMode}`
   };
 }
-function oe() {
-  const e = game.settings.get(E, "cameras");
+function se() {
+  const e = game.settings.get(k, "cameras");
   return !e || typeof e != "object" || Array.isArray(e) ? {} : e;
 }
 function pt() {
-  return Object.values(oe()).map(K).sort((e, t) => e.name.localeCompare(t.name));
+  return Object.values(se()).map(Q).sort((e, t) => e.name.localeCompare(t.name));
 }
-function W(e) {
+function Y(e) {
   const t = String(e ?? "");
   if (!t) return null;
-  const i = oe()[t];
-  return i ? K(i) : null;
+  const i = se()[t];
+  return i ? Q(i) : null;
 }
 async function Re(e) {
   var i;
-  const t = ve(oe());
-  await game.settings.set(E, "cameras", e), _.invalidateFrames();
+  const t = ye(se());
+  await game.settings.set(k, "cameras", e), _.invalidateFrames();
   for (const r of Object.keys(t))
-    JSON.stringify(t[r]) !== JSON.stringify(e[r]) && (xt(r), me({
+    JSON.stringify(t[r]) !== JSON.stringify(e[r]) && (xt(r), ue({
       action: "cameraChanged",
       gmUserId: game.user.id,
       cameraId: r,
-      camera: e[r] ? K(e[r]) : null
-    }), ((i = A == null ? void 0 : A.camera) == null ? void 0 : i.id) === r && (e[r] ? await Me(e[r]) : await _e()), ye === r && (Ae++, _.stopBroadcastLiveRefresh(), e[r] || (ye = "")));
+      camera: e[r] ? Q(e[r]) : null
+    }), ((i = M == null ? void 0 : M.camera) == null ? void 0 : i.id) === r && (e[r] ? await Me(e[r]) : await _e()), he === r && (Ae++, _.stopBroadcastLiveRefresh(), e[r] || (he = "")));
   await Ei();
 }
-function ce(e = "manage security cameras") {
+function oe(e = "manage security cameras") {
   var t, i, r;
   return (t = game.user) != null && t.isGM ? !0 : ((r = (i = ui.notifications) == null ? void 0 : i.warn) == null || r.call(i, `Only the GM can ${e}.`), !1);
 }
-function me(e) {
+function ue(e) {
   return vt.emit(e);
 }
 async function hi(e = {}) {
   var n, s;
-  if (!ce("register security cameras")) return null;
-  const t = Te(e);
+  if (!oe("register security cameras")) return null;
+  const t = Ue(e);
   if (!t.ok)
     return (s = (n = ui.notifications) == null ? void 0 : n.error) == null || s.call(n, t.errors.join(" ")), null;
-  const i = Be(t.camera), r = ve(oe());
-  return r[i.id] = i, L = i.id, ee = i.id, await Re(r), i;
+  const i = Be(t.camera), r = ye(se());
+  return r[i.id] = i, R = i.id, Z = i.id, await Re(r), i;
 }
 async function St(e) {
   var o, l;
-  if (!ce("delete security cameras")) return !1;
-  const t = String(e ?? L ?? "");
-  if (!t || !W(t))
+  if (!oe("delete security cameras")) return !1;
+  const t = String(e ?? R ?? "");
+  if (!t || !Y(t))
     return (l = (o = ui.notifications) == null ? void 0 : o.warn) == null || l.call(o, "Select a camera to delete."), !1;
-  const i = W(t);
+  const i = Y(t);
   if (!(typeof Dialog < "u" ? await Dialog.confirm({
     title: "Delete Security Camera",
     content: `<p>Delete camera <strong>${yt(i.name)}</strong>?</p>`,
@@ -1303,38 +1322,38 @@ async function St(e) {
     no: () => !1,
     defaultYes: !1
   }) : window.confirm(`Delete camera "${i.name}"?`))) return !1;
-  const n = ve(oe());
-  return delete n[t], L = Object.keys(n)[0] ?? "", ee = L, await Re(n), !0;
+  const n = ye(se());
+  return delete n[t], R = Object.keys(n)[0] ?? "", Z = R, await Re(n), !0;
 }
 async function Ct(e) {
   var n, s;
-  if (!ce("duplicate security cameras")) return null;
-  const t = W(e || L);
+  if (!oe("duplicate security cameras")) return null;
+  const t = Y(e || R);
   if (!t)
     return (s = (n = ui.notifications) == null ? void 0 : n.warn) == null || s.call(n, "Select a camera to duplicate."), null;
-  const i = K({
+  const i = Q({
     ...t,
     id: ke(),
     name: `${t.name} Copy`
-  }), r = ve(oe());
-  return r[i.id] = i, L = i.id, ee = i.id, await Re(r), i;
+  }), r = ye(se());
+  return r[i.id] = i, R = i.id, Z = i.id, await Re(r), i;
 }
 async function It() {
   var i, r;
-  if (!ce("create security cameras")) return null;
-  const e = K({
+  if (!oe("create security cameras")) return null;
+  const e = Q({
     ...He(),
     id: ke(),
     name: "New Camera",
     location: "Unlabeled Location"
-  }), t = ve(oe());
-  return t[e.id] = Be(e), L = e.id, ee = e.id, await Re(t), (r = (i = ui.notifications) == null ? void 0 : i.info) == null || r.call(i, "New security camera created."), e;
+  }), t = ye(se());
+  return t[e.id] = Be(e), R = e.id, Z = e.id, await Re(t), (r = (i = ui.notifications) == null ? void 0 : i.info) == null || r.call(i, "New security camera created."), e;
 }
 function Ft(e) {
   const t = new FormData(e), i = String(t.get("originalId") ?? "").trim(), r = String(t.get("id") ?? "").trim() || i || ke();
   return {
     originalId: i,
-    camera: K({
+    camera: Q({
       id: r,
       name: t.get("name"),
       sceneId: e.elements.sceneId.value,
@@ -1353,17 +1372,17 @@ function Ft(e) {
   };
 }
 async function lt(e) {
-  var o, l, y, c, m, h;
-  if (!ce("save security cameras") || !(e != null && e.reportValidity())) return null;
-  const { originalId: t, camera: i } = Ft(e), r = Te(i);
+  var o, l, y, c, m, g;
+  if (!oe("save security cameras") || !(e != null && e.reportValidity())) return null;
+  const { originalId: t, camera: i } = Ft(e), r = Ue(i);
   if (!r.ok)
     return (l = (o = ui.notifications) == null ? void 0 : o.error) == null || l.call(o, r.errors.join(" ")), null;
-  const n = Be(r.camera), s = ve(oe());
-  return t !== n.id && Object.hasOwn(s, n.id) ? ((c = (y = ui.notifications) == null ? void 0 : y.warn) == null || c.call(y, "That camera ID is already in use. Choose a unique ID."), null) : (t && t !== n.id && delete s[t], $e = !1, de = null, s[n.id] = n, L = n.id, ee = n.id, await Re(s), (h = (m = ui.notifications) == null ? void 0 : m.info) == null || h.call(m, "Security camera saved."), n);
+  const n = Be(r.camera), s = ye(se());
+  return t !== n.id && Object.hasOwn(s, n.id) ? ((c = (y = ui.notifications) == null ? void 0 : y.warn) == null || c.call(y, "That camera ID is already in use. Choose a unique ID."), null) : (t && t !== n.id && delete s[t], $e = !1, le = null, s[n.id] = n, R = n.id, Z = n.id, await Re(s), (g = (m = ui.notifications) == null ? void 0 : m.info) == null || g.call(m, "Security camera saved."), n);
 }
-function yi(e = L) {
+function yi(e = R) {
   var i, r, n, s, o, l, y, c;
-  const t = W(e);
+  const t = Y(e);
   if (!Number.isFinite(t == null ? void 0 : t.regionX) || !Number.isFinite(t == null ? void 0 : t.regionY)) {
     (r = (i = ui.notifications) == null ? void 0 : i.warn) == null || r.call(i, "This camera does not have a region yet.");
     return;
@@ -1385,21 +1404,21 @@ function Ve(e, t = null) {
 }
 function vi() {
   const e = pt();
-  !L && e.length && (L = e[0].id), ee === null && (ee = L);
-  const t = W(L), i = de ?? (ee === "" ? He() : W(ee) ?? He()), r = Ue(i);
+  !R && e.length && (R = e[0].id), Z === null && (Z = R);
+  const t = Y(R), i = le ?? (Z === "" ? He() : Y(Z) ?? He()), r = Te(i);
   return {
     cameras: e.map((n) => ({
-      ...Ue(n),
-      isSelected: n.id === L
+      ...Te(n),
+      isSelected: n.id === R
     })),
-    selectedCamera: t ? Ue(t) : null,
+    selectedCamera: t ? Te(t) : null,
     editorCamera: r,
-    originalEditorId: (de == null ? void 0 : de.originalId) ?? i.id,
+    originalEditorId: (le == null ? void 0 : le.originalId) ?? i.id,
     sceneChoices: mi(i.sceneId),
     regionChoices: bt(i.sceneId, i.regionId),
     feedSourceChoices: ze(_t, i.feedSource),
-    statusChoices: ze(Ut, i.status),
-    displayModeChoices: ze(Tt, i.displayMode),
+    statusChoices: ze(Tt, i.status),
+    displayModeChoices: ze(Ut, i.displayMode),
     showStaticImageField: i.feedSource === "image",
     hasCameras: e.length > 0,
     isNewCamera: !i.id,
@@ -1422,90 +1441,90 @@ function wi(e) {
   }).browse();
 }
 function Je() {
-  return $e ? window.confirm("Discard unsaved camera changes?") ? ($e = !1, de = null, !0) : !1 : !0;
+  return $e ? window.confirm("Discard unsaved camera changes?") ? ($e = !1, le = null, !0) : !1 : !0;
 }
 function At(e) {
   _.stopLocalLiveRefresh(e);
 }
 function bi(e, t = null) {
-  var l, y, c, m, h, g, v;
+  var l, y, c, m, g, f, b;
   const i = Ve(e, t);
   if (!i) return;
   const r = i.querySelector("[data-security-camera-form]");
-  At(e), e.camera = W(L), e.lastFrameAt = null, e.frameError = !1;
+  At(e), e.camera = Y(R), e.lastFrameAt = null, e.frameError = !1;
   const n = i.querySelector(".security-camera-preview-frame");
   if (((l = e.camera) == null ? void 0 : l.feedSource) === "live" && !["offline", "restricted"].includes(e.camera.status) && n) {
     n.replaceChildren();
-    const w = document.createElement("img");
-    w.alt = e.camera.name, w.hidden = !0, n.append(w);
-    const p = document.createElement("div");
-    p.className = "security-camera-placeholder", p.textContent = "Waiting for first frame", n.append(p), e.updateLiveFrame = async (S) => {
-      w.getAttribute("src") !== S && (w.src = S), w.hidden = !1, p.hidden = !0, e.lastFrameAt = Date.now(), e.frameError = !1;
+    const S = document.createElement("img");
+    S.alt = e.camera.name, S.hidden = !0, n.append(S);
+    const C = document.createElement("div");
+    C.className = "security-camera-placeholder", C.textContent = "Waiting for first frame", n.append(C), e.updateLiveFrame = async (I) => {
+      S.getAttribute("src") !== I && (S.src = I), S.hidden = !1, C.hidden = !0, e.lastFrameAt = Date.now(), e.frameError = !1;
     }, _.startLocalLiveRefresh(e);
   }
   const s = () => {
     $e = !0;
-    const w = Ft(r);
-    de = { ...w.camera, originalId: w.originalId };
-    const p = i.querySelector("[data-camera-dirty]");
-    p && (p.hidden = !1);
+    const S = Ft(r);
+    le = { ...S.camera, originalId: S.originalId };
+    const C = i.querySelector("[data-camera-dirty]");
+    C && (C.hidden = !1);
   };
   r == null || r.addEventListener("input", s), r == null || r.addEventListener("change", s), (c = (y = r == null ? void 0 : r.elements) == null ? void 0 : y.sceneId) == null || c.addEventListener("change", () => {
-    r.elements.regionId.replaceChildren(...bt(r.elements.sceneId.value).map((p) => new Option(p.name, p.id)));
-    for (const p of ["regionX", "regionY"]) r.elements[p].value = "";
+    r.elements.regionId.replaceChildren(...bt(r.elements.sceneId.value).map((C) => new Option(C.name, C.id)));
+    for (const C of ["regionX", "regionY"]) r.elements[C].value = "";
     r.elements.regionWidth.value = xe, r.elements.regionHeight.value = Ee, s();
-  }), (h = (m = r == null ? void 0 : r.elements) == null ? void 0 : m.regionId) == null || h.addEventListener("change", () => {
+  }), (g = (m = r == null ? void 0 : r.elements) == null ? void 0 : m.regionId) == null || g.addEventListener("change", () => {
     if (!r.elements.regionId.value)
-      for (const w of ["regionX", "regionY"]) r.elements[w].value = "";
+      for (const S of ["regionX", "regionY"]) r.elements[S].value = "";
     s();
-  }), r == null || r.addEventListener("submit", async (w) => {
-    w.preventDefault(), await lt(r);
+  }), r == null || r.addEventListener("submit", async (S) => {
+    S.preventDefault(), await lt(r);
   });
   const o = () => {
-    const w = r.elements.feedSource.value === "live";
-    r.elements.sceneId.disabled = !w, r.elements.regionId.disabled = !w;
-    const p = r.querySelector("[data-security-camera-static-image-field]");
-    p && (p.hidden = r.elements.feedSource.value !== "image");
+    const S = r.elements.feedSource.value === "live";
+    r.elements.sceneId.disabled = !S, r.elements.regionId.disabled = !S;
+    const C = r.querySelector("[data-security-camera-static-image-field]");
+    C && (C.hidden = r.elements.feedSource.value !== "image");
   };
-  o(), (v = (g = r == null ? void 0 : r.elements) == null ? void 0 : g.feedSource) == null || v.addEventListener("change", o), i.querySelectorAll("[data-security-camera-id]").forEach((w) => {
-    w.addEventListener("click", async (p) => {
-      Je() && (L = p.currentTarget.dataset.securityCameraId, ee = L, await e.render(!0));
+  o(), (b = (f = r == null ? void 0 : r.elements) == null ? void 0 : f.feedSource) == null || b.addEventListener("change", o), i.querySelectorAll("[data-security-camera-id]").forEach((S) => {
+    S.addEventListener("click", async (C) => {
+      Je() && (R = C.currentTarget.dataset.securityCameraId, Z = R, await e.render(!0));
     });
-  }), i.querySelectorAll("[data-security-camera-action]").forEach((w) => {
-    w.addEventListener("click", async (p) => {
-      const S = p.currentTarget.dataset.securityCameraAction;
-      if (!(["new", "duplicate", "delete"].includes(S) && !Je())) {
-        if (S === "new") {
+  }), i.querySelectorAll("[data-security-camera-action]").forEach((S) => {
+    S.addEventListener("click", async (C) => {
+      const I = C.currentTarget.dataset.securityCameraAction;
+      if (!(["new", "duplicate", "delete"].includes(I) && !Je())) {
+        if (I === "new") {
           await It();
           return;
         }
-        if (S === "duplicate") {
-          await Ct(L);
+        if (I === "duplicate") {
+          await Ct(R);
           return;
         }
-        if (S === "delete") {
-          await St(L);
+        if (I === "delete") {
+          await St(R);
           return;
         }
-        if (S === "browse-image") {
+        if (I === "browse-image") {
           wi(r);
           return;
         }
-        if (S === "pan-region") {
-          yi(L);
+        if (I === "pan-region") {
+          yi(R);
           return;
         }
-        if (S === "show" || S === "save-show") {
-          if (S === "save-show") {
-            const I = await lt(r);
-            if (!I) return;
-            await Ke(I.id);
+        if (I === "show" || I === "save-show") {
+          if (I === "save-show") {
+            const A = await lt(r);
+            if (!A) return;
+            await Ke(A.id);
             return;
           }
-          await Ke(L);
+          await Ke(R);
           return;
         }
-        if (S === "close-feed") {
+        if (I === "close-feed") {
           Et();
           return;
         }
@@ -1520,12 +1539,12 @@ function $t(e) {
     const o = Number(t.regionWidth) && Number(t.regionHeight) ? Number(t.regionWidth) / Number(t.regionHeight) : 1.7777777777777777, l = Math.min(620, Math.max(360, window.innerWidth * 0.42)), y = Math.min(460, Math.max(260, window.innerHeight * 0.38));
     let c = l, m = c / o;
     m > y && (m = y, c = m * o);
-    const h = Math.round(m + 190);
+    const g = Math.round(m + 190);
     c += 48, (n = e.setPosition) == null || n.call(e, {
       left: Math.max(12, window.innerWidth - c - 24),
-      top: Math.max(12, window.innerHeight - h - 84),
+      top: Math.max(12, window.innerHeight - g - 84),
       width: Math.round(c),
-      height: h
+      height: g
     });
     return;
   }
@@ -1541,19 +1560,19 @@ function pi(e, t = null) {
   $t(e), _.startLocalLiveRefresh(e), Mi(e), e.liveFrame && !e.lastFrameAt && (e.lastFrameAt = Date.now());
   const r = i.querySelector("[data-security-camera-drag]");
   (s = e.feedDragController) == null || s.abort(), r == null || r.addEventListener("pointerdown", (l) => {
-    var g, v;
+    var f, b;
     if (l.button !== 0) return;
-    l.preventDefault(), l.stopPropagation(), (g = e.bringToFront) == null || g.call(e);
+    l.preventDefault(), l.stopPropagation(), (f = e.bringToFront) == null || f.call(e);
     const y = i.getBoundingClientRect();
-    (v = e.feedDragController) == null || v.abort();
+    (b = e.feedDragController) == null || b.abort();
     const c = e.feedDragController = new AbortController(), m = { pointerId: l.pointerId, x: l.clientX, y: l.clientY, left: y.left, top: y.top };
-    document.addEventListener("pointermove", (w) => {
-      w.pointerId === m.pointerId && n(m.left + w.clientX - m.x, m.top + w.clientY - m.y);
+    document.addEventListener("pointermove", (S) => {
+      S.pointerId === m.pointerId && n(m.left + S.clientX - m.x, m.top + S.clientY - m.y);
     }, { signal: c.signal });
-    const h = (w) => {
-      w.pointerId === m.pointerId && c.abort();
+    const g = (S) => {
+      S.pointerId === m.pointerId && c.abort();
     };
-    document.addEventListener("pointerup", h, { signal: c.signal }), document.addEventListener("pointercancel", h, { signal: c.signal });
+    document.addEventListener("pointerup", g, { signal: c.signal }), document.addEventListener("pointercancel", g, { signal: c.signal });
   });
   const n = (l, y) => {
     var c;
@@ -1580,62 +1599,62 @@ const _ = ni({
     return !!((e = game.user) != null && e.isGM);
   },
   getPerformance: oi,
-  moduleId: E,
-  normalizeCamera: K
+  moduleId: k,
+  normalizeCamera: Q
 }), { SecurityMonitor: Si, CameraFeed: Ci } = jt({
-  moduleId: E,
+  moduleId: k,
   monitorTemplatePath: ai,
   feedTemplatePath: si,
   escapeHTML: yt,
   getMonitorContext: vi,
-  prepareCamera: Ue,
+  prepareCamera: Te,
   bindMonitorControls: bi,
   bindFeedControls: pi,
   getElement: Ve,
   liveFrameController: _,
   allowDiscardCameraChanges: Je,
   clearActiveMonitor: (e) => {
-    At(e), P === e && (P = null);
+    At(e), B === e && (B = null);
   },
   clearActiveFeed: (e) => {
     var t;
-    (t = e.feedDragController) == null || t.abort(), et(e), A === e && (A = null);
+    (t = e.feedDragController) == null || t.abort(), et(e), M === e && (M = null);
   }
 });
 async function Mt() {
   var e;
-  return ce("open the Security Camera Manager") ? P ? ((e = P.bringToFront) == null || e.call(P), P) : (P = new Si(), await P.render(!0), P) : null;
+  return oe("open the Security Camera Manager") ? B ? ((e = B.bringToFront) == null || e.call(B), B) : (B = new Si(), await B.render(!0), B) : null;
 }
 async function Ii() {
-  if (!P) return;
-  await P.close();
+  if (!B) return;
+  await B.close();
 }
 async function Me(e, t = {}) {
-  const i = K(e), r = A, n = ++Oe;
-  if (A = null, r && await r.close(), n !== Oe) return null;
+  const i = Q(e), r = M, n = ++Oe;
+  if (M = null, r && await r.close(), n !== Oe) return null;
   const s = new Ci(i, { liveFrame: t.liveFrame ?? "" });
-  return A = s, await s.render(!0), n !== Oe ? (await s.close({}), null) : ($t(s), s);
+  return M = s, await s.render(!0), n !== Oe ? (await s.close({}), null) : ($t(s), s);
 }
 async function _e() {
-  if (Oe++, !A) return;
-  const e = A;
-  A = null, et(e), await e.close();
+  if (Oe++, !M) return;
+  const e = M;
+  M = null, et(e), await e.close();
 }
 async function Ke(e) {
   var n, s;
-  if (!ce("broadcast camera feeds")) return null;
-  const t = W(e);
+  if (!oe("broadcast camera feeds")) return null;
+  const t = Y(e);
   if (!t)
     return (s = (n = ui.notifications) == null ? void 0 : n.warn) == null || s.call(n, "Security camera not found."), null;
   const i = ++Ae;
-  _.stopBroadcastLiveRefresh(), ye = t.id;
+  _.stopBroadcastLiveRefresh(), he = t.id;
   let r = "";
   try {
     r = await _.captureLiveFrame(t, { preferDataUrl: !0 });
   } catch (o) {
-    console.warn(`${E} | Initial frame unavailable.`, o);
+    console.warn(`${k} | Initial frame unavailable.`, o);
   }
-  return i !== Ae || Fe(W(t.id)) !== Fe(t) ? null : (me({
+  return i !== Ae || Fe(Y(t.id)) !== Fe(t) ? null : (ue({
     action: "showFeed",
     gmUserId: game.user.id,
     camera: t,
@@ -1644,7 +1663,7 @@ async function Ke(e) {
 }
 async function Fi(e, t = {}) {
   var n, s, o, l, y, c;
-  const i = W(e);
+  const i = Y(e);
   if (!i)
     return (s = (n = ui.notifications) == null ? void 0 : n.warn) == null || s.call(n, "Security camera not found."), null;
   if (!tt((o = game.user) == null ? void 0 : o.id, e))
@@ -1654,17 +1673,17 @@ async function Fi(e, t = {}) {
     try {
       r = await _.captureLiveFrame(i, { preferDataUrl: !0 });
     } catch (m) {
-      console.warn(`${E} | Initial frame unavailable.`, m);
+      console.warn(`${k} | Initial frame unavailable.`, m);
     }
   return Me(i, { liveFrame: r });
 }
 function Ai(e) {
   var t, i;
-  me({
+  ue({
     action: "requestLiveFrame",
     userId: (t = game.user) == null ? void 0 : t.id,
     cameraId: e,
-    hasFrame: !!(((i = A == null ? void 0 : A.camera) == null ? void 0 : i.id) === e && A.liveFrame)
+    hasFrame: !!(((i = M == null ? void 0 : M.camera) == null ? void 0 : i.id) === e && M.liveFrame)
   });
 }
 function $i(e) {
@@ -1675,48 +1694,48 @@ function Mi(e) {
   if (et(e), !$i(e == null ? void 0 : e.camera)) return;
   let t = !1;
   const i = () => {
-    document.visibilityState !== "hidden" && !e.minimized && !e._minimized ? (Ai(e.camera.id), t = !0) : t && (me({ action: "unsubscribeFeed", userId: game.user.id, cameraId: e.camera.id }), t = !1);
+    document.visibilityState !== "hidden" && !e.minimized && !e._minimized ? (Ai(e.camera.id), t = !0) : t && (ue({ action: "unsubscribeFeed", userId: game.user.id, cameraId: e.camera.id }), t = !1);
   };
   e.remoteLiveFrameTimer = window.setInterval(i, li), e.remoteVisibilityHandler = i, document.addEventListener("visibilitychange", i), i();
 }
 function et(e) {
   var t, i;
-  e && (e.remoteLiveFrameTimer && (window.clearInterval(e.remoteLiveFrameTimer), me({ action: "unsubscribeFeed", userId: (t = game.user) == null ? void 0 : t.id, cameraId: (i = e.camera) == null ? void 0 : i.id })), e.remoteVisibilityHandler && document.removeEventListener("visibilitychange", e.remoteVisibilityHandler), e.remoteVisibilityHandler = null, e.remoteLiveFrameTimer = null);
+  e && (e.remoteLiveFrameTimer && (window.clearInterval(e.remoteLiveFrameTimer), ue({ action: "unsubscribeFeed", userId: (t = game.user) == null ? void 0 : t.id, cameraId: (i = e.camera) == null ? void 0 : i.id })), e.remoteVisibilityHandler && document.removeEventListener("visibilitychange", e.remoteVisibilityHandler), e.remoteVisibilityHandler = null, e.remoteLiveFrameTimer = null);
 }
-function ge(e) {
-  const t = H.get(e);
-  t && window.clearTimeout(t.timer), H.delete(e), _.unsubscribeRemote(e);
+function fe(e) {
+  const t = J.get(e);
+  t && window.clearTimeout(t.timer), J.delete(e), _.unsubscribeRemote(e);
 }
 function xt(e) {
-  for (const [t, i] of [...H]) i.cameraId === e && ge(t);
+  for (const [t, i] of [...J]) i.cameraId === e && fe(t);
 }
 function xi() {
-  for (const e of [...H.keys()]) ge(e);
+  for (const e of [...J.keys()]) fe(e);
 }
 function tt(e, t) {
   var r, n;
-  const i = W(t);
+  const i = Y(t);
   return ut((n = (r = game.users) == null ? void 0 : r.get) == null ? void 0 : n.call(r, e), i);
 }
 function Et() {
-  ce("close player camera feeds") && (me({
+  oe("close player camera feeds") && (ue({
     action: "closeFeed",
     gmUserId: game.user.id
-  }), Ae++, ye = "", xi(), _.stopBroadcastLiveRefresh(), _e());
+  }), Ae++, he = "", xi(), _.stopBroadcastLiveRefresh(), _e());
 }
 async function Ei() {
-  P && await P.render(!0);
+  B && await B.render(!0);
 }
 function ki(e, t, i) {
-  const r = W(e);
+  const r = Y(e);
   if (!r || Fe(r) !== t) return;
-  const n = [...H.values()].filter((o) => {
+  const n = [...J.values()].filter((o) => {
     var l, y, c;
     return o.cameraId === e && o.revision === t && Date.now() < o.expires && ((c = (y = (l = game.users) == null ? void 0 : l.get) == null ? void 0 : y.call(l, o.userId)) == null ? void 0 : c.active) && ut(game.users.get(o.userId), r);
   }), s = (o, l) => {
     if (!o.length) return;
     const y = o.map((c) => c.userId);
-    me({
+    ue({
       action: "updateFeedFrame",
       gmUserId: game.user.id,
       cameraId: e,
@@ -1730,80 +1749,80 @@ function ki(e, t, i) {
   s(n.filter((o) => o.lastFrame !== i), { liveFrame: i }), s(n.filter((o) => o.needsAck), { frameUnchanged: !0 });
 }
 async function Ri(e) {
-  var i, r, n, s, o, l, y, c, m, h, g, v, w, p, S;
+  var i, r, n, s, o, l, y, c, m, g, f, b, S, C, I;
   if (!e || typeof e != "object") return;
   const t = vt.isGMSender(e.gmUserId);
   if (e.action === "unsubscribeFeed") {
-    (i = game.user) != null && i.isGM && ge(`${String(e.userId ?? "")}:${String(e.cameraId ?? "")}`);
+    (i = game.user) != null && i.isGM && fe(`${String(e.userId ?? "")}:${String(e.cameraId ?? "")}`);
     return;
   }
   if (e.action === "requestLiveFrame") {
     if (!((r = game.user) != null && r.isGM)) return;
-    const I = (((n = game.users) == null ? void 0 : n.contents) ?? []).filter((D) => D.isGM && D.active).sort((D, Z) => D.id.localeCompare(Z.id))[0];
-    if (I && I.id !== game.user.id) return;
-    const R = String(e.cameraId ?? ""), O = String(e.userId ?? ""), j = W(R), B = `${O}:${R}`;
-    if (!j || !((l = (o = (s = game.users) == null ? void 0 : s.get) == null ? void 0 : o.call(s, O)) != null && l.active) || j.feedSource !== "live" || !tt(O, R)) {
-      ge(B);
+    const A = (((n = game.users) == null ? void 0 : n.contents) ?? []).filter((D) => D.isGM && D.active).sort((D, ee) => D.id.localeCompare(ee.id))[0];
+    if (A && A.id !== game.user.id) return;
+    const O = String(e.cameraId ?? ""), T = String(e.userId ?? ""), j = Y(O), P = `${T}:${O}`;
+    if (!j || !((l = (o = (s = game.users) == null ? void 0 : s.get) == null ? void 0 : o.call(s, T)) != null && l.active) || j.feedSource !== "live" || !tt(T, O)) {
+      fe(P);
       return;
     }
-    const G = H.get(B);
-    G && window.clearTimeout(G.timer);
-    const Q = Fe(j), x = {
-      userId: O,
-      cameraId: R,
-      revision: Q,
+    const V = J.get(P);
+    V && window.clearTimeout(V.timer);
+    const H = Fe(j), E = {
+      userId: T,
+      cameraId: O,
+      revision: H,
       expires: Date.now() + 3e4,
       needsAck: !0,
-      lastFrame: e.hasFrame === !0 ? (G == null ? void 0 : G.lastFrame) ?? "" : "",
-      timer: window.setTimeout(() => ge(B), 3e4)
+      lastFrame: e.hasFrame === !0 ? (V == null ? void 0 : V.lastFrame) ?? "" : "",
+      timer: window.setTimeout(() => fe(P), 3e4)
     };
-    H.set(B, x), _.subscribeRemote(j, B, (D) => {
-      H.get(B) === x && ki(R, Q, D);
+    J.set(P, E), _.subscribeRemote(j, P, (D) => {
+      J.get(P) === E && ki(O, H, D);
     }, () => {
-      var D, Z, le;
-      return H.get(B) === x && Date.now() < x.expires && !!((le = (Z = (D = game.users) == null ? void 0 : D.get) == null ? void 0 : Z.call(D, O)) != null && le.active);
+      var D, ee, de;
+      return J.get(P) === E && Date.now() < E.expires && !!((de = (ee = (D = game.users) == null ? void 0 : D.get) == null ? void 0 : ee.call(D, T)) != null && de.active);
     });
     return;
   }
   if (e.action === "cameraChanged") {
     if (!t || (y = game.user) != null && y.isGM && e.gmUserId === game.user.id) return;
-    const I = e.camera ? Te(e.camera, { requireId: !0 }) : null;
-    if (e.camera && (!(I != null && I.ok) || I.camera.id !== e.cameraId)) return;
-    xt(e.cameraId), _.invalidateFrames(), ye === e.cameraId && (Ae++, _.stopBroadcastLiveRefresh(), I || (ye = "")), ((c = A == null ? void 0 : A.camera) == null ? void 0 : c.id) === e.cameraId && (I ? await Me(I.camera) : await _e());
+    const A = e.camera ? Ue(e.camera, { requireId: !0 }) : null;
+    if (e.camera && (!(A != null && A.ok) || A.camera.id !== e.cameraId)) return;
+    xt(e.cameraId), _.invalidateFrames(), he === e.cameraId && (Ae++, _.stopBroadcastLiveRefresh(), A || (he = "")), ((c = M == null ? void 0 : M.camera) == null ? void 0 : c.id) === e.cameraId && (A ? await Me(A.camera) : await _e());
     return;
   }
   if (e.action === "showFeed") {
     if ((m = game.user) != null && m.isGM) return;
     if (!t) {
-      console.warn(`${E} | Ignoring camera feed socket message without a GM sender.`);
+      console.warn(`${k} | Ignoring camera feed socket message without a GM sender.`);
       return;
     }
-    const I = Te(e.camera);
-    if (!I.ok) {
-      console.warn(`${E} | Ignoring invalid socket camera payload.`, I.errors);
+    const A = Ue(e.camera);
+    if (!A.ok) {
+      console.warn(`${k} | Ignoring invalid socket camera payload.`, A.errors);
       return;
     }
-    await Me(I.camera, {
+    await Me(A.camera, {
       liveFrame: typeof e.liveFrame == "string" ? e.liveFrame : ""
     });
     return;
   }
   if (e.action === "updateFeedFrame") {
-    if ((h = game.user) != null && h.isGM || !t || Array.isArray(e.recipientUserIds) && !e.recipientUserIds.includes((g = game.user) == null ? void 0 : g.id)) return;
-    const I = String(e.recipientUserId ?? "");
-    if (I && I !== ((v = game.user) == null ? void 0 : v.id)) return;
-    const R = String(e.cameraId ?? "");
-    if (!R || ((w = A == null ? void 0 : A.camera) == null ? void 0 : w.id) !== R || e.revision !== Fe(K(A.camera)) || ["offline", "restricted"].includes(A.camera.status)) return;
+    if ((g = game.user) != null && g.isGM || !t || Array.isArray(e.recipientUserIds) && !e.recipientUserIds.includes((f = game.user) == null ? void 0 : f.id)) return;
+    const A = String(e.recipientUserId ?? "");
+    if (A && A !== ((b = game.user) == null ? void 0 : b.id)) return;
+    const O = String(e.cameraId ?? "");
+    if (!O || ((S = M == null ? void 0 : M.camera) == null ? void 0 : S.id) !== O || e.revision !== Fe(Q(M.camera)) || ["offline", "restricted"].includes(M.camera.status)) return;
     if (e.frameUnchanged === !0) {
-      A.lastFrameAt = Date.now();
+      M.lastFrameAt = Date.now();
       return;
     }
     if (typeof e.liveFrame != "string" || !e.liveFrame) return;
-    await ((p = A.updateLiveFrame) == null ? void 0 : p.call(A, e.liveFrame));
+    await ((C = M.updateLiveFrame) == null ? void 0 : C.call(M, e.liveFrame));
     return;
   }
   if (e.action === "closeFeed") {
-    if ((S = game.user) != null && S.isGM || !t) return;
+    if ((I = game.user) != null && I.isGM || !t) return;
     await _e();
   }
 }
@@ -1817,29 +1836,29 @@ function Di() {
     deleteCamera: St,
     duplicateCamera: Ct,
     getCameras: pt,
-    getCamera: W,
+    getCamera: Y,
     openCameraFeed: Fi,
     hasCameraAccess: tt,
     closeFeed: Et,
     get activeMonitor() {
-      return P;
+      return B;
     },
     get activeFeed() {
-      return A;
+      return M;
     }
   };
   game.securityCameras = e;
-  const t = game.modules.get(E);
+  const t = game.modules.get(k);
   t && (t.api = e);
 }
 function Li() {
   const e = game.modules.get("holosuite-core"), t = e != null && e.active ? e.api : null;
   return t != null && t.registerApp ? (t.registerApp({
-    id: E,
+    id: k,
     title: "Security Cameras",
     icon: "fa-solid fa-video",
     premium: !1,
-    featureId: E,
+    featureId: k,
     playerVisible: !1,
     description: "Manage camera feeds and broadcast surveillance views.",
     open: () => Mt()
@@ -1851,8 +1870,8 @@ Hooks.once("init", () => {
 Hooks.once("ready", () => {
   var e, t;
   qe(), Di(), Li(), (t = (e = game.socket) == null ? void 0 : e.on) == null || t.call(e, ht, (i) => {
-    Ri(i).catch((r) => console.warn(`${E} | Camera message failed.`, r));
-  }), console.log(`${E} | Ready. Use game.securityCameras.openMonitor()`);
+    Ri(i).catch((r) => console.warn(`${k} | Camera message failed.`, r));
+  }), console.log(`${k} | Ready. Use game.securityCameras.openMonitor()`);
 });
 for (const e of ["createToken", "updateToken", "deleteToken", "createTile", "updateTile", "deleteTile", "updateScene", "createRegion", "updateRegion", "deleteRegion"])
   Hooks.on(e, (t) => {
@@ -1868,11 +1887,11 @@ Hooks.on("updateActor", (e, t) => {
 });
 Hooks.on("updateUser", () => {
   var e, t, i, r;
-  for (const n of [...H.keys()])
-    (r = (i = (e = game.users) == null ? void 0 : e.get) == null ? void 0 : i.call(e, (t = H.get(n)) == null ? void 0 : t.userId)) != null && r.active || ge(n);
+  for (const n of [...J.keys()])
+    (r = (i = (e = game.users) == null ? void 0 : e.get) == null ? void 0 : i.call(e, (t = J.get(n)) == null ? void 0 : t.userId)) != null && r.active || fe(n);
 });
 for (const e of ["minimizeApplication", "maximizeApplication", "minimizeApplicationV2", "maximizeApplicationV2"])
   Hooks.on(e, () => {
     var t;
-    (t = A == null ? void 0 : A.remoteVisibilityHandler) == null || t.call(A), _.wake();
+    (t = M == null ? void 0 : M.remoteVisibilityHandler) == null || t.call(M), _.wake();
   });
