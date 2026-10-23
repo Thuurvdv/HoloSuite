@@ -72,7 +72,7 @@
   align-items: center;
   gap: 6px;
   color: var(--security-camera-green);
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0;
 }
@@ -133,7 +133,7 @@
 .security-camera-list-item i,
 .security-camera-monitor-preview strong {
   color: var(--security-camera-blue);
-  font-size: 10px;
+  font-size: 12px;
   font-style: normal;
   text-transform: uppercase;
 }
@@ -169,7 +169,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: saturate(0.78) contrast(1.12) brightness(0.82);
+  filter: saturate(calc(1 - .22 * var(--security-camera-effect-intensity, 1))) contrast(calc(1 + .12 * var(--security-camera-effect-intensity, 1))) brightness(calc(1 - .18 * var(--security-camera-effect-intensity, 1)));
 }
 
 .security-camera-source-live .security-camera-feed-frame img {
@@ -203,7 +203,7 @@
 .security-camera-monitor-preview dt {
   color: var(--security-camera-muted);
   text-transform: uppercase;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .security-camera-monitor-preview dd {
@@ -221,7 +221,7 @@
   gap: 5px;
   padding: 0 12px;
   color: var(--security-camera-muted);
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
@@ -238,7 +238,7 @@
 }
 
 .security-camera-editor textarea {
-  resize: both;
+  resize: vertical;
   min-height: 76px;
 }
 
@@ -269,21 +269,28 @@
 
 .security-camera-feed {
   position: relative;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 12px;
   overflow: hidden;
-  padding: 16px;
-  min-height: 100%;
+  padding: 16px 24px 24px;
+  height: 100%;
+  min-height: 0;
   background:
-    linear-gradient(rgba(231, 250, 255, 0.035) 50%, transparent 50%) 0 0 / 100% 4px,
-    radial-gradient(circle at 80% 0%, rgba(72, 199, 255, 0.18), transparent 30%),
+    linear-gradient(rgb(231 250 255 / calc(.035 * var(--security-camera-effect-intensity, 1))) 50%, transparent 50%) 0 0 / 100% 4px,
+    radial-gradient(circle at 80% 0%, rgb(72 199 255 / calc(.18 * var(--security-camera-effect-intensity, 1))), transparent 30%),
     var(--hs-bg-deep);
   border: 1px solid var(--security-camera-line);
+  border-radius: 32px;
   font-family: var(--hs-font-mono);
 }
 
 .security-camera-feed::before {
+  opacity: var(--security-camera-effect-intensity, 1);
   content: "";
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   pointer-events: none;
   border: 1px solid rgba(109, 255, 176, 0.18);
   box-shadow: inset 0 0 38px rgba(109, 255, 176, 0.14);
@@ -300,7 +307,7 @@
 }
 
 .security-camera-feed-static {
-  opacity: 0.18;
+  opacity: calc(.18 * var(--security-camera-effect-intensity, 1));
   background:
     repeating-radial-gradient(circle at 17% 32%, rgba(255, 255, 255, 0.7) 0 1px, transparent 1px 3px),
     repeating-linear-gradient(0deg, transparent 0 3px, rgba(109, 255, 176, 0.18) 3px 4px);
@@ -308,7 +315,7 @@
 }
 
 .security-camera-feed-scanline {
-  opacity: 0.35;
+  opacity: calc(.35 * var(--security-camera-effect-intensity, 1));
   background: linear-gradient(180deg, transparent 0%, rgba(72, 199, 255, 0.28) 49%, transparent 50%);
   transform: translateY(-100%);
   animation: security-camera-scanline 4s linear infinite;
@@ -349,7 +356,7 @@
   justify-items: end;
   gap: 6px;
   color: var(--security-camera-blue);
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
@@ -374,12 +381,14 @@
 
 .security-camera-feed-frame {
   z-index: 1;
-  aspect-ratio: var(--security-camera-region-aspect, 16 / 9);
+  min-height: 0;
+  border-radius: 16px;
   border: 1px solid rgba(72, 199, 255, 0.22);
 }
 
 .security-camera-feed-frame::after,
 .security-camera-preview-frame::after {
+  opacity: var(--security-camera-effect-intensity, 1);
   content: "";
   position: absolute;
   inset: 0;
@@ -388,10 +397,100 @@
 }
 
 .security-camera-feed-footer {
-  padding-top: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  padding-top: 4px;
 }
 
-/* PiP overlay — must stack above all other windows; high z-index is intentional */
+.security-camera-feed-footer > span { overflow-wrap: anywhere; }
+.security-camera-feed-close { grid-column: 2; }
+
+.security-camera-feed-window {
+  border-radius: 32px;
+  overflow: hidden;
+  background: var(--hs-bg-deep);
+}
+
+.security-camera-feed-window > .window-header { display: none; }
+.security-camera-feed-window .window-content {
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  min-height: 0;
+}
+
+.security-camera-feed-drag,
+.security-camera-feed-close {
+  position: relative;
+  z-index: 4;
+  width: auto;
+  margin: 0;
+  color: var(--security-camera-text);
+  border: 1px solid var(--security-camera-line);
+  background: var(--hs-control-bg);
+  box-shadow: none;
+  font: 12px var(--hs-font-mono);
+}
+
+.security-camera-feed-drag {
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.security-camera-feed-drag span {
+  width: 52px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--security-camera-muted);
+  opacity: .35;
+}
+
+.security-camera-feed-drag:active { cursor: grabbing; }
+.security-camera-feed-close { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border-radius: 999px; }
+.security-camera-feed-close i { margin: 0; }
+/* Override native resize artwork as well as the handle itself in both windows. */
+:is(.security-camera-window, .security-camera-feed-window):is(.application, .window-app) :is(.window-resizable-handle, .window-resize-handle) {
+  width: 18px !important;
+  height: 18px !important;
+  padding: 0 !important;
+  border: 1px solid var(--hs-cyan, #69e8ff) !important;
+  border-radius: 4px !important;
+  color: var(--hs-cyan, #69e8ff) !important;
+  background: rgba(2, 13, 24, .94) !important;
+  background-image: none !important;
+  filter: none !important;
+  box-shadow: var(--hs-glow-cyan) !important;
+}
+:is(.security-camera-window, .security-camera-feed-window):is(.application, .window-app) :is(.window-resizable-handle, .window-resize-handle) > * {
+  display: none !important;
+}
+:is(.security-camera-window, .security-camera-feed-window):is(.application, .window-app) :is(.window-resizable-handle, .window-resize-handle)::before,
+:is(.security-camera-window, .security-camera-feed-window):is(.application, .window-app) :is(.window-resizable-handle, .window-resize-handle)::after {
+  background: none !important;
+  border-color: var(--hs-cyan, #69e8ff) !important;
+  filter: none !important;
+}
+.security-camera-feed-drag:hover,
+.security-camera-feed-close:hover { background: var(--hs-control-bg-hover); }
+.security-camera-feed-drag:focus-visible,
+.security-camera-feed-close:focus-visible { outline: 2px solid var(--security-camera-blue); outline-offset: 2px; }
+
+.security-camera-editor select:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+/* Keep picture-in-picture feeds above other windows. */
 .security-camera-feed-display-pip {
   z-index: 99999;
 }
@@ -401,7 +500,7 @@
 }
 
 .security-camera-feed-display-pip .security-camera-feed {
-  padding: 8px;
+  padding: 12px 24px 20px;
 }
 
 .security-camera-feed-display-pip .security-camera-feed h2 {
@@ -414,7 +513,7 @@
 
 .security-camera-feed-display-pip .security-camera-feed-header p,
 .security-camera-feed-display-pip .security-camera-feed-footer {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .security-camera-feed-display-pip .security-camera-feed-footer {
@@ -432,7 +531,7 @@
 }
 
 .security-camera-status-offline img {
-  filter: grayscale(1) brightness(0.38);
+  filter: grayscale(var(--security-camera-effect-intensity, 1)) brightness(max(0, calc(1 - .62 * var(--security-camera-effect-intensity, 1))));
 }
 
 .security-camera-status-restricted .security-camera-signal,
@@ -443,8 +542,8 @@
 .security-camera-status-restricted .security-camera-feed-frame,
 .security-camera-status-restricted .security-camera-preview-frame {
   background:
-    repeating-linear-gradient(135deg, rgba(255, 78, 106, 0.18) 0 8px, transparent 8px 16px),
-    radial-gradient(circle, rgba(255, 78, 106, 0.12), transparent 48%),
+    repeating-linear-gradient(135deg, rgb(255 78 106 / calc(.18 * var(--security-camera-effect-intensity, 1))) 0 8px, transparent 8px 16px),
+    radial-gradient(circle, rgb(255 78 106 / calc(.12 * var(--security-camera-effect-intensity, 1))), transparent 48%),
     #090303;
 }
 
@@ -455,17 +554,18 @@
 }
 
 .security-camera-status-corrupted .security-camera-feed-static {
-  opacity: 0.38;
+  opacity: calc(.38 * var(--security-camera-effect-intensity, 1));
   animation-duration: 0.22s;
 }
 
 .security-camera-status-corrupted img {
-  filter: hue-rotate(110deg) saturate(1.35) contrast(1.45);
+  filter: hue-rotate(calc(110deg * var(--security-camera-effect-intensity, 1))) saturate(calc(1 + .35 * var(--security-camera-effect-intensity, 1))) contrast(calc(1 + .45 * var(--security-camera-effect-intensity, 1)));
   animation: security-camera-glitch 1.1s steps(2) infinite;
 }
 
 .security-camera-status-corrupted .security-camera-feed-frame::before,
 .security-camera-status-corrupted .security-camera-preview-frame::before {
+  opacity: var(--security-camera-effect-intensity, 1);
   content: "";
   position: absolute;
   inset: 0;
@@ -493,6 +593,28 @@
   animation: none;
 }
 
+/* Clean cameras keep their source pixels free of the simulated screen effects. */
+.security-camera-status-clean :is(.security-camera-feed-static, .security-camera-feed-scanline),
+.security-camera-feed.security-camera-status-clean::before,
+.security-camera-status-clean :is(.security-camera-feed-frame, .security-camera-preview-frame)::before,
+.security-camera-status-clean :is(.security-camera-feed-frame, .security-camera-preview-frame)::after {
+  display: none;
+}
+.security-camera-status-clean :is(.security-camera-feed-frame, .security-camera-preview-frame),
+.security-camera-status-clean :is(.security-camera-feed-frame, .security-camera-preview-frame) img {
+  filter: none;
+  animation: none;
+  transform: none;
+  box-shadow: none;
+  background: #010505;
+}
+.security-camera-feed.security-camera-status-clean {
+  background: var(--hs-bg-deep);
+}
+.security-camera-status-clean :is(.security-camera-rec i, .security-camera-feed-warning) {
+  animation: none;
+}
+
 @keyframes security-camera-static {
   0% { transform: translate(0, 0); }
   33% { transform: translate(-2%, 1%); }
@@ -512,9 +634,9 @@
 
 @keyframes security-camera-glitch {
   0%, 100% { transform: translate(0, 0) skewX(0deg); }
-  20% { transform: translate(2px, -1px) skewX(1deg); }
-  40% { transform: translate(-3px, 1px) skewX(-1deg); }
-  60% { transform: translate(1px, 2px) skewX(0.5deg); }
+  20% { transform: translate(calc(2px * var(--security-camera-effect-intensity, 1)), calc(-1px * var(--security-camera-effect-intensity, 1))) skewX(calc(1deg * var(--security-camera-effect-intensity, 1))); }
+  40% { transform: translate(calc(-3px * var(--security-camera-effect-intensity, 1)), calc(1px * var(--security-camera-effect-intensity, 1))) skewX(calc(-1deg * var(--security-camera-effect-intensity, 1))); }
+  60% { transform: translate(calc(1px * var(--security-camera-effect-intensity, 1)), calc(2px * var(--security-camera-effect-intensity, 1))) skewX(calc(.5deg * var(--security-camera-effect-intensity, 1))); }
 }
 
 @keyframes security-camera-glitch-bar {
@@ -526,9 +648,9 @@
 
 @keyframes security-camera-signal-loss {
   0%, 100% { opacity: 1; filter: brightness(1); }
-  45% { opacity: 0.62; filter: brightness(0.65); }
-  50% { opacity: 0.22; filter: brightness(0.25); }
-  54% { opacity: 0.88; filter: brightness(1.15); }
+  45% { opacity: calc(1 - .38 * var(--security-camera-effect-intensity, 1)); filter: brightness(calc(1 - .35 * var(--security-camera-effect-intensity, 1))); }
+  50% { opacity: calc(1 - .78 * var(--security-camera-effect-intensity, 1)); filter: brightness(max(0, calc(1 - .75 * var(--security-camera-effect-intensity, 1)))); }
+  54% { opacity: calc(1 - .12 * var(--security-camera-effect-intensity, 1)); filter: brightness(calc(1 + .15 * var(--security-camera-effect-intensity, 1))); }
 }
 
 @keyframes security-camera-live-pulse {
@@ -536,22 +658,66 @@
   50% { opacity: 0.62; text-shadow: 0 0 22px rgba(109, 255, 176, 0.9); }
 }
 
-@media (max-width: 980px) {
-  .security-camera-manager {
-    grid-template-columns: 1fr;
-  }
+.security-camera-effects-disabled :is(.security-camera-feed-window, .security-camera-window) :is(.security-camera-feed-frame, .security-camera-preview-frame, .security-camera-feed-frame img, .security-camera-preview-frame img, .security-camera-rec i, .security-camera-feed-warning) {
+  animation: none !important;
+}
+.security-camera-effects-disabled :is(.security-camera-feed-frame, .security-camera-preview-frame) img { filter: none; }
+
+/* Remove entire effect layers on low-powered clients and when intensity is zero. */
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) :is(.security-camera-feed-static, .security-camera-feed-scanline),
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) .security-camera-feed::before,
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) :is(.security-camera-feed-frame, .security-camera-preview-frame)::before,
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) :is(.security-camera-feed-frame, .security-camera-preview-frame)::after {
+  display: none !important;
+  animation: none !important;
+}
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) :is(.security-camera-feed-window, .security-camera-window) :is(.security-camera-feed-frame, .security-camera-preview-frame, .security-camera-feed-frame img, .security-camera-preview-frame img, .security-camera-rec i, .security-camera-feed-warning) {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
 }
 
-@media (max-width: 720px) {
-  .security-camera-preview-actions,
-  .security-camera-editor-actions,
-  .security-camera-feed-header,
-  .security-camera-feed-footer {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .security-camera-signal {
-    justify-items: start;
+/* Respond to the resizable Foundry window, not the browser viewport. */
+.security-camera-window .window-content {
+  container-type: inline-size;
+  overflow: auto;
+  min-height: 0;
+}
+.security-camera-feed-window .window-content { overflow: hidden; }
+.security-camera-manager { min-height: 100%; align-items: start; }
+.security-camera-editor { padding-bottom: 4px; }
+.security-camera-editor-actions { position: sticky; bottom: 0; background: var(--security-camera-panel); z-index: 5; }
+.security-camera-primary,
+.security-camera-editor-actions [data-security-camera-action="save-show"] {
+  border-color: var(--security-camera-green);
+  font-weight: 700;
+}
+.security-camera-window button:focus-visible,
+.security-camera-window input:focus-visible,
+.security-camera-window select:focus-visible,
+.security-camera-window textarea:focus-visible {
+  outline: 2px solid var(--security-camera-blue);
+  outline-offset: 2px;
+}
+.security-camera-window [hidden], .security-camera-feed-window [hidden] { display: none !important; }
+.security-camera-dirty { margin: 0; padding: 4px 12px 10px; font-size: 12px; color: var(--security-camera-yellow); }
+.security-camera-preview-frame img { object-fit: contain; }
+.security-camera-list-item { min-height: 64px; }
+.security-camera-feed-header > div { min-width: 0; overflow-wrap: anywhere; }
+@container (max-width: 900px) {
+  .security-camera-manager { grid-template-columns: minmax(180px, .65fr) minmax(260px, 1fr); }
+  .security-camera-editor { grid-column: 1 / -1; }
+}
+@container (max-width: 540px) {
+  .security-camera-manager { grid-template-columns: minmax(0, 1fr); padding: 8px; gap: 8px; }
+  .security-camera-list { max-height: 220px; }
+  .security-camera-editor { grid-column: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .security-camera-window *, .security-camera-feed-window *,
+  .security-camera-window *::before, .security-camera-window *::after,
+  .security-camera-feed-window *::before, .security-camera-feed-window *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

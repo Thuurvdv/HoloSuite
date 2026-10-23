@@ -32,6 +32,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     bindFeedControls,
     getElement,
     liveFrameController,
+    allowDiscardCameraChanges,
     clearActiveMonitor,
     clearActiveFeed
   } = deps;
@@ -40,6 +41,26 @@ export function createSecurityCameraAppClasses(deps: any) {
   const HandlebarsApplicationMixin = foundry?.applications?.api?.HandlebarsApplicationMixin;
   const LegacyApplication = getLegacyApplicationBase();
   const useApplicationV2 = shouldUseApplicationV2();
+
+  const monitorScrollSelectors = [".security-camera-list", ".window-content"];
+
+  function rememberMonitorScroll(app: any) {
+    const element = getElement(app);
+    if (!element?.querySelector) return;
+    app.monitorScroll = monitorScrollSelectors.map(selector => ({
+      selector,
+      top: (element.matches?.(selector) ? element : element.querySelector(selector))?.scrollTop ?? 0
+    }));
+  }
+
+  function restoreMonitorScroll(app: any, html: any = null) {
+    const element = getElement(app, html);
+    if (!element?.querySelector) return;
+    for (const { selector, top } of app.monitorScroll ?? []) {
+      const target = element.matches?.(selector) ? element : element.querySelector(selector);
+      if (target) target.scrollTop = top;
+    }
+  }
 
   function isObjectUrl(value: string) {
     return typeof value === "string" && value.startsWith("blob:");
@@ -53,6 +74,8 @@ export function createSecurityCameraAppClasses(deps: any) {
   }
 
   function setLiveFrame(app: any, frame: string) {
+    app.lastFrameAt = Date.now();
+    app.frameError = false;
     if (app.liveFrame === frame) return;
     releaseLiveFrameUrl(app);
     app.liveFrame = frame;
@@ -74,6 +97,7 @@ export function createSecurityCameraAppClasses(deps: any) {
     }
 
     getData() {
+      rememberMonitorScroll(this);
       return getMonitorContext();
     }
 
@@ -89,9 +113,11 @@ export function createSecurityCameraAppClasses(deps: any) {
     activateListeners(html: any) {
       super.activateListeners(html);
       bindMonitorControls(this, html);
+      restoreMonitorScroll(this, html);
     }
 
     async close(options: any) {
+      if (!allowDiscardCameraChanges()) return this;
       clearActiveMonitor(this);
       return super.close(options);
     }
@@ -159,7 +185,7 @@ export function createSecurityCameraAppClasses(deps: any) {
       const waiting = element?.querySelector?.("[data-security-camera-live-waiting]");
 
       if (image) {
-        image.src = frame;
+        if (image.getAttribute("src") !== frame) image.src = frame;
         image.hidden = false;
         if (waiting) waiting.hidden = true;
         return;
@@ -201,6 +227,7 @@ export function createSecurityCameraAppClasses(deps: any) {
       };
 
       async _prepareContext(options: any) {
+        rememberMonitorScroll(this);
         return {
           ...(await super._prepareContext(options)),
           ...getMonitorContext()
@@ -221,9 +248,11 @@ export function createSecurityCameraAppClasses(deps: any) {
       _onRender(context: any, options: any) {
         super._onRender?.(context, options);
         bindMonitorControls(this);
+        restoreMonitorScroll(this);
       }
 
       async close(options: any) {
+        if (!allowDiscardCameraChanges()) return this;
         clearActiveMonitor(this);
         return super.close(options);
       }
@@ -305,7 +334,7 @@ export function createSecurityCameraAppClasses(deps: any) {
         const waiting = element?.querySelector?.("[data-security-camera-live-waiting]");
 
         if (image) {
-          image.src = frame;
+          if (image.getAttribute("src") !== frame) image.src = frame;
           image.hidden = false;
           if (waiting) waiting.hidden = true;
           return;

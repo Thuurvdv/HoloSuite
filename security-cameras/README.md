@@ -1,57 +1,52 @@
 # Security Cameras
 
-Security Cameras is a Foundry VTT module that gives the GM a full surveillance camera system for sci-fi and cyberpunk games. Set up cameras across your scenes, then broadcast live or static feeds to your players during gameplay. Every feed comes wrapped in a stylish cyberpunk UI with scanlines, recording indicators, and signal effects.
+Show players camera feeds from live scenes or static images.
 
-![Camera Feed](../images/CameraFeed.jpg)
+Supports Foundry v12-v14. Requires **HoloSuite Core**.
 
-## What Does It Do?
+## Installation
 
-- Lets the GM create, organize, and manage security cameras across any scene in the world.
-- Cameras can show a live view of a specific area on the canvas or display a static image (like a pre-made screenshot or a "last known" still).
-- Each camera has a status that controls what players see: online, offline, corrupted, or restricted. Offline cameras show a signal loss screen. Corrupted cameras display a glitched feed. Restricted cameras show an access denied overlay.
-- The GM can push a camera feed to all players with one click, and close all player feeds just as easily.
-- Feeds can appear in a draggable window or as a compact picture-in-picture overlay.
-- Cameras can be linked to Foundry v13 Scene Regions so the feed automatically frames a specific area of the map.
+1. In Foundry's Setup screen, open **Add-on Modules > Install Module**. Install **Security Cameras** and **HoloSuite Core**.
+2. Launch your world as a GM. Open **Game Settings > Manage Modules**, enable both modules, and save.
+3. Open **Security Cameras** from the HoloSuite launcher.
 
-## Tutorial: Using Security Cameras as a DM
+## Quick Start
 
-### Setting Up Cameras
+1. Click **New** and enter a camera name and location.
+2. Choose a **Feed Source**:
+   - **Live Canvas:** Select a Scene and, optionally, a Scene Region to crop the view. Scene Regions require Foundry v13 or later.
+   - **Static Image:** Choose an image with **Browse**. Scene and Scene Region are disabled for this source.
+3. Choose a status and display mode: **Window** or **Picture-in-Picture**.
+4. Click **Save Camera**. The manager shows a preview automatically.
+5. Click **Show Saved Feed** to broadcast it to players, or **Save & Show** to save your changes and broadcast together.
+6. Use **Close Feeds** to close the camera windows for everyone.
 
-1. Enable **Security Cameras** & **Holosuite-core** in your Foundry world.
-2. Open the **Camera Manager** from the HoloSuite launcher.
-3. Click **New** to create your first camera. The scene field defaults to whichever scene you have open.
-4. Give the camera a name and location label (for example, "Lobby Cam 01" in "Corporate Lobby").
-5. Choose a feed source:
-   - **Live Canvas** captures a real-time view of an area on the current scene. Link a Foundry v13 Scene Region to frame the shot.
-   - **Static Image** displays a fixed image file. Use Foundry's file picker to select the image.
-6. Set the camera's status to **Online** (or leave it as-is and change it later for dramatic effect).
-7. Choose a display mode: **Window** opens a draggable feed panel, while **Picture-in-Picture** keeps it compact and out of the way.
-8. Save the camera. You can create as many as you need.
+Players receive the feed automatically. Drag the top-center handle to move it, resize from the bottom-right corner, or close it with the bottom-center X.
 
-### Running Cameras During a Session
+## Camera Status
 
-1. Open the Camera Manager.
-2. Select a camera from the list.
-3. Click **Show to Players** to broadcast that camera's feed to everyone.
-4. Players will see the feed appear on their screens with the cyberpunk overlay matching the camera's current status.
-5. Change a camera's status mid-session to create tension. Switch a camera to **Corrupted** when something goes wrong, or to **Offline** when an enemy cuts the feed.
-6. Click **Close All Player Feeds** when you want to pull every feed off the players' screens at once.
-7. Use **Duplicate** to quickly create variants of an existing camera (useful for multi-camera hallways or repeating setups).
+| Status | What players see |
+| --- | --- |
+| Online | The camera view with screen effects. |
+| Clean | The camera view without screen effects or filters. |
+| Offline | A no-signal screen. |
+| Corrupted | A glitched camera view. |
+| Restricted | An access-denied screen. |
 
-## Tutorial: Using Security Cameras as a Player
+Save a status change to update open feeds.
 
-### Viewing Camera Feeds
+## Video Effects
 
-1. When the GM broadcasts a camera feed, it appears on your screen automatically.
-2. The feed window shows the camera name, location, and a live or static image inside a cyberpunk-styled frame.
-3. If the camera is **online**, you see the feed normally with a REC indicator.
-4. If the camera is **offline**, you see a "Signal Lost" screen.
-5. If the camera is **corrupted**, the feed shows heavy visual glitching.
-6. If the camera is **restricted**, you see an "Access Denied" overlay.
-7. You can drag and reposition the feed window. The GM controls when feeds open and close.
+In **Configure Settings > Security Cameras > Video Effect Intensity**, adjust the effects from **0%** (off) to **200%**. The default is **50%**. Changes apply immediately for all viewers. Clean feeds always have no effects.
 
-### Things to Know
+## Performance
 
-- You cannot open camera feeds on your own. The GM decides which cameras to share and when.
-- If the GM closes all feeds, your camera windows will close automatically.
-- For live canvas feeds, you need to be on the same scene as the camera for the feed to update in real time. If you are on a different scene, the feed may show a fallback image instead.
+In **Configure Settings > Security Cameras**:
+
+- **Camera Quality:** Low uses 480px frames every 2.5 seconds, Balanced uses 640px every 1.5 seconds, and High uses 960px every 1.25 seconds. Balanced is the default. Still scenes reuse their last frame until something changes.
+- **Reduced Screen Effects:** Remove animated effects and image filters on your own computer. Each player can choose this independently.
+- **Animate Video Tiles:** Turn this off to use still frames from video backgrounds and tiles, reducing work on the GM's computer.
+
+## Video
+
+[Watch the Security Cameras overview on our website](https://www.magetowerstudios.com/docs/module.html?id=security-cameras#videos).

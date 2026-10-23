@@ -1,4 +1,4 @@
-export type SecurityCameraStatus = "online" | "offline" | "corrupted" | "restricted";
+export type SecurityCameraStatus = "online" | "clean" | "offline" | "corrupted" | "restricted";
 export type SecurityCameraFeedSource = "live" | "image";
 export type SecurityCameraDisplayMode = "window" | "picture-in-picture";
 
@@ -35,7 +35,7 @@ export interface SecurityCameraValidationResult {
   errors: string[];
 }
 
-export const CAMERA_STATUSES = new Set<SecurityCameraStatus>(["online", "offline", "corrupted", "restricted"]);
+export const CAMERA_STATUSES = new Set<SecurityCameraStatus>(["online", "clean", "offline", "corrupted", "restricted"]);
 export const FEED_SOURCES = new Set<SecurityCameraFeedSource>(["live", "image"]);
 export const DISPLAY_MODES = new Set<SecurityCameraDisplayMode>(["window", "picture-in-picture"]);
 
@@ -44,6 +44,7 @@ export const DEFAULT_CAMERA_REGION_HEIGHT = 675;
 
 export const STATUS_CHOICES = [
   { value: "online", label: "Online" },
+  { value: "clean", label: "Clean" },
   { value: "offline", label: "Offline" },
   { value: "corrupted", label: "Corrupted" },
   { value: "restricted", label: "Restricted" }

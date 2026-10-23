@@ -3,6 +3,15 @@ import test from "node:test";
 
 const model = await import("../../.tmp-tests/camera-model.js");
 
+test("Clean status survives normalization and validation for live and static sources", () => {
+  for (const feedSource of ["live", "image"]) {
+    const result = model.validateCameraData({ id: "clean-camera", name: "Clean Camera", status: "clean", feedSource });
+    assert.equal(result.ok, true);
+    assert.equal(result.camera.status, "clean");
+    assert.equal(result.camera.feedSource, feedSource);
+  }
+});
+
 test("normalizeCamera fills defaults and generates ids", () => {
   const camera = model.normalizeCamera({
     name: "  Dock 17  ",
