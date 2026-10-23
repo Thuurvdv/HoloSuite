@@ -101,6 +101,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
       : dimensions;
     // Keep the requested scene rectangle intact, including padding outside the background.
     const settings = performanceOptions();
+    const generation = Number((globalThis as any).game?.release?.generation ?? 13);
     const scale = Math.min(1, settings.maxDimension / region.width, settings.maxDimension / region.height);
     const width = Math.max(1, Math.round(region.width * scale));
     const height = Math.max(1, Math.round(region.height * scale));
@@ -128,8 +129,10 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
       const image = await loadImage(imagePath);
       if (imagePath && !image) throw new Error("Camera background could not be loaded.");
       const tiles = sceneDocuments(scene.tiles ?? scene._source?.tiles);
+      const foregroundOffset = generation >= 14 ? .5 : 0;
       if (typeof scene.foreground === "string" && scene.foreground) tiles.push({
-        x: dimensions.x, y: dimensions.y, width: dimensions.width, height: dimensions.height,
+        x: dimensions.x + dimensions.width * foregroundOffset,
+        y: dimensions.y + dimensions.height * foregroundOffset, width: dimensions.width, height: dimensions.height,
         elevation: scene.foregroundElevation ?? Number.MAX_SAFE_INTEGER, sort: -Number.MAX_SAFE_INTEGER,
         texture: { src: scene.foreground }
       });
@@ -146,7 +149,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
           continue;
         }
         const data: any = entry.data;
-        const initialGeometry = getTileGeometry(data);
+        const initialGeometry = getTileGeometry(data, undefined, generation);
         if (!initialGeometry || !initialGeometry.alpha) continue;
         if ((!data.texture?.fit || data.texture.fit === "fill") && !getBoundsIntersection(initialGeometry.bounds, region)) continue;
         const path = String(data.texture?.src ?? data.img ?? "");
@@ -156,7 +159,7 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
         if (media.tagName === "VIDEO") {
           media.loop = data.video?.loop !== false;
         }
-        const geometry = getTileGeometry(data, media)!;
+        const geometry = getTileGeometry(data, media, generation)!;
         if (!getBoundsIntersection(geometry.bounds, region)) continue;
         sceneTransform();
         drawSceneTile(context, media, geometry);

@@ -22,7 +22,7 @@ export function getSceneDrawOrder(tiles: any[], tokens: any[]) {
   });
 }
 
-export function getTileGeometry(document: any, media?: any) {
+export function getTileGeometry(document: any, media?: any, generation = 13) {
   const tile: any = getTokenData(document);
   if (!tile || tile.hidden || !(tile.width > 0) || !(tile.height > 0)) return null;
   let width = number(tile.width), height = number(tile.height);
@@ -36,8 +36,10 @@ export function getTileGeometry(document: any, media?: any) {
   const anchorX = number(tile.texture?.anchorX, 0.5), anchorY = number(tile.texture?.anchorY, 0.5);
   const scaleX = number(tile.texture?.scaleX, 1), scaleY = number(tile.texture?.scaleY, 1);
   const rotation = number(tile.rotation) * Math.PI / 180;
-  const cx = number(tile.x) + number(tile.width) * number(tile.anchorX, 0.5),
-    cy = number(tile.y) + number(tile.height) * number(tile.anchorY, 0.5);
+  // Since v14, tile coordinates locate the texture anchor rather than the tile's top-left corner.
+  const centerOffset = generation >= 14 ? 0 : .5;
+  const cx = number(tile.x) + number(tile.width) * centerOffset,
+    cy = number(tile.y) + number(tile.height) * centerOffset;
   const corners = [[-width * anchorX, -height * anchorY], [width * (1 - anchorX), -height * anchorY],
     [width * (1 - anchorX), height * (1 - anchorY)], [-width * anchorX, height * (1 - anchorY)]]
     .map(([x, y]) => ({ x: cx + x * scaleX * Math.cos(rotation) - y * scaleY * Math.sin(rotation),
