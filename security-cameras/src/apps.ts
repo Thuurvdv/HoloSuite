@@ -163,7 +163,7 @@ export function createSecurityCameraAppClasses(deps: any) {
       const waiting = element?.querySelector?.("[data-security-camera-live-waiting]");
 
       if (image) {
-        image.src = frame;
+        if (image.getAttribute("src") !== frame) image.src = frame;
         image.hidden = false;
         if (waiting) waiting.hidden = true;
         return;
@@ -310,7 +310,7 @@ export function createSecurityCameraAppClasses(deps: any) {
         const waiting = element?.querySelector?.("[data-security-camera-live-waiting]");
 
         if (image) {
-          image.src = frame;
+          if (image.getAttribute("src") !== frame) image.src = frame;
           image.hidden = false;
           if (waiting) waiting.hidden = true;
           return;

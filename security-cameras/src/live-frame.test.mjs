@@ -7,23 +7,28 @@ const { createLiveFrameController } = await import(`data:text/javascript;base64,
 const helper = await build({ stdin: { contents: 'export * from "./scene-compositor.ts"; export * from "./frame-cache.ts"; export * from "./camera-access.ts";', resolveDir: new URL(".", import.meta.url).pathname.replace(/^\/([A-Z]:)/i, "$1") }, bundle: true, write: false, format: "esm", platform: "node" });
 const { getTileGeometry, getSceneDrawOrder, createFrameCache, canUserAccessCamera } = await import(`data:text/javascript;base64,${Buffer.from(helper.outputFiles[0].text).toString("base64")}`);
 
-function setup({ background = "", active = false, deferred = false } = {}) {
+function setup({ background = "", active = false, deferred = false, getPerformance = undefined } = {}) {
   const draws = [], transforms = [], pending = [], intervals = new Map();
   let timerId = 0, encoded = 0;
   const scene = { id: "scene", width: 800, height: 600, grid: { size: 100 }, dimensions: { sceneX: 100, sceneY: 200, sceneWidth: 800, sceneHeight: 600 }, tiles: [], tokens: [] };
   globalThis.canvas = { scene: active ? scene : { id: "other" }, dimensions: scene.dimensions };
   globalThis.window = { setTimeout, clearTimeout, setInterval: fn => { intervals.set(++timerId, fn); return timerId; }, clearInterval: id => intervals.delete(id) };
   const context = { fillRect() {}, setTransform: (...args) => transforms.push(args), save() {}, restore() {}, translate() {}, rotate() {}, scale() {}, drawImage: (image, ...args) => draws.push({ src: image.src, args }), beginPath() {}, arc() {}, fill() {}, stroke() {}, fillText() {} };
-  globalThis.document = { visibilityState: "visible", addEventListener() {}, removeEventListener() {}, createElement: () => ({ getContext: () => context, toDataURL: () => { encoded++; return "data:image/webp;base64,frame"; } }) };
+  const canvases = [];
+  globalThis.document = { visibilityState: "visible", addEventListener() {}, removeEventListener() {}, createElement: () => {
+    const canvas = { getContext: () => context, toDataURL: () => { encoded++; return "data:image/webp;base64,frame"; } };
+    canvases.push(canvas);
+    return canvas;
+  } };
   globalThis.Image = class {
     naturalWidth = 100; naturalHeight = 100;
     set src(value) { this._src = value; if (deferred) pending.push(() => this.onload?.()); else queueMicrotask(() => this.onload?.()); }
     get src() { return this._src; }
   };
   const broadcasts = [];
-  const controller = createLiveFrameController({ normalizeCamera: camera => camera, applyLinkedRegionBounds: camera => camera, getSceneById: () => scene, getSceneBackgroundPath: () => background, moduleId: "test", isFrameProducer: () => true, broadcastLiveFrame: (...args) => broadcasts.push(args) });
+  const controller = createLiveFrameController({ normalizeCamera: camera => camera, applyLinkedRegionBounds: camera => camera, getSceneById: id => id && id !== scene.id ? { ...scene, id } : scene, getSceneBackgroundPath: () => background, moduleId: "test", isFrameProducer: () => true, getPerformance, broadcastLiveFrame: (...args) => broadcasts.push(args) });
   const camera = { id: "camera", sceneId: "scene", feedSource: "live", status: "online", regionX: 100, regionY: 200, regionWidth: 400, regionHeight: 300 };
-  return { scene, controller, camera, draws, transforms, pending, broadcasts, intervals, get encoded() { return encoded; } };
+  return { scene, controller, camera, draws, transforms, pending, broadcasts, intervals, canvases, get encoded() { return encoded; } };
 }
 
 for (const active of [false, true]) test(`tiles render with a background on ${active ? "active" : "inactive"} scenes`, async () => {
@@ -139,4 +144,84 @@ test("failed frame work can retry and invalidation cannot resurrect stale cache 
   complete("old");
   await old;
   assert.equal(await cache.get("other", async () => "new"), "new");
+});
+
+test("unchanged scenes reuse their encoded frame beyond the old cache timeout", async (t) => {
+  let now = Date.now() - 10000;
+  t.mock.method(Date, "now", () => now);
+  const env = setup({ background: "background.png" });
+  await env.controller.captureLiveFrame(env.camera);
+  now += 10000;
+  await env.controller.captureLiveFrame(env.camera);
+  assert.equal(env.encoded, 1);
+  env.scene.tiles.push({ x: 120, y: 220, width: 100, height: 100, texture: { src: "new.png" } });
+  env.controller.invalidateFrames();
+  await env.controller.captureLiveFrame(env.camera);
+  assert.equal(env.encoded, 2);
+  assert.ok(env.draws.some(draw => draw.src === "new.png"));
+  assert.equal(env.canvases.length, 1, "the output canvas is reused");
+});
+
+test("scene documents are serialized once per frame and fallback serialization stays lazy", async () => {
+  const env = setup();
+  let copies = 0;
+  env.scene.toObject = () => { throw new Error("Full-scene serialization should not run"); };
+  env.scene.tokens = Array.from({ length: 100 }, () => ({
+    toObject() { copies++; return { x: 150, y: 250, width: 1, height: 1, texture: { src: "token.png" } }; }
+  }));
+  await env.controller.captureLiveFrame(env.camera);
+  assert.equal(copies, 100);
+});
+
+test("quality changes resize output immediately without changing the viewed region", async () => {
+  let maxDimension = 480;
+  const env = setup({ getPerformance: () => ({ maxDimension, interval: 2500, quality: .65, animateVideo: false }) });
+  const camera = { ...env.camera, regionWidth: 1600, regionHeight: 900 };
+  await env.controller.captureLiveFrame(camera);
+  assert.equal(env.canvases[0].width, 480);
+  assert.equal(env.canvases[0].height, 270);
+  maxDimension = 960;
+  env.controller.reconfigure();
+  await env.controller.captureLiveFrame(camera);
+  assert.equal(env.canvases[0].width, 960);
+  assert.equal(env.canvases[0].height, 540);
+});
+
+test("local and remote consumers share one timer and continue until the last viewer leaves", async () => {
+  const env = setup({ background: "background.png" });
+  let previews = 0, remote = 0;
+  const target = { camera: env.camera, rendered: true, updateLiveFrame() { previews++; } };
+  env.controller.startLocalLiveRefresh(target);
+  env.controller.subscribeRemote(env.camera, "remote", () => { remote++; }, () => true);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(env.encoded, 1);
+  assert.equal(previews, 1);
+  assert.equal(remote, 1);
+  assert.equal(env.intervals.size, 1);
+  env.controller.stopLocalLiveRefresh(target);
+  assert.equal(env.intervals.size, 1);
+  env.controller.unsubscribeRemote("remote");
+  assert.equal(env.intervals.size, 0);
+});
+
+test("scene edits during capture cannot publish an outdated frame", async () => {
+  const env = setup({ background: "background.png", deferred: true });
+  const frame = env.controller.captureLiveFrame(env.camera);
+  await new Promise(resolve => setImmediate(resolve));
+  env.controller.invalidateFrames();
+  env.pending.forEach(resolve => resolve());
+  assert.equal(await frame, "");
+});
+
+test("an edit in another scene does not evict this camera's frame", async () => {
+  const env = setup({ background: "background.png" });
+  const other = { ...env.camera, id: "other-camera", sceneId: "other" };
+  await env.controller.captureLiveFrame(env.camera);
+  await env.controller.captureLiveFrame(other);
+  assert.equal(env.encoded, 2);
+  env.controller.invalidateFrames("scene");
+  await env.controller.captureLiveFrame(other);
+  assert.equal(env.encoded, 2);
+  await env.controller.captureLiveFrame(env.camera);
+  assert.equal(env.encoded, 3);
 });

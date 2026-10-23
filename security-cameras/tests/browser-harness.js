@@ -4,7 +4,12 @@ const waitFor = async (predicate) => { for (let i = 0; i < 100; i++) { if (predi
 const hooks = new Map();
 const messages = [];
 const generation = Number(new URL(location.href).searchParams.get("generation"));
-globalThis.Hooks = { once: (name, fn) => hooks.set(name, fn) };
+const eventHooks = new Map();
+globalThis.Hooks = {
+  once: (name, fn) => hooks.set(name, fn),
+  on(name, fn) { const listeners = eventHooks.get(name) ?? []; listeners.push(fn); eventHooks.set(name, listeners); },
+  callAll(name, ...args) { for (const fn of eventHooks.get(name) ?? []) fn(...args); }
+};
 globalThis.ui = { notifications: { info() {}, warn() {}, error(message) { throw new Error(message); } } };
 globalThis.Dialog = { confirm: async () => true };
 window.confirm = () => true;
@@ -77,6 +82,8 @@ try {
   const effectSetting = settingDefinitions.get("videoEffectIntensity");
   assert(effectSetting.config && effectSetting.scope === "world" && effectSetting.default === 50 && effectSetting.range.max === 200, "world settings default video effect intensity to 50%");
   assert(document.documentElement.style.getPropertyValue("--security-camera-effect-intensity") === "0.4", "saved video intensity is restored on ready");
+  assert(settingDefinitions.get("cameraQuality").default === "balanced" && settingDefinitions.get("cameraQuality").scope === "world", "Balanced is the world camera quality default");
+  assert(settingDefinitions.get("reducedEffects").scope === "client", "reduced effects are a personal setting");
   await game.settings.set("security-cameras", "videoEffectIntensity", 100);
   const api = game.securityCameras;
   const camera = { id: "lobby", name: "Lobby 01", sceneId: "scene", regionId: "entrance", location: "Transit Hub · West entrance", feedSource: "live", status: "online", regionX: 100, regionY: 200, regionWidth: 400, regionHeight: 300 };
@@ -101,9 +108,15 @@ try {
   sourceForm.elements.feedSource.value = "live";
   sourceForm.elements.feedSource.dispatchEvent(new Event("change", { bubbles: true }));
   assert(!sourceForm.elements.sceneId.disabled && !sourceForm.elements.regionId.disabled, "switching back to Live Canvas enables scene fields");
-  const controller = module.createLiveFrameController({ normalizeCamera: value => value, applyLinkedRegionBounds: value => value, getSceneById: () => scene, getSceneBackgroundPath: () => scene.background.src, moduleId: "test", isFrameProducer: () => true });
+  const controller = module.createLiveFrameController({ normalizeCamera: value => value, applyLinkedRegionBounds: value => value, getSceneById: () => scene, getSceneBackgroundPath: () => scene.background.src, moduleId: "test", isFrameProducer: () => true,
+    getPerformance: () => ({ maxDimension: 960, interval: 1250, quality: .72, animateVideo: game.settings.get("security-cameras", "animateVideoTiles") }) });
   const pixel = async (frame, x, y) => { const img = new Image(); img.src = frame; await img.decode(); const c = document.createElement("canvas"); c.width = img.width; c.height = img.height; const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0); return [...ctx.getImageData(x, y, 1, 1).data]; };
-  let frame = await controller.captureLiveFrame(camera);
+  const synchronousEncode = HTMLCanvasElement.prototype.toDataURL;
+  let frame;
+  HTMLCanvasElement.prototype.toDataURL = () => { throw new Error("Synchronous encoding must not be used"); };
+  try { frame = await controller.captureLiveFrame(camera); }
+  finally { HTMLCanvasElement.prototype.toDataURL = synchronousEncode; }
+  assert(frame.startsWith("data:image/"), "asynchronous encoding preserves the socket-compatible data URL format");
   let rgb = await pixel(frame, 80, 80);
   assert(rgb[0] > 220 && rgb[2] < 30, "inactive scene tile pixels appear above background");
   scene.background.src = "";
@@ -140,8 +153,18 @@ try {
   const videoUrl = URL.createObjectURL(new Blob(chunks, { type: "video/webm" }));
   scene.tiles.push({ x: 150, y: 250, width: 100, height: 100, elevation: 30, texture: { src: `${videoUrl}#clip.webm` }, video: { autoplay: true, loop: true } });
   controller.invalidateFrames();
-  rgb = await pixel(await controller.captureLiveFrame(camera), 80, 80);
+  const playVideo = HTMLMediaElement.prototype.play;
+  let decodedVideo;
+  HTMLMediaElement.prototype.play = function(...args) { if (this.src.startsWith(videoUrl)) decodedVideo = this; return playVideo.apply(this, args); };
+  try { rgb = await pixel(await controller.captureLiveFrame(camera), 80, 80); }
+  finally { HTMLMediaElement.prototype.play = playVideo; }
   assert(rgb[1] > 200 && rgb[0] < 40, "video tile supplies decoded pixels");
+  assert(decodedVideo && !decodedVideo.paused, "video tiles play only when requested by a live capture");
+  await game.settings.set("security-cameras", "animateVideoTiles", false);
+  controller.reconfigure();
+  await controller.captureLiveFrame(camera);
+  assert(decodedVideo.paused, "disabling video playback stops the decoder and keeps a still frame");
+  await game.settings.set("security-cameras", "animateVideoTiles", true);
   scene.tiles.pop();
   URL.revokeObjectURL(videoUrl);
 
@@ -172,7 +195,19 @@ try {
   await api.showFeed("lobby");
   assert(messages.some(message => message.action === "showFeed" && message.liveFrame), "broadcast sends initial frame");
   assert(api.activeFeed.liveFrame, "GM feed opens with frame");
+  const previousFrame = api.activeFeed.liveFrame;
+  scene.tiles[0].texture.src = green;
+  Hooks.callAll("updateTile", { parent: scene });
+  await waitFor(() => api.activeFeed.liveFrame !== previousFrame);
+  const updatedPixel = await pixel(api.activeFeed.liveFrame, 80, 80);
+  assert(updatedPixel[1] > 200 && updatedPixel[0] < 40, "scene edit hooks refresh cached frames with changed tile pixels");
+  scene.tiles[0].texture.src = red;
+  Hooks.callAll("updateTile", { parent: scene });
   const feedElement = api.activeFeed.element;
+  await game.settings.set("security-cameras", "reducedEffects", true);
+  assert(getComputedStyle(feedElement.querySelector(".security-camera-feed-static")).display === "none" && getComputedStyle(feedElement.querySelector(".security-camera-feed-scanline")).display === "none", "personal reduced effects remove full-window animated layers");
+  assert(getComputedStyle(feedElement.querySelector(".security-camera-feed-frame img")).filter === "none" && getComputedStyle(feedElement.querySelector(".security-camera-rec i")).animationName === "none", "personal reduced effects remove image filters and flicker");
+  await game.settings.set("security-cameras", "reducedEffects", false);
   const staticLayer = feedElement.querySelector(".security-camera-feed-static");
   const scanlineLayer = feedElement.querySelector(".security-camera-feed-scanline");
   await game.settings.set("security-cameras", "videoEffectIntensity", 50);
@@ -241,8 +276,32 @@ try {
   assert(messages.some(message => message.action === "cameraChanged" && message.camera.status === "restricted"), "status changes propagate to players");
   await api.registerCamera({ ...api.getCamera("lobby"), status: "online" });
   await module.handleSocketMessage({ action: "requestLiveFrame", userId: "player", cameraId: "lobby" });
+  await waitFor(() => messages.some(message => message.action === "updateFeedFrame" && message.recipientUserId === "player" && message.liveFrame));
   const response = messages.findLast(message => message.action === "updateFeedFrame" && message.recipientUserId === "player");
   assert(response?.revision && response.liveFrame, "online player request receives versioned frame");
+  await module.handleSocketMessage({ action: "requestLiveFrame", userId: "player", cameraId: "lobby", hasFrame: true });
+  await waitFor(() => messages.some(message => message.action === "updateFeedFrame" && message.recipientUserId === "player" && message.frameUnchanged));
+  assert(!messages.findLast(message => message.frameUnchanged).liveFrame, "subscription renewals use a small heartbeat for unchanged frames");
+  users.push({ id: "player-two", isGM: false, active: true });
+  await module.handleSocketMessage({ action: "requestLiveFrame", userId: "player-two", cameraId: "lobby" });
+  await waitFor(() => messages.some(message => message.action === "updateFeedFrame" && message.recipientUserId === "player-two" && message.liveFrame));
+  const intendedFor = (message, id) => message.recipientUserId === id || message.recipientUserIds?.includes(id);
+  const deliveredBeforeEdit = messages.filter(message => message.action === "updateFeedFrame" && intendedFor(message, "player") && message.liveFrame).length;
+  const messagesBeforeEdit = messages.length;
+  scene.tiles[0].texture.src = green;
+  Hooks.callAll("updateTile", { parent: scene });
+  await waitFor(() => messages.filter(message => message.action === "updateFeedFrame" && intendedFor(message, "player") && message.liveFrame).length > deliveredBeforeEdit);
+  assert(true, "subscribed viewers receive changed frames without polling");
+  const sharedUpdates = messages.slice(messagesBeforeEdit).filter(message => message.action === "updateFeedFrame" && message.liveFrame);
+  assert(sharedUpdates.length === 1 && intendedFor(sharedUpdates[0], "player") && intendedFor(sharedUpdates[0], "player-two"), "multiple viewers receive one shared image payload per camera update");
+  await module.handleSocketMessage({ action: "unsubscribeFeed", userId: "player", cameraId: "lobby" });
+  const afterUnsubscribe = messages.filter(message => message.action === "updateFeedFrame" && intendedFor(message, "player")).length;
+  scene.tiles[0].texture.src = red;
+  Hooks.callAll("updateTile", { parent: scene });
+  await new Promise(resolve => setTimeout(resolve, 1800));
+  assert(messages.filter(message => message.action === "updateFeedFrame" && intendedFor(message, "player")).length === afterUnsubscribe, "unsubscribing stops remote frame delivery");
+  await module.handleSocketMessage({ action: "unsubscribeFeed", userId: "player-two", cameraId: "lobby" });
+  users.pop();
   game.user = users[1];
   await module.handleSocketMessage({ action: "cameraChanged", gmUserId: "gm", cameraId: "lobby", camera: { ...api.getCamera("lobby"), status: "restricted" } });
   await module.handleSocketMessage(response);

@@ -18,6 +18,7 @@ import {
 } from "./region-geometry";
 import { createSecurityCameraAppClasses } from "./apps";
 import { createLiveFrameController } from "./live-frame";
+import { applyCameraEffects, cameraPerformance, registerCameraSettings } from "./settings";
 import { FEED_TEMPLATE_PATH, MODULE_ID, MONITOR_TEMPLATE_PATH, SOCKET_NAME } from "./constants";
 import { createCameraId, escapeHTML, getDeepClone } from "./utils";
 
@@ -35,7 +36,10 @@ let broadcastGeneration = 0;
 let feedGeneration = 0;
 let editorDirty = false;
 let editorDraft: any = null;
-const REMOTE_LIVE_FRAME_INTERVAL_MS = 1250;
+const REMOTE_LEASE_INTERVAL_MS = 10000;
+const remoteViewers = new Map<string, {
+  userId: string; cameraId: string; revision: string; expires: number; timer: number; lastFrame: string; needsAck: boolean;
+}>();
 
 function normalizeCamera(cameraData = {}, options = {}) {
   return normalizeCameraModel(cameraData, { ...options, createId: createCameraId });
@@ -210,6 +214,7 @@ async function saveCameraStore(cameras) {
   liveFrameController.invalidateFrames();
   for (const id of Object.keys(previous)) {
     if (JSON.stringify(previous[id]) === JSON.stringify(cameras[id])) continue;
+    removeCameraViewers(id);
     emitSocketMessage({ action: "cameraChanged", gmUserId: game.user.id, cameraId: id,
       camera: cameras[id] ? normalizeCamera(cameras[id]) : null });
     if (activeFeed?.camera?.id === id) {
@@ -219,8 +224,7 @@ async function saveCameraStore(cameras) {
     if (broadcastCameraId === id) {
       broadcastGeneration++;
       liveFrameController.stopBroadcastLiveRefresh();
-      if (cameras[id]) liveFrameController.startBroadcastLiveRefresh(cameras[id]);
-      else broadcastCameraId = "";
+      if (!cameras[id]) broadcastCameraId = "";
     }
   }
   await refreshMonitor();
@@ -482,7 +486,7 @@ function bindMonitorControls(app: any, html: any = null) {
     waiting.textContent = "Waiting for first frame";
     preview.append(waiting);
     app.updateLiveFrame = async (frame: string) => {
-      image.src = frame;
+      if (image.getAttribute("src") !== frame) image.src = frame;
       image.hidden = false;
       waiting.hidden = true;
       app.lastFrameAt = Date.now();
@@ -631,7 +635,7 @@ function bindFeedControls(app: any, html: any = null) {
   liveFrameController.startLocalLiveRefresh(app);
   startRemoteLiveRefresh(app);
   if (app.liveFrame && !app.lastFrameAt) app.lastFrameAt = Date.now();
-  const handle = element.querySelector<HTMLElement>("[data-security-camera-drag]");
+  const handle = element.querySelector("[data-security-camera-drag]") as HTMLElement | null;
   app.feedDragController?.abort();
   handle?.addEventListener("pointerdown", (event: PointerEvent) => {
     if (event.button !== 0) return;
@@ -670,20 +674,11 @@ function bindFeedControls(app: any, html: any = null) {
 
 const liveFrameController = createLiveFrameController({
   applyLinkedRegionBounds,
-  broadcastLiveFrame: (camera, liveFrame) => {
-    if (!game.user?.isGM || !camera?.id || !liveFrame) return;
-    emitSocketMessage({
-      action: "updateFeedFrame",
-      gmUserId: game.user.id,
-      cameraId: camera.id,
-      revision: cameraRevision(normalizeCamera(camera)),
-      liveFrame
-    });
-  },
   getRegionDocument,
   getSceneBackgroundPath,
   getSceneById,
   isFrameProducer: () => Boolean(game.user?.isGM),
+  getPerformance: cameraPerformance,
   moduleId: MODULE_ID,
   normalizeCamera
 });
@@ -776,7 +771,6 @@ async function showFeed(cameraId) {
     camera,
     liveFrame
   });
-  liveFrameController.startBroadcastLiveRefresh(camera);
 
   return openLocalFeed(camera, { liveFrame });
 }
@@ -804,7 +798,8 @@ function requestRemoteLiveFrame(cameraId) {
   emitSocketMessage({
     action: "requestLiveFrame",
     userId: game.user?.id,
-    cameraId
+    cameraId,
+    hasFrame: Boolean(activeFeed?.camera?.id === cameraId && activeFeed.liveFrame)
   });
 }
 
@@ -815,16 +810,45 @@ function isRemoteLiveCamera(camera) {
 function startRemoteLiveRefresh(app) {
   stopRemoteLiveRefresh(app);
   if (!isRemoteLiveCamera(app?.camera)) return;
-  requestRemoteLiveFrame(app.camera.id);
-  app.remoteLiveFrameTimer = window.setInterval(() => {
-    if (document.visibilityState !== "hidden" && (!app.lastFrameAt || Date.now() - app.lastFrameAt > REMOTE_LIVE_FRAME_INTERVAL_MS)) requestRemoteLiveFrame(app.camera.id);
-  }, REMOTE_LIVE_FRAME_INTERVAL_MS);
+  let subscribed = false;
+  const renew = () => {
+    const visible = document.visibilityState !== "hidden" && !app.minimized && !app._minimized;
+    if (visible) { requestRemoteLiveFrame(app.camera.id); subscribed = true; }
+    else if (subscribed) {
+      emitSocketMessage({ action: "unsubscribeFeed", userId: game.user.id, cameraId: app.camera.id });
+      subscribed = false;
+    }
+  };
+  app.remoteLiveFrameTimer = window.setInterval(renew, REMOTE_LEASE_INTERVAL_MS);
+  app.remoteVisibilityHandler = renew;
+  document.addEventListener("visibilitychange", renew);
+  renew();
 }
 
 function stopRemoteLiveRefresh(app) {
-  if (!app?.remoteLiveFrameTimer) return;
-  window.clearInterval(app.remoteLiveFrameTimer);
+  if (!app) return;
+  if (app.remoteLiveFrameTimer) {
+    window.clearInterval(app.remoteLiveFrameTimer);
+    emitSocketMessage({ action: "unsubscribeFeed", userId: game.user?.id, cameraId: app.camera?.id });
+  }
+  if (app.remoteVisibilityHandler) document.removeEventListener("visibilitychange", app.remoteVisibilityHandler);
+  app.remoteVisibilityHandler = null;
   app.remoteLiveFrameTimer = null;
+}
+
+function removeRemoteViewer(key: string) {
+  const viewer = remoteViewers.get(key);
+  if (viewer) window.clearTimeout(viewer.timer);
+  remoteViewers.delete(key);
+  liveFrameController.unsubscribeRemote(key);
+}
+
+function removeCameraViewers(cameraId: string) {
+  for (const [key, viewer] of [...remoteViewers]) if (viewer.cameraId === cameraId) removeRemoteViewer(key);
+}
+
+function clearRemoteViewers() {
+  for (const key of [...remoteViewers.keys()]) removeRemoteViewer(key);
 }
 
 function hasCameraAccess(userId, cameraId) {
@@ -840,6 +864,7 @@ function closeFeedForEveryone() {
   });
   broadcastGeneration++;
   broadcastCameraId = "";
+  clearRemoteViewers();
   liveFrameController.stopBroadcastLiveRefresh();
   closeLocalFeed();
 }
@@ -849,9 +874,31 @@ async function refreshMonitor() {
   await activeMonitor.render(true);
 }
 
+function deliverRemoteFrame(cameraId: string, revision: string, liveFrame: string) {
+  const camera = getCamera(cameraId);
+  if (!camera || cameraRevision(camera) !== revision) return;
+  const viewers = [...remoteViewers.values()].filter(viewer => viewer.cameraId === cameraId && viewer.revision === revision
+    && Date.now() < viewer.expires && game.users?.get?.(viewer.userId)?.active
+    && canUserAccessCamera(game.users.get(viewer.userId), camera));
+  const send = (recipients: typeof viewers, payload: any) => {
+    if (!recipients.length) return;
+    const ids = recipients.map(viewer => viewer.userId);
+    emitSocketMessage({ action: "updateFeedFrame", gmUserId: game.user.id, cameraId, revision,
+      ...(ids.length === 1 ? { recipientUserId: ids[0] } : { recipientUserIds: ids }), ...payload });
+    for (const viewer of recipients) { viewer.lastFrame = liveFrame; viewer.needsAck = false; }
+  };
+  send(viewers.filter(viewer => viewer.lastFrame !== liveFrame), { liveFrame });
+  send(viewers.filter(viewer => viewer.needsAck), { frameUnchanged: true });
+}
+
 async function handleSocketMessage(message) {
   if (!message || typeof message !== "object") return;
   const isGMSent = moduleSocket.isGMSender(message.gmUserId);
+
+  if (message.action === "unsubscribeFeed") {
+    if (game.user?.isGM) removeRemoteViewer(`${String(message.userId ?? "")}:${String(message.cameraId ?? "")}`);
+    return;
+  }
 
   if (message.action === "requestLiveFrame") {
     if (!game.user?.isGM) return;
@@ -860,19 +907,22 @@ async function handleSocketMessage(message) {
     const cameraId = String(message.cameraId ?? "");
     const userId = String(message.userId ?? "");
     const camera = getCamera(cameraId);
-    if (!camera || !game.users?.get?.(userId)?.active || camera.feedSource !== "live" || !hasCameraAccess(userId, cameraId)) return;
-    const liveFrame = await liveFrameController.captureLiveFrame(camera, {
-      preferDataUrl: true
-    });
-    if (!liveFrame || !hasCameraAccess(userId, cameraId) || cameraRevision(getCamera(cameraId)) !== cameraRevision(camera)) return;
-    emitSocketMessage({
-      action: "updateFeedFrame",
-      gmUserId: game.user.id,
-      cameraId,
-      recipientUserId: userId,
-      revision: cameraRevision(camera),
-      liveFrame
-    });
+    const key = `${userId}:${cameraId}`;
+    if (!camera || !game.users?.get?.(userId)?.active || camera.feedSource !== "live" || !hasCameraAccess(userId, cameraId)) {
+      removeRemoteViewer(key);
+      return;
+    }
+    const previous = remoteViewers.get(key);
+    if (previous) window.clearTimeout(previous.timer);
+    const revision = cameraRevision(camera);
+    const viewer = { userId, cameraId, revision, expires: Date.now() + 30000, needsAck: true,
+      lastFrame: message.hasFrame === true ? previous?.lastFrame ?? "" : "",
+      timer: window.setTimeout(() => removeRemoteViewer(key), 30000) };
+    remoteViewers.set(key, viewer);
+    liveFrameController.subscribeRemote(camera, key, liveFrame => {
+      if (remoteViewers.get(key) !== viewer) return;
+      deliverRemoteFrame(cameraId, revision, liveFrame);
+    }, () => remoteViewers.get(key) === viewer && Date.now() < viewer.expires && Boolean(game.users?.get?.(userId)?.active));
     return;
   }
 
@@ -880,12 +930,12 @@ async function handleSocketMessage(message) {
     if (!isGMSent || (game.user?.isGM && message.gmUserId === game.user.id)) return;
     const validation = message.camera ? validateCameraData(message.camera, { requireId: true }) : null;
     if (message.camera && (!validation?.ok || validation.camera.id !== message.cameraId)) return;
+    removeCameraViewers(message.cameraId);
     liveFrameController.invalidateFrames();
     if (broadcastCameraId === message.cameraId) {
       broadcastGeneration++;
       liveFrameController.stopBroadcastLiveRefresh();
-      if (validation) liveFrameController.startBroadcastLiveRefresh(validation.camera);
-      else broadcastCameraId = "";
+      if (!validation) broadcastCameraId = "";
     }
     if (activeFeed?.camera?.id === message.cameraId) {
       if (validation) await openLocalFeed(validation.camera);
@@ -914,12 +964,14 @@ async function handleSocketMessage(message) {
   if (message.action === "updateFeedFrame") {
     if (game.user?.isGM) return;
     if (!isGMSent) return;
+    if (Array.isArray(message.recipientUserIds) && !message.recipientUserIds.includes(game.user?.id)) return;
     const recipientUserId = String(message.recipientUserId ?? "");
     if (recipientUserId && recipientUserId !== game.user?.id) return;
     const cameraId = String(message.cameraId ?? "");
     if (!cameraId || activeFeed?.camera?.id !== cameraId) return;
     if (message.revision !== cameraRevision(normalizeCamera(activeFeed.camera))) return;
     if (["offline", "restricted"].includes(activeFeed.camera.status)) return;
+    if (message.frameUnchanged === true) { activeFeed.lastFrameAt = Date.now(); return; }
     if (typeof message.liveFrame !== "string" || !message.liveFrame) return;
     await activeFeed.updateLiveFrame?.(message.liveFrame);
     return;
@@ -930,34 +982,6 @@ async function handleSocketMessage(message) {
     if (!isGMSent) return;
     await closeLocalFeed();
   }
-}
-
-function applyVideoEffectIntensity(value: unknown) {
-  const number = Number(value);
-  const intensity = Number.isFinite(number) ? Math.max(0, Math.min(200, number)) / 100 : .5;
-  document.documentElement.style.setProperty("--security-camera-effect-intensity", String(intensity));
-  document.documentElement.classList.toggle("security-camera-effects-disabled", intensity === 0);
-}
-
-function registerSettings() {
-  game.settings.register(MODULE_ID, "videoEffectIntensity", {
-    name: "Video Effect Intensity",
-    hint: "Adjust static, scanlines, tint, flicker, and glitches for all viewers. Default: 50%. Use 0% to turn effects off or 100% for the original strength. Clean cameras have no effects.",
-    scope: "world",
-    config: true,
-    type: Number,
-    range: { min: 0, max: 200, step: 10 },
-    default: 50,
-    onChange: applyVideoEffectIntensity
-  });
-  game.settings.register(MODULE_ID, "cameras", {
-    name: "Security Cameras",
-    hint: "World-level camera feed definitions for the Security Cameras module.",
-    scope: "world",
-    config: false,
-    type: Object,
-    default: {}
-  });
 }
 
 function registerApi() {
@@ -1006,11 +1030,11 @@ function registerWithHoloSuite() {
 }
 
 Hooks.once("init", () => {
-  registerSettings();
+  registerCameraSettings(() => liveFrameController.reconfigure());
 });
 
 Hooks.once("ready", () => {
-  applyVideoEffectIntensity(game.settings.get(MODULE_ID, "videoEffectIntensity"));
+  applyCameraEffects();
   registerApi();
   registerWithHoloSuite();
   game.socket?.on?.(SOCKET_NAME, (message) => {
@@ -1018,3 +1042,29 @@ Hooks.once("ready", () => {
   });
   console.log(`${MODULE_ID} | Ready. Use game.securityCameras.openMonitor()`);
 });
+
+// Scene edits invalidate still frames; animated media continues on the selected refresh interval.
+for (const event of ["createToken", "updateToken", "deleteToken", "createTile", "updateTile", "deleteTile", "updateScene", "createRegion", "updateRegion", "deleteRegion"]) {
+  Hooks.on(event, document => {
+    const sceneId = event === "updateScene" ? document.id : document.parent?.id;
+    liveFrameController.invalidateFrames(sceneId);
+  });
+}
+Hooks.on("updateActor", (actor, changes) => {
+  if (!Object.keys(changes).some(key => /^(img|name|prototypeToken)(\.|$)/.test(key))) return;
+  for (const scene of game.scenes?.contents ?? []) {
+    const tokens = scene.tokens?.contents ?? scene.tokens ?? [];
+    if ([...tokens].some(token => token.actorId === actor.id)) liveFrameController.invalidateFrames(scene.id);
+  }
+});
+Hooks.on("updateUser", () => {
+  for (const key of [...remoteViewers.keys()]) {
+    if (!game.users?.get?.(remoteViewers.get(key)?.userId)?.active) removeRemoteViewer(key);
+  }
+});
+for (const event of ["minimizeApplication", "maximizeApplication", "minimizeApplicationV2", "maximizeApplicationV2"]) {
+  Hooks.on(event, () => {
+    activeFeed?.remoteVisibilityHandler?.();
+    liveFrameController.wake();
+  });
+}

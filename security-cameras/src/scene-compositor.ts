@@ -11,11 +11,11 @@ export function sceneDocuments(collection: any): any[] {
 /** A camera has no selected token: roofs retain their document opacity, not GM hover occlusion. */
 export function getSceneDrawOrder(tiles: any[], tokens: any[]) {
   return [
-    ...tiles.map(document => ({ kind: "tile" as const, document })),
-    ...tokens.map(document => ({ kind: "token" as const, document }))
-  ].filter(entry => !getTokenData(entry.document)?.hidden).sort((a, b) => {
-    const left: any = getTokenData(a.document);
-    const right: any = getTokenData(b.document);
+    ...tiles.map(document => ({ kind: "tile" as const, document, data: getTokenData(document) })),
+    ...tokens.map(document => ({ kind: "token" as const, document, data: getTokenData(document) }))
+  ].filter(entry => entry.data && !entry.data.hidden).sort((a, b) => {
+    const left: any = a.data;
+    const right: any = b.data;
     return number(left.elevation, left.overhead ? 1 : 0) - number(right.elevation, right.overhead ? 1 : 0)
       || (a.kind === "tile" ? 0 : 1) - (b.kind === "tile" ? 0 : 1)
       || number(left.sort) - number(right.sort);

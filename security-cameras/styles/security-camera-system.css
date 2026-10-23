@@ -663,6 +663,20 @@
 }
 .security-camera-effects-disabled :is(.security-camera-feed-frame, .security-camera-preview-frame) img { filter: none; }
 
+/* Remove entire effect layers on low-powered clients and when intensity is zero. */
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) :is(.security-camera-feed-static, .security-camera-feed-scanline),
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) .security-camera-feed::before,
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) :is(.security-camera-feed-frame, .security-camera-preview-frame)::before,
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) :is(.security-camera-feed-frame, .security-camera-preview-frame)::after {
+  display: none !important;
+  animation: none !important;
+}
+:is(.security-camera-reduced-effects, .security-camera-effects-disabled) :is(.security-camera-feed-window, .security-camera-window) :is(.security-camera-feed-frame, .security-camera-preview-frame, .security-camera-feed-frame img, .security-camera-preview-frame img, .security-camera-rec i, .security-camera-feed-warning) {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
 /* Respond to the resizable Foundry window, not the browser viewport. */
 .security-camera-window .window-content {
   container-type: inline-size;

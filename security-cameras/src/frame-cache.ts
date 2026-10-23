@@ -3,9 +3,12 @@ export function createFrameCache(ttl = 1000, capacity = 32) {
   const entries = new Map<string, { time: number; pending: boolean; promise: Promise<string> }>();
   return {
     clear() { entries.clear(); },
-    get(key: string, produce: () => Promise<string>) {
+    invalidate(matches: (key: string) => boolean) {
+      for (const key of entries.keys()) if (matches(key)) entries.delete(key);
+    },
+    get(key: string, produce: () => Promise<string>, maxAge = ttl) {
       const existing = entries.get(key);
-      if (existing && (existing.pending || Date.now() - existing.time < ttl)) return existing.promise;
+      if (existing && (existing.pending || Date.now() - existing.time < maxAge)) return existing.promise;
       const entry = { time: Date.now(), pending: true, promise: null as unknown as Promise<string> };
       entry.promise = Promise.resolve().then(produce).then(frame => {
         entry.pending = false;

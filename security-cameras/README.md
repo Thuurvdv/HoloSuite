@@ -39,6 +39,14 @@ Save a status change to update open feeds.
 
 In **Configure Settings > Security Cameras > Video Effect Intensity**, adjust the effects from **0%** (off) to **200%**. The default is **50%**. Changes apply immediately for all viewers. Clean feeds always have no effects.
 
+## Performance
+
+In **Configure Settings > Security Cameras**:
+
+- **Camera Quality:** Low uses 480px frames every 2.5 seconds, Balanced uses 640px every 1.5 seconds, and High uses 960px every 1.25 seconds. Balanced is the default. Still scenes reuse their last frame until something changes.
+- **Reduced Screen Effects:** Remove animated effects and image filters on your own computer. Each player can choose this independently.
+- **Animate Video Tiles:** Turn this off to use still frames from video backgrounds and tiles, reducing work on the GM's computer.
+
 ## Video
 
 [Watch the Security Cameras overview on our website](https://www.magetowerstudios.com/docs/module.html?id=security-cameras#videos).
