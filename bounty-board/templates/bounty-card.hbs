@@ -1,37 +1,26 @@
 <article
   class="bb-card {{bbStatusClass bounty.status}} {{#if bounty.expanded}}is-expanded{{else}}is-collapsed{{/if}}"
   data-bounty-id="{{bounty.id}}"
+  data-status="{{bounty.status}}"
+  data-mission-type="{{bounty.missionType}}"
   data-search-text="{{bounty.searchText}}"
 >
   <header class="bb-card-header">
     <div class="bb-contract-heading">
+      <span class="bb-mission-type"><i class="fa-solid {{bounty.missionIcon}}" aria-hidden="true"></i> {{bounty.displayMissionType}}</span>
       <span class="bb-contract-id" title="{{localize "BOUNTYBOARD.Card.ContractId"}}">{{bounty.displayId}}</span>
-      <h3 class="bb-card-title">{{bounty.title}}</h3>
     </div>
     <div class="bb-card-signals">
-      <span class="bb-status-badge">
-        <i class="fa-solid fa-circle" aria-hidden="true"></i>
-        {{bounty.statusLabel}}
-      </span>
-      <span class="bb-threat bb-threat--{{bounty.threatClass}}">
-        <span>{{localize "BOUNTYBOARD.Card.Threat"}}</span>
-        <strong>{{bounty.threatLevel}}</strong>
-      </span>
-      <button
-        type="button"
-        class="bb-expand-toggle"
-        data-bounty-toggle="{{bounty.id}}"
-        aria-expanded="{{#if bounty.expanded}}true{{else}}false{{/if}}"
-        data-collapsed-label="{{localize "BOUNTYBOARD.Card.ShowDetails"}}"
-        data-expanded-label="{{localize "BOUNTYBOARD.Card.HideDetails"}}"
-        data-collapsed-title="{{localize "BOUNTYBOARD.Card.Expand"}}"
-        data-expanded-title="{{localize "BOUNTYBOARD.Card.Collapse"}}"
-        title="{{#if bounty.expanded}}{{localize "BOUNTYBOARD.Card.Collapse"}}{{else}}{{localize "BOUNTYBOARD.Card.Expand"}}{{/if}}"
-      >
-        <span class="bb-expand-label">{{#if bounty.expanded}}{{localize "BOUNTYBOARD.Card.HideDetails"}}{{else}}{{localize "BOUNTYBOARD.Card.ShowDetails"}}{{/if}}</span>
-        <i class="fa-solid {{#if bounty.expanded}}fa-chevron-up{{else}}fa-chevron-down{{/if}}" aria-hidden="true"></i>
-        <span class="bb-visually-hidden">{{#if bounty.expanded}}{{localize "BOUNTYBOARD.Card.Collapse"}}{{else}}{{localize "BOUNTYBOARD.Card.Expand"}}{{/if}}</span>
-      </button>
+      {{#if isGM}}<button type="button" class="bb-card-icon" data-action="editBounty" title="{{localize 'BOUNTYBOARD.Action.Edit'}}" aria-label="{{localize 'BOUNTYBOARD.Action.Edit'}}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>{{/if}}
+      <button type="button" class="bb-card-icon" data-action="openHandout" title="{{localize 'BOUNTYBOARD.Handout.Open'}}" aria-label="{{localize 'BOUNTYBOARD.Handout.Open'}}"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></button>
+      {{#if isGM}}
+        <select class="bb-status-badge bb-status-select" data-bounty-status aria-label="{{localize 'BOUNTYBOARD.Filter.Status'}}">
+          {{#if bounty.statusPrivate}}<option value="" selected disabled>{{bounty.statusLabel}} · {{localize "BOUNTYBOARD.Status.Private"}}</option>{{/if}}
+          {{#each bounty.statusChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+        </select>
+      {{else}}
+        <span class="bb-status-badge"><i class="fa-solid fa-circle" aria-hidden="true"></i> {{bounty.statusLabel}}</span>
+      {{/if}}
     </div>
   </header>
 
@@ -47,21 +36,17 @@
       <span class="bb-portrait-frame">
         {{#if bounty.hasImage}}
           <img class="bb-card-image bb-card-image--backdrop" src="{{bounty.image}}" alt="" aria-hidden="true" />
-          <img class="bb-card-image bb-card-image--subject" src="{{bounty.image}}" alt="{{bounty.targetName}}" />
+          <img class="bb-card-image bb-card-image--subject" src="{{bounty.image}}" alt="{{bounty.missionSubject}}" />
         {{else}}
-          <span class="bb-card-image bb-card-image--fallback"><i class="fa-solid fa-user-secret" aria-hidden="true"></i></span>
+          <span class="bb-card-image bb-card-image--fallback"><i class="fa-solid {{bounty.missionIcon}}" aria-hidden="true"></i></span>
         {{/if}}
       </span>
     </button>
 
     <div class="bb-card-summary">
       <section class="bb-target-block">
-        <span class="bb-data-label">{{localize "BOUNTYBOARD.Card.Target"}}</span>
-        <h4 class="bb-card-target">{{bounty.targetName}}</h4>
-        {{#if isGM}}<div class="bb-target-link">
-          {{#if bounty.linkedActorUuid}}<span><i class="fa-solid fa-link" aria-hidden="true"></i> {{bounty.linkedActorName}}</span><button type="button" data-action="unlinkTarget" title="{{localize 'BOUNTYBOARD.Link.Unlink'}}" aria-label="{{localize 'BOUNTYBOARD.Link.Unlink'}}"><i class="fa-solid fa-link-slash" aria-hidden="true"></i></button>
-          {{else}}<span>{{localize "BOUNTYBOARD.Link.DropHint"}}</span>{{/if}}
-        </div>{{/if}}
+        {{#if bounty.displayMissionSubject}}<h4 class="bb-card-target">{{bounty.displayMissionSubject}}</h4>{{/if}}
+        {{#if bounty.displayContractTitle}}<h3 class="bb-card-title">{{bounty.displayContractTitle}}</h3>{{/if}}
         {{#if bounty.description}}<p class="bb-card-description">{{bounty.description}}</p>{{/if}}
       </section>
 
@@ -73,7 +58,13 @@
         </div>
       </section>
 
+      <span class="bb-threat bb-threat--{{bounty.threatClass}}">
+        <span>{{bounty.dangerLabel}}</span>
+        <strong>{{bounty.threatLevel}}</strong>
+      </span>
+
       <dl class="bb-card-meta">
+        {{#each bounty.missionFacts}}<div><dt>{{label}}</dt><dd>{{value}}</dd></div>{{/each}}
         <div>
           <dt>{{localize "BOUNTYBOARD.Card.Faction"}}</dt>
           <dd>{{#if bounty.faction}}{{bounty.faction}}{{else}}{{localize "BOUNTYBOARD.Card.Unlisted"}}{{/if}}</dd>
@@ -85,16 +76,38 @@
         {{#if bounty.tags.length}}
           <div class="bb-tags-meta">
             <dt>{{localize "BOUNTYBOARD.Card.Tags"}}</dt>
-            <dd class="bb-tags">
+            <dd class="bb-tags-viewport" tabindex="0" aria-label="{{localize 'BOUNTYBOARD.Card.Tags'}}"><div class="bb-tags bb-tags-track">
               {{#each bounty.tags as |tag|}}<span>{{tag}}</span>{{/each}}
-            </dd>
+            </div></dd>
           </div>
         {{/if}}
       </dl>
     </div>
   </div>
 
+  <div class="bb-contract-action">
+      <button
+        type="button"
+        class="bb-expand-toggle"
+        data-bounty-toggle="{{bounty.id}}"
+        aria-expanded="{{#if bounty.expanded}}true{{else}}false{{/if}}"
+        data-collapsed-label="{{localize "BOUNTYBOARD.Card.ShowDetails"}}"
+        data-expanded-label="{{localize "BOUNTYBOARD.Card.HideDetails"}}"
+        data-collapsed-title="{{localize "BOUNTYBOARD.Card.Expand"}}"
+        data-expanded-title="{{localize "BOUNTYBOARD.Card.Collapse"}}"
+        title="{{#if bounty.expanded}}{{localize "BOUNTYBOARD.Card.Collapse"}}{{else}}{{localize "BOUNTYBOARD.Card.Expand"}}{{/if}}"
+      >
+        <span class="bb-expand-label">{{#if bounty.expanded}}{{localize "BOUNTYBOARD.Card.HideDetails"}}{{else}}{{localize "BOUNTYBOARD.Card.ShowDetails"}}{{/if}}</span>
+        <i class="fa-solid {{#if bounty.expanded}}fa-chevron-up{{else}}fa-chevron-down{{/if}}" aria-hidden="true"></i>
+        <span class="bb-visually-hidden">{{#if bounty.expanded}}{{localize "BOUNTYBOARD.Card.Collapse"}}{{else}}{{localize "BOUNTYBOARD.Card.Expand"}}{{/if}}</span>
+      </button>
+  </div>
+
   <section class="bb-card-details" {{#unless bounty.expanded}}hidden{{/unless}}>
+        {{#if isGM}}<div class="bb-target-link">
+          {{#if bounty.linkedActorUuid}}<span><i class="fa-solid fa-link" aria-hidden="true"></i> {{bounty.linkedActorName}}</span><button type="button" data-action="unlinkTarget" title="{{localize 'BOUNTYBOARD.Link.Unlink'}}" aria-label="{{localize 'BOUNTYBOARD.Link.Unlink'}}"><i class="fa-solid fa-link-slash" aria-hidden="true"></i></button>
+          {{else}}<span>{{localize "BOUNTYBOARD.Link.DropHint"}}</span>{{/if}}
+        </div>{{/if}}
       {{#if bounty.longDescription}}
         <div class="bb-dossier-notes">
           <span class="bb-data-label">{{localize "BOUNTYBOARD.Card.DossierNotes"}}</span>
@@ -104,11 +117,7 @@
       {{#if (bbEq bounty.status "claimed")}}
         <label class="bb-claim-field">
           <span>{{localize "BOUNTYBOARD.Card.ClaimedBy"}}</span>
-          {{#if isGM}}
-            <input type="text" data-claimed-by value="{{bounty.claimedBy}}" placeholder="{{localize "BOUNTYBOARD.Card.AssigneePlaceholder"}}" />
-          {{else}}
-            <strong>{{#if bounty.claimedBy}}{{bounty.claimedBy}}{{else}}{{localize "BOUNTYBOARD.Card.AssignedParty"}}{{/if}}</strong>
-          {{/if}}
+          <strong>{{#if bounty.claimedBy}}{{bounty.claimedBy}}{{else}}{{localize "BOUNTYBOARD.Card.AssignedParty"}}{{/if}}</strong>
         </label>
       {{/if}}
       {{#if bounty.canSeeJournal}}
@@ -121,42 +130,4 @@
       {{/if}}
   </section>
 
-  {{#if isGM}}
-    <footer class="bb-card-actions">
-      <button type="button" title="{{localize "BOUNTYBOARD.Action.Edit"}}" data-action="editBounty">
-        <i class="fa-solid fa-pen" aria-hidden="true"></i>
-        <span>{{localize "BOUNTYBOARD.Action.Edit"}}</span>
-      </button>
-      {{#if bounty.published}}
-        <button type="button" title="{{localize "BOUNTYBOARD.Action.Unpublish"}}" data-action="unpublishBounty">
-          <i class="fa-solid fa-eye-slash" aria-hidden="true"></i>
-          <span>{{localize "BOUNTYBOARD.Action.Unpublish"}}</span>
-        </button>
-      {{else}}
-        <button type="button" title="{{localize "BOUNTYBOARD.Action.Publish"}}" data-action="publishBounty">
-          <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>
-          <span>{{localize "BOUNTYBOARD.Action.Publish"}}</span>
-        </button>
-      {{/if}}
-      {{#unless bounty.isClaimed}}
-        <button type="button" title="{{localize "BOUNTYBOARD.Action.Assign"}}" data-action="claimBounty">
-          <i class="fa-solid fa-handshake" aria-hidden="true"></i>
-          <span>{{localize "BOUNTYBOARD.Action.Assign"}}</span>
-        </button>
-      {{/unless}}
-      <details class="bb-more-menu">
-        <summary title="{{localize "BOUNTYBOARD.Action.More"}}">
-          <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
-          <span>{{localize "BOUNTYBOARD.Action.More"}}</span>
-        </summary>
-        <div class="bb-more-actions">
-          <button type="button" data-action="completeBounty"><i class="fa-solid fa-check" aria-hidden="true"></i>{{localize "BOUNTYBOARD.Action.Complete"}}</button>
-          <button type="button" data-action="failBounty"><i class="fa-solid fa-xmark" aria-hidden="true"></i>{{localize "BOUNTYBOARD.Action.Fail"}}</button>
-          <button type="button" data-action="hideBounty"><i class="fa-solid fa-user-lock" aria-hidden="true"></i>{{localize "BOUNTYBOARD.Action.Hide"}}</button>
-          <button type="button" data-action="archiveBounty"><i class="fa-solid fa-box-archive" aria-hidden="true"></i>{{localize "BOUNTYBOARD.Action.Archive"}}</button>
-          <button type="button" class="bb-danger-action" data-action="deleteBounty"><i class="fa-solid fa-trash" aria-hidden="true"></i>{{localize "BOUNTYBOARD.Action.Delete"}}</button>
-        </div>
-      </details>
-    </footer>
-  {{/if}}
 </article>

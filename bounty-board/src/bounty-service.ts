@@ -1,3 +1,4 @@
+import { MISSION_TYPES, normalizeMissionType, missionPresentation } from "./mission-types";
 import {
   BOUNTY_STATUSES,
   DEFAULT_TAGS,
@@ -10,20 +11,32 @@ import {
   SETTING_PUBLIC_DOCUMENT_LINKS,
   SETTING_REMOVED_TAGS,
   SETTING_BOARD_VISIBLE_TO_PLAYERS,
+  SETTING_LARGE_CARDS,
+  SETTING_DETAIL_COLOR,
   STATUS_LABELS,
   THREAT_LEVELS
 } from "./bounty-constants";
 import { postBountyChatCard } from "./bounty-chat";
+import { applyDetailColor } from "./bounty-appearance";
 
 declare const foundry: any;
 declare const game: any;
 declare const ui: any;
 declare const Dialog: any;
 declare const ChatMessage: any;
+declare const Hooks: any;
 
 export type BountyData = {
   id: string;
   contractId: string;
+  missionType: string;
+  objective: string;
+  cargo: string;
+  pickup: string;
+  destination: string;
+  deadline: string;
+  region: string;
+  hazards: string;
   title: string;
   targetName: string;
   description: string;
@@ -48,6 +61,7 @@ export type BountyData = {
 };
 
 export type BountyFilters = {
+  missionType?: string;
   status?: string;
   threatLevel?: string;
   faction?: string;
@@ -149,7 +163,15 @@ export function normalizeBounty(source: Partial<BountyData> & Record<string, any
     ...clone(EMPTY_BOUNTY),
     id,
     contractId,
-    title: normalizeString(source.title, "Untitled Bounty"),
+    title: normalizeString(source.title),
+    missionType: normalizeMissionType(source.missionType),
+    objective: normalizeString(source.objective),
+    cargo: normalizeString(source.cargo),
+    pickup: normalizeString(source.pickup),
+    destination: normalizeString(source.destination),
+    deadline: normalizeString(source.deadline),
+    region: normalizeString(source.region),
+    hazards: normalizeString(source.hazards),
     targetName: normalizeString(source.targetName),
     description: normalizeString(source.description),
     longDescription: normalizeString(source.longDescription),
@@ -186,8 +208,13 @@ export function prepareBountyForDisplay(bounty: Partial<BountyData>) {
   }
   const canSeeJournal = Boolean(linkedJournal && (user?.isGM || publicLinks || linkedJournal.testUserPermission?.(user, "OBSERVER")));
 
+  const statusPrivate = !normalized.published
+    && normalized.status !== BOUNTY_STATUSES.HIDDEN
+    && normalized.status !== BOUNTY_STATUSES.ARCHIVED;
+
   return {
     ...normalized,
+    ...missionPresentation(normalized),
     linkedActorName: target?.name || normalized.targetName,
     displayId: normalized.contractId,
     statusLabel: getStatusLabel(normalized.status),
@@ -196,6 +223,7 @@ export function prepareBountyForDisplay(bounty: Partial<BountyData>) {
     rewardCurrencyLabel: normalized.rewardCurrency,
     threatClass: normalized.threatLevel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
     searchText: [
+      normalized.missionType, normalized.objective, normalized.cargo, normalized.pickup, normalized.destination, normalized.deadline, normalized.region, normalized.hazards,
       normalized.title,
       normalized.contractId,
       normalized.targetName,
@@ -211,7 +239,13 @@ export function prepareBountyForDisplay(bounty: Partial<BountyData>) {
     isVisibleToPlayers: isBountyVisibleToPlayers(normalized),
     linkedJournalName: linkedJournal?.name ?? "",
     canSeeJournal,
-    canEdit: game.user?.isGM === true
+    canEdit: game.user?.isGM === true,
+    statusPrivate,
+    statusChoices: Object.values(BOUNTY_STATUSES).map(value => ({
+      value,
+      label: getStatusLabel(value),
+      selected: normalized.status === value && !statusPrivate
+    }))
   };
 }
 
@@ -267,7 +301,7 @@ export function getBounty(id: string): BountyData | null {
 export function getBountiesForActor(actorUuid: string) {
   if (!actorUuid || (!game.user?.isGM && !isBoardVisibleToPlayers())) return [];
   return getAllBounties({ includeHidden: game.user?.isGM === true })
-    .filter(bounty => bounty.linkedActorUuid === actorUuid)
+    .filter(bounty => bounty.missionType === "Bounty" && bounty.linkedActorUuid === actorUuid)
     .map(({ id, rewardAmount, rewardCurrency, status }) => ({ id, rewardAmount, rewardCurrency, status }));
 }
 
@@ -308,7 +342,7 @@ export function getBountiesForScene(sceneId: string) {
     .filter((bounty) => bounty.sceneId === normalizedSceneId)
     .map((bounty) => ({
       id: bounty.id,
-      name: bounty.targetName || bounty.title,
+      name: missionPresentation(bounty).missionSubject,
       image: bounty.image,
       status: bounty.status,
       statusLabel: getStatusLabel(bounty.status),
@@ -319,8 +353,7 @@ export function getBountiesForScene(sceneId: string) {
 
 export function validateBounty(data: Partial<BountyData>) {
   const errors = [];
-  if (!normalizeString(data.title)) errors.push("Title is required.");
-  if (!normalizeString(data.targetName)) errors.push("Target name is required.");
+  if (normalizeMissionType(data.missionType) === "Bounty" && !normalizeString(data.targetName)) errors.push("Target name is required.");
   if (!normalizeString(data.rewardCurrency)) errors.push("Reward currency is required.");
   if (!normalizeString(data.threatLevel)) errors.push("Threat level is required.");
   return errors;
@@ -337,6 +370,9 @@ export async function upsertBounty(data: Partial<BountyData> & Record<string, an
     createdAt: existing?.createdAt || timestamp,
     updatedAt: timestamp
   });
+  // Reuse the existing spelling of user-defined types (case-insensitive).
+  const knownType = getAllBounties({ includeHidden: true }).find(item => item.missionType.toLowerCase() === bounty.missionType.toLowerCase());
+  if (knownType) bounty.missionType = knownType.missionType;
   const removedTags = new Set(getRemovedTags().map((tag) => tag.toLowerCase()));
   bounty.tags = bounty.tags.filter((tag) => !removedTags.has(tag.toLowerCase()));
   const errors = validateBounty(bounty);
@@ -403,6 +439,16 @@ export async function archiveBounty(id: string) {
   return updateBountyState(id, { status: BOUNTY_STATUSES.ARCHIVED, published: false });
 }
 
+/** Apply the same publication and chat semantics as the original card actions. */
+export async function setBountyStatus(id: string, status: string) {
+  if (!Object.values(BOUNTY_STATUSES).includes(status as any)) return null;
+  if (status === BOUNTY_STATUSES.AVAILABLE) return publishBounty(id, true);
+  if (status === BOUNTY_STATUSES.ARCHIVED) return archiveBounty(id);
+  if (status === BOUNTY_STATUSES.HIDDEN) return updateBountyState(id, { status, published: false });
+  if (status === BOUNTY_STATUSES.COMPLETED || status === BOUNTY_STATUSES.FAILED) return markBountyCompleted(id, status === BOUNTY_STATUSES.FAILED);
+  return updateBountyState(id, { status, published: true });
+}
+
 export async function setBountiesPublished(ids: string[], published: boolean) {
   if (!requireGM(published ? "publish bounties" : "hide bounties")) return 0;
   const uniqueIds = [...new Set(ids)].filter(Boolean);
@@ -464,14 +510,22 @@ export async function removeTag(tag: any) {
   return true;
 }
 
+export function getMissionTypes() {
+  const visible = !game.user?.isGM && !isBoardVisibleToPlayers() ? [] : getAllBounties({ includeHidden: game.user?.isGM === true });
+  const names = new Map(MISSION_TYPES.map(type => [type.toLowerCase(), type]));
+  for (const bounty of visible) if (!names.has(bounty.missionType.toLowerCase())) names.set(bounty.missionType.toLowerCase(), bounty.missionType);
+  return [...names.values()];
+}
+
 export function getFilterOptions() {
-  const bounties = getAllBounties({ includeHidden: true });
+  const bounties = getAllBounties({ includeHidden: game.user?.isGM === true });
   const unique = (values: any[]) => [...new Set(values.map((value) => normalizeString(value)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
   const removedTags = new Set(getRemovedTags().map((tag) => tag.toLowerCase()));
   const availableTags = unique([...DEFAULT_TAGS, ...bounties.flatMap((bounty) => bounty.tags)])
     .filter((tag) => !removedTags.has(tag.toLowerCase()));
 
   return {
+    missionTypes: getMissionTypes(),
     statuses: Object.values(BOUNTY_STATUSES).map((value) => ({ value, label: getStatusLabel(value) })),
     threatLevels: THREAT_LEVELS,
     factions: unique(bounties.map((bounty) => bounty.faction)),
@@ -480,6 +534,7 @@ export function getFilterOptions() {
 }
 
 export function filterBounties(bounties: Partial<BountyData>[], filters: BountyFilters = {}) {
+  const missionType = normalizeString(filters.missionType).toLowerCase();
   const status = normalizeString(filters.status);
   const threatLevel = normalizeString(filters.threatLevel);
   const faction = normalizeString(filters.faction).toLowerCase();
@@ -488,12 +543,14 @@ export function filterBounties(bounties: Partial<BountyData>[], filters: BountyF
 
   return bounties.filter((bounty) => {
     const normalized = normalizeBounty(bounty);
+    if (missionType && normalized.missionType.toLowerCase() !== missionType) return false;
     if (status && normalized.status !== status) return false;
     if (threatLevel && normalized.threatLevel !== threatLevel) return false;
     if (faction && normalized.faction.toLowerCase() !== faction) return false;
     if (tag && !normalized.tags.some((candidate) => candidate.toLowerCase() === tag)) return false;
     if (search) {
       const haystack = [
+        normalized.missionType, normalized.objective, normalized.cargo, normalized.pickup, normalized.destination, normalized.deadline, normalized.region, normalized.hazards,
         normalized.title,
         normalized.targetName,
         normalized.description,
@@ -516,7 +573,7 @@ export async function requestContract(id: string) {
     <div class="bb-chat-card bb-chat-card--request">
       <h3>Contract Request</h3>
       <p><strong>${escapeHtml(game.user?.name ?? "A player")}</strong> requests contract authorization.</p>
-      <p><strong>${escapeHtml(bounty.title)}</strong> - ${escapeHtml(bounty.targetName)}</p>
+      <p><strong>${escapeHtml(bounty.title)}</strong> - ${escapeHtml(missionPresentation(bounty).missionSubject)}</p>
     </div>
   `;
   await ChatMessage.create({
@@ -528,6 +585,29 @@ export async function requestContract(id: string) {
 }
 
 export function registerSettings() {
+  game.settings.register(MODULE_ID, SETTING_DETAIL_COLOR, {
+    name: "BOUNTYBOARD.Settings.DetailColor.Name",
+    hint: "BOUNTYBOARD.Settings.DetailColor.Hint",
+    scope: "client",
+    config: true,
+    type: String,
+    choices: {
+      pink: "BOUNTYBOARD.Settings.DetailColor.Pink",
+      yellow: "BOUNTYBOARD.Settings.DetailColor.Yellow",
+      green: "BOUNTYBOARD.Settings.DetailColor.Green"
+    },
+    default: "pink",
+    onChange: applyDetailColor
+  });
+  game.settings.register(MODULE_ID, SETTING_LARGE_CARDS, {
+    name: "BOUNTYBOARD.Settings.LargeCards.Name",
+    hint: "BOUNTYBOARD.Settings.LargeCards.Hint",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: () => Hooks.callAll("bountyBoardLayoutChanged")
+  });
   game.settings.register(MODULE_ID, SETTING_BOUNTIES, {
     scope: "world",
     config: false,

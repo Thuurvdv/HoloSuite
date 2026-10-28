@@ -116,44 +116,6 @@
   white-space: nowrap;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .bounty-board-window,
-:where(:root, body)[data-holosuite-device-style="space-police"] .bounty-editor-window,
-:where(:root, body)[data-holosuite-device-style="space-police"] .bb-shell,
-:where(:root, body)[data-holosuite-device-style="space-police"] .bb-chat-card {
-  --hs-cyan: #fff15a;
-  --hs-amber: #fff15a;
-  --hs-line: rgba(255, 241, 90, 0.34);
-  --hs-line-strong: rgba(255, 241, 90, 0.72);
-  --hs-panel: linear-gradient(180deg, rgba(18, 18, 15, 0.98), rgba(2, 2, 2, 0.96));
-  --hs-field: #10100c;
-  --hs-surface-window: linear-gradient(180deg, rgba(10, 11, 10, 0.98), rgba(2, 2, 2, 0.97));
-  --hs-surface-panel: var(--hs-panel);
-  --hs-surface-card: linear-gradient(180deg, rgba(30, 28, 18, 0.94), rgba(6, 6, 5, 0.97));
-  --hs-surface-control: linear-gradient(180deg, rgba(38, 39, 34, 0.94), rgba(8, 8, 7, 0.98));
-  --hs-surface-control-hover: linear-gradient(180deg, rgba(66, 56, 28, 0.96), rgba(15, 13, 8, 0.98));
-  --hs-surface-active: linear-gradient(135deg, rgba(255, 241, 90, 0.22), rgba(255, 156, 64, 0.12));
-  --hs-border-subtle: var(--hs-line);
-  --hs-border-strong: var(--hs-line-strong);
-  --hs-color-accent: #ffb13d;
-  --hs-color-primary: #fff15a;
-  --hs-text-secondary: #c7c1a9;
-  --hs-glow-cyan: 0 0 18px rgba(255, 241, 90, 0.3);
-  --hs-focus-ring: 0 0 0 2px rgba(255, 177, 61, 0.2);
-  --hs-shadow-control:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
-    inset 0 -1px 0 rgba(255, 177, 61, 0.16);
-  --hs-shadow-panel:
-    0 20px 46px rgba(0, 0, 0, 0.48),
-    inset 0 0 32px rgba(255, 241, 90, 0.08);
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .bounty-board-window .window-header,
-:where(:root, body)[data-holosuite-device-style="space-police"] .bounty-editor-window .window-header {
-  background:
-    linear-gradient(rgba(255, 247, 173, 0.028) 50%, rgba(0, 0, 0, 0.05) 50%) 0 0 / 100% 4px,
-    linear-gradient(90deg, rgba(10, 10, 8, 0.98), rgba(25, 22, 12, 0.94), rgba(10, 10, 8, 0.98)) !important;
-}
-
 .bounty-board-window .bb-shell {
   --hs-app-padding-block: 20px;
   --hs-app-padding-inline: 24px;

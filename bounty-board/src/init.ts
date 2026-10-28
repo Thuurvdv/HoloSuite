@@ -1,5 +1,7 @@
 import { MODULE_ID, MODULE_TITLE, TEMPLATE_ROOT } from "./bounty-constants";
-import { openBounty, openBountyBoard } from "./bounty-board-app";
+import { applyDetailColor } from "./bounty-appearance";
+import { openBounty, openBountyBoard, refreshBountyBoard } from "./bounty-board-app";
+import { openBountyHandout, showBountyHandout, registerHandoutHooks } from "./bounty-handout";
 import {
   archiveBounty,
   claimBounty,
@@ -23,6 +25,24 @@ declare const Handlebars: any;
 declare const loadTemplates: any;
 
 const LOCALIZATION_FALLBACKS: Record<string, string> = {
+  "BOUNTYBOARD.Settings.DetailColor.Name": "Detail color",
+  "BOUNTYBOARD.Settings.DetailColor.Hint": "Choose the reward text, border, and background color on your cards and handouts. Updates immediately and only affects your display.",
+  "BOUNTYBOARD.Settings.DetailColor.Pink": "Hot Pink",
+  "BOUNTYBOARD.Settings.DetailColor.Yellow": "Bright Yellow",
+  "BOUNTYBOARD.Settings.DetailColor.Green": "Neon Green",
+  "BOUNTYBOARD.Settings.LargeCards.Name": "Use Large Bounty Cards",
+  "BOUNTYBOARD.Settings.LargeCards.Hint": "Use larger portraits with the title and details below the image. Enabled by default. Disable for compact cards; changes apply immediately to your board.",
+  "BOUNTYBOARD.Status.Private": "Private",
+  "BOUNTYBOARD.Handout.Title": "Contract handout",
+  "BOUNTYBOARD.Handout.Close": "Close handout",
+  "BOUNTYBOARD.Handout.Wanted": "Wanted",
+  "BOUNTYBOARD.Handout.Briefing": "Contract briefing",
+  "BOUNTYBOARD.Handout.PublicNotes": "Public notes",
+  "BOUNTYBOARD.Handout.Open": "Open handout",
+  "BOUNTYBOARD.Handout.Show": "Show to players",
+  "BOUNTYBOARD.Handout.Shared": "A contract handout has been shared with you.",
+  "BOUNTYBOARD.Handout.Unavailable": "This contract handout is no longer available.",
+  "BOUNTYBOARD.Handout.PublishFirst": "Publish this contract and show the board to players before sharing its handout.",
   "BOUNTYBOARD.Link.DropHint": "Drop Actor / Token onto this bounty to link its target",
   "BOUNTYBOARD.Link.Unlink": "Unlink target",
   "BOUNTYBOARD.Link.Invalid": "Drop a world Actor or Token onto a bounty.",
@@ -39,7 +59,8 @@ const LOCALIZATION_FALLBACKS: Record<string, string> = {
   "BOUNTYBOARD.Header.HideBoard": "Hide board",
   "BOUNTYBOARD.Header.ShowBoard": "Show board",
   "BOUNTYBOARD.Filter.Status": "Status",
-  "BOUNTYBOARD.Filter.Threat": "Threat",
+  "BOUNTYBOARD.Filter.MissionType": "Mission type",
+  "BOUNTYBOARD.Filter.Threat": "Danger",
   "BOUNTYBOARD.Filter.Faction": "Faction",
   "BOUNTYBOARD.Filter.Tag": "Tags",
   "BOUNTYBOARD.Filter.Search": "Search",
@@ -107,6 +128,8 @@ function exposeApi() {
     getBountiesForActor,
     linkBountyTarget,
     openBounty,
+    openHandout: openBountyHandout,
+    showHandout: showBountyHandout,
     upsertBounty,
     deleteBounty,
     publishBounty,
@@ -114,13 +137,6 @@ function exposeApi() {
     setBoardVisibleToPlayers,
     archiveBounty,
     claimBounty,
-    // Future extension hooks:
-    // Patreon/premium gating can wrap open() or selected GM actions here.
-    // Random bounty generator can call upsertBounty() with generated data.
-    // Faction reputation systems can listen for completed/failed state changes.
-    // Galaxy Map consumes the permission-filtered Scene query above when installed.
-    // CyberCall contact integration can add claimant/contact actions.
-    // Security camera and crime scene modules can attach evidence links via notes or future document ids.
   };
 
   const foundryModule = game.modules.get(MODULE_ID);
@@ -141,11 +157,16 @@ Hooks.once("init", async () => {
     `${TEMPLATE_ROOT}/bounty-card.hbs`,
     `${TEMPLATE_ROOT}/bounty-board.hbs`,
     `${TEMPLATE_ROOT}/bounty-editor.hbs`,
-    `${TEMPLATE_ROOT}/bounty-chat-card.hbs`
+    `${TEMPLATE_ROOT}/bounty-chat-card.hbs`,
+    `${TEMPLATE_ROOT}/bounty-handout.hbs`,
+    `${TEMPLATE_ROOT}/bounty-handout-chat.hbs`
   ]);
 });
 
 Hooks.once("ready", () => {
+  applyDetailColor();
+  Hooks.on("bountyBoardLayoutChanged", () => refreshBountyBoard());
+  registerHandoutHooks();
   installLocalizationFallbacks();
   exposeApi();
   game.modules.get("holosuite-core")?.api?.registerApp?.({

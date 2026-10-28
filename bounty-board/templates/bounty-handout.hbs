@@ -1,0 +1,44 @@
+<article class="bb-handout">
+  <div class="bb-handout-drag-handle" aria-hidden="true"></div>
+  <div class="bb-handout-controls">
+    {{#if isGM}}{{#if bounty}}
+      <button type="button" data-action="showHandout" title="{{#if canShare}}{{localize 'BOUNTYBOARD.Handout.Show'}}{{else}}{{localize 'BOUNTYBOARD.Handout.PublishFirst'}}{{/if}}" aria-label="{{localize 'BOUNTYBOARD.Handout.Show'}}" {{#unless canShare}}disabled{{/unless}}><i class="fa-solid fa-users" aria-hidden="true"></i></button>
+    {{/if}}{{/if}}
+    <button type="button" data-action="closeHandout" title="{{localize 'BOUNTYBOARD.Handout.Close'}}" aria-label="{{localize 'BOUNTYBOARD.Handout.Close'}}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+  </div>
+  <div class="bb-handout-scroll">
+  {{#if bounty}}
+    <header class="bb-handout-heading">
+      <p class="bb-handout-eyebrow">{{#if bounty.isBounty}}{{localize "BOUNTYBOARD.Handout.Wanted"}}{{else}}{{bounty.displayMissionType}}{{/if}}</p>
+      <div class="bb-handout-ident"><span>{{bounty.contractId}}</span><span class="bb-handout-status" data-status="{{bounty.status}}">{{bounty.statusLabel}}</span></div>
+    </header>
+    <div class="bb-handout-portrait-stage {{#if tagCallouts.length}}bb-handout-portrait-stage--tagged{{/if}}">
+    <div class="bb-handout-portrait-orbit">
+
+      <div class="bb-handout-portrait">
+      {{#if bounty.image}}<img src="{{bounty.image}}" alt="{{bounty.missionSubject}}" />{{/if}}
+      <i class="fa-solid {{bounty.missionIcon}} bb-handout-fallback" aria-hidden="true" {{#if bounty.image}}hidden{{/if}}></i>
+      </div>
+    </div>
+      {{#if tagCallouts.length}}
+        <svg class="bb-handout-tag-lines" aria-hidden="true" focusable="false">
+          {{#each tagCallouts}}<path data-side="{{side}}" data-row="{{row}}" pathLength="1" />{{/each}}
+        </svg>
+        {{#each tagCallouts}}<span class="bb-handout-tag-callout" data-side="{{side}}" style="--tag-row: {{row}}" title="{{label}}">{{label}}</span>{{/each}}
+      {{/if}}
+    </div>
+    <section class="bb-handout-subject">
+      {{#if bounty.displayMissionSubject}}<h2>{{bounty.displayMissionSubject}}</h2>{{/if}}
+      {{#if bounty.displayContractTitle}}<p class="bb-handout-title">{{bounty.displayContractTitle}}</p>{{/if}}
+    </section>
+    <dl class="bb-handout-facts bb-handout-summary">
+      <div><dt>{{bounty.dangerLabel}}</dt><dd title="{{bounty.threatLevel}}">{{bounty.threatLevel}}</dd></div>
+      <div><dt>{{localize "BOUNTYBOARD.Card.Faction"}}</dt><dd title="{{bounty.faction}}">{{#if bounty.faction}}{{bounty.faction}}{{else}}{{localize "BOUNTYBOARD.Card.Unlisted"}}{{/if}}</dd></div>
+      <div><dt>{{localize "BOUNTYBOARD.Card.Location"}}</dt><dd title="{{bounty.location}}">{{#if bounty.location}}{{bounty.location}}{{else}}{{localize "BOUNTYBOARD.Card.Unknown"}}{{/if}}</dd></div>
+    </dl>
+    <div class="bb-handout-reward"><span>{{localize "BOUNTYBOARD.Card.Reward"}}</span><strong>{{bounty.rewardLabel}}</strong></div>
+  {{else}}
+    <p class="bb-handout-copy">{{localize "BOUNTYBOARD.Handout.Unavailable"}}</p>
+  {{/if}}
+  </div>
+</article>

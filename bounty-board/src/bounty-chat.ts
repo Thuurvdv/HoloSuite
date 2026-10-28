@@ -1,3 +1,4 @@
+import { missionPresentation } from "./mission-types";
 import { MODULE_ID, STATUS_LABELS, TEMPLATE_ROOT } from "./bounty-constants";
 import type { BountyData } from "./bounty-service";
 
@@ -9,7 +10,8 @@ function normalizeForChat(bounty: Partial<BountyData> = {}) {
   const currency = bounty.rewardCurrency || "credits";
   return {
     ...bounty,
-    title: String(bounty.title ?? "Untitled Bounty"),
+    ...missionPresentation(bounty),
+    title: String(bounty.title ?? "").trim(),
     targetName: String(bounty.targetName ?? ""),
     threatLevel: String(bounty.threatLevel ?? "Moderate"),
     faction: String(bounty.faction ?? ""),

@@ -6,6 +6,8 @@ export const SETTING_POST_RESULT_CHAT = "postResultChat";
 export const SETTING_PUBLIC_DOCUMENT_LINKS = "publicDocumentLinks";
 export const SETTING_REMOVED_TAGS = "removedTags";
 export const SETTING_BOARD_VISIBLE_TO_PLAYERS = "boardVisibleToPlayers";
+export const SETTING_LARGE_CARDS = "largeCards";
+export const SETTING_DETAIL_COLOR = "detailColor";
 
 export const TEMPLATE_ROOT = `modules/${MODULE_ID}/templates`;
 
@@ -44,6 +46,14 @@ export const EMPTY_BOUNTY = Object.freeze({
   id: "",
   contractId: "",
   title: "",
+  missionType: "Bounty",
+  objective: "",
+  cargo: "",
+  pickup: "",
+  destination: "",
+  deadline: "",
+  region: "",
+  hazards: "",
   targetName: "",
   description: "",
   longDescription: "",
