@@ -6,14 +6,26 @@
 
     <div class="bb-editor-grid">
       <label>
+        <span>Mission type</span>
+        <select name="missionTypeChoice">
+          {{#each missionTypes}}<option value="{{this}}" {{#if (bbEq ../bounty.missionType this)}}selected{{/if}}>{{this}}</option>{{/each}}
+          <option value="">Other…</option>
+        </select>
+      </label>
+      <label data-mission-name hidden>
+        <span>Your mission type</span>
+        <input type="text" name="missionTypeName" maxlength="80" placeholder="Salvage, Diplomacy, Sabotage…" disabled />
+      </label>
+
+      <label>
         <span>{{localize "BOUNTYBOARD.Editor.ContractId"}}</span>
         <input class="bb-contract-id-input" type="text" name="contractId" value="{{bounty.contractId}}" maxlength="32" autocomplete="off" spellcheck="false" required />
       </label>
       <label>
         <span>Title</span>
-        <input type="text" name="title" value="{{bounty.title}}" required />
+        <input type="text" name="title" value="{{bounty.title}}" />
       </label>
-      <label>
+      <label data-mission-fields="Bounty">
         <span>Target Name</span>
         <input type="text" name="targetName" value="{{bounty.targetName}}" required />
       </label>
@@ -26,7 +38,7 @@
         <input type="text" name="rewardCurrency" value="{{bounty.rewardCurrency}}" required />
       </label>
       <label>
-        <span>Threat Level</span>
+        <span data-danger-label>Threat Level</span>
         <select name="threatLevel" required>
           {{#each threatLevels as |threat|}}
             <option value="{{threat}}" {{#if (bbEq ../bounty.threatLevel threat)}}selected{{/if}}>{{threat}}</option>
@@ -42,12 +54,40 @@
         </select>
       </label>
       <label>
-        <span>Faction / Source</span>
+        <span>Issuer / Faction</span>
         <input type="text" name="faction" value="{{bounty.faction}}" />
       </label>
       <label>
         <span>Location</span>
         <input type="text" name="location" value="{{bounty.location}}" />
+      </label>
+      <label data-mission-fields="Transport" hidden>
+        <span>Cargo</span>
+        <input type="text" name="cargo" value="{{bounty.cargo}}" />
+      </label>
+      <label data-mission-fields="Transport" hidden>
+        <span>Pickup</span>
+        <input type="text" name="pickup" value="{{bounty.pickup}}" />
+      </label>
+      <label data-mission-fields="Transport" hidden>
+        <span>Destination</span>
+        <input type="text" name="destination" value="{{bounty.destination}}" />
+      </label>
+      <label data-mission-fields="Transport" hidden>
+        <span>Delivery deadline</span>
+        <input type="text" name="deadline" value="{{bounty.deadline}}" />
+      </label>
+      <label data-mission-fields="Exploration" hidden>
+        <span>Region</span>
+        <input type="text" name="region" value="{{bounty.region}}" />
+      </label>
+      <label data-mission-fields="Exploration" hidden>
+        <span>Known hazards</span>
+        <input type="text" name="hazards" value="{{bounty.hazards}}" />
+      </label>
+      <label data-mission-fields="other" hidden>
+        <span>Objective</span>
+        <input type="text" name="objective" value="{{bounty.objective}}" />
       </label>
       <label class="bb-editor-wide">
         <span>Short Description</span>
@@ -84,10 +124,6 @@
           {{/each}}
         </select>
       </label>
-      <label>
-        <span>Claimed By</span>
-        <input type="text" name="claimedBy" value="{{bounty.claimedBy}}" />
-      </label>
       <label class="bb-checkbox bb-checkbox-compact">
         <input type="checkbox" name="published" {{#if bounty.published}}checked{{/if}} />
         <span>Published to players</span>
@@ -95,6 +131,7 @@
     </div>
 
     <footer class="bb-editor-actions">
+      {{#if canDelete}}<button type="button" class="bb-danger-action" data-action="deleteContract"><i class="fa-solid fa-trash" aria-hidden="true"></i>{{localize "BOUNTYBOARD.Action.Delete"}}</button>{{/if}}
       <button type="submit" class="bb-primary"><i class="fa-solid fa-floppy-disk"></i>Save Contract</button>
     </footer>
   {{/unless}}

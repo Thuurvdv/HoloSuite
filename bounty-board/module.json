@@ -2,7 +2,7 @@
   "id": "bounty-board",
   "title": "Bounty Board",
   "description": "A sci-fi contract terminal for creating, publishing, claiming, and resolving campaign bounties.",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "authors": [
     {
       "name": "Mage Tower Studios",
@@ -18,7 +18,9 @@
   ],
   "styles": [
     "styles/holosuite-tokens.css",
-    "styles/bounty-board.css"
+    "styles/bounty-board.css",
+    "styles/bounty-dossier.css",
+    "styles/bounty-handout.css"
   ],
   "packs": [],
   "languages": [

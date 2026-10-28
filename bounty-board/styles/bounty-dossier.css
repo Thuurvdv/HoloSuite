@@ -1,0 +1,951 @@
+/* Keep Bounty Board's palette local so Core themes cannot recolor its UI. */
+:is(.bounty-board-window, .bounty-editor-window, .bounty-handout-window, .bb-shell, .bb-chat-card) {
+  --hs-bg: #05070d;
+  --hs-bg-deep: #03070b;
+  --hs-panel: rgba(8, 18, 28, 0.9);
+  --hs-panel-strong: rgba(12, 30, 42, 0.96);
+  --hs-field: rgba(2, 12, 20, 0.88);
+  --hs-line: rgba(105, 232, 255, 0.28);
+  --hs-line-strong: rgba(125, 249, 255, 0.58);
+  --hs-cyan: #69e8ff;
+  --hs-green: #62ffb6;
+  --hs-magenta: #ff4d7d;
+  --hs-amber: #ffd166;
+  --hs-violet: #b48cff;
+  --hs-text: #e7faff;
+  --hs-muted: #8fb5bf;
+  --hs-dim: #5f7f89;
+  --hs-radius: 6px;
+  --hs-font-ui: "Rajdhani", "Orbitron", "Segoe UI", system-ui, sans-serif;
+  --hs-font-mono: "Cascadia Mono", "Roboto Mono", "Consolas", monospace;
+  --hs-glow-cyan: 0 0 16px rgba(105, 232, 255, 0.26);
+  --hs-glow-green: 0 0 16px rgba(98, 255, 182, 0.22);
+  --hs-shadow-panel: 0 16px 42px rgba(0, 0, 0, 0.38), inset 0 0 28px rgba(105, 232, 255, 0.08);
+  --hs-shadow-control: inset 0 0 12px rgba(105, 232, 255, 0.08);
+  --hs-focus-ring: 0 0 0 2px rgba(105, 232, 255, 0.18);
+  --hs-disabled-opacity: 0.55;
+  --hs-control-min-height: 32px;
+  --hs-space-window: 14px;
+  --hs-space-panel: 12px;
+  --hs-transition-fast: 140ms ease;
+  --hs-window-header-bg: rgba(2, 13, 24, 0.94);
+  --hs-surface-bg:
+    linear-gradient(rgba(231, 250, 255, 0.026) 50%, rgba(0, 0, 0, 0.035) 50%) 0 0 / 100% 4px,
+    radial-gradient(circle at 18% 8%, rgba(105, 232, 255, 0.14), transparent 30rem),
+    radial-gradient(circle at 86% 18%, rgba(255, 77, 125, 0.08), transparent 28rem),
+    var(--hs-bg-deep);
+  --hs-panel-bg: linear-gradient(180deg, rgba(12, 30, 42, 0.96), rgba(5, 14, 22, 0.94));
+  --hs-card-bg: linear-gradient(180deg, rgba(14, 35, 46, 0.92), rgba(5, 14, 22, 0.96));
+  --hs-control-bg: linear-gradient(180deg, rgba(20, 46, 58, 0.82), rgba(5, 17, 26, 0.9));
+  --hs-control-bg-hover: linear-gradient(180deg, rgba(29, 68, 82, 0.9), rgba(8, 26, 38, 0.95));
+  --hs-active-bg: linear-gradient(135deg, rgba(105, 232, 255, 0.24), rgba(98, 255, 182, 0.15));
+  --hs-danger-bg: linear-gradient(180deg, rgba(94, 22, 35, 0.84), rgba(42, 7, 17, 0.92));
+  --hs-warning-bg: linear-gradient(180deg, rgba(96, 70, 28, 0.74), rgba(38, 28, 11, 0.9));
+  --hs-grid-bg:
+    linear-gradient(rgba(105, 232, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(105, 232, 255, 0.045) 1px, transparent 1px);
+
+  --hs-color-primary: var(--hs-cyan);
+  --hs-color-success: var(--hs-green);
+  --hs-color-danger: var(--hs-magenta);
+  --hs-color-warning: var(--hs-amber);
+  --hs-color-accent: var(--hs-violet);
+  --hs-surface-window: var(--hs-surface-bg);
+  --hs-surface-panel: var(--hs-panel-bg);
+  --hs-surface-card: var(--hs-card-bg);
+  --hs-surface-control: var(--hs-control-bg);
+  --hs-surface-control-hover: var(--hs-control-bg-hover);
+  --hs-surface-active: var(--hs-active-bg);
+  --hs-border-subtle: var(--hs-line);
+  --hs-border-strong: var(--hs-line-strong);
+  --hs-text-primary: var(--hs-text);
+  --hs-text-secondary: var(--hs-muted);
+  --hs-text-tertiary: var(--hs-dim);
+}
+
+/* Scroll areas use the module palette instead of Foundry's red scrollbar. */
+:is(.bounty-board-window .bb-results, .bounty-board-window .bb-tag-options, .bounty-editor-window > .window-content, .bounty-handout-window .bb-handout-scroll) {
+  scrollbar-color: #64deff #101f30;
+  scrollbar-width: thin;
+}
+:is(.bounty-board-window .bb-results, .bounty-board-window .bb-tag-options, .bounty-editor-window > .window-content, .bounty-handout-window .bb-handout-scroll)::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+:is(.bounty-board-window .bb-results, .bounty-board-window .bb-tag-options, .bounty-editor-window > .window-content, .bounty-handout-window .bb-handout-scroll)::-webkit-scrollbar-track {
+  background: #101f30;
+}
+:is(.bounty-board-window .bb-results, .bounty-board-window .bb-tag-options, .bounty-editor-window > .window-content, .bounty-handout-window .bb-handout-scroll)::-webkit-scrollbar-thumb {
+  background: #64deff;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+}
+:is(.bounty-board-window .bb-results, .bounty-board-window .bb-tag-options, .bounty-editor-window > .window-content, .bounty-handout-window .bb-handout-scroll)::-webkit-scrollbar-thumb:hover {
+  background: #a3f3ff;
+}
+
+@font-face {
+  font-family: "Keania One";
+  src: url("../assets/fonts/KeaniaOne-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+/* Dossier skin. Transparent SVG centers and fixed 24-unit nine-slice corners. */
+#bounty-board-app {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0;
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+}
+#bounty-board-app > .window-content {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+#bounty-board-app .bb-shell {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0;
+}
+.bounty-board-window .bb-shell {
+  --bb-bg: #080f1d;
+  --bb-panel: #142c48;
+  --bb-panel-strong: #1c3c60;
+  --bb-text: #eef7ff;
+  --bb-muted: #a9c3d6;
+  --bb-dim: #8ca9bf;
+  --bb-accent: var(--hs-color-primary, #5de4fa);
+  --bb-line: #345c7d;
+  --bb-reward: var(--bb-detail-color, #ff4f9a);
+  --hs-app-padding-inline: 22px;
+  --hs-app-padding-block: 20px;
+  --hs-font-ui: Arial, Helvetica, sans-serif;
+  --hs-surface-control: linear-gradient(135deg, #194767, #152d49);
+  --hs-surface-control-hover: linear-gradient(135deg, #24678a, #21426b);
+  --hs-field: #101f30;
+  background: radial-gradient(ellipse at 8% 0%, #123c5b 0%, transparent 48%), radial-gradient(ellipse at 100% 100%, #0b2038 0%, transparent 48%), var(--bb-bg);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.bounty-board-window .bb-shell .hs-background {
+  background: none;
+}
+.bounty-board-window .bb-dossier-frame,
+.bounty-board-window .bb-card::after {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border: 24px solid transparent;
+  border-image: url('../assets/ui/frame-card.svg') 24 / 24px / 0 stretch;
+  clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 16px);
+  pointer-events: none;
+  z-index: 2;
+}
+.bounty-board-window .bb-dossier-frame {
+  border-image-source: url('../assets/ui/frame-active.svg');
+}
+#bounty-board-app > .window-header {
+  display: none;
+}
+.bounty-board-window .bb-close-board {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+}
+.bounty-board-window .bb-header {
+  cursor: move;
+  touch-action: none;
+}
+.bounty-board-window .bb-shell .hs-content {
+  gap: 12px;
+}
+.bounty-board-window .bb-header {
+  padding: 0 0 10px;
+  align-items: center;
+}
+.bounty-board-window .bb-header::before {
+  display: none;
+}
+.bounty-board-window .bb-heading {
+  position: relative;
+  padding-left: 64px;
+}
+.bounty-board-window .bb-brand-icon {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  font-size: 38px;
+  color: var(--bb-accent);
+}
+.bounty-board-window .bb-brand-icon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  background: currentColor;
+  mask: url('../../holosuite-core/assets/device-styles/space-police/icons/bounty-board.svg') center / contain no-repeat;
+  -webkit-mask: url('../../holosuite-core/assets/device-styles/space-police/icons/bounty-board.svg') center / contain no-repeat;
+}
+.bounty-board-window .bb-shell :is(h2,h3,h4) {
+  font-family: Arial, Helvetica, sans-serif;
+  text-shadow: none;
+  border: 0;
+}
+.bounty-board-window .bb-header h2 {
+  font-family: "Keania One", Arial, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: clamp(24px, 3cqw, 34px);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.bounty-board-window .bb-kicker {
+  letter-spacing: .22em;
+}
+.bounty-board-window .bb-subtitle {
+  font-size: 10px;
+  letter-spacing: .04em;
+}
+.bounty-board-window .bb-filters {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.55fr) repeat(5,minmax(84px,1fr)) 34px;
+  padding: 14px 0 12px;
+  margin: 0;
+  border: 0;
+  background: none;
+}
+.bounty-board-window .bb-search {
+  grid-column: 1;
+  grid-row: 1;
+}
+.bounty-board-window .bb-shell :is(button,input,select,summary) {
+  font-family: inherit;
+}
+.bounty-board-window .bb-shell :is(input,select) {
+  background: #101f30;
+  box-shadow: none;
+  min-height: 36px;
+}
+.bounty-board-window .bb-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
+  align-items: stretch;
+  padding-bottom: 4px;
+}
+.bounty-board-window .bb-card {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  background: linear-gradient(155deg, #193754 0%, #12283f 42%, #101c32 100%);
+  border: 0;
+  border-radius: 0;
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+  box-shadow: none;
+  animation: none;
+}
+.bounty-board-window .bb-card::before {
+  display: none;
+}
+.bounty-board-window .bb-card:is(:hover,:focus-within,.is-expanded,.bb-target-drop-active)::after {
+  border-image-source: url('../assets/ui/frame-active.svg');
+}
+.bounty-board-window .bb-card:is(:hover,:focus-within,.is-expanded) {
+  box-shadow: inset 0 0 28px #36cfff0c, 0 0 12px #31cfff24;
+}
+.bounty-board-window .bb-card-header {
+  grid-template-columns: minmax(0,1fr) auto;
+  padding: 6px 9px;
+  align-items: center;
+  background: none;
+  border: 0;
+  gap: 6px;
+}
+.bounty-board-window .bb-contract-id {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 400;
+  font-size: 11px;
+}
+.bounty-board-window .bb-status-badge {
+  font-size: 10px;
+  border-color: color-mix(in srgb, var(--bb-status-color) 65%, transparent);
+  background: color-mix(in srgb, var(--bb-status-color) 16%, #10243a);
+  box-shadow: inset 0 0 10px color-mix(in srgb, var(--bb-status-color) 8%, transparent);
+}
+.bounty-board-window .bb-card-body {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-content: start;
+  align-items: start;
+  gap: 9px 10px;
+  padding: 8px 10px 10px;
+  flex: 1;
+}
+.bounty-board-window .bb-portrait-button {
+  width: 88px;
+  aspect-ratio: 1;
+  grid-column: 1;
+  grid-row: 1;
+}
+.bounty-board-window .bb-target-block {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+.bounty-board-window .bb-card-body :is(.bb-reward-panel, .bb-threat, .bb-card-meta) {
+  grid-column: 1 / -1;
+}
+.bounty-board-window .bb-portrait-frame {
+  padding: 0;
+  border: 0;
+  background: radial-gradient(ellipse at 50% 35%, #275675, #14263e);
+  clip-path: polygon(8px 0,100% 0,100% 100%,0 100%,0 8px);
+}
+.bounty-board-window .bb-portrait-frame::after {
+  display: none;
+}
+.bounty-board-window .bb-card-image {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.bounty-board-window .bb-card-summary {
+  display: contents;
+}
+.bounty-board-window .bb-card-target {
+  font-style: italic;
+  margin: 0 0 6px;
+  font-size: clamp(20px,6cqw,27px);
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+.bounty-board-window .bb-card-title {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--bb-muted);
+}
+.bounty-board-window .bb-card-description {
+  font-size: 12px;
+  -webkit-line-clamp: 2;
+}
+.bounty-board-window .bb-target-link {
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--bb-dim);
+}
+.bounty-board-window .bb-reward-panel {
+  position: relative;
+  isolation: isolate;
+  padding: 8px 10px;
+  border: 0;
+  background: none;
+  margin-top: auto;
+  text-align: center;
+}
+.bounty-board-window .bb-reward-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 10px;
+  z-index: -1;
+  border-inline: 2px solid var(--bb-reward);
+  background: color-mix(in srgb, var(--bb-reward) 7%, transparent);
+  transform: skewX(-12deg);
+  pointer-events: none;
+}
+.bounty-board-window .bb-reward-value {
+  justify-content: center;
+}
+.bounty-board-window .bb-reward-value :is(strong, span) {
+  font-family: "Keania One", Arial, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+}
+.bounty-board-window .bb-reward-value strong {
+  font-size: clamp(23px,8cqw,32px);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.bounty-board-window .bb-card-summary > .bb-threat {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  padding: 0;
+  gap: 12px;
+  font-size: 12px;
+}
+.bounty-board-window .bb-threat > span {
+  font-size: 10px;
+}
+.bounty-board-window .bb-card-meta {
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin: 0;
+}
+.bounty-board-window .bb-card-meta > div {
+  display: grid;
+  grid-template-columns: 66px minmax(0,1fr);
+  gap: 8px;
+}
+.bounty-board-window .bb-card-meta dt {
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: .04em;
+  margin: 2px 0 0;
+}
+.bounty-board-window .bb-card-meta dd {
+  color: var(--bb-muted);
+  font-size: 12px;
+}
+.bounty-board-window .bb-contract-action {
+  padding: 0 10px 6px;
+}
+.bounty-board-window .bb-contract-action .bb-expand-toggle {
+  width: 100%;
+  min-height: 36px !important;
+  font-family: inherit;
+  font-size: 12px;
+}
+.bounty-board-window .bb-card-actions {
+  padding: 6px 10px;
+  background: none;
+}
+.bounty-board-window .bb-card-details {
+  background: #17283c;
+  margin: 0 4px 8px;
+}
+.bounty-board-window .bb-shell :is(button,input,select,summary):focus-visible {
+  outline: 2px solid var(--bb-accent);
+  outline-offset: 2px;
+}
+/* Brief interaction feedback; no idle loops or repeated flashing. */
+.bounty-board-window .bb-card {
+  transition: transform 160ms ease-out, box-shadow 180ms ease-out;
+}
+.bounty-board-window .bb-card-grid {
+  padding-top: 3px;
+}
+.bounty-board-window .bb-card::after {
+  transition: filter 180ms ease-out;
+}
+.bounty-board-window .bb-card:focus-within::after {
+  filter: drop-shadow(0 0 3px #4cdbff66);
+}
+@media (hover: hover) {
+  .bounty-board-window .bb-card:hover {
+    transform: translateY(-2px);
+  }
+  .bounty-board-window .bb-card:hover::after {
+    filter: drop-shadow(0 0 3px #4cdbff66);
+  }
+}
+.bounty-board-window .bb-card.bb-status-changed {
+  animation: bb-status-pulse 650ms ease-out;
+}
+@keyframes bb-status-pulse {
+  0%, 100% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+  30% {
+    box-shadow: inset 0 0 0 2px var(--bb-status-color), inset 0 0 36px color-mix(in srgb, var(--bb-status-color) 24%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bounty-board-window .bb-card,
+  .bounty-board-window .bb-card::after {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+/* Color is concentrated at the masthead, actions and semantic status cues. */
+.bounty-board-window .bb-brand-icon {
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--bb-accent) 45%, transparent));
+}
+.bounty-board-window .bb-header {
+  border-bottom-color: color-mix(in srgb, var(--bb-accent) 45%, transparent);
+}
+.bounty-board-window .bb-kicker {
+  color: #8bf2ff;
+}
+.bounty-board-window .bb-contract-id {
+  color: #9edcf6;
+}
+.bounty-board-window .bb-contract-action .bb-expand-toggle {
+  background: linear-gradient(110deg, color-mix(in srgb, var(--bb-accent) 24%, #10243a), #183550) !important;
+  border-color: color-mix(in srgb, var(--bb-accent) 65%, transparent) !important;
+}
+.bounty-board-window .bb-contract-action .bb-expand-toggle:hover {
+  background: color-mix(in srgb, var(--bb-accent) 35%, #10243a) !important;
+}
+.bounty-board-window .bb-header-actions .bb-primary {
+  color: #071727 !important;
+  background: linear-gradient(110deg, #80f0ff, #47c6ef) !important;
+  border-color: #8ef1ff !important;
+  box-shadow: 0 0 14px #45dcff24 !important;
+}
+@container bounty-board (max-width: 760px) {
+  .bounty-board-window .bb-filters {
+    grid-template-columns: repeat(3,minmax(0,1fr)) 34px;
+  }
+  .bounty-board-window .bb-search {
+    grid-column: 1 / -2;
+  }
+  .bounty-board-window .bb-clear-filters {
+    grid-column: -2 / -1;
+    grid-row: 1;
+  }
+  .bounty-board-window .bb-filter-field:nth-child(1) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .bounty-board-window .bb-filter-field:nth-child(2) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .bounty-board-window .bb-filter-field:nth-child(3) {
+    grid-column: 3;
+    grid-row: 2;
+  }
+  .bounty-board-window .bb-tag-filter {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .bounty-board-window .bb-status-filter {
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+@container bounty-board (max-width: 580px) {
+  .bounty-board-window .bb-filters {
+    grid-template-columns: repeat(2,minmax(0,1fr)) 34px;
+  }
+  .bounty-board-window .bb-filter-field:nth-child(3) {
+    grid-column: 1 / -2;
+    grid-row: 3;
+  }
+  .bounty-board-window .bb-tag-filter {
+    grid-column: 1;
+    grid-row: 4;
+  }
+  .bounty-board-window .bb-status-filter {
+    grid-column: 2;
+    grid-row: 4;
+  }
+  .bounty-board-window .bb-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .bounty-board-window .bb-heading {
+    padding-left: 48px;
+  }
+  .bounty-board-window .bb-brand-icon {
+    font-size: 30px;
+  }
+  .bounty-board-window .bb-shell .hs-content {
+    padding: 16px;
+  }
+}
+.bounty-board-window .bb-mission-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--bb-accent);
+  font-size: 11px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.bounty-board-window .bb-card-meta > div {
+  grid-template-columns: 80px minmax(0,1fr);
+}
+.bounty-editor-window [hidden] {
+  display: none !important;
+}
+/* Large cards keep the same controls and row alignment as compact cards. */
+.bounty-board-window .bb-cards-large .bb-card-body {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+.bounty-board-window .bb-cards-large .bb-portrait-button {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  max-height: 260px;
+}
+.bounty-board-window .bb-cards-large .bb-target-block {
+  grid-column: 1;
+  grid-row: 2;
+}
+.bounty-board-window .bb-cards-large .bb-card-image--backdrop {
+  opacity: 0.08;
+}
+/* Compact card controls and single-line tag tracks. */
+.bounty-board-window .bb-card-signals {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+/* Core themes also style buttons; keep all three controls identical here. */
+.bounty-board-window .bb-card-signals :is(.bb-card-icon, .bb-status-select) {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0;
+  border: 1px solid var(--bb-status-color) !important;
+  border-radius: 3px;
+  background: #101f30 !important;
+  color: var(--bb-status-color) !important;
+  box-shadow: none;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.bounty-board-window .bb-card-signals .bb-card-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  min-width: 28px;
+  padding: 0;
+}
+.bounty-board-window .bb-card-icon i {
+  margin: 0;
+  font-size: inherit;
+}
+.bounty-board-window .bb-card-signals .bb-status-select {
+  width: 104px;
+  padding: 2px 18px 2px 6px;
+}
+.bounty-board-window .bb-card-signals .bb-card-icon:hover {
+  background: color-mix(in srgb, var(--bb-status-color) 14%, #101f30) !important;
+}
+.bounty-board-window .bb-card-signals :is(.bb-card-icon, .bb-status-select):focus-visible {
+  outline: 2px solid var(--bb-status-color);
+  outline-offset: 2px;
+}
+.bounty-board-window .bb-status-select option {
+  color: #eef7ff;
+  background: #101f30;
+}
+.bounty-board-window .bb-contract-action {
+  margin-top: auto;
+}
+.bounty-board-window .bb-tags-viewport {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  height: 22px;
+}
+.bounty-board-window .bb-tags-viewport::-webkit-scrollbar {
+  display: none;
+}
+.bounty-board-window .bb-tags-track {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  gap: 5px;
+}
+.bounty-board-window .bb-tags-track > span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.bounty-board-window .bb-tags-viewport.is-overflowing .bb-tags-track {
+  animation: bb-card-tags var(--bb-tags-duration, 12s) ease-in-out infinite alternate;
+}
+.bounty-board-window .bb-tags-viewport:is(:hover,:focus-within) .bb-tags-track {
+  animation-play-state: paused;
+}
+@keyframes bb-card-tags {
+  0%, 12% {
+    transform: translateX(0);
+  }
+  88%, 100% {
+    transform: translateX(calc(-1 * var(--bb-tags-travel, 0px)));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bounty-board-window .bb-tags-viewport.is-overflowing .bb-tags-track {
+    animation: none;
+  }
+}
+.bounty-board-window .bb-topbar {
+  position: relative;
+  z-index: 4;
+}
+.bounty-board-window .bb-filters {
+  overflow: visible;
+}
+.bounty-board-window .bb-tag-picker {
+  position: relative;
+  min-width: 0;
+}
+.bounty-board-window .bb-tag-picker > summary {
+  min-height: 36px;
+  padding: 8px 24px 8px 10px;
+  border: 1px solid var(--bb-line);
+  border-radius: 4px;
+  background: #101f30;
+  color: #eef7ff;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.bounty-board-window .bb-tag-picker > summary::after {
+  content: "▾";
+  position: absolute;
+  right: 8px;
+  top: 9px;
+  color: #a9eaff;
+}
+.bounty-board-window .bb-tag-picker > summary {
+  list-style: none;
+}
+.bounty-board-window .bb-tag-picker > summary::-webkit-details-marker {
+  display: none;
+}
+.bounty-board-window .bb-tag-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 220px;
+  max-width: min(320px, 80vw);
+  max-height: 260px;
+  overflow: auto;
+  padding: 5px;
+  border: 1px solid #64deff88;
+  border-radius: 4px;
+  background: #102238;
+  box-shadow: 0 8px 24px #0009;
+  z-index: 10;
+}
+.bounty-board-window .bb-tag-option {
+  display: flex;
+  gap: 4px;
+}
+.bounty-board-window .bb-tag-options button {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+.bounty-board-window .bb-tag-options button:hover {
+  background: #214764;
+}
+.bounty-board-window .bb-tag-options .bb-tag-delete {
+  flex: 0 0 28px;
+  width: 28px;
+  text-align: center;
+  color: #ff9aa3;
+  padding: 0;
+}
+/* Editor uses the board's dossier frame, palette and form controls. */
+.bounty-editor-window {
+  --bb-text: #eef7ff;
+  --bb-muted: #a9c3d6;
+  --bb-line: #345c7d;
+  --bb-accent: var(--hs-color-primary, #64deff);
+  background: #0a1423 !important;
+  border: 0 !important;
+  border-radius: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+}
+.bounty-editor-window::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 24px solid transparent;
+  border-image: url('../assets/ui/frame-active.svg') 24 / 24px / 0 stretch;
+  clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 16px);
+  pointer-events: none;
+  z-index: 10;
+}
+.bounty-editor-window > .window-header {
+  min-height: 44px;
+  padding: 8px 20px;
+  background: #11263a !important;
+  box-shadow: none;
+  color: #eef7ff !important;
+}
+.bounty-editor-window > .window-header::before, .bounty-editor-window > .window-header::after {
+  display: none;
+}
+.bounty-editor-window > .window-content {
+  background: radial-gradient(ellipse at top left, #173c55, transparent 65%), #0a1423;
+}
+.bounty-editor-window .bb-editor {
+  padding: 16px 22px !important;
+}
+.bounty-editor-window .bb-editor-grid {
+  gap: 12px 16px;
+}
+.bounty-editor-window .bb-editor label > span {
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: .07em;
+  color: #8bf2ff;
+  text-transform: uppercase;
+}
+.bounty-editor-window .bb-editor :is(input,select,textarea) {
+  background: #101f30;
+  color: #eef7ff;
+  border: 1px solid #345c7d;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 7px 9px;
+}
+.bounty-editor-window .bb-editor :is(input:not([type=checkbox]),select) {
+  height: 34px;
+}
+.bounty-editor-window .bb-editor :is(input,select,textarea):focus-visible {
+  outline: 2px solid var(--bb-accent);
+  outline-offset: 1px;
+}
+.bounty-editor-window .bb-editor-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  padding: 12px 0 22px;
+  background: #0a1423;
+  z-index: 2;
+}
+.bounty-editor-window .bb-editor-actions > button {
+  min-height: 38px;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+.bounty-editor-window .bb-editor-actions .bb-primary {
+  background: linear-gradient(110deg,#80f0ff,#47c6ef) !important;
+  color: #071727;
+  border-color: #8ef1ff;
+}
+.bounty-editor-window .bb-editor-actions .bb-danger-action {
+  background: #3a1d2b;
+  color: #ffb5bd;
+  border-color: #ad5064;
+}
+#bounty-editor-app {
+  --hs-font-ui: Arial, Helvetica, sans-serif;
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+#bounty-editor-app > .window-content {
+  background: radial-gradient(ellipse at top left, #173c55, transparent 65%), #0a1423 !important;
+  color: #eef7ff !important;
+  font-family: inherit !important;
+}
+#bounty-editor-app .bb-editor :is(input,select,textarea) {
+  background: #101f30 !important;
+  color: #eef7ff !important;
+  box-shadow: none !important;
+  border-color: #345c7d !important;
+  font-family: inherit !important;
+}
+#bounty-editor-app .bb-editor-actions .bb-primary {
+  color: #071727 !important;
+}
+#bounty-editor-app .bb-editor-actions .bb-danger-action {
+  color: #ffb5bd !important;
+  background: #3a1d2b !important;
+  border-color: #ad5064 !important;
+}
+#bounty-editor-app .bb-checkbox {
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+#bounty-editor-app .bb-checkbox input[type="checkbox"] {
+  appearance: auto !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  flex: 0 0 16px;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  accent-color: #64deff;
+}
+#bounty-editor-app .bb-checkbox input[type="checkbox"]::before, #bounty-editor-app .bb-checkbox input[type="checkbox"]::after {
+  display: none !important;
+  content: none !important;
+}
+#bounty-editor-app .bb-checkbox {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px;
+  width: max-content !important;
+}
+:is(#bounty-board-app, #bounty-editor-app, .bounty-handout-window) :is(.window-resize-handle, .window-resizable-handle) {
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+:is(#bounty-board-app, #bounty-editor-app, .bounty-handout-window) :is(.window-resize-handle, .window-resizable-handle) {
+  right: 8px !important;
+  bottom: 8px !important;
+  width: 18px !important;
+  height: 18px !important;
+  padding: 0 !important;
+  border: 1px solid #64deff88 !important;
+  border-radius: 3px !important;
+  background: #10283d !important;
+  color: #64deff !important;
+  box-shadow: 0 0 8px #64deff30 !important;
+  font-size: 0 !important;
+  z-index: 20;
+}
+:is(#bounty-board-app, #bounty-editor-app, .bounty-handout-window) :is(.window-resize-handle, .window-resizable-handle) > * {
+  display: none !important;
+}
+:is(#bounty-board-app, #bounty-editor-app, .bounty-handout-window) :is(.window-resize-handle, .window-resizable-handle)::before {
+  content: "" !important;
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 8px;
+  height: 8px;
+  border: 0 !important;
+  border-right: 2px solid #64deff !important;
+  border-bottom: 2px solid #64deff !important;
+  background: none !important;
+}
+:is(#bounty-board-app, #bounty-editor-app, .bounty-handout-window) :is(.window-resize-handle, .window-resizable-handle)::after {
+  content: "" !important;
+  position: absolute;
+  right: 3px;
+  bottom: 6px;
+  width: 5px;
+  height: 5px;
+  border: 0 !important;
+  border-right: 1px solid #64deff !important;
+  border-bottom: 1px solid #64deff !important;
+  background: none !important;
+}

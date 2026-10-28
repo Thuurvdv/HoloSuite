@@ -1,23 +1,20 @@
-import { BOUNTY_STATUSES, MODULE_ID, TEMPLATE_ROOT } from "./bounty-constants";
+import { BOUNTY_STATUSES, MODULE_ID, SETTING_LARGE_CARDS, TEMPLATE_ROOT } from "./bounty-constants";
 import {
-  archiveBounty,
-  claimBounty,
-  deleteBounty,
   filterBounties,
   getAllBounties,
   getFilterOptions,
   isBoardVisibleToPlayers,
   linkBountyTarget,
-  markBountyCompleted,
   prepareBountyForDisplay,
-  publishBounty,
   removeTag,
-  requestContract,
   setBoardVisibleToPlayers,
   setBountiesPublished,
+  setBountyStatus,
   updateBountyState
 } from "./bounty-service";
 import { BountyEditorApp } from "./bounty-editor-app";
+import { openBountyHandout } from "./bounty-handout";
+import { prefersReducedMotion, revealBoard, toggleDetails, pulseStatus } from "./bounty-motion";
 
 declare const foundry: any;
 declare const Application: any;
@@ -32,6 +29,7 @@ const HandlebarsApplicationMixin = foundry.applications?.api?.HandlebarsApplicat
 const BaseApplication = HandlebarsApplicationMixin ? HandlebarsApplicationMixin(ApplicationV2) : ApplicationV2;
 
 type BountyFilters = {
+  missionType: string;
   status: string;
   threatLevel: string;
   faction: string;
@@ -51,10 +49,13 @@ function formatLocalized(key: string, data: Record<string, string | number>, fal
 }
 
 export class BountyBoardApp extends BaseApplication {
+  declare element: HTMLElement;
   filters: BountyFilters;
   expanded: Set<string>;
   focusBountyId: string | null;
   _targetDropController?: AbortController;
+  _hasRevealed = false;
+  _tagTickerObserver?: ResizeObserver;
 
   static DEFAULT_OPTIONS = {
     id: "bounty-board-app",
@@ -62,25 +63,20 @@ export class BountyBoardApp extends BaseApplication {
     window: {
       title: "Bounty Board",
       icon: "fa-solid fa-crosshairs",
+      minimizable: false,
       resizable: true
     },
     position: {
-      width: 980,
+      width: 1180,
       height: 720
     },
     classes: ["bounty-board-window"],
     actions: {
+      filterTag: BountyBoardApp.#onFilterTag,
+      openHandout: BountyBoardApp.#onOpenHandout,
+      closeBoard: BountyBoardApp.#onCloseBoard,
       createBounty: BountyBoardApp.#onCreateBounty,
       editBounty: BountyBoardApp.#onEditBounty,
-      deleteBounty: BountyBoardApp.#onDeleteBounty,
-      publishBounty: BountyBoardApp.#onPublishBounty,
-      unpublishBounty: BountyBoardApp.#onUnpublishBounty,
-      archiveBounty: BountyBoardApp.#onArchiveBounty,
-      completeBounty: BountyBoardApp.#onCompleteBounty,
-      failBounty: BountyBoardApp.#onFailBounty,
-      hideBounty: BountyBoardApp.#onHideBounty,
-      claimBounty: BountyBoardApp.#onClaimBounty,
-      requestContract: BountyBoardApp.#onRequestContract,
       openImage: BountyBoardApp.#onOpenImage,
       openJournal: BountyBoardApp.#onOpenJournal,
       removeTag: BountyBoardApp.#onRemoveTag,
@@ -101,6 +97,7 @@ export class BountyBoardApp extends BaseApplication {
   constructor(options: any = {}) {
     super(options);
     this.filters = {
+      missionType: "",
       status: "",
       threatLevel: "",
       faction: "",
@@ -127,10 +124,13 @@ export class BountyBoardApp extends BaseApplication {
 
     return {
       isGM,
+      largeCards: game.settings.get(MODULE_ID, SETTING_LARGE_CARDS) === true,
       boardVisibleToPlayers,
       boardHiddenForPlayers,
       filters: this.filters,
+      tagFilterLabel: this.filters.tag || game.i18n.localize("BOUNTYBOARD.Filter.AllTags"),
       options: getFilterOptions(),
+      statusOptions: this._statusOptions(bounties),
       bounties: filteredBounties,
       totalCount: bounties.length,
       visibleCount,
@@ -141,9 +141,37 @@ export class BountyBoardApp extends BaseApplication {
     };
   }
 
+  _statusOptions(bounties = getAllBounties({ includeHidden: game.user?.isGM === true })) {
+    const statuses = getFilterOptions().statuses.filter((status) => game.user?.isGM || ![BOUNTY_STATUSES.HIDDEN, BOUNTY_STATUSES.ARCHIVED].includes(status.value as any));
+    return [{ value: "", label: game.i18n.localize("BOUNTYBOARD.Filter.AllStatuses") }, ...statuses]
+      .map((status) => ({ ...status, selected: this.filters.status === status.value,
+        count: bounties.filter((bounty) => !status.value || bounty.status === status.value).length }));
+  }
+
   _onRender(context: any, options: any) {
     super._onRender?.(context, options);
     const html = this.element;
+    this._tagTickerObserver?.disconnect();
+    const heading = html.querySelector<HTMLElement>(".bb-header");
+    heading?.addEventListener("pointerdown", (event: PointerEvent) => {
+      if (event.button !== 0) return;
+      if ((event.target as Element)?.closest("button, a, input, select, textarea, summary, details, [contenteditable='true']")) return;
+      event.preventDefault();
+      const { left, top } = this.position;
+      const startX = event.clientX;
+      const startY = event.clientY;
+      heading.setPointerCapture(event.pointerId);
+      const move = (next: PointerEvent) => {
+        if (next.pointerId !== event.pointerId) return;
+        this.setPosition({ left: left + next.clientX - startX, top: top + next.clientY - startY });
+      };
+      const stop = () => {
+        heading.removeEventListener("pointermove", move);
+        heading.removeEventListener("lostpointercapture", stop);
+      };
+      heading.addEventListener("pointermove", move);
+      heading.addEventListener("lostpointercapture", stop);
+    });
     this._targetDropController?.abort();
     if (game.user?.isGM) {
       this._targetDropController = new AbortController();
@@ -172,11 +200,15 @@ export class BountyBoardApp extends BaseApplication {
           this.#applySearchFilter();
         });
       } else {
-        input.addEventListener("change", () => this.#updateFilter(input, { immediate: true }));
+        input.addEventListener("change", () => this.#updateFilter(input));
       }
     });
     this.#applySearchFilter();
     this._bindBountyToggles(html);
+    if (!this._hasRevealed) {
+      revealBoard(html);
+      this._hasRevealed = true;
+    }
     if (this.focusBountyId) {
       const bountyId = this.focusBountyId;
       this.focusBountyId = null;
@@ -184,13 +216,37 @@ export class BountyBoardApp extends BaseApplication {
         const card = this._findBountyCard(bountyId);
         if (!card) return;
         card.tabIndex = -1;
-        card.scrollIntoView({ block: "center", behavior: "smooth" });
+        card.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "instant" : "smooth" });
         card.focus({ preventScroll: true });
       });
     }
   }
 
   _bindBountyToggles(root: ParentNode) {
+    if (typeof ResizeObserver !== "undefined") {
+      this._tagTickerObserver ??= new ResizeObserver(entries => {
+        for (const { target } of entries) {
+          const viewport = target as HTMLElement;
+          const track = viewport.querySelector<HTMLElement>(".bb-tags-track");
+          if (!track) continue;
+          const travel = Math.max(0, track.scrollWidth - viewport.clientWidth);
+          viewport.classList.toggle("is-overflowing", travel > 1);
+          track.style.setProperty("--bb-tags-travel", `${travel}px`);
+          track.style.setProperty("--bb-tags-duration", `${Math.max(7, travel / 20)}s`);
+        }
+      });
+      root.querySelectorAll(".bb-tags-viewport").forEach(viewport => this._tagTickerObserver.observe(viewport));
+    }
+    root.querySelectorAll<HTMLSelectElement>("[data-bounty-status]").forEach(select => {
+      select.addEventListener("change", async () => {
+        if (!game.user?.isGM) return;
+        select.disabled = true;
+        try {
+          const updated = await setBountyStatus(select.closest<HTMLElement>("[data-bounty-id]")?.dataset.bountyId ?? "", select.value);
+          if (updated) await this._refreshBountyCard(updated.id, updated);
+        } finally { select.disabled = false; }
+      });
+    });
     root.querySelectorAll("[data-bounty-toggle]").forEach((button: HTMLElement) => {
       button.addEventListener("click", () => {
         const id = button.dataset.bountyToggle ?? "";
@@ -202,7 +258,7 @@ export class BountyBoardApp extends BaseApplication {
         card?.classList.toggle("is-expanded", expanded);
         card?.classList.toggle("is-collapsed", !expanded);
         const details = card?.querySelector<HTMLElement>(".bb-card-details");
-        if (details) details.hidden = !expanded;
+        if (details) toggleDetails(details, expanded);
 
         button.setAttribute("aria-expanded", String(expanded));
         button.title = expanded ? button.dataset.expandedTitle ?? "" : button.dataset.collapsedTitle ?? "";
@@ -245,7 +301,12 @@ export class BountyBoardApp extends BaseApplication {
   _syncCountData() {
     const bounties = getAllBounties({ includeHidden: game.user?.isGM === true });
     const activeCount = bounties.filter((bounty) => [BOUNTY_STATUSES.AVAILABLE, BOUNTY_STATUSES.CLAIMED].includes(bounty.status as any)).length;
-    const subtitle = this.element?.querySelector?.(".bb-subtitle") as HTMLElement | null;
+    const subtitle = this.element?.querySelector<HTMLElement>(".bb-subtitle") as HTMLElement | null;
+    const options = this.element?.querySelectorAll?.<HTMLOptionElement>("[data-filter='status'] option") ?? [];
+    for (const status of this._statusOptions(bounties)) {
+      const option = Array.from(options).find(option => option.value === status.value);
+      if (option) option.textContent = `${status.label} (${status.count})`;
+    }
     if (!subtitle) return;
     subtitle.dataset.totalCount = String(bounties.length);
     subtitle.dataset.activeCount = String(activeCount);
@@ -254,6 +315,12 @@ export class BountyBoardApp extends BaseApplication {
   async _refreshBountyCard(bountyId: string, source: any) {
     const currentCard = this._findBountyCard(bountyId);
     if (!currentCard || !source) return;
+    currentCard.querySelectorAll(".bb-tags-viewport").forEach(viewport => this._tagTickerObserver?.unobserve(viewport));
+    // Type changes also change the available filter choices.
+    if (currentCard.dataset.missionType !== (source.missionType || "Bounty")) {
+      this.render({ force: true });
+      return;
+    }
 
     const bounty = {
       ...prepareBountyForDisplay(source),
@@ -275,6 +342,7 @@ export class BountyBoardApp extends BaseApplication {
       if (replacement) {
         currentCard.replaceWith(replacement);
         this._bindBountyToggles(replacement);
+        pulseStatus(replacement, currentCard.dataset.status);
       }
     }
 
@@ -282,14 +350,7 @@ export class BountyBoardApp extends BaseApplication {
     this.#applySearchFilter();
   }
 
-  _removeBountyCard(bountyId: string) {
-    this._findBountyCard(bountyId)?.remove();
-    this.expanded.delete(bountyId);
-    this._syncCountData();
-    this.#applySearchFilter();
-  }
-
-  #updateFilter(input: HTMLInputElement | HTMLSelectElement, { immediate = false } = {}) {
+  #updateFilter(input: HTMLInputElement | HTMLSelectElement) {
     const filterKey = input.dataset.filter as keyof BountyFilters | undefined;
     if (!filterKey) return;
     this.filters[filterKey] = input.value;
@@ -306,7 +367,7 @@ export class BountyBoardApp extends BaseApplication {
       if (matches) visibleCount += 1;
     }
 
-    const subtitle = this.element?.querySelector?.(".bb-subtitle");
+    const subtitle = this.element?.querySelector<HTMLElement>(".bb-subtitle");
     const totalCount = Number(subtitle?.dataset?.totalCount ?? cards.length);
     const activeCount = Number(subtitle?.dataset?.activeCount ?? cards.length);
     if (subtitle) {
@@ -326,13 +387,14 @@ export class BountyBoardApp extends BaseApplication {
   }
 
   focusBounty(bountyId: string) {
-    this.filters = { status: "", threatLevel: "", faction: "", tag: "", search: "" };
+    this.filters = { missionType: "", status: "", threatLevel: "", faction: "", tag: "", search: "" };
     this.expanded.add(bountyId);
     this.focusBountyId = bountyId;
     this.render({ force: true });
   }
 
   async close(options: any = {}) {
+    this._tagTickerObserver?.disconnect();
     this._targetDropController?.abort();
     if (boardApp === this) boardApp = null;
     return super.close(options);
@@ -342,76 +404,17 @@ export class BountyBoardApp extends BaseApplication {
     new BountyEditorApp().render({ force: true });
   }
 
+  static #onOpenHandout(event: Event) {
+    return openBountyHandout(getBountyIdFromEvent(event));
+  }
+
+  static async #onCloseBoard(this: BountyBoardApp) {
+    await this.close();
+  }
+
   static #onEditBounty(event: Event) {
     const bountyId = getBountyIdFromEvent(event);
     if (bountyId) new BountyEditorApp({ bountyId }).render({ force: true });
-  }
-
-  static async #onDeleteBounty(this: BountyBoardApp, event: Event) {
-    const bountyId = getBountyIdFromEvent(event);
-    if (bountyId && await deleteBounty(bountyId)) this._removeBountyCard(bountyId);
-  }
-
-  static async #onPublishBounty(this: BountyBoardApp, event: Event) {
-    const bountyId = getBountyIdFromEvent(event);
-    if (bountyId) {
-      const updated = await publishBounty(bountyId, true);
-      if (updated) await this._refreshBountyCard(bountyId, updated);
-    }
-  }
-
-  static async #onUnpublishBounty(this: BountyBoardApp, event: Event) {
-    const bountyId = getBountyIdFromEvent(event);
-    if (bountyId) {
-      const updated = await publishBounty(bountyId, false);
-      if (updated) await this._refreshBountyCard(bountyId, updated);
-    }
-  }
-
-  static async #onArchiveBounty(this: BountyBoardApp, event: Event) {
-    const bountyId = getBountyIdFromEvent(event);
-    if (bountyId) {
-      const updated = await archiveBounty(bountyId);
-      if (updated) await this._refreshBountyCard(bountyId, updated);
-    }
-  }
-
-  static async #onCompleteBounty(this: BountyBoardApp, event: Event) {
-    const bountyId = getBountyIdFromEvent(event);
-    if (bountyId) {
-      const updated = await markBountyCompleted(bountyId, false);
-      if (updated) await this._refreshBountyCard(bountyId, updated);
-    }
-  }
-
-  static async #onFailBounty(this: BountyBoardApp, event: Event) {
-    const bountyId = getBountyIdFromEvent(event);
-    if (bountyId) {
-      const updated = await markBountyCompleted(bountyId, true);
-      if (updated) await this._refreshBountyCard(bountyId, updated);
-    }
-  }
-
-  static async #onHideBounty(this: BountyBoardApp, event: Event) {
-    const bountyId = getBountyIdFromEvent(event);
-    if (bountyId) {
-      const updated = await updateBountyState(bountyId, { status: BOUNTY_STATUSES.HIDDEN, published: false });
-      if (updated) await this._refreshBountyCard(bountyId, updated);
-    }
-  }
-
-  static async #onClaimBounty(this: BountyBoardApp, event: Event) {
-    const bountyId = getBountyIdFromEvent(event);
-    const claimedBy = (event.target as Element | null)?.closest("[data-bounty-id]")?.querySelector<HTMLInputElement>("[data-claimed-by]")?.value ?? "";
-    if (bountyId) {
-      const updated = await claimBounty(bountyId, claimedBy);
-      if (updated) await this._refreshBountyCard(bountyId, updated);
-    }
-  }
-
-  static async #onRequestContract(event: Event) {
-    const bountyId = getBountyIdFromEvent(event);
-    if (bountyId) await requestContract(bountyId);
   }
 
   static #onOpenImage(event: Event) {
@@ -437,10 +440,15 @@ export class BountyBoardApp extends BaseApplication {
     game.journal?.get(id)?.sheet?.render(true);
   }
 
-  static async #onRemoveTag() {
-    const tag = this.filters.tag;
+  static #onFilterTag(this: BountyBoardApp, event: Event, target: HTMLElement) {
+    this.filters.tag = target.dataset.tag ?? "";
+    this.render({ force: true });
+  }
+
+  static async #onRemoveTag(this: BountyBoardApp, event: Event, target: HTMLElement) {
+    const tag = target.dataset.tag ?? "";
     if (await removeTag(tag)) {
-      this.filters.tag = "";
+      if (this.filters.tag === tag) this.filters.tag = "";
       this.render({ force: true });
     }
   }
@@ -460,7 +468,7 @@ export class BountyBoardApp extends BaseApplication {
   }
 
   static #onClearFilters() {
-    this.filters = { status: "", threatLevel: "", faction: "", tag: "", search: "" };
+    this.filters = { missionType: "", status: "", threatLevel: "", faction: "", tag: "", search: "" };
     this.render({ force: true });
   }
 }
