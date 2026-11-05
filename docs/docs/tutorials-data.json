@@ -194,7 +194,82 @@
             "tone": "info"
           }
         ]
-      }
+      },
+      "sections": [
+        {
+          "id": "custom-tabs",
+          "title": "Custom Tabs",
+          "paragraphs": [
+            "As GM, click + in the toolbar to add a tab. Use Configure to choose a Journal text page, name, icon, and visibility. Use Configure → Tabs to reorder, hide, duplicate, or delete tabs. Deleting a tab keeps the source Journal.",
+            "Players need Observer access to the linked Journal and page. To show a copy without changing those permissions, click Publish to Terminal. Secret blocks are left out. Publish again after editing the source, or choose Unpublish copy to return to the live Journal link.",
+            "GM-only tabs stay private when sharing a terminal."
+          ]
+        },
+        {
+          "id": "attaching-hacks",
+          "title": "Attaching Hacks",
+          "paragraphs": [
+            "Click Add Hack on a login, file, mail message, or camera. Choose the minigame and roll settings, click Add, then save the Terminal form. Use Edit Hack or Remove to change it later.",
+            "Skill checks use the player's character. Quick Hack skips the roll but still requires solving the puzzle. Cancelling does not unlock anything. Saved hacks keep their settings when Hacking's defaults change.",
+            "HoloSuite Hacking must be active to configure and play hacks. Use Locked without hacking for content players should not be able to hack."
+          ]
+        },
+        {
+          "id": "player-workflow",
+          "title": "Player Workflow",
+          "paragraphs": [
+            "Enter a linked region and accept the prompt to open the terminal, or have the GM open it for you. Access rules, passwords, and hacks still apply."
+          ]
+        },
+        {
+          "id": "sharing-a-terminal",
+          "title": "Sharing a Terminal",
+          "paragraphs": [
+            "Open and unlock a terminal, then click Share terminal view in the header. Other connected users see a read-only window that follows your tabs, selections, scrolling, media, and open camera feed. Viewers can click Enable audio to hear playback.",
+            "The shared view can show content viewers cannot access on their own. It does not grant permissions or let them use terminal controls. Sharing pauses on private tabs, login screens, and GM editing screens. Separate Journal and layout windows are not shared.",
+            "Click Stop sharing or close the terminal to end the session. Viewers can close their copy; it stays closed until you start a new session. Sharing does not require a connected GM."
+          ]
+        },
+        {
+          "id": "facility-layouts",
+          "title": "Facility Layouts",
+          "paragraphs": [
+            "Publish a layout in HoloSuite Blueprint → Settings → Published Layout. Enable the terminal's Layout app, then use its link button to choose published layouts and optional hack locks.",
+            "Withdrawing a layout in Blueprint hides it from Terminal. Republishing makes it available again."
+          ]
+        },
+        {
+          "id": "custom-utility-actions",
+          "title": "Custom Utility Actions",
+          "paragraphs": [
+            "Enable Utilities in the terminal settings, then click Add Utility. Alongside door, light, and camera controls, you can add:",
+            "Run macro: choose a world macro or drag one into the Macro field. It runs for the user pressing the button. Import compendium macros into the world first.",
+            "Notify GM: send the GMs a private chat message naming the player, terminal, and button.",
+            "Players need permission to run the selected macro. Automatically grant macro access lets a connected GM grant Observer access on the first click. This access is permanent and allows using the macro outside Terminal too. Foundry's Use Script Macros permission still applies.",
+            "Macros run locally. Other player utility actions need a connected GM. Use separate buttons for Activate and Deactivate; utility buttons do not track toggle states.",
+            "Script macros receive scope.terminalId, scope.terminalName, scope.utilityButtonId, scope.utilityLabel, scope.requestedById, and scope.requestedByName. The player's assigned character is passed as the actor when available."
+          ]
+        },
+        {
+          "id": "public-api",
+          "title": "Public API",
+          "paragraphs": [
+            "Use game.holosuiteTerminal or game.modules.get(\"holosuite-terminal\").api:"
+          ],
+          "bullets": [
+            "openTerminal(terminalId, options)",
+            "getTerminalProfiles()",
+            "getTerminalProfileById(id)"
+          ]
+        },
+        {
+          "id": "license",
+          "title": "License",
+          "paragraphs": [
+            "PolyForm Noncommercial License 1.0.0. See LICENSE for the full terms."
+          ]
+        }
+      ]
     },
     "pulse-scanner": {
       "quickStart": {
