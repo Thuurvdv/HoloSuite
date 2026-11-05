@@ -101,7 +101,9 @@
 }
 
 .csi-theme-noir .csi-card {
-  background: #d8c9a6;
+  /* Shared v12 card styles also read this token with !important. */
+  --hs-surface-card: #d8c9a6;
+  background: var(--hs-surface-card);
   color: #24170f;
   border-color: rgba(91, 50, 24, 0.45);
   box-shadow: 0 9px 18px rgba(0, 0, 0, 0.32);
@@ -114,6 +116,12 @@
 
 .csi-theme-noir .csi-card-topline,
 .csi-theme-noir .csi-card .csi-card-subtitle {
+  color: #6f4e32;
+}
+
+.csi-theme-noir .csi-card.csi-layer-private::after {
+  background: #d8c9a6;
+  border-color: #6f4e32;
   color: #6f4e32;
 }
 
