@@ -115,6 +115,7 @@ export function createGalaxyMapViewClass(deps: any) {
     _worldWidth = 0;
     _worldHeight = 0;
     _viewportResizeObserver: ResizeObserver | null = null;
+    _viewportStage: HTMLElement | null = null;
     _baseWindowHeight: number | null = null;
 
     static DEFAULT_OPTIONS = {
@@ -347,6 +348,9 @@ export function createGalaxyMapViewClass(deps: any) {
       if (html) {
         this._attachPartListeners("main", html, options);
         this._observeViewport(html);
+        // Part listeners run before Foundry has mounted the application window.
+        // A cached background can already have dimensions, so size it only here.
+        this._applyViewportTransform(html);
         this._mountBountyIntelCallout(html);
         if (this.externalFocus && this._pendingFocusZoom !== null) {
           const system = normalizeMap(getRawMap(this.mapId)).systems.find((candidate: any) => candidate.id === this.externalFocus.systemId);
@@ -394,8 +398,6 @@ export function createGalaxyMapViewClass(deps: any) {
         galaxy?.classList.toggle("is-hard-contrast", this.hardContrast);
         (event.currentTarget as HTMLElement).setAttribute("aria-pressed", String(this.hardContrast));
       });
-      this._applyViewportTransform(html);
-
       html.querySelectorAll("[data-system-id]").forEach((node: any) => {
         node.addEventListener("click", (event: any) => {
           if (node.dataset.dragged === "true") {
@@ -522,9 +524,11 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     _applyViewportTransform(html: any) {
+      const stage = html.querySelector(".gmf-map-stage");
+      // Ignore image-load and resize callbacks from a closed or replaced view.
+      if (!stage || stage !== this._viewportStage || !stage.isConnected || !this.element?.contains(stage)) return;
       const viewport = html.querySelector(".gmf-map-viewport");
       if (!viewport) return;
-      const stage = html.querySelector(".gmf-map-stage");
       if (stage) {
         const rect = stage.getBoundingClientRect();
         const background = viewport.querySelector(".gmf-map-background");
@@ -590,6 +594,7 @@ export function createGalaxyMapViewClass(deps: any) {
     _observeViewport(html: any) {
       this._viewportResizeObserver?.disconnect();
       const stage = html.querySelector(".gmf-map-stage");
+      this._viewportStage = stage;
       if (!stage) return;
       this._viewportResizeObserver = new ResizeObserver(() => this._applyViewportTransform(html));
       this._viewportResizeObserver.observe(stage);
@@ -1443,6 +1448,7 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     async close(options: any = {}) {
+      this._viewportStage = null;
       this._bountyIntelCallout?.dispose();
       this._bountyIntelCallout = null;
       this._disposePlanetRenderer();

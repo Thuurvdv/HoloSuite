@@ -4,6 +4,10 @@ Galaxy Map turns a Foundry world into a navigable star chart. Build a galaxy, op
 
 ![Galaxy Map Manager](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/images/Galaxy%20Map%20Manager.png)
 
+## What's New in 2.0.1
+
+Fixed a rendering error that could leave Galaxy Map unresponsive when closing or reopening a map with a custom background image. Custom galaxy and system backgrounds now resize the window after it has mounted, and late image-loading or resize callbacks from closed or replaced views are ignored.
+
 ## What's New in 2.0
 
 Galaxy Map 2.0 rebuilds the map around a real galaxy, system, and location hierarchy. Systems now open into their own local maps, where planets, stations, moons, anomalies, and other destinations can have routes, linked Foundry content, custom markers, and optional 3D detail views.
