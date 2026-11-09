@@ -1,0 +1,193 @@
+.holosuite-loot-window { color: var(--hs-text); color-scheme: dark; font-family: var(--hs-font-ui); max-width: calc(100vw - 16px); }
+.holosuite-loot-window * { box-sizing: border-box; }
+.holosuite-loot-window .window-header { background: var(--hs-window-header-bg); color: var(--hs-text); border-bottom: 1px solid var(--hs-line); }
+.holosuite-loot-window { background: transparent; border: 0; box-shadow: none; border-radius: 24px; }
+.holosuite-loot-window .window-content { padding: 8px; background: transparent; color: var(--hs-text); overflow-y: auto; border-radius: 24px; }
+.holosuite-loot-window .hl-panel { border: var(--hl-border-width, 3px) solid var(--hl-border-color, #57e5ff); border-radius: var(--hl-radius, 24px); padding: 12px; color: var(--hs-text); background: var(--hl-surface, linear-gradient(145deg, rgba(0, 150, 181, .8), rgba(0, 48, 69, .8))); box-shadow: var(--hl-shadow, 0 0 9px rgba(36, 209, 255, .65), inset 0 0 8px rgba(36, 209, 255, .22)); }
+.holosuite-loot-window .hl-heading { display: flex; align-items: center; gap: 9px; padding-bottom: 9px; border-bottom: 1px solid var(--hs-line); }
+.holosuite-loot-window .hl-heading img { width: 36px; height: 36px; object-fit: cover; border: 1px solid var(--hs-line); }
+.holosuite-loot-window h2 { font: 600 18px var(--hs-font-ui); color: var(--hs-text); border: 0; margin: 2px 0 0; overflow-wrap: anywhere; }
+.holosuite-loot-window small { color: var(--hs-muted); font-size: 11px; }
+.holosuite-loot-window .hl-heading small { color: var(--hs-cyan); letter-spacing: .08em; text-transform: uppercase; }
+.holosuite-loot-window .hl-destination { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 8px 0; }
+.holosuite-loot-window select { min-width: 0; flex: 1; background: var(--hs-bg-deep, #03070b); color: var(--hs-text, #e7faff); border: 1px solid var(--hs-line-strong); height: 28px; color-scheme: dark; }
+.holosuite-loot-window select option, .holosuite-loot-window select optgroup { background: var(--hs-bg-deep, #03070b); color: var(--hs-text, #e7faff); }
+.holosuite-loot-window .hl-items { max-height: min(340px, 45vh); overflow-y: auto; }
+.holosuite-loot-window button { color: var(--hs-text); background: var(--hs-field); border: 1px solid var(--hs-line); border-radius: 2px; font-family: inherit; cursor: pointer; box-shadow: none; }
+.holosuite-loot-window button:hover { border-color: var(--hs-cyan); background: var(--hs-panel-strong); }
+.holosuite-loot-window button:focus-visible, .holosuite-loot-window select:focus-visible, .holosuite-loot-config input:focus-visible { outline: 2px solid var(--hs-cyan); outline-offset: 1px; }
+.holosuite-loot-window button:disabled { cursor: default; opacity: var(--hs-disabled-opacity); }
+.holosuite-loot-window .hl-item { position: relative; display: flex; width: 100%; gap: 8px; align-items: center; text-align: left; min-height: 47px; padding: 8px 3px; margin: 0; line-height: 1.2; border: 0; background: transparent; border-radius: 8px; }
+.holosuite-loot-window .hl-item:hover { background: var(--hl-row-hover, rgba(96, 230, 255, .12)); }
+.holosuite-loot-window .hl-item + .hl-item::before { content: ""; position: absolute; left: 3px; right: 3px; top: 0; height: 1px; background: var(--hl-divider, #7aeeff); box-shadow: var(--hl-divider-shadow, 0 0 5px #43dfff); pointer-events: none; }
+
+.holosuite-loot-window .hl-item img, .holosuite-loot-window .hl-config-item img { width: 32px; height: 32px; object-fit: cover; border: 1px solid var(--hs-line); }
+.holosuite-loot-window .hl-item-label { flex: 1; min-width: 0; }
+.holosuite-loot-window .hl-item-label strong { display: block; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.holosuite-loot-window .hl-item-label small { display: block; margin-top: 3px; }
+.holosuite-loot-window .hl-quantity { color: var(--hs-cyan); font-size: 13px; white-space: nowrap; }
+.holosuite-loot-window .hl-footer { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding-top: 8px; margin-top: 4px; }
+.holosuite-loot-popup .hl-footer { justify-content: center; }
+.holosuite-loot-window .hl-footer button { width: auto; min-width: 90px; padding: 3px 12px; min-height: 28px; }
+.holosuite-loot-window .hl-empty { margin: 20px 0; text-align: center; color: var(--hs-muted); font-size: 14px; }
+.holosuite-loot-window .hl-message { color: var(--hs-muted); font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.holosuite-loot-window .hl-drop { border: 1px dashed var(--hs-line-strong); padding: 8px; max-height: 230px; overflow-y: auto; font-size: 12px; }
+.holosuite-loot-window .hl-config-item { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+.holosuite-loot-window .hl-config-item span { flex: 1; }
+.holosuite-loot-window .hl-config-item button { width: 25px; flex: 0 0 25px; }
+.hl-token-action { color: var(--hs-cyan, #69e8ff); }
+.holosuite-loot-window > .window-header { display: none !important; }
+@property --hl-open-progress {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+.holosuite-loot-popup {
+  border: 0;
+  border-radius: 24px;
+  --hl-frame-inset: max(0px, calc((50% - var(--hl-corner-depth, 32px)) * (1 - var(--hl-open-progress, 1))));
+  --hl-reveal-opacity: min(1, calc(3 * var(--hl-open-progress, 1)));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The window persists when Foundry replaces the loot template. */
+  .holosuite-loot-popup { animation: hl-popup-open 320ms cubic-bezier(.2, .65, .3, 1); }
+}
+
+@keyframes hl-popup-open {
+  from, to { --hl-reveal-box: border-box; }
+  from { --hl-open-progress: 0; }
+  to { --hl-open-progress: 1; }
+}
+
+.holosuite-loot-popup .hl-panel {
+  /* Outside the animation the missing box variable restores clip-path: none. */
+  clip-path: inset(var(--hl-frame-inset) 0 round var(--hl-radius, 24px)) var(--hl-reveal-box);
+  opacity: var(--hl-reveal-opacity);
+}
+
+.holosuite-loot-window .window-content,
+.holosuite-loot-window .hl-items,
+.holosuite-loot-config .hl-config-content {
+  scrollbar-color: var(--hl-border-color, #57e5ff) var(--hl-scrollbar-track, #003045);
+}
+
+.hl-popup-frame { position: relative; }
+.hl-popup-frame::before,
+.hl-popup-frame::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 32px;
+  z-index: 1;
+  border-image-source: var(--hl-corners, url("../assets/ui/corners-holo.svg"));
+  border-image-slice: 32;
+  /* Join each corner pair with the edge that travels with it. */
+  background-image: linear-gradient(var(--hl-border-color, #57e5ff) 0 0);
+  background-size: max(0px, calc(100% - 2 * var(--hl-corner-depth, 32px) + 2px)) var(--hl-border-width, 3px);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.hl-popup-frame::before {
+  top: var(--hl-frame-inset, 0px);
+  border-image-width: 32px 32px 0;
+  background-position: center top;
+}
+.hl-popup-frame::after {
+  bottom: var(--hl-frame-inset, 0px);
+  border-image-width: 0 32px 32px;
+  background-position: center bottom;
+}
+
+.hl-loot-tether { position: fixed; inset: 0; width: 100vw; height: 100vh; overflow: hidden; pointer-events: none; color: var(--hs-cyan, #69e8ff); }
+.hl-loot-tether line { stroke: currentColor; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+
+.holosuite-loot-window .hl-item img { border: 0; border-radius: 4px; }
+
+.holosuite-loot-window .hl-item-open { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding: 0; text-align: left; border: 0; background: transparent; }
+.holosuite-loot-window .hl-item-open:hover { background: transparent; color: #fff; }
+.holosuite-loot-window .hl-item-loot { flex: 0 0 auto; width: auto; padding: 3px 7px; min-height: 25px; font-size: 11px; border-radius: 6px; }
+
+.holosuite-loot-window:has([data-loot-theme="neutral"]) {
+  --hl-surface: #282e36;
+  --hl-scrollbar-track: #20262e;
+  --hl-border-width: 1px;
+  --hl-border-color: #a2abb6;
+  --hl-radius: 10px;
+  --hl-corner-depth: 22px;
+  --hl-corners: url("../assets/ui/corners-neutral.svg");
+  --hl-shadow: none;
+  --hl-divider: #4a5461;
+  --hl-divider-shadow: none;
+  --hl-row-hover: #343d49;
+  --hs-text: #f2f2ed;
+  --hs-muted: #bcc6d2;
+  --hs-cyan: #adc8e6;
+  --hs-field: #354b64;
+  --hs-panel-strong: #425e7d;
+  --hs-bg-deep: #20262e;
+  --hs-line: #647a93;
+  --hs-line-strong: #8291a3;
+}
+
+.holosuite-loot-window:has([data-loot-theme="fantasy"]) {
+  --hl-surface: #38271f;
+  --hl-scrollbar-track: #2c1e18;
+  --hl-border-width: 2px;
+  --hl-border-color: #ba995f;
+  --hl-radius: 0px;
+  --hl-corner-depth: 25px;
+  --hl-corners: url("../assets/ui/corners-fantasy.svg");
+  --hl-shadow: 0 3px 10px #0006;
+  --hl-divider: #745739;
+  --hl-divider-shadow: none;
+  --hl-row-hover: #49352a;
+  --hs-text: #fff0d8;
+  --hs-muted: #d5bea0;
+  --hs-cyan: #e6c481;
+  --hs-field: #50382a;
+  --hs-panel-strong: #624532;
+  --hs-bg-deep: #2c1e18;
+  --hs-line: #957750;
+  --hs-line-strong: #ba995f;
+}
+
+.holosuite-loot-popup [data-loot-theme="fantasy"] button[data-loot="all"] { background: #63313a; }
+.holosuite-loot-popup [data-loot-theme="fantasy"] button[data-loot="all"]:hover { background: #79414b; }
+
+.hl-auto-warning { color: #ffd37c; font-size: .65em; vertical-align: middle; cursor: help; }
+.holosuite-loot-config .window-content { overflow: hidden; }
+.holosuite-loot-config .hl-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 32px);
+}
+.holosuite-loot-config .hl-config-content {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 3px 6px 3px 3px;
+}
+.holosuite-loot-config .hl-panel > .hl-footer { flex-shrink: 0; }
+.holosuite-loot-config .hl-footer [data-refresh-inventory] { margin-inline-end: auto; min-width: 32px; padding-inline: 7px; }
+.holosuite-loot-config .hl-rules { margin-top: 12px; border-top: 1px solid var(--hs-line); padding-top: 8px; }
+.holosuite-loot-config .hl-rules .hl-items { max-height: none; overflow: visible; }
+.holosuite-loot-config .hl-rules input[type="checkbox"] { flex: 0 0 auto; accent-color: var(--hs-cyan); }
+.holosuite-loot-config label:has(input[type="checkbox"]:enabled) { cursor: pointer; }
+.holosuite-loot-config label:has(input[type="checkbox"]:disabled) { cursor: not-allowed; background: transparent; }
+.holosuite-loot-config input[type="checkbox"]:disabled { opacity: .38; }
+.holosuite-loot-config [data-rule-unavailable]:empty { display: none; }
+.holosuite-loot-config input[name="formula"] {
+  height: 28px;
+  padding-inline: 8px;
+  background: var(--hs-bg-deep, #03070b);
+  color: var(--hs-text, #e7faff);
+  border: 1px solid var(--hs-line-strong);
+}
+.holosuite-loot-config input[name="formula"]::placeholder { color: var(--hs-muted); opacity: 1; }
+.holosuite-app-tile[data-holosuite-app="holosuite-loot"] {
+  --hs-app-accent: #fff0ce !important;
+  --hs-app-accent-rgb: 255, 240, 206 !important;
+}
+.holosuite-app-icon[data-holosuite-app-icon="holosuite-loot"] > i { display: none !important; }
+.holosuite-app-tile[data-holosuite-app="holosuite-loot"] .holosuite-app-icon::before { content: ""; display: block !important; width: 23px; height: 23px; background: var(--hs-app-accent) !important; mask: url("../assets/ui/loot-launcher.svg") center / contain no-repeat !important; }

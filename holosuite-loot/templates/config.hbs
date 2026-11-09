@@ -1,0 +1,64 @@
+<div class="hl-popup-frame">
+  <section class="hl-panel" data-loot-theme="{{theme}}" aria-label="{{localize 'HL.Title'}}: {{name}}">
+    <div class="hl-config-content">
+      <h2 class="hl-config-title">{{localize 'HL.Title'}}{{#if automatic}} <span class="hl-auto-warning" tabindex="0" title="{{localize 'HL.AutoWarning'}}" aria-label="{{localize 'HL.AutoWarning'}}"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span>{{/if}}</h2>
+      <label class="hl-destination">{{localize 'HL.Lootable'}}<select name="mode">{{#each modes}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+      {{#if manual}}
+      <section class="hl-rules" aria-label="{{localize 'HL.ManualItems'}}">
+        <h3>{{localize 'HL.ManualItems'}}</h3>
+        <p class="hl-message">{{#if canEdit}}{{localize 'HL.ManualHint'}}{{else}}{{localize 'HL.RuleGM'}}{{/if}}</p>
+        <div class="hl-items">
+          {{#each rows}}
+            <label class="hl-item">
+              <input type="checkbox" data-manual-item value="{{id}}" aria-label="{{name}}" {{#if selected}}checked{{/if}} {{#if ../saveDisabled}}disabled{{/if}}>
+              <img src="{{img}}" alt="">
+              <span class="hl-item-label"><strong>{{name}}</strong></span>
+            </label>
+          {{else}}<p class="hl-message">{{localize 'HL.NoRuleItems'}}</p>{{/each}}
+        </div>
+      </section>
+      {{else}}
+      <section class="hl-rules" aria-label="{{localize 'HL.InventoryRules'}}">
+        <h3>{{localize 'HL.InventoryRules'}}</h3>
+        {{#if canEdit}}
+          <p class="hl-message">{{localize 'HL.RuleHint'}}</p>
+          <label class="hl-destination">{{localize 'HL.RuleScope'}}<select name="scope">{{#each scopes}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+          <label class="hl-destination">{{localize 'HL.RuleBehavior'}}<select name="behavior">
+            <option value="inherit">{{localize 'HL.Rule.inherit'}}</option>
+            <option value="allow">{{localize 'HL.Rule.allow'}}</option>
+            <option value="never">{{localize 'HL.Rule.never'}}</option>
+            <option value="quantity">{{localize 'HL.Rule.quantity'}}</option>
+          </select></label>
+          <input name="formula" type="text" maxlength="40" placeholder="2 or 1d6" aria-label="{{localize 'HL.Rule.quantity'}}" hidden>
+          <label class="hl-destination"><input type="checkbox" data-select-all> {{localize 'HL.SelectRuleItems'}}</label>
+        {{else}}
+          <p class="hl-message">{{localize 'HL.RuleGM'}}</p>
+        {{/if}}
+        <div class="hl-items">
+          {{#each rows}}
+            <label class="hl-item">
+              {{#if ../canEdit}}<input type="checkbox" data-rule-item value="{{id}}" aria-label="{{name}}"
+                data-token="{{canToken}}" data-actor="{{canActor}}" data-global="{{canGlobal}}"
+                data-token-unavailable="{{tokenUnavailable}}" data-actor-unavailable="RuleNoActorItem" data-global-unavailable="RuleNoSharedSource"
+                data-effective-scope="{{effectiveScope}}" data-token-rule="{{tokenRule}}" data-actor-rule="{{actorRule}}" data-global-rule="{{globalRule}}">{{/if}}
+              <img src="{{img}}" alt="">
+              <span class="hl-item-label"><strong>{{name}}</strong>
+                <small>{{localize 'HL.InventoryQuantity'}} {{quantity}} · {{localize 'HL.OriginalQuantity'}} {{original}} · {{localize 'HL.ManifestQuantity'}} {{remaining}}{{#if pending}} · {{localize 'HL.Pending'}}{{/if}}</small>
+                <small>{{localize 'HL.ConfiguredRule'}} {{configured}} · {{ruleScope}}<span data-scoped-rule></span></small>
+                {{#if rollResult}}<small>{{rollResult}}</small>{{/if}}
+                {{#if ../canEdit}}<small data-rule-unavailable></small>{{/if}}
+              </span>
+            </label>
+          {{else}}<p class="hl-message">{{localize 'HL.NoRuleItems'}}</p>{{/each}}
+        </div>
+        {{#if canEdit}}<div class="hl-footer"><button type="button" data-apply disabled>{{localize 'HL.ApplyRules'}}</button></div>{{/if}}
+      </section>
+      {{/if}}
+    </div>
+    <footer class="hl-footer">
+      {{#if canRefresh}}<button type="button" data-refresh-inventory title="{{localize 'HL.RefreshInventory'}}" aria-label="{{localize 'HL.RefreshInventory'}}" {{#if busy}}disabled{{/if}}><i class="fa-solid fa-rotate" aria-hidden="true"></i></button>{{/if}}
+      <button type="button" data-close>{{localize 'HL.Close'}}</button>
+      <button type="button" data-save {{#if saveDisabled}}disabled{{/if}}>{{localize 'HL.Save'}}</button>
+    </footer>
+  </section>
+</div>

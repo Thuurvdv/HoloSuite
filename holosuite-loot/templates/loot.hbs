@@ -1,0 +1,16 @@
+<div class="hl-popup-frame">
+  <section class="hl-panel" data-loot-theme="{{theme}}" aria-label="{{localize 'HL.Title'}}: {{name}}">
+    {{#if showSelector}}<label class="hl-destination">{{localize 'HL.Destination'}}
+      <select aria-label="{{localize 'HL.Destination'}}" {{#if busy}}disabled{{/if}}><option value="">{{localize 'HL.ChooseActor'}}</option>{{#each actors}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select>
+    </label>{{/if}}
+    {{#if message}}<p class="hl-message" role="status">{{message}}</p>{{/if}}
+    {{#if loading}}<p class="hl-message" role="status" data-loading>{{localize 'HL.Loading'}}</p>{{/if}}
+    <div class="hl-items" aria-live="polite">{{#each entries}}
+      <div class="hl-item">
+      {{#if currency}}<span class="hl-item-open hl-currency">{{else}}<button type="button" class="hl-item-open" data-inspect="{{id}}" aria-label="{{localize 'HL.OpenItem'}}: {{name}}">{{/if}}
+        <img src="{{img}}" alt=""><span class="hl-item-label"><strong>{{name}}</strong><small>{{type}}{{#if rarity}} · {{rarity}}{{/if}}{{#if pending}} · {{localize 'HL.Pending'}}{{/if}}</small></span><span class="hl-quantity">{{#if wholeItem}}{{localize 'HL.WholeItem'}}{{else if formula}}{{formula}}{{else}}×{{quantity}}{{/if}}</span>
+      {{#if currency}}</span>{{else}}</button>{{/if}}<button type="button" class="hl-item-loot" data-loot="{{id}}" {{#if ../disabled}}disabled{{/if}}>{{localize 'HL.Loot'}}</button></div>
+    {{/each}}{{#if empty}}<p class="hl-empty">{{localize 'HL.Empty'}}</p>{{/if}}</div>
+    <footer class="hl-footer"><button type="button" data-loot="all" {{#if disabled}}disabled{{/if}}>{{#if busy}}{{localize 'HL.Working'}}{{else}}{{localize 'HL.All'}}{{/if}}</button></footer>
+  </section>
+</div>

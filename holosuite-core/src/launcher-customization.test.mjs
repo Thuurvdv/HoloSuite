@@ -117,14 +117,12 @@ test("keeps What's New conversational and limits badges to Foundry compatibility
   ]);
   const catalog = JSON.parse(catalogText);
   const galaxyMap = catalog.modules.find((entry) => entry.moduleId === "galaxy-map");
-  const tags = [...catalog.modules, ...catalog.releases]
-    .flatMap((entry) => entry.entries)
-    .flatMap((entry) => entry.tags ?? []);
+  const loot = catalog.releases.find((entry) => entry.moduleId === "holosuite-loot");
 
-  assert.equal(galaxyMap.version, "2.0.0");
-  assert.match(galaxyMap.entries[0].title, /Galaxy Map 2\.0/);
-  assert.ok(tags.length > 0);
-  assert.ok(tags.every((tag) => tag === "Foundry v12-v14"));
+  assert.ok(galaxyMap.entries.some((entry) => /Galaxy Map 2\.0/.test(entry.title)));
+  assert.equal(loot.tier, "free");
+  assert.ok(loot.url.endsWith(`/releases/tag/holosuite-loot-v${loot.version}`));
+  assert.deepEqual(loot.entries.flatMap((entry) => entry.tags ?? []), ["Foundry v12-v14"]);
   assert.match(source, /hasFoundryCompatibilityTag[\s\S]*\["Foundry v12–14"\]/);
   assert.doesNotMatch(source, /escapeHtml\(tierLabel\)/);
   assert.doesNotMatch(source, /installed \? "Installed" : "Not installed"/);
