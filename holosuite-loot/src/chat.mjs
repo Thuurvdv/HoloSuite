@@ -29,7 +29,7 @@ export async function postLootChat({ token, actor, entry, adapter }) {
   const item = adapter.preview ? adapter.preview(entry) : entry.data;
   const text = game.i18n.format("HL.ChatLooted", {
     actor: escape(actor.name), source: escape(token.name), item: escape(item.name),
-    quantity: escape(entry.currency?.amount ?? item.system?.quantity ?? 1)
+    quantity: escape(entry.wholeItem ? 1 : entry.currency?.amount ?? item.system?.quantity ?? 1)
   });
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),

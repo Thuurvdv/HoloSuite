@@ -1,4 +1,4 @@
-import { MODULE_ID, BUILD_VERSION, actorKey } from "./model.mjs";
+import { MODULE_ID, BUILD_VERSION, actorKey, canReceiveLoot } from "./model.mjs";
 declare const game: any;
 declare const canvas: any;
 
@@ -55,8 +55,8 @@ function withinLootRange(target: any, user: any, adapter: any, feet: number, rec
   const destinations = tokenRangePoints(target, grid);
   return Array.from<any>(scene.tokens ?? []).some(token => {
     const actor = token.actor;
-    if (token.id === target.id || token.hidden || !actor || !adapter.destination(actor)
-      || !actor.testUserPermission(user, "OWNER") || (recipient && actorKey(actor) !== actorKey(recipient))) return false;
+    if (token.id === target.id || token.hidden || !canReceiveLoot(actor, user, adapter, target)
+      || (recipient && actorKey(actor) !== actorKey(recipient))) return false;
     // Match the flat distance ruler and use the nearest occupied spaces on a grid.
     return tokenRangePoints(token, grid).some(({ x, y }: any) => destinations.some((point: any) =>
       grid.measurePath([{ x, y }, { x: point.x, y: point.y }]).distance <= limit + 1e-8));
@@ -104,6 +104,6 @@ export function visible(token: any, user: any) {
 export function environment(adapter?: any) {
   const automatic = game.settings.get(MODULE_ID, "zeroHP");
   const feet = adapter ? lootRange() : 0;
-  return { combats: game.combats.contents, automatic, zeroHP: automatic, visible,
+  return { combats: game.combats.contents, automatic, zeroHP: automatic, manual: !!adapter?.manual, visible,
     inRange: feet > 0 ? (token: any, user: any, recipient?: any) => withinLootRange(token, user, adapter, feet, recipient) : undefined };
 }

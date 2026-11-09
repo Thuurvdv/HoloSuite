@@ -1,8 +1,8 @@
 import { getLegacyApplicationBase } from "../../shared/src/application-base";
-import { MODULE_ID, resolveCharacter, actorKey, configFor } from "./model.mjs";
+import { MODULE_ID, resolveCharacter, actorKey, canReceiveLoot, configFor } from "./model.mjs";
 declare const canvas: any;
 import { LootPopupPresentation, OutsideDismissal } from "./popup";
-import { canRefreshInventory, editRules, refreshInventory, ruleRows } from "./persistence";
+import { canRefreshInventory, editRules, manualLootRows, refreshInventory, ruleRows, saveManualLoot } from "./persistence";
 import { postQuantityRoll } from "./chat.mjs";
 import { parseRule } from "./rules.mjs";
 import { isAuthority } from "./permissions";
@@ -36,7 +36,7 @@ export class LootPanel extends Base {
   constructor(token: any, send: any, adapter: any) {
     super({ id: `hololoot-${token.id}` }); this.token = token; this.send = send; this.adapter = adapter;
     const assigned = game.user.character;
-    if (assigned && adapter.destination(assigned) && assigned.testUserPermission(game.user, "OWNER")) this.destination = assigned.id;
+    if (canReceiveLoot(assigned, game.user, adapter, token)) this.destination = adapter.manual ? actorKey(assigned) : assigned.id;
   }
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -82,18 +82,22 @@ export class LootPanel extends Base {
   getData() {
     const showSelector = game.settings.get(MODULE_ID, "characterSelector");
     const theme = game.settings.get(MODULE_ID, "panelTheme");
-    const actors = game.actors.contents.filter((actor: any) => this.adapter.destination(actor)
-      && actor.testUserPermission(game.user, "OWNER"));
+    const actors = this.adapter.manual
+      ? [...new Map([...game.actors.contents, ...Array.from(canvas.scene?.tokens ?? [], (token: any) => token.actor)]
+        .filter(actor => canReceiveLoot(actor, game.user, this.adapter, this.token))
+        .map(actor => [actorKey(actor), actor])).values()]
+      : game.actors.contents.filter((actor: any) => canReceiveLoot(actor, game.user, this.adapter));
+    const destinationId = (actor: any) => this.adapter.manual ? actorKey(actor) : actor.id;
     // One unassigned character is unambiguous; multiple require an explicit choice.
     let resolutionError = "";
     if (!showSelector) {
-      try { this.destination = actorKey(resolveCharacter(game.user, game.actors.contents, canvas.scene?.tokens, this.adapter)); }
+      try { this.destination = actorKey(resolveCharacter(game.user, game.actors.contents, canvas.scene?.tokens, this.adapter, this.token)); }
       catch (error) { this.destination = ""; resolutionError = t(error.code); }
     }
-    else if (!this.destination && actors.length === 1) this.destination = actors[0].id;
-    const selected = showSelector ? actors.some((actor: any) => actor.id === this.destination) : !!this.destination;
+    else if (!this.destination && actors.length === 1) this.destination = destinationId(actors[0]);
+    const selected = showSelector ? actors.some((actor: any) => destinationId(actor) === this.destination) : !!this.destination;
     return { ...this.data, name: this.data.name ?? this.token.name, img: this.data.img ?? this.token.texture.src,
-      actors: actors.map((actor: any) => ({ id: actor.id, name: actor.name, selected: actor.id === this.destination })),
+      actors: actors.map((actor: any) => ({ id: destinationId(actor), name: actor.name, selected: destinationId(actor) === this.destination })),
       disabled: this.loading || this.busy || !selected || !this.data.entries.length,
       loading: this.loading, showSelector, theme,
       busy: this.busy, message: this.message || resolutionError || (!actors.length && showSelector ? t("NoActor") : ""),
@@ -167,10 +171,11 @@ export class LootConfig extends Base {
       template: template("config"), width: 480, height: "auto", resizable: false });
   }
   getData() {
-    const automatic = game.settings.get(MODULE_ID, "zeroHP");
+    const manual = !!this.adapter.manual;
+    const automatic = !manual && game.settings.get(MODULE_ID, "zeroHP");
     const selectedMode = !automatic && this.config.mode === "automatic" ? "disabled" : this.config.mode;
     const ruleLabel = (rule: any) => rule?.quantity ?? (rule ? t(`Rule.${rule.mode}`) : "");
-    const rows = ruleRows(this.token, this.adapter).map(({ entry, effective, overrides, ...row }) => ({
+    const rows = manual ? manualLootRows(this.token, this.adapter) : ruleRows(this.token, this.adapter).map(({ entry, effective, overrides, ...row }) => ({
       ...row, configured: ruleLabel(effective.rule), effectiveScope: effective.scope,
       tokenRule: ruleLabel(overrides.token), actorRule: ruleLabel(overrides.actor), globalRule: ruleLabel(overrides.global),
       ruleScope: t(`Scope.${effective.scope}`),
@@ -181,8 +186,8 @@ export class LootConfig extends Base {
       pending: !!entry?.claim && !entry?.taken
     }));
     const canEdit = isAuthority();
-    return { name: this.token.name, theme: game.settings.get(MODULE_ID, "panelTheme"), busy: this.busy, automatic, rows, canEdit,
-      canRefresh: canEdit && canRefreshInventory(this.token, this.adapter),
+    return { name: this.token.name, theme: game.settings.get(MODULE_ID, "panelTheme"), busy: this.busy, automatic, rows, canEdit, manual,
+      saveDisabled: this.busy || (manual && !canEdit), canRefresh: !manual && canEdit && canRefreshInventory(this.token, this.adapter),
       scopes: ["token", "actor", "global"].map(value => ({ value, label: t(`Scope.${value}`), selected: this.scope === value })),
       modes: (automatic ? ["automatic", "enabled", "disabled"] : ["enabled", "disabled"])
         .map(value => ({ value, label: t(value), selected: value === selectedMode })) };
@@ -192,7 +197,10 @@ export class LootConfig extends Base {
     this.dismissal?.destroy();
     this.dismissal = new OutsideDismissal(root.closest<HTMLElement>(".window-app, .application") ?? root, () => { if (!this.busy) void this.close(); });
     root.querySelector<HTMLSelectElement>('[name="mode"]')?.addEventListener("change", (event: any) => { this.config.mode = event.target.value; });
-    root.querySelector("[data-save]")?.addEventListener("click", () => void this.save());
+    root.querySelector("[data-save]")?.addEventListener("click", () => {
+      const selected = Array.from(root.querySelectorAll<HTMLInputElement>("[data-manual-item]:checked"), input => input.value);
+      void this.save(selected);
+    });
     root.querySelector("[data-close]")?.addEventListener("click", () => void this.close());
     const scope = root.querySelector<HTMLSelectElement>('[name="scope"]');
     const behavior = root.querySelector<HTMLSelectElement>('[name="behavior"]');
@@ -263,12 +271,14 @@ export class LootConfig extends Base {
     });
     sync();
   }
-  async save() {
+  async save(selected: string[] = []) {
     if (!game.user.isGM || this.busy) return;
     this.busy = true; this.render(true);
     try {
-      const mode = this.config.mode === "automatic" && !game.settings.get(MODULE_ID, "zeroHP") ? "disabled" : this.config.mode;
-      await this.queue.run(this.token.uuid, () => this.token.setFlag(MODULE_ID, "config", { ...configFor(this.token), mode }));
+      const mode = this.config.mode === "automatic" && (this.adapter.manual || !game.settings.get(MODULE_ID, "zeroHP"))
+        ? "disabled" : this.config.mode;
+      await this.queue.run(this.token.uuid, () => this.adapter.manual ? saveManualLoot(this.token, this.adapter, mode, selected)
+        : this.token.setFlag(MODULE_ID, "config", { ...configFor(this.token), mode }));
       await this.close();
     } catch (error) { report(error); }
     finally { this.busy = false; if (this.rendered) this.render(true); }

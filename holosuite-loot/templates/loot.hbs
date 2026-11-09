@@ -8,7 +8,7 @@
     <div class="hl-items" aria-live="polite">{{#each entries}}
       <div class="hl-item">
       {{#if currency}}<span class="hl-item-open hl-currency">{{else}}<button type="button" class="hl-item-open" data-inspect="{{id}}" aria-label="{{localize 'HL.OpenItem'}}: {{name}}">{{/if}}
-        <img src="{{img}}" alt=""><span class="hl-item-label"><strong>{{name}}</strong><small>{{type}}{{#if rarity}} · {{rarity}}{{/if}}{{#if pending}} · {{localize 'HL.Pending'}}{{/if}}</small></span><span class="hl-quantity">{{#if formula}}{{formula}}{{else}}×{{quantity}}{{/if}}</span>
+        <img src="{{img}}" alt=""><span class="hl-item-label"><strong>{{name}}</strong><small>{{type}}{{#if rarity}} · {{rarity}}{{/if}}{{#if pending}} · {{localize 'HL.Pending'}}{{/if}}</small></span><span class="hl-quantity">{{#if wholeItem}}{{localize 'HL.WholeItem'}}{{else if formula}}{{formula}}{{else}}×{{quantity}}{{/if}}</span>
       {{#if currency}}</span>{{else}}</button>{{/if}}<button type="button" class="hl-item-loot" data-loot="{{id}}" {{#if ../disabled}}disabled{{/if}}>{{localize 'HL.Loot'}}</button></div>
     {{/each}}{{#if empty}}<p class="hl-empty">{{localize 'HL.Empty'}}</p>{{/if}}</div>
     <footer class="hl-footer"><button type="button" data-loot="all" {{#if disabled}}disabled{{/if}}>{{#if busy}}{{localize 'HL.Working'}}{{else}}{{localize 'HL.All'}}{{/if}}</button></footer>

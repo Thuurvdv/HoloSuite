@@ -23,8 +23,15 @@ export function configFor(token) {
     ?? { mode: "automatic", source: "inventory" };
 }
 export const actorKey = actor => actor?.uuid ?? actor?.id;
-export function resolveCharacter(user, actors, tokens, adapter) {
-  const owned = actor => actor && adapter.destination(actor) && actor.testUserPermission(user, "OWNER");
+export const canonical = value => JSON.stringify(value, (_key, part) => part && typeof part === "object" && !Array.isArray(part)
+  ? Object.fromEntries(Object.entries(part).sort(([a], [b]) => a.localeCompare(b))) : part);
+export function canReceiveLoot(actor, user, adapter, source = undefined) {
+  if (!actor || !adapter.destination(actor) || !actor.testUserPermission(user, "OWNER")) return false;
+  return !adapter.manual || !source || (actorKey(actor) !== actorKey(source.actor)
+    && (actor.isToken || actor.id !== source.actorId));
+}
+export function resolveCharacter(user, actors, tokens, adapter, source = undefined) {
+  const owned = actor => canReceiveLoot(actor, user, adapter, source);
   if (owned(user.character)) return user.character;
   const placed = [...new Map(Array.from(tokens ?? []).map(token => token.actor).filter(owned)
     .map(actor => [actorKey(actor), actor])).values()];
@@ -34,8 +41,9 @@ export function resolveCharacter(user, actors, tokens, adapter) {
   if (candidates.length === 1) return candidates[0];
   throw new LootError(candidates.length ? "AmbiguousActor" : "NoActor");
 }
-export function eligible(token, { combats = [], zeroHP = false, automatic = true } = {}) {
-  if (!token?.actor || token.actor.type !== "npc") return false;
+export function eligible(token, { combats = [], zeroHP = false, automatic = true, manual = false } = {}) {
+  if (!token?.actor || (manual ? !token.actor.items : token.actor.type !== "npc")) return false;
+  if (manual) return token.getFlag(MODULE_ID, "config")?.mode === "enabled";
   const config = configFor(token);
   if (config.mode === "disabled") return false;
   if (config.mode === "enabled") return true;
@@ -61,8 +69,8 @@ export function validateAccess(token, user, environment, recipient = undefined) 
   }
   if (environment.inRange && !environment.inRange(token, user, recipient)) throw new LootError("OutOfRange");
 }
-export function validateActor(actor, user, adapter) {
-  if (!actor || !adapter.destination(actor) || !actor.testUserPermission(user, "OWNER")) {
+export function validateActor(actor, user, adapter, source = undefined) {
+  if (!canReceiveLoot(actor, user, adapter, source)) {
     throw new LootError("ActorDenied");
   }
 }

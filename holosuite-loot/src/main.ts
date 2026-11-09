@@ -19,10 +19,12 @@ let markers: LootMarkers | null = null;
 let started = false;
 let openAttempt = 0;
 const adapter = () => getAdapter(game.system.id);
-const defaultRecipient = (user: any, system: any) =>
-  resolveCharacter(user, game.actors.contents, game.scenes.get(user.viewedScene)?.tokens, system);
+const lootEnvironment = () => environment(adapter());
+const configurable = (token: any) => token?.actor && (adapter().manual ? !!token.actor.items : token.actor.type === "npc");
+const defaultRecipient = (user: any, system: any, token: any) =>
+  resolveCharacter(user, game.actors.contents, game.scenes.get(user.viewedScene)?.tokens, system, token);
 const transactions = new LootTransactions({
-  moduleId: MODULE_ID, authority: isAuthority, environment: () => environment(adapter()), adapter,
+  moduleId: MODULE_ID, authority: isAuthority, environment: lootEnvironment, adapter,
   token: async (uuid: string) => {
     if (!/^Scene\.[^.]+\.Token\.[^.]+$/.test(uuid)) throw new LootError("InvalidRequest");
     const resolve = foundry.utils.fromUuid ?? (globalThis as any).fromUuid;
@@ -31,9 +33,9 @@ const transactions = new LootTransactions({
   },
   actor: (id: string) => game.actors.get(id) ?? (foundry.utils.fromUuid ?? (globalThis as any).fromUuid)(id),
   id: () => foundry.utils.randomID(),
-  destination: (request: any, user: any) => {
+  destination: (request: any, user: any, token: any) => {
     if (game.settings.get(MODULE_ID, "characterSelector")) return request.actorId ? transactions.io.actor(request.actorId) : null;
-    return defaultRecipient(user, adapter());
+    return defaultRecipient(user, adapter(), token);
   },
   load: loadState, save: saveState, summary, collected: postLootChat,
   rollQuantity: rollLootQuantity, quantityRolled: postPickupRoll
@@ -41,7 +43,7 @@ const transactions = new LootTransactions({
 const send = (request: any) => requestLoot(request, transactions);
 
 function canOffer(token: any) {
-  return started && !!adapter() && eligible(token, environment())
+  return started && eligible(token, lootEnvironment())
     && (game.user.isGM || (!token.hidden && token.object?.isVisible));
 }
 async function open(token: any) {
@@ -76,7 +78,7 @@ async function open(token: any) {
 }
 async function configure(token: any) {
   if (!game.user.isGM || !adapter()) return;
-  if (token?.parent?.documentName !== "Scene" || token.actor?.type !== "npc") { ui.notifications.info(t("SelectToken")); return; }
+  if (token?.parent?.documentName !== "Scene" || !configurable(token)) { ui.notifications.info(t("SelectToken")); return; }
   try { new LootConfig(token, adapter(), transactions.queue).render(true); }
   catch (error) { report(error); }
 }
@@ -85,9 +87,9 @@ function refresh(uuid: string) {
   if (panel && !panel.disposed) void panel.refresh();
 }
 function initialize(token: any) {
-  if (!started || !isAuthority() || !adapter() || token.getFlag(MODULE_ID, "state") || !eligible(token, environment())) return;
+  if (!started || !isAuthority() || adapter().manual || token.getFlag(MODULE_ID, "state") || !eligible(token, lootEnvironment())) return;
   void transactions.queue.run(token.uuid, async () => {
-    if (isAuthority() && eligible(token, environment()) && !token.getFlag(MODULE_ID, "state")) await loadState(token, adapter());
+    if (isAuthority() && eligible(token, lootEnvironment()) && !token.getFlag(MODULE_ID, "state")) await loadState(token, adapter());
   }).catch((error: any) => console.warn("HoloSuite Loot | Snapshot initialization failed", token.uuid, error));
 }
 function scanScene() {
@@ -142,7 +144,7 @@ function contextLoot(event: MouseEvent) {
 }
 function bindCanvas() {
   markers?.destroy();
-  markers = started ? new LootMarkers(token => !!adapter() && eligible(token, environment())) : null;
+  markers = started ? new LootMarkers(token => eligible(token, lootEnvironment())) : null;
   canvasElement?.removeEventListener("contextmenu", contextLoot, true);
   canvasElement?.removeEventListener("pointerdown", contextLoot, true);
   canvasElement = canvas.app?.canvas ?? canvas.app?.view;
@@ -199,7 +201,7 @@ Hooks.on("canvasTearDown", () => {
 Hooks.on("renderTokenHUD", (hud: any, html: any) => {
   if (!started) return;
   const token = hud.object?.document;
-  if (!token?.actor || token.actor.type !== "npc") return;
+  if (!configurable(token)) return;
   const root: HTMLElement = html instanceof HTMLElement ? html : html[0];
   const column = root.querySelector(".col.right") ?? root;
   root.querySelectorAll(".hl-token-action").forEach(element => element.remove());
@@ -218,7 +220,7 @@ Hooks.on("renderTokenHUD", (hud: any, html: any) => {
 Hooks.on("renderTokenConfig", (app: any, html: any) => {
   if (!started || !game.user.isGM || !adapter()) return;
   const token = app.document ?? app.object;
-  if (token?.parent?.documentName !== "Scene" || token.actor?.type !== "npc") return;
+  if (token?.parent?.documentName !== "Scene" || !configurable(token)) return;
   const root: HTMLElement = html instanceof HTMLElement ? html : html[0];
   if (root.querySelector(".hl-token-config")) return;
   const button = document.createElement("button"); button.type = "button"; button.className = "hl-token-config";

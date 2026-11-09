@@ -1,4 +1,4 @@
-import { MODULE_ID, LootError, configFor, SerialQueue } from "./model.mjs";
+import { MODULE_ID, LootError, canonical, configFor, SerialQueue } from "./model.mjs";
 import { RULE_SETTING, isDiceRule, parseRule, ruleKeys, resolveRule, resolveQuantity, withRule } from "./rules.mjs";
 import { isAuthority } from "./permissions";
 declare const game: any;
@@ -37,9 +37,6 @@ export async function rollLootQuantity(formula: string) {
   return { quantity: Math.max(0, roll.total), roll: roll.toJSON() };
 }
 
-const canonical = (value: any): string => JSON.stringify(value, (_key, part) => part && typeof part === "object" && !Array.isArray(part)
-  ? Object.fromEntries(Object.entries(part).sort(([a], [b]) => a.localeCompare(b))) : part);
-
 function exactInventoryMatch(items: any[], adapter: any, data: any) {
   const saved = canonical(data);
   const matches = items.filter(item => canonical(adapter.snapshot(item)) === saved);
@@ -52,6 +49,7 @@ type QuantityRoll = { roll: any; itemName: string; quantity: number };
 async function inventoryEntry(item: any, adapter: any, key: string, rule: any,
   { original, previousRoll, legacyRollCeiling, onRoll }: InventoryEntryOptions = {}) {
   const data = adapter.snapshot(item);
+  if (adapter.manual) return { id: foundry.utils.randomID(), data, wholeItem: true, source: { itemId: item.id, ruleKey: key } };
   const originalQuantity = original ?? data.system.quantity;
   const available = Math.min(originalQuantity, data.system.quantity);
   const formula = previousRoll === undefined && legacyRollCeiling === undefined && generatesLoot(item, adapter, rule)
@@ -202,18 +200,40 @@ function readLootRecord(id: string, token: any, kind: string) {
 
 export function canRefreshInventory(token: any, adapter: any) {
   const config = configFor(token);
-  return !!(token.actor && config.source !== "custom" && !config.customId && adapter.sourceClaim && adapter.removeSource);
+  return !!(token.actor && (adapter.manual || (config.source !== "custom" && !config.customId))
+    && adapter.sourceClaim && adapter.removeSource);
+}
+
+type ManualSelection = { mode: string; ids: Set<string> };
+
+export function manualLootRows(token: any, adapter: any) {
+  const vault = snapshotVault(token);
+  const active = new Set(vault?.getFlag(MODULE_ID, "state")?.entries
+    .filter((entry: any) => !entry.taken).map((entry: any) => entry.id));
+  const payload = vault?.getFlag(MODULE_ID, "items");
+  const selected = new Set((Array.isArray(payload) ? payload : [])
+    .filter(entry => entry.wholeItem && active.has(entry.id)).map(entry => entry.source?.ruleKey));
+  return supportedItems(token, adapter).map((item: any) => ({
+    id: item.id, name: item.name, img: item.img, selected: selected.has(ruleKeys(token, item, null).token)
+  }));
+}
+
+export async function saveManualLoot(token: any, adapter: any, mode: string, ids: string[]) {
+  if (!isAuthority()) throw new LootError("RuleGM");
+  if (!adapter.manual || !["enabled", "disabled"].includes(mode)) throw new LootError("InvalidRequest");
+  await refreshInventory(token, adapter, { mode, ids: new Set(ids) });
+  await token.setFlag(MODULE_ID, "config", { mode, source: "inventory" });
 }
 
 /** Called inside the pickup queue. Preserve the authoritative claim ledger and
  * keep reserved sources out of the new inventory until recovery finishes. */
-export async function refreshInventory(token: any, adapter: any) {
+export async function refreshInventory(token: any, adapter: any, selection?: ManualSelection) {
   if (!isAuthority()) throw new LootError("RuleGM");
-  if (!canRefreshInventory(token, adapter)) throw new LootError("RefreshUnsupported");
+  if (!canRefreshInventory(token, adapter) || (adapter.manual && !selection)) throw new LootError("RefreshUnsupported");
   const vault = snapshotVault(token);
   const state = vault?.getFlag(MODULE_ID, "state");
   if (!state) {
-    await loadState(token, adapter);
+    await loadState(token, adapter, selection);
     return;
   }
   if (state.version !== 1) throw new LootError("RecoveryRequired");
@@ -246,7 +266,7 @@ export async function refreshInventory(token: any, adapter: any) {
   const shared = worldRules();
   const entries = [];
   for (const item of supportedItems(token, adapter)) {
-    if (reserved.has(item.id)) continue;
+    if (reserved.has(item.id) || (adapter.manual && !selection?.ids.has(item.id))) continue;
     const keys = ruleKeys(token, item, actor);
     const prior = previous.get(keys.token);
     const limit = prior?.saved.limit;
@@ -264,11 +284,13 @@ export async function refreshInventory(token: any, adapter: any) {
   if (!isAuthority()) throw new LootError("RuleGM");
   const next = { ...state, vaultId: vault.id, currencyReady: true, entries: [...retained, ...entries.map(ledgerEntry)] };
   const history = retained.flatMap((entry: any) => byId.has(entry.id) ? [byId.get(entry.id)] : []);
-  await vault.update({ [flag("state")]: next, [flag("items")]: [...history, ...entries] });
+  await vault.update({ [flag("state")]: next, [flag("items")]: [...history, ...entries],
+    ...(selection ? { [flag("manualMode")]: selection.mode } : {}) });
   await mirrorState(token, next);
 }
-export async function loadState(token: any, adapter: any) {
+export async function loadState(token: any, adapter: any, selection?: ManualSelection) {
   const vault = snapshotVault(token);
+  if (adapter.manual && !selection && vault?.getFlag(MODULE_ID, "manualMode") !== "enabled") throw new LootError("Unavailable");
   // NPC owners may be able to edit Token flags. The GM-owned backing ledger is
   // authoritative; changing or deleting the token mirror must never refill loot.
   let stored = vault?.getFlag(MODULE_ID, "state");
@@ -281,11 +303,12 @@ export async function loadState(token: any, adapter: any) {
     const corpse = corpseRules(vault);
     const actor = baseActor(token);
     const entries = [];
-    if (legacyCustom(token)) {
+    if (!adapter.manual && legacyCustom(token)) {
       const items = config.customId ? readLootRecord(config.customId, token, "custom") : [];
       entries.push(...items.map((data: any) => ({ id: foundry.utils.randomID(), data })));
     } else {
       for (const item of supportedItems(token, adapter)) {
+        if (adapter.manual && !selection?.ids.has(item.id)) continue;
         const keys = ruleKeys(token, item, actor);
         const { rule } = resolveRule(keys, corpse, shared);
         entries.push(await inventoryEntry(item, adapter, keys.token, rule));
@@ -293,9 +316,10 @@ export async function loadState(token: any, adapter: any) {
     }
     entries.push(...(adapter.currencyEntries?.(token.actor) ?? []).map((entry: any) => ({ ...entry, id: foundry.utils.randomID() })));
     const state = { version: 1, currencyReady: true, entries: entries.map(ledgerEntry) };
-    const vaultId = vault ? vault.id : await createLootRecord(token, entries, { state });
+    const vaultId = vault ? vault.id : await createLootRecord(token, entries, { state, ...(selection ? { manualMode: selection.mode } : {}) });
     stored = { ...state, vaultId };
-    if (vault) await vault.update({ [flag("items")]: entries, [flag("state")]: stored, [flag("draft")]: false });
+    if (vault) await vault.update({ [flag("items")]: entries, [flag("state")]: stored, [flag("draft")]: false,
+      ...(selection ? { [flag("manualMode")]: selection.mode } : {}) });
     await mirrorState(token, stored);
   }
   if (stored.version !== 1) throw new LootError("RecoveryRequired");
@@ -323,14 +347,14 @@ export async function loadState(token: any, adapter: any) {
     if (entry.taken) return { ...entry, data: null };
     const saved = payload.find((item: any) => item.id === entry.id);
     const data = saved?.data;
-    if (!data) throw new LootError("RecoveryRequired");
+    if (!data || !!saved.wholeItem !== !!adapter.manual) throw new LootError("RecoveryRequired");
     let source = saved.source;
     // Upgrade old inventory snapshots only when one exact source can be identified.
     if (!source && !saved.currency && !token.getFlag(MODULE_ID, "config")?.customId && adapter.snapshot) {
       const item = exactInventoryMatch(supportedItems(token, adapter), adapter, data);
       if (item) source = { itemId: item.id };
     }
-    return { ...entry, data, ...(saved.formula ? { formula: saved.formula } : {}),
+    return { ...entry, data, ...(saved.wholeItem ? { wholeItem: true } : {}), ...(saved.formula ? { formula: saved.formula } : {}),
       ...(saved.currency ? { currency: saved.currency } : {}), ...(source ? { source } : {}) };
   }) };
 }
@@ -350,7 +374,7 @@ export function summary(token: any, state: any) {
   return {
     tokenUuid: token.uuid, name: token.name, img: token.texture.src,
     entries: state.entries.filter((entry: any) => !entry.taken && !entry.hidden).map((entry: any) => {
-      const data = entry.data;
+      const data = { ...entry.data, system: entry.data.system ?? {} };
       const unidentified = data.system.identified === false || data.system.identification?.status === "unidentified";
       const description = unidentified ? data.system.unidentified?.description : data.system.description?.value;
       return {
@@ -358,7 +382,8 @@ export function summary(token: any, state: any) {
           : unidentified ? (data.system.unidentified?.name || data.system.identification?.unidentified?.name || game.i18n.localize("HL.Unidentified")) : data.name,
         currency: !!entry.currency,
         img: unidentified ? data.system.identification?.unidentified?.img || data.img : data.img,
-        quantity: entry.currency?.amount ?? data.system.quantity,
+        quantity: entry.wholeItem ? 1 : entry.currency?.amount ?? data.system.quantity,
+        ...(entry.wholeItem ? { wholeItem: true } : {}),
         ...(entry.formula ? { formula: entry.formula } : {}),
         type: entry.currency ? game.i18n.localize("HL.CurrencyLabel") : game.i18n.localize(`TYPES.Item.${data.type}`),
         rarity: unidentified ? "" : game.i18n.localize((globalThis as any).CONFIG?.DND5E?.itemRarity?.[data.system.rarity]

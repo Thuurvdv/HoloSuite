@@ -34,7 +34,7 @@ export class LootTransactions {
       const access = io.environment();
       check(undefined, access);
       if (!user.isGM && access.inRange && (request.action === "view" || request.action === "inspect")) {
-        const recipient = await io.destination?.({ ...request, actorId: undefined }, user);
+        const recipient = await io.destination?.({ ...request, actorId: undefined }, user, token);
         if (recipient) check(recipient);
       }
       const adapter = io.adapter();
@@ -64,15 +64,15 @@ export class LootTransactions {
         if (!entry || entry.currency) throw new LootError("Unavailable");
         return { item: adapter.preview ? adapter.preview(entry) : clone(entry.data) };
       }
-      const actor = io.destination ? await io.destination(request, user) : await io.actor(request.actorId);
-      validateActor(actor, user, adapter);
+      const actor = io.destination ? await io.destination(request, user, token) : await io.actor(request.actorId);
+      validateActor(actor, user, adapter, token);
       check(actor);
       const entries = state.entries.filter(e => !e.taken && !e.hidden && (request.action === "all" || e.id === request.entryId));
       if (!entries.length && request.action === "take") return io.summary(token, state);
       const failures = [];
       for (const source of entries) {
         try {
-          check(actor); validateActor(actor, user, adapter);
+          check(actor); validateActor(actor, user, adapter, token);
           let entry = state.entries.find(e => e.id === source.id);
           if (entry.claim && (entry.claim.userId !== user.id || ![actor.id, actorKey(actor)].includes(entry.claim.actorId))) {
             throw new LootError("RecoveryRequired");
@@ -100,10 +100,11 @@ export class LootTransactions {
           adapter.validateSourcePlan?.(token, entry, entry.claim);
           if (entry.claim.quantityRoll?.quantity !== 0) {
             await adapter.create(actor, awardEntry(entry), entry.claim, async () => {
+              const attempt = entry.wholeItem ? "itemAttempted" : "currencyAttempted";
               const next = clone(state);
-              next.entries.find(e => e.id === entry.id).claim.currencyAttempted = true;
+              next.entries.find(e => e.id === entry.id).claim[attempt] = true;
               await io.save(token, next); state = next;
-              entry.claim.currencyAttempted = true;
+              entry.claim[attempt] = true;
             });
           }
           await adapter.removeSource?.(token, entry, entry.claim);
