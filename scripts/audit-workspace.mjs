@@ -12,6 +12,7 @@ const modules = [
   "holosuite-critical-cutin",
   "holosuite-hacking",
   "holosuite-performance-check",
+  "holosuite-loot",
   "security-cameras"
 ];
 
@@ -34,7 +35,8 @@ for (const moduleId of modules) {
   const esmodules = manifest.esmodules ?? [];
   const styles = manifest.styles ?? [];
 
-  if (!esmodules.includes("dist/main.js")) failures.push(`${moduleId}: manifest must load dist/main.js`);
+  const entry = moduleId === "holosuite-loot" ? `dist/main-${manifest.version}.js` : "dist/main.js";
+  if (!esmodules.includes(entry)) failures.push(`${moduleId}: manifest must load ${entry}`);
   const standaloneProfiler = moduleId === "holosuite-performance-check";
   const dynamicallyStyledCore = moduleId === "holosuite-core";
   if (dynamicallyStyledCore && styles.length !== 0) failures.push(`${moduleId}: manifest styles must stay empty so the CSS debugging setting can fully disable them`);

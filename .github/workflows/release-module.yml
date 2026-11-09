@@ -71,7 +71,7 @@ jobs:
 
           cp -r "$MODULE_ID/dist" "staging/$MODULE_ID/dist"
 
-          for dir in styles templates assets audio data languages packs samples; do
+          for dir in styles templates assets audio data lang languages packs samples; do
             [ -d "$MODULE_ID/$dir" ] && cp -r "$MODULE_ID/$dir" "staging/$MODULE_ID/$dir"
           done
 
@@ -94,7 +94,7 @@ jobs:
           # Check every runtime file from the module source, including SVGs and
           # other static assets, rather than only checking the entry bundle.
           MISSING=0
-          for dir in dist styles templates assets audio data languages packs samples; do
+          for dir in dist styles templates assets audio data lang languages packs samples; do
             [ -d "$MODULE_ID/$dir" ] || continue
 
             while IFS= read -r -d '' FILE; do
@@ -128,9 +128,14 @@ jobs:
           MODULE_ID="${{ steps.meta.outputs.module_id }}"
           TAG="${{ steps.meta.outputs.tag }}"
           VERSION="${{ steps.meta.outputs.version }}"
+          NOTES=(--generate-notes)
+          NOTES_FILE="$MODULE_ID/release-notes/$VERSION.md"
+          if [ -f "$NOTES_FILE" ]; then
+            NOTES=(--notes-file "$NOTES_FILE")
+          fi
 
           gh release create "$TAG" "$MODULE_ID.zip" "staging/$MODULE_ID/module.json" \
             --title "$MODULE_ID v$VERSION" \
-            --generate-notes
+            "${NOTES[@]}"
 
       # ── Protected (Patreon) modules: artifact only ──────────────────

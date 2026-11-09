@@ -122,8 +122,8 @@ test("keeps What's New conversational and limits badges to Foundry compatibility
   assert.ok(galaxyMap.entries.some((entry) => /Galaxy Map 2\.0/.test(entry.title)));
   assert.equal(loot.tier, "free");
   assert.ok(loot.url.endsWith(`/releases/tag/holosuite-loot-v${loot.version}`));
-  assert.deepEqual(loot.entries.flatMap((entry) => entry.tags ?? []), ["Foundry v12-v14"]);
-  assert.match(source, /hasFoundryCompatibilityTag[\s\S]*\["Foundry v12–14"\]/);
+  assert.deepEqual(loot.entries.flatMap((entry) => entry.tags ?? []), ["Foundry v13-v14"]);
+  assert.match(source, /compatibilityTag[\s\S]*compatibilityTag\.replace/);
   assert.doesNotMatch(source, /escapeHtml\(tierLabel\)/);
   assert.doesNotMatch(source, /installed \? "Installed" : "Not installed"/);
 });

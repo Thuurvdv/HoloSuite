@@ -12,6 +12,7 @@ const modules = [
   "holosuite-core",
   "holosuite-critical-cutin",
   "holosuite-hacking",
+  "holosuite-loot",
   "security-cameras"
 ];
 
