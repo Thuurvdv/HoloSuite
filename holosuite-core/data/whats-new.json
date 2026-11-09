@@ -1,6 +1,24 @@
 {
-  "updated": "2026-10-20",
+  "updated": "2026-11-09",
   "modules": [
+    {
+      "moduleId": "holosuite-terminal",
+      "title": "HoloSuite Terminal",
+      "tier": "premium",
+      "version": "1.4.1",
+      "updated": "2026-11-05",
+      "icon": "fa-solid fa-terminal",
+      "url": "https://www.magetowerstudios.com/docs/module.html?id=holosuite-terminal",
+      "entries": [
+        {
+          "title": "Terminal 1.4.1",
+          "summary": "Share your terminal view with the table, add Journal tabs, and try the new Atomic Age and Cassette Futurism looks. You can also open a terminal for everyone from Permissions.",
+          "tags": [
+            "Foundry v12-v14"
+          ]
+        }
+      ]
+    },
     {
       "moduleId": "pulse-scanner",
       "title": "Pulse Scanner",
@@ -61,11 +79,18 @@
       "moduleId": "galaxy-map",
       "title": "Galaxy Map",
       "tier": "free",
-      "version": "2.0.0",
-      "updated": "2026-10-02",
+      "version": "2.0.1",
+      "updated": "2026-11-05",
       "icon": "fa-solid fa-galaxy",
       "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/galaxy-map",
       "entries": [
+        {
+          "title": "Custom backgrounds reopen reliably",
+          "summary": "Fixed a rendering error that could leave Galaxy Map unresponsive when closing or reopening maps with custom galaxy or system background images.",
+          "tags": [
+            "Bug fix"
+          ]
+        },
         {
           "title": "Galaxy Map 2.0 is here",
           "summary": "Build your galaxy directly on the map, open systems to add planets and stations, connect destinations with routes, and let the crew request travel together. Older maps are upgraded when the primary GM opens the world.",
@@ -173,11 +198,18 @@
       "moduleId": "holosuite-core",
       "title": "HoloSuite Core",
       "tier": "free",
-      "version": "1.2.0",
-      "updated": "2026-10-20",
+      "version": "1.2.1",
+      "updated": "2026-11-09",
       "icon": "fa-solid fa-mobile-screen",
-      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
+      "url": "https://github.com/Thuurvdv/HoloSuite/releases/tag/holosuite-core-v1.2.1",
       "entries": [
+        {
+          "title": "Find HoloSuite Loot in Releases",
+          "summary": "Open What's New and choose Releases for a quick look at the first HoloSuite Loot release and a link to download it.",
+          "tags": [
+            "Foundry v12-v14"
+          ]
+        },
         {
           "title": "More options from the launcher",
           "summary": "Right-click supported app buttons for useful shortcuts. Pulse Scanner can now create a hotbar macro straight from its launcher button. You can also open the menu with Shift+F10.",
@@ -189,6 +221,24 @@
     }
   ],
   "releases": [
+    {
+      "moduleId": "holosuite-loot",
+      "title": "HoloSuite Loot",
+      "tier": "free",
+      "version": "1.1.0",
+      "updated": "2026-11-09",
+      "icon": "fa-solid fa-box-open",
+      "url": "https://github.com/Thuurvdv/HoloSuite/releases/tag/holosuite-loot-v1.1.0",
+      "entries": [
+        {
+          "title": "Loot defeated NPCs right from the map",
+          "summary": "Right-click a defeated NPC to inspect items, take a stack, or use Loot All. GMs can set loot range, choose what drops, and use dice formulas that roll when players collect an item.",
+          "tags": [
+            "Foundry v12-v14"
+          ]
+        }
+      ]
+    },
     {
       "moduleId": "holosuite-galactic-records",
       "title": "Galactic Records",

@@ -2,7 +2,7 @@
   "id": "holosuite-core",
   "title": "HoloSuite Core",
   "description": "A customizable sci-fi phone launcher and registration API for HoloSuite Foundry VTT modules.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "authors": [
     {
       "name": "Mage Tower Studios",
@@ -20,9 +20,9 @@
   "languages": [],
   "packs": [],
   "socket": false,
-  "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core",
-  "manifest": "",
-  "download": "",
+  "url": "https://github.com/Thuurvdv/HoloSuite/tree/main/holosuite-core",
+  "manifest": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/holosuite-core/module.json",
+  "download": "https://github.com/Thuurvdv/HoloSuite/releases/download/holosuite-core-v1.2.1/holosuite-core.zip",
   "license": "LGPL-3.0-or-later",
   "readme": "README.md"
 }
