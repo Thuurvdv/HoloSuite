@@ -1,0 +1,33 @@
+{
+  "moduleVersion": "1.0.2",
+  "plainHTTPWithoutWebCrypto": true,
+  "gmRightClickControlsOnly": true,
+  "gmLootPreview": true,
+  "filtering": true,
+  "simultaneousClaims": true,
+  "visibleWhileGMReplyPending": true,
+  "nativeRightClick": true,
+  "headerlessPopup": true,
+  "dropdownContrast": true,
+  "cyanTetherTracksCanvas": true,
+  "panelSynchronization": true,
+  "clickOutsideDismissesAndCleansTether": true,
+  "independentTokens": true,
+  "reloadPersistence": true,
+  "tokenFlagTamperResistance": true,
+  "permissions": true,
+  "standardFlagStorage": true,
+  "headerlessConfigurationAndNoBackup": true,
+  "customLoot": true,
+  "combatDefeatAndHUD": true,
+  "disabledOverride": true,
+  "visionAndWalls": true,
+  "version": {
+    "foundry": "13.351",
+    "dnd5e": "5.3.3"
+  },
+  "noGMFeedback": true,
+  "testedOn": "2026-11-02",
+  "bundleSHA256": "66C1389C11D1C237BCBD3B19D3BED62A4D0670313A7BCECC621243B327A175DA",
+  "automatedTestCount": 163
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="65" height="65" viewBox="0 0 65 65">
+  <defs>
+    <path id="corner" fill="#a2abb6" d="M22 0H10A10 10 0 0 0 0 10V22H1L3 17V10A7 7 0 0 1 10 3H17L22 1Z"/>
+  </defs>
+  <use href="#corner"/>
+  <use href="#corner" transform="translate(65 0) scale(-1 1)"/>
+  <use href="#corner" transform="translate(0 65) scale(1 -1)"/>
+  <use href="#corner" transform="translate(65 65) scale(-1 -1)"/>
+</svg>
