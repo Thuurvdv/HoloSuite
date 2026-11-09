@@ -234,7 +234,7 @@
           "title": "Loot defeated NPCs right from the map",
           "summary": "Right-click a defeated NPC to inspect items, take a stack, or use Loot All. GMs can set loot range, choose what drops, and use dice formulas that roll when players collect an item.",
           "tags": [
-            "Foundry v12-v14"
+            "Foundry v13-v14"
           ]
         }
       ]

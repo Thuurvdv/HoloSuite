@@ -37,7 +37,7 @@ function dt(e, t = document, n = "") {
 function P(e) {
   return e !== null && typeof e == "object" && !Array.isArray(e);
 }
-function be(e, t) {
+function ye(e, t) {
   return P(e) ? t.includes(String(e.name ?? "")) : !1;
 }
 function Se(e) {
@@ -47,11 +47,11 @@ function Se(e) {
 }
 function ht(e, t, n) {
   if (Array.isArray(e))
-    return e.find((o) => be(o, t)) ?? (n ? e.find(Se) : null) ?? null;
+    return e.find((o) => ye(o, t)) ?? (n ? e.find(Se) : null) ?? null;
   if (!P(e)) return null;
   for (const o of t)
     if (P(e[o])) return e[o];
-  return Object.values(e).find((o) => be(o, t)) ?? (n ? Object.values(e).find(Se) : null) ?? null;
+  return Object.values(e).find((o) => ye(o, t)) ?? (n ? Object.values(e).find(Se) : null) ?? null;
 }
 function ft(e) {
   const t = Object.values(e).map((n) => Number(n == null ? void 0 : n.order)).filter(Number.isFinite);
@@ -77,7 +77,7 @@ const l = "holosuite-core", U = "apiOnlyForDebugging", j = "disableCoreCssForDeb
   "": K[""],
   base: K.base,
   "space-police": K["space-police"]
-}, yt = {
+}, bt = {
   phone: "Phone",
   datapad: "Datapad",
   computer: "Computer"
@@ -87,12 +87,12 @@ const l = "holosuite-core", U = "apiOnlyForDebugging", j = "disableCoreCssForDeb
   violet: "Violet"
 }, D = /* @__PURE__ */ new Map(), N = /* @__PURE__ */ new Map(), F = /* @__PURE__ */ new Map();
 let a = null, A = null, W = !1, _e = 0, ne = !1, Re = null, Le = !1, _ = null, L = !1, oe = 0;
-function bt() {
+function yt() {
   var n, o, r, i, s, c;
   const e = ((o = (n = globalThis.foundry) == null ? void 0 : n.appv1) == null ? void 0 : o.api) ?? ((r = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : r.api) ?? null, t = ((s = (i = globalThis.foundry) == null ? void 0 : i.applications) == null ? void 0 : s.api) ?? ((c = foundry == null ? void 0 : foundry.applications) == null ? void 0 : c.api) ?? null;
   return globalThis.FormApplication ?? (e == null ? void 0 : e.FormApplication) ?? globalThis.Application ?? (e == null ? void 0 : e.Application) ?? (t == null ? void 0 : t.ApplicationV2);
 }
-const Pe = bt();
+const Pe = yt();
 function re(e) {
   return e ? !!e.getLauncherRoot({ includeDocumentFallback: !1 }) : !1;
 }
@@ -103,15 +103,15 @@ function h(e) {
 function M(e, t, n = `${t}s`) {
   return `${e} ${e === 1 ? t : n}`;
 }
-function b(e, t) {
+function y(e, t) {
   try {
     return game.settings.get(e, t);
   } catch {
     return null;
   }
 }
-function y() {
-  return Re ?? b(l, U) === !0;
+function b() {
+  return Re ?? y(l, U) === !0;
 }
 function Q(e) {
   var t;
@@ -124,7 +124,7 @@ function St() {
 function vt(e) {
   var t, n, o, r, i, s;
   if (e === "cybercall") {
-    const c = T(b("cybercall", "contacts")), u = T(b("cybercall", "groupContacts"));
+    const c = T(y("cybercall", "contacts")), u = T(y("cybercall", "groupContacts"));
     return M(c.length + u.length, "link");
   }
   if (e === "bounty-board") {
@@ -147,7 +147,7 @@ function T(e) {
 function Et(e) {
   const t = String((e == null ? void 0 : e.title) ?? "").trim();
   if (!t) return null;
-  const o = T(e == null ? void 0 : e.tags).some((r) => /^foundry\b/i.test(String(r ?? "").trim())) ? ["Foundry v12–14"] : [];
+  const n = T(e == null ? void 0 : e.tags).map((r) => String(r ?? "").trim()).find((r) => /^foundry\b/i.test(r)), o = n ? [n.replace(/-v(?=\d)/i, "–")] : [];
   return {
     title: t,
     summary: String((e == null ? void 0 : e.summary) ?? "").trim(),
@@ -182,7 +182,7 @@ function Me(e) {
   return ((n = (t = game.modules) == null ? void 0 : t.has) == null ? void 0 : n.call(t, e)) === !0;
 }
 function Ct() {
-  const e = Number(b(l, ce));
+  const e = Number(y(l, ce));
   return Number.isFinite(e) ? e : 0;
 }
 function Tt() {
@@ -215,7 +215,7 @@ function At(e) {
 }
 function Dt(e) {
   var r;
-  if (y()) return;
+  if (b()) return;
   const t = ((r = game.user) == null ? void 0 : r.isGM) === !0;
   if (!t && X()) return;
   const n = () => ({
@@ -231,10 +231,10 @@ function Dt(e) {
 }
 function Nt() {
   var e;
-  return !y() && (((e = game.user) == null ? void 0 : e.isGM) === !0 || !X());
+  return !b() && (((e = game.user) == null ? void 0 : e.isGM) === !0 || !X());
 }
 function de() {
-  y() || document.querySelectorAll(".holosuite-sidebar-launcher, .holosuite-floating-launcher").forEach((e) => e.remove());
+  b() || document.querySelectorAll(".holosuite-sidebar-launcher, .holosuite-floating-launcher").forEach((e) => e.remove());
 }
 function v(e) {
   var o;
@@ -275,7 +275,7 @@ function It(...e) {
 }
 function Ft(e) {
   var i;
-  if (y()) return;
+  if (b()) return;
   const t = ((i = game.user) == null ? void 0 : i.isGM) === !0;
   if (!t && X()) return;
   const n = v(e) ?? document.querySelector("#controls, #scene-controls");
@@ -361,7 +361,7 @@ function Rt() {
     scope: "client",
     config: !1,
     type: String,
-    choices: yt,
+    choices: bt,
     default: "phone",
     restricted: !1,
     onChange: () => {
@@ -427,7 +427,7 @@ async function $e() {
     console.warn(`${l} | Could not rebuild scene controls after changing API-only mode.`, o);
   }
 }
-function Pt(e = b(l, U)) {
+function Pt(e = y(l, U)) {
   const t = e === !0;
   if (Re = t, t) {
     document.querySelectorAll(
@@ -437,12 +437,12 @@ function Pt(e = b(l, U)) {
   }
   ne && (Ze(), $e());
 }
-function Be(e = b(l, j)) {
+function Be(e = y(l, j)) {
   var o;
   const t = e === !0, n = String(((o = game.modules.get(l)) == null ? void 0 : o.version) ?? "");
   dt(!t, document, n), t && console.warn(`${l} | Core CSS is disabled on this browser for debugging.`);
 }
-function qe(e = b(l, z)) {
+function qe(e = y(l, z)) {
   const t = e === !0;
   for (const n of [document.documentElement, document.body].filter(Boolean))
     t ? n.setAttribute(Ce, "true") : n.removeAttribute(Ce);
@@ -457,7 +457,7 @@ function xt() {
     restricted: !1,
     onDown: () => {
       var n, o, r, i;
-      return y() ? ((o = (n = ui.notifications) == null ? void 0 : n.warn) == null || o.call(n, "HoloSuite Core is in API-only diagnostic mode on this browser."), !1) : Nt() ? (k.toggleLauncher(), !0) : ((i = (r = ui.notifications) == null ? void 0 : r.warn) == null || i.call(r, "HoloSuite is disabled for players in this world."), !1);
+      return b() ? ((o = (n = ui.notifications) == null ? void 0 : n.warn) == null || o.call(n, "HoloSuite Core is in API-only diagnostic mode on this browser."), !1) : Nt() ? (k.toggleLauncher(), !0) : ((i = (r = ui.notifications) == null ? void 0 : r.warn) == null || i.call(r, "HoloSuite is disabled for players in this world."), !1);
     }
   });
 }
@@ -465,11 +465,11 @@ function fe(e) {
   return Object.hasOwn(x, String(e)) ? String(e) : "base";
 }
 function Y() {
-  const e = String(b(l, Ie) ?? "");
+  const e = String(y(l, Ie) ?? "");
   return Object.hasOwn(x, e) ? e : null;
 }
 function ge() {
-  return fe(b(l, ie));
+  return fe(y(l, ie));
 }
 function Ge() {
   return Y() ?? ge();
@@ -481,7 +481,7 @@ function me(e) {
   return "phone";
 }
 function pe() {
-  return me(b(l, se));
+  return me(y(l, se));
 }
 function Mt(e = pe()) {
   const t = e === "computer" ? { width: 980, height: 720 } : e === "datapad" ? { width: 760, height: 680 } : { width: 483, height: 736 };
@@ -491,7 +491,7 @@ function Mt(e = pe()) {
   };
 }
 function je() {
-  return T(b(l, ae)).map((e) => String(e ?? "").trim()).filter((e, t, n) => !!e && n.indexOf(e) === t);
+  return T(y(l, ae)).map((e) => String(e ?? "").trim()).filter((e, t, n) => !!e && n.indexOf(e) === t);
 }
 function Wt(e) {
   const t = fe(e), n = [document.documentElement, document.body].filter(Boolean);
@@ -512,7 +512,7 @@ function B() {
   Wt(Ge());
 }
 function Bt() {
-  ze(b(l, le));
+  ze(y(l, le));
 }
 function we() {
   Vt(pe());
@@ -548,14 +548,14 @@ async function Ke(e) {
 }
 function Qe(e, t = {}) {
   const n = xe(e);
-  return !n || V(n) < pt ? null : t.replace === !1 && N.has(n.moduleId) ? N.get(n.moduleId) ?? null : (N.set(n.moduleId, n), y() || a == null || a.render(!1), n);
+  return !n || V(n) < pt ? null : t.replace === !1 && N.has(n.moduleId) ? N.get(n.moduleId) ?? null : (N.set(n.moduleId, n), b() || a == null || a.render(!1), n);
 }
 function qt(e, t = {}) {
   const n = xe(e);
-  return n ? t.replace === !1 && F.has(n.moduleId) ? F.get(n.moduleId) ?? null : (F.set(n.moduleId, n), y() || a == null || a.render(!1), n) : null;
+  return n ? t.replace === !1 && F.has(n.moduleId) ? F.get(n.moduleId) ?? null : (F.set(n.moduleId, n), b() || a == null || a.render(!1), n) : null;
 }
 async function Ze() {
-  if (!(y() || Le))
+  if (!(b() || Le))
     return _ || (_ = (async () => {
       try {
         const e = await fetch(mt, { cache: "no-cache" });
@@ -1036,9 +1036,9 @@ function sn() {
   const e = game.messages, t = Number((e == null ? void 0 : e.size) ?? ((n = e == null ? void 0 : e.contents) == null ? void 0 : n.length) ?? 0);
   return Number.isFinite(t) ? t : 0;
 }
-function ye() {
+function be() {
   var c, u, w;
-  const e = b(l, j) === !0, t = y(), n = b(l, z) === !0, o = rn(), r = on(), i = game.release, s = game.system;
+  const e = y(l, j) === !0, t = b(), n = y(l, z) === !0, o = rn(), r = on(), i = game.release, s = game.system;
   return {
     schemaVersion: 1,
     generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
@@ -1064,7 +1064,7 @@ function ye() {
       },
       formFactor: pe(),
       appOrder: je(),
-      colorTheme: Ue(b(l, le))
+      colorTheme: Ue(y(l, le))
     },
     foundry: {
       version: String((i == null ? void 0 : i.version) ?? game.version ?? ""),
@@ -1095,7 +1095,7 @@ function ye() {
   };
 }
 function rt() {
-  return JSON.stringify(ye(), null, 2);
+  return JSON.stringify(be(), null, 2);
 }
 async function an() {
   var t, n, o, r, i, s;
@@ -1117,7 +1117,7 @@ function ln() {
   n.href = t, n.download = `holosuite-core-diagnostics-${o}.json`, n.click(), window.setTimeout(() => URL.revokeObjectURL(t), 0);
 }
 function ke() {
-  const e = ye(), t = e.core, n = [
+  const e = be(), t = e.core, n = [
     t.apiOnly ? "API-only" : null,
     t.cssDisabled ? "CSS disabled" : null,
     t.visualEffectsDisabled ? "visual effects disabled" : null
@@ -1214,7 +1214,7 @@ class G extends Pe {
   }
   render(...n) {
     var o, r;
-    return y() ? ((r = (o = ui.notifications) == null ? void 0 : o.warn) == null || r.call(o, "HoloSuite Core is in API-only diagnostic mode on this browser."), this) : super.render(...n);
+    return b() ? ((r = (o = ui.notifications) == null ? void 0 : o.warn) == null || r.call(o, "HoloSuite Core is in API-only diagnostic mode on this browser."), this) : super.render(...n);
   }
   async _renderInner() {
     return $(Ae(this.currentView, this.whatsNewFilter, this.whatsNewTab));
@@ -1305,31 +1305,31 @@ I(G, "DEFAULT_OPTIONS", {
 const k = {
   registerApp(e) {
     const t = $t(e);
-    return t ? (D.set(t.id, t), y() || a == null || a.render(!1), t) : null;
+    return t ? (D.set(t.id, t), b() || a == null || a.render(!1), t) : null;
   },
   unregisterApp(e) {
     const t = D.delete(String(e ?? ""));
-    return t && !y() && (a == null || a.render(!1)), t;
+    return t && !b() && (a == null || a.render(!1)), t;
   },
   getApps() {
     return [...D.values()];
   },
   getDiagnostics() {
-    return ye();
+    return be();
   },
   registerWhatsNew(e) {
     return Qe(e);
   },
   unregisterWhatsNew(e) {
     const t = N.delete(String(e ?? ""));
-    return t && !y() && (a == null || a.render(!1)), t;
+    return t && !b() && (a == null || a.render(!1)), t;
   },
   getWhatsNew() {
     return [...N.values()].sort(ue);
   },
   async openLauncher() {
     var e, t;
-    return y() ? ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "HoloSuite Core is in API-only diagnostic mode on this browser."), null) : A || (A = (async () => {
+    return b() ? ((t = (e = ui.notifications) == null ? void 0 : e.warn) == null || t.call(e, "HoloSuite Core is in API-only diagnostic mode on this browser."), null) : A || (A = (async () => {
       re(a) || (a = null), a || (a = new G());
       try {
         await a.render(!0);
@@ -1364,5 +1364,5 @@ Hooks.on("renderSidebar", de);
 Hooks.on("renderSidebarTab", de);
 Hooks.on("renderSettingsConfig", _t);
 Hooks.once("ready", () => {
-  ne = !0, st(), Xe(), B(), Bt(), we(), y() ? console.warn(`${l} | API-only diagnostic mode is enabled on this browser.`) : (de(), Ze()), console.log(`${l} | Ready. API available at game.modules.get("${l}").api`);
+  ne = !0, st(), Xe(), B(), Bt(), we(), b() ? console.warn(`${l} | API-only diagnostic mode is enabled on this browser.`) : (de(), Ze()), console.log(`${l} | Ready. API available at game.modules.get("${l}").api`);
 });

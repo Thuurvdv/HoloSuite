@@ -21,6 +21,7 @@
     "holosuite-critical-cutin/src",
     "holosuite-hacking/src",
     "holosuite-performance-check/src",
+    "holosuite-loot/src",
     "shared/src"
   ]
 }

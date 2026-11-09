@@ -11,7 +11,7 @@ HoloSuite Loot lets players right-click a defeated NPC in Foundry VTT, inspect i
 
 ## Installation
 
-Requires **HoloSuite Core** and targets Foundry V12–V14. D&D5e and Starfinder Second Edition have built-in support for automatic defeat detection, stack quantities, and currency. Other game systems use manual loot selection.
+Requires **HoloSuite Core** and targets Foundry V13–V14. D&D5e and Starfinder Second Edition have built-in support for automatic defeat detection, stack quantities, and currency. Other game systems use manual loot selection.
 
 Install using the [Foundry manifest](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/holosuite-loot/module.json), then enable HoloSuite Core and HoloSuite Loot in your world.
 

@@ -174,9 +174,10 @@ function normalizeWhatsNewEntry(entry: HoloSuiteWhatsNewEntry): HoloSuiteWhatsNe
   const title = String(entry?.title ?? "").trim();
   if (!title) return null;
 
-  const hasFoundryCompatibilityTag = safeArray(entry?.tags)
-    .some((tag) => /^foundry\b/i.test(String(tag ?? "").trim()));
-  const tags = hasFoundryCompatibilityTag ? ["Foundry v12–14"] : [];
+  const compatibilityTag = safeArray(entry?.tags)
+    .map((tag) => String(tag ?? "").trim())
+    .find((tag) => /^foundry\b/i.test(tag));
+  const tags = compatibilityTag ? [compatibilityTag.replace(/-v(?=\d)/i, "\u2013")] : [];
 
   return {
     title,
