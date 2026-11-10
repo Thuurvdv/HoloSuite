@@ -23,6 +23,23 @@
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core"
     },
     {
+      "id": "holosuite-loot",
+      "name": "HoloSuite Loot",
+      "tier": "free",
+      "category": "Looting",
+      "compatibility": "Foundry v13-v14",
+      "image": "assets/featured-modules/holosuite-loot.svg",
+      "imageAlt": "HoloSuite Loot icon",
+      "summary": "Let players inspect items and collect loot directly from NPC tokens in Foundry VTT.",
+      "installation": [
+        "Requires Foundry V13 or V14 and HoloSuite Core.",
+        "In Foundry Setup, open Add-on Modules > Install Module. Paste the manifest URL from the button above into the Manifest URL field and click Install.",
+        "In your world, open Game Settings > Manage Modules, enable HoloSuite Core and HoloSuite Loot, and save."
+      ],
+      "moduleUrl": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/holosuite-loot/module.json",
+      "moduleActionLabel": "Foundry Manifest"
+    },
+    {
       "id": "cybercall",
       "name": "CyberCall",
       "tier": "free",

@@ -80,7 +80,7 @@ function moduleVisual(module, pathPrefix = "") {
     `;
   }
 
-  return `<img src="${escapeAttribute(`${pathPrefix}${module.image}`)}" alt="${escapeAttribute(module.name)} preview" loading="lazy">`;
+  return `<img src="${escapeAttribute(`${pathPrefix}${module.image}`)}" alt="${escapeAttribute(module.imageAlt || `${module.name} preview`)}" loading="lazy">`;
 }
 
 function searchableText(module) {

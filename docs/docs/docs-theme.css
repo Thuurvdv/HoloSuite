@@ -31,6 +31,13 @@ body {
   object-fit: contain;
   background: var(--bg);
 }
+.docs-card > img[src$="/holosuite-loot.svg"],
+.doc-module-visual > img[src$="/holosuite-loot.svg"] {
+  object-fit: contain;
+  padding: 5%;
+  filter: invert(1);
+  background: none;
+}
 .docs-card-body h2, .docs-card-body h3 { font-size: 1.2rem; line-height: 1.25; }
 .doc-nav-list a:hover, .doc-toc a:hover { background: rgba(32,217,255,.1); color: var(--cyan); }
 .button.primary { background: var(--cyan); color: #071321; }
