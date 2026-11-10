@@ -1,11 +1,12 @@
 {
   "stats": [
-    { "label": "Free Modules", "value": 10, "suffix": "" },
+    { "label": "Free Modules", "value": 11, "suffix": "" },
     { "label": "Premium Modules", "value": 4, "suffix": "" },
     { "label": "Foundry", "value": 12, "prefix": "v", "suffix": "+" }
   ],
   "featuredModules": [
     { "id": "holosuite-core", "icon": "icon-holosuite.png" },
+    { "id": "holosuite-loot", "icon": "holosuite-loot.svg", "status": "new" },
     { "id": "cybercall", "icon": "cybercall.svg" },
     { "id": "csi-toolkit", "icon": "csi-toolkit.svg" },
     { "id": "holosuite-critical-cutin", "icon": "holosuite-critical-cutin.svg" },
@@ -32,6 +33,19 @@
       "features": ["Phone-themed GM launcher", "News and release notes", "Several visual themes"],
       "docsUrl": "docs/module.html?id=holosuite-core",
       "moduleUrl": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-core"
+    },
+    {
+      "id": "holosuite-loot",
+      "name": "HoloSuite Loot",
+      "tier": "free",
+      "category": "Looting",
+      "image": "assets/featured-modules/holosuite-loot.svg",
+      "imageAlt": "HoloSuite Loot icon",
+      "pitch": "Give players a quick way to inspect and collect loot from defeated enemies or tokens prepared by the GM.",
+      "compatibility": "Foundry v13-v14",
+      "features": ["Automatic defeat detection in D&D5e and Starfinder Second Edition", "Manual item selection in other systems", "Loot All, configurable loot range, and three popup themes"],
+      "docsUrl": "docs/module.html?id=holosuite-loot",
+      "moduleUrl": "https://github.com/Thuurvdv/HoloSuite/tree/main/holosuite-loot"
     },
     {
       "id": "cybercall",

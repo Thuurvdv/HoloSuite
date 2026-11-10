@@ -18,6 +18,33 @@
         ]
       }
     },
+    "holosuite-loot": {
+      "quickStart": {
+        "steps": [
+          "In D&D5e and Starfinder Second Edition, defeated NPCs become lootable automatically by default. The GM can open Loot from an NPC's token HUD to adjust what drops.",
+          "In other systems, open Loot from the token HUD, choose Always lootable, check the items players can take, and save. Selected items transfer whole with their system data intact.",
+          "With a GM connected, right-click a lootable token to inspect its items. Use Loot on an item or Loot All to collect everything."
+        ]
+      },
+      "sections": [
+        {
+          "id": "loot-rules",
+          "title": "Loot Rules",
+          "bullets": [
+            "D&D5e and Starfinder Second Edition support item stacks and currency. A custom quantity like 2d6+2 rolls when a player collects the item and awards that many copies.",
+            "If you edit an NPC's inventory after its loot is prepared, use the refresh icon in Loot to sync it. In manual mode, reopen Loot and save the selection again."
+          ]
+        },
+        {
+          "id": "settings",
+          "title": "Module Settings",
+          "bullets": [
+            "Loot range defaults to 15 ft. Set it to 0 to disable the distance limit.",
+            "Choose Holo, Neutral, or Fantasy for the loot popup."
+          ]
+        }
+      ]
+    },
     "holosuite-galactic-records": {
       "quickStart": {
         "steps": [

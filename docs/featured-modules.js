@@ -27,9 +27,9 @@ function featuredModulePreview(module, featured) {
   const src = featured.preview ? `${FEATURED_ASSET_PATH}${featured.preview}` : module.image;
   if (!src) return "";
   const isPlaceholder = featured.preview && !featured.previewIsFinal;
-  const alt = isPlaceholder
+  const alt = module.imageAlt || (isPlaceholder
     ? `${module.name}: temporary wireframe preview`
-    : `${module.name} interface in Foundry VTT`;
+    : `${module.name} interface in Foundry VTT`);
   return `<div class="featured-card__preview">
     <img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" width="800" height="500" loading="lazy">
     ${isPlaceholder ? '<span class="featured-card__placeholder">Temporary preview</span>' : ""}
