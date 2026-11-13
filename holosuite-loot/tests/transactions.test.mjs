@@ -208,6 +208,19 @@ test('defeat detection respects override and does not infer death from zero HP b
   f.token.getFlag = () => ({ mode: 'disabled' }); assert.equal(eligible(f.token, { combats }), false);
   f.token.getFlag = () => ({ mode: 'enabled' }); assert.equal(eligible(f.token), true);
 });
+test('combatant defeat uses the native getter and the combatant scene in unlinked encounters', () => {
+  const { token } = fixture();
+  token.actor.statuses.clear();
+  const combatant = { tokenId: token.id, sceneId: 'scene', defeated: false, isDefeated: true };
+  const combats = [{ scene: null, combatants: [combatant] }];
+  assert.equal(eligible(token, { combats }), true);
+  assert.equal(eligible(token, { combats, automatic: false }), false);
+  combatant.sceneId = 'other-scene';
+  assert.equal(eligible(token, { combats }), false);
+  combatant.sceneId = 'scene';
+  combatant.isDefeated = false;
+  assert.equal(eligible(token, { combats }), false);
+});
 test('D&D5e physical filtering excludes natural attacks, mechanics and zero quantities', () => {
   const adapter = new Dnd5eAdapter();
   const item = (type, system = {}) => ({ type, system: { quantity: 1, ...system } });

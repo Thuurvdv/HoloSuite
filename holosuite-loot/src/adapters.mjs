@@ -229,7 +229,52 @@ class ManualLootAdapter extends EmbeddedItemAdapter {
   }
 }
 
-const adapters = new Map([["dnd5e", new Dnd5eAdapter()], ["sf2e", new Sf2eAdapter()]]);
 const manualAdapter = new ManualLootAdapter();
+
+export class SwadeAdapter extends Dnd5eAdapter {
+  id = "swade";
+  currencyEntries() { return []; }
+  allowsStoredItem(item) {
+    return ["weapon", "armor", "shield", "gear", "consumable"].includes(item?.type)
+      && item.isPhysicalItem !== false && !item.grantedBy && !item.system?.isNaturalArmor;
+  }
+  eligible(item) {
+    return this.allowsStoredItem(item) && Number.isSafeInteger(item.system?.quantity) && item.system.quantity > 0;
+  }
+  snapshot(item) {
+    return this.carriedData(snapshotItem(item));
+  }
+  carriedData(data) {
+    if ("equipStatus" in data.system) data.system.equipStatus = 1; // SWADE's Carried state.
+    delete data.flags?.swade?.hasGranted;
+    return data;
+  }
+  preview(entry) { return clone(entry.data); }
+  received(actor, entry, claim) {
+    return entry.wholeItem ? manualAdapter.received(actor, entry, claim) : super.received(actor, entry, claim);
+  }
+  async create(actor, entry, claim, begin) {
+    if (entry.wholeItem) {
+      return manualAdapter.create(actor, { ...entry, data: this.carriedData(clone(entry.data)) }, claim, begin);
+    }
+    return super.create(actor, entry, claim, begin);
+  }
+  async sourceClaim(token, entry) {
+    if (!this.eligible(entry.data)) throw new LootError("SourceChanged");
+    if (!entry.wholeItem) return super.sourceClaim(token, entry);
+    if (!this.eligible(token.actor.items.get(entry.source?.itemId))) throw new LootError("SourceChanged");
+    return manualAdapter.sourceClaim(token, entry);
+  }
+  validateSourcePlan(token, entry, claim) {
+    if (!entry.wholeItem) return super.validateSourcePlan(token, entry, claim);
+    if (!this.eligible(token.actor.items.get(claim.source?.itemId))) throw new LootError("SourceChanged");
+    return manualAdapter.validateSourcePlan(token, entry, claim);
+  }
+  async removeSource(token, entry, claim) {
+    return entry.wholeItem ? manualAdapter.removeSource(token, entry, claim) : super.removeSource(token, entry, claim);
+  }
+}
+
+const adapters = new Map([["dnd5e", new Dnd5eAdapter()], ["sf2e", new Sf2eAdapter()], ["swade", new SwadeAdapter()]]);
 export function registerAdapter(id, adapter) { adapters.set(id, adapter); }
 export function getAdapter(id) { return adapters.get(id) ?? manualAdapter; }

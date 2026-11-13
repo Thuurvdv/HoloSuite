@@ -343,19 +343,25 @@ export async function loadState(token: any, adapter: any, selection?: ManualSele
     ...stored, entries: stored.entries.map((entry: any) => ({ ...entry, data: null }))
   };
   const payload = readLootRecord(stored.vaultId, token, "snapshot");
-  return { ...stored, entries: stored.entries.map((entry: any) => {
-    if (entry.taken) return { ...entry, data: null };
+  return { ...stored, entries: stored.entries.flatMap((entry: any) => {
+    if (entry.taken) return [{ ...entry, data: null }];
     const saved = payload.find((item: any) => item.id === entry.id);
     const data = saved?.data;
-    if (!data || !!saved.wholeItem !== !!adapter.manual) throw new LootError("RecoveryRequired");
+    const swade = adapter.id === "swade";
+    if (!data || (!swade && !!saved.wholeItem !== !!adapter.manual)) throw new LootError("RecoveryRequired");
     let source = saved.source;
+    const liveItem = swade && source?.itemId ? token.actor?.items.get(source.itemId) : null;
+    // Keep pending claims available for transaction recovery, even if the source changed.
+    const excluded = swade && (!adapter.allowsStoredItem(data) || (liveItem && !adapter.allowsStoredItem(liveItem)));
+    if (excluded && !entry.claim) return [];
     // Upgrade old inventory snapshots only when one exact source can be identified.
-    if (!source && !saved.currency && !token.getFlag(MODULE_ID, "config")?.customId && adapter.snapshot) {
+    if (!excluded && !source && !saved.currency && !token.getFlag(MODULE_ID, "config")?.customId && adapter.snapshot) {
       const item = exactInventoryMatch(supportedItems(token, adapter), adapter, data);
       if (item) source = { itemId: item.id };
     }
-    return { ...entry, data, ...(saved.wholeItem ? { wholeItem: true } : {}), ...(saved.formula ? { formula: saved.formula } : {}),
-      ...(saved.currency ? { currency: saved.currency } : {}), ...(source ? { source } : {}) };
+    return [{ ...entry, data, ...(excluded ? { hidden: true } : {}),
+      ...(saved.wholeItem ? { wholeItem: true } : {}), ...(saved.formula ? { formula: saved.formula } : {}),
+      ...(saved.currency ? { currency: saved.currency } : {}), ...(source ? { source } : {}) }];
   }) };
 }
 export async function saveState(token: any, state: any) {
@@ -376,7 +382,8 @@ export function summary(token: any, state: any) {
     entries: state.entries.filter((entry: any) => !entry.taken && !entry.hidden).map((entry: any) => {
       const data = { ...entry.data, system: entry.data.system ?? {} };
       const unidentified = data.system.identified === false || data.system.identification?.status === "unidentified";
-      const description = unidentified ? data.system.unidentified?.description : data.system.description?.value;
+      const description = unidentified ? data.system.unidentified?.description
+        : typeof data.system.description === "string" ? data.system.description : data.system.description?.value;
       return {
         id: entry.id, name: entry.currency ? game.i18n.localize(`HL.Currency.${entry.currency.unit}`)
           : unidentified ? (data.system.unidentified?.name || data.system.identification?.unidentified?.name || game.i18n.localize("HL.Unidentified")) : data.name,
