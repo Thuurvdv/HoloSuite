@@ -87,9 +87,14 @@ function refresh(uuid: string) {
   if (panel && !panel.disposed) void panel.refresh();
 }
 function initialize(token: any) {
-  if (!started || !isAuthority() || adapter().manual || token.getFlag(MODULE_ID, "state") || !eligible(token, lootEnvironment())) return;
+  const system = adapter();
+  const needsSnapshot = () => {
+    const state = token.getFlag(MODULE_ID, "state");
+    return !state || (system.currencySnapshotVersion && state.currencyReady !== system.currencySnapshotVersion);
+  };
+  if (!started || !isAuthority() || system.manual || !needsSnapshot() || !eligible(token, lootEnvironment())) return;
   void transactions.queue.run(token.uuid, async () => {
-    if (isAuthority() && eligible(token, lootEnvironment()) && !token.getFlag(MODULE_ID, "state")) await loadState(token, adapter());
+    if (isAuthority() && needsSnapshot() && eligible(token, lootEnvironment())) await loadState(token, system);
   }).catch((error: any) => console.warn("HoloSuite Loot | Snapshot initialization failed", token.uuid, error));
 }
 function scanScene() {

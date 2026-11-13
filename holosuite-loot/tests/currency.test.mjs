@@ -50,6 +50,21 @@ test('D&D5e currency uses native denomination balances and creates no fake inven
   assert.equal(f.destination.system.currency.gp, 15); assert.equal(f.source.system.currency.gp, 0);
   assert.equal(f.destination.items.size, 0); assert.deepEqual(f.destination.flags.currencyReceipts, {});
 });
+test('SWADE transfers native fractional currency and recovers without paying twice', async () => {
+  const f = fixture();
+  const adapter = getAdapter('swade');
+  f.source.system = { details: { currency: 12.5 } };
+  f.destination.system = { details: { currency: 3.25 } };
+  f.io.adapter = () => adapter;
+  await f.io.save(f.token, { entries: adapter.currencyEntries(f.source).map(entry => ({ ...entry, id: 'money0' })) });
+  f.io.failSave = 4;
+  assert.equal((await f.service.execute(f.request(), f.user)).failures.length, 1);
+  await f.service.execute(f.request('view'), f.user);
+  assert.equal(f.source.system.details.currency, 0);
+  assert.equal(f.destination.system.details.currency, 15.75);
+  assert.equal(f.destination.items.size, 0);
+  assert.equal(f.state().entries[0].taken, true);
+});
 test('Loot All transfers each denomination exactly once and preserves existing balances', async () => {
   const f = fixture();
   const load = f.io.load;

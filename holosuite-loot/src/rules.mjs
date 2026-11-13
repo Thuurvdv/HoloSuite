@@ -12,6 +12,10 @@ export function globalItemKey(item) {
 }
 
 export function ruleKeys(token, item, baseActor) {
+  if (item.balance) {
+    const key = item.id;
+    return { token: key, actor: baseActor?.id ? `${baseActor.id}:${key}` : undefined };
+  }
   return {
     token: item.id ? `${token.actorId ?? token.actor?.id ?? ""}:${item.id}` : undefined,
     actor: baseActor?.id && baseActor.items.get(item.id) ? `${baseActor.id}:${item.id}` : undefined,
