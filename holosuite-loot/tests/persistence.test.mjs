@@ -85,7 +85,11 @@ test('SWADE filters legacy ability entries while preserving gear and pending cla
   const gear = { type: 'gear', name: 'Rope', system: { quantity: 2, equipStatus: 3 }, flags: { swade: { hasGranted: ['old'] } } };
   const ability = { type: 'ability', name: 'Fear', system: { quantity: 1 } };
   const items = new Map([['rope', { ...gear, id: 'rope', toObject: () => gear }]]);
-  const token = { uuid: 'Scene.scene.Token.legacy', actorId: 'npc', actor: { items }, getFlag: () => stored };
+  items.filter = predicate => [...items.values()].filter(predicate);
+  let mirror = { currencyReady: true };
+  const token = { uuid: 'Scene.scene.Token.legacy', actorId: 'npc',
+    actor: { items, system: { details: { currency: 8.5 } } }, getFlag: key => key === ID ? mirror : null,
+    async setFlag(_module, _key, value) { mirror = structuredClone(value); } };
   const source = { itemId: 'rope', ruleKey: 'npc:rope' };
   const claim = { id: 'claim', source: { itemId: 'pending' } };
   const stored = { version: 1, vaultId: 'legacy', currencyReady: true, entries: [
@@ -96,11 +100,34 @@ test('SWADE filters legacy ability entries while preserving gear and pending cla
     { id: 'fear', data: ability, wholeItem: true },
     { id: 'pending', data: ability, wholeItem: true }
   ] };
-  const record = { getFlag: (_m, name) => flags[name] };
-  globalThis.game = { journal: { find: () => record, get: () => record } };
+  const record = { getFlag: (_m, name) => flags[name], async update(changes) {
+    for (const [path, value] of Object.entries(changes)) flags[path.split('.').at(-1)] = structuredClone(value);
+  } };
+  const originalFoundry = globalThis.foundry;
+  globalThis.foundry = { utils: { randomID: () => 'cash' } };
+  const gm = { id: 'gm', active: true, isGM: true, getFlag: () => '1.2.0' };
+  globalThis.game = { user: gm, users: { contents: [gm] }, journal: { find: () => record, get: () => record },
+    settings: { get: module => module === 'swade' ? 'Credits' : {} } };
   try {
     const state = await api.loadState(token, adapter);
-    assert.deepEqual(state.entries.map(entry => entry.id), ['rope', 'pending']);
+    assert.deepEqual(state.entries.map(entry => entry.id), ['rope', 'pending', 'cash']);
+    assert.equal(state.entries[2].currency.amount, 8.5);
+    assert.equal(state.entries[2].data.name, 'Credits');
+    assert.equal(mirror.currencyReady, 2);
+    assert.equal((await api.loadState(token, adapter)).entries.filter(entry => entry.currency).length, 1);
+    token.actor.system.details.currency = 10;
+    const balanceRow = () => api.ruleRows(token, adapter).find(row => row.id === 'currency:swade');
+    assert.equal(balanceRow().entry.currency.amount, 8.5);
+    globalThis.foundry.utils.randomID = () => 'cash-capped';
+    await api.editRules(token, adapter, 'token', ['currency:swade'], { mode: 'quantity', quantity: '3' });
+    assert.equal(balanceRow().entry.currency.amount, 3);
+    assert.equal((await api.loadState(token, adapter)).entries.find(entry => entry.currency).currency.amount, 3);
+    globalThis.foundry.utils.randomID = () => 'cash-hidden';
+    await api.editRules(token, adapter, 'token', ['currency:swade'], { mode: 'never' });
+    assert.equal(balanceRow().entry.hidden, true);
+    assert.equal(balanceRow().canToken, true);
+    flags.state.entries.find(entry => entry.id === 'cash-hidden').taken = true;
+    assert.equal(balanceRow().canToken, false);
     assert.equal(state.entries[1].hidden, true);
     assert.deepEqual(state.entries[1].claim, claim);
     assert.deepEqual(await adapter.sourceClaim(token, state.entries[0]), { itemId: 'rope' });
@@ -109,5 +136,5 @@ test('SWADE filters legacy ability entries while preserving gear and pending cla
     assert.equal(adapter.eligible({ type: 'armor', system: { quantity: 1, isNaturalArmor: true } }), false);
     assert.equal(adapter.eligible({ ...gear, grantedBy: ability }), false);
     assert.equal(adapter.eligible(ability), false);
-  } finally { globalThis.game = originalGame; }
+  } finally { globalThis.game = originalGame; globalThis.foundry = originalFoundry; }
 });

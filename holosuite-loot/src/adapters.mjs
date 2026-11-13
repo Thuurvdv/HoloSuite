@@ -1,5 +1,5 @@
 import { canonical, clone, MODULE_ID, LootError } from "./model.mjs";
-import { dndCurrency } from "./currency.mjs";
+import { dndCurrency, swadeCurrency } from "./currency.mjs";
 
 function snapshotItem(item) {
   const data = clone(item.toObject());
@@ -39,13 +39,14 @@ class EmbeddedItemAdapter {
 
 export class Dnd5eAdapter extends EmbeddedItemAdapter {
   id = "dnd5e";
-  currencyEntries(actor) { return dndCurrency.entries(actor); }
+  balanceCurrency = dndCurrency;
+  currencyEntries(actor) { return this.balanceCurrency.entries(actor); }
   received(actor, entry, claim) {
-    return entry.currency?.storage === "balance" ? dndCurrency.received(actor, entry, claim)
+    return entry.currency?.storage === "balance" ? this.balanceCurrency.received(actor, entry, claim)
       : super.received(actor, entry, claim);
   }
   async cleanup(token, actor, entry, claim) {
-    if (entry.currency?.storage === "balance") await dndCurrency.cleanup(token, actor, entry, claim);
+    if (entry.currency?.storage === "balance") await this.balanceCurrency.cleanup(token, actor, entry, claim);
   }
   destination(actor) { return actor.type === "character"; }
   eligible(item) {
@@ -71,7 +72,7 @@ export class Dnd5eAdapter extends EmbeddedItemAdapter {
     return data;
   }
   async create(actor, entry, claim, beginCurrency) {
-    if (entry.currency?.storage === "balance") return dndCurrency.grant(actor, entry, claim, beginCurrency);
+    if (entry.currency?.storage === "balance") return this.balanceCurrency.grant(actor, entry, claim, beginCurrency);
     return super.create(actor, entry, claim);
   }
   preview(entry) {
@@ -86,7 +87,7 @@ export class Dnd5eAdapter extends EmbeddedItemAdapter {
       throw new LootError("SourceChanged");
     }
     await detachSource(token);
-    if (entry.currency?.storage === "balance") return dndCurrency.sourcePlan(token, entry);
+    if (entry.currency?.storage === "balance") return this.balanceCurrency.sourcePlan(token, entry);
     const item = token.actor.items.get(entry.source.itemId);
     const quantity = item?.system.quantity;
     if (!this.eligible(item ?? {}) || quantity < entry.data.system.quantity
@@ -111,7 +112,7 @@ export class Dnd5eAdapter extends EmbeddedItemAdapter {
     if (!source) return;
     // A GM may have relinked the corpse since reservation; never edit a shared Actor.
     await detachSource(token);
-    if (source.currency) return dndCurrency.debit(token, entry, claim);
+    if (source.currency) return this.balanceCurrency.debit(token, entry, claim);
     const item = token.actor.items.get(source.itemId);
     if (!item) return; // A completed deletion is idempotent across a failed ledger write.
     if (item.getFlag(MODULE_ID, "sourceClaim") === claim.id) return;
@@ -233,7 +234,8 @@ const manualAdapter = new ManualLootAdapter();
 
 export class SwadeAdapter extends Dnd5eAdapter {
   id = "swade";
-  currencyEntries() { return []; }
+  balanceCurrency = swadeCurrency;
+  currencySnapshotVersion = 2;
   allowsStoredItem(item) {
     return ["weapon", "armor", "shield", "gear", "consumable"].includes(item?.type)
       && item.isPhysicalItem !== false && !item.grantedBy && !item.system?.isNaturalArmor;
@@ -260,7 +262,7 @@ export class SwadeAdapter extends Dnd5eAdapter {
     return super.create(actor, entry, claim, begin);
   }
   async sourceClaim(token, entry) {
-    if (!this.eligible(entry.data)) throw new LootError("SourceChanged");
+    if (entry.currency?.storage !== "balance" && !this.eligible(entry.data)) throw new LootError("SourceChanged");
     if (!entry.wholeItem) return super.sourceClaim(token, entry);
     if (!this.eligible(token.actor.items.get(entry.source?.itemId))) throw new LootError("SourceChanged");
     return manualAdapter.sourceClaim(token, entry);

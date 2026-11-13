@@ -14,6 +14,9 @@ const evaluateRoll = async (formula: string) => {
   return new Roll(formula).evaluate({ allowInteractive: false });
 };
 const supportedItems = (token: any, adapter: any) => token.actor?.items?.filter((item: any) => adapter.eligible(item)) ?? [];
+const balanceItems = (token: any, adapter: any) => (adapter.currencyEntries?.(token.actor) ?? []).map((balance: any) => ({
+  ...balance.data, id: `currency:${balance.currency.unit}`, balance
+}));
 const legacyCustom = (token: any) => configFor(token).source === "custom";
 const corpseRules = (vault: any) => JSON.parse(vault?.getFlag(MODULE_ID, "rules") ?? "{}");
 const flag = (key: string) => `flags.${MODULE_ID}.${key}`;
@@ -27,7 +30,7 @@ const mirrorState = (token: any, state: any) => token.setFlag(MODULE_ID, "state"
   })
 });
 const generatesLoot = (item: any, adapter: any, rule: any) =>
-  isDiceRule(rule) && adapter.sourceClaim && adapter.removeSource && !adapter.entryMetadata?.(item)?.currency;
+  isDiceRule(rule) && adapter.sourceClaim && adapter.removeSource && !item.balance && !adapter.entryMetadata?.(item)?.currency;
 
 export async function rollLootQuantity(formula: string) {
   const rule = parseRule("quantity", formula);
@@ -48,7 +51,7 @@ type QuantityRoll = { roll: any; itemName: string; quantity: number };
 
 async function inventoryEntry(item: any, adapter: any, key: string, rule: any,
   { original, previousRoll, legacyRollCeiling, onRoll }: InventoryEntryOptions = {}) {
-  const data = adapter.snapshot(item);
+  const data = item.balance ? structuredClone(item.balance.data) : adapter.snapshot(item);
   if (adapter.manual) return { id: foundry.utils.randomID(), data, wholeItem: true, source: { itemId: item.id, ruleKey: key } };
   const originalQuantity = original ?? data.system.quantity;
   const available = Math.min(originalQuantity, data.system.quantity);
@@ -75,7 +78,8 @@ async function inventoryEntry(item: any, adapter: any, key: string, rule: any,
     ...(formula ? { formula } : {}),
     ...(rolledQuantity === undefined ? {} : { rolledQuantity }),
     ...(rollCeiling === undefined ? {} : { rollCeiling }),
-    ...(item.id ? { source: { itemId: item.id, ruleKey: key } } : {}), ...adapter.entryMetadata?.(item, quantity) };
+    ...(item.balance ? { currency: { ...item.balance.currency, amount: quantity } }
+      : { ...(item.id ? { source: { itemId: item.id, ruleKey: key } } : {}), ...adapter.entryMetadata?.(item, quantity) }) };
 }
 
 function ruleContext(token: any, adapter: any) {
@@ -85,14 +89,16 @@ function ruleContext(token: any, adapter: any) {
   const byId = new Map<string, any>(Array.isArray(entries) ? entries.map(entry => [entry.id, entry]) : []);
   const byKey = new Map<string, any>();
   const legacyByKey = new Map<string, any>();
-  const items = supportedItems(token, adapter);
+  const items = [...supportedItems(token, adapter), ...balanceItems(token, adapter)];
   const canMatchLegacy = adapter.snapshot && !legacyCustom(token) && !token.getFlag(MODULE_ID, "config")?.customId;
   for (const entry of state?.entries ?? []) {
     const payload = byId.get(entry.id);
-    if (payload?.source?.ruleKey) {
+    if (payload?.currency?.storage === "balance") {
+      byKey.set(`currency:${payload.currency.unit}`, { ...payload, ...entry });
+    } else if (payload?.source?.ruleKey) {
       byKey.set(payload.source.ruleKey, { ...payload, ...entry });
     } else if (canMatchLegacy && payload?.data && !payload.currency && !payload.source) {
-      const item = exactInventoryMatch(items, adapter, payload.data);
+      const item = exactInventoryMatch(items.filter(item => !item.balance), adapter, payload.data);
       if (!item) continue;
       const key = ruleKeys(token, item).token;
       // Multiple saved stacks can match one live item if its duplicates were removed.
@@ -265,7 +271,7 @@ export async function refreshInventory(token: any, adapter: any, selection?: Man
   const corpse = corpseRules(vault);
   const shared = worldRules();
   const entries = [];
-  for (const item of supportedItems(token, adapter)) {
+  for (const item of [...supportedItems(token, adapter), ...balanceItems(token, adapter)]) {
     if (reserved.has(item.id) || (adapter.manual && !selection?.ids.has(item.id))) continue;
     const keys = ruleKeys(token, item, actor);
     const prior = previous.get(keys.token);
@@ -277,12 +283,9 @@ export async function refreshInventory(token: any, adapter: any, selection?: Man
     const legacyRollCeiling = limit === undefined || prior.saved.formula ? undefined : prior.saved.rollCeiling ?? prior.saved.data.system.quantity;
     entries.push(reuseId(await inventoryEntry(item, adapter, keys.token, rule, { previousRoll, legacyRollCeiling }), prior));
   }
-  for (const balance of adapter.currencyEntries?.(token.actor) ?? []) {
-    const key = `currency:${balance.currency.unit}`;
-    if (!reserved.has(key)) entries.push(reuseId({ ...balance, id: foundry.utils.randomID() }, previous.get(key)));
-  }
   if (!isAuthority()) throw new LootError("RuleGM");
-  const next = { ...state, vaultId: vault.id, currencyReady: true, entries: [...retained, ...entries.map(ledgerEntry)] };
+  const next = { ...state, vaultId: vault.id, currencyReady: adapter.currencySnapshotVersion ?? true,
+    entries: [...retained, ...entries.map(ledgerEntry)] };
   const history = retained.flatMap((entry: any) => byId.has(entry.id) ? [byId.get(entry.id)] : []);
   await vault.update({ [flag("state")]: next, [flag("items")]: [...history, ...entries],
     ...(selection ? { [flag("manualMode")]: selection.mode } : {}) });
@@ -314,8 +317,11 @@ export async function loadState(token: any, adapter: any, selection?: ManualSele
         entries.push(await inventoryEntry(item, adapter, keys.token, rule));
       }
     }
-    entries.push(...(adapter.currencyEntries?.(token.actor) ?? []).map((entry: any) => ({ ...entry, id: foundry.utils.randomID() })));
-    const state = { version: 1, currencyReady: true, entries: entries.map(ledgerEntry) };
+    for (const item of balanceItems(token, adapter)) {
+      const keys = ruleKeys(token, item, actor);
+      entries.push(await inventoryEntry(item, adapter, keys.token, resolveRule(keys, corpse, shared).rule));
+    }
+    const state = { version: 1, currencyReady: adapter.currencySnapshotVersion ?? true, entries: entries.map(ledgerEntry) };
     const vaultId = vault ? vault.id : await createLootRecord(token, entries, { state, ...(selection ? { manualMode: selection.mode } : {}) });
     stored = { ...state, vaultId };
     if (vault) await vault.update({ [flag("items")]: entries, [flag("state")]: stored, [flag("draft")]: false,
@@ -324,20 +330,26 @@ export async function loadState(token: any, adapter: any, selection?: ManualSele
   }
   if (stored.version !== 1) throw new LootError("RecoveryRequired");
   stored = { ...stored, vaultId: stored.vaultId ?? vault?.id };
-  if (!stored.currencyReady && adapter.currencyEntries) {
+  const currencyVersion = adapter.currencySnapshotVersion ?? true;
+  if ((!stored.currencyReady || (adapter.currencySnapshotVersion && stored.currencyReady !== currencyVersion)) && adapter.currencyEntries) {
     // Existing corpses gain one currency snapshot; collected Item entries stay collected.
     const original = vault ?? game.journal.get(stored.vaultId);
     const native = original.getFlag(MODULE_ID, "items");
     const payload = Array.isArray(native) ? structuredClone(native)
       : stored.entries.every((entry: any) => entry.taken) ? [] : readLootRecord(stored.vaultId, token, "snapshot");
-    const added = adapter.currencyEntries(token.actor).map((entry: any) => ({ ...entry, id: foundry.utils.randomID() }));
-    stored = { ...stored, currencyReady: true, entries: [...stored.entries, ...added.map(({ id }: any) => ({ id, taken: false }))] };
+    const added = [];
+    for (const item of balanceItems(token, adapter)) {
+      const keys = ruleKeys(token, item, baseActor(token));
+      added.push(await inventoryEntry(item, adapter, keys.token, resolveRule(keys, corpseRules(original), worldRules()).rule));
+    }
+    stored = { ...stored, currencyReady: currencyVersion, entries: [...stored.entries, ...added.map(ledgerEntry)] };
     // Payload and ledger migrate together on their authoritative Journal document.
     if (added.length) await original.update({ [`flags.${MODULE_ID}.items`]: [...payload, ...added], [`flags.${MODULE_ID}.state`]: stored });
     else await original.setFlag(MODULE_ID, "state", stored);
     await mirrorState(token, stored);
   }
-  if (!token.getFlag(MODULE_ID, "state")) await mirrorState(token, stored);
+  const mirror = token.getFlag(MODULE_ID, "state");
+  if (!mirror || (adapter.currencySnapshotVersion && mirror.currencyReady !== stored.currencyReady)) await mirrorState(token, stored);
   // Depleted records can report their ledger without loading the item payload.
   if (stored.entries.every((entry: any) => entry.taken)) return {
     ...stored, entries: stored.entries.map((entry: any) => ({ ...entry, data: null }))
@@ -352,7 +364,8 @@ export async function loadState(token: any, adapter: any, selection?: ManualSele
     let source = saved.source;
     const liveItem = swade && source?.itemId ? token.actor?.items.get(source.itemId) : null;
     // Keep pending claims available for transaction recovery, even if the source changed.
-    const excluded = swade && (!adapter.allowsStoredItem(data) || (liveItem && !adapter.allowsStoredItem(liveItem)));
+    const excluded = swade && saved.currency?.storage !== "balance"
+      && (!adapter.allowsStoredItem(data) || (liveItem && !adapter.allowsStoredItem(liveItem)));
     if (excluded && !entry.claim) return [];
     // Upgrade old inventory snapshots only when one exact source can be identified.
     if (!excluded && !source && !saved.currency && !token.getFlag(MODULE_ID, "config")?.customId && adapter.snapshot) {
@@ -366,7 +379,7 @@ export async function loadState(token: any, adapter: any, selection?: ManualSele
 }
 export async function saveState(token: any, state: any) {
   const stored = {
-    version: 1, ...(state.currencyReady ? { currencyReady: true } : {}), vaultId: state.vaultId,
+    version: 1, ...(state.currencyReady ? { currencyReady: state.currencyReady } : {}), vaultId: state.vaultId,
     entries: state.entries.map(({ id, taken, claim, hidden }: any) => ({
       id, taken: !!taken, ...(claim ? { claim } : {}), ...(hidden ? { hidden } : {})
     }))
@@ -385,7 +398,7 @@ export function summary(token: any, state: any) {
       const description = unidentified ? data.system.unidentified?.description
         : typeof data.system.description === "string" ? data.system.description : data.system.description?.value;
       return {
-        id: entry.id, name: entry.currency ? game.i18n.localize(`HL.Currency.${entry.currency.unit}`)
+        id: entry.id, name: entry.currency ? (entry.currency.unit === "swade" ? data.name : game.i18n.localize(`HL.Currency.${entry.currency.unit}`))
           : unidentified ? (data.system.unidentified?.name || data.system.identification?.unidentified?.name || game.i18n.localize("HL.Unidentified")) : data.name,
         currency: !!entry.currency,
         img: unidentified ? data.system.identification?.unidentified?.img || data.img : data.img,
