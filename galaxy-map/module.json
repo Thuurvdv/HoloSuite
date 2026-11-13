@@ -2,7 +2,7 @@
   "id": "galaxy-map",
   "title": "Galaxy Map",
   "description": "A system-agnostic cinematic galaxy map framework for Foundry VTT campaigns.",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "authors": [
     {
       "name": "Mage Tower Studios",
@@ -23,7 +23,7 @@
   ],
   "url": "https://github.com/Thuurvdv/HoloSuite/tree/main/galaxy-map",
   "manifest": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/galaxy-map/module.json",
-  "download": "https://github.com/Thuurvdv/HoloSuite/releases/download/galaxy-map-v2.0.1/galaxy-map.zip",
+  "download": "https://github.com/Thuurvdv/HoloSuite/releases/download/galaxy-map-v2.1.0/galaxy-map.zip",
   "license": "GPL-3.0-or-later",
   "readme": "README.md",
   "relationships": {

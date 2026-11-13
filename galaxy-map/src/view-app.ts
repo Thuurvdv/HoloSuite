@@ -1,6 +1,7 @@
 import {
   MAX_ZOOM,
   MIN_ZOOM,
+  TRAVEL_ANIMATION_MS,
   ANIMATED_CELESTIAL_STYLES,
   clamp,
   getEffectiveObjectVisibility,
@@ -15,6 +16,9 @@ import { bindFilePickerFields, escapeHtml } from "./dom-utils";
 import { activateGalaxyWindowChrome, GALAXY_DIALOG_OPTIONS } from "./window-chrome";
 import { getApplicationBase } from "./app-base";
 import { animateShipTravel } from "./travel-animation";
+import { canAttachToOrbit, createOrbitLayout, orbitTime } from "./orbits";
+import { mountOrbitLayer } from "./orbit-layer";
+import { bindOrbitEditor } from "./orbit-editor";
 
 declare const foundry: any;
 declare const Dialog: any;
@@ -114,6 +118,8 @@ export function createGalaxyMapViewClass(deps: any) {
     _selectionTimer: any = null;
     _worldWidth = 0;
     _worldHeight = 0;
+    _orbitLayer: ReturnType<typeof mountOrbitLayer> | null = null;
+    showOrbits = true;
     _viewportResizeObserver: ResizeObserver | null = null;
     _viewportStage: HTMLElement | null = null;
     _baseWindowHeight: number | null = null;
@@ -276,6 +282,9 @@ export function createGalaxyMapViewClass(deps: any) {
       const planetAppearance = (!this.playerMode || rawMap?.visibility === "players")
         ? getPlanetAppearance(planetSystem) : null;
       if (!planetAppearance) this.planetSystemId = null;
+      const orbitLayout = activeSystem && !planetAppearance && systemObjects.some((object: any) => object.orbits?.length)
+        ? createOrbitLayout(systemObjects,
+        new Set(systemObjects.filter((object: any) => object.obscured).map((object: any) => object.id))) : null;
       const planetStaticViewKey = planetSystem && planetAppearance ? `${planetSystem.id}:${planetAppearance.preset}` : null;
       if (planetStaticViewKey !== this._planetStaticViewKey) {
         this._planetStaticViewKey = planetStaticViewKey;
@@ -305,6 +314,17 @@ export function createGalaxyMapViewClass(deps: any) {
         submitLabel: this.creationPanel.editId ? "Save changes" : "Create",
         systemOptions: (activeSystem ? systemObjects : displayMap?.systems ?? [])
           .map((endpoint: any) => ({ id: endpoint.id, name: endpoint.displayName || endpoint.name })),
+        orbitOptions: this.creationPanel.kind === "entity" ? systemObjects.flatMap((center: any) =>
+          (center.orbits ?? []).flatMap((ring: any, index: number) => {
+            const link = { centerId: center.id, orbitId: ring.id };
+            if (!canAttachToOrbit(systemObjects, this.creationPanel.editId, link)) return [];
+            const current = this.creationPanel.data.orbit;
+            return [{
+              value: JSON.stringify([center.id, ring.id]),
+              label: `${center.name} · Orbit ${index + 1} (${ring.radius}%)`,
+              selected: current?.centerId === center.id && current.orbitId === ring.id
+            }];
+          })) : [],
         factionOptions: (displayMap?.factions ?? []).map((faction: any) => ({ id: faction.id, name: faction.name }))
       } : null;
       return {
@@ -328,6 +348,9 @@ export function createGalaxyMapViewClass(deps: any) {
         territories: displayMap ? buildTerritories(displayMap.systems, displayMap.factions) : [],
         showTerritories: this.showTerritories,
         showRoutes: this.showRoutes,
+        orbitLayout,
+        hasOrbits: Boolean(orbitLayout?.rings.length),
+        showOrbits: this.showOrbits,
         hardContrast: this.hardContrast,
         mapId: this.mapId,
         playerMode: this.playerMode,
@@ -340,6 +363,8 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     _onRender(context: any, options: any) {
+      this._orbitLayer?.dispose();
+      this._orbitLayer = null;
       this._bountyIntelCallout?.dispose();
       this._bountyIntelCallout = null;
       this._disposePlanetRenderer();
@@ -348,6 +373,8 @@ export function createGalaxyMapViewClass(deps: any) {
       if (html) {
         this._attachPartListeners("main", html, options);
         this._observeViewport(html);
+        const viewport = html.querySelector(".gmf-map-viewport");
+        if (viewport && context.hasOrbits) this._orbitLayer = mountOrbitLayer(viewport, context.orbitLayout);
         // Part listeners run before Foundry has mounted the application window.
         // A cached background can already have dimensions, so size it only here.
         this._applyViewportTransform(html);
@@ -386,6 +413,13 @@ export function createGalaxyMapViewClass(deps: any) {
       html.querySelector("[data-action='toggle-routes']")?.addEventListener("click", () => {
         this.showRoutes = !this.showRoutes;
         this.render({ force: true });
+      });
+      html.querySelector("[data-action='toggle-orbits']")?.addEventListener("click", () => {
+        this.showOrbits = !this.showOrbits;
+        this.render({ force: true });
+      });
+      html.querySelector("[data-action='edit-orbits']")?.addEventListener("click", () => {
+        if (!this.playerMode && game.user?.isGM && this.selectedObjectId) this._openEditPanel("entity", this.selectedObjectId, true);
       });
       html.querySelector("[data-action='edit-current-layer']")?.addEventListener("click", () => {
         if (!game.user?.isGM || this.playerMode) return;
@@ -550,6 +584,7 @@ export function createGalaxyMapViewClass(deps: any) {
         }
         viewport.style.width = `${this._worldWidth}px`;
         viewport.style.height = `${this._worldHeight}px`;
+        this._orbitLayer?.setAspect(this._worldWidth / this._worldHeight);
 
         const scaledWidth = this._worldWidth * this.zoom;
         const scaledHeight = this._worldHeight * this.zoom;
@@ -972,11 +1007,22 @@ export function createGalaxyMapViewClass(deps: any) {
 
       const startX = event.clientX;
       const startY = event.clientY;
+      const orbitLayer = this._orbitLayer;
+      const id = node.dataset.systemId;
+      const systemId = this.activeSystemId;
       let latest = this._pointerToMapPercent(event, html);
       let moved = false;
       let frame: number | null = null;
       const connectedFrom = Array.from(html.querySelectorAll(`[data-route-from="${node.dataset.systemId}"]`));
       const connectedTo = Array.from(html.querySelectorAll(`[data-route-to="${node.dataset.systemId}"]`));
+      const preview = () => {
+        if (orbitLayer) orbitLayer.previewDrag(id, latest);
+        else {
+          node.style.left = `${latest.x}%`;
+          node.style.top = `${latest.y}%`;
+          this._updateConnectedRoutes(connectedFrom, connectedTo, latest.x, latest.y);
+        }
+      };
 
       const onMove = (moveEvent: any) => {
         const dx = Math.abs(moveEvent.clientX - startX);
@@ -989,28 +1035,42 @@ export function createGalaxyMapViewClass(deps: any) {
         if (frame) return;
         frame = requestAnimationFrame(() => {
           frame = null;
-          node.style.left = `${latest.x}%`;
-          node.style.top = `${latest.y}%`;
-          this._updateConnectedRoutes(connectedFrom, connectedTo, latest.x, latest.y);
+          preview();
         });
       };
 
-      const onUp = async () => {
+      const onUp = async (endEvent?: PointerEvent) => {
         if (frame) cancelAnimationFrame(frame);
         node.classList.remove("is-dragging");
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
+        window.removeEventListener("pointercancel", onUp);
+        if (endEvent?.type === "pointercancel") {
+          node.dataset.dragged = "false";
+          if (orbitLayer) orbitLayer.cancelDrag();
+          else if (moved) this.render({ force: true });
+          return;
+        }
+        if (node.isConnected === false || systemId !== this.activeSystemId) return;
         if (moved) {
-          node.style.left = `${latest.x}%`;
-          node.style.top = `${latest.y}%`;
-          this._updateConnectedRoutes(connectedFrom, connectedTo, latest.x, latest.y);
-          if (this.activeSystemId) await saveObjectPosition(this.mapId, this.activeSystemId, node.dataset.systemId, latest.x, latest.y);
-          else await saveSystemPosition(this.mapId, node.dataset.systemId, latest.x, latest.y);
+          preview();
+          const placement = orbitLayer?.finishDrag(id, latest);
+          if (systemId) {
+            try {
+              const saved = await saveObjectPosition(this.mapId, systemId, id, latest.x, latest.y, placement);
+              if (!saved) this.render({ force: true });
+            } catch {
+              orbitLayer?.cancelDrag();
+              notifyError("Could not save the location position.");
+              this.render({ force: true });
+            }
+          } else await saveSystemPosition(this.mapId, node.dataset.systemId, latest.x, latest.y);
         }
       };
 
       window.addEventListener("pointermove", onMove);
       window.addEventListener("pointerup", onUp, { once: true });
+      window.addEventListener("pointercancel", onUp, { once: true });
     }
 
     _startMarkerResize(event: any, node: any) {
@@ -1229,7 +1289,7 @@ export function createGalaxyMapViewClass(deps: any) {
       this.render({ force: true });
     }
 
-    _openEditPanel(kind: string, id: string) {
+    _openEditPanel(kind: string, id: string, showOrbitEditor = false) {
       const map = normalizeMap(getRawMap(this.mapId));
       const source = kind === "system" ? map.systems.find((system: any) => system.id === id)
         : kind === "entity" ? map.systems.find((system: any) => system.id === this.activeSystemId)?.objects.find((object: any) => object.id === id)
@@ -1237,7 +1297,7 @@ export function createGalaxyMapViewClass(deps: any) {
           ? map.systems.find((system: any) => system.id === this.activeSystemId)?.routes.find((route: any) => route.id === id)
           : map.routes.find((route: any) => route.id === id))
         : map.factions.find((faction: any) => faction.id === id);
-      if (source) this._openCreationPanel(kind, source, id);
+      if (source) this._openCreationPanel(kind, showOrbitEditor ? { ...source, showOrbitEditor } : source, id);
     }
 
     openEditor(kind: string, options: any = {}) {
@@ -1283,6 +1343,7 @@ export function createGalaxyMapViewClass(deps: any) {
       const form = html.querySelector<HTMLFormElement>("[data-panel-create-form]");
       if (!form) return;
       bindFilePickerFields(form);
+      const readOrbits = bindOrbitEditor(form, this.creationPanel?.data ?? {});
       form.addEventListener("submit", async event => {
         event.preventDefault();
         const kind = form.dataset.createKind || "";
@@ -1292,6 +1353,7 @@ export function createGalaxyMapViewClass(deps: any) {
           values[control.name] = control.value;
         });
         if (kind === "entity") {
+          Object.assign(values, readOrbits?.());
           values.markerImage = values.useCustomMarker === "true" ? values.markerImage ?? "" : "";
           delete values.useCustomMarker;
         }
@@ -1303,7 +1365,14 @@ export function createGalaxyMapViewClass(deps: any) {
         let saved: any = null;
         if (kind === "map") saved = await updateMapMetadata(this.mapId, { ...existing, ...values });
         else if (kind === "system") saved = await upsertSystem(this.mapId, { ...existing, ...values, x, y });
-        else if (kind === "entity" && this.activeSystemId) saved = await upsertObject(this.mapId, this.activeSystemId, { ...existing, ...values, x, y });
+        else if (kind === "entity" && this.activeSystemId) {
+          const { orbit, orbits, ...location } = existing;
+          saved = await upsertObject(this.mapId, this.activeSystemId, { ...location, ...values, x, y });
+          if (!saved) {
+            this.creationPanel = panel;
+            return;
+          }
+        }
         else if (kind === "route") {
           if (!values.fromSystemId || !values.toSystemId || values.fromSystemId === values.toSystemId) {
             notifyError(`Choose two different ${this.activeSystemId ? "locations" : "systems"} for the route.`);
@@ -1427,7 +1496,15 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     _animateShipTravel(from: any, to: any, html: any) {
-      return animateShipTravel(from, to, html);
+      const now = orbitTime();
+      const start = this._orbitLayer?.position(from.id, now) ?? from;
+      const end = this._orbitLayer?.position(to.id, now + TRAVEL_ANIMATION_MS) ?? to;
+      return animateShipTravel(start, end, html);
+    }
+
+    getOrbitGeometry(systemId: string) {
+      if (this.playerMode || this.activeSystemId !== systemId || !this._orbitLayer) return null;
+      return { aspect: this._orbitLayer.aspect, motion: this._orbitLayer.motion };
     }
 
     _openLinkedJournal() {
@@ -1448,6 +1525,8 @@ export function createGalaxyMapViewClass(deps: any) {
     }
 
     async close(options: any = {}) {
+      this._orbitLayer?.dispose();
+      this._orbitLayer = null;
       this._viewportStage = null;
       this._bountyIntelCallout?.dispose();
       this._bountyIntelCallout = null;

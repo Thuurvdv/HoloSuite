@@ -28,6 +28,11 @@
 
 /* Systems can apply global form styles with greater specificity. Keep Galaxy Map
    controls readable in v12 while these scoped rules remain safe for v13/v14. */
+:is(.galaxy-map-framework, .gmf-crud-dialog) :is(input, select, option, optgroup, textarea),
+.galaxy-map-framework .gmf-orbit-editor [data-add-orbit] {
+  font-family: system-ui, "Segoe UI", sans-serif !important;
+}
+
 :is(.galaxy-map-framework, .gmf-crud-dialog) select {
   border-color: rgba(88, 216, 255, 0.44) !important;
   background: #081522 !important;

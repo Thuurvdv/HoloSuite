@@ -1,6 +1,7 @@
 import { normalizePlanetFinish, normalizePlanetPreset, normalizePlanetPresetForShape, normalizePlanetShape } from "./planet-presets.ts";
 import { normalizeTravelApprovalMode } from "./travel-approval.ts";
 import type { GalaxyLocation } from "./galaxy-types";
+import { canAttachToOrbit, normalizeOrbit, normalizeOrbits } from "./orbits";
 
 export const GALAXY_SCHEMA_VERSION = 3;
 export const SYSTEM_TYPES = ["core", "colony", "frontier", "ruins", "restricted", "unknown"];
@@ -81,6 +82,8 @@ export function normalizeLocation(object: any = {}): GalaxyLocation {
   const compatiblePlanetPreset = normalizePlanetPresetForShape(requestedPlanetPreset, planetShape);
   const planetPreset = planetTexture && !["none", "color"].includes(compatiblePlanetPreset) ? "custom" : compatiblePlanetPreset;
   const kind = inferObjectKind(object);
+  const orbits = normalizeOrbits(object.orbits);
+  const orbit = normalizeOrbit(object.orbit);
   const normalized: any = {
     id: String(object.id || randomId("object")), name: String(object.name || "Unnamed Object"), kind,
     x: clamp(normalizeNumber(object.x, 50), 0, 100), y: clamp(normalizeNumber(object.y, 50), 0, 100),
@@ -94,7 +97,9 @@ export function normalizeLocation(object: any = {}): GalaxyLocation {
     iconStyle: ICON_STYLES.includes(object.iconStyle) ? object.iconStyle : kind === "star" ? "star" : kind === "station" ? "station" : "planet",
     pulse: object.pulse !== false, planetPreset, planetShape,
     planetFinish: normalizePlanetFinish(object.planetFinish),
-    planetTexture, planetColor: normalizeOptionalColor(object.planetColor) || "#58d8ff"
+    planetTexture, planetColor: normalizeOptionalColor(object.planetColor) || "#58d8ff",
+    ...(orbits.length ? { orbits } : {}),
+    ...(orbit ? { orbit } : {})
   };
   return normalized;
 }
@@ -105,6 +110,9 @@ export const normalizeSystemObject = normalizeLocation;
 
 export function normalizeSystem(system: any = {}) {
   const objects = Array.isArray(system.objects) ? system.objects.map(normalizeLocation) : [];
+  const invalidOrbits = objects.filter((object: GalaxyLocation) =>
+    object.orbit && !canAttachToOrbit(objects, object.id, object.orbit));
+  for (const object of invalidOrbits) delete object.orbit;
   const objectIds = new Set(objects.map((object: any) => object.id));
   const routes = (Array.isArray(system.routes) ? system.routes : []).map(normalizeRoute)
     .filter(route => route.fromSystemId !== route.toSystemId && objectIds.has(route.fromSystemId) && objectIds.has(route.toSystemId));

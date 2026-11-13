@@ -1,17 +1,43 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { createGalaxyMapViewClass } from "../src/view-app.ts";
 
 const view = fs.readFileSync(new URL("../src/view-app.ts", import.meta.url), "utf8");
 
-test("system icons only move after the pointer crosses the drag threshold", () => {
-  const dragHandler = view.match(/_startSystemDrag\(event:[\s\S]*?\n    _pointerToMapPercent/)?.[0] ?? "";
+test("system icons only move after the pointer crosses the drag threshold", async () => {
+  const events = new Map();
+  const saves = [];
+  let frame;
+  globalThis.foundry = { applications: { api: {
+    ApplicationV2: class {}, HandlebarsApplicationMixin: Base => Base
+  } } };
+  globalThis.window = {
+    addEventListener: (type, fn) => events.set(type, fn),
+    removeEventListener: type => events.delete(type)
+  };
+  globalThis.requestAnimationFrame = fn => { frame = fn; return 1; };
+  globalThis.cancelAnimationFrame = () => { frame = undefined; };
+  const View = createGalaxyMapViewClass({ saveSystemPosition: (...args) => saves.push(args) });
+  const app = Object.create(View.prototype);
+  app.mapId = "map";
+  app._pointerToMapPercent = event => ({ x: event.clientX, y: event.clientY });
+  const html = { querySelectorAll: () => [] };
+  const node = { dataset: { systemId: "system" }, style: {}, classList: { add() {}, remove() {} } };
+  const down = { button: 0, clientX: 10, clientY: 10, preventDefault() {}, stopPropagation() {} };
 
-  assert.match(dragHandler, /if \(!moved && dx <= 4 && dy <= 4\) return;/);
-  assert.match(dragHandler, /if \(moved\) \{[\s\S]*node\.style\.left[\s\S]*save(?:Object|System)Position/);
+  app._startSystemDrag(down, html, node);
+  events.get("pointermove")({ clientX: 14, clientY: 14 });
+  await events.get("pointerup")();
+  assert.deepEqual(node.style, {});
+  assert.deepEqual(saves, []);
 
-  const pointerUpPrefix = dragHandler.match(/const onUp = async \(\) => \{([\s\S]*?)if \(moved\) \{/)?.[1] ?? "";
-  assert.doesNotMatch(pointerUpPrefix, /node\.style\.(?:left|top)|_updateConnectedRoutes/);
+  app._startSystemDrag(down, html, node);
+  events.get("pointermove")({ clientX: 15, clientY: 14 });
+  frame();
+  assert.deepEqual(node.style, { left: "15%", top: "14%" });
+  await events.get("pointerup")();
+  assert.deepEqual(saves, [["map", "system", 15, 14]]);
 });
 
 test("selected GM markers expose an independent drag-to-resize handle", () => {

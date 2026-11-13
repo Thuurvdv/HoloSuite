@@ -4,6 +4,12 @@ Galaxy Map turns a Foundry world into a navigable star chart. Build a galaxy, op
 
 ![Galaxy Map Manager](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/images/Galaxy%20Map%20Manager.png)
 
+## What's New in 2.1.0
+
+- Add circular orbit rings to locations on system maps. Attach planets, moons, stations, or other locations to a ring and keep them fixed or animate them at a chosen speed and direction.
+- Drag attached markers along their rings. Routes follow moving locations, and each viewer can toggle orbit lines.
+- GM editing fields and dropdowns use a system font for readability.
+
 ## What's New in 2.0.1
 
 Fixed a rendering error that could leave Galaxy Map unresponsive when closing or reopening a map with a custom background image. Custom galaxy and system backgrounds now resize the window after it has mounted, and late image-loading or resize callbacks from closed or replaced views are ignored.

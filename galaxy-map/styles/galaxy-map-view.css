@@ -281,6 +281,7 @@
   will-change: transform;
 }
 
+.gmf-orbits,
 .gmf-routes,
 .gmf-system-layer,
 .gmf-ship-layer {
@@ -297,6 +298,51 @@
 
 .gmf-routes {
   overflow: visible;
+}
+
+.gmf-orbits {
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: rgba(132, 210, 236, 0.42);
+  stroke-width: 1;
+}
+
+.gmf-orbit-editor summary {
+  cursor: pointer;
+}
+
+.gmf-orbit-editor .gmf-icon-button[data-add-orbit] {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto !important;
+  width: max-content !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  gap: 8px;
+  white-space: nowrap;
+  text-shadow: none;
+}
+
+.gmf-orbit-editor[open] > :not(summary):not([hidden]),
+.gmf-orbit-editor [data-orbit-placement]:not([hidden]) > :not([hidden]) {
+  margin-top: 8px;
+}
+
+.gmf-orbit-editor__row {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.gmf-orbit-editor__row label {
+  flex: 1;
+}
+
+.gmf-orbit-editor [hidden] {
+  display: none;
 }
 
 .gmf-route-hit {
