@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
 import { Dnd5eAdapter, getAdapter } from '../src/adapters.mjs';
+import { BUILD_VERSION } from '../src/model.mjs';
 const ID = 'holosuite-loot';
 
 test('normal Foundry flags persist loot without Web Crypto and protect depletion from token edits', async () => {
@@ -105,7 +106,7 @@ test('SWADE filters legacy ability entries while preserving gear and pending cla
   } };
   const originalFoundry = globalThis.foundry;
   globalThis.foundry = { utils: { randomID: () => 'cash' } };
-  const gm = { id: 'gm', active: true, isGM: true, getFlag: () => '1.2.0' };
+  const gm = { id: 'gm', active: true, isGM: true, getFlag: () => BUILD_VERSION };
   globalThis.game = { user: gm, users: { contents: [gm] }, journal: { find: () => record, get: () => record },
     settings: { get: module => module === 'swade' ? 'Credits' : {} } };
   try {

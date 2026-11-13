@@ -1,7 +1,7 @@
 var ft = Object.defineProperty;
 var ht = (t, s, i) => s in t ? ft(t, s, { enumerable: !0, configurable: !0, writable: !0, value: i }) : t[s] = i;
 var R = (t, s, i) => ht(t, typeof s != "symbol" ? s + "" : s, i);
-const f = "holosuite-loot", he = "1.2.0", Ke = "commandV3", Le = "replyV3", $ = (t) => structuredClone(t);
+const f = "holosuite-loot", he = "1.2.1", Ke = "commandV3", Le = "replyV3", $ = (t) => structuredClone(t);
 function mt(t, s, i, e = "request") {
   var n, a;
   return i !== t.id || !t.active || !((a = (n = s.flags) == null ? void 0 : n[f]) != null && a[e]) ? null : $(t.getFlag(f, e));
