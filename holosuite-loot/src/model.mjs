@@ -1,5 +1,5 @@
 export const MODULE_ID = "holosuite-loot";
-export const BUILD_VERSION = "1.1.0";
+export const BUILD_VERSION = "1.2.0";
 export const REQUEST_FLAG = "commandV3";
 export const RESPONSE_FLAG = "replyV3";
 export const clone = value => structuredClone(value);
