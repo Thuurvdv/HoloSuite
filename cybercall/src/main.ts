@@ -22,6 +22,7 @@ import {
   TEMPLATE_PATH
 } from "./constants";
 import { getFilePickerClass, normalizeCustomRingtones, RingtoneSettingsApp } from "./ringtone-settings";
+import { getMessageSoundOptions, getMessageSoundPath, MessageSoundSettingsApp, setMessageSoundPath } from "./message-sound-settings";
 import { escapeHTML } from "./dom-utils";
 import { createGroupThreadId, createThreadIdForContact, getAvatarTone, prepareThreads } from "./message-model";
 import { createMessageEvent, getStoredMessages, sendMessageToContact } from "./message-service";
@@ -647,6 +648,10 @@ function bindContactsControls(app: any, html: any = null) {
     });
   }
 
+  element.querySelector("[data-cybercall-message-sound]")?.addEventListener("change", async (event) => {
+    await setMessageSoundPath(event.currentTarget.value);
+  });
+
   element.querySelectorAll("[data-cybercall-contact-action]").forEach((button) => {
     button.addEventListener("click", async (event) => {
       const action = event.currentTarget.dataset.cybercallContactAction;
@@ -1188,6 +1193,7 @@ const { CyberCallApplication, CyberCallComposer, CyberCallContacts, CyberCallMes
   getGroupContacts,
   getMessageContext,
   getRingtoneChoices,
+  getMessageSoundOptions,
   getSoundPath,
   getActiveContactsTab: () => activeContactsTab,
   canEditContactImages,
@@ -1675,6 +1681,19 @@ function playRinging(callData) {
 }
 
 function playIncomingMessageSound() {
+  const customPath = getMessageSoundPath();
+  if (customPath) {
+    const AudioHelperClass = foundry?.audio?.AudioHelper ?? (globalThis as any).AudioHelper;
+    if (AudioHelperClass?.play) {
+      Promise.resolve(AudioHelperClass.play({ src: customPath, volume: 0.65, loop: false }, false))
+        .catch((error) => console.warn(`${MODULE_ID} | Unable to play message notification sound.`, error));
+    } else {
+      const audio = new Audio(customPath);
+      audio.volume = 0.65 * Math.max(0, Math.min(1, Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5)));
+      audio.play().catch((error) => console.warn(`${MODULE_ID} | Unable to play message notification sound.`, error));
+    }
+    return;
+  }
   const AudioContextClass = (globalThis as any).AudioContext ?? (globalThis as any).webkitAudioContext;
   if (!AudioContextClass) return;
 
@@ -1995,6 +2014,32 @@ function registerSettings() {
     config: true,
     type: Boolean,
     default: true
+  });
+
+  game.settings.register(MODULE_ID, "customMessageSounds", {
+    name: "GM Message Notification Sounds",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: []
+  });
+
+  game.settings.register(MODULE_ID, "shareMessageSounds", {
+    name: "Allow Uploaded Notification Sounds to Be Used by Players",
+    hint: "Let players select sounds from the GM message notification sound library. Turning this off restores the built-in tone for players using a shared sound. Personal uploads follow Foundry's file permissions.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.registerMenu(MODULE_ID, "messageSoundMenu", {
+    name: "Message Notification Sound",
+    label: "Choose or Upload Sound",
+    hint: "Add one or more audio files to the notification list for this world.",
+    icon: "fa-solid fa-music",
+    type: MessageSoundSettingsApp,
+    restricted: true
   });
 
   game.settings.register(MODULE_ID, "showChatCards", {

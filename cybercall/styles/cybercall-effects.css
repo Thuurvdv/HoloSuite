@@ -138,3 +138,13 @@
     inset 0 0 12px rgba(94, 231, 255, 0.1);
   outline: none;
 }
+
+.cybercall-contacts-footer .cybercall-ringtone-select + .cybercall-ringtone-select {
+  margin-top: 8px;
+}
+
+.cybercall-ringtone-select select[data-cybercall-message-sound] {
+  background-color: #00070c;
+  color: #ecfbff;
+  color-scheme: dark;
+}

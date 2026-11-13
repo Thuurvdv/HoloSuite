@@ -183,6 +183,16 @@ export function renderContactsFallbackTemplate(data: any, escapeHTML: EscapeHTML
             ).join("")}
           </select>
         </label>
+        ${data.messageSoundOptions?.length ? `
+          <label class="cybercall-ringtone-select">
+            <span>Notification sound</span>
+            <select data-cybercall-message-sound>
+              ${data.messageSoundOptions.map((choice: any) =>
+                `<option value="${escapeHTML(choice.value)}" ${choice.selected ? "selected" : ""}>${escapeHTML(choice.label)}</option>`
+              ).join("")}
+            </select>
+          </label>
+        ` : ""}
       </footer>
     </section>
   `;

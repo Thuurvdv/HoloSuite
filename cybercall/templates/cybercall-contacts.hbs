@@ -125,5 +125,15 @@
         {{/each}}
       </select>
     </label>
+    {{#if messageSoundOptions}}
+      <label class="cybercall-ringtone-select">
+        <span>Notification sound</span>
+        <select data-cybercall-message-sound>
+          {{#each messageSoundOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </label>
+    {{/if}}
   </footer>
 </section>
