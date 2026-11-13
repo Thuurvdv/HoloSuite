@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
-import { Dnd5eAdapter } from '../src/adapters.mjs';
+import { Dnd5eAdapter, getAdapter } from '../src/adapters.mjs';
 const ID = 'holosuite-loot';
 
 test('normal Foundry flags persist loot without Web Crypto and protect depletion from token edits', async () => {
@@ -74,5 +74,40 @@ test('unsupported item payloads fail closed and depleted snapshots stay depleted
     assert.equal(stored.entries[0].taken, true);
     stored.entries[1].taken = true;
     assert.ok((await api.loadState(token, {})).entries.every(entry => entry.taken && entry.data === null));
+  } finally { globalThis.game = originalGame; }
+});
+
+test('SWADE filters legacy ability entries while preserving gear and pending claim recovery', async () => {
+  const compiled = await build({ entryPoints: [fileURLToPath(new URL('../src/persistence.ts', import.meta.url))], bundle: true, write: false, format: 'esm', platform: 'browser' });
+  const api = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputFiles[0].text).toString('base64')}`);
+  const originalGame = globalThis.game;
+  const adapter = getAdapter('swade');
+  const gear = { type: 'gear', name: 'Rope', system: { quantity: 2, equipStatus: 3 }, flags: { swade: { hasGranted: ['old'] } } };
+  const ability = { type: 'ability', name: 'Fear', system: { quantity: 1 } };
+  const items = new Map([['rope', { ...gear, id: 'rope', toObject: () => gear }]]);
+  const token = { uuid: 'Scene.scene.Token.legacy', actorId: 'npc', actor: { items }, getFlag: () => stored };
+  const source = { itemId: 'rope', ruleKey: 'npc:rope' };
+  const claim = { id: 'claim', source: { itemId: 'pending' } };
+  const stored = { version: 1, vaultId: 'legacy', currencyReady: true, entries: [
+    { id: 'rope', taken: false }, { id: 'fear', taken: false }, { id: 'pending', taken: false, claim }
+  ] };
+  const flags = { tokenUuid: token.uuid, kind: 'snapshot', state: stored, items: [
+    { id: 'rope', data: gear, source, wholeItem: true },
+    { id: 'fear', data: ability, wholeItem: true },
+    { id: 'pending', data: ability, wholeItem: true }
+  ] };
+  const record = { getFlag: (_m, name) => flags[name] };
+  globalThis.game = { journal: { find: () => record, get: () => record } };
+  try {
+    const state = await api.loadState(token, adapter);
+    assert.deepEqual(state.entries.map(entry => entry.id), ['rope', 'pending']);
+    assert.equal(state.entries[1].hidden, true);
+    assert.deepEqual(state.entries[1].claim, claim);
+    assert.deepEqual(await adapter.sourceClaim(token, state.entries[0]), { itemId: 'rope' });
+    assert.equal(adapter.snapshot(items.get('rope')).system.equipStatus, 1);
+    assert.equal(adapter.snapshot(items.get('rope')).flags.swade.hasGranted, undefined);
+    assert.equal(adapter.eligible({ type: 'armor', system: { quantity: 1, isNaturalArmor: true } }), false);
+    assert.equal(adapter.eligible({ ...gear, grantedBy: ability }), false);
+    assert.equal(adapter.eligible(ability), false);
   } finally { globalThis.game = originalGame; }
 });

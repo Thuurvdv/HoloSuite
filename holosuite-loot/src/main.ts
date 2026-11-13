@@ -240,8 +240,11 @@ Hooks.on("updateToken", (token: any, changes: any) => {
   for (const uuid of panels.keys()) if (uuid !== token.uuid) refresh(uuid);
 });
 Hooks.on("createToken", initialize);
+Hooks.on("createCombatant", scanScene);
 Hooks.on("updateCombatant", scanScene);
 Hooks.on("deleteCombatant", scanScene);
+Hooks.on("updateCombat", scanScene);
+Hooks.on("deleteCombat", scanScene);
 Hooks.on("updateActor", scanScene);
 Hooks.on("createActiveEffect", scanScene);
 Hooks.on("updateActiveEffect", scanScene);

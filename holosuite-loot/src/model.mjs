@@ -48,8 +48,9 @@ export function eligible(token, { combats = [], zeroHP = false, automatic = true
   if (config.mode === "disabled") return false;
   if (config.mode === "enabled") return true;
   if (!automatic) return false;
-  if (combats.some(combat => combat.scene?.id === token.parent?.id
-    && combat.combatants?.some(c => c.tokenId === token.id && c.defeated))) return true;
+  if (combats.some(combat => combat.combatants?.some(c => c.tokenId === token.id
+    && (c.sceneId ?? combat.scene?.id) === token.parent?.id
+    && (c.isDefeated || c.defeated)))) return true;
   const statuses = token.actor.statuses;
   if (statuses?.has("dead")) return true;
   // Unconsciousness and player-style death saves are not death.

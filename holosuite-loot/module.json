@@ -1,7 +1,7 @@
 {
   "id": "holosuite-loot",
   "title": "HoloSuite Loot",
-  "description": "Compact corpse looting with native D&D5e and Starfinder Second Edition support and manual item selection for other systems.",
+  "description": "Compact corpse looting with native D&D5e, Starfinder Second Edition, and Savage Worlds Adventure Edition support and manual item selection for other systems.",
   "version": "1.1.0",
   "authors": [{"name": "Mage Tower Studios", "email": "Magetowerfoundry@gmail.com"}],
   "compatibility": {"minimum": "13", "verified": "14"},
