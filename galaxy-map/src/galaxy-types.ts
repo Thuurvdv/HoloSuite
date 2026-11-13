@@ -1,6 +1,20 @@
 export type GalaxyVisibility = "gm" | "players";
 export type LocationVisibility = GalaxyVisibility | "inherit";
 
+export interface GalaxyOrbit {
+  id: string;
+  radius: number;
+}
+
+export interface GalaxyOrbitAttachment {
+  centerId: string;
+  orbitId: string;
+  angle: number;
+  period: number;
+  clockwise: boolean;
+  epoch: number;
+}
+
 export interface GalaxyLocation {
   id: string;
   name: string;
@@ -14,6 +28,8 @@ export interface GalaxyLocation {
   notes: string;
   sceneIds: string[];
   planetLocations: unknown[];
+  orbits?: GalaxyOrbit[];
+  orbit?: GalaxyOrbitAttachment;
   [key: string]: any;
 }
 

@@ -79,6 +79,27 @@
         </div>
         <label>Description<textarea name="description" rows="4">{{creation.description}}</textarea></label>
         <label>GM notes<textarea name="notes" rows="3">{{creation.notes}}</textarea></label>
+        <details class="gmf-orbit-editor" data-orbit-editor {{#if creation.showOrbitEditor}}open{{/if}}>
+          <summary>Orbits</summary>
+          <p class="gmf-empty-copy">Add rings around this location, or attach it to a ring around another location.</p>
+          <div data-orbit-rows></div>
+          <template data-orbit-row-template>
+            <div class="gmf-orbit-editor__row" data-orbit-row>
+              <label>Radius (% of the shorter map edge)<input type="number" min="1" max="100" step="any" required data-orbit-radius /></label>
+              <button type="button" class="gmf-icon-button" data-remove-orbit title="Remove orbit" aria-label="Remove orbit"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </template>
+          <button type="button" class="gmf-icon-button" data-add-orbit><i class="fa-solid fa-plus"></i><span>Add Orbit</span></button>
+          <label>Attach to Orbit<select data-orbit-attachment>
+            <option value="">Free placement</option>
+            {{#each creation.orbitOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select></label>
+          <div data-orbit-placement hidden>
+            <label>Position (0° is right)<input type="number" value="0" step="any" required data-orbit-angle /></label>
+            <label>Motion<select data-orbit-motion><option value="fixed">Fixed</option><option value="clockwise">Animate clockwise</option><option value="counterclockwise">Animate counterclockwise</option></select></label>
+            <label data-orbit-speed hidden>Seconds per revolution<input type="number" value="60" min="5" max="3600" step="any" required data-orbit-period /></label>
+          </div>
+        </details>
       {{/if}}
       {{#if creation.isRoute}}
         <div class="gmf-panel-create__grid">
@@ -247,6 +268,7 @@
               <summary title="GM Actions" aria-label="GM Actions"><i class="fa-solid fa-ellipsis"></i></summary>
               <div class="gmf-action-menu__panel">
                 {{#unless planetView}}<button type="button" class="gmf-icon-button" data-action="edit-system" title="Edit {{#if objectView}}Location{{else}}System{{/if}}" aria-label="Edit {{#if objectView}}Location{{else}}System{{/if}}"><i class="fa-solid fa-pen"></i><span>Edit {{#if objectView}}Location{{else}}System{{/if}}</span></button>{{/unless}}
+                {{#if objectView}}{{#unless planetView}}<button type="button" class="gmf-icon-button" data-action="edit-orbits" title="Edit Orbits" aria-label="Edit Orbits"><i class="fa-regular fa-circle"></i><span>Orbits</span></button>{{/unless}}{{/if}}
                 {{#unless system.isCurrent}}<button type="button" class="gmf-icon-button" data-action="set-current-system" title="Set Current Location" aria-label="Set Current Location"><i class="fa-solid fa-location-crosshairs"></i><span>Set Current</span></button>{{/unless}}
                 {{#if system.gmOnly}}
                   <button type="button" class="gmf-icon-button" data-action="reveal-system" title="Reveal to Players" aria-label="Reveal to Players"><i class="fa-solid fa-eye"></i><span>Reveal</span></button>

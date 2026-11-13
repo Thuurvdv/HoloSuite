@@ -12,6 +12,7 @@ import {
 } from "./galaxy-model";
 import { MODULE_ID, SETTING_MAPS, SOCKET_NAME } from "./constants";
 import { downloadJson, slugify } from "./dom-utils";
+import { canAttachToOrbit, createOrbitLayout, DEFAULT_ORBIT_ASPECT, detachFromOrbit, orbitAngle, orbitTime } from "./orbits";
 
 declare const foundry: any;
 declare const game: any;
@@ -137,14 +138,52 @@ export function createGalaxyStore(deps: StoreDependencies) {
     const map = maps[mapId] ? normalizeMap(maps[mapId]) : null;
     const system = map?.systems.find((candidate: any) => candidate.id === systemId);
     if (!map || !system) return null;
-    const object = normalizeSystemObject(objectData);
-    const index = system.objects.findIndex((candidate: any) => candidate.id === object.id);
+    const index = system.objects.findIndex((candidate: any) => candidate.id === objectData.id);
+    const existing = system.objects[index];
+    const object = normalizeSystemObject({ orbits: existing?.orbits, orbit: existing?.orbit, ...objectData });
+    if (object.orbit && !canAttachToOrbit(system.objects, object.id, object.orbit)) {
+      notifyError("Choose an orbit that exists in this system and does not depend on this location.");
+      return null;
+    }
+    if (existing?.orbit || existing?.orbits?.length) {
+      const time = orbitTime();
+      const geometry = getOrbitGeometry(mapId, systemId);
+      const positions = createOrbitLayout(system.objects).positions(geometry.aspect, time, geometry.motion);
+      if (existing.orbit && !object.orbit) detachFromOrbit(object, positions.get(object.id));
+      if (existing.orbit && object.orbit && object.orbit.epoch !== existing.orbit.epoch
+        && object.orbit.centerId === existing.orbit.centerId && object.orbit.orbitId === existing.orbit.orbitId
+        && object.orbit.angle === existing.orbit.angle) {
+        object.orbit.angle = orbitAngle(existing.orbit, time, geometry.motion);
+      }
+      for (const child of system.objects) {
+        if (child.orbit?.centerId === object.id && !object.orbits?.some(ring => ring.id === child.orbit.orbitId)) {
+          detachFromOrbit(child, positions.get(child.id));
+        }
+      }
+    }
     if (index >= 0) system.objects[index] = object;
     else system.objects.push(object);
     if (!system.primaryObjectId) system.primaryObjectId = object.id;
     maps[mapId] = map;
     await persistMap(maps, mapId);
     return clone(object);
+  }
+
+  function getOrbitGeometry(mapId: string, systemId: string) {
+    for (const app of getOpenMapViews(mapId)) {
+      const geometry = app.getOrbitGeometry?.(systemId);
+      if (geometry) return geometry;
+    }
+    return { aspect: DEFAULT_ORBIT_ASPECT, motion: true };
+  }
+
+  function detachLocationOrbits(mapId: string, system: any, objectId: string) {
+    const detached = system.objects.filter((object: any) =>
+      object.orbit && (object.id === objectId || object.orbit.centerId === objectId));
+    if (!detached.length) return;
+    const { aspect, motion } = getOrbitGeometry(mapId, system.id);
+    const positions = createOrbitLayout(system.objects).positions(aspect, orbitTime(), motion);
+    for (const object of detached) detachFromOrbit(object, positions.get(object.id));
   }
 
   const updateOpenPlanetLocations = (mapId: string, systemId: string, objectId: string) => {
@@ -200,6 +239,7 @@ export function createGalaxyStore(deps: StoreDependencies) {
     const map = maps[mapId] ? normalizeMap(maps[mapId]) : null;
     const system = map?.systems.find((candidate: any) => candidate.id === systemId);
     if (!map || !system) return false;
+    detachLocationOrbits(mapId, system, objectId);
     system.objects = system.objects.filter((candidate: any) => candidate.id !== objectId);
     if (system.primaryObjectId === objectId) system.primaryObjectId = system.objects[0]?.id ?? "";
     if (map.currentLocation.objectId === objectId) map.currentLocation.objectId = system.primaryObjectId;
@@ -216,6 +256,7 @@ export function createGalaxyStore(deps: StoreDependencies) {
     const destination = map?.systems.find((system: any) => system.id === destinationSystemId);
     const object = source?.objects.find((candidate: any) => candidate.id === objectId);
     if (!map || !source || !destination || !object) return null;
+    if (source.id !== destination.id) detachLocationOrbits(mapId, source, objectId);
     source.objects = source.objects.filter((candidate: any) => candidate.id !== objectId);
     destination.objects.push(object);
     if (source.primaryObjectId === objectId) source.primaryObjectId = source.objects[0]?.id ?? "";
@@ -239,13 +280,20 @@ export function createGalaxyStore(deps: StoreDependencies) {
     return clone(system);
   }
 
-  async function saveObjectPosition(mapId: string, systemId: string, objectId: string, x: any, y: any) {
+  async function saveObjectPosition(mapId: string, systemId: string, objectId: string, x: any, y: any, orbitPlacement?: { centerId: string; orbitId: string; angle: number }) {
+    if (!requireGM("place locations")) return null;
     const maps = getMapStore();
     const map = maps[mapId] ? normalizeMap(maps[mapId]) : null;
     const object = map?.systems.find((system: any) => system.id === systemId)?.objects.find((candidate: any) => candidate.id === objectId);
     if (!map || !object) return null;
-    object.x = clamp(normalizeNumber(x, object.x), 0, 100);
-    object.y = clamp(normalizeNumber(y, object.y), 0, 100);
+    if (orbitPlacement) {
+      if (object.orbit?.centerId !== orbitPlacement.centerId || object.orbit.orbitId !== orbitPlacement.orbitId) return null;
+      object.orbit.angle = orbitPlacement.angle;
+      object.orbit.epoch = orbitTime();
+    } else {
+      object.x = clamp(normalizeNumber(x, object.x), 0, 100);
+      object.y = clamp(normalizeNumber(y, object.y), 0, 100);
+    }
     maps[mapId] = map;
     await persistMap(maps, mapId);
     return clone(object);

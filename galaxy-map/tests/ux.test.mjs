@@ -117,7 +117,7 @@ test("map chrome stays minimal without search, zoom, add, scan, or ping controls
   assert.match(details, /data-panel-create-form[\s\S]*creation\.isSystem[\s\S]*creation\.isEntity[\s\S]*creation\.isRoute[\s\S]*creation\.isFaction/);
   assert.match(view, /action === "add-system"[\s\S]*_openCreationPanel\("system"/);
   assert.match(view, /data-action='edit-system'[\s\S]*_openEditPanel\("entity"[\s\S]*_openEditPanel\("system"/);
-  assert.match(view, /kind === "entity"[\s\S]*upsertObject\(this\.mapId, this\.activeSystemId, \{ \.\.\.existing, \.\.\.values/);
+  assert.match(view, /kind === "entity"[\s\S]*upsertObject\(this\.mapId, this\.activeSystemId, \{ \.\.\.location, \.\.\.values/);
   assert.match(viewCss, /\.gmf-system-panel \{[\s\S]*position: absolute;[\s\S]*border-radius: 30px;[\s\S]*background: rgba\(88, 216, 255, 0\.15\);[\s\S]*box-shadow:/);
   assert.match(details, /gmf-system-panel__scroll/);
   assert.match(viewCss, /\.gmf-system-panel \{[\s\S]*overflow: hidden/);
