@@ -18,6 +18,7 @@ Players can also call the GM using a built-in contacts directory, making two-way
 - Players can send persistent private CyberCall messages to other players or to contacts handled by the GM.
 - Players can create named private group chats, invite other player users, and message every member in one thread.
 - Incoming messages briefly show the sender's portrait and message preview with a short notification tone; each user can disable these alerts in CyberCall settings.
+- Players choose **Notification sound** below **Ringtone** in the **Calls** tab. GMs manage uploads and shared sounds in **Message Notification Sound → Choose or Upload Sound** in module settings. **Allow uploaded notification sounds to be used by players** is enabled by default. Selections are saved per user and world. Unavailable sounds fall back to the built-in tone.
 - CyberCall cards are hidden from Foundry's standard chat log by default and can be restored per client with **Show CyberCall Chat Cards**.
 - Message timestamps are hidden by default and can be enabled per client with the **Show Message Timestamps** CyberCall setting.
 - GMs can link contacts to Actors and reply in message threads as that NPC/contact.

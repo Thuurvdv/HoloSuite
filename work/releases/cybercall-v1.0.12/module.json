@@ -1,0 +1,39 @@
+{
+  "id": "cybercall",
+  "title": "CyberCall",
+  "description": "A sci-fi hologram communication overlay for Foundry VTT.",
+  "version": "1.0.12",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "Mage Tower Studios",
+      "email": "Magetowerfoundry@gmail.com"
+    }
+  ],
+  "esmodules": [
+    "dist/main.js"
+  ],
+  "styles": [
+    "styles/holosuite-tokens.css",
+    "styles/cybercall.css"
+  ],
+  "packs": [],
+  "languages": [],
+  "socket": true,
+  "url": "https://github.com/Thuurvdv/HoloSuite/tree/main/cybercall",
+  "manifest": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/cybercall/module.json",
+  "download": "https://github.com/Thuurvdv/HoloSuite/releases/download/cybercall-v1.0.12/cybercall.zip",
+  "license": "GPL-3.0-or-later",
+  "readme": "README.md",
+  "relationships": {
+    "requires": [
+      {
+        "id": "holosuite-core",
+        "type": "module"
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+<form class="cybercall-ringtone-config">
+  <header class="cybercall-ringtone-config-header">
+    <h2>Message Notification Sound</h2>
+    <p>Choose the sound you hear when a CyberCall message arrives. Your choice is saved to your user in this world.</p>
+  </header>
+  <label class="cybercall-ringtone-config-field">
+    <span>Notification sound</span>
+    <select data-message-sound-selection name="selection">
+      <option value="" {{#if useDefault}}selected{{/if}}>Built-in notification tone</option>
+      <option value="personal" {{#if usePersonal}}selected{{/if}}>My custom audio file</option>
+      {{#each sounds}}
+        <option value="{{path}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+      {{/each}}
+    </select>
+  </label>
+  {{#if canChooseFile}}
+    <div class="cybercall-ringtone-config-field">
+      <label for="cybercall-personal-message-sound">My custom audio file</label>
+      <div class="cybercall-ringtone-config-path cybercall-message-sound-path">
+        <input id="cybercall-personal-message-sound" type="text" data-personal-sound name="personalPath" value="{{personal.path}}" placeholder="Choose an audio file…" {{#if useDefault}}disabled{{/if}}>
+        <button type="button" data-message-sound-browse title="Choose or upload audio" {{#if useDefault}}disabled{{/if}}><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Browse</button>
+      </div>
+    </div>
+    {{#if canUpload}}
+      <p>Use Browse to upload an audio file into a folder in Foundry, then select it.</p>
+    {{else}}
+      <p>You can choose existing audio files. Uploading requires Foundry's Upload New Files permission.</p>
+    {{/if}}
+  {{else}}
+    <p>Browsing and uploading files require the corresponding Foundry world permissions. You can still choose shared GM sounds.</p>
+  {{/if}}
+  {{#if isGM}}
+    <h3>GM Sound Library</h3>
+    <label><input type="checkbox" name="shareSounds" data-share-message-sounds {{#if shareSounds}}checked{{/if}}> Allow uploaded notification sounds to be used by players</label>
+    <div class="cybercall-ringtone-config-list" data-ringtone-list>
+      {{#each ringtones}}
+        <div class="cybercall-ringtone-config-row" data-ringtone-row>
+          <label class="cybercall-ringtone-config-field"><span>Display name</span><input type="text" data-ringtone-label name="ringtones.{{@index}}.label" value="{{label}}"></label>
+          <label class="cybercall-ringtone-config-field">
+            <span>Audio file</span>
+            <div class="cybercall-ringtone-config-path">
+              <input type="text" data-ringtone-path name="ringtones.{{@index}}.path" value="{{path}}">
+              <button type="button" data-ringtone-browse title="Choose or upload audio"><i class="fa-solid fa-folder-open"></i></button>
+            </div>
+          </label>
+          <button type="button" data-ringtone-remove title="Remove sound"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      {{/each}}
+      <div class="cybercall-ringtone-config-empty" data-ringtone-empty><span>Add audio files to the GM library.</span></div>
+    </div>
+    <button type="button" class="cybercall-ringtone-add" data-ringtone-add><i class="fa-solid fa-plus"></i> Add shared sound</button>
+  {{/if}}
+  <footer><button type="submit" class="cybercall-ringtone-save"><i class="fa-solid fa-floppy-disk"></i> Save changes</button></footer>
+</form>

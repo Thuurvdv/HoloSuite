@@ -444,7 +444,8 @@
 .cybercall-contacts select option,
 .cybercall-contacts select optgroup,
 .cybercall-messages select option,
-.cybercall-messages select optgroup {
+.cybercall-messages select optgroup,
+.cybercall-ringtone-config select[data-message-sound-selection] option {
   background: #06111a !important;
   background-color: #06111a !important;
   color: #e7faff !important;
@@ -467,7 +468,9 @@
 .cybercall-contacts select option:checked,
 .cybercall-contacts select option:hover,
 .cybercall-messages select option:checked,
-.cybercall-messages select option:hover {
+.cybercall-messages select option:hover,
+.cybercall-ringtone-config select[data-message-sound-selection] option:checked,
+.cybercall-ringtone-config select[data-message-sound-selection] option:hover {
   background: #0b4f6f !important;
   background-color: #0b4f6f !important;
   color: #d2f9ff !important;
@@ -613,6 +616,33 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 42px;
   gap: 6px;
+}
+
+.cybercall-message-sound-path {
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+}
+
+.cybercall-message-sound-path button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-inline: 12px;
+  white-space: nowrap;
+}
+
+.cybercall-message-sound-path :disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cybercall-ringtone-config select[data-message-sound-selection] {
+  min-height: 38px;
+  border-color: #3b9db5 !important;
+  background-color: #00070c !important;
+  color: #ecfbff !important;
+  color-scheme: dark;
 }
 
 .cybercall-ringtone-config input[type="text"] {

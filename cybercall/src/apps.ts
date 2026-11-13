@@ -40,6 +40,7 @@ export function createCyberCallAppClasses(deps: any) {
     getGroupContacts,
     getMessageContext,
     getRingtoneChoices,
+    getMessageSoundOptions,
     getSoundPath,
     getActiveContactsTab,
     canEditContactImages,
@@ -78,6 +79,7 @@ export function createCyberCallAppClasses(deps: any) {
       unreadMessageCount: getMessageContext().unreadCount,
       hasUnreadMessages: getMessageContext().unreadCount > 0,
       ringtoneChoices: getRingtoneChoices(),
+      messageSoundOptions: game.user?.isGM ? [] : getMessageSoundOptions(),
       currentRingtone: getSoundPath()
     };
   }
