@@ -4,6 +4,13 @@ Galaxy Map turns a Foundry world into a navigable star chart. Build a galaxy, op
 
 ![Galaxy Map Manager](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/images/Galaxy%20Map%20Manager.png)
 
+## What's New in 2.2.0
+
+- Open **Factions** in the map toolbar to view territory overlays and see each faction's prominence or standing toward the party. Select a faction's name on either tab to open its dossier.
+- Connect minor factions to major factions in the faction panel. GMs can set prominence for the galaxy and for individual systems and edit how each faction views the party.
+- GMs can customize both rating scales under **Configure Settings → Galaxy Map**. Turn off **Enable Factions** there to hide the faction feature for the world while keeping saved data.
+- Fixed travel and manual location changes so the party's current system stays at the chosen destination.
+
 ## What's New in 2.1.0
 
 - Add circular orbit rings to locations on system maps. Attach planets, moons, stations, or other locations to a ring and keep them fixed or animate them at a chosen speed and direction.

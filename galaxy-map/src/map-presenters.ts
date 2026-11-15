@@ -1,4 +1,5 @@
-import { ANIMATED_CELESTIAL_STYLES, normalizeMap } from "./galaxy-model";
+import { ANIMATED_CELESTIAL_STYLES, getEffectiveObjectVisibility, normalizeMap } from "./galaxy-model";
+import type { GalaxyFaction } from "./galaxy-types";
 import { getPlanetAppearance } from "./planet-presets";
 import { TRAVEL_APPROVAL_OPTIONS } from "./travel-approval";
 
@@ -12,22 +13,34 @@ function isSystemObscured(system: any, playerMode: boolean) {
   return playerMode && system.status === "undiscovered";
 }
 
+function prepareFactionOwnership(
+  entity: { factionId: string; iconColor: string },
+  factions: ReadonlyMap<string, Pick<GalaxyFaction, "id" | "name" | "color">>,
+  obscured: boolean,
+  factionsDisabled: boolean
+) {
+  const faction = obscured ? undefined : factions.get(entity.factionId);
+  return {
+    factionId: faction?.id ?? "",
+    factionName: faction?.name ?? (obscured || factionsDisabled ? "" : "Unaffiliated"),
+    factionColor: (!obscured && entity.iconColor) || faction?.color || "#58d8ff"
+  };
+}
+
 export function getDisplayIconStyle(type: string, iconStyle: string) {
   const typeIconFallbacks: Record<string, string> = { station: "station", anomaly: "diamond", ruins: "diamond", unknown: "diamond" };
   return iconStyle === "planet" ? typeIconFallbacks[type] ?? iconStyle : iconStyle;
 }
 
-export function prepareMapForDisplay(map: any, { playerMode = false, selectedSystemId = null, selectedRouteId = null }: any = {}) {
+export function prepareMapForDisplay(map: any, { playerMode = false, selectedSystemId = null, selectedRouteId = null, factionsDisabled = false }: any = {}) {
+  playerMode = playerMode || !game.user?.isGM;
   const normalized = normalizeMap(map);
   const systems = playerMode ? normalized.systems.filter(canPlayerSeeSystem) : normalized.systems;
   const visibleSystemIds = new Set(systems.map((system: any) => system.id));
-  const factions = playerMode
-    ? normalized.factions.filter((faction: any) => faction.visibility === "players")
-    : normalized.factions;
-  const factionLookup = new Map(factions.map((faction: any) => [faction.id, faction]));
+  const visibleFactions = factionsDisabled ? [] : normalized.factions.filter(faction => !playerMode || faction.visibility === "players");
+  const factionLookup = new Map(visibleFactions.filter(faction => faction.kind === "major").map(faction => [faction.id, faction]));
 
   const displaySystems = systems.map((system: any) => {
-    const faction: any = factionLookup.get(system.factionId);
     const obscured = isSystemObscured(system, playerMode);
     const displayType = obscured ? "unknown" : system.type;
     const displayIconStyle = obscured ? "diamond" : getDisplayIconStyle(displayType, system.iconStyle);
@@ -48,8 +61,13 @@ export function prepareMapForDisplay(map: any, { playerMode = false, selectedSys
       displayDescription: obscured ? "Unresolved sensor contact. Details are not available." : system.description,
       displayType,
       displayStatus: obscured ? "undiscovered" : system.status,
-      factionName: faction?.name ?? "Unaffiliated",
-      factionColor: system.iconColor || faction?.color || "#58d8ff",
+      ...prepareFactionOwnership(system, factionLookup, obscured, factionsDisabled),
+      objects: system.objects
+        .filter(object => !playerMode || getEffectiveObjectVisibility(system, object) === "players")
+        .map(object => ({
+          ...object,
+          ...prepareFactionOwnership(object, factionLookup, obscured || (playerMode && object.status === "undiscovered"), factionsDisabled)
+        })),
       obscured,
       isCurrent: system.id === normalized.currentSystemId,
       isSelected: system.id === selectedSystemId,
@@ -61,6 +79,23 @@ export function prepareMapForDisplay(map: any, { playerMode = false, selectedSys
       hasScenes: Boolean(!obscured && system.sceneIds.length),
       showImage: Boolean(!obscured && system.image),
       canInspectSystem: Boolean(getPlanetAppearance({ ...system, iconStyle: displayIconStyle, obscured }))
+    };
+  });
+
+  const knownSystems = displaySystems.filter(system => !system.obscured);
+  const factions = visibleFactions.map(faction => {
+    const headquarters = knownSystems.find(system => system.id === faction.headquartersSystemId);
+    const { id, name, color, emblem, tagline, type, description, visibility, kind, prominence, reputation } = faction;
+    return {
+      id, name, color, emblem, tagline, type, description, visibility, kind, prominence, reputation,
+      parentFactionId: factionLookup.has(faction.parentFactionId) ? faction.parentFactionId : "",
+      systemProminence: Object.fromEntries(knownSystems
+        .filter(system => Object.hasOwn(faction.systemProminence, system.id))
+        .map(system => [system.id, faction.systemProminence[system.id]])),
+      gmNotes: playerMode ? undefined : faction.gmNotes,
+      headquarters: headquarters ? { id: headquarters.id, name: headquarters.displayName } : null,
+      controlledSystems: knownSystems.filter(system => system.factionId === id)
+        .map(system => ({ id: system.id, name: system.displayName }))
     };
   });
 
@@ -123,6 +158,10 @@ export function prepareMapForManager(map: any) {
   return {
     ...normalized,
     travelApprovalModeLabel: TRAVEL_APPROVAL_OPTIONS.find(option => option.value === normalized.travelApprovalMode)?.label ?? "Unanimous agreement",
+    factions: normalized.factions.map(faction => ({
+      ...faction,
+      systemCount: normalized.systems.filter(system => system.factionId === faction.id).length
+    })),
     systems: normalized.systems.map((system: any) => ({
       ...system,
       factionName: factionsById.get(system.factionId)?.name ?? "Unaffiliated"

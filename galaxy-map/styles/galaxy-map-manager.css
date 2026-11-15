@@ -687,6 +687,25 @@
   font-size: 12px;
 }
 
+:is(.gmf-manager, .gmf-galaxy) .gmf-faction-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+:is(.gmf-manager, .gmf-galaxy) .gmf-faction-emblem {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border: 1px solid var(--hs-line);
+  border-radius: var(--hs-radius);
+  background: var(--hs-field);
+}
+
+.gmf-galaxy .gmf-faction-emblem { width: 56px; height: 56px; }
+
 .gmf-color-dot {
   display: inline-block;
   width: 10px;

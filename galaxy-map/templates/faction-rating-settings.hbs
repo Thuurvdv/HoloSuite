@@ -1,0 +1,28 @@
+<section>
+  {{#if canEdit}}
+    <form class="standard-form" data-faction-ratings>
+      <p class="hint">Renaming a rating keeps its faction assignments. Factions assigned a removed rating display as Unrated.</p>
+      <fieldset>
+        <legend>{{title}} ratings</legend>
+        {{#each ratings}}
+          <div class="form-group">
+            <label for="gmf-{{../scale}}-{{id}}">Rating name</label>
+            <div class="form-fields">
+              <input id="gmf-{{../scale}}-{{id}}" type="text" value="{{label}}" data-rating-label="{{id}}" required />
+              <button type="button" data-remove-rating="{{id}}" aria-label="Remove {{#if label}}{{label}}{{else}}rating{{/if}}">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        {{else}}
+          <p>No ratings configured.</p>
+        {{/each}}
+        <div class="form-fields">
+          <button type="button" data-add-rating><i class="fa-solid fa-plus" aria-hidden="true"></i> Add rating</button>
+          <button type="submit"><i class="fa-solid fa-check" aria-hidden="true"></i> Save ratings</button>
+        </div>
+      </fieldset>
+      <output data-rating-status role="status"></output>
+    </form>
+  {{/if}}
+</section>

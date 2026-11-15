@@ -1,4 +1,4 @@
-<aside class="gmf-system-panel" aria-label="Navigation inspector">
+<aside class="gmf-system-panel {{#if showFactionPanel}}gmf-faction-panel{{/if}}" aria-label="{{#if showFactionPanel}}Faction details{{else}}Navigation inspector{{/if}}">
   <div class="gmf-system-panel__scroll">
   {{#if factionRegistry}}
     <header class="gmf-system-panel__top">
@@ -52,6 +52,7 @@
           <label>Visibility<select name="visibility"><option value="gm" {{#if (gmfEq creation.visibility "gm")}}selected{{/if}}>GM only</option><option value="players" {{#if (gmfEq creation.visibility "players")}}selected{{/if}}>Players</option></select></label>
         </div>
         <label>Description<textarea name="description" rows="4">{{creation.description}}</textarea></label>
+        {{#unless factionsDisabled}}<label>Faction<select name="factionId"><option value="">Unaffiliated</option>{{#if creation.missingFaction}}<option value="{{creation.factionId}}" selected>Unavailable faction</option>{{/if}}{{#each creation.factionOptions}}<option value="{{id}}" {{#if (gmfEq id ../creation.factionId)}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>{{/unless}}
         <label>Custom Marker Image
           <span class="gmf-path-field">
             <input type="text" name="markerImage" value="{{creation.markerImage}}" placeholder="Uses the standard system marker" />
@@ -75,7 +76,7 @@
         </div>
         <div class="gmf-panel-create__grid">
           <label>Visibility<select name="visibility"><option value="inherit" {{#if (gmfEq creation.visibility "inherit")}}selected{{/if}}>Inherit System</option><option value="gm" {{#if (gmfEq creation.visibility "gm")}}selected{{/if}}>GM only</option><option value="players" {{#if (gmfEq creation.visibility "players")}}selected{{/if}}>Players</option></select></label>
-          <label>Faction<select name="factionId"><option value="">Unaffiliated</option>{{#each creation.factionOptions}}<option value="{{id}}" {{#if (gmfEq id ../creation.factionId)}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
+          {{#unless factionsDisabled}}<label>Faction<select name="factionId"><option value="">Unaffiliated</option>{{#each creation.factionOptions}}<option value="{{id}}" {{#if (gmfEq id ../creation.factionId)}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>{{/unless}}
         </div>
         <label>Description<textarea name="description" rows="4">{{creation.description}}</textarea></label>
         <label>GM notes<textarea name="notes" rows="3">{{creation.notes}}</textarea></label>
@@ -119,10 +120,34 @@
       {{#if creation.isFaction}}
         <label>Name<input type="text" name="name" value="{{creation.name}}" required autofocus /></label>
         <div class="gmf-panel-create__grid">
+          <label>Faction scale<select name="kind"><option value="major">Major</option><option value="minor" {{#if (gmfEq creation.factionScale "minor")}}selected{{/if}}>Minor</option></select></label>
+          <label class="gmf-parent-faction-field">Parent faction<select name="parentFactionId" {{#unless (gmfEq creation.factionScale "minor")}}disabled{{/unless}}>
+            <option value="">Independent</option>
+            {{#each creation.parentFactionOptions}}<option value="{{id}}" {{#if (gmfEq id ../creation.parentFactionId)}}selected{{/if}}>{{name}}</option>{{/each}}
+          </select></label>
+        </div>
+        <div class="gmf-panel-create__grid">
           <label>Color<input type="color" name="color" value="{{creation.color}}" /></label>
           <label>Visibility<select name="visibility"><option value="gm" {{#if (gmfEq creation.visibility "gm")}}selected{{/if}}>GM only</option><option value="players" {{#if (gmfEq creation.visibility "players")}}selected{{/if}}>Players</option></select></label>
         </div>
+        <label>Emblem
+          <span class="gmf-path-field">
+            <input type="text" name="emblem" value="{{creation.emblem}}" />
+            <button type="button" class="gmf-icon-button" data-browse-target="emblem" title="Browse emblem" aria-label="Browse emblem"><i class="fa-solid fa-folder-open"></i></button>
+            <button type="button" class="gmf-icon-button" data-clear-target="emblem" title="Clear emblem" aria-label="Clear emblem"><i class="fa-solid fa-xmark"></i></button>
+          </span>
+        </label>
+        <div class="gmf-panel-create__grid">
+          <label>Tagline<input type="text" name="tagline" value="{{creation.tagline}}" /></label>
+          <label>Faction Type<input type="text" name="type" value="{{creation.type}}" /></label>
+        </div>
+        <label>Headquarters<select name="headquartersSystemId">
+          <option value="">None</option>
+          {{#if creation.missingHeadquarters}}<option value="{{creation.headquartersSystemId}}" selected>Unavailable system</option>{{/if}}
+          {{#each creation.headquartersOptions}}<option value="{{id}}" {{#if (gmfEq id ../creation.headquartersSystemId)}}selected{{/if}}>{{name}}</option>{{/each}}
+        </select></label>
         <label>Description<textarea name="description" rows="4">{{creation.description}}</textarea></label>
+        <label>GM Notes<textarea name="gmNotes" rows="3">{{creation.gmNotes}}</textarea></label>
       {{/if}}
       <div class="gmf-panel-create__actions">
         <button type="button" class="gmf-icon-button" data-action="cancel-panel-create" title="Cancel" aria-label="Cancel"><i class="fa-solid fa-xmark"></i></button>
@@ -130,7 +155,43 @@
       </div>
     </form>
   {{else}}
-  {{#if route}}
+  {{#if factionDossier}}
+    <header class="gmf-system-panel__top" style="--gmf-faction-color: {{factionDossier.color}};">
+      <div class="gmf-faction-entry">
+        {{#if factionDossier.emblem}}<img class="gmf-faction-emblem" src="{{factionDossier.emblem}}" alt="" />{{/if}}
+        <div>
+          {{#if factionDossier.type}}<p class="gmf-kicker">{{factionDossier.type}}</p>{{/if}}
+          <h3><span class="gmf-color-dot" style="--gmf-faction-color: {{factionDossier.color}};"></span>{{factionDossier.name}}</h3>
+          {{#if (gmfEq factionDossier.kind "minor")}}<p>Minor faction{{#if factionDossier.parentName}} · {{factionDossier.parentName}}{{/if}}</p>{{/if}}
+        </div>
+      </div>
+      {{#if factionDossier.tagline}}<p>{{factionDossier.tagline}}</p>{{/if}}
+      <div class="gmf-row-actions">
+        {{#if map.canEdit}}<button type="button" class="gmf-icon-button" data-edit-inline-faction="{{factionDossier.id}}" title="Edit faction" aria-label="Edit faction"><i class="fa-solid fa-pen"></i></button>{{/if}}
+        <button type="button" class="gmf-icon-button" data-action="clear-faction" title="Back to factions" aria-label="Back to factions"><i class="fa-solid fa-arrow-left"></i></button>
+      </div>
+    </header>
+    <section class="gmf-faction-dossier">
+      {{#if factionDossier.description}}
+        <h4>Description</h4>
+        <p>{{factionDossier.description}}</p>
+      {{/if}}
+      {{#if factionDossier.headquarters}}
+        <h4>Headquarters</h4>
+        <p>{{factionDossier.headquarters.name}}</p>
+      {{/if}}
+      <h4>Known controlled systems ({{factionDossier.controlledSystems.length}})</h4>
+      {{#if factionDossier.controlledSystems.length}}
+        <ul>{{#each factionDossier.controlledSystems}}<li>{{name}}</li>{{/each}}</ul>
+      {{else}}
+        <p class="gmf-empty-copy">No known controlled systems.</p>
+      {{/if}}
+      {{#if factionDossier.gmNotes}}
+        <h4>GM Notes</h4>
+        <p>{{factionDossier.gmNotes}}</p>
+      {{/if}}
+    </section>
+  {{else if route}}
     <header class="gmf-system-panel__top">
       <p class="gmf-kicker">{{#if objectView}}Location Route{{else}}Travel Route{{/if}}</p>
       <h3>{{route.fromName}} <i class="fa-solid fa-arrow-right-long"></i> {{route.toName}}</h3>
@@ -170,7 +231,7 @@
   {{else}}
     {{#if system}}
       <header class="gmf-system-panel__top" style="--gmf-faction-color: {{system.factionColor}};">
-        <p class="gmf-kicker">{{system.factionName}}</p>
+        {{#unless factionsDisabled}}<p class="gmf-kicker">{{system.factionName}}</p>{{/unless}}
         <h3>{{system.displayName}}</h3>
         {{#if objectView}}<div class="gmf-status-icons" aria-label="Location state">
           <span title="Type: {{system.displayType}}" aria-label="Type: {{system.displayType}}"><i class="fa-solid fa-cube"></i></span>

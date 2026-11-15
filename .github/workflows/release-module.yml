@@ -75,7 +75,7 @@ jobs:
             [ -d "$MODULE_ID/$dir" ] && cp -r "$MODULE_ID/$dir" "staging/$MODULE_ID/$dir"
           done
 
-          for file in README.md LICENSE; do
+          for file in README.md LICENSE THREE-LICENSE.txt; do
             [ -f "$MODULE_ID/$file" ] && cp "$MODULE_ID/$file" "staging/$MODULE_ID/$file"
           done
 

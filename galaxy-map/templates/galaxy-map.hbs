@@ -7,21 +7,23 @@
     <p>The requested map no longer exists in world settings.</p>
   </section>
 {{else}}
-  <section class="gmf-galaxy {{#if hardContrast}}is-hard-contrast{{/if}}">
+  <section data-holosuite-branding="galaxy-map" class="gmf-galaxy {{#if hardContrast}}is-hard-contrast{{/if}}">
     <div class="gmf-galaxy__backdrop"></div>
     <div class="gmf-frame-drag-strip" data-gmf-window-drag title="Drag window" aria-hidden="true"></div>
     <header class="gmf-galaxy__header" data-gmf-window-drag>
       <div class="gmf-galaxy-identity">
         <div class="gmf-galaxy-identity__row">
           <button type="button" class="gmf-icon-button gmf-layer-up" data-action="navigate-up" title="{{#if planetView}}Back to System{{else}}{{#if activeSystem}}Back to Galaxy{{else}}Galaxy level{{/if}}{{/if}}" aria-label="{{#if planetView}}Back to System{{else}}{{#if activeSystem}}Back to Galaxy{{else}}Galaxy level{{/if}}{{/if}}" {{#unless activeSystem}}disabled aria-disabled="true"{{/unless}}><i class="fa-solid fa-arrow-up"></i></button>
-          <span><span class="gmf-galaxy-name">{{map.title}}</span>{{#if activeSystem}}<span class="gmf-chart-name">{{activeSystem.name}}</span>{{/if}}</span>
+          <span><span data-holosuite-brand-icon></span><span data-holosuite-brand-name></span> <span class="gmf-galaxy-name">{{map.title}}</span>{{#if activeSystem}}<span class="gmf-chart-name">{{activeSystem.displayName}}</span>{{/if}}</span>
         </div>
       </div>
       <div class="gmf-actions">
         <button type="button" class="gmf-icon-button gmf-contrast-toggle" data-action="toggle-hard-contrast" title="Hard contrast" aria-label="Hard contrast" aria-pressed="{{#if hardContrast}}true{{else}}false{{/if}}"><i class="fa-solid fa-circle-half-stroke"></i></button>
         {{#unless planetView}}<button type="button" class="gmf-icon-button gmf-route-toggle" data-action="toggle-routes" title="Routes" aria-label="Routes" aria-pressed="{{#if showRoutes}}true{{else}}false{{/if}}"><i class="fa-solid fa-route"></i></button>{{/unless}}
         {{#if hasOrbits}}<button type="button" class="gmf-icon-button" data-action="toggle-orbits" title="Orbit Lines" aria-label="Orbit Lines" aria-pressed="{{#if showOrbits}}true{{else}}false{{/if}}"><i class="fa-regular fa-circle"></i></button>{{/if}}
-        {{#if systemView}}<button type="button" class="gmf-icon-button gmf-faction-toggle" data-action="toggle-territories" title="Faction regions" aria-label="Faction regions" aria-pressed="{{#if showTerritories}}true{{else}}false{{/if}}"><i class="fa-solid fa-layer-group"></i></button>{{/if}}
+        {{#unless planetView}}
+          {{#unless factionsDisabled}}<button type="button" class="gmf-icon-button gmf-faction-toggle" data-action="toggle-territories" title="Factions" aria-label="Factions" aria-pressed="{{#if showTerritories}}true{{else}}false{{/if}}" aria-expanded="{{#if showFactionPanel}}true{{else}}false{{/if}}" {{#if creationPanel}}disabled{{/if}}><i class="fa-solid fa-layer-group"></i></button>{{/unless}}
+        {{/unless}}
         {{#if map.canEdit}}{{#unless planetView}}<button type="button" class="gmf-icon-button gmf-layer-edit" data-action="edit-current-layer" title="{{#if systemView}}Edit System{{else}}Edit Galaxy{{/if}}" aria-label="{{#if systemView}}Edit System{{else}}Edit Galaxy{{/if}}"><i class="fa-solid fa-pen"></i></button>{{/unless}}{{/if}}
         <button type="button" class="gmf-window-close" data-action="close-window" title="Close" aria-label="Close Galaxy Map"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -50,15 +52,15 @@
       <main class="gmf-map-stage {{#if map.backgroundImage}}gmf-map-stage--custom-background{{/if}}" aria-label="{{#if systemView}}Interactive system chart{{else}}Interactive galaxy map{{/if}}">
         <div class="gmf-map-viewport" style="--gmf-pan-x: {{panX}}px; --gmf-pan-y: {{panY}}px; --gmf-zoom: {{zoom}};">
           {{#if map.backgroundImage}}<img class="gmf-map-background" src="{{map.backgroundImage}}" alt="" aria-hidden="true" />{{/if}}
-          {{#if systemView}}{{#if showTerritories}}
+          {{#if showTerritories}}{{#if territories.length}}
             <div class="gmf-territories" aria-hidden="true">
               <svg viewBox="0 0 100 100" preserveAspectRatio="none">
                 {{#each territories}}
-                  <polygon points="{{points}}" style="--gmf-territory-color: {{color}};" />
+                  <polygon class="{{#if ../highlightedFactionId}}{{#if (gmfEq id ../highlightedFactionId)}}is-faction-highlighted{{else}}is-faction-muted{{/if}}{{/if}}" points="{{points}}" style="--gmf-territory-color: {{color}};" />
                 {{/each}}
               </svg>
               {{#each territories}}
-                <span class="gmf-territory-label" style="left: {{labelX}}%; top: {{labelY}}%; --gmf-territory-color: {{color}};">{{name}}</span>
+                <span class="gmf-territory-label {{#if ../highlightedFactionId}}{{#if (gmfEq id ../highlightedFactionId)}}is-faction-highlighted{{else}}is-faction-muted{{/if}}{{/if}}" style="left: {{labelX}}%; top: {{labelY}}%; --gmf-territory-color: {{color}};">{{name}}</span>
               {{/each}}
             </div>
           {{/if}}{{/if}}
@@ -84,7 +86,7 @@
           <div class="gmf-system-layer">
             {{#each map.systems as |system|}}
               <button type="button"
-                class="gmf-system {{#if system.hasCustomMarker}}has-custom-marker{{/if}} {{#if ../systemView}}gmf-system--{{system.displayType}} gmf-icon--{{system.iconStyle}} {{#if system.animatedCelestial}}gmf-system--animated-celestial{{/if}}{{else}}gmf-system--galaxy-node{{/if}} gmf-status--{{system.displayStatus}} {{#if system.isSelected}}is-selected{{/if}} {{#if system.isCurrent}}is-current{{/if}} {{#if system.isDestination}}is-destination{{/if}} {{#if system.hasAlert}}has-alert{{/if}} {{#if system.obscured}}is-obscured{{/if}} {{#if system.gmOnly}}gmf-gm-only{{/if}} {{#unless system.pulse}}gmf-no-pulse{{/unless}} {{#if system.isExternalFocus}}is-external-focus gmf-focus--{{system.externalFocus.kind}}{{/if}}"
+                class="gmf-system {{#if ../highlightedFactionId}}{{#if (gmfEq system.factionId ../highlightedFactionId)}}is-faction-highlighted{{else}}is-faction-muted{{/if}}{{/if}} {{#if system.hasCustomMarker}}has-custom-marker{{/if}} {{#if ../systemView}}gmf-system--{{system.displayType}} gmf-icon--{{system.iconStyle}} {{#if system.animatedCelestial}}gmf-system--animated-celestial{{/if}}{{else}}gmf-system--galaxy-node{{/if}} gmf-status--{{system.displayStatus}} {{#if system.isSelected}}is-selected{{/if}} {{#if system.isCurrent}}is-current{{/if}} {{#if system.isDestination}}is-destination{{/if}} {{#if system.hasAlert}}has-alert{{/if}} {{#if system.obscured}}is-obscured{{/if}} {{#if system.gmOnly}}gmf-gm-only{{/if}} {{#unless system.pulse}}gmf-no-pulse{{/unless}} {{#if system.isExternalFocus}}is-external-focus gmf-focus--{{system.externalFocus.kind}}{{/if}}"
                 style="left: {{gmfPercent system.x}}; top: {{gmfPercent system.y}}; --gmf-faction-color: {{system.factionColor}}; --gmf-system-size: {{system.iconSize}}px; {{#if system.isExternalFocus}}--gmf-focus-color: {{system.externalFocus.color}};{{/if}}"
                 data-system-id="{{system.id}}"
                 data-icon-size="{{system.iconSize}}"
@@ -129,7 +131,13 @@
       </main>
 
       {{#if creationPanel.isEntity}}{{> "modules/galaxy-map/templates/object-appearance-panel.hbs" creation=creationPanel appearanceGuideMarkup=appearanceGuideMarkup}}{{/if}}
-      {{#if showInspector}}{{> "modules/galaxy-map/templates/system-details.hbs" creation=creationPanel factionRegistry=factionRegistry system=map.selectedSystem route=map.selectedRoute map=map playerMode=playerMode objectView=systemView linkedScenes=linkedPlanetScenes linkedJournal=linkedPlanetJournal canEditLinks=canPlacePlanetLocations}}{{/if}}
+      {{#if showInspector}}
+        {{#if factionPanel}}
+          {{> "modules/galaxy-map/templates/faction-panel.hbs" panel=factionPanel}}
+        {{else}}
+          {{> "modules/galaxy-map/templates/system-details.hbs" creation=creationPanel factionRegistry=factionRegistry factionDossier=factionDossier system=map.selectedSystem route=map.selectedRoute map=map playerMode=playerMode objectView=systemView linkedScenes=linkedPlanetScenes linkedJournal=linkedPlanetJournal canEditLinks=canPlacePlanetLocations}}
+        {{/if}}
+      {{/if}}
       {{/if}}
     </div>
   </section>

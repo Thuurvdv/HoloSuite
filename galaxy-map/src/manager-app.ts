@@ -2,6 +2,7 @@ declare const Dialog: any;
 
 import { activateGalaxyWindowChrome, GALAXY_DIALOG_OPTIONS } from "./window-chrome";
 import { getApplicationBase } from "./app-base";
+import { areFactionsEnabled } from "./faction-ratings";
 import { escapeHtml } from "./dom-utils";
 
 export function createGalaxyMapManagerClass(deps: any) {
@@ -62,6 +63,8 @@ export function createGalaxyMapManagerClass(deps: any) {
 
     async _prepareContext(options: any) {
       const context = await super._prepareContext(options);
+      const factionsDisabled = !areFactionsEnabled();
+      if (factionsDisabled && this.activeTab === "factions") this.activeTab = "systems";
       const maps = getMaps().sort((a: any, b: any) => a.title.localeCompare(b.title));
       if (!this.selectedMapId || !maps.some((map: any) => map.id === this.selectedMapId)) {
         this.selectedMapId = maps[0]?.id ?? null;
@@ -82,6 +85,7 @@ export function createGalaxyMapManagerClass(deps: any) {
         selectedMap,
         selectedMapId: this.selectedMapId,
         activeTab: this.activeTab,
+        factionsDisabled,
         showSystems: this.activeTab === "systems",
         showRoutes: this.activeTab === "routes",
         showFactions: this.activeTab === "factions",
@@ -239,7 +243,7 @@ export function createGalaxyMapManagerClass(deps: any) {
         subtitle: "Uncharted theatre",
         description: "A campaign-scale navigation map.",
         visibility: "players",
-        factions: [
+        factions: areFactionsEnabled() ? [
           {
             id: "independent",
             name: "Independent",
@@ -247,7 +251,7 @@ export function createGalaxyMapManagerClass(deps: any) {
             description: "Unaffiliated worlds and stations.",
             visibility: "players"
           }
-        ],
+        ] : [],
         systems: [],
         routes: []
       });

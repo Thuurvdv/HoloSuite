@@ -1,0 +1,46 @@
+<aside class="gmf-system-panel gmf-faction-panel" aria-label="Factions">
+  <div class="gmf-system-panel__scroll">
+    <header class="gmf-system-panel__top">
+      <h3>Factions</h3>
+      {{#if panel.canManage}}
+        <button type="button" class="gmf-icon-button" data-action="add-inline-faction" title="Add faction" aria-label="Add faction"><i class="fa-solid fa-plus"></i></button>
+      {{/if}}
+    </header>
+    <nav class="gmf-faction-panel__tabs" aria-label="Faction views">
+      <button type="button" data-faction-panel-tab="prominence" aria-pressed="{{#if panel.reputation}}false{{else}}true{{/if}}">Prominence</button>
+      <button type="button" data-faction-panel-tab="reputation" aria-pressed="{{#if panel.reputation}}true{{else}}false{{/if}}">Reputation</button>
+    </nav>
+    <p class="gmf-faction-panel__scope">{{#if panel.reputation}}Standing toward the party{{else}}{{panel.scope}}{{/if}}</p>
+    <ul class="gmf-faction-panel__rows">
+      {{#each panel.rows}}
+        <li class="gmf-faction-panel__row {{#if parentFactionId}}gmf-faction-panel__row--child{{/if}}">
+          <button type="button" class="gmf-faction-panel__identity" data-inspect-faction="{{id}}" aria-label="Inspect {{name}}">
+            <strong><span class="gmf-color-dot" style="--gmf-faction-color: {{color}};"></span>{{name}}</strong>
+            {{#if (gmfEq visibility "gm")}}<small>GM only</small>{{/if}}
+          </button>
+          {{#if ../panel.canEdit}}
+            <div class="gmf-faction-panel__controls">
+              <details class="gmf-faction-panel__rating" data-faction-standing="{{id}}" data-prominence-system-id="{{../panel.systemId}}" data-reputation="{{../panel.reputation}}">
+                <summary aria-label="{{name}} {{#if ../panel.reputation}}reputation{{else}}prominence{{/if}}: {{value}}">{{value}}</summary>
+                <div class="gmf-faction-panel__choices">
+                  {{#each ../panel.choices}}
+                    <button type="button" data-faction-rating="{{id}}" aria-pressed="{{#if (gmfEq id ../ratingId)}}true{{else}}false{{/if}}">{{label}}</button>
+                  {{else}}
+                    <p>No reputation ratings configured.</p>
+                  {{/each}}
+                </div>
+              </details>
+              {{#if ../panel.canManage}}
+                <button type="button" class="gmf-icon-button" data-edit-inline-faction="{{id}}" title="Edit {{name}}" aria-label="Edit {{name}}"><i class="fa-solid fa-pen"></i></button>
+              {{/if}}
+            </div>
+          {{else}}
+            <span class="gmf-faction-panel__standing">{{value}}</span>
+          {{/if}}
+        </li>
+      {{else}}
+        <li class="gmf-empty-copy">No factions to display.</li>
+      {{/each}}
+    </ul>
+  </div>
+</aside>

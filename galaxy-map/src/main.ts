@@ -6,7 +6,9 @@ import {
 import { createGalaxyMapManagerClass } from "./manager-app";
 import { createGalaxyMapViewClass } from "./view-app";
 import { createPlayerMapChooserClass } from "./player-map-chooser-app";
-import { MODULE_ID, SETTING_MAPS, SETTING_SCHEMA_V1_BACKUP, SETTING_SURFACE_LOCATION_RECOVERY, SOCKET_NAME, TEMPLATE_ROOT } from "./constants";
+import { createFactionRatingSettingsClass } from "./faction-rating-settings-app";
+import { MODULE_ID, SETTING_ENABLE_FACTIONS, SETTING_MAPS, SETTING_SCHEMA_V1_BACKUP, SETTING_SURFACE_LOCATION_RECOVERY, SOCKET_NAME, TEMPLATE_ROOT } from "./constants";
+import { areFactionsEnabled, defaultFactionRatings, FACTION_RATING_SCALES } from "./faction-ratings";
 import { getHtmlElement } from "./dom-utils";
 import { activateGalaxyDialogChrome } from "./window-chrome";
 import { prepareMapForDisplay, prepareMapForManager } from "./map-presenters";
@@ -135,7 +137,7 @@ function openMap(mapId, options: any = {}) {
     return null;
   }
 
-  const playerMode = options.playerMode ?? !game.user?.isGM;
+  const playerMode = !game.user?.isGM || options.playerMode === true;
   if (playerMode && map.visibility !== "players" && !options.broadcast) {
     notifyError("That galaxy map is not visible to players.");
     return null;
@@ -312,6 +314,7 @@ function registerWithHoloSuite() {
   if (!api?.registerApp) return false;
 
   api.registerApp({
+    brandingInApp: true,
     id: MODULE_ID,
     title: "Galaxy Map",
     icon: "fa-solid fa-route",
@@ -323,6 +326,35 @@ function registerWithHoloSuite() {
 }
 
 Hooks.once("init", async () => {
+  game.settings.register(MODULE_ID, SETTING_ENABLE_FACTIONS, {
+    name: "Enable Factions",
+    hint: "Show faction controls, ratings, and territories on galaxy maps. Turning this off keeps existing faction data.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: true,
+    onChange: () => refreshOpenApps()
+  });
+  for (const scale of ["reputation", "prominence"] as const) {
+    const { setting, title, icon } = FACTION_RATING_SCALES[scale];
+    game.settings.register(MODULE_ID, setting, {
+      scope: "world",
+      config: false,
+      type: Object,
+      default: { ratings: defaultFactionRatings(scale) },
+      onChange: () => refreshOpenApps()
+    });
+    if (!areFactionsEnabled()) continue;
+    game.settings.registerMenu(MODULE_ID, `faction${title}`, {
+      name: `Faction ${title}`,
+      label: `Edit ${title} Ratings`,
+      hint: `Rename, add, or remove the ${scale} ratings available on galaxy maps in this world.`,
+      icon,
+      type: createFactionRatingSettingsClass(TEMPLATE_ROOT, scale),
+      restricted: true
+    });
+  }
   game.settings.register(MODULE_ID, SETTING_MAPS, {
     scope: "world",
     config: false,
@@ -360,6 +392,7 @@ Hooks.once("init", async () => {
     `${TEMPLATE_ROOT}/celestial-icon.hbs`,
     `${TEMPLATE_ROOT}/object-appearance-panel.hbs`,
     `${TEMPLATE_ROOT}/system-details.hbs`,
+    `${TEMPLATE_ROOT}/faction-panel.hbs`,
     `${TEMPLATE_ROOT}/player-map-chooser.hbs`
   ]);
 });
