@@ -6,15 +6,15 @@ import { fileURLToPath } from 'node:url';
 const code = buildSync({ entryPoints: [fileURLToPath(new URL('../src/effect-presets.ts', import.meta.url))], bundle: true, write: false, format: 'esm' }).outputFiles[0].text;
 const { EFFECT_PRESETS, normalizeEffectId, effectMarkup } = await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
 
-test('all twelve saved choices normalize without falling back; legacy IDs stay valid', () => {
-  assert.equal(EFFECT_PRESETS.length, 12);
-  assert.equal(new Set(EFFECT_PRESETS.map(p => p.id)).size, 12);
+test('all fourteen saved choices normalize without falling back; legacy IDs stay valid', () => {
+  assert.equal(EFFECT_PRESETS.length, 14);
+  assert.equal(new Set(EFFECT_PRESETS.map(p => p.id)).size, 14);
   for (const preset of EFFECT_PRESETS) assert.equal(normalizeEffectId(preset.id), preset.id);
   for (const invalid of [null, undefined, '', '<script>', {}, 'future-style']) assert.equal(normalizeEffectId(invalid), 'strike');
 });
 
 test('effects have distinct geometry, bounded density and deterministic client output', () => {
-  assert.equal(new Set(EFFECT_PRESETS.map(p => effectMarkup(p.id))).size, 12);
+  assert.equal(new Set(EFFECT_PRESETS.map(p => effectMarkup(p.id))).size, 14);
   for (const preset of EFFECT_PRESETS) {
     const low = effectMarkup(preset.id, 'low');
     const high = effectMarkup(preset.id, 'high');

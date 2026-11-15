@@ -4,6 +4,8 @@ import { createOverlay, playCutin } from '../src/cutin-animation';
 import { MANGA_STYLE, startMangaExit, startMangaIntro } from '../src/manga-overdrive';
 import { startRiftExit, startRiftIntro } from '../src/rift-slash';
 import { EFFECT_PRESETS } from '../src/effect-presets';
+import { OVERRIDE_EXIT, OVERRIDE_STYLE, startOverrideExit, startOverrideIntro } from '../src/reality-override';
+import { COLLAPSE_EXIT, COLLAPSE_STYLE, startCollapseExit, startCollapseIntro } from '../src/system-collapse';
 import { PlayerConfigApp } from '../src/player-config-app';
 import { createManualPayloadForUser, registerRollDetection } from '../src/roll-detector';
 
@@ -23,11 +25,11 @@ function mount(id = 'strike', kind = 'success', at = 650, extra = {}) {
   const overlay = createOverlay(payload(id, kind, extra));
   overlay.style.setProperty('--hcci-intro', '1000ms');
   document.body.appendChild(overlay);
-  const exitDuration = id === FATE_STYLE ? FATE_EXIT : 180;
+  const exitDuration = id === FATE_STYLE ? FATE_EXIT : id === OVERRIDE_STYLE ? OVERRIDE_EXIT : id === COLLAPSE_STYLE ? COLLAPSE_EXIT : 180;
   const holdAt = 2500 - exitDuration;
-  if (id === 'rift' || id === MANGA_STYLE || id === FATE_STYLE) {
-    const startIntro = id === FATE_STYLE ? startFateIntro : id === 'rift' ? startRiftIntro : startMangaIntro;
-    const startExit = id === FATE_STYLE ? startFateExit : id === 'rift' ? startRiftExit : startMangaExit;
+  if (id === 'rift' || id === MANGA_STYLE || id === FATE_STYLE || id === OVERRIDE_STYLE || id === COLLAPSE_STYLE) {
+    const startIntro = id === OVERRIDE_STYLE ? startOverrideIntro : id === COLLAPSE_STYLE ? startCollapseIntro : id === FATE_STYLE ? startFateIntro : id === 'rift' ? startRiftIntro : startMangaIntro;
+    const startExit = id === OVERRIDE_STYLE ? startOverrideExit : id === COLLAPSE_STYLE ? startCollapseExit : id === FATE_STYLE ? startFateExit : id === 'rift' ? startRiftExit : startMangaExit;
     startIntro(overlay, holdAt);
     if (at >= holdAt) {
       for (const animation of overlay.getAnimations({ subtree: true })) {
