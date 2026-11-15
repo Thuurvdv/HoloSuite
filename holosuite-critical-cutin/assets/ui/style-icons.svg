@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 28">
+  <symbol id="strike" viewBox="0 0 72 28">
+    <path d="m8 22 21-9-6 1L49 2 37 12l11-4-8 7 20-8-24 17 8-10-19 9 6-8Z" fill="currentColor"/>
+    <path d="m9 10 15-7m24 21 15-7" stroke="currentColor" opacity=".55"/>
+  </symbol>
+  <symbol id="breach" viewBox="0 0 72 28">
+    <path d="m16 3 47-1-11 19-46 5Zm0 0 9 8m38-9L25 11l12 1-14 7 28-5m1 7-1-7m-28 5L6 26" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  </symbol>
+  <symbol id="signal" viewBox="0 0 72 28">
+    <g fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="36" cy="14" r="5"/><circle cx="36" cy="14" r="10"/>
+      <path d="M23 20a14 14 0 0 1 0-12m26 0a14 14 0 0 1 0 12M17 20a20 20 0 0 1 0-12m38 0a20 20 0 0 1 0 12M7 14h5m48 0h5"/>
+    </g>
+  </symbol>
+  <symbol id="rift" viewBox="0 0 72 28">
+    <path d="m4 23 14-4 8-7 7 1 6-6 8 1L66 1 53 11l-9 1-6 7-8-2-8 6Z" fill="currentColor"/>
+    <path d="m8 14 14-8 5 1 8-4m3 23 8-5 6 1 12-8m-44 9-4 4m39-18 4-4" fill="none" stroke="currentColor" opacity=".65"/>
+  </symbol>
+  <symbol id="manga-overdrive" viewBox="0 0 72 28">
+    <path d="m3 5 17 5L13 1l16 7 4-7 4 7L53 1l-5 8 20-6-9 9 12 3-15 4 8 7-16-5 2 6-14-5-12 5 3-6-18 5 9-7L1 16l14-4Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+    <path d="m22 11 27-3 1 10-27 3Z" fill="currentColor"/>
+    <path d="m9 9 10 4m34 5 11 4M30 3l2 4m8 16 3 4" stroke="currentColor" opacity=".65"/>
+  </symbol>
+  <symbol id="shattered-fate" viewBox="0 0 72 28">
+    <path fill="none" stroke="currentColor" stroke-width="1.4" d="m15 3 41-2 4 23-48 3Zm0 0 12 8 7 4 9-7L56 1M12 27l14-7 8-5 7 5 11 5M26 20l1-9 9-3 7 0 4 6-6 6m6-6 11-4M36 8l-4-6m2 13-1 11"/>
+    <path fill="currentColor" d="m63 5 7-3-3 6Zm-2 14 9 3-6 4ZM7 15l-6-2 6-3Z"/>
+  </symbol>
+</svg>

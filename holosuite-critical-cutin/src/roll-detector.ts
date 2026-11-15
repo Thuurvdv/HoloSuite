@@ -1,5 +1,8 @@
-import { MODULE_ID, SOCKET_NAME, SETTINGS, debugLog, getDieSides, getFailureThreshold, getPlayerConfigs, getThreshold, resultQualifies, setting } from "./settings";
+import { BOX_FLAG } from "./box-of-doom";
+import { MODULE_ID, SOCKET_NAME, SETTINGS, debugLog, getDieSides, getFailureThreshold, getPlayerConfigs, getThreshold, normalizeDurationOverride, resultQualifies, setting } from "./settings";
 import { playCutin, type CutinPayload } from "./cutin-animation";
+import { normalizeEffectId } from "./effect-presets";
+import { MANGA_ACCENT, MANGA_STYLE } from "./manga-overdrive";
 
 declare const foundry: any;
 declare const game: any;
@@ -130,7 +133,7 @@ function gmTargetKey() {
 }
 
 function sanitizeAnimationStyle(value: any) {
-  return ["strike", "breach", "signal"].includes(value) ? value : "strike";
+  return normalizeEffectId(value);
 }
 
 function hasOwner(actor: any, userId: string) {
@@ -169,6 +172,7 @@ type TriggerConfig = {
   kind: "success" | "failure";
   enabled: boolean;
   threshold: number;
+  duration: number;
   animationStyle: string;
   imagePath: string;
   audioPath: string;
@@ -179,8 +183,9 @@ type TriggerConfig = {
 function normalizeTriggerConfig(rawConfig: any = {}, kind: "success" | "failure", actor: any, preferActorImage = false): TriggerConfig {
   const fallbackThreshold = kind === "failure" ? getFailureThreshold() : getThreshold();
   const defaultText = kind === "failure" ? setting(SETTINGS.defaultFailureText) : setting(SETTINGS.defaultText);
-  const defaultAccent = kind === "failure" ? "#ff4d7d" : "#69e8ff";
   const config = kind === "failure" ? rawConfig.failure ?? {} : rawConfig;
+  const animationStyle = sanitizeAnimationStyle(config.animationStyle);
+  const defaultAccent = animationStyle === MANGA_STYLE ? MANGA_ACCENT : kind === "failure" ? "#ff4d7d" : "#69e8ff";
   const configuredThreshold = Number(config.threshold);
   return {
     kind,
@@ -188,7 +193,8 @@ function normalizeTriggerConfig(rawConfig: any = {}, kind: "success" | "failure"
     threshold: Number.isInteger(configuredThreshold) && configuredThreshold >= 1 && configuredThreshold <= getDieSides()
       ? configuredThreshold
       : fallbackThreshold,
-    animationStyle: sanitizeAnimationStyle(config.animationStyle),
+    duration: normalizeDurationOverride(config.duration) ?? setting(SETTINGS.duration),
+    animationStyle,
     imagePath: (preferActorImage ? actor?.img : "") || config.imagePath || actor?.img || "",
     audioPath: config.audioPath || "",
     overlayText: config.overlayText || defaultText,
@@ -224,7 +230,7 @@ function buildPayload(message: any, qualifyingResult: number, actor: any, user: 
     userId: user?.id ?? null,
     actorId: actor?.id ?? null,
     userName: user?.name ?? "",
-    actorName: actor?.name ?? user?.name ?? "",
+    actorName: actor?.name ?? "",
     triggerKind: config.kind ?? "success",
     naturalResult: qualifyingResult,
     threshold: config.threshold,
@@ -236,7 +242,7 @@ function buildPayload(message: any, qualifyingResult: number, actor: any, user: 
     overlayText: config.overlayText || "",
     accentColor: config.accentColor || "#69e8ff",
     textEnabled: setting(SETTINGS.textEnabled),
-    duration: setting(SETTINGS.duration),
+    duration: config.duration,
     volume: setting(SETTINGS.volume),
     audience: setting(SETTINGS.audience)
   };
@@ -273,7 +279,7 @@ function rememberProcessedMessage(messageId: string) {
 }
 
 function detectChatMessage(message: any) {
-  if (!message?.id || processedMessages.has(message.id)) return true;
+  if (!message?.id || message.flags?.[MODULE_ID]?.[BOX_FLAG] || processedMessages.has(message.id)) return true;
 
   const actor = resolveActor(message);
   const user = resolveTriggerUser(message, actor);
@@ -299,7 +305,7 @@ function detectChatMessage(message: any) {
 }
 
 function detectRenderedChatMessage(message: any, html: any) {
-  if (!message?.id || processedMessages.has(message.id)) return true;
+  if (!message?.id || message.flags?.[MODULE_ID]?.[BOX_FLAG] || processedMessages.has(message.id)) return true;
 
   const actor = resolveActor(message);
   const user = resolveTriggerUser(message, actor);
@@ -379,7 +385,7 @@ export function createManualPayloadForUser(userId: string, options: any = {}): C
     userId,
     actorId: actor?.id ?? null,
     userName: user?.name ?? "",
-    actorName: actor?.name ?? user?.name ?? "",
+    actorName: actor?.name ?? "",
     naturalResult: options.naturalResult ?? config.threshold,
     triggerKind,
     threshold: options.threshold ?? config.threshold ?? getThreshold(),
@@ -389,7 +395,7 @@ export function createManualPayloadForUser(userId: string, options: any = {}): C
     overlayText: options.overlayText ?? config.overlayText ?? setting(SETTINGS.defaultText),
     accentColor: options.accentColor ?? config.accentColor ?? "#69e8ff",
     textEnabled: options.textEnabled ?? setting(SETTINGS.textEnabled),
-    duration: options.duration ?? setting(SETTINGS.duration),
+    duration: options.duration ?? config.duration,
     volume: options.volume ?? setting(SETTINGS.volume),
     audience: options.audience ?? setting(SETTINGS.audience)
   };

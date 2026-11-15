@@ -1,3 +1,4 @@
+import { openBoxOfDoom } from "./box-of-doom";
 import { MODULE_ID, MODULE_TITLE, SETTINGS, setting } from "./settings";
 import { openPlayerConfig } from "./player-config-app";
 
@@ -15,6 +16,7 @@ export function registerHoloSuiteIntegration() {
 
   // HoloSuite integration point: this adds the module to the GM command panel when HoloSuite is active.
   api.registerApp({
+    brandingInApp: true,
     id: MODULE_ID,
     title: "Critical Cut-In",
     icon: "fa-solid fa-bolt-lightning",
@@ -23,6 +25,17 @@ export function registerHoloSuiteIntegration() {
     description: "JRPG-style critical hit cut-in animation for natural d20 results.",
     enabled: setting(SETTINGS.enabled),
     open: () => openPlayerConfig()
+  });
+  api.registerApp({
+    brandingInApp: true,
+    id: `${MODULE_ID}-box-of-doom`,
+    title: "Box of Doom",
+    icon: "fa-solid fa-box",
+    premium: false,
+    playerVisible: false,
+    description: "Reveal a high-stakes roll to the whole table.",
+    enabled: setting(SETTINGS.enabled),
+    open: () => openBoxOfDoom()
   });
   api.registerWhatsNew?.({
     moduleId: MODULE_ID,
@@ -50,4 +63,5 @@ export function registerHoloSuiteIntegration() {
 export function unregisterHoloSuiteIntegration() {
   const api = getHoloSuiteApi();
   api?.unregisterApp?.(MODULE_ID);
+  api?.unregisterApp?.(`${MODULE_ID}-box-of-doom`);
 }

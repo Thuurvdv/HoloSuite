@@ -1,5 +1,16 @@
-@import url("./critical-cutin-overlay.css");
+@import url("./critical-cutin-doom.css");
 @import url("./critical-cutin-stage.css");
 @import url("./critical-cutin-config.css");
-@import url("./critical-cutin-animations.css");
 @import url("./critical-cutin-responsive.css");
+@import url("./critical-cutin-cinematic.css");
+@import url("./critical-cutin-rift.css");
+@import url("./critical-cutin-manga.css");
+@import url("./critical-cutin-fate.css");
+
+@font-face {
+  font-family: "HCCI AICON";
+  src: url("../assets/fonts/Aicon-Bold.otf") format("opentype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
