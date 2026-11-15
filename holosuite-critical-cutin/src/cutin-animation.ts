@@ -4,6 +4,8 @@ import { MANGA_ACCENT, MANGA_STYLE, startMangaExit, startMangaIntro } from "./ma
 import { startRiftExit, startRiftIntro } from "./rift-slash";
 
 import { FATE_EXIT, FATE_STYLE, prepareFatePortrait, startFateExit, startFateIntro } from "./shattered-fate";
+import { OVERRIDE_EXIT, OVERRIDE_STYLE, prepareOverride, startOverrideExit, startOverrideIntro } from "./reality-override";
+import { COLLAPSE_EXIT, COLLAPSE_STYLE, prepareCollapse, startCollapseExit, startCollapseIntro } from "./system-collapse";
 
 declare const foundry: any;
 declare const game: any;
@@ -104,8 +106,10 @@ export function createOverlay(payload: CutinPayload) {
   const isRift = animationStyle === "rift";
   const isManga = animationStyle === MANGA_STYLE;
   const isFate = animationStyle === FATE_STYLE;
-  const fullScreenArt = isRift || isManga || isFate;
-  const accent = payload.accentColor || (isManga ? MANGA_ACCENT : (isRift || isFate) && triggerKind === "failure" ? "#ff4d7d" : "#69e8ff");
+  const isOverride = animationStyle === OVERRIDE_STYLE;
+  const isCollapse = animationStyle === COLLAPSE_STYLE;
+  const fullScreenArt = isRift || isManga || isFate || isOverride || isCollapse;
+  const accent = payload.accentColor || (isManga ? MANGA_ACCENT : (isRift || isFate || isOverride || isCollapse) && triggerKind === "failure" ? "#ff4d7d" : "#69e8ff");
   const image = payload.imagePath
     ? `<img class="hcci-portrait" src="${escapeHtml(payload.imagePath)}" alt="">`
     : `<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>`;
@@ -140,7 +144,7 @@ export function createOverlay(payload: CutinPayload) {
   overlay.setAttribute("aria-hidden", "true");
   const effects = (motionMode === "full" || isManga) ? effectMarkup(animationStyle, detail) : "";
   overlay.innerHTML = `
-    ${isManga || isFate ? "" : `<div class="${isRift ? "hcci-rift-flash" : "hcci-flash"}"></div>`}
+    ${isManga || isFate || isOverride || isCollapse ? "" : `<div class="${isRift ? "hcci-rift-flash" : "hcci-flash"}"></div>`}
     ${fullScreenArt ? effects : ""}
     <div class="hcci-atmosphere"></div>
     <section class="hcci-stage">
@@ -159,7 +163,13 @@ export function createOverlay(payload: CutinPayload) {
     </section>
   `;
   const fracturePortrait = isFate && motionMode === "full";
-  if (fracturePortrait) prepareFatePortrait(overlay);
+  // Effects that rebuild the artwork into their own layers; rerun whenever the image is swapped.
+  const rebuildArt = () => {
+    if (fracturePortrait) prepareFatePortrait(overlay);
+    if (isOverride && motionMode === "full") prepareOverride(overlay);
+    if (isCollapse) prepareCollapse(overlay, motionMode === "full");
+  };
+  rebuildArt();
   const portrait = overlay.querySelector<HTMLImageElement>("img.hcci-portrait");
   if (portrait && motionMode === "full" && (animationStyle === "shatter" || animationStyle === "overdrive")) {
     const fragments = [
@@ -185,7 +195,7 @@ export function createOverlay(payload: CutinPayload) {
     if (fallbackPath && portrait.getAttribute("src") !== fallbackPath) {
       portrait.src = fallbackPath;
       overlay.querySelectorAll<HTMLImageElement>(".hcci-portrait-echo img").forEach(image => { image.src = fallbackPath; });
-      if (fracturePortrait) prepareFatePortrait(overlay);
+      rebuildArt();
       return;
     }
     overlay.querySelectorAll(".hcci-portrait-echo").forEach(echo => echo.remove());
@@ -193,7 +203,7 @@ export function createOverlay(payload: CutinPayload) {
     fallback.className = "hcci-portrait hcci-portrait-fallback";
     fallback.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>';
     portrait.replaceWith(fallback);
-    if (fracturePortrait) prepareFatePortrait(overlay);
+    rebuildArt();
   });
   return overlay;
 }
@@ -216,11 +226,14 @@ async function playNow(payload: CutinPayload) {
   try {
     document.body.appendChild(overlay);
     const isFate = overlay.classList.contains(`hcci-style-${FATE_STYLE}`);
-    const exitDuration = isFate ? FATE_EXIT : 180;
+    const isOverride = overlay.classList.contains(`hcci-style-${OVERRIDE_STYLE}`);
+    const isCollapse = overlay.classList.contains(`hcci-style-${COLLAPSE_STYLE}`);
+    const exitDuration = isFate ? FATE_EXIT : isOverride ? OVERRIDE_EXIT : isCollapse ? COLLAPSE_EXIT : 180;
     const holdAt = duration - exitDuration;
     const isRift = overlay.classList.contains("hcci-style-rift");
     const isManga = overlay.classList.contains(`hcci-style-${MANGA_STYLE}`);
-    const intro = isFate ? startFateIntro(overlay, holdAt) : isManga ? startMangaIntro(overlay, holdAt) : isRift ? startRiftIntro(overlay, holdAt) : undefined;
+    const intro = isOverride ? startOverrideIntro(overlay, holdAt) : isCollapse ? startCollapseIntro(overlay, holdAt)
+      : isFate ? startFateIntro(overlay, holdAt) : isManga ? startMangaIntro(overlay, holdAt) : isRift ? startRiftIntro(overlay, holdAt) : undefined;
     if (intro) cinematicAnimations = intro.animations;
     const startAudio = () => {
       void playAudio(payload.audioPath, payload.volume).then(handle => {
@@ -247,7 +260,9 @@ async function playNow(payload: CutinPayload) {
     stopAudio(audioHandle);
     audioHandle = null;
     overlay.classList.add("hcci-exiting");
-    if (isFate) cinematicAnimations.push(...startFateExit(overlay, exitDuration));
+    if (isOverride) cinematicAnimations.push(...startOverrideExit(overlay, exitDuration));
+    else if (isCollapse) cinematicAnimations.push(...startCollapseExit(overlay, exitDuration));
+    else if (isFate) cinematicAnimations.push(...startFateExit(overlay, exitDuration));
     else if (isManga) cinematicAnimations.push(...startMangaExit(overlay, exitDuration));
     else if (isRift) cinematicAnimations.push(...startRiftExit(overlay, exitDuration));
     await new Promise((resolve) => window.setTimeout(resolve, exitDuration));

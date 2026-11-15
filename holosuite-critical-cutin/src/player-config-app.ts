@@ -5,6 +5,8 @@ import { getCriticalRollEndpoints, getDieOptions } from "../../shared/src/dice-c
 import { previewCutin } from "./cutin-animation";
 import { EFFECT_PRESETS, normalizeEffectId, getEffectPreset } from "./effect-presets";
 import { MANGA_ACCENT, MANGA_STYLE } from "./manga-overdrive";
+import { OVERRIDE_STYLE } from "./reality-override";
+import { COLLAPSE_STYLE } from "./system-collapse";
 
 declare const foundry: any;
 declare const game: any;
@@ -154,7 +156,7 @@ export class PlayerConfigApp extends BaseFormApplication {
         characterHeading: player.id === "gm" ? "GM Configuration" : `${player.name}’s Characters`,
         tabDetail: player.id === "gm" ? "Global" : `${player.targets.length} ${player.targets.length === 1 ? "character" : "characters"}`
       })),
-      featuredStyles: ["strike", "breach", "signal", "rift", MANGA_STYLE, FATE_STYLE].map(getEffectPreset),
+      featuredStyles: ["strike", "breach", "signal", "rift", MANGA_STYLE, FATE_STYLE, OVERRIDE_STYLE, COLLAPSE_STYLE].map(getEffectPreset),
       dieSides: getDieSides(),
       dice: getDieOptions(getDieSides()),
       lowRollsGood: lowRollsAreGood(),
@@ -377,7 +379,7 @@ export class PlayerConfigApp extends BaseFormApplication {
           audioPath: field("audioPath")!.value.trim(),
           overlayText: field("overlayText")!.value.trim() || field("overlayText")!.placeholder,
           accentColor: field("accentColor")!.value,
-          textEnabled: !["rift", MANGA_STYLE, FATE_STYLE].includes(animationStyle) || setting(SETTINGS.textEnabled) !== false,
+          textEnabled: !["rift", MANGA_STYLE, FATE_STYLE, OVERRIDE_STYLE, COLLAPSE_STYLE].includes(animationStyle) || setting(SETTINGS.textEnabled) !== false,
           duration: normalizeDurationOverride(field("duration")?.value)
             ?? normalizeDurationOverride(query<HTMLInputElement>('[name="duration"]').value)
             ?? setting(SETTINGS.duration),

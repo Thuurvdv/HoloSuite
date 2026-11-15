@@ -6,6 +6,8 @@
 @import url("./critical-cutin-rift.css");
 @import url("./critical-cutin-manga.css");
 @import url("./critical-cutin-fate.css");
+@import url("./critical-cutin-override.css");
+@import url("./critical-cutin-collapse.css");
 
 @font-face {
   font-family: "HCCI AICON";

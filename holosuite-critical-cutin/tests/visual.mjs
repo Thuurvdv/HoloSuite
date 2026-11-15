@@ -91,7 +91,7 @@ try {
     for(const font of ['aicon','classic']) for(const id of ids) {
       await evaluate(`studio.values.animationFont=${JSON.stringify(font)};studio.mount(${JSON.stringify(id)},'success',1400,{overlayText:'UNSTOPPABLE CRITICAL STRIKE',actorName:'A VERY LONG ACTOR NAME THAT MUST REMAIN ON SCREEN'})`);
       const rect = await evaluate(`(() => {const r=document.querySelector('.hcci-copy').getBoundingClientRect(); return {left:r.left,right:r.right,bottom:r.bottom};})()`);
-      if (width === 1920 && !['rift', 'manga-overdrive', 'shattered-fate'].includes(id)) assert.ok(rect.right > 1850, 'copy should use the right side of wide screens');
+      if (width === 1920 && !['rift', 'manga-overdrive', 'shattered-fate', 'reality-override', 'system-collapse'].includes(id)) assert.ok(rect.right > 1850, 'copy should use the right side of wide screens');
       assert.ok(rect.left >= -1 && rect.right <= width+1 && rect.bottom <= height+1,`${id} at ${width}: text overflow ${JSON.stringify(rect)}`);
     }
     await screenshot(`responsive-${width}.png`);

@@ -1,6 +1,8 @@
 import { FATE_STYLE, fateMarkup } from "./shattered-fate";
 import { mangaMarkup, MANGA_STYLE } from "./manga-overdrive";
 import { riftSlashMarkup } from "./rift-slash";
+import { OVERRIDE_STYLE, overrideMarkup } from "./reality-override";
+import { COLLAPSE_STYLE, collapseMarkup } from "./system-collapse";
 
 /** Shared by the editor, roll detection and renderer. Saved IDs remain stable. */
 export const EFFECT_PRESETS = [
@@ -15,7 +17,9 @@ export const EFFECT_PRESETS = [
   { id: "eclipse", label: "Astral Eclipse", description: "An orbital crown and star field frame a slow celestial reveal.", shake: 0 },
   { id: MANGA_STYLE, label: "Manga Overdrive", description: "A burst of ink cuts to a halftone portrait and a full-color manga impact.", shake: 0.7 },
   { id: FATE_STYLE, label: "Shattered Fate", description: "The portrait breaks into eighteen shards, exposing a fractured title behind it.", shake: 0.65 },
-  { id: "overdrive", label: "Cyber Overdrive", description: "A perspective data tunnel accelerates into a segmented hologram.", shake: 0.45 }
+  { id: "overdrive", label: "Cyber Overdrive", description: "A perspective data tunnel accelerates into a segmented hologram.", shake: 0.45 },
+  { id: OVERRIDE_STYLE, label: "Reality Override", description: "The scene freezes and is cut into slanted louvers that flip open on the portrait, then lock under a title band.", shake: 0.8 },
+  { id: COLLAPSE_STYLE, label: "System Collapse", description: "The portrait loses sync and resolution row by row, freezes, then pancakes to the floor before powering off.", shake: 0.6 }
 ] as const;
 
 export type EffectId = typeof EFFECT_PRESETS[number]["id"];
@@ -42,6 +46,8 @@ export function effectMarkup(value: unknown, intensity = "standard") {
     case FATE_STYLE: return fateMarkup();
     case MANGA_STYLE: return mangaMarkup(intensity);
     case "rift": return riftSlashMarkup(intensity);
+    case OVERRIDE_STYLE: return overrideMarkup(intensity);
+    case COLLAPSE_STYLE: return collapseMarkup(intensity);
     case "shatter": return layer("shard", count) + layer("prism", 2) + wave;
     case "reactor": return layer("rail", 6) + layer("column") + layer("corona", 2) + particles;
     case "void": return layer("disk", 2) + layer("horizon") + layer("infall", count) + wave;

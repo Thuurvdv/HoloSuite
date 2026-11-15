@@ -25,4 +25,14 @@
     <path fill="none" stroke="currentColor" stroke-width="1.4" d="m15 3 41-2 4 23-48 3Zm0 0 12 8 7 4 9-7L56 1M12 27l14-7 8-5 7 5 11 5M26 20l1-9 9-3 7 0 4 6-6 6m6-6 11-4M36 8l-4-6m2 13-1 11"/>
     <path fill="currentColor" d="m63 5 7-3-3 6Zm-2 14 9 3-6 4ZM7 15l-6-2 6-3Z"/>
   </symbol>
+  <symbol id="reality-override" viewBox="0 0 72 28">
+    <path d="m19 1h8l-6 26h-8Zm11 0h8l-6 26h-8Zm11 0h8l-6 26h-8Z" fill="currentColor"/>
+    <path d="m14 1-6 26m47-26-6 26" fill="none" stroke="currentColor" opacity=".65"/>
+    <path d="m2 21 68-7v5L2 26Z" fill="currentColor" stroke="#0b0716" stroke-width="1.4"/>
+  </symbol>
+  <symbol id="system-collapse" viewBox="0 0 72 28">
+    <path d="M22 2h28v2H22Zm-4 5h28v2H18Zm8 5h28v2H26Zm-5 5h28v2H21Z" fill="currentColor" opacity=".65"/>
+    <path d="M22 21h28v1H22Zm0 2h28v1H22Zm0 2h28v1H22Z" fill="currentColor"/>
+    <path d="M4 27h64" stroke="currentColor" stroke-width="1.4"/>
+  </symbol>
 </svg>

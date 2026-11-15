@@ -33,6 +33,13 @@ Both Success and Failure have nine complete presets. Each includes its own revea
 | Astral Eclipse | Celestial crown, crescent, star field, and orbital rings |
 | Cyber Overdrive | Expanding data tunnel and segmented portrait assembly |
 
+Two flagship presets are choreographed as full cinematic sequences and are suited to either outcome:
+
+- **Reality Override** (built for successes): the live scene freezes to monochrome, hairline cuts race through it, and five slanted louvers flip open in perspective onto the portrait. The slices stay tinted and out of register until a single impact frame locks them into full color as the title band slams across the screen.
+- **System Collapse** (built for failures): the portrait loses horizontal sync and resolution row by row in an accelerating rhythm, freezes as a block mosaic, then pancakes to the floor under gravity, exposing a stark two-tone portrait. It exits like a display powering off.
+
+Both use the configured artwork directly at any size or aspect ratio, follow the duration, flash, shake, detail and motion settings, and fall back to a static composition for reduced or still motion. Low **Local Effect Detail** also turns off their live-scene backdrop filter.
+
 Failures alter the movement: fractures scatter, doors jam, signals destabilize, and energy collapses. The portrait remains readable after impact. Effects adapt to portrait size and screen layout; longer durations extend the readable hold instead of slowing down the impact.
 
 **Local Effect Detail** controls decorative density. **Local Impact Shake** controls movement of the cut-in itself; the Foundry board and interface remain stationary. Reduced and still motion omit decorative geometry and disable impact shake. Local flash settings control the opening wash.
