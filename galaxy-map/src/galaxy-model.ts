@@ -1,6 +1,6 @@
 import { normalizePlanetFinish, normalizePlanetPreset, normalizePlanetPresetForShape, normalizePlanetShape } from "./planet-presets.ts";
 import { normalizeTravelApprovalMode } from "./travel-approval.ts";
-import type { GalaxyLocation } from "./galaxy-types";
+import type { GalaxyFaction, GalaxyLocation, GalaxyVisibility } from "./galaxy-types";
 import { canAttachToOrbit, normalizeOrbit, normalizeOrbits } from "./orbits";
 
 export const GALAXY_SCHEMA_VERSION = 3;
@@ -29,7 +29,7 @@ export const TRAVEL_REQUEST_TIMEOUT_MS = 60_000;
 export function randomId(prefix = "gmf") { return `${prefix}-${foundry.utils.randomID(10)}`; }
 export function normalizeVisibility(value: unknown, fallback = "players") {
   const safeFallback = VISIBILITIES.includes(fallback) ? fallback : "players";
-  return VISIBILITIES.includes(value as string) ? String(value) : safeFallback;
+  return (VISIBILITIES.includes(value as string) ? value : safeFallback) as GalaxyVisibility;
 }
 export function normalizeObjectVisibility(value: unknown) { return OBJECT_VISIBILITIES.includes(value as string) ? String(value) : "inherit"; }
 export function normalizeColor(value: unknown) { return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : "#58d8ff"; }
@@ -146,9 +146,28 @@ export function normalizeRoute(route: any = {}) {
     type: ROUTE_TYPES.includes(route.type) ? route.type : "unknown", travelTime: String(route.travelTime || ""),
     fuelCost: normalizeNumber(route.fuelCost, 0), visibility: normalizeVisibility(route.visibility, "players"), notes: String(route.notes || "") };
 }
-export function normalizeFaction(faction: any = {}) {
-  return { id: String(faction.id || randomId("faction")), name: String(faction.name || "Unaffiliated"), color: normalizeColor(faction.color),
-    description: String(faction.description || ""), visibility: normalizeVisibility(faction.visibility, "players") };
+export function normalizeFaction(faction: Partial<GalaxyFaction> = {}): GalaxyFaction {
+  const kind = faction.kind === "minor" ? "minor" : "major";
+  const systemProminence = Object.fromEntries(Object.entries(faction.systemProminence ?? {})
+    .filter(([, value]) => typeof value === "string" && value && value !== "Unrated"));
+  return {
+    ...faction,
+    id: String(faction.id || randomId("faction")),
+    name: String(faction.name || "Unaffiliated"),
+    color: normalizeColor(faction.color),
+    description: String(faction.description || ""),
+    visibility: normalizeVisibility(faction.visibility, "players"),
+    emblem: String(faction.emblem || "").trim(),
+    tagline: String(faction.tagline || "").trim(),
+    type: String(faction.type || "").trim(),
+    headquartersSystemId: String(faction.headquartersSystemId || ""),
+    gmNotes: String(faction.gmNotes || ""),
+    kind,
+    parentFactionId: kind === "minor" ? String(faction.parentFactionId || "") : "",
+    prominence: typeof faction.prominence === "string" && faction.prominence ? faction.prominence : "Unrated",
+    systemProminence,
+    reputation: typeof faction.reputation === "string" && faction.reputation ? faction.reputation : "Neutral"
+  };
 }
 
 function getDefaultSystemId(map: any = {}) {
@@ -257,7 +276,13 @@ export function normalizeMap(input: any = {}) {
   const map = migrateMap(input);
   const systems = Array.isArray(map.systems) ? map.systems.map(normalizeSystem) : [];
   const routes = Array.isArray(map.routes) ? map.routes.map(normalizeRoute) : [];
-  const factions = Array.isArray(map.factions) ? map.factions.map(normalizeFaction) : [];
+  const factions: GalaxyFaction[] = Array.isArray(map.factions) ? map.factions.filter(faction => faction && typeof faction === "object").map(normalizeFaction) : [];
+  const majorFactionIds = new Set(factions.filter(faction => faction.kind === "major").map(faction => faction.id));
+  const systemIds = new Set(systems.map(system => system.id));
+  for (const faction of factions) {
+    if (!majorFactionIds.has(faction.parentFactionId) || faction.parentFactionId === faction.id) faction.parentFactionId = "";
+    faction.systemProminence = Object.fromEntries(Object.entries(faction.systemProminence).filter(([id]) => systemIds.has(id)));
+  }
   const requestedSystemId = String(map.currentLocation?.systemId || map.currentSystemId || systems[0]?.id || "");
   const currentSystemId = systems.some((system: any) => system.id === requestedSystemId) ? requestedSystemId : systems[0]?.id ?? "";
   const currentSystem = systems.find((system: any) => system.id === currentSystemId);

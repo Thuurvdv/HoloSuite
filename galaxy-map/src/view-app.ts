@@ -8,6 +8,7 @@ import {
   normalizeMap
 } from "./galaxy-model";
 import { buildTerritories } from "./territories";
+import { areFactionsEnabled, getFactionRatings } from "./faction-ratings";
 import { getPlanetAppearance, isDefaultStaticPlanetAppearance } from "./planet-presets";
 import { getBountyIntelForSystem, openBountyIntel } from "./bounty-integration";
 import { createPlanetIntelCallout } from "./planet-intel-callout";
@@ -103,6 +104,8 @@ export function createGalaxyMapViewClass(deps: any) {
     _externalFocusTimeout: any;
     _pendingFocusZoom: number | null;
     showTerritories = true;
+    showGalaxyTerritories = false;
+    selectedFactionId = "";
     showRoutes = true;
     hardContrast = false;
     planetSystemId: string | null = null;
@@ -115,6 +118,8 @@ export function createGalaxyMapViewClass(deps: any) {
     _planetLocationCallout: any = null;
     creationPanel: any = null;
     factionRegistry = false;
+    factionPanelOpen = false;
+    factionPanelTab = "prominence";
     _selectionTimer: any = null;
     _worldWidth = 0;
     _worldHeight = 0;
@@ -147,7 +152,7 @@ export function createGalaxyMapViewClass(deps: any) {
 
     constructor(options: any = {}) {
       const mapId = options.mapId;
-      const playerMode = options.playerMode ?? !game.user?.isGM;
+      const playerMode = !game.user?.isGM || options.playerMode === true;
       super({
         ...options,
         id: `galaxy-map-view-${playerMode ? "player" : "gm"}-${mapId}`
@@ -177,18 +182,30 @@ export function createGalaxyMapViewClass(deps: any) {
 
     async _prepareContext(options: any) {
       const context = await super._prepareContext(options);
+      const factionsDisabled = !areFactionsEnabled();
+      if (factionsDisabled) {
+        this.factionPanelOpen = false;
+        this.factionRegistry = false;
+        this.selectedFactionId = "";
+        if (this.creationPanel?.kind === "faction") this.creationPanel = null;
+      }
       const rawMap = getRawMap(this.mapId);
       const displayMap = rawMap ? prepareMapForDisplay(rawMap, {
+        factionsDisabled,
         playerMode: this.playerMode,
         selectedSystemId: this.selectedSystemId,
         selectedRouteId: this.selectedRouteId
       }) : null;
+      const selectedFaction = displayMap?.factions.find(faction => faction.id === this.selectedFactionId);
+      const factionDossier = selectedFaction ? {
+        ...selectedFaction,
+        parentName: displayMap?.factions.find(faction => faction.id === selectedFaction.parentFactionId)?.name
+      } : null;
+      if (!factionDossier) this.selectedFactionId = "";
       if (displayMap?.systems) {
         displayMap.systems = displayMap.systems.map((system: any) => ({
           ...system,
           displayType: "system",
-          factionName: "System",
-          factionColor: "#58d8ff",
           animatedCelestial: false,
           hasCustomMarker: Boolean(system.displayMarkerImage)
         }));
@@ -205,14 +222,12 @@ export function createGalaxyMapViewClass(deps: any) {
         }
       }
       if (!this.activeSystemId && this.selectedSystemId && !displayMap?.selectedSystem) this.selectedSystemId = null;
-      const activeSystem = displayMap?.systems.find((system: any) => system.id === this.activeSystemId) ?? null;
-      if (activeSystem) displayMap.backgroundImage = activeSystem.backgroundImage || "";
-      const factionLookup = new Map((displayMap?.factions ?? []).map((faction: any) => [faction.id, faction]));
+      const galaxySystems = displayMap?.systems ?? [];
+      const activeSystem = galaxySystems.find((system: any) => system.id === this.activeSystemId) ?? null;
+      if (activeSystem) displayMap.backgroundImage = activeSystem.obscured ? "" : activeSystem.backgroundImage || "";
       const systemObjects = activeSystem ? activeSystem.objects
-        .filter((object: any) => !this.playerMode || getEffectiveObjectVisibility(activeSystem, object) === "players")
         .map((object: any) => {
-          const obscured = this.playerMode && object.status === "undiscovered";
-          const faction: any = factionLookup.get(object.factionId);
+          const obscured = this.playerMode && (activeSystem.obscured || object.status === "undiscovered");
           const displayMarkerImage = obscured ? "" : object.markerImage;
           return {
             ...object,
@@ -221,8 +236,6 @@ export function createGalaxyMapViewClass(deps: any) {
             displayDescription: obscured ? "Unresolved sensor contact. Details are not available." : object.description,
             displayType: obscured ? "unknown" : object.kind,
             displayStatus: obscured ? "undiscovered" : object.status,
-            factionName: faction?.name ?? "Unaffiliated",
-            factionColor: object.iconColor || faction?.color || "#58d8ff",
             displayMarkerImage,
             hasCustomMarker: Boolean(displayMarkerImage),
             obscured,
@@ -304,6 +317,7 @@ export function createGalaxyMapViewClass(deps: any) {
         ...this.creationPanel.data,
         kind: this.creationPanel.kind,
         entityKind: this.creationPanel.data?.kind,
+        factionScale: this.creationPanel.data?.kind,
         isSystem: this.creationPanel.kind === "system",
         isEntity: this.creationPanel.kind === "entity",
         isRoute: this.creationPanel.kind === "route",
@@ -325,11 +339,30 @@ export function createGalaxyMapViewClass(deps: any) {
               selected: current?.centerId === center.id && current.orbitId === ring.id
             }];
           })) : [],
-        factionOptions: (displayMap?.factions ?? []).map((faction: any) => ({ id: faction.id, name: faction.name }))
+        missingFaction: Boolean(this.creationPanel.data.factionId
+          && !displayMap?.factions.some(faction => faction.id === this.creationPanel.data.factionId)),
+        missingHeadquarters: Boolean(this.creationPanel.data.headquartersSystemId
+          && !galaxySystems.some(system => system.id === this.creationPanel.data.headquartersSystemId)),
+        headquartersOptions: this.creationPanel.kind === "faction"
+          ? galaxySystems.map(system => ({ id: system.id, name: system.name })) : [],
+        factionOptions: (displayMap?.factions ?? []).filter(faction => faction.kind === "major").map(faction => ({ id: faction.id, name: faction.name })),
+        parentFactionOptions: (displayMap?.factions ?? []).filter(faction => faction.kind === "major" && faction.id !== this.creationPanel.editId)
       } : null;
+      const showFactionPanel = this.factionPanelOpen && !planetAppearance && !creationPanel && !this.factionRegistry;
+      const showTerritories = !factionsDisabled && (showFactionPanel || (activeSystem ? this.showTerritories : this.showGalaxyTerritories));
+      const highlightedFactionId = !planetAppearance && !creationPanel && !this.factionRegistry && factionDossier?.kind === "major"
+        ? factionDossier.id : undefined;
+      const factionPanel = showFactionPanel && !factionDossier && displayMap
+        ? this._prepareFactionPanel(displayMap, activeSystem)
+        : null;
       return {
         ...context,
         map: displayMap,
+        factionsDisabled,
+        factionDossier,
+        showFactionPanel,
+        factionPanel,
+        highlightedFactionId,
         systemView: Boolean(activeSystem && !planetAppearance),
         activeSystem,
         selectedObject,
@@ -344,9 +377,10 @@ export function createGalaxyMapViewClass(deps: any) {
         creationPanel,
         factionRegistry: this.factionRegistry,
         appearanceGuideMarkup: creationPanel?.isEntity ? getTextureGuideMarkup(creationPanel.planetShape || "sphere") : "",
-        showInspector: Boolean(creationPanel || this.factionRegistry || planetAppearance || displayMap?.selectedSystem || displayMap?.selectedRoute),
-        territories: displayMap ? buildTerritories(displayMap.systems, displayMap.factions) : [],
-        showTerritories: this.showTerritories,
+        showInspector: Boolean(factionPanel || creationPanel || this.factionRegistry || factionDossier || planetAppearance || displayMap?.selectedSystem || displayMap?.selectedRoute),
+        territories: showTerritories && displayMap && !planetAppearance
+          ? buildTerritories(displayMap.systems, displayMap.factions, { cluster: !activeSystem }) : [],
+        showTerritories,
         showRoutes: this.showRoutes,
         orbitLayout,
         hasOrbits: Boolean(orbitLayout?.rings.length),
@@ -360,6 +394,50 @@ export function createGalaxyMapViewClass(deps: any) {
         zoom: this.zoom,
         missingMap: !rawMap
       };
+    }
+
+    _prepareFactionPanel(map: any, system: any) {
+      const reputation = this.factionPanelTab === "reputation";
+      const choices = getFactionRatings(reputation ? "reputation" : "prominence");
+      if (!reputation) choices.unshift({ id: "Unrated", label: "Unrated" });
+      const children = new Map<string, any[]>();
+      for (const faction of map.factions) {
+        const group = children.get(faction.parentFactionId) ?? [];
+        group.push(faction);
+        children.set(faction.parentFactionId, group);
+      }
+      const systemId = system?.id ?? "";
+      const canEdit = Boolean(game.user?.isGM && (reputation || !system?.obscured));
+      const rows = (children.get("") ?? []).flatMap(faction => [faction, ...(children.get(faction.id) ?? [])]).map(faction => {
+        const ratingId = reputation ? faction.reputation
+          : systemId ? faction.systemProminence[systemId] ?? "Unrated" : faction.prominence;
+        const value = choices.find(choice => choice.id === ratingId)?.label ?? "Unrated";
+        return { ...faction, ratingId, value };
+      });
+      return { reputation, choices, systemId, scope: system?.displayName ?? map.title, canEdit, canManage: map.canEdit, rows };
+    }
+
+    async _saveFactionStanding(id: string, value: string, systemId: string, reputation: boolean) {
+      if (!game.user?.isGM || !areFactionsEnabled()) return false;
+      const scale = reputation ? "reputation" : "prominence";
+      if ((reputation || value !== "Unrated") && !getFactionRatings(scale).some(rating => rating.id === value)) {
+        notifyError(`That ${scale} rating is no longer available.`);
+        return false;
+      }
+      const map = getRawMap(this.mapId);
+      if (!map) return false;
+      const faction = normalizeMap(map).factions.find(candidate => candidate.id === id);
+      if (!faction) { notifyError("That faction is no longer on this map."); return false; }
+      const changes = reputation ? { reputation: value }
+        : systemId ? { systemProminence: { ...faction.systemProminence, [systemId]: value } }
+          : { prominence: value };
+      try {
+        return Boolean(await upsertFaction(this.mapId, { id, ...changes }));
+      } catch (error) {
+        console.error("Galaxy Map failed to save faction standing", error);
+        notifyError("Could not save the faction change.");
+      }
+      return false;
     }
 
     _onRender(context: any, options: any) {
@@ -407,7 +485,44 @@ export function createGalaxyMapViewClass(deps: any) {
         this._attachAppearancePreview(html);
       }
       html.querySelector("[data-action='toggle-territories']")?.addEventListener("click", () => {
-        this.showTerritories = !this.showTerritories;
+        this.factionPanelOpen = !this.factionPanelOpen;
+        this.factionRegistry = false;
+        this.selectedFactionId = "";
+        if (this.activeSystemId) this.showTerritories = this.factionPanelOpen;
+        else this.showGalaxyTerritories = this.factionPanelOpen;
+        this.render({ force: true });
+      });
+      (html as ParentNode).querySelectorAll<HTMLButtonElement>("[data-faction-panel-tab]").forEach(button => {
+        button.addEventListener("click", () => {
+          this.factionPanelTab = button.dataset.factionPanelTab ?? "prominence";
+          this.render({ force: true });
+        });
+      });
+      const ratingButtons = (html as ParentNode).querySelectorAll<HTMLButtonElement>("[data-faction-rating]");
+      ratingButtons.forEach(button => {
+        button.addEventListener("click", async () => {
+          const picker = button.closest<HTMLDetailsElement>("[data-faction-standing]");
+          const value = button.dataset.factionRating;
+          if (!picker || !value || button.disabled) return;
+          if (button.getAttribute("aria-pressed") === "true") { picker.open = false; return; }
+          const { factionStanding = "", prominenceSystemId = "", reputation } = picker.dataset;
+          ratingButtons.forEach(control => { control.disabled = true; });
+          try {
+            if (await this._saveFactionStanding(factionStanding, value, prominenceSystemId, reputation === "true")) picker.open = false;
+          } finally {
+            ratingButtons.forEach(control => { control.disabled = false; });
+          }
+        });
+      });
+      (html as ParentNode).querySelectorAll<HTMLButtonElement>("[data-inspect-faction]").forEach(button => {
+        button.addEventListener("click", () => {
+          if (this._selectionTimer) clearTimeout(this._selectionTimer);
+          this.selectedFactionId = button.dataset.inspectFaction ?? "";
+          this.render({ force: true });
+        });
+      });
+      html.querySelector("[data-action='clear-faction']")?.addEventListener("click", () => {
+        this.selectedFactionId = "";
         this.render({ force: true });
       });
       html.querySelector("[data-action='toggle-routes']")?.addEventListener("click", () => {
@@ -432,7 +547,7 @@ export function createGalaxyMapViewClass(deps: any) {
         galaxy?.classList.toggle("is-hard-contrast", this.hardContrast);
         (event.currentTarget as HTMLElement).setAttribute("aria-pressed", String(this.hardContrast));
       });
-      html.querySelectorAll("[data-system-id]").forEach((node: any) => {
+      html.querySelectorAll(".gmf-system[data-system-id]").forEach((node: any) => {
         node.addEventListener("click", (event: any) => {
           if (node.dataset.dragged === "true") {
             node.dataset.dragged = "false";
@@ -441,6 +556,7 @@ export function createGalaxyMapViewClass(deps: any) {
           event.stopPropagation();
           if (this._selectionTimer) clearTimeout(this._selectionTimer);
           this._selectionTimer = globalThis.setTimeout(() => {
+            this.selectedFactionId = "";
             if (this.activeSystemId) this.selectedObjectId = node.dataset.systemId;
             else this.selectedSystemId = node.dataset.systemId;
             this.selectedRouteId = null;
@@ -453,6 +569,7 @@ export function createGalaxyMapViewClass(deps: any) {
           if (this._selectionTimer) clearTimeout(this._selectionTimer);
           this._selectionTimer = null;
           const id = node.dataset.systemId;
+          this.selectedFactionId = "";
           this.selectedRouteId = null;
           this.creationPanel = null;
           if (this.activeSystemId) {
@@ -476,6 +593,7 @@ export function createGalaxyMapViewClass(deps: any) {
       html.querySelectorAll("[data-route-id]").forEach((route: any) => {
         route.addEventListener("click", (event: any) => {
           event.stopPropagation();
+          this.selectedFactionId = "";
           this.selectedRouteId = route.dataset.routeId;
           if (this.activeSystemId) this.selectedObjectId = null;
           else this.selectedSystemId = null;
@@ -894,6 +1012,7 @@ export function createGalaxyMapViewClass(deps: any) {
         color,
         label: String(options.label || (kind === "distress" ? "Distress signal" : "Signal located")).slice(0, 120)
       };
+      this.selectedFactionId = "";
       this.selectedSystemId = systemId;
       this.planetSystemId = null;
       this.selectedRouteId = null;
@@ -919,6 +1038,7 @@ export function createGalaxyMapViewClass(deps: any) {
         ?? system?.objects.find((candidate: any) => candidate.id === system.primaryObjectId);
       if (!system || !object) return false;
       if (this.playerMode && (system.visibility !== "players" || getEffectiveObjectVisibility(system, object) !== "players")) return false;
+      this.selectedFactionId = "";
       this.activeSystemId = system.id;
       this.selectedSystemId = system.id;
       this.selectedObjectId = object.id;
@@ -989,6 +1109,7 @@ export function createGalaxyMapViewClass(deps: any) {
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
         if (!moved) {
+          this.selectedFactionId = "";
           this.selectedRouteId = null;
           if (this.activeSystemId) this.selectedObjectId = null;
           else this.selectedSystemId = null;
@@ -1283,6 +1404,11 @@ export function createGalaxyMapViewClass(deps: any) {
         }
       };
       this.factionRegistry = false;
+      if (kind === "faction" && this.selectedFactionId === editId) {
+        this.render({ force: true });
+        return;
+      }
+      this.selectedFactionId = "";
       this.selectedSystemId = null;
       this.selectedObjectId = null;
       this.selectedRouteId = null;
@@ -1302,6 +1428,7 @@ export function createGalaxyMapViewClass(deps: any) {
 
     openEditor(kind: string, options: any = {}) {
       if (!game.user?.isGM || this.playerMode) return false;
+      if (kind === "faction" && !areFactionsEnabled()) return false;
       this._disposePlanetRenderer();
       this.planetSystemId = null;
       if (kind === "entity") {
@@ -1342,6 +1469,13 @@ export function createGalaxyMapViewClass(deps: any) {
       });
       const form = html.querySelector<HTMLFormElement>("[data-panel-create-form]");
       if (!form) return;
+      const factionKind = form.querySelector<HTMLSelectElement>('select[name="kind"]');
+      const parentFaction = form.querySelector<HTMLSelectElement>('select[name="parentFactionId"]');
+      if (factionKind && parentFaction) {
+        factionKind.addEventListener("change", () => {
+          parentFaction.disabled = factionKind.value !== "minor";
+        });
+      }
       bindFilePickerFields(form);
       const readOrbits = bindOrbitEditor(form, this.creationPanel?.data ?? {});
       form.addEventListener("submit", async event => {
@@ -1364,8 +1498,12 @@ export function createGalaxyMapViewClass(deps: any) {
         this.creationPanel = null;
         let saved: any = null;
         if (kind === "map") saved = await updateMapMetadata(this.mapId, { ...existing, ...values });
-        else if (kind === "system") saved = await upsertSystem(this.mapId, { ...existing, ...values, x, y });
-        else if (kind === "entity" && this.activeSystemId) {
+        else if (kind === "system") {
+          // Existing coordinates and nested locations can change while the editor is open.
+          delete values.x;
+          delete values.y;
+          saved = await upsertSystem(this.mapId, panel?.editId ? values : { ...values, x, y });
+        } else if (kind === "entity" && this.activeSystemId) {
           const { orbit, orbits, ...location } = existing;
           saved = await upsertObject(this.mapId, this.activeSystemId, { ...location, ...values, x, y });
           if (!saved) {
@@ -1381,8 +1519,13 @@ export function createGalaxyMapViewClass(deps: any) {
           }
           saved = await upsertRoute(this.mapId, { ...existing, ...values }, this.activeSystemId ?? "");
         } else if (kind === "faction") {
-          saved = await upsertFaction(this.mapId, { ...existing, ...values });
-          this.factionRegistry = true;
+          delete values.x;
+          delete values.y;
+          saved = await upsertFaction(this.mapId, values);
+          this.factionRegistry = Boolean(saved && !this.selectedFactionId && !this.factionPanelOpen);
+        }
+        if (!saved && (kind === "system" || kind === "faction")) {
+          this.creationPanel = { ...panel, data: { ...existing, ...values } };
         }
         if (saved?.id) {
           if (kind === "system") this.selectedSystemId = saved.id;

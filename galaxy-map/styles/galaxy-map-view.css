@@ -199,6 +199,8 @@
   pointer-events: none;
 }
 
+.gmf-galaxy .gmf-territories { z-index: 0; }
+
 .gmf-territories polygon {
   fill: var(--gmf-territory-color);
   fill-opacity: 0.065;
@@ -230,10 +232,45 @@
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--gmf-territory-color) 65%, #d8e6ef);
+  color: color-mix(in srgb, var(--gmf-territory-color) 65%, var(--hs-text));
   opacity: 0.6;
   text-shadow: 0 1px 4px #01050a;
 }
+
+.gmf-galaxy .gmf-territories polygon.is-faction-highlighted {
+  fill-opacity: 0.18;
+  stroke-opacity: 0.8;
+}
+
+.gmf-galaxy .gmf-territory-label.is-faction-highlighted { opacity: 1; }
+.gmf-galaxy .gmf-territories .is-faction-muted { opacity: 0.25; }
+
+.gmf-galaxy .gmf-system.is-faction-muted:not(:is(:hover, :focus-visible, .is-current, .is-selected, .is-external-focus)) {
+  opacity: 0.42;
+}
+
+.gmf-galaxy .gmf-system.is-faction-highlighted :is(.gmf-system__core, .gmf-custom-marker__image) {
+  outline: 1px solid var(--gmf-faction-color);
+  outline-offset: 3px;
+}
+
+.gmf-galaxy .gmf-faction-select {
+  width: clamp(85px, 15vw, 145px);
+  color: var(--hs-text);
+  background: var(--hs-field);
+  border: 1px solid var(--hs-line);
+  border-radius: var(--hs-radius);
+}
+
+.gmf-galaxy .gmf-faction-dossier {
+  display: grid;
+  gap: 6px;
+  padding: var(--hs-space-panel);
+  overflow-wrap: anywhere;
+}
+
+.gmf-galaxy .gmf-faction-dossier :is(h4, p, ul) { margin: 0; }
+.gmf-galaxy .gmf-faction-dossier p { white-space: pre-wrap; }
 
 .gmf-map-stage:active {
   cursor: grabbing;
@@ -1416,6 +1453,123 @@
 
 .gmf-galaxy.is-hard-contrast .gmf-system-panel {
   background: rgb(2, 12, 20);
+}
+
+.gmf-faction-panel__tabs,
+.gmf-faction-panel__controls {
+  display: flex;
+  gap: 6px;
+}
+
+.gmf-system-panel.gmf-faction-panel {
+  right: auto;
+  left: 18px;
+}
+
+.gmf-faction-panel__tabs button {
+  flex: 1;
+}
+
+.galaxy-map-framework .gmf-faction-panel__tabs button[aria-pressed="true"] {
+  background: var(--gmf-cyan, #58d8ff) !important;
+  border-color: var(--gmf-cyan, #58d8ff) !important;
+  color: #081522 !important;
+  font-weight: 700;
+}
+
+.gmf-panel-create .gmf-parent-faction-field:has(select:disabled) {
+  opacity: 0.55;
+}
+
+.gmf-parent-faction-field select:disabled {
+  cursor: not-allowed;
+}
+
+.gmf-faction-panel__scope {
+  margin-block: 12px 6px;
+}
+
+.gmf-faction-panel__rows {
+  --gmf-faction-row-gap: 8px;
+  display: grid;
+  gap: var(--gmf-faction-row-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gmf-faction-panel__row {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid rgb(88 216 255 / 28%);
+  border-radius: 8px;
+  background: rgb(2 12 20 / 75%);
+}
+
+.gmf-faction-panel__row--child {
+  --gmf-faction-branch-width: 15px;
+  --gmf-faction-branch-height: 24px;
+  --gmf-faction-branch-color: var(--gmf-cyan, #58d8ff);
+  position: relative;
+  margin-inline-start: 22px;
+}
+
+.gmf-faction-panel__row--child::before,
+.gmf-faction-panel__row--child::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: calc(-1 * var(--gmf-faction-branch-width));
+  pointer-events: none;
+}
+
+.gmf-faction-panel__row--child::before {
+  inset-block-start: calc(-1 * (var(--gmf-faction-row-gap) + 1px));
+  inset-block-end: calc(100% - var(--gmf-faction-branch-height));
+  border-inline-start: 1px solid var(--gmf-faction-branch-color);
+}
+
+.gmf-faction-panel__row--child:has(+ .gmf-faction-panel__row--child)::before {
+  inset-block-end: -1px;
+}
+
+.gmf-faction-panel__row--child::after {
+  inset-block-start: var(--gmf-faction-branch-height);
+  inline-size: var(--gmf-faction-branch-width);
+  border-block-start: 1px solid var(--gmf-faction-branch-color);
+}
+
+.gmf-faction-panel button.gmf-faction-panel__identity {
+  display: grid;
+  justify-content: start;
+  gap: 1px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.gmf-faction-panel__rating {
+  flex: 1;
+  min-width: 0;
+}
+
+.gmf-faction-panel__rating summary {
+  padding: 5px 8px;
+  border: 1px solid rgb(88 216 255 / 44%);
+  border-radius: 6px;
+  background: #081522;
+  color: #e9fbff;
+  cursor: pointer;
+}
+
+.gmf-faction-panel__choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.gmf-faction-panel__choices button[aria-pressed="true"] {
+  border-color: var(--gmf-cyan, #58d8ff);
 }
 
 .gmf-object-appearance-panel {

@@ -10,11 +10,25 @@ test("unknown contacts and unavailable factions do not create influence regions"
   assert.deepEqual(buildTerritories([known, { factionId: "a", x: 90, y: 90, obscured: true }], factions), buildTerritories([known], factions));
 });
 test("regions handle single systems, duplicate positions, and map edges", () => {
-  for (const positions of [[[0, 0]], [[100, 100]], [[50, 50], [50, 50]], [[10, 20], [80, 90]]]) {
+  for (const positions of [[[0, 0]], [[100, 100]], [[50, 50], [50, 50]]]) {
     const regions = buildTerritories(positions.map(([x, y]) => ({ factionId: "a", x, y })), factions);
     assert.equal(regions.length, 1);
     const points = regions[0].points.split(" ").map(p => p.split(",").map(Number));
     assert.ok(points.length >= 3);
+    assert.equal(new Set(points.map(point => point.join(","))).size, points.length);
     assert.ok(points.flat().every(n => Number.isFinite(n) && n >= 1 && n <= 99));
+  }
+});
+
+test("galaxy colonies form deterministic separate regions with a bounded span", () => {
+  const members = [[8, 10], [18, 10], [28, 10], [40, 10], [90, 90]]
+    .map(([x, y]) => ({ factionId: "a", x, y }));
+  const regions = buildTerritories(members, factions);
+  assert.equal(regions.length, 3);
+  assert.deepEqual(buildTerritories([...members].reverse(), factions), regions);
+  assert.equal(buildTerritories(members, factions, { cluster: false }).length, 1);
+  for (const region of regions) {
+    const xs = region.points.split(" ").map(point => Number(point.split(",")[0]));
+    assert.ok(Math.max(...xs) - Math.min(...xs) <= 32);
   }
 });

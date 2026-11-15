@@ -1,7 +1,7 @@
-<section class="gmf-manager">
+<section data-holosuite-branding="galaxy-map" class="gmf-manager">
   <header class="gmf-manager__header" data-gmf-window-drag>
     <div>
-      <p class="gmf-kicker">Galaxy Map Framework</p>
+      <p class="gmf-kicker"><span data-holosuite-brand-icon></span><span data-holosuite-brand-name>Galaxy Map Framework</span></p>
       <h2>Map Manager</h2>
     </div>
     <div class="gmf-window-actions">
@@ -90,7 +90,7 @@
             <div class="gmf-creation-actions" aria-label="Create map content">
               <button type="button" data-action="create-system"><i class="fa-solid fa-plus"></i>System</button>
               <button type="button" data-action="create-route"><i class="fa-solid fa-plus"></i>Route</button>
-              <button type="button" data-action="create-faction"><i class="fa-solid fa-plus"></i>Faction</button>
+              {{#unless factionsDisabled}}<button type="button" data-action="create-faction"><i class="fa-solid fa-plus"></i>Faction</button>{{/unless}}
             </div>
           </div>
 
@@ -101,9 +101,11 @@
             <button type="button" role="tab" data-manager-tab="routes" aria-selected="{{#if showRoutes}}true{{else}}false{{/if}}" class="{{#if showRoutes}}is-active{{/if}}">
               Routes <span>{{selectedMap.routes.length}}</span>
             </button>
-            <button type="button" role="tab" data-manager-tab="factions" aria-selected="{{#if showFactions}}true{{else}}false{{/if}}" class="{{#if showFactions}}is-active{{/if}}">
-              Factions <span>{{selectedMap.factions.length}}</span>
-            </button>
+            {{#unless factionsDisabled}}
+              <button type="button" role="tab" data-manager-tab="factions" aria-selected="{{#if showFactions}}true{{else}}false{{/if}}" class="{{#if showFactions}}is-active{{/if}}">
+                Factions <span>{{selectedMap.factions.length}}</span>
+              </button>
+            {{/unless}}
           </nav>
 
           <div class="gmf-manager-tabpanels">
@@ -186,9 +188,13 @@
                 <div class="gmf-crud-list">
                   {{#each selectedMap.factions as |faction|}}
                     <article class="gmf-crud-row">
-                      <div class="gmf-crud-row__identity">
-                        <strong><span class="gmf-color-dot" style="--gmf-faction-color: {{faction.color}};"></span>{{faction.name}}</strong>
-                        <span>{{gmfFallback faction.description "No faction description."}}</span>
+                      <div class="gmf-faction-entry">
+                        {{#if faction.emblem}}<img class="gmf-faction-emblem" src="{{faction.emblem}}" alt="" loading="lazy" />{{/if}}
+                        <div class="gmf-crud-row__identity">
+                          <strong><span class="gmf-color-dot" style="--gmf-faction-color: {{faction.color}};"></span>{{faction.name}}</strong>
+                          {{#if faction.tagline}}<span>{{faction.tagline}}</span>{{else}}{{#if faction.type}}<span>{{faction.type}}</span>{{/if}}{{/if}}
+                          <span>Controlled systems: {{faction.systemCount}}</span>
+                        </div>
                       </div>
                       <span class="gmf-visibility-state gmf-visibility-state--{{faction.visibility}}"><i class="fa-solid {{#if (gmfEq faction.visibility "players")}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>{{faction.visibility}}</span>
                       <div class="gmf-row-actions">

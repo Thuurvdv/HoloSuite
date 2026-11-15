@@ -96,9 +96,9 @@ test("map chrome stays minimal without search, zoom, add, scan, or ping controls
   assert.match(template, /data-action="toggle-routes"[\s\S]*aria-pressed=/);
   assert.match(template, /#if map\.canEdit[\s\S]*data-action="edit-current-layer"[\s\S]*Edit System[\s\S]*Edit Galaxy/);
   assert.match(template, /data-action="toggle-hard-contrast"[\s\S]*aria-pressed=/);
-  assert.match(template, /gmf-actions[\s\S]*#if systemView[\s\S]*gmf-faction-toggle[\s\S]*gmf-window-close/);
+  assert.match(template, /gmf-actions[\s\S]*#unless planetView[\s\S]*gmf-faction-toggle[\s\S]*gmf-window-close/);
   assert.match(template, /data-action="navigate-up"[\s\S]*fa-arrow-up/);
-  assert.match(template, /#if systemView[^\n]*#if showTerritories/);
+  assert.match(template, /#if showTerritories[^\n]*#if territories.length/);
   assert.match(template, /map-context-menu\.hbs/);
   assert.match(contextMenu, /data-context-action="add-entity"[\s\S]*Add Location/);
   assert.doesNotMatch(contextMenu, /data-context-action="add-entity" data-context-show="system"/);

@@ -10,6 +10,7 @@ import {
   normalizeSystemObject,
   randomId
 } from "./galaxy-model";
+import type { GalaxyFaction } from "./galaxy-types";
 import { MODULE_ID, SETTING_MAPS, SOCKET_NAME } from "./constants";
 import { downloadJson, slugify } from "./dom-utils";
 import { canAttachToOrbit, createOrbitLayout, DEFAULT_ORBIT_ASPECT, detachFromOrbit, orbitAngle, orbitTime } from "./orbits";
@@ -117,6 +118,11 @@ export function createGalaxyStore(deps: StoreDependencies) {
     if (!maps[mapId]) { notifyError(`Map "${mapId}" was not found.`); return null; }
     const map = normalizeMap(maps[mapId]);
     const existing = map.systems.find((candidate: any) => candidate.id === systemData.id);
+    if (systemData.factionId && systemData.factionId !== existing?.factionId
+      && !map.factions.some(faction => faction.id === systemData.factionId)) {
+      notifyError("Choose a faction on this galaxy map.");
+      return null;
+    }
     const objects = systemData.objects ?? existing?.objects ?? [];
     const primaryId = existing?.primaryObjectId || objects[0]?.id;
     const objectFields = ["image", "sceneIds", "planetLocations", "journalId", "planetPreset", "planetShape", "planetFinish", "planetTexture", "planetColor"];
@@ -320,6 +326,7 @@ export function createGalaxyStore(deps: StoreDependencies) {
     map.systems = map.systems.filter((system: any) => system.id !== systemId);
     map.routes = map.routes.filter((route: any) => route.fromSystemId !== systemId && route.toSystemId !== systemId);
     if (map.currentSystemId === systemId) map.currentSystemId = map.systems[0]?.id ?? "";
+    for (const faction of map.factions ?? []) if (faction.headquartersSystemId === systemId) faction.headquartersSystemId = "";
     await persistMap(maps, mapId);
     return true;
   }
@@ -330,6 +337,9 @@ export function createGalaxyStore(deps: StoreDependencies) {
     const map = maps[mapId] ? normalizeMap(maps[mapId]) : null;
     const system = map?.systems.find((candidate: any) => candidate.id === systemId);
     if (!map || !system) { notifyError(`System "${systemId}" was not found.`); return null; }
+    if (map.currentLocation.systemId !== systemId) {
+      map.currentLocation = { systemId, objectId: system.primaryObjectId };
+    }
     map.currentSystemId = systemId;
     maps[mapId] = map;
     await persistMap(maps, mapId);
@@ -377,15 +387,26 @@ export function createGalaxyStore(deps: StoreDependencies) {
     return true;
   }
 
-  async function upsertFaction(mapId: string, factionData: any = {}) {
+  async function upsertFaction(mapId: string, factionData: Partial<GalaxyFaction> = {}) {
     if (!requireGM("save factions")) return null;
     const maps = getMapStore();
-    const map = maps[mapId];
-    if (!map) { notifyError(`Map "${mapId}" was not found.`); return null; }
-    const faction = normalizeFaction(factionData);
-    const index = map.factions.findIndex((candidate: any) => candidate.id === faction.id);
+    if (!maps[mapId]) { notifyError(`Map "${mapId}" was not found.`); return null; }
+    const map = normalizeMap(maps[mapId]);
+    const index = map.factions.findIndex(candidate => candidate.id === factionData.id);
+    const faction = normalizeFaction({ ...map.factions[index], ...factionData });
+    if (faction.parentFactionId && (faction.parentFactionId === faction.id
+      || !map.factions.some(parent => parent.id === faction.parentFactionId && parent.kind === "major"))) {
+      notifyError("Choose a major faction on this galaxy map as the parent.");
+      return null;
+    }
+    if (faction.headquartersSystemId && faction.headquartersSystemId !== map.factions[index]?.headquartersSystemId
+      && !map.systems.some(system => system.id === faction.headquartersSystemId)) {
+      notifyError("Choose a headquarters system on this galaxy map.");
+      return null;
+    }
     if (index >= 0) map.factions[index] = faction;
     else map.factions.push(faction);
+    maps[mapId] = map;
     await persistMap(maps, mapId);
     return clone(faction);
   }
@@ -393,13 +414,14 @@ export function createGalaxyStore(deps: StoreDependencies) {
   async function deleteFaction(mapId: string, factionId: string) {
     if (!requireGM("delete factions")) return false;
     const maps = getMapStore();
-    const map = maps[mapId];
-    if (!map) return false;
-    map.factions = map.factions.filter((faction: any) => faction.id !== factionId);
+    if (!maps[mapId]) return false;
+    const map = normalizeMap(maps[mapId]);
+    map.factions = map.factions.filter(faction => faction.id !== factionId);
     for (const system of map.systems) {
       if (system.factionId === factionId) system.factionId = "";
       for (const object of system.objects ?? []) if (object.factionId === factionId) object.factionId = "";
     }
+    maps[mapId] = map;
     await persistMap(maps, mapId);
     return true;
   }
@@ -481,6 +503,7 @@ export function createGalaxyStore(deps: StoreDependencies) {
   }
 
   function exportMap(mapId: string) {
+    if (!requireGM("export galaxy maps")) return;
     const map = getRawMap(mapId);
     if (!map) { notifyError(`Map "${mapId}" was not found.`); return; }
     downloadJson(`${slugify(map.title)}.json`, normalizeMap(map));

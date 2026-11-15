@@ -44,6 +44,24 @@ export interface GalaxyRoute {
   notes: string;
 }
 
+export interface GalaxyFaction {
+  id: string;
+  name: string;
+  color: string;
+  description: string;
+  visibility: GalaxyVisibility;
+  emblem: string;
+  tagline: string;
+  type: string;
+  headquartersSystemId: string;
+  gmNotes: string;
+  kind: "major" | "minor";
+  parentFactionId: string;
+  prominence: string;
+  systemProminence: Record<string, string>;
+  reputation: string;
+}
+
 export interface GalaxySystem {
   id: string;
   name: string;
@@ -51,6 +69,7 @@ export interface GalaxySystem {
   y: number;
   status: string;
   visibility: GalaxyVisibility;
+  factionId: string;
   objects: GalaxyLocation[];
   routes: GalaxyRoute[];
   primaryObjectId: string;
@@ -62,7 +81,7 @@ export interface GalaxyMap {
   title: string;
   systems: GalaxySystem[];
   routes: GalaxyRoute[];
-  factions: unknown[];
+  factions: GalaxyFaction[];
   currentSystemId: string;
   [key: string]: any;
 }
