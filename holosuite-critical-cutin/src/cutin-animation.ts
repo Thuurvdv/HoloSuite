@@ -1,4 +1,9 @@
 import { AUDIENCE, SETTINGS, debugLog, setting } from "./settings";
+import { effectMarkup, getEffectPreset } from "./effect-presets";
+import { MANGA_ACCENT, MANGA_STYLE, startMangaExit, startMangaIntro } from "./manga-overdrive";
+import { startRiftExit, startRiftIntro } from "./rift-slash";
+
+import { FATE_EXIT, FATE_STYLE, prepareFatePortrait, startFateExit, startFateIntro } from "./shattered-fate";
 
 declare const foundry: any;
 declare const game: any;
@@ -13,10 +18,11 @@ export type CutinPayload = {
   triggerKind?: "success" | "failure" | string;
   naturalResult?: number;
   threshold?: number;
-  animationStyle?: "strike" | "breach" | "signal" | string;
+  animationStyle?: string;
   blind?: boolean;
   whisper?: string[];
   imagePath?: string;
+  fallbackImagePath?: string;
   audioPath?: string;
   overlayText?: string;
   accentColor?: string;
@@ -24,6 +30,7 @@ export type CutinPayload = {
   duration?: number;
   volume?: number;
   audience?: string;
+  preview?: boolean;
 };
 
 const activeQueue: CutinPayload[] = [];
@@ -33,10 +40,11 @@ let playing = false;
 function escapeHtml(value: any) {
   const div = document.createElement("div");
   div.textContent = String(value ?? "");
-  return div.innerHTML;
+  return div.innerHTML.replace(/"/g, "&quot;");
 }
 
 function shouldPlayForAudience(payload: CutinPayload) {
+  if (!payload.preview && setting(SETTINGS.suppressCutins) === true) return false;
   if (payload?.blind && !game.user?.isGM) return false;
   if (Array.isArray(payload?.whisper) && payload.whisper.length && !payload.whisper.includes(game.user?.id) && !game.user?.isGM) {
     return false;
@@ -52,7 +60,9 @@ function shouldPlayForAudience(payload: CutinPayload) {
 async function playAudio(src?: string, volume?: number) {
   if (!src) return;
   try {
-    const baseVolume = Math.min(1, Math.max(0, Number(volume ?? setting(SETTINGS.volume) ?? 0.8)));
+    const worldVolume = Math.min(1, Math.max(0, Number(volume ?? setting(SETTINGS.volume) ?? 0.8)));
+    const localVolume = Math.min(1, Math.max(0, Number(setting(SETTINGS.localVolume) ?? 1)));
+    const baseVolume = worldVolume * localVolume;
     if (foundry.audio?.AudioHelper?.play) {
       return foundry.audio.AudioHelper.play({ src, volume: baseVolume, autoplay: true, loop: false }, false);
     }
@@ -87,51 +97,60 @@ function stopAudio(handle: any) {
   }
 }
 
-function createOverlay(payload: CutinPayload) {
-  const accent = payload.accentColor || "#69e8ff";
-  const animationStyle = ["strike", "breach", "signal"].includes(payload.animationStyle) ? payload.animationStyle : "strike";
+export function createOverlay(payload: CutinPayload) {
+  const preset = getEffectPreset(payload.animationStyle);
+  const animationStyle = preset.id;
   const triggerKind = payload.triggerKind === "failure" ? "failure" : "success";
+  const isRift = animationStyle === "rift";
+  const isManga = animationStyle === MANGA_STYLE;
+  const isFate = animationStyle === FATE_STYLE;
+  const fullScreenArt = isRift || isManga || isFate;
+  const accent = payload.accentColor || (isManga ? MANGA_ACCENT : (isRift || isFate) && triggerKind === "failure" ? "#ff4d7d" : "#69e8ff");
   const image = payload.imagePath
     ? `<img class="hcci-portrait" src="${escapeHtml(payload.imagePath)}" alt="">`
     : `<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>`;
-  const fracture = payload.imagePath
-    ? [0, 1, 2, 3].map((index) => `<div class="hcci-fracture hcci-fracture-${index + 1}" style="background-image: url('${escapeHtml(payload.imagePath)}')"></div>`).join("")
-    : "";
   const titleLength = Math.max(1, String(payload.overlayText ?? "").length);
+  const words = String(payload.overlayText ?? "").trim().split(/\s+/);
+  const title = isFate && words.length > 1
+    ? `${escapeHtml(words.slice(0, -1).join(" "))} <span>${escapeHtml(words.at(-1))}</span>`
+    : escapeHtml(payload.overlayText);
   const text = payload.textEnabled && payload.overlayText
-    ? `<div class="hcci-title" style="--hcci-title-chars: ${titleLength}">${escapeHtml(payload.overlayText)}</div>`
+    ? `<div class="hcci-title" style="--hcci-title-chars: ${titleLength}">${title}</div>`
     : "";
-  const actorName = payload.actorName || payload.userName || "";
+  const actorName = payload.actorName || "";
+  const configuredMotion = String(setting(SETTINGS.motionMode) ?? "system");
+  const systemReduced = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
+  const motionMode = configuredMotion === "system" || (fullScreenArt && systemReduced && configuredMotion === "full")
+    ? (systemReduced ? "reduced" : "full")
+    : (["full", "reduced", "still"].includes(configuredMotion) ? configuredMotion : "full");
+  const configuredFlash = String(setting(SETTINGS.flashMode) ?? "soft");
+  const flashMode = ["full", "soft", "off"].includes(configuredFlash) ? configuredFlash : "soft";
+  const configuredDetail = setting(SETTINGS.effectIntensity);
+  const detail = ["low", "standard", "high"].includes(configuredDetail) ? configuredDetail : "standard";
 
   const overlay = document.createElement("div");
-  overlay.className = `hcci-overlay hcci-style-${animationStyle} hcci-kind-${triggerKind}`;
+  overlay.className = `hcci-overlay hcci-style-${animationStyle} hcci-kind-${triggerKind} hcci-motion-${motionMode} hcci-flash-${flashMode} hcci-detail-${detail}`;
   overlay.style.setProperty("--hcci-accent", accent);
+  const font = setting(SETTINGS.animationFont);
+  overlay.style.setProperty("--hcci-font", font === "classic"
+    ? '"Orbitron", "Eurostile", "Agency FB", Impact, sans-serif'
+    : '"HCCI AICON", "Orbitron", sans-serif');
+  const shake = Number(setting(SETTINGS.shakeIntensity) ?? 0.5);
+  overlay.style.setProperty("--hcci-shake", `${preset.shake * (Number.isFinite(shake) ? Math.max(0, Math.min(1, shake)) : 0.5) * 9}px`);
+  overlay.setAttribute("aria-hidden", "true");
+  const effects = (motionMode === "full" || isManga) ? effectMarkup(animationStyle, detail) : "";
   overlay.innerHTML = `
-    <div class="hcci-flash"></div>
-    <div class="hcci-noise"></div>
-    <div class="hcci-ring hcci-ring-a"></div>
-    <div class="hcci-ring hcci-ring-b"></div>
-    <div class="hcci-orbit-glow"></div>
-    <div class="hcci-panel hcci-panel-a"></div>
-    <div class="hcci-panel hcci-panel-b"></div>
-    <div class="hcci-tear hcci-tear-top"><span></span></div>
-    <div class="hcci-tear hcci-tear-bottom"><span></span></div>
-    <div class="hcci-triangle hcci-triangle-a"></div>
-    <div class="hcci-triangle hcci-triangle-b"></div>
-    <div class="hcci-triangle hcci-triangle-c"></div>
-    <div class="hcci-sparkle hcci-sparkle-a"></div>
-    <div class="hcci-sparkle hcci-sparkle-b"></div>
-    <div class="hcci-scan hcci-scan-a"></div>
-    <div class="hcci-scan hcci-scan-b"></div>
-    <div class="hcci-scan hcci-scan-c"></div>
-    <div class="hcci-diagonal hcci-diagonal-a"></div>
-    <div class="hcci-diagonal hcci-diagonal-b"></div>
+    ${isManga || isFate ? "" : `<div class="${isRift ? "hcci-rift-flash" : "hcci-flash"}"></div>`}
+    ${fullScreenArt ? effects : ""}
+    <div class="hcci-atmosphere"></div>
     <section class="hcci-stage">
+      <div class="hcci-visual">
+      <div class="hcci-effects">${fullScreenArt ? "" : effects}</div>
       <div class="hcci-portrait-frame">
-        ${image}
-        ${fracture}
-        <div class="hcci-frame-lightning hcci-frame-lightning-a"></div>
-        <div class="hcci-frame-lightning hcci-frame-lightning-b"></div>
+        ${isManga ? `<div class="hcci-manga-artwork">${image}</div><div class="hcci-manga-dots"></div>` : image}
+      </div>
+      ${isManga ? '<div class="hcci-manga-panel-glint"></div>' : ""}
+      <div class="hcci-frame-accent"></div>
       </div>
       <div class="hcci-copy">
         ${text}
@@ -139,35 +158,134 @@ function createOverlay(payload: CutinPayload) {
       </div>
     </section>
   `;
+  const fracturePortrait = isFate && motionMode === "full";
+  if (fracturePortrait) prepareFatePortrait(overlay);
+  const portrait = overlay.querySelector<HTMLImageElement>("img.hcci-portrait");
+  if (portrait && motionMode === "full" && (animationStyle === "shatter" || animationStyle === "overdrive")) {
+    const fragments = [
+      'polygon(0 0,50% 0,50% 50%)', 'polygon(50% 0,100% 0,50% 50%)',
+      'polygon(100% 0,100% 100%,50% 50%)', 'polygon(100% 100%,50% 100%,50% 50%)',
+      'polygon(50% 100%,0 100%,50% 50%)', 'polygon(0 100%,0 0,50% 50%)'
+    ];
+    for (let index = 0; index < 6; index++) {
+      const echo = document.createElement("div");
+      echo.className = "hcci-portrait-echo";
+      echo.style.setProperty("--piece", String(index));
+      echo.style.setProperty("--dx", `${index % 2 ? 1 : -1}`);
+      echo.style.setProperty("--dy", `${index < 3 ? -1 : 1}`);
+      echo.style.clipPath = animationStyle === "shatter" ? fragments[index] : `inset(${index * 100 / 6}% 0 ${100 - (index + 1) * 100 / 6}% 0)`;
+      const fragment = portrait.cloneNode() as HTMLImageElement;
+      fragment.className = "";
+      echo.appendChild(fragment);
+      overlay.querySelector(".hcci-visual")!.appendChild(echo);
+    }
+  }
+  portrait?.addEventListener("error", () => {
+    const fallbackPath = payload.preview ? payload.fallbackImagePath : undefined;
+    if (fallbackPath && portrait.getAttribute("src") !== fallbackPath) {
+      portrait.src = fallbackPath;
+      overlay.querySelectorAll<HTMLImageElement>(".hcci-portrait-echo img").forEach(image => { image.src = fallbackPath; });
+      if (fracturePortrait) prepareFatePortrait(overlay);
+      return;
+    }
+    overlay.querySelectorAll(".hcci-portrait-echo").forEach(echo => echo.remove());
+    const fallback = document.createElement("div");
+    fallback.className = "hcci-portrait hcci-portrait-fallback";
+    fallback.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>';
+    portrait.replaceWith(fallback);
+    if (fracturePortrait) prepareFatePortrait(overlay);
+  });
   return overlay;
 }
 
 async function playNow(payload: CutinPayload) {
   if (!shouldPlayForAudience(payload)) return;
 
-  const duration = Math.min(8000, Math.max(800, Number(payload.duration ?? setting(SETTINGS.duration) ?? 2500)));
+  const requestedDuration = Number(payload.duration ?? setting(SETTINGS.duration) ?? 2500);
+  const duration = Math.min(8000, Math.max(800, Number.isFinite(requestedDuration) ? requestedDuration : 2500));
   const overlay = createOverlay(payload);
   overlay.style.setProperty("--hcci-duration", `${duration}ms`);
-  document.body.appendChild(overlay);
-  document.body.classList.add("hcci-screen-shake");
-  const audioHandlePromise = playAudio(payload.audioPath, payload.volume);
+  // Compress the entrance at the shortest duration; longer settings extend the hold.
+  overlay.style.setProperty("--hcci-intro", `${Math.min(1000, (duration - 180) * 0.85)}ms`);
+  let finished = false;
+  let audioHandle: any;
+  let timer: ReturnType<typeof setTimeout>;
+  let audioTimer: ReturnType<typeof setTimeout> | undefined;
+  let cinematicAnimations: Animation[] = [];
+  let onKeyDown: (event: KeyboardEvent) => void;
+  try {
+    document.body.appendChild(overlay);
+    const isFate = overlay.classList.contains(`hcci-style-${FATE_STYLE}`);
+    const exitDuration = isFate ? FATE_EXIT : 180;
+    const holdAt = duration - exitDuration;
+    const isRift = overlay.classList.contains("hcci-style-rift");
+    const isManga = overlay.classList.contains(`hcci-style-${MANGA_STYLE}`);
+    const intro = isFate ? startFateIntro(overlay, holdAt) : isManga ? startMangaIntro(overlay, holdAt) : isRift ? startRiftIntro(overlay, holdAt) : undefined;
+    if (intro) cinematicAnimations = intro.animations;
+    const startAudio = () => {
+      void playAudio(payload.audioPath, payload.volume).then(handle => {
+        if (finished) stopAudio(handle);
+        else audioHandle = handle;
+      });
+    };
+    if (payload.audioPath && intro?.audioDelay) audioTimer = window.setTimeout(startAudio, intro.audioDelay);
+    else startAudio();
+    await new Promise<void>((resolve) => {
+      timer = window.setTimeout(finish, holdAt);
+      function finish() {
+        window.clearTimeout(timer);
+        globalThis.removeEventListener("keydown", onKeyDown);
+        resolve();
+      }
+      onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "Escape") finish();
+      };
+      globalThis.addEventListener("keydown", onKeyDown);
+    });
+    finished = true;
+    window.clearTimeout(audioTimer);
+    stopAudio(audioHandle);
+    audioHandle = null;
+    overlay.classList.add("hcci-exiting");
+    if (isFate) cinematicAnimations.push(...startFateExit(overlay, exitDuration));
+    else if (isManga) cinematicAnimations.push(...startMangaExit(overlay, exitDuration));
+    else if (isRift) cinematicAnimations.push(...startRiftExit(overlay, exitDuration));
+    await new Promise((resolve) => window.setTimeout(resolve, exitDuration));
+  } finally {
+    finished = true;
+    window.clearTimeout(timer);
+    window.clearTimeout(audioTimer);
+    cinematicAnimations.forEach(animation => animation.cancel());
+    if (onKeyDown) globalThis.removeEventListener("keydown", onKeyDown);
+    stopAudio(audioHandle);
+    overlay.remove();
+  }
+}
 
-  await new Promise((resolve) => window.setTimeout(resolve, Math.max(250, duration - 250)));
-  stopAudio(await audioHandlePromise);
-  overlay.classList.add("hcci-exiting");
-  await new Promise((resolve) => window.setTimeout(resolve, 250));
-  overlay.remove();
-  document.body.classList.remove("hcci-screen-shake");
+export async function previewCutin(payload: CutinPayload) {
+  if (!game.user?.isGM || playing) return false;
+  await playCutin({
+    ...payload,
+    id: foundry.utils.randomID(),
+    userId: game.user?.id ?? null,
+    audience: AUDIENCE.gm,
+    preview: true
+  });
+  return true;
 }
 
 async function drainQueue() {
   if (playing) return;
   playing = true;
-  while (activeQueue.length) {
-    const payload = activeQueue.shift();
-    await playNow(payload);
+  try {
+    while (activeQueue.length) {
+      const payload = activeQueue.shift();
+      try { await playNow(payload); }
+      catch (error) { debugLog("Cut-in playback failed; continuing queue.", error); }
+    }
+  } finally {
+    playing = false;
   }
-  playing = false;
 }
 
 export function playCutin(payload: CutinPayload | null | undefined) {
@@ -180,5 +298,5 @@ export function playCutin(payload: CutinPayload | null | undefined) {
   }
   activeQueue.push(payload);
   if (activeQueue.length > 3) activeQueue.splice(1, activeQueue.length - 3);
-  drainQueue();
+  return drainQueue();
 }

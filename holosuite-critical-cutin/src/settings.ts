@@ -15,8 +15,15 @@ export const SETTINGS = {
   volume: "volume",
   audience: "audience",
   textEnabled: "textEnabled",
+  animationFont: "animationFont",
   defaultText: "defaultText",
   defaultFailureText: "defaultFailureText",
+  motionMode: "motionMode",
+  flashMode: "flashMode",
+  effectIntensity: "effectIntensity",
+  shakeIntensity: "shakeIntensity",
+  localVolume: "localVolume",
+  suppressCutins: "suppressCutins",
   debug: "debug",
   playerConfigs: "playerConfigs"
 };
@@ -31,6 +38,15 @@ declare const foundry: any;
 declare const game: any;
 
 export function registerSettings(configAppClass: any) {
+  game.settings.register(MODULE_ID, SETTINGS.effectIntensity, {
+    name: "Local Effect Detail", hint: "Choose the density of decorative particles and the strength of glow on this device.",
+    scope: "client", config: true, type: String, default: "standard",
+    choices: { low: "Low", standard: "Standard", high: "High" }
+  });
+  game.settings.register(MODULE_ID, SETTINGS.shakeIntensity, {
+    name: "Local Impact Shake", hint: "Shake the cut-in at impact. Reduced and still motion always disable shake.",
+    scope: "client", config: true, type: Number, default: 0.5, range: { min: 0, max: 1, step: 0.1 }
+  });
   game.settings.register(MODULE_ID, SETTINGS.enabled, {
     name: "Enable Critical Cut-In",
     hint: "Play a configured cut-in when a qualifying natural result is rolled on the selected die.",
@@ -104,6 +120,13 @@ export function registerSettings(configAppClass: any) {
     default: AUDIENCE.everyone
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.animationFont, {
+    name: "Animation Font",
+    hint: "Typeface for the cut-in label and actor name.",
+    scope: "world", config: true, type: String, default: "aicon",
+    choices: { aicon: "AICON", classic: "Classic (Orbitron / system fallback)" }
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.textEnabled, {
     name: "Enable Text Overlay",
     hint: "Show the configured label during the cut-in.",
@@ -129,6 +152,50 @@ export function registerSettings(configAppClass: any) {
     config: true,
     type: String,
     default: "CRITICAL FAILURE"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.motionMode, {
+    name: "Local Motion",
+    hint: "Control cut-in motion on this device. System follows your operating-system reduced-motion preference.",
+    scope: "client",
+    config: true,
+    type: String,
+    choices: {
+      system: "Follow system preference",
+      full: "Full cinematic motion",
+      reduced: "Reduced motion",
+      still: "Still presentation"
+    },
+    default: "system"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.flashMode, {
+    name: "Local Flash Intensity",
+    hint: "Reduce or disable the bright opening flash on this device.",
+    scope: "client",
+    config: true,
+    type: String,
+    choices: { full: "Full", soft: "Soft", off: "Off" },
+    default: "soft"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.localVolume, {
+    name: "Local Cut-In Volume",
+    hint: "Personal volume multiplier applied after the GM's cut-in volume setting.",
+    scope: "client",
+    config: true,
+    type: Number,
+    range: { min: 0, max: 1, step: 0.05 },
+    default: 1
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.suppressCutins, {
+    name: "Hide Cut-Ins On This Device",
+    hint: "Do not show or play critical cut-ins for this client.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false
   });
 
   game.settings.register(MODULE_ID, SETTINGS.debug, {
@@ -164,6 +231,12 @@ export function setting(key: string) {
 
 export async function setSetting(key: string, value: any) {
   return game.settings.set(MODULE_ID, key, value);
+}
+
+export function normalizeDurationOverride(value: unknown): number | undefined {
+  if (typeof value !== "number" && typeof value !== "string") return undefined;
+  const duration = Number(value);
+  return Number.isInteger(duration) && duration >= 800 && duration <= 8000 ? duration : undefined;
 }
 
 export function getThreshold() {

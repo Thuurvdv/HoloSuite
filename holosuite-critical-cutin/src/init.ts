@@ -1,3 +1,4 @@
+import { openBoxOfDoom, registerBoxOfDoom, renderBoxOfDoom } from "./box-of-doom";
 import { MODULE_ID, MODULE_TITLE, registerSettings } from "./settings";
 import { playCutin } from "./cutin-animation";
 import { broadcastPayload, createManualPayloadForActor, createManualPayloadForUser, registerRollDetection } from "./roll-detector";
@@ -22,7 +23,8 @@ function exposeApi() {
       else playCutin(payload);
       return payload;
     },
-    openConfig: openPlayerConfig
+    openConfig: openPlayerConfig,
+    openBoxOfDoom
   };
 
   const foundryModule = game.modules.get(MODULE_ID);
@@ -33,6 +35,7 @@ function exposeApi() {
 
 Hooks.once("init", async () => {
   registerSettings(PlayerConfigApp);
+  registerBoxOfDoom();
   exposeApi();
   await loadTemplates([`modules/${MODULE_ID}/templates/player-config.hbs`]);
 });
@@ -40,6 +43,8 @@ Hooks.once("init", async () => {
 Hooks.once("ready", () => {
   exposeApi();
   registerRollDetection();
+  renderBoxOfDoom();
+  Hooks.on("userConnected", renderBoxOfDoom);
   registerHoloSuiteIntegration();
   console.log(`${MODULE_ID} | Ready. API available at game.modules.get("${MODULE_ID}").api`);
 });

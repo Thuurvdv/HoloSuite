@@ -1,0 +1,178 @@
+/* All effect coordinates are relative to the portrait, including on narrow screens.
+   Intro is bounded independently of hold time. Exits always occupy the final 180ms. */
+.hcci-overlay {
+  --hcci-accent: #69e8ff; --hcci-intro: 1000ms; --hcci-shake: 3px;
+  --fx-hot: color-mix(in srgb, var(--hcci-accent), white 50%);
+  --fx-dim: color-mix(in srgb, var(--hcci-accent), transparent 75%);
+  position: fixed; inset: 0; z-index: 100000; overflow: hidden; pointer-events: none;
+  isolation: isolate; color: white; animation: hcci-fade-in 150ms both;
+  background: radial-gradient(ellipse at 35% 50%, #020810b3, transparent 75%), linear-gradient(90deg, #02081033, #02081066);
+}
+.hcci-atmosphere { position: absolute; inset: 0; background: radial-gradient(ellipse at 35% 50%, var(--fx-dim), transparent 65%); opacity: .45; }
+.hcci-stage { z-index: 2; }
+.hcci-visual { --hcci-radius: min(19vw,24vh,220px); position: relative; justify-self: end; width: min(38vw,48vh,440px); aspect-ratio: 1; isolation: isolate; animation: hcci-impact 240ms calc(var(--hcci-intro) * .3) both; }
+.hcci-effects { position: absolute; inset: 0; z-index: -1; }
+.hcci-portrait-frame { width: 100%; height: 100%; opacity: 1; transform: none; animation: hcci-reveal var(--hcci-intro) cubic-bezier(.16,.8,.2,1) both; }
+.hcci-portrait { display: block; width: 100%; transform: none; }
+.hcci-portrait-fallback { display: grid; }
+.hcci-effect-description { display: block; font-size: 11px; line-height: 1.4; opacity: .75; font-weight: 400; }
+.hcci-frame-accent { position: absolute; inset: -10px; border: 1px solid var(--fx-dim); clip-path: polygon(0 0,30% 0,30% 2%,2% 2%,2% 30%,0 30%,0 0,100% 100%,70% 100%,70% 98%,98% 98%,98% 70%,100% 70%,100% 100%); }
+.hcci-portrait-echo { position: absolute; inset: 0; pointer-events: none; opacity: 0; animation: hcci-image-assemble var(--hcci-intro) both; }
+.hcci-portrait-echo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hcci-style-overdrive .hcci-portrait-echo { animation-name: hcci-image-bands; }
+.hcci-kind-failure.hcci-style-shatter .hcci-portrait-echo { animation-name: hcci-image-break; }
+.hcci-kind-failure.hcci-style-overdrive .hcci-portrait-echo { animation-name: hcci-image-corrupt; }
+.hcci-copy { animation: hcci-copy-in calc(var(--hcci-intro) * .6) calc(var(--hcci-intro) * .22) both; }
+.hcci-style-reactor .hcci-copy { animation-name: hcci-copy-rise; }
+.hcci-style-void .hcci-copy,.hcci-style-eclipse .hcci-copy { animation-name: hcci-copy-bloom; }
+.hcci-style-shatter .hcci-copy { animation-name: hcci-copy-prism; }
+.hcci-style-overdrive .hcci-copy { animation-name: hcci-copy-scan; }
+.hcci-title,.hcci-subtitle { animation: none; transform: none; opacity: 1; }
+.hcci-title { white-space: normal; overflow-wrap: anywhere; max-width: 100%; text-wrap: wrap; }
+.hcci-subtitle { max-width: 100%; overflow-wrap: anywhere; }
+.hcci-flash { position: absolute; inset: 0; background: var(--fx-hot); opacity: 0; animation: hcci-impact-flash calc(var(--hcci-intro) * .6) calc(var(--hcci-intro) * .16) both; }
+.hcci-flash-soft { --flash-peak: .14; }
+.hcci-flash-full { --flash-peak: .5; }
+.hcci-flash-off .hcci-flash { display: none; }
+.hcci-fx { position: absolute; display: block; left: 50%; top: 50%; pointer-events: none; color: var(--hcci-accent); box-sizing: border-box; --angle: calc(var(--i) * 360deg / var(--n)); }
+.hcci-fx-wave { width: 115%; aspect-ratio: 1; border: 2px solid var(--fx-hot); border-radius: 50%; box-shadow: 0 0 22px var(--fx-dim); opacity: 0; animation: hcci-wave calc(var(--hcci-intro) * .75) calc(var(--hcci-intro) * (.24 + var(--i) * .13)) both; }
+.hcci-fx-particle { width: 3px; height: calc(8px + var(--v) * 4px); background: var(--fx-hot); box-shadow: 0 0 8px var(--hcci-accent); opacity: 0; animation: hcci-particle calc(var(--hcci-intro) * .8) calc(var(--hcci-intro) * (.2 + var(--d) * .025)) both; }
+/* Neon Strike: crossing blade trails, followed by a shockwave. */
+.hcci-fx-slash { width: 220%; height: 5px; background: linear-gradient(90deg, transparent, var(--hcci-accent) 35%, white 50%, transparent); box-shadow: 0 0 20px var(--hcci-accent); --angle: calc(-24deg + var(--i) * 55deg); animation: hcci-slash calc(var(--hcci-intro) * .65) calc(var(--i) * var(--hcci-intro) * .12) both; }
+.hcci-fx-speed { width: 230%; height: 1px; top: calc(5% + var(--i) * 15%); background: linear-gradient(90deg,transparent,var(--hcci-accent),transparent); animation: hcci-speed calc(var(--hcci-intro) * .65) calc(var(--i) * 30ms) both; }
+.hcci-style-strike .hcci-portrait-frame { clip-path: polygon(8% 0,100% 0,92% 100%,0 100%); animation-name: hcci-strike-reveal; }
+/* Panel Breach: doors open around a bright central seam. */
+.hcci-style-breach .hcci-portrait-frame { clip-path: none; border-radius: 4px; animation-name: hcci-aperture; }
+.hcci-tear { position: absolute; left: -80%; width: 260%; top: 50%; height: 3px; background: linear-gradient(90deg,transparent,var(--hcci-accent),white,var(--hcci-accent),transparent); box-shadow: 0 0 18px var(--hcci-accent); animation: hcci-seam var(--hcci-intro) both; --side: -1; }
+.hcci-tear-bottom { --side: 1; }
+.hcci-fx-door { width: 150%; height: 56%; background: linear-gradient(0deg,var(--fx-dim),#09121f); border: 1px solid var(--hcci-accent); --side: -1; animation: hcci-door var(--hcci-intro) both; }
+.hcci-fx-door:nth-of-type(2) { --side: 1; }
+/* Signal Bloom: counter-rotating targeting arcs and an acquisition sweep. */
+.hcci-style-signal .hcci-portrait-frame { clip-path: circle(49%); border-radius: 50%; animation-name: hcci-hologram; }
+.hcci-fx-reticle { width: calc(112% + var(--i) * 16%); aspect-ratio: 1; border: 2px solid var(--hcci-accent); border-left-color: transparent; border-right-color: transparent; border-radius: 50%; animation: hcci-lock var(--hcci-intro) both, hcci-orbit 16s var(--hcci-intro) linear infinite; --angle: calc(var(--i) * 45deg); }
+.hcci-fx-tick { width: 3px; height: 12px; background: var(--fx-hot); transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -1.16)); animation: hcci-ticks var(--hcci-intro) both; }
+.hcci-fx-sweep { width: 125%; height: 2px; box-shadow: 0 0 24px var(--hcci-accent); background: var(--fx-hot); animation: hcci-sweep var(--hcci-intro) both; }
+/* Quantum Shatter: large polygon fragments on divergent trajectories. */
+.hcci-style-shatter .hcci-portrait-frame { clip-path: polygon(14% 0,88% 0,100% 16%,100% 82%,84% 100%,8% 100%,0 88%,0 12%); animation-name: hcci-shatter-reveal; }
+.hcci-fx-shard { width: calc(14% + var(--v) * 5%); height: 38%; background: linear-gradient(calc(var(--angle) + 35deg),var(--fx-hot),var(--fx-dim) 45%,transparent); clip-path: polygon(50% 0,100% 75%,12% 100%,0 60%); animation: hcci-shard var(--hcci-intro) both; }
+.hcci-fx-prism { width: calc(140% + var(--i) * 28%); aspect-ratio: 1; border: 1px solid var(--hcci-accent); transform: translate(-50%,-50%) rotate(45deg); animation: hcci-prism var(--hcci-intro) both; }
+/* Reactor Surge: six charging rails feed a plasma column. */
+.hcci-style-reactor .hcci-portrait-frame { clip-path: polygon(15% 0,85% 0,100% 15%,100% 85%,85% 100%,15% 100%,0 85%,0 15%); animation-name: hcci-reactor-reveal; }
+.hcci-fx-rail { left: calc(-15% + var(--i) * 26%); width: 3px; height: 220%; background: linear-gradient(0deg,transparent,var(--hcci-accent),white,transparent); animation: hcci-charge var(--hcci-intro) calc(var(--i) * 20ms) both; }
+.hcci-fx-column { width: 82%; height: 250%; background: linear-gradient(90deg,transparent,var(--fx-dim),var(--fx-hot),var(--fx-dim),transparent); animation: hcci-column var(--hcci-intro) both; }
+.hcci-fx-corona { width: calc(128% + var(--i) * 22%); aspect-ratio: 1; border: 3px dashed var(--hcci-accent); border-radius: 50%; animation: hcci-lock var(--hcci-intro) both, hcci-orbit 20s var(--hcci-intro) linear infinite; }
+/* Void Collapse: elliptical accretion disks and inward streaks. */
+.hcci-style-void .hcci-portrait-frame { clip-path: circle(48%); border-radius: 50%; animation-name: hcci-void-reveal; }
+.hcci-fx-disk { width: calc(190% + var(--i) * 20%); height: 58%; border: 9px solid var(--fx-hot); border-top-color: transparent; border-radius: 50%; box-shadow: 0 0 30px var(--hcci-accent),inset 0 0 20px var(--fx-dim); --angle: calc(-25deg + var(--i) * 155deg); animation: hcci-disk var(--hcci-intro) both; }
+.hcci-fx-horizon { width: 130%; aspect-ratio: 1; background: #02030b; border-radius: 50%; box-shadow: 0 0 65px var(--hcci-accent); animation: hcci-horizon var(--hcci-intro) both; }
+.hcci-fx-infall { width: 2px; height: 80px; background: linear-gradient(transparent,var(--fx-hot)); animation: hcci-infall var(--hcci-intro) both; }
+/* Railgun Salvo: converging sights, muzzle lance and parallel wakes. */
+.hcci-style-railgun .hcci-portrait-frame { clip-path: polygon(0 12%,100% 0,100% 88%,0 100%); animation-name: hcci-ballistic; }
+.hcci-fx-sight { width: 24%; height: 24%; border-top: 2px solid var(--hcci-accent); border-left: 2px solid var(--hcci-accent); --angle: calc(var(--i) * 90deg + 45deg); animation: hcci-sights var(--hcci-intro) both; }
+.hcci-fx-lance { width: 350%; height: 10px; background: linear-gradient(90deg,transparent,var(--hcci-accent),white,var(--hcci-accent),transparent); box-shadow: 0 0 30px var(--hcci-accent); animation: hcci-lance var(--hcci-intro) both; }
+.hcci-fx-wake { width: 260%; height: 2px; top: calc(15% + var(--i) * 12%); background: linear-gradient(90deg,transparent,var(--fx-hot),transparent); animation: hcci-speed var(--hcci-intro) calc(var(--i) * 15ms) both; }
+/* Astral Eclipse: quiet orbital crown, crescent and fixed constellation points. */
+.hcci-style-eclipse .hcci-portrait-frame { border-radius: 50% 50% 8px 8px; clip-path: none; animation-name: hcci-astral; }
+.hcci-fx-moon { width: 130%; aspect-ratio: 1; border-radius: 50%; box-shadow: -18px -8px 0 -2px var(--fx-hot),-26px -12px 30px -12px var(--hcci-accent); animation: hcci-moon var(--hcci-intro) both; }
+.hcci-fx-crown { width: calc(143% + var(--i) * 18%); aspect-ratio: 1; border: 1px solid var(--hcci-accent); border-radius: 50%; animation: hcci-lock var(--hcci-intro) both; }
+.hcci-fx-star { width: 7px; height: 7px; background: var(--fx-hot); clip-path: polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); animation: hcci-stars var(--hcci-intro) both; }
+.hcci-fx-orbit { width: calc(150% + var(--i) * 20%); height: 70%; border: 1px solid var(--fx-dim); border-radius: 50%; --angle: calc(30deg + var(--i) * 60deg); animation: hcci-disk var(--hcci-intro) both; }
+/* Cyber Overdrive: nested perspective gates and segmented data lanes. */
+.hcci-style-overdrive .hcci-portrait-frame { clip-path: polygon(0 0,90% 0,100% 10%,100% 100%,10% 100%,0 90%); animation-name: hcci-digital; }
+.hcci-fx-gate { width: 130%; aspect-ratio: 1; border: 2px solid var(--hcci-accent); clip-path: polygon(0 0,90% 0,100% 10%,100% 100%,10% 100%,0 90%); animation: hcci-gate var(--hcci-intro) calc(var(--i) * 55ms) both; }
+.hcci-fx-data { width: 5px; height: calc(25px + var(--v) * 15px); background: repeating-linear-gradient(0deg,var(--hcci-accent) 0 4px,transparent 4px 8px); left: calc(-30% + var(--i) * 160% / var(--n)); animation: hcci-data var(--hcci-intro) calc(var(--v) * 50ms) both; }
+/* Outcomes alter the choreography, not the character image's transform. */
+.hcci-kind-failure { --fx-hot: color-mix(in srgb,var(--hcci-accent),#ffc6d0 55%); }
+.hcci-kind-failure .hcci-frame-accent { border-color: var(--hcci-accent); border-style: dashed; }
+.hcci-kind-failure .hcci-fx-wave { animation-name: hcci-wave-collapse; }
+.hcci-kind-failure .hcci-fx-particle { animation-name: hcci-particle-fall; }
+.hcci-kind-failure.hcci-style-strike .hcci-portrait-frame { animation-name: hcci-strike-failure; }
+.hcci-kind-failure.hcci-style-breach .hcci-portrait-frame { animation-name: hcci-jammed; }
+.hcci-kind-failure.hcci-style-signal .hcci-portrait-frame,
+.hcci-kind-failure.hcci-style-overdrive .hcci-portrait-frame { animation-name: hcci-signal-loss; }
+.hcci-kind-failure.hcci-style-shatter .hcci-fx-shard { animation-name: hcci-shard-break; }
+.hcci-kind-failure.hcci-style-reactor .hcci-fx-column { animation-name: hcci-meltdown; }
+.hcci-kind-failure.hcci-style-void .hcci-fx-disk { animation-name: hcci-disk-collapse; }
+.hcci-kind-failure.hcci-style-railgun .hcci-fx-lance { animation-name: hcci-misfire; }
+.hcci-kind-failure.hcci-style-eclipse .hcci-fx-moon { animation-name: hcci-eclipse-failure; }
+.hcci-detail-low .hcci-fx { box-shadow: none; }
+.hcci-detail-low .hcci-atmosphere { opacity: .25; }
+.hcci-detail-high .hcci-atmosphere { opacity: .7; }
+/* An explicit exit per family, including the surrounding geometry. */
+.hcci-exiting { animation: hcci-fade-out 180ms both; }
+.hcci-exiting .hcci-visual { animation: hcci-exit-strike 180ms both; }
+.hcci-style-breach.hcci-exiting .hcci-visual,.hcci-style-reactor.hcci-exiting .hcci-visual { animation-name: hcci-exit-aperture; }
+.hcci-style-signal.hcci-exiting .hcci-visual,.hcci-style-overdrive.hcci-exiting .hcci-visual { animation-name: hcci-exit-signal; }
+.hcci-style-void.hcci-exiting .hcci-visual,.hcci-style-eclipse.hcci-exiting .hcci-visual { animation-name: hcci-exit-void; }
+.hcci-style-shatter.hcci-exiting .hcci-visual { animation-name: hcci-exit-shatter; }
+.hcci-style-railgun.hcci-exiting .hcci-visual { animation-name: hcci-exit-railgun; }
+/* Accessible presentations retain each silhouette without decorative motion. */
+.hcci-motion-reduced .hcci-visual,.hcci-motion-still .hcci-visual,
+.hcci-motion-reduced .hcci-portrait-frame,.hcci-motion-still .hcci-portrait-frame,
+.hcci-motion-reduced .hcci-copy,.hcci-motion-still .hcci-copy { animation: none !important; transform: none; filter: none; opacity: 1; }
+.hcci-motion-reduced .hcci-flash,.hcci-motion-still .hcci-flash { display: none; }
+.hcci-motion-still,.hcci-motion-still.hcci-exiting { animation: none; }
+@media(max-width:760px) { .hcci-visual { --hcci-radius: min(32vw,19vh,160px); justify-self: center; width: min(64vw,38vh,320px); } .hcci-stage { gap: 24px; } .hcci-copy { max-width: 92vw; } }
+@media(max-height:600px) and (min-width:761px) { .hcci-visual { --hcci-radius: min(22vh,170px); width: min(44vh,340px); } }
+@keyframes hcci-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hcci-fade-out { to { opacity: 0; } }
+@keyframes hcci-impact-flash { 0%,100% { opacity: 0; } 25% { opacity: var(--flash-peak,.14); } }
+@keyframes hcci-impact { 0%,100% { transform: none; } 20% { transform: translateX(calc(-1 * var(--hcci-shake))); } 45% { transform: translateX(var(--hcci-shake)); } 70% { transform: translateY(calc(var(--hcci-shake) * -.4)); } }
+@keyframes hcci-copy-in { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
+@keyframes hcci-copy-rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@keyframes hcci-copy-bloom { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes hcci-copy-prism { from { opacity: 0; transform: skewX(-10deg) translateX(24px); } to { opacity: 1; transform: none; } }
+@keyframes hcci-copy-scan { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(-24px); } }
+@keyframes hcci-reveal { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: none; } }
+@keyframes hcci-strike-reveal { 0%,12% { opacity: 0; transform: translateX(-80%) skewX(-12deg); } 48% { opacity: 1; transform: translateX(3%) skewX(-4deg); } 100% { transform: none; } }
+@keyframes hcci-wave { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.5); } 25% { opacity: .8; } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.9); } }
+@keyframes hcci-particle { 0% { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -0.45)); } 25% { opacity: .9; } 100% { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -1.65)) scale(.2); } }
+@keyframes hcci-slash { 0% { opacity: 0; transform: translate(-90%,-50%) rotate(var(--angle)) scaleX(0); } 35% { opacity: 1; transform: translate(-50%,-50%) rotate(var(--angle)) scaleX(1); } 100% { opacity: 0; transform: translate(-15%,-50%) rotate(var(--angle)) scaleX(.5); } }
+@keyframes hcci-speed { from { opacity: 0; transform: translate(-120%,-50%); } 35% { opacity: .6; } to { opacity: 0; transform: translate(40%,-50%); } }
+@keyframes hcci-aperture { 0%,22% { clip-path: inset(50% 0); opacity: 0; } 30% { opacity: 1; } 75%,100% { clip-path: inset(0); } }
+@keyframes hcci-seam { 0% { opacity: 0; transform: scaleX(0); } 22% { opacity: 1; transform: scaleX(1); } 75%,100% { opacity: 0; transform: translateY(calc(var(--side) * 220px)); } }
+@keyframes hcci-door { 0% { opacity: 0; transform: translate(-50%,-50%) scaleX(.1); } 22% { opacity: 1; transform: translate(-50%,-50%) scaleX(1); } 100% { opacity: 0; transform: translate(-50%,calc(-50% + var(--side) * 280px)); } }
+@keyframes hcci-hologram { 0% { opacity: 0; clip-path: circle(0%); } 35% { opacity: .7; } 80%,100% { opacity: 1; clip-path: circle(49%); } }
+@keyframes hcci-lock { from { opacity: 0; transform: translate(-50%,-50%) rotate(calc(var(--angle,0deg) - 100deg)) scale(1.5); } to { opacity: .65; transform: translate(-50%,-50%) rotate(var(--angle,0deg)); } }
+@keyframes hcci-orbit { from { transform: translate(-50%,-50%) rotate(var(--angle,0deg)); } to { transform: translate(-50%,-50%) rotate(calc(var(--angle,0deg) + 360deg)); } }
+@keyframes hcci-ticks { from { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -0.82)); } to { opacity: .65; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -1.16)); } }
+@keyframes hcci-sweep { 0% { opacity: 0; transform: translate(-50%,-180px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,220px); } }
+@keyframes hcci-shatter-reveal { 0% { opacity: 0; transform: scale(.6) rotate(-8deg); } 38% { opacity: .7; transform: scale(1.04) rotate(2deg); } 100% { opacity: 1; transform: none; } }
+@keyframes hcci-shard { from { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -1.65)) rotate(70deg); } 45% { opacity: .9; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -0.73)); } to { opacity: .25; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -1.05)) rotate(12deg); } }
+@keyframes hcci-prism { from { opacity: 0; transform: translate(-50%,-50%) rotate(0deg) scale(.3); } to { opacity: .3; transform: translate(-50%,-50%) rotate(45deg); } }
+@keyframes hcci-reactor-reveal { 0%,20% { opacity: 0; transform: translateY(25%) scale(.85); } 55% { opacity: 1; transform: scale(1.04); } 100% { transform: none; } }
+@keyframes hcci-charge { from { opacity: 0; transform: translate(-50%,70%) scaleY(.3); } 40% { opacity: .9; } to { opacity: .15; transform: translate(-50%,-50%) scaleY(1); } }
+@keyframes hcci-column { 0%,20% { opacity: 0; transform: translate(-50%,-50%) scaleX(.02); } 45% { opacity: .9; transform: translate(-50%,-50%) scaleX(1.5); } 100% { opacity: .12; transform: translate(-50%,-50%) scaleX(.8); } }
+@keyframes hcci-void-reveal { 0%,28% { opacity: 0; transform: scale(.02) rotate(-30deg); } 70% { opacity: 1; transform: scale(1.05); } 100% { transform: none; } }
+@keyframes hcci-disk { from { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) scale(1.8); } 42% { opacity: .9; transform: translate(-50%,-50%) rotate(var(--angle)) scale(.65); } to { opacity: .55; transform: translate(-50%,-50%) rotate(var(--angle)); } }
+@keyframes hcci-horizon { from { opacity: 0; transform: translate(-50%,-50%) scale(1.8); } 40% { opacity: 1; transform: translate(-50%,-50%) scale(.2); } to { opacity: .8; transform: translate(-50%,-50%) scale(1); } }
+@keyframes hcci-infall { from { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -1.9)); } 35% { opacity: .9; } to { opacity: 0; transform: translate(-50%,-50%) rotate(calc(var(--angle) + 45deg)) translateY(calc(var(--hcci-radius) * -0.18)); } }
+@keyframes hcci-ballistic { 0%,30% { opacity: 0; transform: translateX(-130%) scaleX(1.4); } 50% { opacity: 1; transform: translateX(5%); } 100% { transform: none; } }
+@keyframes hcci-sights { from { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -1.6)); } to { opacity: .65; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -0.96)); } }
+@keyframes hcci-lance { 0%,25% { opacity: 0; transform: translate(-70%,-50%) scaleX(0); } 38% { opacity: 1; transform: translate(-50%,-50%) scaleX(1); } 100% { opacity: 0; transform: translate(10%,-50%) scaleX(1); } }
+@keyframes hcci-astral { from { opacity: 0; transform: translateY(12%) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes hcci-moon { from { opacity: 0; transform: translate(-50%,-50%) rotate(-70deg) scale(.8); } to { opacity: .9; transform: translate(-50%,-50%) rotate(12deg); } }
+@keyframes hcci-stars { from { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -0.73)) scale(0); } to { opacity: .8; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * (-1 - var(--s) * .18))) scale(1); } }
+@keyframes hcci-digital { 0% { opacity: 0; clip-path: inset(0 100% 0 0); } 45% { opacity: .8; clip-path: inset(0 30% 0 0); } 75%,100% { opacity: 1; clip-path: inset(0); } }
+@keyframes hcci-gate { from { opacity: 0; transform: translate(-50%,-50%) scale(.1); } 30% { opacity: .8; } to { opacity: 0; transform: translate(-50%,-50%) scale(2.5); } }
+@keyframes hcci-data { from { opacity: 0; transform: translateY(-300px); } 40% { opacity: .8; } to { opacity: .15; transform: translateY(200px); } }
+@keyframes hcci-wave-collapse { from { opacity: 0; transform: translate(-50%,-50%) scale(1.8); } 40% { opacity: .8; } to { opacity: 0; transform: translate(-50%,-50%) scale(.3); } }
+@keyframes hcci-particle-fall { from { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -0.73)); } 30% { opacity: .8; } to { opacity: 0; transform: translateY(320px) rotate(var(--angle)) translateX(180px); } }
+@keyframes hcci-strike-failure { 0% { opacity: 0; transform: translateX(-50%) rotate(-5deg); } 40% { opacity: 1; transform: translateX(4%) rotate(3deg); } 65% { transform: translateX(-2%); } 100% { transform: none; } }
+@keyframes hcci-jammed { 0%,20% { opacity: 0; clip-path: inset(50% 0); } 35% { opacity: 1; clip-path: inset(28% 0); } 48% { clip-path: inset(36% 0); } 75%,100% { clip-path: inset(0); } }
+@keyframes hcci-signal-loss { 0% { opacity: 0; transform: scaleY(.02); } 35% { opacity: 1; transform: scaleY(1); } 48% { opacity: .4; transform: translateX(-12px); } 60% { opacity: .8; transform: translateX(6px); } 100% { opacity: 1; transform: none; } }
+@keyframes hcci-shard-break { from { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -0.55)); } 30% { opacity: 1; } to { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--hcci-radius) * -1.75)) rotate(80deg); } }
+@keyframes hcci-meltdown { from { opacity: 0; transform: translate(-50%,-50%) scaleX(.1); } 35% { opacity: .7; transform: translate(-50%,-50%) scaleX(1.6); } 65% { opacity: .3; } to { opacity: 0; transform: translate(-50%,10%) scaleX(.1); } }
+@keyframes hcci-disk-collapse { from { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) scale(1.5); } 35% { opacity: 1; } to { opacity: .2; transform: translate(-50%,-50%) rotate(calc(var(--angle) + 70deg)) scale(.6); } }
+@keyframes hcci-misfire { 0%,20% { opacity: 0; transform: translate(-50%,-50%) scaleX(.1); } 35% { opacity: .8; transform: translate(-50%,-50%) scaleX(.6); } 55% { opacity: .2; transform: translate(-70%,30px) rotate(-6deg); } 100% { opacity: 0; transform: translate(-100%,100px) rotate(-12deg); } }
+@keyframes hcci-eclipse-failure { from { opacity: 0; transform: translate(-50%,-50%) rotate(80deg); } 40% { opacity: .9; } to { opacity: .25; transform: translate(-50%,-50%) rotate(-40deg) scale(.85); } }
+@keyframes hcci-exit-strike { to { opacity: 0; transform: translateX(12%) skewX(-8deg); } }
+@keyframes hcci-exit-aperture { to { opacity: 0; transform: scaleY(.04); } }
+@keyframes hcci-exit-signal { to { opacity: 0; clip-path: inset(50% 0); } }
+@keyframes hcci-exit-void { to { opacity: 0; transform: scale(.6) rotate(8deg); } }
+@keyframes hcci-exit-shatter { to { opacity: 0; transform: scale(1.15) rotate(4deg); } }
+@keyframes hcci-exit-railgun { to { opacity: 0; transform: translateX(45%); } }
+@keyframes hcci-image-assemble { 0% { opacity: 0; transform: translate(calc(var(--dx) * 45%),calc(var(--dy) * 32%)) rotate(calc(var(--dx) * 15deg)); } 18% { opacity: .8; } 48% { opacity: 1; transform: none; } 72%,100% { opacity: 0; transform: none; } }
+@keyframes hcci-image-break { 0%,24% { opacity: 0; transform: none; } 32% { opacity: .85; transform: none; } 85%,100% { opacity: 0; transform: translate(calc(var(--dx) * 38%),calc(var(--dy) * 26%)) rotate(calc(var(--dx) * 12deg)); } }
+@keyframes hcci-image-bands { 0% { opacity: 0; transform: translateX(calc(var(--dx) * (45% + var(--piece) * 7%))); } 20% { opacity: .8; } 65% { opacity: 1; transform: none; } 85%,100% { opacity: 0; transform: none; } }
+@keyframes hcci-image-corrupt { 0% { opacity: 0; transform: none; } 25% { opacity: .8; transform: translateX(calc(var(--dx) * 14%)); } 42% { transform: translateX(calc(var(--dx) * -6%)); } 80%,100% { opacity: 0; transform: none; } }
