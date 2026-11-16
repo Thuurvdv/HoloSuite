@@ -129,7 +129,7 @@ test("faction prominence is editable by GMs and reputation is readable by player
   const map = { title: "Test", systems: [], routes: [] };
   const faction = { id: "guild", name: "Guild", kind: "minor", parentFactionId: "alliance", value: "Influential", ratingId: "Influential" };
   const gm = galaxyMap({ map, showInspector: true, showFactionPanel: true, factionPanel: {
-    canEdit: true, scope: "Sol", systemId: "sol", reputation: false, rows: [faction],
+    canEdit: true, showRatingControls: true, showLabels: true, scope: "Sol", systemId: "sol", reputation: false, rows: [faction],
     choices: [{ id: "Limited", label: "Limited" }, { id: "Influential", label: "Influential" }]
   } });
   assert.match(gm, /aria-expanded="true"/);
@@ -140,10 +140,16 @@ test("faction prominence is editable by GMs and reputation is readable by player
   assert.doesNotMatch(gm, /\sdata-system-id=/);
   assert.match(gm, /data-faction-rating="Influential" aria-pressed="true"/);
   const player = galaxyMap({ map, showInspector: true, factionPanel: {
-    reputation: true, rows: [{ ...faction, value: "Friendly" }]
+    reputation: true, showLabels: true, rows: [{ ...faction, value: "Friendly" }]
   } });
   assert.match(player, /Standing toward the party/);
   assert.match(player, /data-inspect-faction="guild"/);
   assert.match(player, />Friendly<\/span>/);
   assert.doesNotMatch(player, /data-faction-standing|data-edit-inline-faction/);
+  const percentOnly = galaxyMap({ map, showInspector: true, factionPanel: {
+    reputation: true, scale: "reputation", showLabels: false, showPercentages: true,
+    rows: [{ ...faction, value: "Friendly", hasPercentage: true, percentage: 0 }]
+  } });
+  assert.match(percentOnly, /<meter min="0" max="100" value="0"/);
+  assert.doesNotMatch(percentOnly, /Friendly|data-faction-percentage/);
 });

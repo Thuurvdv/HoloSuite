@@ -4,6 +4,11 @@ Galaxy Map turns a Foundry world into a navigable star chart. Build a galaxy, op
 
 ![Galaxy Map Manager](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/images/Galaxy%20Map%20Manager.png)
 
+## What's New in 2.3.0
+
+- GMs can assign 0–100% prominence separately for the galaxy and each system, and set a reputation percentage for each faction's standing toward the party across the map.
+- Under **Configure Settings → Galaxy Map**, choose independently whether to show rating labels and percentage bars on the **Prominence** and **Reputation** tabs. Hiding either display keeps its saved values.
+
 ## What's New in 2.2.0
 
 - Open **Factions** in the map toolbar to view territory overlays and see each faction's prominence or standing toward the party. Select a faction's name on either tab to open its dossier.

@@ -5,10 +5,11 @@ import {
   ANIMATED_CELESTIAL_STYLES,
   clamp,
   getEffectiveObjectVisibility,
+  isFactionPercent,
   normalizeMap
 } from "./galaxy-model";
 import { buildTerritories } from "./territories";
-import { areFactionsEnabled, getFactionRatings } from "./faction-ratings";
+import { areFactionsEnabled, FACTION_RATING_SCALES, getFactionRatingDisplay, getFactionRatings } from "./faction-ratings";
 import { getPlanetAppearance, isDefaultStaticPlanetAppearance } from "./planet-presets";
 import { getBountyIntelForSystem, openBountyIntel } from "./bounty-integration";
 import { createPlanetIntelCallout } from "./planet-intel-callout";
@@ -398,7 +399,9 @@ export function createGalaxyMapViewClass(deps: any) {
 
     _prepareFactionPanel(map: any, system: any) {
       const reputation = this.factionPanelTab === "reputation";
-      const choices = getFactionRatings(reputation ? "reputation" : "prominence");
+      const scale = reputation ? "reputation" : "prominence";
+      const { showLabels, showPercentages } = getFactionRatingDisplay(scale);
+      const choices = getFactionRatings(scale);
       if (!reputation) choices.unshift({ id: "Unrated", label: "Unrated" });
       const children = new Map<string, any[]>();
       for (const faction of map.factions) {
@@ -412,9 +415,45 @@ export function createGalaxyMapViewClass(deps: any) {
         const ratingId = reputation ? faction.reputation
           : systemId ? faction.systemProminence[systemId] ?? "Unrated" : faction.prominence;
         const value = choices.find(choice => choice.id === ratingId)?.label ?? "Unrated";
-        return { ...faction, ratingId, value };
+        const percentage = reputation ? faction.reputationPercent
+          : systemId ? faction.systemProminencePercent[systemId] : faction.prominencePercent;
+        return { ...faction, ratingId, value, percentage, hasPercentage: isFactionPercent(percentage) };
       });
-      return { reputation, choices, systemId, scope: system?.displayName ?? map.title, canEdit, canManage: map.canEdit, rows };
+      return {
+        reputation, scale, title: FACTION_RATING_SCALES[scale].title, showLabels, showPercentages, choices, systemId,
+        scope: system?.displayName ?? map.title, canEdit, canManage: map.canEdit,
+        showRatingControls: canEdit && (showLabels || map.canEdit), rows
+      };
+    }
+
+    async _saveFactionPercentage(id: string, systemId: string, percentage: number | null, reputation: boolean) {
+      const scale = reputation ? "reputation" : "prominence";
+      if (!game.user?.isGM || !areFactionsEnabled() || !getFactionRatingDisplay(scale).showPercentages) return;
+      if (percentage !== null && !isFactionPercent(percentage)) {
+        notifyError(`Enter a whole ${scale} percentage from 0 to 100.`);
+        return;
+      }
+      const rawMap = getRawMap(this.mapId);
+      if (!rawMap) return;
+      const map = normalizeMap(rawMap);
+      const faction = map.factions.find(candidate => candidate.id === id);
+      if (!faction || (!reputation && systemId && !map.systems.some(system => system.id === systemId))) {
+        notifyError("The faction or system is no longer on this map.");
+        return;
+      }
+      let changes: Partial<typeof faction> = reputation ? { reputationPercent: percentage } : { prominencePercent: percentage };
+      if (!reputation && systemId) {
+        const systemProminencePercent = percentage === null
+          ? Object.fromEntries(Object.entries(faction.systemProminencePercent).filter(([id]) => id !== systemId))
+          : { ...faction.systemProminencePercent, [systemId]: percentage };
+        changes = { systemProminencePercent };
+      }
+      try {
+        await upsertFaction(this.mapId, { id, ...changes });
+      } catch (error) {
+        console.error(`Galaxy Map failed to save faction ${scale} percentage`, error);
+        notifyError(`Could not save the ${scale} percentage.`);
+      }
     }
 
     async _saveFactionStanding(id: string, value: string, systemId: string, reputation: boolean) {
@@ -499,6 +538,9 @@ export function createGalaxyMapViewClass(deps: any) {
         });
       });
       const ratingButtons = (html as ParentNode).querySelectorAll<HTMLButtonElement>("[data-faction-rating]");
+      const ratingControls = (html as ParentNode).querySelectorAll<HTMLButtonElement>(
+        "[data-faction-rating], [data-faction-percentage] button[type='submit']"
+      );
       ratingButtons.forEach(button => {
         button.addEventListener("click", async () => {
           const picker = button.closest<HTMLDetailsElement>("[data-faction-standing]");
@@ -506,11 +548,29 @@ export function createGalaxyMapViewClass(deps: any) {
           if (!picker || !value || button.disabled) return;
           if (button.getAttribute("aria-pressed") === "true") { picker.open = false; return; }
           const { factionStanding = "", prominenceSystemId = "", reputation } = picker.dataset;
-          ratingButtons.forEach(control => { control.disabled = true; });
+          ratingControls.forEach(control => { control.disabled = true; });
           try {
             if (await this._saveFactionStanding(factionStanding, value, prominenceSystemId, reputation === "true")) picker.open = false;
           } finally {
-            ratingButtons.forEach(control => { control.disabled = false; });
+            ratingControls.forEach(control => { control.disabled = false; });
+          }
+        });
+      });
+      const percentForms = (html as ParentNode).querySelectorAll<HTMLFormElement>("[data-faction-percentage]");
+      percentForms.forEach(form => {
+        const input = form.querySelector<HTMLInputElement>('input[type="number"]');
+        const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        if (!input || !submit) return;
+        form.addEventListener("submit", async event => {
+          event.preventDefault();
+          if (submit.disabled || !form.reportValidity()) return;
+          const percentage = input.value === "" ? null : input.valueAsNumber;
+          const { factionPercentage = "", prominenceSystemId = "", reputation } = form.dataset;
+          ratingControls.forEach(control => { control.disabled = true; });
+          try {
+            await this._saveFactionPercentage(factionPercentage, prominenceSystemId, percentage, reputation === "true");
+          } finally {
+            ratingControls.forEach(control => { control.disabled = false; });
           }
         });
       });

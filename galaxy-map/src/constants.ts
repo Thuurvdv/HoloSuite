@@ -1,6 +1,7 @@
 export const MODULE_ID = "galaxy-map";
 export const SETTING_MAPS = "maps";
 export const SETTING_ENABLE_FACTIONS = "enableFactions";
+export const SETTING_PROMINENCE_PERCENTAGES = "showProminencePercentages";
 export const SETTING_REPUTATION_RATINGS = "reputationRatings";
 export const SETTING_PROMINENCE_RATINGS = "prominenceRatings";
 export const SETTING_SCHEMA_V1_BACKUP = "schemaV1Backup";

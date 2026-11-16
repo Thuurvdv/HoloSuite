@@ -88,6 +88,11 @@ export function prepareMapForDisplay(map: any, { playerMode = false, selectedSys
     const { id, name, color, emblem, tagline, type, description, visibility, kind, prominence, reputation } = faction;
     return {
       id, name, color, emblem, tagline, type, description, visibility, kind, prominence, reputation,
+      prominencePercent: faction.prominencePercent,
+      reputationPercent: faction.reputationPercent,
+      systemProminencePercent: Object.fromEntries(knownSystems
+        .filter(system => Object.hasOwn(faction.systemProminencePercent, system.id))
+        .map(system => [system.id, faction.systemProminencePercent[system.id]])),
       parentFactionId: factionLookup.has(faction.parentFactionId) ? faction.parentFactionId : "",
       systemProminence: Object.fromEntries(knownSystems
         .filter(system => Object.hasOwn(faction.systemProminence, system.id))
