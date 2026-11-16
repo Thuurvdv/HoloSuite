@@ -333,5 +333,35 @@ try {
   store = { lobby: store.lobby };
   await api.registerCamera({ ...camera, name: "Lobby 01", notes: "Monitor the west entrance. Elevated tiles retain their opacity; hidden tiles are excluded." });
   await waitFor(() => api.activeMonitor.lastFrameAt);
+  if (generation === 14) {
+    const lower = { id: "ground", name: "Ground Floor", background: { src: blue }, sort: 0 };
+    const upper = { id: "upper", name: "Upper Floor", background: { src: green }, sort: 1 };
+    scene.levels = new Map([[lower.id, lower], [upper.id, upper]]);
+    scene.initialLevel = lower;
+    scene.regions.contents[0].levels = new Set([lower.id]);
+    scene.regions.contents.push({ id: "upper-entry", name: "Upper Entrance", levels: new Set([upper.id]),
+      shapes: [{ type: "rectangle", x: 100, y: 200, width: 400, height: 300 }] });
+    scene.tiles[0].levels = new Set([lower.id]);
+    await monitor.render(true);
+    const levelForm = monitor.element.querySelector("form");
+    const levelField = levelForm.elements.levelId;
+    assert(!levelField.closest("label").hidden && levelField.options[2].text === upper.name, "v14 camera editor lists scene floors");
+    levelField.value = upper.id;
+    levelField.dispatchEvent(new Event("change", { bubbles: true }));
+    assert([...levelForm.elements.regionId.options].map(option => option.value).join(",") === ",upper-entry", "changing floor removes regions from other floors");
+    levelForm.elements.regionId.value = "upper-entry";
+    await module.saveCameraFromForm(levelForm);
+    assert(api.getCamera("lobby").levelId === upper.id, "saving a camera persists its floor");
+    assert(monitor.element.querySelector("dl").textContent.includes(upper.name), "preview identifies the selected floor");
+    await waitFor(() => monitor.lastFrameAt);
+    const floorPixel = await pixel(monitor.element.querySelector(".security-camera-preview-frame img").src, 70, 70);
+    assert(floorPixel[1] > 220 && floorPixel[0] < 30 && canvas.scene === otherScene, "preview shows the selected floor while the GM views another scene");
+    let panned;
+    scene.view = async ({ level }) => { canvas.scene = scene; canvas.level = scene.levels.get(level); };
+    canvas.animatePan = position => { panned = position; };
+    monitor.element.querySelector('[data-security-camera-action="pan-region"]').click();
+    await waitFor(() => panned);
+    assert(canvas.level === upper && panned.x === 300 && panned.y === 350, "Pan to Region switches to the camera floor before centering");
+  }
   window.testResult = { passed: results.length, checks: results };
 } catch (error) { window.testResult = { error: error.stack, checks: results }; }

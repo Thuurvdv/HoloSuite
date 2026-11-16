@@ -3,6 +3,7 @@ import { createMediaCache } from "./media-cache";
 import { createFrameScheduler } from "./frame-scheduler";
 import { CAMERA_QUALITY, type CameraPerformance } from "./performance";
 import { drawSceneTile, getSceneDrawOrder, getTileGeometry, sceneDocuments } from "./scene-compositor";
+import { getCameraSceneLevel, isOnSceneLevel } from "./scene-levels";
 import type { SecurityCamera } from "./camera-model";
 import {
   DEFAULT_CAMERA_REGION_HEIGHT,
@@ -92,9 +93,8 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     });
   }
 
-  async function captureSceneBackgroundFrame(camera: any, cacheKey: string, captureEpoch: string) {
-    const scene = dependencies.getSceneById(camera.sceneId);
-    if (!scene) return "";
+  async function captureSceneBackgroundFrame(camera: SecurityCamera, scene: any, level: any, linkedRegion: any,
+    cacheKey: string, captureEpoch: string) {
     const dimensions = getSceneDimensions(camera.sceneId);
     const region = Number.isFinite(camera.regionX) && Number.isFinite(camera.regionY)
       ? { x: camera.regionX, y: camera.regionY, width: camera.regionWidth, height: camera.regionHeight }
@@ -123,20 +123,25 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
       return image;
     };
     try {
-      context.fillStyle = String(scene.backgroundColor ?? "#010505");
+      const color = level ? level.background?.color : scene.backgroundColor;
+      context.fillStyle = typeof color === "number" ? `#${color.toString(16).padStart(6, "0")}` : String(color ?? "#010505");
       context.fillRect(0, 0, width, height);
-      const imagePath = dependencies.getSceneBackgroundPath(camera.sceneId) || camera.image;
+      const imagePath = (level ? level.background?.src : dependencies.getSceneBackgroundPath(camera.sceneId)) || camera.image;
       const image = await loadImage(imagePath);
       if (imagePath && !image) throw new Error("Camera background could not be loaded.");
-      const tiles = sceneDocuments(scene.tiles ?? scene._source?.tiles);
+      const tiles = sceneDocuments(scene.tiles ?? scene._source?.tiles)
+        .filter(tile => !level || isOnSceneLevel(tile, level.id));
       const foregroundOffset = generation >= 14 ? .5 : 0;
-      if (typeof scene.foreground === "string" && scene.foreground) tiles.push({
+      const foreground = level ? level.foreground?.src : scene.foreground;
+      if (typeof foreground === "string" && foreground) tiles.push({
         x: dimensions.x + dimensions.width * foregroundOffset,
         y: dimensions.y + dimensions.height * foregroundOffset, width: dimensions.width, height: dimensions.height,
-        elevation: scene.foregroundElevation ?? Number.MAX_SAFE_INTEGER, sort: -Number.MAX_SAFE_INTEGER,
-        texture: { src: scene.foreground }
+        elevation: (level ? level.elevation?.top : scene.foregroundElevation) ?? Number.MAX_SAFE_INTEGER,
+        sort: -Number.MAX_SAFE_INTEGER,
+        texture: { src: foreground }
       });
-      const entries = getSceneDrawOrder(tiles, getCameraTokenDocuments(scene, camera));
+      const tokens = getCameraTokenDocuments(scene, linkedRegion, level);
+      const entries = getSceneDrawOrder(tiles, tokens);
       const gridSize = getSceneGridSize(scene);
       const sceneTransform = () => context.setTransform(width / region.width, 0, 0, height / region.height,
         -region.x * width / region.width, -region.y * height / region.height);
@@ -249,10 +254,17 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     } finally { context.restore(); }
   }
 
-  function getCameraTokenDocuments(scene: any, camera: SecurityCamera) {
-    const region = dependencies.getRegionDocument?.(camera.regionId, camera.sceneId);
-    if (region && canvas?.scene?.id === scene.id && "tokens" in Object(region)) return normalizeTokenCollection(region.tokens);
-    return getSceneTokenDocuments(scene);
+  function getCameraTokenDocuments(scene: any, region: any, level: any) {
+    if (!level && region && canvas?.scene?.id === scene.id && "tokens" in Object(region)) {
+      return normalizeTokenCollection(region.tokens);
+    }
+    const tokens = getSceneTokenDocuments(scene);
+    if (!level) return tokens;
+    return tokens.filter(token => {
+      const tokenLevel = token.level ?? token._source?.level;
+      return (!tokenLevel ? level.id === scene.initialLevel?.id : tokenLevel === level.id)
+        && (!region || token.testInsideRegion?.(region) !== false);
+    });
   }
 
   function getTokenImageCrop(image: any, bounds: any, visibleBounds: any) {
@@ -297,12 +309,17 @@ export function createLiveFrameController(dependencies: LiveFrameDependencies) {
     const normalized = dependencies.applyLinkedRegionBounds(dependencies.normalizeCamera(camera));
     if (!isCameraLive(normalized)) return "";
     const scene = dependencies.getSceneById(normalized.sceneId);
-    const resolved = { ...normalized, sceneId: scene?.id ?? normalized.sceneId };
+    if (!scene) return "";
+    const linkedRegion = dependencies.getRegionDocument?.(normalized.regionId, scene.id);
+    const level = getCameraSceneLevel(scene, normalized.levelId, linkedRegion);
+    if (scene.levels && (!level || !isOnSceneLevel(linkedRegion, level.id))) return "";
+    const resolved = { ...normalized, sceneId: scene.id, levelId: level?.id ?? "" };
     const settings = performanceOptions();
     const key = JSON.stringify([resolved.sceneId, resolved, settings]);
     const captureEpoch = captureVersion(resolved.sceneId);
     const maxAge = animatedCameras.has(key) ? settings.interval * .8 : Infinity;
-    const frame = await frameCache.get(key, () => captureSceneBackgroundFrame(resolved, key, captureEpoch), maxAge);
+    const frame = await frameCache.get(key,
+      () => captureSceneBackgroundFrame(resolved, scene, level, linkedRegion, key, captureEpoch), maxAge);
     return captureEpoch === captureVersion(resolved.sceneId) ? frame : "";
   }
 

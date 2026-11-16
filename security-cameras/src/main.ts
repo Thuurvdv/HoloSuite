@@ -18,6 +18,8 @@ import {
 } from "./region-geometry";
 import { createSecurityCameraAppClasses } from "./apps";
 import { createLiveFrameController } from "./live-frame";
+import { sceneDocuments } from "./scene-compositor";
+import { getCameraSceneLevel, isOnSceneLevel } from "./scene-levels";
 import { applyCameraEffects, cameraPerformance, registerCameraSettings } from "./settings";
 import { FEED_TEMPLATE_PATH, MODULE_ID, MONITOR_TEMPLATE_PATH, SOCKET_NAME } from "./constants";
 import { createCameraId, escapeHTML, getDeepClone } from "./utils";
@@ -79,10 +81,23 @@ function getSceneById(sceneId = "") {
   return game.scenes?.get(sceneId) ?? null;
 }
 
-function getSceneRegions(sceneId = "") {
+function getLevelChoices(sceneId = "", selectedLevelId = "") {
+  const levels = sceneDocuments(getSceneById(sceneId)?.levels).sort((a, b) => a.sort - b.sort);
+  const choices = [
+    { id: "", name: "Automatic", selected: !selectedLevelId },
+    ...levels.map(level => ({ id: level.id, name: level.name, selected: level.id === selectedLevelId }))
+  ];
+  if (selectedLevelId && !choices.some(choice => choice.selected)) {
+    choices.push({ id: selectedLevelId, name: "Level unavailable", selected: true });
+  }
+  return choices;
+}
+
+function getSceneRegions(sceneId = "", levelId = "") {
   const scene = getSceneById(sceneId);
   const regions = scene?.regions?.contents ?? [];
   return regions
+    .filter(region => !levelId || isOnSceneLevel(region, levelId))
     .map((region) => ({
       id: region.id,
       name: region.name || `Region ${region.id}`,
@@ -91,15 +106,19 @@ function getSceneRegions(sceneId = "") {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function getRegionChoices(sceneId = "", selectedRegionId = "") {
-  return [
+function getRegionChoices(sceneId = "", selectedRegionId = "", levelId = "") {
+  const choices = [
     { id: "", name: "No Linked Region", selected: !selectedRegionId },
-    ...getSceneRegions(sceneId).map((entry) => ({
+    ...getSceneRegions(sceneId, levelId).map((entry) => ({
       id: entry.id,
       name: entry.name,
       selected: entry.id === selectedRegionId
     }))
   ];
+  if (selectedRegionId && !choices.some(choice => choice.selected)) {
+    choices.push({ id: selectedRegionId, name: "Region unavailable", selected: true });
+  }
+  return choices;
 }
 
 function getRegionDocument(regionId = "", sceneId = "") {
@@ -141,6 +160,7 @@ function createEmptyCameraDraft() {
     id: "",
     name: "",
     sceneId: activeScene?.id ?? "",
+    levelId: canvas?.level?.id ?? "",
     location: "",
     image: "",
     feedSource: "live",
@@ -165,12 +185,14 @@ function prepareCamera(cameraData = {}) {
   const isCorrupted = camera.status === "corrupted";
   const isRestricted = camera.status === "restricted";
   const isLive = camera.feedSource === "live";
+  const region = getRegionDocument(camera.regionId, camera.sceneId);
+  const level = isLive ? getCameraSceneLevel(getSceneById(camera.sceneId), camera.levelId, region) : null;
 
   return {
     ...camera,
     sceneName: getSceneName(camera.sceneId),
-    regionName: getRegionDocument(camera.regionId, camera.sceneId)?.name || (camera.regionId ? "Region unavailable" : "No region"),
-    sceneBackground: getSceneBackgroundPath(camera.sceneId),
+    levelName: isLive ? level?.name ?? (camera.levelId ? "Level unavailable" : "") : "",
+    regionName: region?.name || (camera.regionId ? "Region unavailable" : "No region"),
     regionAspect: camera.regionWidth && camera.regionHeight ? `${camera.regionWidth} / ${camera.regionHeight}` : "16 / 9",
     timestamp,
     signalLabel: isOnline ? "SIGNAL LOCK" : isCorrupted ? "SIGNAL CORRUPTED" : isRestricted ? "ACCESS DENIED" : "NO SIGNAL",
@@ -336,6 +358,7 @@ function readCameraForm(form) {
       id,
       name: formData.get("name"),
       sceneId: form.elements.sceneId.value,
+      levelId: form.elements.levelId.value,
       location: formData.get("location"),
       image: formData.get("image"),
       feedSource: formData.get("feedSource"),
@@ -379,16 +402,29 @@ async function saveCameraFromForm(form) {
   return savedCamera;
 }
 
-function panToCameraRegion(cameraId = selectedCameraId) {
-  const camera = getCamera(cameraId);
+async function panToCameraRegion(cameraId = selectedCameraId) {
+  const saved = getCamera(cameraId);
+  const camera = saved && applyLinkedRegionBounds(saved);
   if (!Number.isFinite(camera?.regionX) || !Number.isFinite(camera?.regionY)) {
     ui.notifications?.warn?.("This camera does not have a region yet.");
     return;
   }
 
-  if (camera.sceneId && canvas.scene?.id !== camera.sceneId) {
+  const scene = getSceneById(camera.sceneId);
+  if (!scene || (!scene.levels && canvas.scene?.id !== scene.id)) {
     ui.notifications?.warn?.("Activate the camera's scene before panning to its region.");
     return;
+  }
+
+  if (scene.levels) {
+    const region = getRegionDocument(camera.regionId, camera.sceneId);
+    const level = getCameraSceneLevel(scene, camera.levelId, region);
+    if (!level || !isOnSceneLevel(region, level.id)) {
+      ui.notifications?.warn?.("The camera's level or region is unavailable.");
+      return;
+    }
+    if (canvas.scene?.id !== scene.id || canvas.level?.id !== level.id) await scene.view({ level: level.id });
+    if (canvas.scene?.id !== scene.id || canvas.level?.id !== level.id) return;
   }
 
   canvas.animatePan?.({
@@ -427,7 +463,9 @@ function getMonitorContext() {
     editorCamera: preparedEditorCamera,
     originalEditorId: editorDraft?.originalId ?? editorCamera.id,
     sceneChoices: getSceneChoices(editorCamera.sceneId),
-    regionChoices: getRegionChoices(editorCamera.sceneId, editorCamera.regionId),
+    levelChoices: getLevelChoices(editorCamera.sceneId, editorCamera.levelId),
+    hasSceneLevels: Boolean(getSceneById(editorCamera.sceneId)?.levels) || Boolean(editorCamera.levelId),
+    regionChoices: getRegionChoices(editorCamera.sceneId, editorCamera.regionId, editorCamera.levelId),
     feedSourceChoices: prepareChoices(FEED_SOURCE_CHOICES, editorCamera.feedSource),
     statusChoices: prepareChoices(STATUS_CHOICES, editorCamera.status),
     displayModeChoices: prepareChoices(DISPLAY_MODE_CHOICES, editorCamera.displayMode),
@@ -503,12 +541,24 @@ function bindMonitorControls(app: any, html: any = null) {
   };
   form?.addEventListener("input", markDirty);
   form?.addEventListener("change", markDirty);
-  form?.elements?.sceneId?.addEventListener("change", () => {
-    const select = form.elements.regionId;
-    select.replaceChildren(...getRegionChoices(form.elements.sceneId.value).map(choice => new Option(choice.name, choice.id)));
+  const updateRegions = (selectedRegionId?: string) => {
+    const { sceneId, levelId, regionId } = form.elements;
+    regionId.replaceChildren(...getRegionChoices(sceneId.value, "", levelId.value)
+      .map(choice => new Option(choice.name, choice.id, false, choice.id === selectedRegionId)));
+    if (regionId.value === selectedRegionId) return;
     for (const name of ["regionX", "regionY"]) form.elements[name].value = "";
     form.elements.regionWidth.value = DEFAULT_CAMERA_REGION_WIDTH;
     form.elements.regionHeight.value = DEFAULT_CAMERA_REGION_HEIGHT;
+  };
+  form?.elements?.sceneId?.addEventListener("change", () => {
+    const { sceneId, levelId } = form.elements;
+    levelId.replaceChildren(...getLevelChoices(sceneId.value).map(choice => new Option(choice.name, choice.id)));
+    levelId.closest("label").hidden = !getSceneById(sceneId.value)?.levels;
+    updateRegions();
+    markDirty();
+  });
+  form?.elements?.levelId?.addEventListener("change", () => {
+    updateRegions(form.elements.regionId.value);
     markDirty();
   });
   form?.elements?.regionId?.addEventListener("change", () => {
@@ -526,6 +576,7 @@ function bindMonitorControls(app: any, html: any = null) {
   const updateFeedSourceFields = () => {
     const isLive = form.elements.feedSource.value === "live";
     form.elements.sceneId.disabled = !isLive;
+    form.elements.levelId.disabled = !isLive;
     form.elements.regionId.disabled = !isLive;
     const imageField = form.querySelector("[data-security-camera-static-image-field]");
     if (imageField) imageField.hidden = form.elements.feedSource.value !== "image";
@@ -567,7 +618,7 @@ function bindMonitorControls(app: any, html: any = null) {
       }
 
       if (action === "pan-region") {
-        panToCameraRegion(selectedCameraId);
+        await panToCameraRegion(selectedCameraId);
         return;
       }
 
@@ -1017,6 +1068,7 @@ function registerWithHoloSuite() {
   if (!api?.registerApp) return false;
 
   api.registerApp({
+    brandingInApp: true,
     id: MODULE_ID,
     title: "Security Cameras",
     icon: "fa-solid fa-video",
@@ -1044,7 +1096,8 @@ Hooks.once("ready", () => {
 });
 
 // Scene edits invalidate still frames; animated media continues on the selected refresh interval.
-for (const event of ["createToken", "updateToken", "deleteToken", "createTile", "updateTile", "deleteTile", "updateScene", "createRegion", "updateRegion", "deleteRegion"]) {
+for (const event of ["createToken", "updateToken", "deleteToken", "createTile", "updateTile", "deleteTile", "updateScene",
+  "createRegion", "updateRegion", "deleteRegion", "createLevel", "updateLevel", "deleteLevel"]) {
   Hooks.on(event, document => {
     const sceneId = event === "updateScene" ? document.id : document.parent?.id;
     liveFrameController.invalidateFrames(sceneId);
