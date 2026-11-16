@@ -76,6 +76,107 @@ test('Loot All transfers each denomination exactly once and preserves existing b
   assert.equal(f.source.system.currency.sp, 0);
   await f.service.execute(f.request('all'), f.user); assert.equal(f.destination.system.currency.sp, 7);
 });
+test('Dragonbane credits and debits the three native coin balances', async () => {
+  const f = fixture();
+  const adapter = getAdapter('dragonbane');
+  f.source.system.currency = { gc: 2, sc: 5, cc: 8 };
+  f.destination.system.currency = { gc: 1, sc: 0, cc: 3 };
+  f.io.adapter = () => adapter;
+  await f.io.save(f.token, { entries: adapter.currencyEntries(f.source).map((entry, index) => ({ ...entry, id: `money${index}` })) });
+  assert.equal((await f.service.execute(f.request('all'), f.user)).entries.length, 0);
+  assert.deepEqual(f.source.system.currency, { gc: 0, sc: 0, cc: 0 });
+  assert.deepEqual(f.destination.system.currency, { gc: 3, sc: 5, cc: 11 });
+  assert.equal(f.destination.items.size, 0);
+});
+
+test('Star Wars credits transfer to the native balance once, including after a failed commit', async () => {
+  const f = fixture();
+  const adapter = getAdapter('starwarsffg');
+  f.source.type = 'rival';
+  f.source.system = { stats: { credits: { value: 47 } } };
+  f.destination.system = { stats: { credits: { value: 15 } } };
+  f.io.adapter = () => adapter;
+  f.io.environment = () => ({ sourceActor: actor => adapter.sourceActor(actor), visible: () => true });
+  const [credits] = adapter.currencyEntries(f.source);
+  assert.deepEqual(credits.currency, { storage: 'balance', unit: 'credits', amount: 47 });
+  await f.io.save(f.token, { entries: [{ ...credits, id: 'money0' }] });
+  f.io.failSave = 4;
+  assert.equal((await f.service.execute(f.request(), f.user)).failures.length, 1);
+  assert.equal((await f.service.execute(f.request('view'), f.user)).entries.length, 0);
+  assert.equal(f.source.system.stats.credits.value, 0);
+  assert.equal(f.destination.system.stats.credits.value, 62);
+  assert.equal(f.destination.items.size, 0);
+});
+
+test('Warhammer merges matching denominations and recovers without paying twice', async () => {
+  const f = fixture();
+  const adapter = getAdapter('wfrp4e');
+  const data = { name: 'Gold Crowns', type: 'money', system: { quantity: { value: 3 }, coinValue: { value: 240 } } };
+  const makeStack = (id, value, quantity) => {
+    const flags = {};
+    return { id, type: 'money', system: { quantity: { value: quantity }, coinValue: { value } },
+      getFlag: (_module, key) => flags[key],
+      async update(changes) {
+        for (const [path, value] of Object.entries(changes)) {
+          if (path === 'system.quantity.value') this.system.quantity.value = value;
+          else {
+            const key = path.split('.').at(-1);
+            flags.coinReceipts ??= {};
+            if (key.startsWith('-=')) delete flags.coinReceipts[key.slice(2)];
+            else flags.coinReceipts[key] = value;
+          }
+        }
+      } };
+  };
+  const gold = makeStack('gold', 240, 9);
+  const silver = makeStack('silver', 12, 11);
+  f.destination.items.set(gold.id, gold);
+  f.destination.items.set(silver.id, silver);
+  f.io.adapter = () => adapter;
+  await f.io.save(f.token, { entries: [{ id: 'money0', data }] });
+  f.io.failSave = 4;
+  assert.equal((await f.service.execute(f.request(), f.user)).failures.length, 1);
+  await f.service.execute(f.request('view'), f.user);
+  assert.equal(f.destination.items.size, 2);
+  assert.equal(gold.system.quantity.value, 12);
+  assert.equal(silver.system.quantity.value, 11);
+  assert.deepEqual(gold.getFlag(MODULE_ID, 'coinReceipts'), {});
+  assert.equal(f.state().entries[0].taken, true);
+});
+
+test('Pathfinder transfers native coins and recovers a partial debit without paying twice', async () => {
+  const f = fixture();
+  const adapter = getAdapter('pf2e');
+  const data = { name: 'Gold Pieces', type: 'treasure',
+    system: { quantity: 7, category: 'coin', price: { value: { gp: 1 } } } };
+  const flags = {};
+  const coin = { ...data, id: 'coins', isCoinage: true, unit: 'gp', toObject: () => structuredClone(data),
+    getFlag: (_module, key) => flags[key],
+    async update(changes) {
+      data.system.quantity = changes['system.quantity'];
+      flags.sourceClaim = changes[`flags.${MODULE_ID}.sourceClaim`];
+    } };
+  f.source.items.set(coin.id, coin);
+  const snapshot = adapter.snapshot(coin);
+  snapshot.system.quantity = 3;
+  const { currency } = adapter.entryMetadata(coin, 3);
+  assert.deepEqual(currency, { storage: 'item', unit: 'gp', amount: 3 });
+  assert.deepEqual(adapter.entryMetadata({ type: 'treasure', system: { quantity: 2, category: 'gem', price: { value: { gp: 1 } } } }), {});
+  assert.equal(adapter.eligible({ type: 'weapon', system: { category: 'unarmed', quantity: 1 } }), false);
+  f.destination.createEmbeddedDocuments = async (_type, [data]) => {
+    const created = { ...data, id: data._id, getFlag: (_module, key) => data.flags[MODULE_ID][key] };
+    f.destination.items.set(created.id, created);
+    return [created];
+  };
+  f.io.adapter = () => adapter;
+  await f.io.save(f.token, { entries: [{ id: 'money0', data: snapshot, currency, source: { itemId: coin.id, ruleKey: 'source-corpse:coins' } }] });
+  f.io.failSave = 3;
+  assert.equal((await f.service.execute(f.request(), f.user)).failures.length, 1);
+  assert.equal((await f.service.execute(f.request('view'), f.user)).entries.length, 0);
+  assert.equal(f.destination.items.size, 1);
+  assert.equal([...f.destination.items.values()][0].system.quantity, 3);
+  assert.equal(coin.system.quantity, 4);
+});
 test('two players racing for the same coins receive only one payment', async () => {
   const f = fixture();
   await Promise.all([f.service.execute(f.request(), f.user), f.service.execute(f.request(), { ...f.user, id: 'p2' })]);

@@ -20,7 +20,7 @@ let started = false;
 let openAttempt = 0;
 const adapter = () => getAdapter(game.system.id);
 const lootEnvironment = () => environment(adapter());
-const configurable = (token: any) => token?.actor && (adapter().manual ? !!token.actor.items : token.actor.type === "npc");
+const configurable = (token: any) => token?.actor && (adapter().manual ? !!token.actor.items : (adapter().sourceActor?.(token.actor) ?? token.actor.type === "npc"));
 const defaultRecipient = (user: any, system: any, token: any) =>
   resolveCharacter(user, game.actors.contents, game.scenes.get(user.viewedScene)?.tokens, system, token);
 const transactions = new LootTransactions({

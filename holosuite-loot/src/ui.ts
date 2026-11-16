@@ -1,5 +1,5 @@
 import { getLegacyApplicationBase } from "../../shared/src/application-base";
-import { MODULE_ID, resolveCharacter, actorKey, canReceiveLoot, configFor } from "./model.mjs";
+import { MODULE_ID, resolveCharacter, actorKey, canReceiveLoot, configFor, itemQuantity } from "./model.mjs";
 declare const canvas: any;
 import { LootPopupPresentation, OutsideDismissal } from "./popup";
 import { canRefreshInventory, editRules, manualLootRows, refreshInventory, ruleRows, saveManualLoot } from "./persistence";
@@ -180,9 +180,9 @@ export class LootConfig extends Base {
       tokenRule: ruleLabel(overrides.token), actorRule: ruleLabel(overrides.actor), globalRule: ruleLabel(overrides.global),
       ruleScope: t(`Scope.${effective.scope}`),
       original: entry?.originalQuantity ?? row.quantity,
-      remaining: entry ? (entry.taken ? 0 : entry.formula ?? entry.data.system.quantity) : "—",
+      remaining: entry ? (entry.taken ? 0 : entry.formula ?? itemQuantity(entry.data)) : "—",
       rollResult: !entry?.taken && Number.isSafeInteger(entry?.rolledQuantity)
-        ? game.i18n.format("HL.QuantityRollResult", { roll: entry.rolledQuantity, quantity: entry.data.system.quantity }) : "",
+        ? game.i18n.format("HL.QuantityRollResult", { roll: entry.rolledQuantity, quantity: itemQuantity(entry.data) }) : "",
       pending: !!entry?.claim && !entry?.taken
     }));
     const canEdit = isAuthority();

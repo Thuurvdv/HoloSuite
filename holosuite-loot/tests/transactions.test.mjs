@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { MODULE_ID, eligible, resolveCharacter, SerialQueue, authenticatedRequest } from '../src/model.mjs';
-import { Dnd5eAdapter } from '../src/adapters.mjs';
+import { Dnd5eAdapter, getAdapter } from '../src/adapters.mjs';
 import { LootTransactions } from '../src/transactions.mjs';
 
 const copy = value => structuredClone(value);
@@ -48,6 +48,87 @@ test('individual transfer preserves quantity and leaves source inventory untouch
   assert.equal([...f.actor.items.values()][0].system.quantity, 2);
   assert.equal(f.token.actor, original);
   assert.equal(f.state().entries[0].taken, true);
+});
+
+test('Star Wars FFG adversary gear transfers a partial native stack and recovers a failed commit', async () => {
+  const f = fixture(0);
+  const adapter = getAdapter('starwarsffg');
+  const source = f.token.actor;
+  source.id = 'rival';
+  source.type = 'rival';
+  const raw = { name: 'Gear', type: 'gear', system: { quantity: { value: 5 }, equippable: { equipped: true } } };
+  const flags = {};
+  const item = { ...raw, id: 'gear', toObject: () => copy(raw), getFlag: (_module, key) => flags[key],
+    async update(changes) {
+      raw.system.quantity.value = changes['system.quantity.value'];
+      flags.sourceClaim = changes[`flags.${MODULE_ID}.sourceClaim`];
+    } };
+  source.items = new Map([[item.id, item]]);
+  const data = adapter.snapshot(item);
+  data.system.quantity.value = 2;
+  f.io.adapter = () => adapter;
+  f.io.environment = () => ({ sourceActor: actor => adapter.sourceActor(actor), visible: () => true });
+  const create = f.actor.createEmbeddedDocuments;
+  f.actor.createEmbeddedDocuments = (type, [item]) => create(type, [{ ...item, _id: 'system-generated-id' }]);
+  await f.io.save(f.token, { entries: [{ id: 'entry0', data, source: { itemId: 'gear', ruleKey: 'rival:gear' } }] });
+  f.io.failSave = 4;
+  assert.equal((await f.service.execute(f.request(), f.user)).failures.length, 1);
+  assert.equal((await f.service.execute(f.request('view'), f.user)).entries.length, 0);
+  assert.equal(f.actor.items.size, 1);
+  assert.deepEqual([...f.actor.items.values()][0].system, { quantity: { value: 2 }, equippable: { equipped: false } });
+  assert.equal(raw.system.quantity.value, 3);
+});
+
+test('Star Wars FFG detects its defeat status and wounds above the threshold', () => {
+  const adapter = getAdapter('starwarsffg');
+  const wounds = { value: 12, max: 12 };
+  const actor = { type: 'rival', statuses: new Set(), system: { stats: { wounds } }, getFlag: () => null };
+  const token = { actor, getFlag: () => null };
+  const options = { sourceActor: actor => adapter.sourceActor(actor), hitPoints: actor => adapter.hitPoints(actor),
+    defeated: actor => adapter.defeated(actor) };
+  assert.equal(eligible(token, options), false);
+  wounds.value++;
+  assert.equal(eligible(token, options), true);
+  wounds.value = 0;
+  actor.statuses.add('starwarsffg-defeated');
+  assert.equal(eligible(token, options), true);
+  assert.equal(eligible(token, { ...options, automatic: false }), false);
+});
+
+test('native inventory adapters exclude actor abilities while accepting physical loot', () => {
+  const cases = [
+    ['pf2e', ['armor', 'consumable', 'treasure'], ['action', 'feat', 'lore', 'melee', 'spell']],
+    ['dragonbane', ['item', 'material', 'weapon'], ['skill', 'spell', 'ability', 'recipe']],
+    ['wfrp4e', ['money', 'trapping', 'armour'], ['skill', 'talent', 'trait', 'spell', 'prayer']],
+    ['starwarsffg', ['gear', 'armour', 'itemattachment'], ['ability', 'talent', 'forcepower']],
+    ['CoC7', ['item', 'book', 'weapon'], ['skill', 'occupation', 'spell', 'talent']]
+  ];
+  for (const [system, physical, excluded] of cases) {
+    const adapter = getAdapter(system);
+    for (const type of physical) assert.equal(adapter.eligible({ type, system: { quantity: 1 } }), true, `${system} ${type}`);
+    for (const type of excluded) assert.equal(adapter.eligible({ type, system: { quantity: 1 } }), false, `${system} ${type}`);
+  }
+});
+
+test('Pathfinder auto loot distinguishes defeated NPCs from dying or unconscious creatures', () => {
+  const adapter = getAdapter('pf2e');
+  const conditions = new Set();
+  const actor = { type: 'npc', hitPoints: { value: 0, max: 15 }, statuses: new Set(), getFlag: () => null,
+    hasCondition: (...slugs) => slugs.some(slug => conditions.has(slug)) };
+  const token = { id: 'corpse', actor, parent: { id: 'scene' }, getFlag: () => null };
+  const options = { zeroHP: true, hitPoints: actor => adapter.hitPoints(actor) };
+  assert.equal(eligible(token, options), true);
+  conditions.add('dying');
+  assert.equal(eligible(token, options), false);
+  conditions.clear();
+  conditions.add('unconscious');
+  assert.equal(eligible(token, options), false);
+  const combats = [{ combatants: [{ tokenId: 'corpse', sceneId: 'scene', defeated: true }] }];
+  assert.equal(eligible(token, { ...options, combats }), true);
+  actor.statuses.add('dead');
+  assert.equal(eligible(token, options), true);
+  actor.type = 'character';
+  assert.equal(eligible(token, { ...options, combats }), false);
 });
 
 test('loot range is rechecked before pickup and cannot be satisfied by a different character', async () => {
