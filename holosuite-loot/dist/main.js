@@ -1,664 +1,883 @@
-var ft = Object.defineProperty;
-var ht = (t, s, i) => s in t ? ft(t, s, { enumerable: !0, configurable: !0, writable: !0, value: i }) : t[s] = i;
-var R = (t, s, i) => ht(t, typeof s != "symbol" ? s + "" : s, i);
-const f = "holosuite-loot", he = "1.2.1", Ke = "commandV3", Le = "replyV3", $ = (t) => structuredClone(t);
-function mt(t, s, i, e = "request") {
+var wt = Object.defineProperty;
+var vt = (s, i, e) => i in s ? wt(s, i, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[i] = e;
+var S = (s, i, e) => vt(s, typeof i != "symbol" ? i + "" : i, e);
+const f = "holosuite-loot", ye = "1.3.0", ke = "commandV3", Te = "replyV3", O = (s) => structuredClone(s), H = (s) => {
+  var i, e, t;
+  return ((e = (i = s == null ? void 0 : s.system) == null ? void 0 : i.quantity) == null ? void 0 : e.value) ?? ((t = s == null ? void 0 : s.system) == null ? void 0 : t.quantity) ?? 1;
+}, He = (s) => {
+  var i;
+  return typeof ((i = s == null ? void 0 : s.system) == null ? void 0 : i.quantity) == "object" && s.system.quantity !== null ? "system.quantity.value" : "system.quantity";
+};
+function Xe(s, i) {
+  He(s) === "system.quantity.value" ? s.system.quantity.value = i : s.system.quantity !== void 0 && (s.system.quantity = i);
+}
+function bt(s, i, e, t = "request") {
   var n, a;
-  return i !== t.id || !t.active || !((a = (n = s.flags) == null ? void 0 : n[f]) != null && a[e]) ? null : $(t.getFlag(f, e));
+  return e !== s.id || !s.active || !((a = (n = i.flags) == null ? void 0 : n[f]) != null && a[t]) ? null : O(s.getFlag(f, t));
 }
 class m extends Error {
-  constructor(s) {
-    super(s), this.code = s;
+  constructor(i) {
+    super(i), this.code = i;
   }
 }
-function me(t) {
-  const s = (i) => typeof i == "string" && /^[\w-]{1,64}$/.test(i);
-  return typeof (t == null ? void 0 : t.tokenUuid) == "string" && /^Scene\.[\w-]{1,64}\.Token\.[\w-]{1,64}$/.test(t.tokenUuid) && ["view", "inspect", "take", "all"].includes(t.action) && (!["inspect", "take"].includes(t.action) || s(t.entryId)) && (t.actorId == null || typeof t.actorId == "string" && /^(?:[\w-]{1,64}|Actor\.[\w-]{1,64}|Scene\.[\w-]{1,64}\.Token\.[\w-]{1,64}(?:\.Actor\.[\w-]{1,64})?)$/.test(t.actorId));
+function pe(s) {
+  const i = (e) => typeof e == "string" && /^[\w-]{1,64}$/.test(e);
+  return typeof (s == null ? void 0 : s.tokenUuid) == "string" && /^Scene\.[\w-]{1,64}\.Token\.[\w-]{1,64}$/.test(s.tokenUuid) && ["view", "inspect", "take", "all"].includes(s.action) && (!["inspect", "take"].includes(s.action) || i(s.entryId)) && (s.actorId == null || typeof s.actorId == "string" && /^(?:[\w-]{1,64}|Actor\.[\w-]{1,64}|Scene\.[\w-]{1,64}\.Token\.[\w-]{1,64}(?:\.Actor\.[\w-]{1,64})?)$/.test(s.actorId));
 }
-function Y(t) {
-  var s;
-  return t.getFlag(f, "config") ?? ((s = t.actor) == null ? void 0 : s.getFlag(f, "config")) ?? { mode: "automatic", source: "inventory" };
+function Z(s) {
+  var i;
+  return s.getFlag(f, "config") ?? ((i = s.actor) == null ? void 0 : i.getFlag(f, "config")) ?? { mode: "automatic", source: "inventory" };
 }
-const N = (t) => (t == null ? void 0 : t.uuid) ?? (t == null ? void 0 : t.id), Z = (t) => JSON.stringify(t, (s, i) => i && typeof i == "object" && !Array.isArray(i) ? Object.fromEntries(Object.entries(i).sort(([e], [n]) => e.localeCompare(n))) : i);
-function J(t, s, i, e = void 0) {
-  return !t || !i.destination(t) || !t.testUserPermission(s, "OWNER") ? !1 : !i.manual || !e || N(t) !== N(e.actor) && (t.isToken || t.id !== e.actorId);
+const N = (s) => (s == null ? void 0 : s.uuid) ?? (s == null ? void 0 : s.id), ee = (s) => JSON.stringify(s, (i, e) => e && typeof e == "object" && !Array.isArray(e) ? Object.fromEntries(Object.entries(e).sort(([t], [n]) => t.localeCompare(n))) : e);
+function J(s, i, e, t = void 0) {
+  return !s || !e.destination(s) || !s.testUserPermission(i, "OWNER") ? !1 : !(e.manual || e.acceptsLegacyWholeItems) || !t || N(s) !== N(t.actor) && (s.isToken || s.id !== t.actorId);
 }
-function Qe(t, s, i, e, n = void 0) {
-  const a = (r) => J(r, t, e, n);
-  if (a(t.character)) return t.character;
-  const c = [...new Map(Array.from(i ?? []).map((r) => r.actor).filter(a).map((r) => [N(r), r])).values()];
-  if (c.length === 1) return c[0];
-  if (c.length > 1) throw new m("AmbiguousActor");
-  const o = Array.from(s ?? []).filter(a);
+function Ye(s, i, e, t, n = void 0) {
+  const a = (c) => J(c, s, t, n);
+  if (a(s.character)) return s.character;
+  const o = [...new Map(Array.from(e ?? []).map((c) => c.actor).filter(a).map((c) => [N(c), c])).values()];
   if (o.length === 1) return o[0];
-  throw new m(o.length ? "AmbiguousActor" : "NoActor");
+  if (o.length > 1) throw new m("AmbiguousActor");
+  const r = Array.from(i ?? []).filter(a);
+  if (r.length === 1) return r[0];
+  throw new m(r.length ? "AmbiguousActor" : "NoActor");
 }
-function se(t, { combats: s = [], zeroHP: i = !1, automatic: e = !0, manual: n = !1 } = {}) {
-  var r, l, u, d, p, b;
-  if (!(t != null && t.actor) || (n ? !t.actor.items : t.actor.type !== "npc")) return !1;
-  if (n) return ((r = t.getFlag(f, "config")) == null ? void 0 : r.mode) === "enabled";
-  const a = Y(t);
-  if (a.mode === "disabled") return !1;
-  if (a.mode === "enabled") return !0;
-  if (!e) return !1;
-  if (s.some((w) => {
-    var S;
-    return (S = w.combatants) == null ? void 0 : S.some((g) => {
-      var L, C;
-      return g.tokenId === t.id && (g.sceneId ?? ((L = w.scene) == null ? void 0 : L.id)) === ((C = t.parent) == null ? void 0 : C.id) && (g.isDefeated || g.defeated);
+function ae(s, { combats: i = [], zeroHP: e = !1, automatic: t = !0, manual: n = !1, sourceActor: a, hitPoints: o, defeated: r } = {}) {
+  var d, v, b, p, I, g;
+  if (!(s != null && s.actor) || (n ? !s.actor.items : !((a == null ? void 0 : a(s.actor)) ?? s.actor.type === "npc"))) return !1;
+  if (n) return ((d = s.getFlag(f, "config")) == null ? void 0 : d.mode) === "enabled";
+  const c = Z(s);
+  if (c.mode === "disabled") return !1;
+  if (c.mode === "enabled") return !0;
+  if (!t) return !1;
+  if (i.some((C) => {
+    var L;
+    return (L = C.combatants) == null ? void 0 : L.some((q) => {
+      var h, R;
+      return q.tokenId === s.id && (q.sceneId ?? ((h = C.scene) == null ? void 0 : h.id)) === ((R = s.parent) == null ? void 0 : R.id) && (q.isDefeated || q.defeated);
     });
   })) return !0;
-  const c = t.actor.statuses;
-  if (c != null && c.has("dead")) return !0;
-  const o = (u = (l = t.actor.system) == null ? void 0 : l.attributes) == null ? void 0 : u.hp;
-  return i && Number(o == null ? void 0 : o.max) > 0 && (o == null ? void 0 : o.value) === 0 && !((b = (p = (d = t.actor.system) == null ? void 0 : d.attributes) == null ? void 0 : p.death) != null && b.success);
+  const l = s.actor.statuses;
+  if (l != null && l.has("dead") || r != null && r(s.actor)) return !0;
+  const u = o ? o(s.actor) : (b = (v = s.actor.system) == null ? void 0 : v.attributes) == null ? void 0 : b.hp;
+  return e && Number(u == null ? void 0 : u.max) > 0 && (u == null ? void 0 : u.value) === 0 && !((g = (I = (p = s.actor.system) == null ? void 0 : p.attributes) == null ? void 0 : I.death) != null && g.success);
 }
-function gt(t, s, i, e = void 0) {
-  var a, c, o;
-  if (!(s != null && s.active) || !se(t, i)) throw new m("Unavailable");
-  if (s.isGM) return;
-  const n = ((a = t.parent) == null ? void 0 : a.active) || ((c = t.parent) == null ? void 0 : c.testUserPermission(s, "LIMITED"));
-  if (t.hidden || s.viewedScene !== ((o = t.parent) == null ? void 0 : o.id) || !n || !i.visible(t, s))
+function St(s, i, e, t = void 0) {
+  var a, o, r;
+  if (!(i != null && i.active) || !ae(s, e)) throw new m("Unavailable");
+  if (i.isGM) return;
+  const n = ((a = s.parent) == null ? void 0 : a.active) || ((o = s.parent) == null ? void 0 : o.testUserPermission(i, "LIMITED"));
+  if (s.hidden || i.viewedScene !== ((r = s.parent) == null ? void 0 : r.id) || !n || !e.visible(s, i))
     throw new m("AccessDenied");
-  if (i.inRange && !i.inRange(t, s, e)) throw new m("OutOfRange");
+  if (e.inRange && !e.inRange(s, i, t)) throw new m("OutOfRange");
 }
-function De(t, s, i, e = void 0) {
-  if (!J(t, s, i, e))
+function Ge(s, i, e, t = void 0) {
+  if (!J(s, i, e, t))
     throw new m("ActorDenied");
 }
-class be {
+class de {
   constructor() {
-    R(this, "tails", /* @__PURE__ */ new Map());
+    S(this, "tails", /* @__PURE__ */ new Map());
   }
-  async run(s, i) {
-    const n = (this.tails.get(s) ?? Promise.resolve()).catch(() => {
-    }).then(i);
-    this.tails.set(s, n);
+  async run(i, e) {
+    const n = (this.tails.get(i) ?? Promise.resolve()).catch(() => {
+    }).then(e);
+    this.tails.set(i, n);
     try {
       return await n;
     } finally {
-      this.tails.get(s) === n && this.tails.delete(s);
+      this.tails.get(i) === n && this.tails.delete(i);
     }
   }
 }
-const Ce = new be(), qe = (t) => `${t.currency.unit}:${t.currency.amount}`, ee = (t, s, i, e = !1) => {
+const Ae = new de(), Fe = (s) => `${s.currency.unit}:${s.currency.amount}`, se = (s, i, e, t = !1) => {
   var n, a;
-  return ((a = (n = t.getFlag) == null ? void 0 : n.call(t, f, e ? "currencyDebits" : "currencyReceipts")) == null ? void 0 : a[i.id]) === qe(s);
+  return ((a = (n = s.getFlag) == null ? void 0 : n.call(s, f, t ? "currencyDebits" : "currencyReceipts")) == null ? void 0 : a[e.id]) === Fe(i);
 };
-function Je({ units: t, amountOf: s, path: i, valid: e, name: n }) {
+function Re({ units: s, amountOf: i, path: e, valid: t, name: n }) {
   return {
     entries(a) {
-      return t.filter((c) => e(s(a, c)) && s(a, c) > 0).map((c) => {
-        const o = s(a, c);
-        return { currency: { storage: "balance", unit: c, amount: o }, data: {
-          name: n(c),
+      return s.filter((o) => t(i(a, o)) && i(a, o) > 0).map((o) => {
+        const r = i(a, o);
+        return { currency: { storage: "balance", unit: o, amount: r }, data: {
+          name: n(o),
           type: "currency",
           img: "icons/svg/coins.svg",
-          system: { quantity: o }
+          system: { quantity: r }
         } };
       });
     },
-    received: ee,
-    async grant(a, c, o, r) {
-      return Ce.run(N(a), async () => {
-        if (ee(a, c, o)) return;
-        if (o.currencyAttempted) throw new m("RecoveryRequired");
-        if (!r) throw new m("RecoveryRequired");
-        await r();
-        const { unit: l, amount: u } = c.currency, d = s(a, l);
-        if (!t.includes(l) || !e(u) || !u || !e(d) || !e(d + u)) throw new m("CurrencyChanged");
+    received: se,
+    async grant(a, o, r, c) {
+      return Ae.run(N(a), async () => {
+        if (se(a, o, r)) return;
+        if (r.currencyAttempted) throw new m("RecoveryRequired");
+        if (!c) throw new m("RecoveryRequired");
+        await c();
+        const { unit: l, amount: u } = o.currency, d = i(a, l);
+        if (!s.includes(l) || !t(u) || !u || !t(d) || !t(d + u)) throw new m("CurrencyChanged");
         if (await a.update({
-          [i(l)]: d + u,
-          [`flags.${f}.currencyReceipts.${o.id}`]: qe(c)
-        }), !ee(a, c, o)) throw new m("TransferFailed");
+          [e(l)]: d + u,
+          [`flags.${f}.currencyReceipts.${r.id}`]: Fe(o)
+        }), !se(a, o, r)) throw new m("TransferFailed");
       });
     },
-    sourcePlan(a, c) {
-      const { unit: o, amount: r } = c.currency, l = s(a.actor, o);
-      if (!t.includes(o) || !e(l) || !e(r) || r <= 0 || l < r) throw new m("CurrencyChanged");
-      return { currency: o, before: l, after: l - r };
+    sourcePlan(a, o) {
+      const { unit: r, amount: c } = o.currency, l = i(a.actor, r);
+      if (!s.includes(r) || !t(l) || !t(c) || c <= 0 || l < c) throw new m("CurrencyChanged");
+      return { currency: r, before: l, after: l - c };
     },
-    async debit(a, c, o) {
-      return Ce.run(N(a.actor), async () => {
-        const r = a.actor;
-        if (ee(r, c, o, !0)) return;
-        const l = o.source;
-        if (s(r, l.currency) !== l.before) throw new m("CurrencyChanged");
-        if (await r.update({
-          [i(l.currency)]: l.after,
-          [`flags.${f}.currencyDebits.${o.id}`]: qe(c)
-        }), !ee(r, c, o, !0)) throw new m("CurrencyChanged");
+    async debit(a, o, r) {
+      return Ae.run(N(a.actor), async () => {
+        const c = a.actor;
+        if (se(c, o, r, !0)) return;
+        const l = r.source;
+        if (i(c, l.currency) !== l.before) throw new m("CurrencyChanged");
+        if (await c.update({
+          [e(l.currency)]: l.after,
+          [`flags.${f}.currencyDebits.${r.id}`]: Fe(o)
+        }), !se(c, o, r, !0)) throw new m("CurrencyChanged");
       });
     },
-    async cleanup(a, c, o, r) {
-      for (const [l, u] of [[c, "currencyReceipts"], [a.actor, "currencyDebits"]])
+    async cleanup(a, o, r, c) {
+      for (const [l, u] of [[o, "currencyReceipts"], [a.actor, "currencyDebits"]])
         try {
-          await Ce.run(N(l), () => l.update({ [`flags.${f}.${u}.-=${r.id}`]: null }));
+          await Ae.run(N(l), () => l.update({ [`flags.${f}.${u}.-=${c.id}`]: null }));
         } catch (d) {
           console.warn("HoloSuite Loot | Could not clean committed currency receipt", d);
         }
     }
   };
 }
-const yt = Je({
+const It = Re({
   units: ["cp", "sp", "ep", "gp", "pp"],
-  amountOf: (t, s) => {
-    var i, e;
-    return (e = (i = t == null ? void 0 : t.system) == null ? void 0 : i.currency) == null ? void 0 : e[s];
+  amountOf: (s, i) => {
+    var e, t;
+    return (t = (e = s == null ? void 0 : s.system) == null ? void 0 : e.currency) == null ? void 0 : t[i];
   },
-  path: (t) => `system.currency.${t}`,
-  valid: (t) => Number.isSafeInteger(t) && t >= 0,
-  name: (t) => {
-    var e, n, a, c, o;
-    const s = (a = (n = (e = globalThis.CONFIG) == null ? void 0 : e.DND5E) == null ? void 0 : n.currencies) == null ? void 0 : a[t], i = typeof s == "string" ? s : s == null ? void 0 : s.label;
-    return i ? ((o = (c = globalThis.game) == null ? void 0 : c.i18n) == null ? void 0 : o.localize(i)) ?? i : t.toUpperCase();
+  path: (s) => `system.currency.${s}`,
+  valid: (s) => Number.isSafeInteger(s) && s >= 0,
+  name: (s) => {
+    var t, n, a, o, r;
+    const i = (a = (n = (t = globalThis.CONFIG) == null ? void 0 : t.DND5E) == null ? void 0 : n.currencies) == null ? void 0 : a[s], e = typeof i == "string" ? i : i == null ? void 0 : i.label;
+    return e ? ((r = (o = globalThis.game) == null ? void 0 : o.i18n) == null ? void 0 : r.localize(e)) ?? e : s.toUpperCase();
   }
-}), pt = Je({
+}), Rt = Re({
   units: ["swade"],
-  amountOf: (t) => {
-    var s, i;
-    return (i = (s = t == null ? void 0 : t.system) == null ? void 0 : s.details) == null ? void 0 : i.currency;
+  amountOf: (s) => {
+    var i, e;
+    return (e = (i = s == null ? void 0 : s.system) == null ? void 0 : i.details) == null ? void 0 : e.currency;
   },
   path: () => "system.details.currency",
-  valid: (t) => Number.isFinite(t) && t >= 0 && t <= Number.MAX_SAFE_INTEGER,
+  valid: (s) => Number.isFinite(s) && s >= 0 && s <= Number.MAX_SAFE_INTEGER,
   name: () => {
-    var t, s, i;
-    return ((i = (s = (t = globalThis.game) == null ? void 0 : t.settings) == null ? void 0 : s.get("swade", "currencyName")) == null ? void 0 : i.trim()) || "Currency";
+    var s, i, e;
+    return ((e = (i = (s = globalThis.game) == null ? void 0 : s.settings) == null ? void 0 : i.get("swade", "currencyName")) == null ? void 0 : e.trim()) || "Currency";
+  }
+}), Ct = Re({
+  units: ["credits"],
+  amountOf: (s) => {
+    var i, e, t;
+    return (t = (e = (i = s == null ? void 0 : s.system) == null ? void 0 : i.stats) == null ? void 0 : e.credits) == null ? void 0 : t.value;
+  },
+  path: () => "system.stats.credits.value",
+  valid: (s) => Number.isSafeInteger(s) && s >= 0,
+  name: () => "Credits"
+}), _e = { gc: "gold", sc: "silver", cc: "copper" }, Lt = Re({
+  units: Object.keys(_e),
+  amountOf: (s, i) => {
+    var e, t;
+    return (t = (e = s == null ? void 0 : s.system) == null ? void 0 : e.currency) == null ? void 0 : t[i];
+  },
+  path: (s) => `system.currency.${s}`,
+  valid: (s) => Number.isSafeInteger(s) && s >= 0,
+  name: (s) => {
+    var n, a;
+    const i = _e[s], e = `DoD.currency.${i}`, t = (a = (n = globalThis.game) == null ? void 0 : n.i18n) == null ? void 0 : a.localize(e);
+    return t && t !== e ? t : i[0].toUpperCase() + i.slice(1);
   }
 });
-function Fe(t) {
-  var i;
-  const s = $(t.toObject());
-  delete s._id, delete s.folder, delete s.ownership, delete s._stats, (i = s.flags) == null || delete i[f];
-  for (const e of s.effects ?? [])
-    delete e._id, e.origin = null;
-  return s;
+function $e(s) {
+  var e;
+  const i = O(s.toObject());
+  delete i._id, delete i.folder, delete i.ownership, delete i._stats, (e = i.flags) == null || delete e[f];
+  for (const t of i.effects ?? [])
+    delete t._id, t.origin = null;
+  return i;
 }
-async function ge(t) {
-  if (t.actorLink && await t.update({ actorLink: !1 }), t.actorLink) throw new m("SourceChanged");
+async function we(s) {
+  if (s.actorLink && await s.update({ actorLink: !1 }), s.actorLink) throw new m("SourceChanged");
 }
-class We {
+class Ze {
   constructor() {
-    R(this, "manual", !1);
+    S(this, "manual", !1);
   }
-  received(s, i, e) {
+  received(i, e, t) {
     var n;
-    return ((n = s.items.get(e.itemId)) == null ? void 0 : n.getFlag(f, "claim")) === e.id;
+    return ((n = i.items.get(t.itemId)) == null ? void 0 : n.getFlag(f, "claim")) === t.id;
   }
-  async create(s, i, e) {
-    const n = s.items.get(e.itemId);
+  async create(i, e, t) {
+    var r;
+    const n = i.items.get(t.itemId);
     if (n) {
-      if (n.getFlag(f, "claim") !== e.id) throw new m("RecoveryRequired");
+      if (n.getFlag(f, "claim") !== t.id) throw new m("RecoveryRequired");
       return n;
     }
-    const a = $(i.data);
-    a._id = e.itemId, a.flags ?? (a.flags = {}), a.flags[f] = { claim: e.id };
-    const [c] = await s.createEmbeddedDocuments("Item", [a], { keepId: !0 });
-    if (!c || (this.manual ? !this.received(s, i, e) : c.id !== e.itemId))
+    const a = O(e.data);
+    a._id = t.itemId, a.flags ?? (a.flags = {}), a.flags[f] = { claim: t.id };
+    const o = (r = await i.createEmbeddedDocuments("Item", [a], { keepId: !0 })) == null ? void 0 : r[0];
+    if (!this.received(i, e, t))
       throw new m("TransferFailed");
-    return c;
+    return o;
   }
 }
-class xe extends We {
+class et extends Ze {
   constructor() {
     super(...arguments);
-    R(this, "id", "dnd5e");
-    R(this, "balanceCurrency", yt);
+    S(this, "id", "dnd5e");
+    S(this, "balanceCurrency", It);
   }
-  currencyEntries(i) {
-    return this.balanceCurrency.entries(i);
+  currencyEntries(e) {
+    return this.balanceCurrency.entries(e);
   }
-  received(i, e, n) {
+  received(e, t, n) {
     var a;
-    return ((a = e.currency) == null ? void 0 : a.storage) === "balance" ? this.balanceCurrency.received(i, e, n) : super.received(i, e, n);
+    return ((a = t.currency) == null ? void 0 : a.storage) === "balance" ? this.balanceCurrency.received(e, t, n) : super.received(e, t, n);
   }
-  async cleanup(i, e, n, a) {
-    var c;
-    ((c = n.currency) == null ? void 0 : c.storage) === "balance" && await this.balanceCurrency.cleanup(i, e, n, a);
+  async cleanup(e, t, n, a) {
+    var o;
+    ((o = n.currency) == null ? void 0 : o.storage) === "balance" && await this.balanceCurrency.cleanup(e, t, n, a);
   }
-  destination(i) {
-    return i.type === "character";
+  destination(e) {
+    return e.type === "character";
   }
-  eligible(i) {
-    var r, l, u, d, p;
-    const e = i.system, n = (r = e == null ? void 0 : e.constructor) == null ? void 0 : r.metadata;
-    if (!["weapon", "equipment", "consumable", "tool", "loot", "container"].includes(i.type) || (n == null ? void 0 : n.inventoryItem) === !1) return !1;
-    const c = (u = (l = e == null ? void 0 : e.schema) == null ? void 0 : l.getField) == null ? void 0 : u.call(l, "quantity");
-    if (e != null && e.schema && !c || !Number.isSafeInteger(e == null ? void 0 : e.quantity) || e.quantity <= 0) return !1;
-    const o = ((d = e.type) == null ? void 0 : d.value) ?? e.weaponType ?? ((p = e.armor) == null ? void 0 : p.type);
-    return !["natural", "siege", "vehicle", "currency"].includes(o);
+  eligible(e) {
+    var c, l, u, d, v;
+    const t = e.system, n = (c = t == null ? void 0 : t.constructor) == null ? void 0 : c.metadata;
+    if (!["weapon", "equipment", "consumable", "tool", "loot", "container"].includes(e.type) || (n == null ? void 0 : n.inventoryItem) === !1) return !1;
+    const o = (u = (l = t == null ? void 0 : t.schema) == null ? void 0 : l.getField) == null ? void 0 : u.call(l, "quantity");
+    if (t != null && t.schema && !o || !Number.isSafeInteger(t == null ? void 0 : t.quantity) || t.quantity <= 0) return !1;
+    const r = ((d = t.type) == null ? void 0 : d.value) ?? t.weaponType ?? ((v = t.armor) == null ? void 0 : v.type);
+    return !["natural", "siege", "vehicle", "currency"].includes(r);
   }
-  snapshot(i) {
-    const e = Fe(i);
-    return e.system.container = null, "equipped" in e.system && (e.system.equipped = !1), "attuned" in e.system && (e.system.attuned = !1), e.system.attunement === 2 && (e.system.attunement = 1), e;
+  snapshot(e) {
+    const t = $e(e);
+    return t.system.container = null, "equipped" in t.system && (t.system.equipped = !1), "attuned" in t.system && (t.system.attuned = !1), t.system.attunement === 2 && (t.system.attunement = 1), t;
   }
-  async create(i, e, n, a) {
-    var c;
-    return ((c = e.currency) == null ? void 0 : c.storage) === "balance" ? this.balanceCurrency.grant(i, e, n, a) : super.create(i, e, n);
+  async create(e, t, n, a) {
+    var o;
+    return ((o = t.currency) == null ? void 0 : o.storage) === "balance" ? this.balanceCurrency.grant(e, t, n, a) : super.create(e, t, n);
   }
-  preview(i) {
+  preview(e) {
     var n, a;
-    const e = $(i.data);
-    return e.system.identified !== !1 ? e : {
-      name: ((n = e.system.unidentified) == null ? void 0 : n.name) || "Unidentified Item",
-      img: e.img,
+    const t = O(e.data);
+    return t.system.identified !== !1 ? t : {
+      name: ((n = t.system.unidentified) == null ? void 0 : n.name) || "Unidentified Item",
+      img: t.img,
       type: "loot",
-      system: { quantity: e.system.quantity, identified: !1, description: { value: ((a = e.system.unidentified) == null ? void 0 : a.description) ?? "" } }
+      system: { quantity: t.system.quantity, identified: !1, description: { value: ((a = t.system.unidentified) == null ? void 0 : a.description) ?? "" } }
     };
   }
-  async sourceClaim(i, e) {
-    var c, o, r, l, u;
-    if (!((c = e.source) != null && c.itemId) && ((o = e.currency) == null ? void 0 : o.storage) !== "balance") return null;
-    if ((r = e.source) != null && r.ruleKey && e.source.ruleKey !== `${i.actorId ?? ((l = i.actor) == null ? void 0 : l.id) ?? ""}:${e.source.itemId}`)
+  async sourceClaim(e, t) {
+    var r, c, l, u, d;
+    if (!((r = t.source) != null && r.itemId) && ((c = t.currency) == null ? void 0 : c.storage) !== "balance") return null;
+    if ((l = t.source) != null && l.ruleKey && t.source.ruleKey !== `${e.actorId ?? ((u = e.actor) == null ? void 0 : u.id) ?? ""}:${t.source.itemId}`)
       throw new m("SourceChanged");
-    if (await ge(i), ((u = e.currency) == null ? void 0 : u.storage) === "balance") return this.balanceCurrency.sourcePlan(i, e);
-    const n = i.actor.items.get(e.source.itemId), a = n == null ? void 0 : n.system.quantity;
-    if (!this.eligible(n ?? {}) || a < e.data.system.quantity || e.source.ruleKey && n.type !== e.data.type) throw new m("SourceChanged");
-    return { itemId: n.id, before: a, after: a - e.data.system.quantity };
+    if (await we(e), ((d = t.currency) == null ? void 0 : d.storage) === "balance") return this.balanceCurrency.sourcePlan(e, t);
+    const n = e.actor.items.get(t.source.itemId), a = H(n), o = H(t.data);
+    if (!this.eligible(n ?? {}) || a < o || t.source.ruleKey && n.type !== t.data.type) throw new m("SourceChanged");
+    return { itemId: n.id, before: a, after: a - o };
   }
-  validateSourcePlan(i, e, n) {
-    var o, r, l, u;
-    if (!((o = e.source) != null && o.ruleKey)) return;
-    const a = (l = i.actor) == null ? void 0 : l.items.get((r = n.source) == null ? void 0 : r.itemId);
-    if (i.actorLink || e.source.ruleKey !== `${i.actorId ?? ((u = i.actor) == null ? void 0 : u.id) ?? ""}:${a == null ? void 0 : a.id}` || !this.eligible(a ?? {}) || a.type !== e.data.type || a.system.quantity !== n.source.before)
+  validateSourcePlan(e, t, n) {
+    var r, c, l, u;
+    if (!((r = t.source) != null && r.ruleKey)) return;
+    const a = (l = e.actor) == null ? void 0 : l.items.get((c = n.source) == null ? void 0 : c.itemId);
+    if (e.actorLink || t.source.ruleKey !== `${e.actorId ?? ((u = e.actor) == null ? void 0 : u.id) ?? ""}:${a == null ? void 0 : a.id}` || !this.eligible(a ?? {}) || a.type !== t.data.type || H(a) !== n.source.before)
       throw new m("SourceChanged");
-    const c = n.source.sfCurrency;
-    if (c) {
+    const o = n.source.sfCurrency;
+    if (o) {
       const d = this.entryMetadata(a).currency;
-      if ((d == null ? void 0 : d.unit) !== c.unit || (d == null ? void 0 : d.amount) !== c.amount) throw new m("CurrencyChanged");
+      if ((d == null ? void 0 : d.unit) !== o.unit || (d == null ? void 0 : d.amount) !== o.amount) throw new m("CurrencyChanged");
     }
   }
-  async removeSource(i, e, n) {
+  async removeSource(e, t, n) {
     const a = n.source;
     if (!a) return;
-    if (await ge(i), a.currency) return this.balanceCurrency.debit(i, e, n);
-    const c = i.actor.items.get(a.itemId);
-    if (!c || c.getFlag(f, "sourceClaim") === n.id) return;
-    if (c.system.quantity !== a.before) throw new m("SourceChanged");
-    a.after === 0 ? await i.actor.deleteEmbeddedDocuments("Item", [c.id]) : await c.update({ "system.quantity": a.after, [`flags.${f}.sourceClaim`]: n.id });
-    const o = i.actor.items.get(a.itemId);
-    if (a.after === 0 ? o : (o == null ? void 0 : o.system.quantity) !== a.after || (o == null ? void 0 : o.getFlag(f, "sourceClaim")) !== n.id) throw new m("SourceChanged");
+    if (await we(e), a.currency) return this.balanceCurrency.debit(e, t, n);
+    const o = e.actor.items.get(a.itemId);
+    if (!o || o.getFlag(f, "sourceClaim") === n.id) return;
+    if (H(o) !== a.before) throw new m("SourceChanged");
+    a.after === 0 ? await e.actor.deleteEmbeddedDocuments("Item", [o.id]) : await o.update({ [He(o)]: a.after, [`flags.${f}.sourceClaim`]: n.id });
+    const r = e.actor.items.get(a.itemId);
+    if (a.after === 0 ? r : !r || H(r) !== a.after || (r == null ? void 0 : r.getFlag(f, "sourceClaim")) !== n.id) throw new m("SourceChanged");
   }
 }
-class wt extends xe {
+class qt extends Ze {
   constructor() {
     super(...arguments);
-    R(this, "id", "sf2e");
+    S(this, "manual", !0);
   }
-  currencyEntries() {
-    return [];
+  destination(e) {
+    return !!e.items && typeof e.createEmbeddedDocuments == "function";
   }
-  eligible(i) {
-    var n, a;
-    return ["ammo", "armor", "backpack", "book", "consumable", "equipment", "shield", "treasure", "weapon"].includes(i.type) && (i.isOfType ? i.isOfType("physical") : !0) && !(i.type === "weapon" && ((n = i.system) == null ? void 0 : n.category) === "unarmed") && Number.isSafeInteger((a = i.system) == null ? void 0 : a.quantity) && i.system.quantity > 0;
+  eligible(e) {
+    return !!(e != null && e.id) && typeof e.toObject == "function";
   }
-  snapshot(i) {
-    var n, a, c, o, r;
-    const e = $(i.toObject());
-    delete e._id, delete e.folder, delete e.ownership, delete e._stats, (n = e.flags) == null || delete n[f], (c = (a = e.flags) == null ? void 0 : a.pf2e) == null || delete c.grantedBy, (r = (o = e.flags) == null ? void 0 : o.pf2e) == null || delete r.itemGrants, e.system.containerId = null, e.system.description && delete e.system.description.gm, e.system.equipped && (e.system.equipped = { carryType: "stowed", handsHeld: 0, invested: !1 });
-    for (const l of e.effects ?? [])
-      delete l._id, l.origin = null;
+  snapshot(e) {
+    return $e(e);
+  }
+  preview(e) {
+    var a, o, r, c, l, u;
+    const { data: t } = e;
+    if (((a = t.system) == null ? void 0 : a.identified) !== !1 && ((r = (o = t.system) == null ? void 0 : o.identification) == null ? void 0 : r.status) !== "unidentified") return O(t);
+    const n = ((c = t.system) == null ? void 0 : c.unidentified) ?? ((u = (l = t.system) == null ? void 0 : l.identification) == null ? void 0 : u.unidentified);
+    return { name: (n == null ? void 0 : n.name) || "Unidentified Item", type: t.type, img: (n == null ? void 0 : n.img) || t.img };
+  }
+  received(e, t, n) {
+    return super.received(e, t, n) || Array.from(e.items.values()).some((a) => a.getFlag(f, "claim") === n.id);
+  }
+  async create(e, t, n, a) {
+    if (n.itemAttempted || !a) throw new m("RecoveryRequired");
+    return await a(), super.create(e, t, n);
+  }
+  async sourceClaim(e, t) {
+    var a;
+    await we(e);
+    const n = { itemId: (a = t.source) == null ? void 0 : a.itemId };
+    return this.validateSourcePlan(e, t, { source: n }), n;
+  }
+  validateSourcePlan(e, t, n) {
+    var r, c, l, u, d;
+    const a = (r = n.source) == null ? void 0 : r.itemId, o = (c = e.actor) == null ? void 0 : c.items.get(a);
+    if (e.actorLink || !t.wholeItem || a !== ((l = t.source) == null ? void 0 : l.itemId) || ((u = t.source) == null ? void 0 : u.ruleKey) !== `${e.actorId ?? ((d = e.actor) == null ? void 0 : d.id) ?? ""}:${a}` || !this.eligible(o) || ee(this.snapshot(o)) !== ee(t.data))
+      throw new m("SourceChanged");
+  }
+  async removeSource(e, t, n) {
+    var o, r, c;
+    await we(e);
+    const a = (o = n.source) == null ? void 0 : o.itemId;
+    if (!a || !t.wholeItem || ((r = t.source) == null ? void 0 : r.ruleKey) !== `${e.actorId ?? ((c = e.actor) == null ? void 0 : c.id) ?? ""}:${a}`)
+      throw new m("RecoveryRequired");
+    if (e.actor.items.get(a) && (this.validateSourcePlan(e, t, n), await e.actor.deleteEmbeddedDocuments("Item", [a]), e.actor.items.get(a)))
+      throw new m("SourceChanged");
+  }
+}
+const B = new qt();
+class te extends et {
+  constructor() {
+    super(...arguments);
+    S(this, "acceptsLegacyWholeItems", !0);
+    S(this, "balanceCurrency", null);
+  }
+  currencyEntries(e) {
+    var t;
+    return ((t = this.balanceCurrency) == null ? void 0 : t.entries(e)) ?? [];
+  }
+  eligible(e) {
+    const t = H(e);
+    return this.allowsStoredItem(e) && Number.isSafeInteger(t) && t > 0;
+  }
+  snapshot(e) {
+    return this.carriedData($e(e));
+  }
+  carriedData(e) {
     return e;
   }
-  entryMetadata(i, e = ((n) => (n = i.system) == null ? void 0 : n.quantity)()) {
-    var r, l, u, d;
-    const a = i.isCurrency ? i.unit : null, c = a ? i.assetValue : null, o = e === ((r = i.system) == null ? void 0 : r.quantity) ? c == null ? void 0 : c[a] : (d = (u = c == null ? void 0 : (l = c.constructor).fromPrice) == null ? void 0 : u.call(l, i.price, e)) == null ? void 0 : d[a];
-    return a && Number.isSafeInteger(o) && o > 0 ? { currency: { storage: "item", unit: a, amount: o } } : {};
+  preview(e) {
+    return O(e.data);
+  }
+  received(e, t, n) {
+    return t.wholeItem ? B.received(e, t, n) : super.received(e, t, n);
+  }
+  async create(e, t, n, a) {
+    return t.wholeItem ? B.create(e, { ...t, data: this.carriedData(O(t.data)) }, n, a) : super.create(e, t, n, a);
+  }
+  async sourceClaim(e, t) {
+    var n, a;
+    if (this.acceptsLegacyWholeItems && ((n = t.currency) == null ? void 0 : n.storage) !== "balance" && !this.eligible(t.data))
+      throw new m("SourceChanged");
+    if (!t.wholeItem) return super.sourceClaim(e, t);
+    if (!this.eligible(e.actor.items.get((a = t.source) == null ? void 0 : a.itemId))) throw new m("SourceChanged");
+    return B.sourceClaim(e, t);
+  }
+  validateSourcePlan(e, t, n) {
+    var a;
+    if (!t.wholeItem) return super.validateSourcePlan(e, t, n);
+    if (!this.eligible(e.actor.items.get((a = n.source) == null ? void 0 : a.itemId))) throw new m("SourceChanged");
+    return B.validateSourcePlan(e, t, n);
+  }
+  async removeSource(e, t, n) {
+    return t.wholeItem ? B.removeSource(e, t, n) : super.removeSource(e, t, n);
+  }
+}
+class tt extends te {
+  allowsStoredItem(i) {
+    var t;
+    return ["ammo", "armor", "backpack", "book", "consumable", "equipment", "shield", "treasure", "weapon"].includes(i == null ? void 0 : i.type) && (i.isOfType ? i.isOfType("physical") : !0) && !(i.type === "weapon" && ((t = i.system) == null ? void 0 : t.category) === "unarmed");
+  }
+  eligible(i) {
+    var e;
+    return Number.isSafeInteger((e = i == null ? void 0 : i.system) == null ? void 0 : e.quantity) && super.eligible(i);
+  }
+  carriedData(i) {
+    var e, t, n, a;
+    return (t = (e = i.flags) == null ? void 0 : e.pf2e) == null || delete t.grantedBy, (a = (n = i.flags) == null ? void 0 : n.pf2e) == null || delete a.itemGrants, i.system.containerId = null, i.system.description && delete i.system.description.gm, i.system.equipped && (i.system.equipped = { carryType: "stowed", handsHeld: 0, invested: !1 }), i;
   }
   async sourceClaim(i, e) {
     var r;
-    const n = await super.sourceClaim(i, e);
-    if (((r = e.currency) == null ? void 0 : r.storage) !== "item") return n;
-    const a = i.actor.items.get(e.source.itemId), c = this.entryMetadata(a).currency, o = this.entryMetadata(a, e.data.system.quantity).currency;
-    if ((o == null ? void 0 : o.unit) !== e.currency.unit || (o == null ? void 0 : o.amount) !== e.currency.amount || !e.source.ruleKey && a.system.quantity !== e.data.system.quantity) throw new m("CurrencyChanged");
-    return { ...n, sfCurrency: { unit: c.unit, amount: c.amount } };
+    const t = await super.sourceClaim(i, e);
+    if (((r = e.currency) == null ? void 0 : r.storage) !== "item") return t;
+    const n = i.actor.items.get(e.source.itemId), a = this.entryMetadata(n).currency, o = this.entryMetadata(n, e.data.system.quantity).currency;
+    if ((o == null ? void 0 : o.unit) !== e.currency.unit || (o == null ? void 0 : o.amount) !== e.currency.amount || !e.source.ruleKey && n.system.quantity !== e.data.system.quantity) throw new m("CurrencyChanged");
+    return { ...t, sfCurrency: { unit: a.unit, amount: a.amount } };
   }
-  async removeSource(i, e, n) {
-    var c;
-    const a = (c = n.source) != null && c.itemId ? i.actor.items.get(n.source.itemId) : null;
-    if (a && n.source.sfCurrency) {
-      const o = this.entryMetadata(a).currency;
-      if ((o == null ? void 0 : o.unit) !== n.source.sfCurrency.unit || (o == null ? void 0 : o.amount) !== n.source.sfCurrency.amount) throw new m("CurrencyChanged");
+  async removeSource(i, e, t) {
+    var a, o;
+    const n = (a = t.source) != null && a.itemId ? i.actor.items.get(t.source.itemId) : null;
+    if (n && t.source.sfCurrency && ((o = n.getFlag) == null ? void 0 : o.call(n, f, "sourceClaim")) !== t.id) {
+      const r = this.entryMetadata(n).currency;
+      if ((r == null ? void 0 : r.unit) !== t.source.sfCurrency.unit || (r == null ? void 0 : r.amount) !== t.source.sfCurrency.amount) throw new m("CurrencyChanged");
     }
-    return super.removeSource(i, e, n);
+    return super.removeSource(i, e, t);
   }
   preview(i) {
-    var a, c, o, r;
-    const e = $(i.data);
-    if (((a = e.system.identification) == null ? void 0 : a.status) === "identified") return e;
-    const n = (c = e.system.identification) == null ? void 0 : c.unidentified;
+    var n, a, o, r;
+    const e = O(i.data);
+    if (((n = e.system.identification) == null ? void 0 : n.status) === "identified") return e;
+    const t = (a = e.system.identification) == null ? void 0 : a.unidentified;
     return {
-      name: (n == null ? void 0 : n.name) || "Unidentified Item",
-      img: (n == null ? void 0 : n.img) || e.img,
+      name: (t == null ? void 0 : t.name) || "Unidentified Item",
+      img: (t == null ? void 0 : t.img) || e.img,
       type: "equipment",
-      system: { quantity: e.system.quantity, description: { value: ((r = (o = n == null ? void 0 : n.data) == null ? void 0 : o.description) == null ? void 0 : r.value) ?? "" } }
+      system: { quantity: e.system.quantity, description: { value: ((r = (o = t == null ? void 0 : t.data) == null ? void 0 : o.description) == null ? void 0 : r.value) ?? "" } }
     };
   }
 }
-class vt extends We {
+class Tt extends tt {
   constructor() {
     super(...arguments);
-    R(this, "manual", !0);
+    S(this, "id", "sf2e");
+    S(this, "acceptsLegacyWholeItems", !1);
   }
-  destination(i) {
-    return !!i.items && typeof i.createEmbeddedDocuments == "function";
-  }
-  eligible(i) {
-    return !!(i != null && i.id) && typeof i.toObject == "function";
-  }
-  snapshot(i) {
-    return Fe(i);
-  }
-  preview(i) {
-    var a, c, o, r, l, u;
-    const { data: e } = i;
-    if (((a = e.system) == null ? void 0 : a.identified) !== !1 && ((o = (c = e.system) == null ? void 0 : c.identification) == null ? void 0 : o.status) !== "unidentified") return $(e);
-    const n = ((r = e.system) == null ? void 0 : r.unidentified) ?? ((u = (l = e.system) == null ? void 0 : l.identification) == null ? void 0 : u.unidentified);
-    return { name: (n == null ? void 0 : n.name) || "Unidentified Item", type: e.type, img: (n == null ? void 0 : n.img) || e.img };
-  }
-  received(i, e, n) {
-    return super.received(i, e, n) || i.items.some((a) => a.getFlag(f, "claim") === n.id);
-  }
-  async create(i, e, n, a) {
-    if (n.itemAttempted || !a) throw new m("RecoveryRequired");
-    return await a(), super.create(i, e, n);
-  }
-  async sourceClaim(i, e) {
-    var a;
-    await ge(i);
-    const n = { itemId: (a = e.source) == null ? void 0 : a.itemId };
-    return this.validateSourcePlan(i, e, { source: n }), n;
-  }
-  validateSourcePlan(i, e, n) {
-    var o, r, l, u, d;
-    const a = (o = n.source) == null ? void 0 : o.itemId, c = (r = i.actor) == null ? void 0 : r.items.get(a);
-    if (i.actorLink || !e.wholeItem || a !== ((l = e.source) == null ? void 0 : l.itemId) || ((u = e.source) == null ? void 0 : u.ruleKey) !== `${i.actorId ?? ((d = i.actor) == null ? void 0 : d.id) ?? ""}:${a}` || !this.eligible(c) || Z(this.snapshot(c)) !== Z(e.data))
-      throw new m("SourceChanged");
-  }
-  async removeSource(i, e, n) {
-    var c, o, r;
-    await ge(i);
-    const a = (c = n.source) == null ? void 0 : c.itemId;
-    if (!a || !e.wholeItem || ((o = e.source) == null ? void 0 : o.ruleKey) !== `${i.actorId ?? ((r = i.actor) == null ? void 0 : r.id) ?? ""}:${a}`)
-      throw new m("RecoveryRequired");
-    if (i.actor.items.get(a) && (this.validateSourcePlan(i, e, n), await i.actor.deleteEmbeddedDocuments("Item", [a]), i.actor.items.get(a)))
-      throw new m("SourceChanged");
+  entryMetadata(e, t = ((n) => (n = e.system) == null ? void 0 : n.quantity)()) {
+    var c, l, u, d;
+    const a = e.isCurrency ? e.unit : null, o = a ? e.assetValue : null, r = t === ((c = e.system) == null ? void 0 : c.quantity) ? o == null ? void 0 : o[a] : (d = (u = o == null ? void 0 : (l = o.constructor).fromPrice) == null ? void 0 : u.call(l, e.price, t)) == null ? void 0 : d[a];
+    return a && Number.isSafeInteger(r) && r > 0 ? { currency: { storage: "item", unit: a, amount: r } } : {};
   }
 }
-const B = new vt();
-class bt extends xe {
+class At extends tt {
   constructor() {
     super(...arguments);
-    R(this, "id", "swade");
-    R(this, "balanceCurrency", pt);
-    R(this, "currencySnapshotVersion", 2);
+    S(this, "id", "pf2e");
   }
-  allowsStoredItem(i) {
-    var e;
-    return ["weapon", "armor", "shield", "gear", "consumable"].includes(i == null ? void 0 : i.type) && i.isPhysicalItem !== !1 && !i.grantedBy && !((e = i.system) != null && e.isNaturalArmor);
+  hitPoints(e) {
+    var t, n, a;
+    return (t = e.hasCondition) != null && t.call(e, "dying", "unconscious") ? null : e.hitPoints ?? ((a = (n = e.system) == null ? void 0 : n.attributes) == null ? void 0 : a.hp);
   }
-  eligible(i) {
-    var e;
-    return this.allowsStoredItem(i) && Number.isSafeInteger((e = i.system) == null ? void 0 : e.quantity) && i.system.quantity > 0;
+  entryMetadata(e, t = ((n) => (n = e.system) == null ? void 0 : n.quantity)()) {
+    var l, u;
+    const a = e.system;
+    if (e.type !== "treasure" || !(e.isCoinage ?? ((a == null ? void 0 : a.stackGroup) === "coins" || (a == null ? void 0 : a.category) === "coin"))) return {};
+    const o = ["cp", "sp", "gp", "pp"], r = ((l = e.price) == null ? void 0 : l.value) ?? ((u = a == null ? void 0 : a.price) == null ? void 0 : u.value), c = e.unit ?? o.find((d) => (r == null ? void 0 : r[d]) === 1);
+    return o.includes(c) && Number.isSafeInteger(t) && t > 0 ? { currency: { storage: "item", unit: c, amount: t } } : {};
   }
-  snapshot(i) {
-    return this.carriedData(Fe(i));
+}
+class Ft extends te {
+  constructor() {
+    super(...arguments);
+    S(this, "id", "swade");
+    S(this, "balanceCurrency", Rt);
+    S(this, "currencySnapshotVersion", 2);
   }
-  carriedData(i) {
-    var e, n;
-    return "equipStatus" in i.system && (i.system.equipStatus = 1), (n = (e = i.flags) == null ? void 0 : e.swade) == null || delete n.hasGranted, i;
+  allowsStoredItem(e) {
+    var t;
+    return ["weapon", "armor", "shield", "gear", "consumable"].includes(e == null ? void 0 : e.type) && e.isPhysicalItem !== !1 && !e.grantedBy && !((t = e.system) != null && t.isNaturalArmor);
   }
-  preview(i) {
-    return $(i.data);
+  eligible(e) {
+    var t;
+    return Number.isSafeInteger((t = e == null ? void 0 : e.system) == null ? void 0 : t.quantity) && super.eligible(e);
   }
-  received(i, e, n) {
-    return e.wholeItem ? B.received(i, e, n) : super.received(i, e, n);
+  carriedData(e) {
+    var t, n;
+    return "equipStatus" in e.system && (e.system.equipStatus = 1), (n = (t = e.flags) == null ? void 0 : t.swade) == null || delete n.hasGranted, e;
   }
-  async create(i, e, n, a) {
-    return e.wholeItem ? B.create(i, { ...e, data: this.carriedData($(e.data)) }, n, a) : super.create(i, e, n, a);
+}
+class Mt extends te {
+  constructor() {
+    super(...arguments);
+    S(this, "id", "dragonbane");
+    S(this, "balanceCurrency", Lt);
+    S(this, "currencySnapshotVersion", 2);
   }
-  async sourceClaim(i, e) {
+  sourceActor(e) {
+    return ["npc", "monster"].includes(e.type);
+  }
+  hitPoints(e) {
+    var t;
+    return (t = e.system) == null ? void 0 : t.hitPoints;
+  }
+  allowsStoredItem(e) {
+    var t, n;
+    return ["armor", "helmet", "item", "material", "weapon"].includes(e == null ? void 0 : e.type) && !((n = (t = e.system) == null ? void 0 : t.features) != null && n.includes("unarmed"));
+  }
+  carriedData(e) {
+    for (const t of ["worn", "storage", "mainHand", "offHand"])
+      t in e.system && (e.system[t] = !1);
+    return e;
+  }
+}
+class xt extends te {
+  constructor() {
+    super(...arguments);
+    S(this, "id", "wfrp4e");
+    S(this, "coinWrites", new de());
+  }
+  coinValue(e) {
     var n, a;
-    if (((n = e.currency) == null ? void 0 : n.storage) !== "balance" && !this.eligible(e.data)) throw new m("SourceChanged");
-    if (!e.wholeItem) return super.sourceClaim(i, e);
-    if (!this.eligible(i.actor.items.get((a = e.source) == null ? void 0 : a.itemId))) throw new m("SourceChanged");
-    return B.sourceClaim(i, e);
+    const t = (a = (n = e == null ? void 0 : e.system) == null ? void 0 : n.coinValue) == null ? void 0 : a.value;
+    return (e == null ? void 0 : e.type) === "money" && Number.isSafeInteger(t) && t > 0 ? t : null;
   }
-  validateSourcePlan(i, e, n) {
+  coinReceipt(e, t) {
+    return Array.from(e.items.values()).find((n) => {
+      var a;
+      return n.type === "money" && ((a = n.getFlag(f, "coinReceipts")) == null ? void 0 : a[t.id]) === !0;
+    });
+  }
+  received(e, t, n) {
     var a;
-    if (!e.wholeItem) return super.validateSourcePlan(i, e, n);
-    if (!this.eligible(i.actor.items.get((a = n.source) == null ? void 0 : a.itemId))) throw new m("SourceChanged");
-    return B.validateSourcePlan(i, e, n);
+    return super.received(e, t, n) || ((a = t.data) == null ? void 0 : a.type) === "money" && !!this.coinReceipt(e, n);
   }
-  async removeSource(i, e, n) {
-    return e.wholeItem ? B.removeSource(i, e, n) : super.removeSource(i, e, n);
+  async create(e, t, n, a) {
+    const o = this.coinValue(t.data);
+    return o === null ? super.create(e, t, n, a) : this.coinWrites.run(N(e), async () => {
+      if (this.received(e, t, n)) return;
+      if (n.itemAttempted) throw new m("RecoveryRequired");
+      const r = Array.from(e.items.values()).find((u) => this.coinValue(u) === o);
+      if (!r) return super.create(e, t, n, a);
+      const c = H(t.data);
+      if (!Number.isSafeInteger(c) || c <= 0 || !a) throw new m("TransferFailed");
+      await a();
+      const l = H(r) + c;
+      if (!e.items.has(r.id) || !Number.isSafeInteger(l)) throw new m("TransferFailed");
+      if (await r.update({ [He(r)]: l, [`flags.${f}.coinReceipts.${n.id}`]: !0 }), !this.coinReceipt(e, n)) throw new m("TransferFailed");
+    });
   }
-}
-const ke = /* @__PURE__ */ new Map([["dnd5e", new xe()], ["sf2e", new wt()], ["swade", new bt()]]);
-function St(t, s) {
-  ke.set(t, s);
-}
-function It(t) {
-  return ke.get(t) ?? B;
-}
-function Pe(t) {
-  if (!t.claim.quantityRoll) return t;
-  const s = $(t.data);
-  return s.system.quantity = t.claim.quantityRoll.quantity, { ...t, data: s };
-}
-class Rt {
-  constructor(s) {
-    R(this, "queue", new be());
-    this.io = s;
-  }
-  async collected(s, i, e, n) {
-    var c, o, r, l;
-    const a = Pe(e);
-    if (e.claim.quantityRoll) {
+  async cleanup(e, t, n, a) {
+    var o;
+    ((o = n.data) == null ? void 0 : o.type) === "money" && await this.coinWrites.run(N(t), async () => {
+      const r = this.coinReceipt(t, a);
       try {
-        await ((o = (c = this.io).quantityRolled) == null ? void 0 : o.call(c, a, n));
+        await (r == null ? void 0 : r.update({ [`flags.${f}.coinReceipts.-=${a.id}`]: null }));
+      } catch (c) {
+        console.warn("HoloSuite Loot | Could not clean committed coin receipt", c);
+      }
+    });
+  }
+  sourceActor(e) {
+    return ["npc", "creature", "vehicle"].includes(e.type);
+  }
+  hitPoints(e) {
+    var t, n;
+    return (n = (t = e.system) == null ? void 0 : t.status) == null ? void 0 : n.wounds;
+  }
+  allowsStoredItem(e) {
+    return ["ammunition", "armour", "cargo", "container", "money", "trapping", "weapon"].includes(e == null ? void 0 : e.type);
+  }
+  carriedData(e) {
+    var t, n;
+    return typeof ((t = e.system.equipped) == null ? void 0 : t.value) == "boolean" && (e.system.equipped.value = !1), typeof ((n = e.system.location) == null ? void 0 : n.value) == "string" && (e.system.location.value = ""), e;
+  }
+}
+class Ht extends te {
+  constructor() {
+    super(...arguments);
+    S(this, "id", "starwarsffg");
+    S(this, "balanceCurrency", Ct);
+    S(this, "currencySnapshotVersion", 2);
+  }
+  sourceActor(e) {
+    return ["minion", "rival", "nemesis", "vehicle", "homestead"].includes(e.type);
+  }
+  defeated(e) {
+    var a, o;
+    if ((a = e.statuses) != null && a.has("starwarsffg-defeated")) return !0;
+    const t = (o = e.system) == null ? void 0 : o.stats, n = e.type === "vehicle" ? t == null ? void 0 : t.hullTrauma : t == null ? void 0 : t.wounds;
+    return Number.isFinite(n == null ? void 0 : n.value) && Number.isFinite(n == null ? void 0 : n.max) && n.max > 0 && n.value > n.max;
+  }
+  hitPoints() {
+    return null;
+  }
+  received(e, t, n) {
+    var a;
+    return ((a = t.currency) == null ? void 0 : a.storage) === "balance" ? super.received(e, t, n) : B.received(e, t, n);
+  }
+  async create(e, t, n, a) {
+    var o;
+    if (((o = t.currency) == null ? void 0 : o.storage) === "balance") return super.create(e, t, n, a);
+    if (!this.received(e, t, n))
+      return B.create(e, { ...t, data: this.carriedData(O(t.data)) }, n, a);
+  }
+  allowsStoredItem(e) {
+    return ["armour", "gear", "itemattachment", "weapon"].includes(e == null ? void 0 : e.type);
+  }
+  carriedData(e) {
+    return e.system.equippable && (e.system.equippable.equipped = !1), e;
+  }
+}
+class $t extends te {
+  constructor() {
+    super(...arguments);
+    S(this, "id", "CoC7");
+  }
+  destination(e) {
+    return ["character", "npc"].includes(e.type);
+  }
+  sourceActor(e) {
+    return ["npc", "creature", "container"].includes(e.type);
+  }
+  hitPoints(e) {
+    var t, n;
+    return (n = (t = e.system) == null ? void 0 : t.attribs) == null ? void 0 : n.hp;
+  }
+  allowsStoredItem(e) {
+    return ["armor", "book", "item", "weapon"].includes(e == null ? void 0 : e.type);
+  }
+}
+const st = new Map([
+  new et(),
+  new At(),
+  new Tt(),
+  new Ft(),
+  new Mt(),
+  new xt(),
+  new Ht(),
+  new $t()
+].map((s) => [s.id, s]));
+function Et(s, i) {
+  st.set(s, i);
+}
+function Nt(s) {
+  return st.get(s) ?? B;
+}
+function Ve(s) {
+  if (!s.claim.quantityRoll) return s;
+  const i = O(s.data);
+  return Xe(i, s.claim.quantityRoll.quantity), { ...s, data: i };
+}
+class Ot {
+  constructor(i) {
+    S(this, "queue", new de());
+    this.io = i;
+  }
+  async collected(i, e, t, n) {
+    var o, r, c, l;
+    const a = Ve(t);
+    if (t.claim.quantityRoll) {
+      try {
+        await ((r = (o = this.io).quantityRolled) == null ? void 0 : r.call(o, a, n));
       } catch (u) {
         console.warn("HoloSuite Loot | Could not post quantity roll", u);
       }
-      if (!e.claim.quantityRoll.quantity) return;
+      if (!t.claim.quantityRoll.quantity) return;
     }
     try {
-      await ((l = (r = this.io).collected) == null ? void 0 : l.call(r, { token: s, actor: i, entry: a, adapter: n }));
+      await ((l = (c = this.io).collected) == null ? void 0 : l.call(c, { token: i, actor: e, entry: a, adapter: n }));
     } catch (u) {
       console.warn("HoloSuite Loot | Could not post loot to chat", u);
     }
   }
-  async execute(s, i) {
-    if (!me(s)) throw new m("InvalidRequest");
-    return this.queue.run(s.tokenUuid, async () => {
-      var p, b, w, S, g, L, C, q, h, I;
-      const e = this.io, n = await e.token(s.tokenUuid);
+  async execute(i, e) {
+    if (!pe(i)) throw new m("InvalidRequest");
+    return this.queue.run(i.tokenUuid, async () => {
+      var v, b, p, I, g, C, L, q, h, R;
+      const t = this.io, n = await t.token(i.tokenUuid);
       if (!n) throw new m("Unavailable");
-      const a = (v, y = e.environment()) => {
-        if (!e.authority()) throw new m("NoGM");
-        gt(n, i, y, v);
-      }, c = e.environment();
-      if (a(void 0, c), !i.isGM && c.inRange && (s.action === "view" || s.action === "inspect")) {
-        const v = await ((p = e.destination) == null ? void 0 : p.call(e, { ...s, actorId: void 0 }, i, n));
-        v && a(v);
+      const a = (w, y = t.environment()) => {
+        if (!t.authority()) throw new m("NoGM");
+        St(n, e, y, w);
+      }, o = t.environment();
+      if (a(void 0, o), !e.isGM && o.inRange && (i.action === "view" || i.action === "inspect")) {
+        const w = await ((v = t.destination) == null ? void 0 : v.call(t, { ...i, actorId: void 0 }, e, n));
+        w && a(w);
       }
-      const o = e.adapter();
-      if (!o) throw new m("Unsupported");
-      let r = await e.load(n, o);
-      for (const v of r.entries.filter((y) => y.claim && !y.taken)) {
+      const r = t.adapter();
+      if (!r) throw new m("Unsupported");
+      let c = await t.load(n, r);
+      for (const w of c.entries.filter((y) => y.claim && !y.taken)) {
         a();
-        const y = await e.actor(v.claim.actorId);
+        const y = await t.actor(w.claim.actorId);
         if (!y) throw new m("RecoveryRequired");
-        if (((b = v.claim.quantityRoll) == null ? void 0 : b.quantity) === 0 || (o.received ? o.received(y, v, v.claim) : ((w = y.items.get(v.claim.itemId)) == null ? void 0 : w.getFlag(e.moduleId, "claim")) === v.claim.id)) {
-          await ((S = o.removeSource) == null ? void 0 : S.call(o, n, v, v.claim));
-          const T = $(r);
-          T.entries.find((O) => O.id === v.id).taken = !0, await e.save(n, T), r = T, await this.collected(n, y, v, o), await ((g = o.cleanup) == null ? void 0 : g.call(o, n, y, v, v.claim));
+        if (((b = w.claim.quantityRoll) == null ? void 0 : b.quantity) === 0 || (r.received ? r.received(y, w, w.claim) : ((p = y.items.get(w.claim.itemId)) == null ? void 0 : p.getFlag(t.moduleId, "claim")) === w.claim.id)) {
+          await ((I = r.removeSource) == null ? void 0 : I.call(r, n, w, w.claim));
+          const T = O(c);
+          T.entries.find(($) => $.id === w.id).taken = !0, await t.save(n, T), c = T, await this.collected(n, y, w, r), await ((g = r.cleanup) == null ? void 0 : g.call(r, n, y, w, w.claim));
         }
       }
-      if (s.action === "view") return e.summary(n, r);
-      if (s.action === "inspect") {
-        const v = r.entries.find((y) => y.id === s.entryId && !y.taken && !y.hidden);
-        if (!v || v.currency) throw new m("Unavailable");
-        return { item: o.preview ? o.preview(v) : $(v.data) };
+      if (i.action === "view") return t.summary(n, c);
+      if (i.action === "inspect") {
+        const w = c.entries.find((y) => y.id === i.entryId && !y.taken && !y.hidden);
+        if (!w || w.currency) throw new m("Unavailable");
+        return { item: r.preview ? r.preview(w) : O(w.data) };
       }
-      const l = e.destination ? await e.destination(s, i, n) : await e.actor(s.actorId);
-      De(l, i, o, n), a(l);
-      const u = r.entries.filter((v) => !v.taken && !v.hidden && (s.action === "all" || v.id === s.entryId));
-      if (!u.length && s.action === "take") return e.summary(n, r);
+      const l = t.destination ? await t.destination(i, e, n) : await t.actor(i.actorId);
+      Ge(l, e, r, n), a(l);
+      const u = c.entries.filter((w) => !w.taken && !w.hidden && (i.action === "all" || w.id === i.entryId));
+      if (!u.length && i.action === "take") return t.summary(n, c);
       const d = [];
-      for (const v of u)
+      for (const w of u)
         try {
-          a(l), De(l, i, o, n);
-          let y = r.entries.find((T) => T.id === v.id);
-          if (y.claim && (y.claim.userId !== i.id || ![l.id, N(l)].includes(y.claim.actorId)))
+          a(l), Ge(l, e, r, n);
+          let y = c.entries.find((T) => T.id === w.id);
+          if (y.claim && (y.claim.userId !== e.id || ![l.id, N(l)].includes(y.claim.actorId)))
             throw new m("RecoveryRequired");
           if (!y.claim) {
-            const T = await ((L = o.sourceClaim) == null ? void 0 : L.call(o, n, y));
+            const T = await ((C = r.sourceClaim) == null ? void 0 : C.call(r, n, y));
             a(l);
-            let O;
+            let $;
             if (y.formula) {
-              if (!T || !o.removeSource) throw new m("SourceChanged");
-              O = await e.rollQuantity(y.formula), a(l);
+              if (!T || !r.removeSource) throw new m("SourceChanged");
+              $ = await t.rollQuantity(y.formula), a(l);
             }
-            const j = $(r);
-            j.entries.find((z) => z.id === y.id).claim = {
-              id: e.id(),
-              itemId: e.id(),
-              userId: i.id,
+            const V = O(c);
+            V.entries.find((z) => z.id === y.id).claim = {
+              id: t.id(),
+              itemId: t.id(),
+              userId: e.id,
               actorId: N(l),
-              ...O ? { quantityRoll: O } : {},
+              ...$ ? { quantityRoll: $ } : {},
               ...T ? { source: T } : {}
-            }, await e.save(n, j), r = j, y = r.entries.find((z) => z.id === v.id);
+            }, await t.save(n, V), c = V, y = c.entries.find((z) => z.id === w.id);
           }
-          a(l), (C = o.validateSourcePlan) == null || C.call(o, n, y, y.claim), ((q = y.claim.quantityRoll) == null ? void 0 : q.quantity) !== 0 && await o.create(l, Pe(y), y.claim, async () => {
-            const T = y.wholeItem ? "itemAttempted" : "currencyAttempted", O = $(r);
-            O.entries.find((j) => j.id === y.id).claim[T] = !0, await e.save(n, O), r = O, y.claim[T] = !0;
-          }), await ((h = o.removeSource) == null ? void 0 : h.call(o, n, y, y.claim));
-          const A = $(r);
-          A.entries.find((T) => T.id === y.id).taken = !0, await e.save(n, A), r = A, await this.collected(n, l, y, o), await ((I = o.cleanup) == null ? void 0 : I.call(o, n, l, y, y.claim));
+          a(l), (L = r.validateSourcePlan) == null || L.call(r, n, y, y.claim), ((q = y.claim.quantityRoll) == null ? void 0 : q.quantity) !== 0 && await r.create(l, Ve(y), y.claim, async () => {
+            var V;
+            const T = ((V = y.currency) == null ? void 0 : V.storage) === "balance" ? "currencyAttempted" : "itemAttempted", $ = O(c);
+            $.entries.find((z) => z.id === y.id).claim[T] = !0, await t.save(n, $), c = $, y.claim[T] = !0;
+          }), await ((h = r.removeSource) == null ? void 0 : h.call(r, n, y, y.claim));
+          const A = O(c);
+          A.entries.find((T) => T.id === y.id).taken = !0, await t.save(n, A), c = A, await this.collected(n, l, y, r), await ((R = r.cleanup) == null ? void 0 : R.call(r, n, l, y, y.claim));
         } catch (y) {
-          if (d.push({ name: v.data.name, code: y.code ?? "TransferFailed" }), !e.authority()) break;
+          if (d.push({ name: w.data.name, code: y.code ?? "TransferFailed" }), !t.authority()) break;
         }
-      return { ...e.summary(n, r), failures: d };
+      return { ...t.summary(n, c), failures: d };
     });
   }
 }
-const ye = "inventoryRules";
-function Lt(t) {
-  var i, e, n, a, c;
-  const s = /^(?:Item\.[\w-]+|Compendium\.[\w-]+\.[\w-]+\.(?:Item\.)?[\w-]+)$/;
-  return (c = [(i = t._stats) == null ? void 0 : i.compendiumSource, (e = t._stats) == null ? void 0 : e.duplicateSource, (a = (n = t.flags) == null ? void 0 : n.core) == null ? void 0 : a.sourceId].find((o) => typeof o == "string" && s.test(o))) == null ? void 0 : c.replace(/^(Compendium\.[^.]+\.[^.]+)\.(?!Item\.)/, "$1.Item.");
+const ve = "inventoryRules";
+function Dt(s) {
+  var e, t, n, a, o;
+  const i = /^(?:Item\.[\w-]+|Compendium\.[\w-]+\.[\w-]+\.(?:Item\.)?[\w-]+)$/;
+  return (o = [(e = s._stats) == null ? void 0 : e.compendiumSource, (t = s._stats) == null ? void 0 : t.duplicateSource, (a = (n = s.flags) == null ? void 0 : n.core) == null ? void 0 : a.sourceId].find((r) => typeof r == "string" && i.test(r))) == null ? void 0 : o.replace(/^(Compendium\.[^.]+\.[^.]+)\.(?!Item\.)/, "$1.Item.");
 }
-function _(t, s, i) {
-  var e;
-  if (s.balance) {
-    const n = s.id;
-    return { token: n, actor: i != null && i.id ? `${i.id}:${n}` : void 0 };
+function j(s, i, e) {
+  var t;
+  if (i.balance) {
+    const n = i.id;
+    return { token: n, actor: e != null && e.id ? `${e.id}:${n}` : void 0 };
   }
   return {
-    token: s.id ? `${t.actorId ?? ((e = t.actor) == null ? void 0 : e.id) ?? ""}:${s.id}` : void 0,
-    actor: i != null && i.id && i.items.get(s.id) ? `${i.id}:${s.id}` : void 0,
-    global: Lt(s)
+    token: i.id ? `${s.actorId ?? ((t = s.actor) == null ? void 0 : t.id) ?? ""}:${i.id}` : void 0,
+    actor: e != null && e.id && e.items.get(i.id) ? `${e.id}:${i.id}` : void 0,
+    global: Dt(i)
   };
 }
-function W(t, s, i) {
-  var e;
+function k(s, i, e) {
+  var t;
   for (const n of ["token", "actor", "global"]) {
-    const a = t[n] && ((e = n === "token" ? s : i[n]) == null ? void 0 : e[t[n]]);
+    const a = s[n] && ((t = n === "token" ? i : e[n]) == null ? void 0 : t[s[n]]);
     if (a) return { rule: a, scope: n };
   }
   return { rule: { mode: "allow" }, scope: "default" };
 }
-function Se(t, s = "") {
-  if (t === "inherit") return null;
-  if (t === "allow" || t === "never") return { mode: t };
-  if (t !== "quantity" || typeof s != "string" || s.length > 40) throw new m("InvalidRule");
-  const i = s.trim().toLowerCase().replace(/\s+/g, "");
-  if (/^\d+$/.test(i) && Number.isSafeInteger(Number(i))) return { mode: t, quantity: String(Number(i)) };
-  const e = /^(\d{0,3})d([1-9]\d{0,4})(?:[+-]\d{1,6})?$/.exec(i);
-  if (e && (e[1] === "" || Number(e[1]) > 0)) return { mode: t, quantity: e[1] ? i : `1${i}` };
+function Ce(s, i = "") {
+  if (s === "inherit") return null;
+  if (s === "allow" || s === "never") return { mode: s };
+  if (s !== "quantity" || typeof i != "string" || i.length > 40) throw new m("InvalidRule");
+  const e = i.trim().toLowerCase().replace(/\s+/g, "");
+  if (/^\d+$/.test(e) && Number.isSafeInteger(Number(e))) return { mode: s, quantity: String(Number(e)) };
+  const t = /^(\d{0,3})d([1-9]\d{0,4})(?:[+-]\d{1,6})?$/.exec(e);
+  if (t && (t[1] === "" || Number(t[1]) > 0)) return { mode: s, quantity: t[1] ? e : `1${e}` };
   throw new m("InvalidRule");
 }
-async function Ct(t, s, i) {
-  if (t.mode === "never") return 0;
-  if (t.mode === "allow") return s;
-  const { quantity: e } = Se(t.mode, t.quantity), n = /^\d+$/.test(e) ? Number(e) : await i(e);
+async function Pt(s, i, e) {
+  if (s.mode === "never") return 0;
+  if (s.mode === "allow") return i;
+  const { quantity: t } = Ce(s.mode, s.quantity), n = /^\d+$/.test(t) ? Number(t) : await e(t);
   if (!Number.isSafeInteger(n)) throw new m("InvalidRule");
-  return Math.min(s, Math.max(0, n));
+  return Math.min(i, Math.max(0, n));
 }
-const Xe = (t) => (t == null ? void 0 : t.mode) === "quantity" && !/^\d+$/.test(t.quantity);
-function Ue(t, s, i) {
-  const e = { ...t };
-  for (const n of s)
-    i ? e[n] = i : delete e[n];
-  return e;
+const it = (s) => (s == null ? void 0 : s.mode) === "quantity" && !/^\d+$/.test(s.quantity);
+function je(s, i, e) {
+  const t = { ...s };
+  for (const n of i)
+    e ? t[n] = e : delete t[n];
+  return t;
 }
-function Ae() {
-  return game.users.contents.filter((t) => {
-    var s;
-    return t.active && t.isGM && ((s = t.getFlag) == null ? void 0 : s.call(t, f, "transportVersion")) === he;
-  }).sort((t, s) => t.id.localeCompare(s.id))[0];
+function Ee() {
+  return game.users.contents.filter((s) => {
+    var i;
+    return s.active && s.isGM && ((i = s.getFlag) == null ? void 0 : i.call(s, f, "transportVersion")) === ye;
+  }).sort((s, i) => s.id.localeCompare(i.id))[0];
 }
-const E = () => {
-  var t;
-  return ((t = Ae()) == null ? void 0 : t.id) === game.user.id;
-}, Ye = "lootRange", Ze = 15;
-function He() {
-  const t = game.settings.get(f, Ye);
-  return Number.isFinite(t) ? Math.max(0, t) : Ze;
+const D = () => {
+  var s;
+  return ((s = Ee()) == null ? void 0 : s.id) === game.user.id;
+}, nt = "lootRange", at = 15;
+function Ne() {
+  const s = game.settings.get(f, nt);
+  return Number.isFinite(s) ? Math.max(0, s) : at;
 }
-function qt(t, s, i) {
-  var e, n, a;
-  return ((e = t.getCenterPoint) == null ? void 0 : e.call(t, i)) ?? ((a = (n = t.object) == null ? void 0 : n.getCenterPoint) == null ? void 0 : a.call(n, i)) ?? {
-    x: i.x + t.width * (s.sizeX ?? s.size) / 2,
-    y: i.y + t.height * (s.sizeY ?? s.size) / 2
+function Ut(s, i, e) {
+  var t, n, a;
+  return ((t = s.getCenterPoint) == null ? void 0 : t.call(s, e)) ?? ((a = (n = s.object) == null ? void 0 : n.getCenterPoint) == null ? void 0 : a.call(n, e)) ?? {
+    x: e.x + s.width * (i.sizeX ?? i.size) / 2,
+    y: e.y + s.height * (i.sizeY ?? i.size) / 2
   };
 }
-function Ge(t, s) {
-  var c;
-  const { x: i, y: e } = t._source ?? t, n = { x: i, y: e };
-  if (s.isSquare && s.getOffsetRange) {
-    const o = t.width * s.size, r = t.height * s.size, [l, u, d, p] = s.getOffsetRange({ ...n, width: o, height: r }), b = [];
-    for (let w = l; w < d; w++)
-      for (let S = u; S < p; S++) b.push(s.getCenterPoint({ i: w, j: S }));
+function ze(s, i) {
+  var o;
+  const { x: e, y: t } = s._source ?? s, n = { x: e, y: t };
+  if (i.isSquare && i.getOffsetRange) {
+    const r = s.width * i.size, c = s.height * i.size, [l, u, d, v] = i.getOffsetRange({ ...n, width: r, height: c }), b = [];
+    for (let p = l; p < d; p++)
+      for (let I = u; I < v; I++) b.push(i.getCenterPoint({ i: p, j: I }));
     if (b.length) return b;
   }
-  const a = (c = t.getOccupiedGridSpaceOffsets) == null ? void 0 : c.call(t, { ...n, level: null });
-  return a != null && a.length ? a.map(({ i: o, j: r }) => s.getCenterPoint({ i: o, j: r })) : [qt(t, s, n)];
+  const a = (o = s.getOccupiedGridSpaceOffsets) == null ? void 0 : o.call(s, { ...n, level: null });
+  return a != null && a.length ? a.map(({ i: r, j: c }) => i.getCenterPoint({ i: r, j: c })) : [Ut(s, i, n)];
 }
-function Tt(t, s, i, e, n) {
+function Gt(s, i, e, t, n) {
   var u;
-  const a = t.parent, c = a == null ? void 0 : a.grid;
-  if (!(c != null && c.measurePath)) return !1;
-  const o = (u = c.units) == null ? void 0 : u.trim().toLowerCase().replace(/\.$/, ""), r = /^(m|meters?|metres?)$/.test(o ?? "") ? e * 0.3048 : /^(yd|yards?)$/.test(o ?? "") ? e / 3 : e, l = Ge(t, c);
+  const a = s.parent, o = a == null ? void 0 : a.grid;
+  if (!(o != null && o.measurePath)) return !1;
+  const r = (u = o.units) == null ? void 0 : u.trim().toLowerCase().replace(/\.$/, ""), c = /^(m|meters?|metres?)$/.test(r ?? "") ? t * 0.3048 : /^(yd|yards?)$/.test(r ?? "") ? t / 3 : t, l = ze(s, o);
   return Array.from(a.tokens ?? []).some((d) => {
-    const p = d.actor;
-    return d.id === t.id || d.hidden || !J(p, s, i, t) || n && N(p) !== N(n) ? !1 : Ge(d, c).some(({ x: b, y: w }) => l.some((S) => c.measurePath([{ x: b, y: w }, { x: S.x, y: S.y }]).distance <= r + 1e-8));
+    const v = d.actor;
+    return d.id === s.id || d.hidden || !J(v, i, e, s) || n && N(v) !== N(n) ? !1 : ze(d, o).some(({ x: b, y: p }) => l.some((I) => o.measurePath([{ x: b, y: p }, { x: I.x, y: I.y }]).distance <= c + 1e-8));
   });
 }
-function Mt(t, s) {
-  var a, c;
-  const i = t.parent;
-  if (((a = canvas.scene) == null ? void 0 : a.id) !== i.id) return !1;
-  if (!i.tokenVision) return !0;
-  const e = t.object;
-  if (!e) return !1;
+function _t(s, i) {
+  var a, o;
+  const e = s.parent;
+  if (((a = canvas.scene) == null ? void 0 : a.id) !== e.id) return !1;
+  if (!e.tokenVision) return !0;
+  const t = s.object;
+  if (!t) return !1;
   const n = globalThis.CONFIG;
-  return (c = t.hasStatusEffect) != null && c.call(t, n.specialStatusEffects.INVISIBLE) ? !1 : canvas.tokens.placeables.some((o) => {
-    var l, u, d, p, b, w, S, g, L, C, q, h, I, v;
-    if (o.document.hidden || !((l = o.document.sight) != null && l.enabled) || !((u = o.actor) != null && u.testUserPermission(s, "OWNER")) || (p = (d = o.document).hasStatusEffect) != null && p.call(d, n.specialStatusEffects.BLIND)) return !1;
-    let r;
+  return (o = s.hasStatusEffect) != null && o.call(s, n.specialStatusEffects.INVISIBLE) ? !1 : canvas.tokens.placeables.some((r) => {
+    var l, u, d, v, b, p, I, g, C, L, q, h, R, w;
+    if (r.document.hidden || !((l = r.document.sight) != null && l.enabled) || !((u = r.actor) != null && u.testUserPermission(i, "OWNER")) || (v = (d = r.document).hasStatusEffect) != null && v.call(d, n.specialStatusEffects.BLIND)) return !1;
+    let c;
     try {
-      const y = o.document.sight, A = ((w = (b = o.document).getVisionOrigin) == null ? void 0 : w.call(b)) ?? { ...o.center, elevation: o.document.elevation };
-      if (r = new n.Canvas.visionSourceClass({ object: o, sourceId: `hololoot-${s.id}-${o.id}` }), r.initialize({
+      const y = r.document.sight, A = ((p = (b = r.document).getVisionOrigin) == null ? void 0 : p.call(b)) ?? { ...r.center, elevation: r.document.elevation };
+      if (c = new n.Canvas.visionSourceClass({ object: r, sourceId: `hololoot-${i.id}-${r.id}` }), c.initialize({
         x: A.x,
         y: A.y,
         elevation: A.elevation,
-        ...o.document.level != null ? { level: o.document.level } : {},
-        rotation: o.document.rotation,
-        radius: o.sightRange,
-        lightRadius: o.lightPerceptionRange ?? canvas.dimensions.maxR,
-        externalRadius: o.externalRadius,
+        ...r.document.level != null ? { level: r.document.level } : {},
+        rotation: r.document.rotation,
+        radius: r.sightRange,
+        lightRadius: r.lightPerceptionRange ?? canvas.dimensions.maxR,
+        externalRadius: r.externalRadius,
         angle: y.angle,
         visionMode: y.visionMode,
         color: y.color,
@@ -666,594 +885,598 @@ function Mt(t, s) {
         saturation: y.saturation,
         brightness: y.brightness,
         attenuation: y.attenuation
-      }), r.isBlinded || !((S = r.los) != null && S.contains(e.center.x, e.center.y))) return !1;
-      if ((g = r.shape) != null && g.contains(e.center.x, e.center.y)) return !0;
-      const T = (L = canvas.environment) == null ? void 0 : L.globalLightSource;
-      return (T ? T.active && ((C = T.shape) == null ? void 0 : C.contains(e.center.x, e.center.y)) : i.globalLight && (i.globalLightThreshold == null || i.darkness <= i.globalLightThreshold)) && ((q = r.light) != null && q.contains(e.center.x, e.center.y)) ? !0 : !!((h = r.light) != null && h.contains(e.center.x, e.center.y)) && !!((v = (I = canvas.effects) == null ? void 0 : I.lightSources) != null && v.some((j) => {
+      }), c.isBlinded || !((I = c.los) != null && I.contains(t.center.x, t.center.y))) return !1;
+      if ((g = c.shape) != null && g.contains(t.center.x, t.center.y)) return !0;
+      const T = (C = canvas.environment) == null ? void 0 : C.globalLightSource;
+      return (T ? T.active && ((L = T.shape) == null ? void 0 : L.contains(t.center.x, t.center.y)) : e.globalLight && (e.globalLightThreshold == null || e.darkness <= e.globalLightThreshold)) && ((q = c.light) != null && q.contains(t.center.x, t.center.y)) ? !0 : !!((h = c.light) != null && h.contains(t.center.x, t.center.y)) && !!((w = (R = canvas.effects) == null ? void 0 : R.lightSources) != null && w.some((V) => {
         var z;
-        return j.active && ((z = j.shape) == null ? void 0 : z.contains(e.center.x, e.center.y));
+        return V.active && ((z = V.shape) == null ? void 0 : z.contains(t.center.x, t.center.y));
       }));
     } catch {
       return !1;
     } finally {
-      r == null || r.destroy();
+      c == null || c.destroy();
     }
   });
 }
-function Ft(t) {
-  const s = game.settings.get(f, "zeroHP"), i = t ? He() : 0;
+function Vt(s) {
+  var t, n, a;
+  const i = game.settings.get(f, "zeroHP"), e = s ? Ne() : 0;
   return {
     combats: game.combats.contents,
-    automatic: s,
-    zeroHP: s,
-    manual: !!(t != null && t.manual),
-    visible: Mt,
-    inRange: i > 0 ? (e, n, a) => Tt(e, n, t, i, a) : void 0
+    automatic: i,
+    zeroHP: i,
+    manual: !!(s != null && s.manual),
+    visible: _t,
+    sourceActor: (t = s == null ? void 0 : s.sourceActor) == null ? void 0 : t.bind(s),
+    hitPoints: (n = s == null ? void 0 : s.hitPoints) == null ? void 0 : n.bind(s),
+    defeated: (a = s == null ? void 0 : s.defeated) == null ? void 0 : a.bind(s),
+    inRange: e > 0 ? (o, r, c) => Gt(o, r, s, e, c) : void 0
   };
 }
-const xt = new be(), Ie = (t) => game.journal.find((s) => s.getFlag(f, "tokenUuid") === t.uuid && s.getFlag(f, "kind") === "snapshot"), ne = () => game.settings.get(f, ye) ?? {}, ae = (t) => {
-  var s;
-  return (s = game.actors) == null ? void 0 : s.get(t.actorId);
-}, et = async (t) => {
-  var i, e;
-  const s = ((e = (i = globalThis.foundry) == null ? void 0 : i.dice) == null ? void 0 : e.Roll) ?? globalThis.Roll;
-  return new s(t).evaluate({ allowInteractive: !1 });
-}, oe = (t, s) => {
-  var i, e;
-  return ((e = (i = t.actor) == null ? void 0 : i.items) == null ? void 0 : e.filter((n) => s.eligible(n))) ?? [];
-}, pe = (t, s) => {
+const jt = new de(), Le = (s) => game.journal.find((i) => i.getFlag(f, "tokenUuid") === s.uuid && i.getFlag(f, "kind") === "snapshot"), re = () => game.settings.get(f, ve) ?? {}, oe = (s) => {
   var i;
-  return (((i = s.currencyEntries) == null ? void 0 : i.call(s, t.actor)) ?? []).map((e) => ({
-    ...e.data,
-    id: `currency:${e.currency.unit}`,
-    balance: e
+  return (i = game.actors) == null ? void 0 : i.get(s.actorId);
+}, rt = async (s) => {
+  var e, t;
+  const i = ((t = (e = globalThis.foundry) == null ? void 0 : e.dice) == null ? void 0 : t.Roll) ?? globalThis.Roll;
+  return new i(s).evaluate({ allowInteractive: !1 });
+}, ce = (s, i) => {
+  var e, t;
+  return ((t = (e = s.actor) == null ? void 0 : e.items) == null ? void 0 : t.filter((n) => i.eligible(n))) ?? [];
+}, be = (s, i) => {
+  var e;
+  return (((e = i.currencyEntries) == null ? void 0 : e.call(i, s.actor)) ?? []).map((t) => ({
+    ...t.data,
+    id: `currency:${t.currency.unit}`,
+    balance: t
   }));
-}, Te = (t) => Y(t).source === "custom", we = (t) => JSON.parse((t == null ? void 0 : t.getFlag(f, "rules")) ?? "{}"), G = (t) => `flags.${f}.${t}`, ve = ({ id: t, hidden: s }) => ({ id: t, taken: !1, ...s ? { hidden: !0 } : {} }), tt = (t) => t.mode === "quantity" ? t.quantity : t.mode, k = (t, s) => t.setFlag(f, "state", {
-  ...s,
-  entries: s.entries.map((i) => {
+}, Me = (s) => Z(s).source === "custom", Se = (s) => JSON.parse((s == null ? void 0 : s.getFlag(f, "rules")) ?? "{}"), _ = (s) => `flags.${f}.${s}`, Ie = ({ id: s, hidden: i }) => ({ id: s, taken: !1, ...i ? { hidden: !0 } : {} }), ot = (s) => s.mode === "quantity" ? s.quantity : s.mode, X = (s, i) => s.setFlag(f, "state", {
+  ...i,
+  entries: i.entries.map((e) => {
     var a;
-    if (!((a = i.claim) != null && a.quantityRoll)) return i;
-    const { quantityRoll: e, ...n } = i.claim;
-    return { ...i, claim: n };
+    if (!((a = e.claim) != null && a.quantityRoll)) return e;
+    const { quantityRoll: t, ...n } = e.claim;
+    return { ...e, claim: n };
   })
-}), it = (t, s, i) => {
-  var e, n;
-  return Xe(i) && s.sourceClaim && s.removeSource && !t.balance && !((n = (e = s.entryMetadata) == null ? void 0 : e.call(s, t)) != null && n.currency);
+}), ct = (s, i, e) => {
+  var t, n, a;
+  return it(e) && ((t = s.system) == null ? void 0 : t.quantity) != null && i.sourceClaim && i.removeSource && !s.balance && !((a = (n = i.entryMetadata) == null ? void 0 : n.call(i, s)) != null && a.currency);
 };
-async function At(t) {
-  const s = Se("quantity", t);
-  if (!Xe(s)) throw new m("InvalidRule");
-  const i = await et(s.quantity);
-  if (!Number.isSafeInteger(i.total)) throw new m("InvalidRule");
-  return { quantity: Math.max(0, i.total), roll: i.toJSON() };
+async function zt(s) {
+  const i = Ce("quantity", s);
+  if (!it(i)) throw new m("InvalidRule");
+  const e = await rt(i.quantity);
+  if (!Number.isSafeInteger(e.total)) throw new m("InvalidRule");
+  return { quantity: Math.max(0, e.total), roll: e.toJSON() };
 }
-function st(t, s, i) {
-  const e = Z(i), n = t.filter((a) => Z(s.snapshot(a)) === e);
+function ut(s, i, e) {
+  const t = ee(e), n = s.filter((a) => ee(i.snapshot(a)) === t);
   return n.length === 1 && n[0].id ? n[0] : void 0;
 }
-async function te(t, s, i, e, { original: n, previousRoll: a, legacyRollCeiling: c, onRoll: o } = {}) {
-  var S;
-  const r = t.balance ? structuredClone(t.balance.data) : s.snapshot(t);
-  if (s.manual) return { id: foundry.utils.randomID(), data: r, wholeItem: !0, source: { itemId: t.id, ruleKey: i } };
-  const l = n ?? r.system.quantity, u = Math.min(l, r.system.quantity), d = a === void 0 && c === void 0 && it(t, s, e) ? e.quantity : void 0;
-  let p, b;
-  const w = d ? u : await Ct(e, u, async (g) => {
-    if (a === void 0 && c !== void 0)
-      return b = c, b;
+async function ie(s, i, e, t, { original: n, previousRoll: a, legacyRollCeiling: o, onRoll: r } = {}) {
+  var I;
+  const c = s.balance ? structuredClone(s.balance.data) : i.snapshot(s);
+  if (i.manual) return { id: foundry.utils.randomID(), data: c, wholeItem: !0, source: { itemId: s.id, ruleKey: e } };
+  const l = n ?? H(c), u = Math.min(l, H(c)), d = a === void 0 && o === void 0 && ct(s, i, t) ? t.quantity : void 0;
+  let v, b;
+  const p = d ? u : await Pt(t, u, async (g) => {
+    if (a === void 0 && o !== void 0)
+      return b = o, b;
     if (a !== void 0)
-      p = a;
+      v = a;
     else {
-      const L = await et(g);
-      p = L.total, o == null || o(L);
+      const C = await rt(g);
+      v = C.total, r == null || r(C);
     }
-    return p;
+    return v;
   });
-  return r.system.quantity = w, {
+  return Xe(c, p), {
     id: foundry.utils.randomID(),
-    data: r,
+    data: c,
     originalQuantity: l,
-    limit: tt(e),
-    hidden: w === 0,
+    limit: ot(t),
+    hidden: p === 0,
     ...d ? { formula: d } : {},
-    ...p === void 0 ? {} : { rolledQuantity: p },
+    ...v === void 0 ? {} : { rolledQuantity: v },
     ...b === void 0 ? {} : { rollCeiling: b },
-    ...t.balance ? { currency: { ...t.balance.currency, amount: w } } : { ...t.id ? { source: { itemId: t.id, ruleKey: i } } : {}, ...(S = s.entryMetadata) == null ? void 0 : S.call(s, t, w) }
+    ...s.balance ? { currency: { ...s.balance.currency, amount: p } } : { ...s.id ? { source: { itemId: s.id, ruleKey: e } } : {}, ...(I = i.entryMetadata) == null ? void 0 : I.call(i, s, p) }
   };
 }
-function nt(t, s) {
-  var u, d, p;
-  const i = Ie(t), e = i == null ? void 0 : i.getFlag(f, "state"), n = i == null ? void 0 : i.getFlag(f, "items"), a = new Map(Array.isArray(n) ? n.map((b) => [b.id, b]) : []), c = /* @__PURE__ */ new Map(), o = /* @__PURE__ */ new Map(), r = [...oe(t, s), ...pe(t, s)], l = s.snapshot && !Te(t) && !((u = t.getFlag(f, "config")) != null && u.customId);
-  for (const b of (e == null ? void 0 : e.entries) ?? []) {
-    const w = a.get(b.id);
-    if (((d = w == null ? void 0 : w.currency) == null ? void 0 : d.storage) === "balance")
-      c.set(`currency:${w.currency.unit}`, { ...w, ...b });
-    else if ((p = w == null ? void 0 : w.source) != null && p.ruleKey)
-      c.set(w.source.ruleKey, { ...w, ...b });
-    else if (l && (w != null && w.data) && !w.currency && !w.source) {
-      const S = st(r.filter((L) => !L.balance), s, w.data);
-      if (!S) continue;
-      const g = _(t, S).token;
-      o.set(g, o.has(g) ? null : { ...w, ...b });
+function lt(s, i) {
+  var u, d, v;
+  const e = Le(s), t = e == null ? void 0 : e.getFlag(f, "state"), n = e == null ? void 0 : e.getFlag(f, "items"), a = new Map(Array.isArray(n) ? n.map((b) => [b.id, b]) : []), o = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), c = [...ce(s, i), ...be(s, i)], l = i.snapshot && !Me(s) && !((u = s.getFlag(f, "config")) != null && u.customId);
+  for (const b of (t == null ? void 0 : t.entries) ?? []) {
+    const p = a.get(b.id);
+    if (((d = p == null ? void 0 : p.currency) == null ? void 0 : d.storage) === "balance")
+      o.set(`currency:${p.currency.unit}`, { ...p, ...b });
+    else if ((v = p == null ? void 0 : p.source) != null && v.ruleKey)
+      o.set(p.source.ruleKey, { ...p, ...b });
+    else if (l && (p != null && p.data) && !p.currency && !p.source) {
+      const I = ut(c.filter((C) => !C.balance), i, p.data);
+      if (!I) continue;
+      const g = j(s, I).token;
+      r.set(g, r.has(g) ? null : { ...p, ...b });
     }
   }
-  for (const [b, w] of o) w && !c.has(b) && c.set(b, w);
+  for (const [b, p] of r) p && !o.has(b) && o.set(b, p);
   return {
-    vault: i,
-    state: e,
+    vault: e,
+    state: t,
     byId: a,
-    byKey: c,
-    items: r,
-    corpse: we(i),
-    shared: ne(),
-    locked: Te(t) || !e && (t.getFlag(f, "state") || i && !i.getFlag(f, "draft"))
+    byKey: o,
+    items: c,
+    corpse: Se(e),
+    shared: re(),
+    locked: Me(s) || !t && (s.getFlag(f, "state") || e && !e.getFlag(f, "draft"))
   };
 }
-function Ht(t, s) {
-  const { state: i, byKey: e, items: n, corpse: a, shared: c, locked: o } = nt(t, s), r = ae(t);
+function Bt(s, i) {
+  const { state: e, byKey: t, items: n, corpse: a, shared: o, locked: r } = lt(s, i), c = oe(s);
   return n.map((l) => {
-    var b, w;
-    const u = _(t, l, r), d = e.get(u.token), p = o ? "RuleLocked" : !u.token || i && !d ? "RuleMissingSnapshot" : d != null && d.taken ? "RuleCollected" : d != null && d.claim ? "RuleReserved" : "";
+    var b, p;
+    const u = j(s, l, c), d = t.get(u.token), v = r ? "RuleLocked" : !u.token || e && !d ? "RuleMissingSnapshot" : d != null && d.taken ? "RuleCollected" : d != null && d.claim ? "RuleReserved" : "";
     return {
       id: l.id,
       name: l.name,
       img: l.img,
-      quantity: l.system.quantity,
+      quantity: H(l),
       entry: d,
-      effective: W(u, a, c),
-      overrides: { token: a[u.token], actor: (b = c.actor) == null ? void 0 : b[u.actor], global: (w = c.global) == null ? void 0 : w[u.global] },
-      canToken: !p,
-      tokenUnavailable: p,
+      effective: k(u, a, o),
+      overrides: { token: a[u.token], actor: (b = o.actor) == null ? void 0 : b[u.actor], global: (p = o.global) == null ? void 0 : p[u.global] },
+      canToken: !v,
+      tokenUnavailable: v,
       canActor: !!u.actor,
       canGlobal: !!u.global
     };
   });
 }
-async function $t(t, s, i, e, n) {
-  if (!E()) throw new m("RuleGM");
-  const { vault: a, state: c, byId: o, byKey: r, items: l, corpse: u, shared: d, locked: p } = nt(t, s), b = ae(t), w = l.filter((h) => e.includes(h.id)).map((h) => ({ item: h, key: _(t, h, b)[i] }));
-  if (!e.length || w.length !== e.length || w.some(({ key: h }) => !h)) throw new m("RuleScopeUnavailable");
-  const S = w.map(({ key: h }) => h);
-  if (i === "actor" || i === "global")
-    return xt.run(ye, async () => {
-      if (!E()) throw new m("RuleGM");
-      const h = ne(), I = { ...h, [i]: Ue(h[i], S, i === "global" && (n == null ? void 0 : n.mode) === "allow" ? null : n) };
-      await game.settings.set(f, ye, I);
+async function Kt(s, i, e, t, n) {
+  if (!D()) throw new m("RuleGM");
+  const { vault: a, state: o, byId: r, byKey: c, items: l, corpse: u, shared: d, locked: v } = lt(s, i), b = oe(s), p = l.filter((h) => t.includes(h.id)).map((h) => ({ item: h, key: j(s, h, b)[e] }));
+  if (!t.length || p.length !== t.length || p.some(({ key: h }) => !h)) throw new m("RuleScopeUnavailable");
+  const I = p.map(({ key: h }) => h);
+  if (e === "actor" || e === "global")
+    return jt.run(ve, async () => {
+      if (!D()) throw new m("RuleGM");
+      const h = re(), R = { ...h, [e]: je(h[e], I, e === "global" && (n == null ? void 0 : n.mode) === "allow" ? null : n) };
+      await game.settings.set(f, ve, R);
     });
-  if (i !== "token" || p) throw new m("RuleScopeUnavailable");
-  if (c && S.some((h) => {
-    const I = r.get(h);
-    return !I || I.taken || I.claim;
+  if (e !== "token" || v) throw new m("RuleScopeUnavailable");
+  if (o && I.some((h) => {
+    const R = c.get(h);
+    return !R || R.taken || R.claim;
   })) throw new m("RuleScopeUnavailable");
-  const g = Ue(u, S, n);
+  const g = je(u, I, n);
   if (!a) {
-    Object.keys(g).length && await at(t, [], { rules: JSON.stringify(g), draft: !0 });
+    Object.keys(g).length && await dt(s, [], { rules: JSON.stringify(g), draft: !0 });
     return;
   }
-  if (!c) {
+  if (!o) {
     await a.setFlag(f, "rules", JSON.stringify(g));
     return;
   }
-  const L = /* @__PURE__ */ new Map(), C = [];
-  for (const { item: h, key: I } of w) {
-    const v = r.get(I), y = W(_(t, h, b), g, d).rule;
-    if (v.limit !== tt(y) || !v.formula && it(h, s, y)) {
+  const C = /* @__PURE__ */ new Map(), L = [];
+  for (const { item: h, key: R } of p) {
+    const w = c.get(R), y = k(j(s, h, b), g, d).rule;
+    if (w.limit !== ot(y) || !w.formula && ct(h, i, y)) {
       let A;
-      const T = await te(h, s, I, y, {
-        original: v.originalQuantity ?? v.data.system.quantity,
-        onRoll: (O) => {
-          A = O;
+      const T = await ie(h, i, R, y, {
+        original: w.originalQuantity ?? H(w.data),
+        onRoll: ($) => {
+          A = $;
         }
       });
-      L.set(v.id, T), A && C.push({ roll: A, itemName: h.name, quantity: T.data.system.quantity });
+      C.set(w.id, T), A && L.push({ roll: A, itemName: h.name, quantity: H(T.data) });
     }
   }
-  if (!E()) throw new m("RuleGM");
+  if (!D()) throw new m("RuleGM");
   const q = {
-    ...c,
+    ...o,
     vaultId: a.id,
-    entries: c.entries.map((h) => L.has(h.id) ? ve(L.get(h.id)) : h)
+    entries: o.entries.map((h) => C.has(h.id) ? Ie(C.get(h.id)) : h)
   };
   return await a.update({
-    [G("rules")]: JSON.stringify(g),
-    [G("state")]: q,
-    [G("items")]: Array.from(o.values(), (h) => L.get(h.id) ?? h)
-  }), await k(t, q), C;
+    [_("rules")]: JSON.stringify(g),
+    [_("state")]: q,
+    [_("items")]: Array.from(r.values(), (h) => C.get(h.id) ?? h)
+  }), await X(s, q), L;
 }
-async function at(t, s, i) {
-  var a, c;
-  const n = await (((c = (a = globalThis.foundry) == null ? void 0 : a.documents) == null ? void 0 : c.JournalEntry) ?? globalThis.JournalEntry).create({
-    name: `HoloLoot · ${t.name}`,
+async function dt(s, i, e) {
+  var a, o;
+  const n = await (((o = (a = globalThis.foundry) == null ? void 0 : a.documents) == null ? void 0 : o.JournalEntry) ?? globalThis.JournalEntry).create({
+    name: `HoloLoot · ${s.name}`,
     ownership: { default: 0 },
-    flags: { [f]: { tokenUuid: t.uuid, kind: "snapshot", items: structuredClone(s), ...i } }
+    flags: { [f]: { tokenUuid: s.uuid, kind: "snapshot", items: structuredClone(i), ...e } }
   });
   if (!n) throw new m("PersistenceFailed");
   return n.id;
 }
-function fe(t, s, i) {
-  const e = game.journal.get(t);
-  if (!e || e.getFlag(f, "tokenUuid") !== s.uuid || e.getFlag(f, "kind") !== i) throw new m("RecoveryRequired");
-  const n = e.getFlag(f, "items");
+function ge(s, i, e) {
+  const t = game.journal.get(s);
+  if (!t || t.getFlag(f, "tokenUuid") !== i.uuid || t.getFlag(f, "kind") !== e) throw new m("RecoveryRequired");
+  const n = t.getFlag(f, "items");
   if (!Array.isArray(n)) throw new m("RecoveryRequired");
   return structuredClone(n);
 }
-function ot(t, s) {
-  const i = Y(t);
-  return !!(t.actor && (s.manual || i.source !== "custom" && !i.customId) && s.sourceClaim && s.removeSource);
+function ft(s, i) {
+  const e = Z(s);
+  return !!(s.actor && (i.manual || e.source !== "custom" && !e.customId) && i.sourceClaim && i.removeSource);
 }
-function Et(t, s) {
-  var c;
-  const i = Ie(t), e = new Set((c = i == null ? void 0 : i.getFlag(f, "state")) == null ? void 0 : c.entries.filter((o) => !o.taken).map((o) => o.id)), n = i == null ? void 0 : i.getFlag(f, "items"), a = new Set((Array.isArray(n) ? n : []).filter((o) => o.wholeItem && e.has(o.id)).map((o) => {
-    var r;
-    return (r = o.source) == null ? void 0 : r.ruleKey;
+function Wt(s, i) {
+  var o;
+  const e = Le(s), t = new Set((o = e == null ? void 0 : e.getFlag(f, "state")) == null ? void 0 : o.entries.filter((r) => !r.taken).map((r) => r.id)), n = e == null ? void 0 : e.getFlag(f, "items"), a = new Set((Array.isArray(n) ? n : []).filter((r) => r.wholeItem && t.has(r.id)).map((r) => {
+    var c;
+    return (c = r.source) == null ? void 0 : c.ruleKey;
   }));
-  return oe(t, s).map((o) => ({
-    id: o.id,
-    name: o.name,
-    img: o.img,
-    selected: a.has(_(t, o, null).token)
+  return ce(s, i).map((r) => ({
+    id: r.id,
+    name: r.name,
+    img: r.img,
+    selected: a.has(j(s, r, null).token)
   }));
 }
-async function Ot(t, s, i, e) {
-  if (!E()) throw new m("RuleGM");
-  if (!s.manual || !["enabled", "disabled"].includes(i)) throw new m("InvalidRequest");
-  await rt(t, s, { mode: i, ids: new Set(e) }), await t.setFlag(f, "config", { mode: i, source: "inventory" });
+async function Qt(s, i, e, t) {
+  if (!D()) throw new m("RuleGM");
+  if (!i.manual || !["enabled", "disabled"].includes(e)) throw new m("InvalidRequest");
+  await ht(s, i, { mode: e, ids: new Set(t) }), await s.setFlag(f, "config", { mode: e, source: "inventory" });
 }
-async function rt(t, s, i) {
-  var C, q;
-  if (!E()) throw new m("RuleGM");
-  if (!ot(t, s) || s.manual && !i) throw new m("RefreshUnsupported");
-  const e = Ie(t), n = e == null ? void 0 : e.getFlag(f, "state");
+async function ht(s, i, e) {
+  var L, q;
+  if (!D()) throw new m("RuleGM");
+  if (!ft(s, i) || i.manual && !e) throw new m("RefreshUnsupported");
+  const t = Le(s), n = t == null ? void 0 : t.getFlag(f, "state");
   if (!n) {
-    await $e(t, s, i);
+    await Oe(s, i, e);
     return;
   }
   if (n.version !== 1) throw new m("RecoveryRequired");
-  const a = n.entries.filter((h) => h.claim || h.taken), c = (h) => {
-    var I, v, y, A;
-    return ((v = (I = h.claim) == null ? void 0 : I.source) == null ? void 0 : v.itemId) || ((A = (y = h.claim) == null ? void 0 : y.source) == null ? void 0 : A.currency) && `currency:${h.claim.source.currency}`;
+  const a = n.entries.filter((h) => h.claim || h.taken), o = (h) => {
+    var R, w, y, A;
+    return ((w = (R = h.claim) == null ? void 0 : R.source) == null ? void 0 : w.itemId) || ((A = (y = h.claim) == null ? void 0 : y.source) == null ? void 0 : A.currency) && `currency:${h.claim.source.currency}`;
   };
-  if (a.length && t.actorLink || a.some((h) => !c(h)))
+  if (a.length && s.actorLink || a.some((h) => !o(h)))
     throw new m("RefreshUntracked");
-  const o = new Set(a.filter((h) => !h.taken).map(c)), r = fe(e.id, t, "snapshot"), l = new Map(r.map((h) => [h.id, h]));
+  const r = new Set(a.filter((h) => !h.taken).map(o)), c = ge(t.id, s, "snapshot"), l = new Map(c.map((h) => [h.id, h]));
   if (a.some((h) => !h.taken && !l.has(h.id))) throw new m("RecoveryRequired");
   const u = /* @__PURE__ */ new Map();
   for (const h of n.entries) {
-    const I = l.get(h.id), v = ((C = I == null ? void 0 : I.source) == null ? void 0 : C.ruleKey) || ((q = I == null ? void 0 : I.currency) == null ? void 0 : q.storage) === "balance" && `currency:${I.currency.unit}`;
-    v && u.set(v, { saved: I, taken: h.taken });
+    const R = l.get(h.id), w = ((L = R == null ? void 0 : R.source) == null ? void 0 : L.ruleKey) || ((q = R == null ? void 0 : R.currency) == null ? void 0 : q.storage) === "balance" && `currency:${R.currency.unit}`;
+    w && u.set(w, { saved: R, taken: h.taken });
   }
-  const d = (h, I) => (I && !I.taken && Z({ ...h, id: I.saved.id }) === Z(I.saved) && (h.id = I.saved.id), h), p = ae(t), b = we(e), w = ne(), S = [];
-  for (const h of [...oe(t, s), ...pe(t, s)]) {
-    if (o.has(h.id) || s.manual && !(i != null && i.ids.has(h.id))) continue;
-    const I = _(t, h, p), v = u.get(I.token), y = v == null ? void 0 : v.saved.limit, A = y === void 0 ? W(I, b, w).rule : Se(y === "allow" || y === "never" ? y : "quantity", y), T = v == null ? void 0 : v.saved.rolledQuantity, O = y === void 0 || v.saved.formula ? void 0 : v.saved.rollCeiling ?? v.saved.data.system.quantity;
-    S.push(d(await te(h, s, I.token, A, { previousRoll: T, legacyRollCeiling: O }), v));
+  const d = (h, R) => (R && !R.taken && ee({ ...h, id: R.saved.id }) === ee(R.saved) && (h.id = R.saved.id), h), v = oe(s), b = Se(t), p = re(), I = [];
+  for (const h of [...ce(s, i), ...be(s, i)]) {
+    if (r.has(h.id) || i.manual && !(e != null && e.ids.has(h.id))) continue;
+    const R = j(s, h, v), w = u.get(R.token), y = w == null ? void 0 : w.saved.limit, A = y === void 0 ? k(R, b, p).rule : Ce(y === "allow" || y === "never" ? y : "quantity", y), T = w == null ? void 0 : w.saved.rolledQuantity, $ = y === void 0 || w.saved.formula ? void 0 : w.saved.rollCeiling ?? H(w.saved.data);
+    I.push(d(await ie(h, i, R.token, A, { previousRoll: T, legacyRollCeiling: $ }), w));
   }
-  if (!E()) throw new m("RuleGM");
+  if (!D()) throw new m("RuleGM");
   const g = {
     ...n,
-    vaultId: e.id,
-    currencyReady: s.currencySnapshotVersion ?? !0,
-    entries: [...a, ...S.map(ve)]
-  }, L = a.flatMap((h) => l.has(h.id) ? [l.get(h.id)] : []);
-  await e.update({
-    [G("state")]: g,
-    [G("items")]: [...L, ...S],
-    ...i ? { [G("manualMode")]: i.mode } : {}
-  }), await k(t, g);
+    vaultId: t.id,
+    currencyReady: i.currencySnapshotVersion ?? !0,
+    entries: [...a, ...I.map(Ie)]
+  }, C = a.flatMap((h) => l.has(h.id) ? [l.get(h.id)] : []);
+  await t.update({
+    [_("state")]: g,
+    [_("items")]: [...C, ...I],
+    ...e ? { [_("manualMode")]: e.mode } : {}
+  }), await X(s, g);
 }
-async function $e(t, s, i) {
-  const e = Ie(t);
-  if (s.manual && !i && (e == null ? void 0 : e.getFlag(f, "manualMode")) !== "enabled") throw new m("Unavailable");
-  let n = e == null ? void 0 : e.getFlag(f, "state");
-  if (!n && (t.getFlag(f, "state") || e && !e.getFlag(f, "draft")))
+async function Oe(s, i, e) {
+  const t = Le(s);
+  if (i.manual && !e && (t == null ? void 0 : t.getFlag(f, "manualMode")) !== "enabled") throw new m("Unavailable");
+  let n = t == null ? void 0 : t.getFlag(f, "state");
+  if (!n && (s.getFlag(f, "state") || t && !t.getFlag(f, "draft")))
     throw new m("RecoveryRequired");
   if (!n) {
-    const r = Y(t), l = ne(), u = we(e), d = ae(t), p = [];
-    if (!s.manual && Te(t)) {
-      const S = r.customId ? fe(r.customId, t, "custom") : [];
-      p.push(...S.map((g) => ({ id: foundry.utils.randomID(), data: g })));
+    const c = Z(s), l = re(), u = Se(t), d = oe(s), v = [];
+    if (!i.manual && Me(s)) {
+      const I = c.customId ? ge(c.customId, s, "custom") : [];
+      v.push(...I.map((g) => ({ id: foundry.utils.randomID(), data: g })));
     } else
-      for (const S of oe(t, s)) {
-        if (s.manual && !(i != null && i.ids.has(S.id))) continue;
-        const g = _(t, S, d), { rule: L } = W(g, u, l);
-        p.push(await te(S, s, g.token, L));
+      for (const I of ce(s, i)) {
+        if (i.manual && !(e != null && e.ids.has(I.id))) continue;
+        const g = j(s, I, d), { rule: C } = k(g, u, l);
+        v.push(await ie(I, i, g.token, C));
       }
-    for (const S of pe(t, s)) {
-      const g = _(t, S, d);
-      p.push(await te(S, s, g.token, W(g, u, l).rule));
+    for (const I of be(s, i)) {
+      const g = j(s, I, d);
+      v.push(await ie(I, i, g.token, k(g, u, l).rule));
     }
-    const b = { version: 1, currencyReady: s.currencySnapshotVersion ?? !0, entries: p.map(ve) }, w = e ? e.id : await at(t, p, { state: b, ...i ? { manualMode: i.mode } : {} });
-    n = { ...b, vaultId: w }, e && await e.update({
-      [G("items")]: p,
-      [G("state")]: n,
-      [G("draft")]: !1,
-      ...i ? { [G("manualMode")]: i.mode } : {}
-    }), await k(t, n);
+    const b = { version: 1, currencyReady: i.currencySnapshotVersion ?? !0, entries: v.map(Ie) }, p = t ? t.id : await dt(s, v, { state: b, ...e ? { manualMode: e.mode } : {} });
+    n = { ...b, vaultId: p }, t && await t.update({
+      [_("items")]: v,
+      [_("state")]: n,
+      [_("draft")]: !1,
+      ...e ? { [_("manualMode")]: e.mode } : {}
+    }), await X(s, n);
   }
   if (n.version !== 1) throw new m("RecoveryRequired");
-  n = { ...n, vaultId: n.vaultId ?? (e == null ? void 0 : e.id) };
-  const a = s.currencySnapshotVersion ?? !0;
-  if ((!n.currencyReady || s.currencySnapshotVersion && n.currencyReady !== a) && s.currencyEntries) {
-    const r = e ?? game.journal.get(n.vaultId), l = r.getFlag(f, "items"), u = Array.isArray(l) ? structuredClone(l) : n.entries.every((p) => p.taken) ? [] : fe(n.vaultId, t, "snapshot"), d = [];
-    for (const p of pe(t, s)) {
-      const b = _(t, p, ae(t));
-      d.push(await te(p, s, b.token, W(b, we(r), ne()).rule));
+  n = { ...n, vaultId: n.vaultId ?? (t == null ? void 0 : t.id) };
+  const a = i.currencySnapshotVersion ?? !0;
+  if ((!n.currencyReady || i.currencySnapshotVersion && n.currencyReady !== a) && i.currencyEntries) {
+    const c = t ?? game.journal.get(n.vaultId), l = c.getFlag(f, "items"), u = Array.isArray(l) ? structuredClone(l) : n.entries.every((v) => v.taken) ? [] : ge(n.vaultId, s, "snapshot"), d = [];
+    for (const v of be(s, i)) {
+      const b = j(s, v, oe(s));
+      d.push(await ie(v, i, b.token, k(b, Se(c), re()).rule));
     }
-    n = { ...n, currencyReady: a, entries: [...n.entries, ...d.map(ve)] }, d.length ? await r.update({ [`flags.${f}.items`]: [...u, ...d], [`flags.${f}.state`]: n }) : await r.setFlag(f, "state", n), await k(t, n);
+    n = { ...n, currencyReady: a, entries: [...n.entries, ...d.map(Ie)] }, d.length ? await c.update({ [`flags.${f}.items`]: [...u, ...d], [`flags.${f}.state`]: n }) : await c.setFlag(f, "state", n), await X(s, n);
   }
-  const c = t.getFlag(f, "state");
-  if ((!c || s.currencySnapshotVersion && c.currencyReady !== n.currencyReady) && await k(t, n), n.entries.every((r) => r.taken)) return {
+  const o = s.getFlag(f, "state");
+  if ((!o || i.currencySnapshotVersion && o.currencyReady !== n.currencyReady) && await X(s, n), n.entries.every((c) => c.taken)) return {
     ...n,
-    entries: n.entries.map((r) => ({ ...r, data: null }))
+    entries: n.entries.map((c) => ({ ...c, data: null }))
   };
-  const o = fe(n.vaultId, t, "snapshot");
-  return { ...n, entries: n.entries.flatMap((r) => {
-    var S, g, L;
-    if (r.taken) return [{ ...r, data: null }];
-    const l = o.find((C) => C.id === r.id), u = l == null ? void 0 : l.data, d = s.id === "swade";
-    if (!u || !d && !!l.wholeItem != !!s.manual) throw new m("RecoveryRequired");
-    let p = l.source;
-    const b = d && (p != null && p.itemId) ? (S = t.actor) == null ? void 0 : S.items.get(p.itemId) : null, w = d && ((g = l.currency) == null ? void 0 : g.storage) !== "balance" && (!s.allowsStoredItem(u) || b && !s.allowsStoredItem(b));
-    if (w && !r.claim) return [];
-    if (!w && !p && !l.currency && !((L = t.getFlag(f, "config")) != null && L.customId) && s.snapshot) {
-      const C = st(oe(t, s), s, u);
-      C && (p = { itemId: C.id });
+  const r = ge(n.vaultId, s, "snapshot");
+  return { ...n, entries: n.entries.flatMap((c) => {
+    var p, I, g;
+    if (c.taken) return [{ ...c, data: null }];
+    const l = r.find((C) => C.id === c.id), u = l == null ? void 0 : l.data;
+    if (!u || !i.acceptsLegacyWholeItems && !!l.wholeItem != !!i.manual) throw new m("RecoveryRequired");
+    let d = l.source;
+    const v = i.allowsStoredItem && (d != null && d.itemId) ? (p = s.actor) == null ? void 0 : p.items.get(d.itemId) : null, b = i.allowsStoredItem && ((I = l.currency) == null ? void 0 : I.storage) !== "balance" && (!i.allowsStoredItem(u) || v && !i.allowsStoredItem(v));
+    if (b && !c.claim) return [];
+    if (!b && !d && !l.currency && !((g = s.getFlag(f, "config")) != null && g.customId) && i.snapshot) {
+      const C = ut(ce(s, i), i, u);
+      C && (d = { itemId: C.id });
     }
     return [{
-      ...r,
+      ...c,
       data: u,
-      ...w ? { hidden: !0 } : {},
+      ...b ? { hidden: !0 } : {},
       ...l.wholeItem ? { wholeItem: !0 } : {},
       ...l.formula ? { formula: l.formula } : {},
       ...l.currency ? { currency: l.currency } : {},
-      ...p ? { source: p } : {}
+      ...d ? { source: d } : {}
     }];
   }) };
 }
-async function Nt(t, s) {
-  const i = {
+async function Jt(s, i) {
+  const e = {
     version: 1,
-    ...s.currencyReady ? { currencyReady: s.currencyReady } : {},
-    vaultId: s.vaultId,
-    entries: s.entries.map(({ id: n, taken: a, claim: c, hidden: o }) => ({
+    ...i.currencyReady ? { currencyReady: i.currencyReady } : {},
+    vaultId: i.vaultId,
+    entries: i.entries.map(({ id: n, taken: a, claim: o, hidden: r }) => ({
       id: n,
       taken: !!a,
-      ...c ? { claim: c } : {},
-      ...o ? { hidden: o } : {}
+      ...o ? { claim: o } : {},
+      ...r ? { hidden: r } : {}
     }))
-  }, e = game.journal.get(s.vaultId);
-  if ((e == null ? void 0 : e.getFlag(f, "tokenUuid")) !== t.uuid) throw new m("RecoveryRequired");
-  await e.setFlag(f, "state", i), await k(t, i);
+  }, t = game.journal.get(i.vaultId);
+  if ((t == null ? void 0 : t.getFlag(f, "tokenUuid")) !== s.uuid) throw new m("RecoveryRequired");
+  await t.setFlag(f, "state", e), await X(s, e);
 }
-function Dt(t, s) {
+function kt(s, i) {
   return {
-    tokenUuid: t.uuid,
-    name: t.name,
-    img: t.texture.src,
-    entries: s.entries.filter((i) => !i.taken && !i.hidden).map((i) => {
-      var c, o, r, l, u, d, p, b, w, S, g, L, C, q, h, I, v;
-      const e = { ...i.data, system: i.data.system ?? {} }, n = e.system.identified === !1 || ((c = e.system.identification) == null ? void 0 : c.status) === "unidentified", a = n ? (o = e.system.unidentified) == null ? void 0 : o.description : typeof e.system.description == "string" ? e.system.description : (r = e.system.description) == null ? void 0 : r.value;
+    tokenUuid: s.uuid,
+    name: s.name,
+    img: s.texture.src,
+    entries: i.entries.filter((e) => !e.taken && !e.hidden).map((e) => {
+      var c, l, u, d, v, b, p, I, g, C, L, q, h, R, w, y, A, T, $;
+      const t = { ...e.data, system: e.data.system ?? {} }, n = t.system.identified === !1 || ((c = t.system.identification) == null ? void 0 : c.status) === "unidentified", a = n ? (l = t.system.unidentified) == null ? void 0 : l.description : typeof t.system.description == "string" ? t.system.description : (u = t.system.description) == null ? void 0 : u.value, o = typeof t.system.rarity == "string" ? t.system.rarity : typeof ((d = t.system.traits) == null ? void 0 : d.rarity) == "string" ? t.system.traits.rarity : "", r = ((p = (b = (v = globalThis.CONFIG) == null ? void 0 : v.DND5E) == null ? void 0 : b.itemRarity) == null ? void 0 : p[o]) ?? ((C = (g = (I = globalThis.CONFIG) == null ? void 0 : I.PF2E) == null ? void 0 : g.rarityTraits) == null ? void 0 : C[o]);
       return {
-        id: i.id,
-        name: i.currency ? i.currency.unit === "swade" ? e.name : game.i18n.localize(`HL.Currency.${i.currency.unit}`) : n ? ((l = e.system.unidentified) == null ? void 0 : l.name) || ((d = (u = e.system.identification) == null ? void 0 : u.unidentified) == null ? void 0 : d.name) || game.i18n.localize("HL.Unidentified") : e.name,
-        currency: !!i.currency,
-        img: n && ((b = (p = e.system.identification) == null ? void 0 : p.unidentified) == null ? void 0 : b.img) || e.img,
-        quantity: i.wholeItem ? 1 : ((w = i.currency) == null ? void 0 : w.amount) ?? e.system.quantity,
-        ...i.wholeItem ? { wholeItem: !0 } : {},
-        ...i.formula ? { formula: i.formula } : {},
-        type: i.currency ? game.i18n.localize("HL.CurrencyLabel") : game.i18n.localize(`TYPES.Item.${e.type}`),
-        rarity: n ? "" : game.i18n.localize(((L = (g = (S = globalThis.CONFIG) == null ? void 0 : S.DND5E) == null ? void 0 : g.itemRarity) == null ? void 0 : L[e.system.rarity]) ?? ((I = (q = (C = globalThis.CONFIG) == null ? void 0 : C.PF2E) == null ? void 0 : q.rarityTraits) == null ? void 0 : I[(h = e.system.traits) == null ? void 0 : h.rarity]) ?? e.system.rarity ?? ""),
-        tooltip: ((v = new DOMParser().parseFromString(a ?? "", "text/html").body.textContent) == null ? void 0 : v.slice(0, 1500)) ?? "",
-        pending: !!i.claim
+        id: e.id,
+        name: e.currency ? (q = (L = game.i18n).has) != null && q.call(L, `HL.Currency.${e.currency.unit}`) ? game.i18n.localize(`HL.Currency.${e.currency.unit}`) : t.name : n ? ((h = t.system.unidentified) == null ? void 0 : h.name) || ((w = (R = t.system.identification) == null ? void 0 : R.unidentified) == null ? void 0 : w.name) || game.i18n.localize("HL.Unidentified") : t.name,
+        currency: !!e.currency,
+        img: n && ((A = (y = t.system.identification) == null ? void 0 : y.unidentified) == null ? void 0 : A.img) || t.img,
+        quantity: e.wholeItem ? 1 : ((T = e.currency) == null ? void 0 : T.amount) ?? H(t),
+        ...e.wholeItem ? { wholeItem: !0 } : {},
+        ...e.formula ? { formula: e.formula } : {},
+        type: e.currency ? game.i18n.localize("HL.CurrencyLabel") : game.i18n.localize(`TYPES.Item.${t.type}`),
+        rarity: n || !o ? "" : game.i18n.localize(typeof r == "string" ? r : o),
+        tooltip: (($ = new DOMParser().parseFromString(a ?? "", "text/html").body.textContent) == null ? void 0 : $.slice(0, 1500)) ?? "",
+        pending: !!e.claim
       };
     })
   };
 }
-function Pt(t, s = t) {
-  const i = `${s} |`;
+function Xt(s, i = s) {
+  const e = `${i} |`;
   return {
-    log: (e, ...n) => console.log(i, e, ...n),
-    warn: (e, ...n) => console.warn(i, e, ...n),
-    error: (e, ...n) => console.error(i, e, ...n)
+    log: (t, ...n) => console.log(e, t, ...n),
+    warn: (t, ...n) => console.warn(e, t, ...n),
+    error: (t, ...n) => console.error(e, t, ...n)
   };
 }
-function Ut(t, s = {}) {
-  const i = s.socketName ?? `module.${t}`, e = Pt(t, s.title ?? t);
+function Yt(s, i = {}) {
+  const e = i.socketName ?? `module.${s}`, t = Xt(s, i.title ?? s);
   return {
-    socketName: i,
+    socketName: e,
     emit(n) {
-      var c;
-      const a = (c = globalThis.game) == null ? void 0 : c.socket;
-      return a != null && a.emit ? (a.emit(i, n), !0) : (e.warn("Foundry socket is unavailable.", n), !1);
+      var o;
+      const a = (o = globalThis.game) == null ? void 0 : o.socket;
+      return a != null && a.emit ? (a.emit(e, n), !0) : (t.warn("Foundry socket is unavailable.", n), !1);
     },
     isGMSender(n) {
-      var a, c, o;
-      return n ? !!((o = (c = (a = globalThis.game) == null ? void 0 : a.users) == null ? void 0 : c.get(String(n))) != null && o.isGM) : !1;
+      var a, o, r;
+      return n ? !!((r = (o = (a = globalThis.game) == null ? void 0 : a.users) == null ? void 0 : o.get(String(n))) != null && r.isGM) : !1;
     }
   };
 }
-const _e = Ut(f, { title: "HoloSuite Loot" }), ie = /* @__PURE__ */ new Map(), Gt = new be();
-async function _t(t, s) {
-  game.socket.on(_e.socketName, (i) => {
-    (i == null ? void 0 : i.type) === "refresh" && typeof i.tokenUuid == "string" && s(i.tokenUuid);
-  }), Hooks.on("updateUser", (i, e, n, a) => {
-    var o, r, l;
-    if (i.id === game.user.id && ((r = (o = e.flags) == null ? void 0 : o[f]) != null && r[Le])) {
+const Be = Yt(f, { title: "HoloSuite Loot" }), ne = /* @__PURE__ */ new Map(), Zt = new de();
+async function es(s, i) {
+  game.socket.on(Be.socketName, (e) => {
+    (e == null ? void 0 : e.type) === "refresh" && typeof e.tokenUuid == "string" && i(e.tokenUuid);
+  }), Hooks.on("updateUser", (e, t, n, a) => {
+    var r, c, l;
+    if (e.id === game.user.id && ((c = (r = t.flags) == null ? void 0 : r[f]) != null && c[Te])) {
       let u;
       try {
-        u = JSON.parse(i.getFlag(f, Le));
+        u = JSON.parse(e.getFlag(f, Te));
       } catch {
         return;
       }
-      const d = ie.get(u == null ? void 0 : u.id);
-      d && d.gm === a && ((l = game.users.get(a)) != null && l.isGM) && (clearTimeout(d.timer), ie.delete(u.id), u.result.error ? d.reject(new m(u.result.error)) : d.resolve(structuredClone(u.result)));
+      const d = ne.get(u == null ? void 0 : u.id);
+      d && d.gm === a && ((l = game.users.get(a)) != null && l.isGM) && (clearTimeout(d.timer), ne.delete(u.id), u.result.error ? d.reject(new m(u.result.error)) : d.resolve(structuredClone(u.result)));
     }
-    const c = mt(i, e, a, Ke);
-    !c || !E() || typeof c.id != "string" || !/^[\w-]{1,64}$/.test(c.id) || Gt.run(i.id, async () => {
-      if (!E()) return;
+    const o = bt(e, t, a, ke);
+    !o || !D() || typeof o.id != "string" || !/^[\w-]{1,64}$/.test(o.id) || Zt.run(e.id, async () => {
+      if (!D()) return;
       let u;
       try {
-        if (!me(c)) throw new m("InvalidRequest");
-        u = await t.execute(c, i);
+        if (!pe(o)) throw new m("InvalidRequest");
+        u = await s.execute(o, e);
       } catch (d) {
         console.warn("HoloSuite Loot | Request failed", d), u = { error: d.code ?? "TransferFailed" };
       }
-      await i.setFlag(f, Le, JSON.stringify({ id: c.id, result: u })), me(c) && ["take", "all"].includes(c.action) && _e.emit({ type: "refresh", tokenUuid: c.tokenUuid });
+      await e.setFlag(f, Te, JSON.stringify({ id: o.id, result: u })), pe(o) && ["take", "all"].includes(o.action) && Be.emit({ type: "refresh", tokenUuid: o.tokenUuid });
     }).catch((u) => console.warn("HoloSuite Loot | Could not deliver reply", u));
-  }), game.user.isGM && await game.user.setFlag(f, "transportVersion", he);
+  }), game.user.isGM && await game.user.setFlag(f, "transportVersion", ye);
 }
-async function jt(t, s) {
-  if (!me(t)) throw new m("InvalidRequest");
-  const i = Ae();
-  if (!i) throw new m(game.users.contents.some((n) => n.active && n.isGM) ? "BuildMismatch" : "NoGM");
-  if (i.id === game.user.id && s) return s.execute(t, game.user);
-  const e = foundry.utils.randomID();
+async function ts(s, i) {
+  if (!pe(s)) throw new m("InvalidRequest");
+  const e = Ee();
+  if (!e) throw new m(game.users.contents.some((n) => n.active && n.isGM) ? "BuildMismatch" : "NoGM");
+  if (e.id === game.user.id && i) return i.execute(s, game.user);
+  const t = foundry.utils.randomID();
   return new Promise((n, a) => {
-    const c = setTimeout(() => {
-      ie.delete(e), a(new m("Timeout"));
-    }, t.action === "view" ? 8e3 : 2e4);
-    ie.set(e, { resolve: n, reject: a, timer: c, gm: i.id }), game.user.setFlag(f, Ke, { ...t, id: e }).catch((o) => {
-      clearTimeout(c), ie.delete(e), a(o);
+    const o = setTimeout(() => {
+      ne.delete(t), a(new m("Timeout"));
+    }, s.action === "view" ? 8e3 : 2e4);
+    ne.set(t, { resolve: n, reject: a, timer: o, gm: e.id }), game.user.setFlag(f, ke, { ...s, id: t }).catch((r) => {
+      clearTimeout(o), ne.delete(t), a(r);
     });
   });
 }
-function Vt() {
-  var t, s, i;
-  return ((s = (t = globalThis.foundry) == null ? void 0 : t.applications) == null ? void 0 : s.api) ?? ((i = foundry == null ? void 0 : foundry.applications) == null ? void 0 : i.api) ?? null;
+function ss() {
+  var s, i, e;
+  return ((i = (s = globalThis.foundry) == null ? void 0 : s.applications) == null ? void 0 : i.api) ?? ((e = foundry == null ? void 0 : foundry.applications) == null ? void 0 : e.api) ?? null;
 }
-function zt() {
-  var t, s, i;
-  return ((s = (t = globalThis.foundry) == null ? void 0 : t.appv1) == null ? void 0 : s.api) ?? ((i = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : i.api) ?? null;
+function is() {
+  var s, i, e;
+  return ((i = (s = globalThis.foundry) == null ? void 0 : s.appv1) == null ? void 0 : i.api) ?? ((e = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : e.api) ?? null;
 }
-function Bt(t = {}, s = {}) {
-  var e, n, a;
-  const i = ((n = (e = globalThis.foundry) == null ? void 0 : e.utils) == null ? void 0 : n.mergeObject) ?? ((a = foundry == null ? void 0 : foundry.utils) == null ? void 0 : a.mergeObject);
-  return typeof i == "function" ? i(t, s, { inplace: !1 }) : { ...t, ...s };
+function ns(s = {}, i = {}) {
+  var t, n, a;
+  const e = ((n = (t = globalThis.foundry) == null ? void 0 : t.utils) == null ? void 0 : n.mergeObject) ?? ((a = foundry == null ? void 0 : foundry.utils) == null ? void 0 : a.mergeObject);
+  return typeof e == "function" ? e(s, i, { inplace: !1 }) : { ...s, ...i };
 }
-function Kt() {
-  var t, s, i, e, n;
-  return ((i = (s = (t = globalThis.foundry) == null ? void 0 : t.utils) == null ? void 0 : s.randomID) == null ? void 0 : i.call(s, 8)) ?? ((n = (e = foundry == null ? void 0 : foundry.utils) == null ? void 0 : e.randomID) == null ? void 0 : n.call(e, 8)) ?? Math.random().toString(36).slice(2, 10);
+function as() {
+  var s, i, e, t, n;
+  return ((e = (i = (s = globalThis.foundry) == null ? void 0 : s.utils) == null ? void 0 : i.randomID) == null ? void 0 : e.call(i, 8)) ?? ((n = (t = foundry == null ? void 0 : foundry.utils) == null ? void 0 : t.randomID) == null ? void 0 : n.call(t, 8)) ?? Math.random().toString(36).slice(2, 10);
 }
-function je(t = {}) {
+function Ke(s = {}) {
   return {
-    id: String(t.id ?? `legacy-application-${Kt()}`),
-    tag: t.tag ?? "section",
-    classes: Array.isArray(t.classes) ? t.classes : [],
+    id: String(s.id ?? `legacy-application-${as()}`),
+    tag: s.tag ?? "section",
+    classes: Array.isArray(s.classes) ? s.classes : [],
     window: {
-      title: t.title ?? "",
-      icon: t.icon,
-      resizable: t.resizable === !0
+      title: s.title ?? "",
+      icon: s.icon,
+      resizable: s.resizable === !0
     },
     position: {
-      width: Number(t.width ?? 600),
-      height: t.height === "auto" ? "auto" : Number(t.height ?? 600)
+      width: Number(s.width ?? 600),
+      height: s.height === "auto" ? "auto" : Number(s.height ?? 600)
     }
   };
 }
-function Qt(t) {
-  return class extends t {
-    constructor(e = {}) {
-      const n = Bt(new.target.defaultOptions ?? {}, e);
-      super(je(n));
-      R(this, "_v1Options");
+function rs(s) {
+  return class extends s {
+    constructor(t = {}) {
+      const n = ns(new.target.defaultOptions ?? {}, t);
+      super(Ke(n));
+      S(this, "_v1Options");
       this._v1Options = n;
     }
     static get defaultOptions() {
       return {};
     }
     static get DEFAULT_OPTIONS() {
-      return je(this.defaultOptions ?? {});
+      return Ke(this.defaultOptions ?? {});
     }
-    activateListeners(e) {
+    activateListeners(t) {
     }
-    async _renderHTML(e, n) {
+    async _renderHTML(t, n) {
       var l, u, d;
-      const a = typeof this.getData == "function" ? await this.getData() : {}, c = ((l = this._v1Options) == null ? void 0 : l.template) ?? ((u = this.options) == null ? void 0 : u.template) ?? ((d = this.constructor.defaultOptions) == null ? void 0 : d.template);
-      if (!c) return document.createDocumentFragment();
-      const o = await globalThis.renderTemplate(c, a), r = document.createElement("template");
-      return r.innerHTML = o.trim(), r.content;
+      const a = typeof this.getData == "function" ? await this.getData() : {}, o = ((l = this._v1Options) == null ? void 0 : l.template) ?? ((u = this.options) == null ? void 0 : u.template) ?? ((d = this.constructor.defaultOptions) == null ? void 0 : d.template);
+      if (!o) return document.createDocumentFragment();
+      const r = await globalThis.renderTemplate(o, a), c = document.createElement("template");
+      return c.innerHTML = r.trim(), c.content;
     }
-    _activateV1Form(e) {
-      var a, c;
+    _activateV1Form(t) {
+      var a, o;
       if (typeof this._updateObject != "function") return;
-      const n = (a = e.matches) != null && a.call(e, "form") ? e : (c = e.querySelector) == null ? void 0 : c.call(e, "form");
-      n instanceof HTMLFormElement && n.addEventListener("submit", async (o) => {
+      const n = (a = t.matches) != null && a.call(t, "form") ? t : (o = t.querySelector) == null ? void 0 : o.call(t, "form");
+      n instanceof HTMLFormElement && n.addEventListener("submit", async (r) => {
         var l;
-        o.preventDefault(), o.stopPropagation();
-        const r = new FormData(n);
-        await this._updateObject(o, r), ((l = this._v1Options) == null ? void 0 : l.closeOnSubmit) === !0 && await this.close();
+        r.preventDefault(), r.stopPropagation();
+        const c = new FormData(n);
+        await this._updateObject(r, c), ((l = this._v1Options) == null ? void 0 : l.closeOnSubmit) === !0 && await this.close();
       });
     }
-    _replaceHTML(e, n, a) {
-      var u, d, p, b;
-      n.replaceChildren(e);
-      const c = globalThis.jQuery ?? globalThis.$, o = ((u = n.closest) == null ? void 0 : u.call(n, ".window-app, .app, .application")) ?? n, r = c ? c(o) : o;
+    _replaceHTML(t, n, a) {
+      var u, d, v, b;
+      n.replaceChildren(t);
+      const o = globalThis.jQuery ?? globalThis.$, r = ((u = n.closest) == null ? void 0 : u.call(n, ".window-app, .app, .application")) ?? n, c = o ? o(r) : r;
       try {
         Object.defineProperty(this, "element", {
-          value: r,
+          value: c,
           configurable: !0,
           writable: !0
         });
       } catch {
         try {
-          this.element = r;
+          this.element = c;
         } catch {
         }
       }
       const l = (d = this._v1Options) == null ? void 0 : d.classes;
-      Array.isArray(l) && l.length && (n.classList.add(...l), (b = (p = n.closest) == null ? void 0 : p.call(n, ".window-app, .app, .application")) == null || b.classList.add(...l)), this._activateV1Form(n), typeof this.activateListeners == "function" && this.activateListeners(c ? c(n) : n);
+      Array.isArray(l) && l.length && (n.classList.add(...l), (b = (v = n.closest) == null ? void 0 : v.call(n, ".window-app, .app, .application")) == null || b.classList.add(...l)), this._activateV1Form(n), typeof this.activateListeners == "function" && this.activateListeners(o ? o(n) : n);
     }
   };
 }
-function Jt() {
-  const t = Vt(), s = zt(), i = globalThis.Application ?? (s == null ? void 0 : s.Application) ?? (t == null ? void 0 : t.ApplicationV1) ?? globalThis.FormApplication ?? (s == null ? void 0 : s.FormApplication) ?? (t == null ? void 0 : t.FormApplication);
-  if (i) return i;
-  const e = t == null ? void 0 : t.ApplicationV2;
-  return e ? Qt(e) : null;
+function os() {
+  const s = ss(), i = is(), e = globalThis.Application ?? (i == null ? void 0 : i.Application) ?? (s == null ? void 0 : s.ApplicationV1) ?? globalThis.FormApplication ?? (i == null ? void 0 : i.FormApplication) ?? (s == null ? void 0 : s.FormApplication);
+  if (e) return e;
+  const t = s == null ? void 0 : s.ApplicationV2;
+  return t ? rs(t) : null;
 }
-class Wt {
-  constructor(s, i) {
-    R(this, "outside", (s) => {
-      s.composedPath().includes(this.root) || this.dismiss();
+class cs {
+  constructor(i, e) {
+    S(this, "outside", (i) => {
+      i.composedPath().includes(this.root) || this.dismiss();
     });
-    this.root = s, this.dismiss = i, document.addEventListener("pointerdown", this.outside, !0);
+    this.root = i, this.dismiss = e, document.addEventListener("pointerdown", this.outside, !0);
   }
   destroy() {
     document.removeEventListener("pointerdown", this.outside, !0);
   }
 }
-class kt {
-  constructor(s, i, e, n) {
-    R(this, "frame", 0);
-    R(this, "destroyed", !1);
-    R(this, "svg");
-    R(this, "line");
-    R(this, "lastGeometry", "");
-    R(this, "outside", (s) => {
-      var e, n;
-      const i = s.composedPath();
-      s.button === 2 && i.includes(((e = canvas.app) == null ? void 0 : e.canvas) ?? ((n = canvas.app) == null ? void 0 : n.view)) || i.includes(this.root) || this.dismiss();
+class us {
+  constructor(i, e, t, n) {
+    S(this, "frame", 0);
+    S(this, "destroyed", !1);
+    S(this, "svg");
+    S(this, "line");
+    S(this, "lastGeometry", "");
+    S(this, "outside", (i) => {
+      var t, n;
+      const e = i.composedPath();
+      i.button === 2 && e.includes(((t = canvas.app) == null ? void 0 : t.canvas) ?? ((n = canvas.app) == null ? void 0 : n.view)) || e.includes(this.root) || this.dismiss();
     });
-    R(this, "update", () => {
-      var e, n;
+    S(this, "update", () => {
+      var t, n;
       if (this.destroyed) return;
-      const s = ((e = canvas.app) == null ? void 0 : e.canvas) ?? ((n = canvas.app) == null ? void 0 : n.view), i = this.token.object;
+      const i = ((t = canvas.app) == null ? void 0 : t.canvas) ?? ((n = canvas.app) == null ? void 0 : n.view), e = this.token.object;
       if (!this.root.isConnected) {
         this.destroy();
         return;
       }
-      if (!i || this.token.hidden) {
+      if (!e || this.token.hidden) {
         this.destroy(), this.dismiss();
         return;
       }
-      if (this.root.isConnected && s && canvas.stage) {
-        const a = s.getBoundingClientRect(), c = canvas.app.renderer.screen, o = canvas.stage.worldTransform.apply(i.center), r = a.left + o.x * a.width / c.width, l = a.top + o.y * a.height / c.height, u = this.root.getBoundingClientRect(), d = 24 + Math.min(60, (i.w ?? 0) * Math.abs(canvas.stage.worldTransform.a) / 2), p = r + d + u.width <= innerWidth - 8 ? r + d : r - d - u.width, b = Math.max(8, Math.min(innerWidth - u.width - 8, p)), w = Math.max(8, Math.min(innerHeight - u.height - 8, l - u.height / 3));
-        (Math.abs(u.left - b) > 0.5 || Math.abs(u.top - w) > 0.5) && this.position(b, w);
-        const S = this.root.querySelector(".hl-panel") ?? this.root, g = S.getBoundingClientRect(), L = getComputedStyle(S), C = parseFloat(L.borderLeftWidth) || 3, q = Math.min(parseFloat(L.borderTopLeftRadius) || 0, g.height / 2, g.width / 2), h = r <= g.left || r >= g.right, I = h ? r <= g.left ? g.left + C / 2 : g.right - C / 2 : Math.max(g.left + q, Math.min(g.right - q, r)), v = h ? Math.max(g.top + q, Math.min(g.bottom - q, l)) : l < (g.top + g.bottom) / 2 ? g.top + C / 2 : g.bottom - C / 2, y = `${r},${l},${I},${v}`;
-        y !== this.lastGeometry && (this.line.setAttribute("x1", String(r)), this.line.setAttribute("y1", String(l)), this.line.setAttribute("x2", String(I)), this.line.setAttribute("y2", String(v)), this.lastGeometry = y), this.line.style.stroke = L.borderLeftColor, this.line.style.strokeWidth = String(C), this.svg.style.zIndex = String(Math.max(0, (parseInt(getComputedStyle(this.root).zIndex) || 100) - 1));
+      if (this.root.isConnected && i && canvas.stage) {
+        const a = i.getBoundingClientRect(), o = canvas.app.renderer.screen, r = canvas.stage.worldTransform.apply(e.center), c = a.left + r.x * a.width / o.width, l = a.top + r.y * a.height / o.height, u = this.root.getBoundingClientRect(), d = 24 + Math.min(60, (e.w ?? 0) * Math.abs(canvas.stage.worldTransform.a) / 2), v = c + d + u.width <= innerWidth - 8 ? c + d : c - d - u.width, b = Math.max(8, Math.min(innerWidth - u.width - 8, v)), p = Math.max(8, Math.min(innerHeight - u.height - 8, l - u.height / 3));
+        (Math.abs(u.left - b) > 0.5 || Math.abs(u.top - p) > 0.5) && this.position(b, p);
+        const I = this.root.querySelector(".hl-panel") ?? this.root, g = I.getBoundingClientRect(), C = getComputedStyle(I), L = parseFloat(C.borderLeftWidth) || 3, q = Math.min(parseFloat(C.borderTopLeftRadius) || 0, g.height / 2, g.width / 2), h = c <= g.left || c >= g.right, R = h ? c <= g.left ? g.left + L / 2 : g.right - L / 2 : Math.max(g.left + q, Math.min(g.right - q, c)), w = h ? Math.max(g.top + q, Math.min(g.bottom - q, l)) : l < (g.top + g.bottom) / 2 ? g.top + L / 2 : g.bottom - L / 2, y = `${c},${l},${R},${w}`;
+        y !== this.lastGeometry && (this.line.setAttribute("x1", String(c)), this.line.setAttribute("y1", String(l)), this.line.setAttribute("x2", String(R)), this.line.setAttribute("y2", String(w)), this.lastGeometry = y), this.line.style.stroke = C.borderLeftColor, this.line.style.strokeWidth = String(L), this.svg.style.zIndex = String(Math.max(0, (parseInt(getComputedStyle(this.root).zIndex) || 100) - 1));
       }
       this.frame = requestAnimationFrame(this.update);
     });
-    this.root = s, this.token = i, this.position = e, this.dismiss = n;
+    this.root = i, this.token = e, this.position = t, this.dismiss = n;
     const a = "http://www.w3.org/2000/svg";
     this.svg = document.createElementNS(a, "svg"), this.svg.classList.add("hl-loot-tether"), this.svg.setAttribute("aria-hidden", "true"), this.line = document.createElementNS(a, "line"), this.svg.append(this.line), document.body.append(this.svg), document.addEventListener("pointerdown", this.outside, !0), this.frame = requestAnimationFrame(this.update);
   }
@@ -1261,82 +1484,82 @@ class kt {
     this.destroyed = !0, cancelAnimationFrame(this.frame), document.removeEventListener("pointerdown", this.outside, !0), this.svg.remove();
   }
 }
-const K = (t) => String(t ?? "").replace(/[&<>"']/g, (s) => ({
+const W = (s) => String(s ?? "").replace(/[&<>"']/g, (i) => ({
   "&": "&amp;",
   "<": "&lt;",
   ">": "&gt;",
   '"': "&quot;",
   "'": "&#39;"
-})[s]);
-async function Xt({ roll: t, itemName: s, quantity: i }) {
-  var c;
-  const { game: e } = globalThis, n = e.i18n.format("HL.QuantityRollChat", { item: K(s), quantity: i }), a = ((c = e.release) == null ? void 0 : c.generation) >= 14 ? { messageMode: "self" } : { rollMode: "selfroll" };
-  await t.toMessage({ flavor: n }, a);
+})[i]);
+async function ls({ roll: s, itemName: i, quantity: e }) {
+  var o;
+  const { game: t } = globalThis, n = t.i18n.format("HL.QuantityRollChat", { item: W(i), quantity: e }), a = ((o = t.release) == null ? void 0 : o.generation) >= 14 ? { messageMode: "self" } : { rollMode: "selfroll" };
+  await s.toMessage({ flavor: n }, a);
 }
-async function Yt(t, s) {
+async function ds(s, i) {
   var d;
-  const { game: i, foundry: e, ChatMessage: n } = globalThis, a = t.claim.quantityRoll, c = s.preview ? s.preview(t) : t.data, r = (((d = e == null ? void 0 : e.dice) == null ? void 0 : d.Roll) ?? globalThis.Roll).fromData(a.roll), l = i.i18n.format("HL.PickupRollChat", { item: K(c.name), quantity: a.quantity }), u = await r.toMessage({ flavor: l }, { create: !1 });
-  await n.create({ ...u, whisper: [t.claim.userId], blind: !1 });
+  const { game: e, foundry: t, ChatMessage: n } = globalThis, a = s.claim.quantityRoll, o = i.preview ? i.preview(s) : s.data, c = (((d = t == null ? void 0 : t.dice) == null ? void 0 : d.Roll) ?? globalThis.Roll).fromData(a.roll), l = e.i18n.format("HL.PickupRollChat", { item: W(o.name), quantity: a.quantity }), u = await c.toMessage({ flavor: l }, { create: !1 });
+  await n.create({ ...u, whisper: [s.claim.userId], blind: !1 });
 }
-async function Zt({ token: t, actor: s, entry: i, adapter: e }) {
-  var r, l;
+async function fs({ token: s, actor: i, entry: e, adapter: t }) {
+  var c;
   const { game: n, ChatMessage: a } = globalThis;
   if (!n.settings.get(f, "chatLog")) return;
-  const c = e.preview ? e.preview(i) : i.data, o = n.i18n.format("HL.ChatLooted", {
-    actor: K(s.name),
-    source: K(t.name),
-    item: K(c.name),
-    quantity: K(i.wholeItem ? 1 : ((r = i.currency) == null ? void 0 : r.amount) ?? ((l = c.system) == null ? void 0 : l.quantity) ?? 1)
+  const o = t.preview ? t.preview(e) : e.data, r = n.i18n.format("HL.ChatLooted", {
+    actor: W(i.name),
+    source: W(s.name),
+    item: W(o.name),
+    quantity: W(e.wholeItem ? 1 : ((c = e.currency) == null ? void 0 : c.amount) ?? H(o))
   });
   await a.create({
-    speaker: a.getSpeaker({ actor: s }),
-    content: `<p>${o}</p>`,
+    speaker: a.getSpeaker({ actor: i }),
+    content: `<p>${r}</p>`,
     whisper: [],
     blind: !1,
-    flags: { [f]: { claimId: i.claim.id, userId: i.claim.userId } }
+    flags: { [f]: { claimId: e.claim.id, userId: e.claim.userId } }
   });
 }
-const ct = Jt(), ut = (t) => `modules/${f}/templates/${t}.hbs`, x = (t) => game.i18n.localize(`HL.${t}`);
-function P(t) {
-  const s = x((t == null ? void 0 : t.code) ?? "TransferFailed");
-  return ui.notifications.warn(s), s;
+const mt = os(), gt = (s) => `modules/${f}/templates/${s}.hbs`, x = (s) => game.i18n.localize(`HL.${s}`);
+function U(s) {
+  const i = x((s == null ? void 0 : s.code) ?? "TransferFailed");
+  return ui.notifications.warn(i), i;
 }
-const lt = (t) => t instanceof HTMLElement ? t : t[0];
-class ei extends ct {
-  constructor(i, e, n) {
-    super({ id: `hololoot-${i.id}` });
-    R(this, "token");
-    R(this, "send");
-    R(this, "adapter");
-    R(this, "data", { entries: [] });
-    R(this, "destination", "");
-    R(this, "busy", !1);
-    R(this, "message", "");
-    R(this, "loading", !1);
-    R(this, "firstDraw", null);
-    R(this, "resolveFirstDraw", null);
-    R(this, "refreshing", null);
-    R(this, "refreshAgain", !1);
-    R(this, "disposed", !1);
-    R(this, "presentation", null);
-    this.token = i, this.send = e, this.adapter = n;
+const yt = (s) => s instanceof HTMLElement ? s : s[0];
+class hs extends mt {
+  constructor(e, t, n) {
+    super({ id: `hololoot-${e.id}` });
+    S(this, "token");
+    S(this, "send");
+    S(this, "adapter");
+    S(this, "data", { entries: [] });
+    S(this, "destination", "");
+    S(this, "busy", !1);
+    S(this, "message", "");
+    S(this, "loading", !1);
+    S(this, "firstDraw", null);
+    S(this, "resolveFirstDraw", null);
+    S(this, "refreshing", null);
+    S(this, "refreshAgain", !1);
+    S(this, "disposed", !1);
+    S(this, "presentation", null);
+    this.token = e, this.send = t, this.adapter = n;
     const a = game.user.character;
-    J(a, game.user, n, i) && (this.destination = n.manual ? N(a) : a.id);
+    J(a, game.user, n, e) && (this.destination = n.manual ? N(a) : a.id);
   }
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       title: "HoloSuite Loot",
       classes: ["holosuite-loot-window", "holosuite-loot-popup"],
-      template: ut("loot"),
+      template: gt("loot"),
       width: 340,
       height: "auto",
       resizable: !1
     });
   }
-  show(i) {
-    return this.firstDraw || (this.firstDraw = new Promise((e) => {
-      this.resolveFirstDraw = e;
-    }), this.loading = i === void 0, this.loading || (this.data = i), this.render(!0)), this.firstDraw;
+  show(e) {
+    return this.firstDraw || (this.firstDraw = new Promise((t) => {
+      this.resolveFirstDraw = t;
+    }), this.loading = e === void 0, this.loading || (this.data = e), this.render(!0)), this.firstDraw;
   }
   async refresh() {
     if (!this.disposed) {
@@ -1347,13 +1570,13 @@ class ei extends ct {
       return this.refreshing ? (this.refreshAgain = !0, this.refreshing) : (this.refreshAgain = !1, this.refreshing = (async () => {
         try {
           this.data = await this.send({ action: "view", tokenUuid: this.token.uuid }), this.message = "";
-        } catch (i) {
+        } catch (e) {
           if (this.disposed) return;
-          if ((i == null ? void 0 : i.code) === "OutOfRange") {
-            P(i), await this.close();
+          if ((e == null ? void 0 : e.code) === "OutOfRange") {
+            U(e), await this.close();
             return;
           }
-          this.data = { entries: [] }, this.message = P(i);
+          this.data = { entries: [] }, this.message = U(e);
         }
         this.loading = !1, this.disposed || this.render(!0);
       })().finally(() => {
@@ -1362,59 +1585,59 @@ class ei extends ct {
     }
   }
   getData() {
-    var r, l;
-    const i = game.settings.get(f, "characterSelector"), e = game.settings.get(f, "panelTheme"), n = this.adapter.manual ? [...new Map([...game.actors.contents, ...Array.from(((r = canvas.scene) == null ? void 0 : r.tokens) ?? [], (u) => u.actor)].filter((u) => J(u, game.user, this.adapter, this.token)).map((u) => [N(u), u])).values()] : game.actors.contents.filter((u) => J(u, game.user, this.adapter)), a = (u) => this.adapter.manual ? N(u) : u.id;
-    let c = "";
-    if (i)
+    var c, l;
+    const e = game.settings.get(f, "characterSelector"), t = game.settings.get(f, "panelTheme"), n = this.adapter.manual ? [...new Map([...game.actors.contents, ...Array.from(((c = canvas.scene) == null ? void 0 : c.tokens) ?? [], (u) => u.actor)].filter((u) => J(u, game.user, this.adapter, this.token)).map((u) => [N(u), u])).values()] : game.actors.contents.filter((u) => J(u, game.user, this.adapter)), a = (u) => this.adapter.manual ? N(u) : u.id;
+    let o = "";
+    if (e)
       !this.destination && n.length === 1 && (this.destination = a(n[0]));
     else try {
-      this.destination = N(Qe(game.user, game.actors.contents, (l = canvas.scene) == null ? void 0 : l.tokens, this.adapter, this.token));
+      this.destination = N(Ye(game.user, game.actors.contents, (l = canvas.scene) == null ? void 0 : l.tokens, this.adapter, this.token));
     } catch (u) {
-      this.destination = "", c = x(u.code);
+      this.destination = "", o = x(u.code);
     }
-    const o = i ? n.some((u) => a(u) === this.destination) : !!this.destination;
+    const r = e ? n.some((u) => a(u) === this.destination) : !!this.destination;
     return {
       ...this.data,
       name: this.data.name ?? this.token.name,
       img: this.data.img ?? this.token.texture.src,
       actors: n.map((u) => ({ id: a(u), name: u.name, selected: a(u) === this.destination })),
-      disabled: this.loading || this.busy || !o || !this.data.entries.length,
+      disabled: this.loading || this.busy || !r || !this.data.entries.length,
       loading: this.loading,
-      showSelector: i,
-      theme: e,
+      showSelector: e,
+      theme: t,
       busy: this.busy,
-      message: this.message || c || (!n.length && i ? x("NoActor") : ""),
+      message: this.message || o || (!n.length && e ? x("NoActor") : ""),
       empty: !this.loading && !this.data.entries.length && !this.message
     };
   }
-  activateListeners(i) {
-    var a, c, o;
-    if (super.activateListeners(i), this.disposed) return;
-    const e = lt(i);
+  activateListeners(e) {
+    var a, o, r;
+    if (super.activateListeners(e), this.disposed) return;
+    const t = yt(e);
     (a = this.presentation) == null || a.destroy();
-    const n = e.closest(".window-app, .application") ?? e.closest(".holosuite-loot-popup") ?? e;
-    this.presentation = new kt(
+    const n = t.closest(".window-app, .application") ?? t.closest(".holosuite-loot-popup") ?? t;
+    this.presentation = new us(
       n,
       this.token,
-      (r, l) => this.setPosition({ left: r, top: l }),
+      (c, l) => this.setPosition({ left: c, top: l }),
       () => void this.close()
-    ), (c = e.querySelector("select")) == null || c.addEventListener("change", (r) => {
-      this.destination = r.target.value, this.render(!0);
-    }), e.querySelectorAll("button[data-loot]").forEach((r) => {
-      r.addEventListener("click", () => void this.take(r.dataset.loot));
-    }), e.querySelectorAll("[data-inspect]").forEach((r) => {
-      r.addEventListener("click", () => void this.inspect(r.dataset.inspect));
-    }), (o = this.resolveFirstDraw) == null || o.call(this), this.resolveFirstDraw = null;
+    ), (o = t.querySelector("select")) == null || o.addEventListener("change", (c) => {
+      this.destination = c.target.value, this.render(!0);
+    }), t.querySelectorAll("button[data-loot]").forEach((c) => {
+      c.addEventListener("click", () => void this.take(c.dataset.loot));
+    }), t.querySelectorAll("[data-inspect]").forEach((c) => {
+      c.addEventListener("click", () => void this.inspect(c.dataset.inspect));
+    }), (r = this.resolveFirstDraw) == null || r.call(this), this.resolveFirstDraw = null;
   }
-  async inspect(i) {
+  async inspect(e) {
     try {
-      const n = { ...(await this.send({ action: "inspect", entryId: i, tokenUuid: this.token.uuid })).item, ownership: { default: 0, [game.user.id]: 2 } }, a = globalThis.CONFIG.Item.documentClass;
+      const n = { ...(await this.send({ action: "inspect", entryId: e, tokenUuid: this.token.uuid })).item, ownership: { default: 0, [game.user.id]: 2 } }, a = globalThis.CONFIG.Item.documentClass;
       new a(n, { temporary: !0 }).sheet.render(!0, { editable: !1 });
-    } catch (e) {
-      P(e);
+    } catch (t) {
+      U(t);
     }
   }
-  async take(i) {
+  async take(e) {
     if (!this.busy) {
       if (this.getData(), !this.destination) {
         this.message = this.getData().message || x("NoActor"), this.render(!0);
@@ -1423,49 +1646,49 @@ class ei extends ct {
       this.busy = !0, this.message = "", this.render(!0);
       try {
         this.data = await this.send({
-          action: i === "all" ? "all" : "take",
-          entryId: i,
+          action: e === "all" ? "all" : "take",
+          entryId: e,
           actorId: this.destination,
           tokenUuid: this.token.uuid
         });
-        const e = this.data.failures ?? [];
-        this.message = e.map((n) => `${n.name}: ${x(n.code)}`).join(" · "), this.message && ui.notifications.warn(this.message);
-      } catch (e) {
-        this.message = P(e);
+        const t = this.data.failures ?? [];
+        this.message = t.map((n) => `${n.name}: ${x(n.code)}`).join(" · "), this.message && ui.notifications.warn(this.message);
+      } catch (t) {
+        this.message = U(t);
       } finally {
         this.busy = !1, this.disposed || (this.render(!0), this.refreshAgain && this.refresh());
       }
     }
   }
-  async close(i) {
-    var e, n;
-    return this.disposed = !0, (e = this.presentation) == null || e.destroy(), this.presentation = null, (n = this.resolveFirstDraw) == null || n.call(this), this.resolveFirstDraw = null, super.close(i);
+  async close(e) {
+    var t, n;
+    return this.disposed = !0, (t = this.presentation) == null || t.destroy(), this.presentation = null, (n = this.resolveFirstDraw) == null || n.call(this), this.resolveFirstDraw = null, super.close(e);
   }
 }
-class ti extends ct {
-  constructor(i, e, n) {
-    super({ id: `hololoot-config-${i.id}` });
-    R(this, "token");
-    R(this, "adapter");
-    R(this, "queue");
-    R(this, "config");
-    R(this, "scope", "token");
-    R(this, "busy", !1);
-    R(this, "dismissal", null);
-    this.token = i, this.adapter = e, this.queue = n, this.config = structuredClone(Y(i));
+class ms extends mt {
+  constructor(e, t, n) {
+    super({ id: `hololoot-config-${e.id}` });
+    S(this, "token");
+    S(this, "adapter");
+    S(this, "queue");
+    S(this, "config");
+    S(this, "scope", "token");
+    S(this, "busy", !1);
+    S(this, "dismissal", null);
+    this.token = e, this.adapter = t, this.queue = n, this.config = structuredClone(Z(e));
   }
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       title: x("Title"),
       classes: ["holosuite-loot-window", "holosuite-loot-config"],
-      template: ut("config"),
+      template: gt("config"),
       width: 480,
       height: "auto",
       resizable: !1
     });
   }
   getData() {
-    const i = !!this.adapter.manual, e = !i && game.settings.get(f, "zeroHP"), n = !e && this.config.mode === "automatic" ? "disabled" : this.config.mode, a = (r) => (r == null ? void 0 : r.quantity) ?? (r ? x(`Rule.${r.mode}`) : ""), c = i ? Et(this.token, this.adapter) : Ht(this.token, this.adapter).map(({ entry: r, effective: l, overrides: u, ...d }) => ({
+    const e = !!this.adapter.manual, t = !e && game.settings.get(f, "zeroHP"), n = !t && this.config.mode === "automatic" ? "disabled" : this.config.mode, a = (c) => (c == null ? void 0 : c.quantity) ?? (c ? x(`Rule.${c.mode}`) : ""), o = e ? Wt(this.token, this.adapter) : Bt(this.token, this.adapter).map(({ entry: c, effective: l, overrides: u, ...d }) => ({
       ...d,
       configured: a(l.rule),
       effectiveScope: l.scope,
@@ -1473,79 +1696,79 @@ class ti extends ct {
       actorRule: a(u.actor),
       globalRule: a(u.global),
       ruleScope: x(`Scope.${l.scope}`),
-      original: (r == null ? void 0 : r.originalQuantity) ?? d.quantity,
-      remaining: r ? r.taken ? 0 : r.formula ?? r.data.system.quantity : "—",
-      rollResult: !(r != null && r.taken) && Number.isSafeInteger(r == null ? void 0 : r.rolledQuantity) ? game.i18n.format("HL.QuantityRollResult", { roll: r.rolledQuantity, quantity: r.data.system.quantity }) : "",
-      pending: !!(r != null && r.claim) && !(r != null && r.taken)
-    })), o = E();
+      original: (c == null ? void 0 : c.originalQuantity) ?? d.quantity,
+      remaining: c ? c.taken ? 0 : c.formula ?? H(c.data) : "—",
+      rollResult: !(c != null && c.taken) && Number.isSafeInteger(c == null ? void 0 : c.rolledQuantity) ? game.i18n.format("HL.QuantityRollResult", { roll: c.rolledQuantity, quantity: H(c.data) }) : "",
+      pending: !!(c != null && c.claim) && !(c != null && c.taken)
+    })), r = D();
     return {
       name: this.token.name,
       theme: game.settings.get(f, "panelTheme"),
       busy: this.busy,
-      automatic: e,
-      rows: c,
-      canEdit: o,
-      manual: i,
-      saveDisabled: this.busy || i && !o,
-      canRefresh: !i && o && ot(this.token, this.adapter),
-      scopes: ["token", "actor", "global"].map((r) => ({ value: r, label: x(`Scope.${r}`), selected: this.scope === r })),
-      modes: (e ? ["automatic", "enabled", "disabled"] : ["enabled", "disabled"]).map((r) => ({ value: r, label: x(r), selected: r === n }))
+      automatic: t,
+      rows: o,
+      canEdit: r,
+      manual: e,
+      saveDisabled: this.busy || e && !r,
+      canRefresh: !e && r && ft(this.token, this.adapter),
+      scopes: ["token", "actor", "global"].map((c) => ({ value: c, label: x(`Scope.${c}`), selected: this.scope === c })),
+      modes: (t ? ["automatic", "enabled", "disabled"] : ["enabled", "disabled"]).map((c) => ({ value: c, label: x(c), selected: c === n }))
     };
   }
-  activateListeners(i) {
-    var p, b, w, S;
-    super.activateListeners(i);
-    const e = lt(i);
-    (p = this.dismissal) == null || p.destroy(), this.dismissal = new Wt(e.closest(".window-app, .application") ?? e, () => {
+  activateListeners(e) {
+    var v, b, p, I;
+    super.activateListeners(e);
+    const t = yt(e);
+    (v = this.dismissal) == null || v.destroy(), this.dismissal = new cs(t.closest(".window-app, .application") ?? t, () => {
       this.busy || this.close();
-    }), (b = e.querySelector('[name="mode"]')) == null || b.addEventListener("change", (g) => {
+    }), (b = t.querySelector('[name="mode"]')) == null || b.addEventListener("change", (g) => {
       this.config.mode = g.target.value;
-    }), (w = e.querySelector("[data-save]")) == null || w.addEventListener("click", () => {
-      const g = Array.from(e.querySelectorAll("[data-manual-item]:checked"), (L) => L.value);
+    }), (p = t.querySelector("[data-save]")) == null || p.addEventListener("click", () => {
+      const g = Array.from(t.querySelectorAll("[data-manual-item]:checked"), (C) => C.value);
       this.save(g);
-    }), (S = e.querySelector("[data-close]")) == null || S.addEventListener("click", () => void this.close());
-    const n = e.querySelector('[name="scope"]'), a = e.querySelector('[name="behavior"]'), c = e.querySelector('[name="formula"]'), o = e.querySelector("[data-apply]"), r = e.querySelector("[data-refresh-inventory]"), l = e.querySelector("[data-select-all]");
-    if (!n || !a || !c || !o || !l) return;
-    const u = Array.from(e.querySelectorAll("input[data-rule-item]")), d = () => {
-      this.scope = n.value, n.disabled = a.disabled = c.disabled = this.busy, r && (r.disabled = this.busy);
-      const g = u.filter((C) => {
-        const q = C.dataset[this.scope] === "true";
-        C.disabled = this.busy || !q, q || (C.checked = !1);
-        const h = C.closest("label"), I = h == null ? void 0 : h.querySelector("[data-rule-unavailable]"), v = C.dataset[`${this.scope}Unavailable`];
-        I && (I.textContent = !q && v ? x(v) : "");
-        const y = h == null ? void 0 : h.querySelector("[data-scoped-rule]"), A = C.dataset[`${this.scope}Rule`];
-        return y && (y.textContent = A && C.dataset.effectiveScope !== this.scope ? ` · ${x(`Scope.${this.scope}`)} ${A}` : ""), q;
-      }), L = g.filter((C) => C.checked).length;
-      l.disabled = this.busy || !g.length, l.checked = !!L && L === g.length, l.indeterminate = !!L && !l.checked, o.disabled = this.busy || !L, c.hidden = a.value !== "quantity";
+    }), (I = t.querySelector("[data-close]")) == null || I.addEventListener("click", () => void this.close());
+    const n = t.querySelector('[name="scope"]'), a = t.querySelector('[name="behavior"]'), o = t.querySelector('[name="formula"]'), r = t.querySelector("[data-apply]"), c = t.querySelector("[data-refresh-inventory]"), l = t.querySelector("[data-select-all]");
+    if (!n || !a || !o || !r || !l) return;
+    const u = Array.from(t.querySelectorAll("input[data-rule-item]")), d = () => {
+      this.scope = n.value, n.disabled = a.disabled = o.disabled = this.busy, c && (c.disabled = this.busy);
+      const g = u.filter((L) => {
+        const q = L.dataset[this.scope] === "true";
+        L.disabled = this.busy || !q, q || (L.checked = !1);
+        const h = L.closest("label"), R = h == null ? void 0 : h.querySelector("[data-rule-unavailable]"), w = L.dataset[`${this.scope}Unavailable`];
+        R && (R.textContent = !q && w ? x(w) : "");
+        const y = h == null ? void 0 : h.querySelector("[data-scoped-rule]"), A = L.dataset[`${this.scope}Rule`];
+        return y && (y.textContent = A && L.dataset.effectiveScope !== this.scope ? ` · ${x(`Scope.${this.scope}`)} ${A}` : ""), q;
+      }), C = g.filter((L) => L.checked).length;
+      l.disabled = this.busy || !g.length, l.checked = !!C && C === g.length, l.indeterminate = !!C && !l.checked, r.disabled = this.busy || !C, o.hidden = a.value !== "quantity";
     };
     n.addEventListener("change", d), a.addEventListener("change", d);
     for (const g of u) g.addEventListener("change", d);
     l.addEventListener("change", () => {
       for (const g of u) g.disabled || (g.checked = l.checked);
       d();
-    }), r == null || r.addEventListener("click", async () => {
-      if (!(!E() || this.busy)) {
+    }), c == null || c.addEventListener("click", async () => {
+      if (!(!D() || this.busy)) {
         this.busy = !0, d();
         try {
-          await this.queue.run(this.token.uuid, () => rt(this.token, this.adapter)), ui.notifications.info(x("InventoryRefreshed"));
+          await this.queue.run(this.token.uuid, () => ht(this.token, this.adapter)), ui.notifications.info(x("InventoryRefreshed"));
         } catch (g) {
-          P(g);
+          U(g);
           return;
         } finally {
           this.busy = !1, d();
         }
         this.rendered && this.render(!0);
       }
-    }), o.addEventListener("click", async () => {
-      if (!(!E() || this.busy)) {
+    }), r.addEventListener("click", async () => {
+      if (!(!D() || this.busy)) {
         try {
-          const g = Se(a.value, c.value), L = u.filter((h) => h.checked && !h.disabled).map((h) => h.value), C = this.scope;
+          const g = Ce(a.value, o.value), C = u.filter((h) => h.checked && !h.disabled).map((h) => h.value), L = this.scope;
           this.busy = !0, d();
-          const q = await this.queue.run(this.token.uuid, () => $t(this.token, this.adapter, C, L, g));
+          const q = await this.queue.run(this.token.uuid, () => Kt(this.token, this.adapter, L, C, g));
           for (const h of q ?? [])
-            Xt(h).catch((I) => console.warn("HoloSuite Loot | Could not post quantity roll", I));
+            ls(h).catch((R) => console.warn("HoloSuite Loot | Could not post quantity roll", R));
         } catch (g) {
-          P(g);
+          U(g);
           return;
         } finally {
           this.busy = !1, d();
@@ -1554,201 +1777,204 @@ class ti extends ct {
       }
     }), d();
   }
-  async save(i = []) {
+  async save(e = []) {
     if (!(!game.user.isGM || this.busy)) {
       this.busy = !0, this.render(!0);
       try {
-        const e = this.config.mode === "automatic" && (this.adapter.manual || !game.settings.get(f, "zeroHP")) ? "disabled" : this.config.mode;
-        await this.queue.run(this.token.uuid, () => this.adapter.manual ? Ot(this.token, this.adapter, e, i) : this.token.setFlag(f, "config", { ...Y(this.token), mode: e })), await this.close();
-      } catch (e) {
-        P(e);
+        const t = this.config.mode === "automatic" && (this.adapter.manual || !game.settings.get(f, "zeroHP")) ? "disabled" : this.config.mode;
+        await this.queue.run(this.token.uuid, () => this.adapter.manual ? Qt(this.token, this.adapter, t, e) : this.token.setFlag(f, "config", { ...Z(this.token), mode: t })), await this.close();
+      } catch (t) {
+        U(t);
       } finally {
         this.busy = !1, this.rendered && this.render(!0);
       }
     }
   }
-  async close(i) {
-    var e;
-    return (e = this.dismissal) == null || e.destroy(), this.dismissal = null, super.close(i);
+  async close(e) {
+    var t;
+    return (t = this.dismissal) == null || t.destroy(), this.dismissal = null, super.close(e);
   }
 }
-class ii {
-  constructor(s) {
-    R(this, "sprites", /* @__PURE__ */ new Map());
-    R(this, "texture");
-    R(this, "disposed", !1);
-    var e;
-    this.available = s;
-    const i = ((e = foundry.canvas) == null ? void 0 : e.loadTexture) ?? globalThis.loadTexture;
-    Promise.resolve().then(() => i == null ? void 0 : i(`modules/${f}/assets/ui/loot-badge.svg`)).then((n) => {
+class gs {
+  constructor(i) {
+    S(this, "sprites", /* @__PURE__ */ new Map());
+    S(this, "texture");
+    S(this, "disposed", !1);
+    var t;
+    this.available = i;
+    const e = ((t = foundry.canvas) == null ? void 0 : t.loadTexture) ?? globalThis.loadTexture;
+    Promise.resolve().then(() => e == null ? void 0 : e(`modules/${f}/assets/ui/loot-badge.svg`)).then((n) => {
       this.disposed || !n || (this.texture = n, this.refreshScene());
     }).catch((n) => console.warn("HoloSuite Loot | Badge texture could not load", n));
   }
   refreshScene() {
-    var s;
-    for (const i of ((s = canvas.tokens) == null ? void 0 : s.placeables) ?? []) this.refresh(i);
+    var i;
+    for (const e of ((i = canvas.tokens) == null ? void 0 : i.placeables) ?? []) this.refresh(e);
   }
-  refresh(s) {
-    if (!s || this.disposed || !this.texture) return;
-    const i = s.document, e = i.getFlag(f, "state");
-    if (s.destroyed || s.isPreview || i.hidden || !this.available(i) || e && !e.entries.some((a) => !a.taken && !a.hidden)) {
-      this.remove(s);
+  refresh(i) {
+    if (!i || this.disposed || !this.texture) return;
+    const e = i.document, t = e.getFlag(f, "state");
+    if (i.destroyed || i.isPreview || e.hidden || !this.available(e) || t && !t.entries.some((a) => !a.taken && !a.hidden)) {
+      this.remove(i);
       return;
     }
-    let n = this.sprites.get(s);
-    (n != null && n.destroyed || (n == null ? void 0 : n.parent) !== s) && (this.remove(s), n = new PIXI.Sprite(this.texture), n.name = "holosuite-loot-badge", n.eventMode = "none", n.anchor.set(0.5), n.width = n.height = 24, n.zIndex = 100, s.addChild(n), this.sprites.set(s, n)), n.position.set(s.w, 0);
+    let n = this.sprites.get(i);
+    (n != null && n.destroyed || (n == null ? void 0 : n.parent) !== i) && (this.remove(i), n = new PIXI.Sprite(this.texture), n.name = "holosuite-loot-badge", n.eventMode = "none", n.anchor.set(0.5), n.width = n.height = 24, n.zIndex = 100, i.addChild(n), this.sprites.set(i, n)), n.position.set(i.w, 0);
   }
-  remove(s) {
-    var e;
-    const i = this.sprites.get(s);
-    this.sprites.delete(s), i && !i.destroyed && ((e = i.parent) == null || e.removeChild(i), i.destroy());
+  remove(i) {
+    var t;
+    const e = this.sprites.get(i);
+    this.sprites.delete(i), e && !e.destroyed && ((t = e.parent) == null || t.removeChild(e), e.destroy());
   }
   destroy() {
     this.disposed = !0;
-    for (const s of this.sprites.keys()) this.remove(s);
+    for (const i of this.sprites.keys()) this.remove(i);
   }
 }
-const H = /* @__PURE__ */ new Map();
-let F = null, V = !1, de = 0;
-const U = () => It(game.system.id), re = () => Ft(U()), Ee = (t) => (t == null ? void 0 : t.actor) && (U().manual ? !!t.actor.items : t.actor.type === "npc"), si = (t, s, i) => {
-  var e;
-  return Qe(t, game.actors.contents, (e = game.scenes.get(t.viewedScene)) == null ? void 0 : e.tokens, s, i);
-}, ue = new Rt({
+const E = /* @__PURE__ */ new Map();
+let M = null, K = !1, me = 0;
+const G = () => Nt(game.system.id), ue = () => Vt(G()), De = (s) => {
+  var i, e;
+  return (s == null ? void 0 : s.actor) && (G().manual ? !!s.actor.items : ((e = (i = G()).sourceActor) == null ? void 0 : e.call(i, s.actor)) ?? s.actor.type === "npc");
+}, ys = (s, i, e) => {
+  var t;
+  return Ye(s, game.actors.contents, (t = game.scenes.get(s.viewedScene)) == null ? void 0 : t.tokens, i, e);
+}, fe = new Ot({
   moduleId: f,
-  authority: E,
-  environment: re,
-  adapter: U,
-  token: async (t) => {
-    if (!/^Scene\.[^.]+\.Token\.[^.]+$/.test(t)) throw new m("InvalidRequest");
-    const i = await (foundry.utils.fromUuid ?? globalThis.fromUuid)(t);
-    return (i == null ? void 0 : i.documentName) === "Token" ? i : null;
+  authority: D,
+  environment: ue,
+  adapter: G,
+  token: async (s) => {
+    if (!/^Scene\.[^.]+\.Token\.[^.]+$/.test(s)) throw new m("InvalidRequest");
+    const e = await (foundry.utils.fromUuid ?? globalThis.fromUuid)(s);
+    return (e == null ? void 0 : e.documentName) === "Token" ? e : null;
   },
-  actor: (t) => game.actors.get(t) ?? (foundry.utils.fromUuid ?? globalThis.fromUuid)(t),
+  actor: (s) => game.actors.get(s) ?? (foundry.utils.fromUuid ?? globalThis.fromUuid)(s),
   id: () => foundry.utils.randomID(),
-  destination: (t, s, i) => game.settings.get(f, "characterSelector") ? t.actorId ? ue.io.actor(t.actorId) : null : si(s, U(), i),
-  load: $e,
-  save: Nt,
-  summary: Dt,
-  collected: Zt,
-  rollQuantity: At,
-  quantityRolled: Yt
-}), Me = (t) => jt(t, ue);
-function Oe(t) {
-  var s;
-  return V && se(t, re()) && (game.user.isGM || !t.hidden && ((s = t.object) == null ? void 0 : s.isVisible));
+  destination: (s, i, e) => game.settings.get(f, "characterSelector") ? s.actorId ? fe.io.actor(s.actorId) : null : ys(i, G(), e),
+  load: Oe,
+  save: Jt,
+  summary: kt,
+  collected: fs,
+  rollQuantity: zt,
+  quantityRolled: ds
+}), xe = (s) => ts(s, fe);
+function Pe(s) {
+  var i;
+  return K && ae(s, ue()) && (game.user.isGM || !s.hidden && ((i = s.object) == null ? void 0 : i.isVisible));
 }
-async function Re(t) {
-  var a, c, o, r, l;
-  t = (t == null ? void 0 : t.document) ?? t;
-  const s = U();
-  if (!s) {
-    P(new m("Unsupported"));
+async function qe(s) {
+  var a, o, r, c, l;
+  s = (s == null ? void 0 : s.document) ?? s;
+  const i = G();
+  if (!i) {
+    U(new m("Unsupported"));
     return;
   }
-  if (game.user.isGM) return le(t);
-  if (!Oe(t)) {
-    P(new m("Unavailable"));
+  if (game.user.isGM) return he(s);
+  if (!Pe(s)) {
+    U(new m("Unavailable"));
     return;
   }
-  const i = ++de;
-  let e;
-  if (He() > 0 && (!H.has(t.uuid) || (a = H.get(t.uuid)) != null && a.disposed)) {
+  const e = ++me;
+  let t;
+  if (Ne() > 0 && (!E.has(s.uuid) || (a = E.get(s.uuid)) != null && a.disposed)) {
     try {
-      e = await Me({ action: "view", tokenUuid: t.uuid });
+      t = await xe({ action: "view", tokenUuid: s.uuid });
     } catch (u) {
-      i === de && ((c = canvas.scene) == null ? void 0 : c.id) === ((o = t.parent) == null ? void 0 : o.id) && P(u);
+      e === me && ((o = canvas.scene) == null ? void 0 : o.id) === ((r = s.parent) == null ? void 0 : r.id) && U(u);
       return;
     }
-    if (i !== de || ((r = canvas.scene) == null ? void 0 : r.id) !== ((l = t.parent) == null ? void 0 : l.id)) return;
+    if (e !== me || ((c = canvas.scene) == null ? void 0 : c.id) !== ((l = s.parent) == null ? void 0 : l.id)) return;
   }
-  for (const [u, d] of H)
-    u !== t.uuid && !d.disposed && await d.close();
-  if (i !== de) return;
-  let n = H.get(t.uuid);
-  (!n || n.disposed) && (n = new ei(t, Me, s), H.set(t.uuid, n), await n.show(e), e !== void 0) || n.disposed || await n.refresh();
+  for (const [u, d] of E)
+    u !== s.uuid && !d.disposed && await d.close();
+  if (e !== me) return;
+  let n = E.get(s.uuid);
+  (!n || n.disposed) && (n = new hs(s, xe, i), E.set(s.uuid, n), await n.show(t), t !== void 0) || n.disposed || await n.refresh();
 }
-async function le(t) {
-  var s;
-  if (!(!game.user.isGM || !U())) {
-    if (((s = t == null ? void 0 : t.parent) == null ? void 0 : s.documentName) !== "Scene" || !Ee(t)) {
+async function he(s) {
+  var i;
+  if (!(!game.user.isGM || !G())) {
+    if (((i = s == null ? void 0 : s.parent) == null ? void 0 : i.documentName) !== "Scene" || !De(s)) {
       ui.notifications.info(x("SelectToken"));
       return;
     }
     try {
-      new ti(t, U(), ue.queue).render(!0);
-    } catch (i) {
-      P(i);
+      new ms(s, G(), fe.queue).render(!0);
+    } catch (e) {
+      U(e);
     }
   }
 }
-function ce(t) {
-  const s = H.get(t);
-  s && !s.disposed && s.refresh();
+function le(s) {
+  const i = E.get(s);
+  i && !i.disposed && i.refresh();
 }
-function Ne(t) {
-  const s = U(), i = () => {
-    const e = t.getFlag(f, "state");
-    return !e || s.currencySnapshotVersion && e.currencyReady !== s.currencySnapshotVersion;
+function Ue(s) {
+  const i = G(), e = () => {
+    const t = s.getFlag(f, "state");
+    return !t || i.currencySnapshotVersion && t.currencyReady !== i.currencySnapshotVersion;
   };
-  !V || !E() || s.manual || !i() || !se(t, re()) || ue.queue.run(t.uuid, async () => {
-    E() && i() && se(t, re()) && await $e(t, s);
-  }).catch((e) => console.warn("HoloSuite Loot | Snapshot initialization failed", t.uuid, e));
+  !K || !D() || i.manual || !e() || !ae(s, ue()) || fe.queue.run(s.uuid, async () => {
+    D() && e() && ae(s, ue()) && await Oe(s, i);
+  }).catch((t) => console.warn("HoloSuite Loot | Snapshot initialization failed", s.uuid, t));
 }
-function D() {
-  var t;
-  for (const s of ((t = canvas.scene) == null ? void 0 : t.tokens) ?? []) Ne(s);
-  F == null || F.refreshScene();
+function P() {
+  var s;
+  for (const i of ((s = canvas.scene) == null ? void 0 : s.tokens) ?? []) Ue(i);
+  M == null || M.refreshScene();
 }
-function ni() {
-  const t = [.../* @__PURE__ */ new Set([...canvas.tokens.controlled, ...game.user.targets])];
-  if (t.length !== 1) {
+function ps() {
+  const s = [.../* @__PURE__ */ new Set([...canvas.tokens.controlled, ...game.user.targets])];
+  if (s.length !== 1) {
     ui.notifications.info(x("SelectToken"));
     return;
   }
-  const s = t[0];
-  game.user.isGM ? le(s.document) : Re(s.document);
+  const i = s[0];
+  game.user.isGM ? he(i.document) : qe(i.document);
 }
-function Ve() {
-  var s;
-  const t = ((s = game.modules.get("holosuite-core")) == null ? void 0 : s.api) ?? game.holosuite;
-  return t != null && t.registerApp ? (t.registerApp({
+function We() {
+  var i;
+  const s = ((i = game.modules.get("holosuite-core")) == null ? void 0 : i.api) ?? game.holosuite;
+  return s != null && s.registerApp ? (s.registerApp({
     id: f,
     title: x("Title"),
     icon: "fa-solid fa-box-open",
     playerVisible: !1,
     premium: !1,
     description: x("SelectToken"),
-    open: ni
+    open: ps
   }), !0) : !1;
 }
-let M, X, ze = "", Be = 0;
-function Q(t) {
-  var r, l;
-  if (game.user.isGM || !V || t.type === "pointerdown" && t.button !== 2) return;
-  const s = M == null ? void 0 : M.getBoundingClientRect(), i = (l = (r = canvas.app) == null ? void 0 : r.renderer) == null ? void 0 : l.screen;
-  if (!(s != null && s.width) || !s.height || !i || !canvas.stage) return;
-  const e = canvas.stage.worldTransform.applyInverse({
-    x: (t.clientX - s.left) * i.width / s.width,
-    y: (t.clientY - s.top) * i.height / s.height
+let F, Y, Qe = "", Je = 0;
+function Q(s) {
+  var c, l;
+  if (game.user.isGM || !K || s.type === "pointerdown" && s.button !== 2) return;
+  const i = F == null ? void 0 : F.getBoundingClientRect(), e = (l = (c = canvas.app) == null ? void 0 : c.renderer) == null ? void 0 : l.screen;
+  if (!(i != null && i.width) || !i.height || !e || !canvas.stage) return;
+  const t = canvas.stage.worldTransform.applyInverse({
+    x: (s.clientX - i.left) * e.width / i.width,
+    y: (s.clientY - i.top) * e.height / i.height
   }), n = (u) => {
     var d;
-    return (u == null ? void 0 : u.isVisible) && (((d = u.bounds) == null ? void 0 : d.contains(e.x, e.y)) ?? (e.x >= u.document.x && e.y >= u.document.y && e.x <= u.document.x + u.w && e.y <= u.document.y + u.h));
-  }, a = n(X) ? X : [...canvas.tokens.placeables].reverse().find(n), c = a == null ? void 0 : a.document;
-  if (!Oe(c)) {
-    for (const u of H.values()) u.disposed || u.close();
+    return (u == null ? void 0 : u.isVisible) && (((d = u.bounds) == null ? void 0 : d.contains(t.x, t.y)) ?? (t.x >= u.document.x && t.y >= u.document.y && t.x <= u.document.x + u.w && t.y <= u.document.y + u.h));
+  }, a = n(Y) ? Y : [...canvas.tokens.placeables].reverse().find(n), o = a == null ? void 0 : a.document;
+  if (!Pe(o)) {
+    for (const u of E.values()) u.disposed || u.close();
     return;
   }
-  if (t.type === "contextmenu" && ze === c.uuid && Date.now() - Be < 1e3) return;
-  t.type === "pointerdown" && (ze = c.uuid, Be = Date.now());
-  const o = H.get(c.uuid);
-  o && !o.disposed ? o.close() : Re(c);
+  if (s.type === "contextmenu" && Qe === o.uuid && Date.now() - Je < 1e3) return;
+  s.type === "pointerdown" && (Qe = o.uuid, Je = Date.now());
+  const r = E.get(o.uuid);
+  r && !r.disposed ? r.close() : qe(o);
 }
-function dt() {
-  var t, s;
-  F == null || F.destroy(), F = V ? new ii((i) => se(i, re())) : null, M == null || M.removeEventListener("contextmenu", Q, !0), M == null || M.removeEventListener("pointerdown", Q, !0), M = ((t = canvas.app) == null ? void 0 : t.canvas) ?? ((s = canvas.app) == null ? void 0 : s.view), M == null || M.addEventListener("contextmenu", Q, !0), M == null || M.addEventListener("pointerdown", Q, !0);
+function pt() {
+  var s, i;
+  M == null || M.destroy(), M = K ? new gs((e) => ae(e, ue())) : null, F == null || F.removeEventListener("contextmenu", Q, !0), F == null || F.removeEventListener("pointerdown", Q, !0), F = ((s = canvas.app) == null ? void 0 : s.canvas) ?? ((i = canvas.app) == null ? void 0 : i.view), F == null || F.addEventListener("contextmenu", Q, !0), F == null || F.addEventListener("pointerdown", Q, !0);
 }
 Hooks.once("init", () => {
-  game.settings.register(f, ye, { scope: "world", config: !1, type: Object, default: {} }), game.settings.register(f, "zeroHP", {
+  game.settings.register(f, ve, { scope: "world", config: !1, type: Object, default: {} }), game.settings.register(f, "zeroHP", {
     name: "HL.ZeroHP",
     hint: "HL.ZeroHPHint",
     scope: "world",
@@ -1756,8 +1982,8 @@ Hooks.once("init", () => {
     type: Boolean,
     default: !0,
     onChange: () => {
-      D();
-      for (const t of H.keys()) ce(t);
+      P();
+      for (const s of E.keys()) le(s);
     }
   }), game.settings.register(f, "hideGmLootButton", {
     name: "HL.HideGmLootButton",
@@ -1773,15 +1999,15 @@ Hooks.once("init", () => {
     config: !0,
     type: Boolean,
     default: !1
-  }), game.settings.register(f, Ye, {
+  }), game.settings.register(f, nt, {
     name: "HL.LootRange",
     hint: "HL.LootRangeHint",
     scope: "world",
     config: !0,
     type: Number,
-    default: Ze,
+    default: at,
     onChange: () => {
-      for (const t of H.keys()) ce(t);
+      for (const s of E.keys()) le(s);
     }
   }), game.settings.register(f, "chatLog", {
     name: "HL.ChatLog",
@@ -1799,97 +2025,97 @@ Hooks.once("init", () => {
     default: "holo",
     choices: { holo: "HL.ThemeHolo", neutral: "HL.ThemeNeutral", fantasy: "HL.ThemeFantasy" },
     onChange: () => {
-      for (const t of H.values()) t.disposed || t.render(!1);
+      for (const s of E.values()) s.disposed || s.render(!1);
     }
   });
 });
 Hooks.once("ready", async () => {
-  var t;
-  if (!((t = game.modules.get("holosuite-core")) != null && t.active)) {
+  var s;
+  if (!((s = game.modules.get("holosuite-core")) != null && s.active)) {
     ui.notifications.error(x("CoreMissing"));
     return;
   }
   try {
-    await _t(ue, ce);
-  } catch (s) {
-    P(s);
+    await es(fe, le);
+  } catch (i) {
+    U(i);
     return;
   }
-  V = !0, game.modules.get(f).api = {
-    version: he,
-    open: Re,
-    configure: le,
-    registerAdapter: St,
+  K = !0, game.modules.get(f).api = {
+    version: ye,
+    open: qe,
+    configure: he,
+    registerAdapter: Et,
     // Requests still pass every authority and permission check, including calls from macros.
-    request: Me,
+    request: xe,
     authority: () => {
-      var s;
-      return (s = Ae()) == null ? void 0 : s.id;
+      var i;
+      return (i = Ee()) == null ? void 0 : i.id;
     }
-  }, Ve(), setTimeout(Ve, 500), dt(), D(), console.info(`HoloSuite Loot | ${he} ready; Foundry ${game.version}, ${game.system.id} ${game.system.version}`);
+  }, We(), setTimeout(We, 500), pt(), P(), console.info(`HoloSuite Loot | ${ye} ready; Foundry ${game.version}, ${game.system.id} ${game.system.version}`);
 });
 Hooks.on("canvasReady", () => {
-  dt(), D();
+  pt(), P();
 });
-Hooks.on("hoverToken", (t, s) => {
-  s ? X = t : X === t && (X = null);
+Hooks.on("hoverToken", (s, i) => {
+  i ? Y = s : Y === s && (Y = null);
 });
 Hooks.on("canvasTearDown", () => {
-  F == null || F.destroy(), F = null, X = null, M == null || M.removeEventListener("contextmenu", Q, !0), M == null || M.removeEventListener("pointerdown", Q, !0), M = null;
-  for (const t of H.values()) t.close();
-  H.clear();
+  M == null || M.destroy(), M = null, Y = null, F == null || F.removeEventListener("contextmenu", Q, !0), F == null || F.removeEventListener("pointerdown", Q, !0), F = null;
+  for (const s of E.values()) s.close();
+  E.clear();
 });
-Hooks.on("renderTokenHUD", (t, s) => {
-  var c;
-  if (!V) return;
-  const i = (c = t.object) == null ? void 0 : c.document;
-  if (!Ee(i)) return;
-  const e = s instanceof HTMLElement ? s : s[0], n = e.querySelector(".col.right") ?? e;
-  e.querySelectorAll(".hl-token-action").forEach((o) => o.remove());
-  const a = (o, r, l) => {
+Hooks.on("renderTokenHUD", (s, i) => {
+  var o;
+  if (!K) return;
+  const e = (o = s.object) == null ? void 0 : o.document;
+  if (!De(e)) return;
+  const t = i instanceof HTMLElement ? i : i[0], n = t.querySelector(".col.right") ?? t;
+  t.querySelectorAll(".hl-token-action").forEach((r) => r.remove());
+  const a = (r, c, l) => {
     const u = document.createElement("button");
-    u.type = "button", u.className = "control-icon hl-token-action", u.title = o, u.setAttribute("aria-label", o);
+    u.type = "button", u.className = "control-icon hl-token-action", u.title = r, u.setAttribute("aria-label", r);
     const d = document.createElement("i");
-    d.className = r, u.append(d), u.addEventListener("click", (p) => {
-      p.preventDefault(), p.stopPropagation(), l();
+    d.className = c, u.append(d), u.addEventListener("click", (v) => {
+      v.preventDefault(), v.stopPropagation(), l();
     }), n.append(u);
   };
-  game.user.isGM ? U() && !game.settings.get(f, "hideGmLootButton") && a(x("Loot"), "fa-solid fa-box-open", () => void le(i)) : Oe(i) && a(x("Loot"), "fa-solid fa-box-open", () => void Re(i));
+  game.user.isGM ? G() && !game.settings.get(f, "hideGmLootButton") && a(x("Loot"), "fa-solid fa-box-open", () => void he(e)) : Pe(e) && a(x("Loot"), "fa-solid fa-box-open", () => void qe(e));
 });
-Hooks.on("renderTokenConfig", (t, s) => {
+Hooks.on("renderTokenConfig", (s, i) => {
   var a;
-  if (!V || !game.user.isGM || !U()) return;
-  const i = t.document ?? t.object;
-  if (((a = i == null ? void 0 : i.parent) == null ? void 0 : a.documentName) !== "Scene" || !Ee(i)) return;
-  const e = s instanceof HTMLElement ? s : s[0];
-  if (e.querySelector(".hl-token-config")) return;
+  if (!K || !game.user.isGM || !G()) return;
+  const e = s.document ?? s.object;
+  if (((a = e == null ? void 0 : e.parent) == null ? void 0 : a.documentName) !== "Scene" || !De(e)) return;
+  const t = i instanceof HTMLElement ? i : i[0];
+  if (t.querySelector(".hl-token-config")) return;
   const n = document.createElement("button");
-  n.type = "button", n.className = "hl-token-config", n.textContent = x("Configure"), n.addEventListener("click", () => le(i)), (e.querySelector('[data-tab="character"]') ?? e.querySelector("form") ?? e).append(n);
+  n.type = "button", n.className = "hl-token-config", n.textContent = x("Configure"), n.addEventListener("click", () => he(e)), (t.querySelector('[data-tab="character"]') ?? t.querySelector("form") ?? t).append(n);
 });
-Hooks.on("drawToken", (t) => F == null ? void 0 : F.refresh(t));
-Hooks.on("refreshToken", (t, s) => {
-  (!s || s.refreshSize || s.refreshShape) && (F == null || F.refresh(t));
+Hooks.on("drawToken", (s) => M == null ? void 0 : M.refresh(s));
+Hooks.on("refreshToken", (s, i) => {
+  (!i || i.refreshSize || i.refreshShape) && (M == null || M.refresh(s));
 });
-Hooks.on("destroyToken", (t) => F == null ? void 0 : F.remove(t));
-Hooks.on("updateToken", (t, s) => {
-  var i, e, n;
-  if (Ne(t), F == null || F.refresh(t.object), ce(t.uuid), !(!H.size || !He() || ((i = t.parent) == null ? void 0 : i.id) !== ((e = canvas.scene) == null ? void 0 : e.id) || !t.actor || !((n = U()) != null && n.destination(t.actor)) || !t.actor.testUserPermission(game.user, "OWNER") || !["x", "y", "elevation", "width", "height", "hidden"].some((a) => a in s)))
-    for (const a of H.keys()) a !== t.uuid && ce(a);
+Hooks.on("destroyToken", (s) => M == null ? void 0 : M.remove(s));
+Hooks.on("updateToken", (s, i) => {
+  var e, t, n;
+  if (Ue(s), M == null || M.refresh(s.object), le(s.uuid), !(!E.size || !Ne() || ((e = s.parent) == null ? void 0 : e.id) !== ((t = canvas.scene) == null ? void 0 : t.id) || !s.actor || !((n = G()) != null && n.destination(s.actor)) || !s.actor.testUserPermission(game.user, "OWNER") || !["x", "y", "elevation", "width", "height", "hidden"].some((a) => a in i)))
+    for (const a of E.keys()) a !== s.uuid && le(a);
 });
-Hooks.on("createToken", Ne);
-Hooks.on("createCombatant", D);
-Hooks.on("updateCombatant", D);
-Hooks.on("deleteCombatant", D);
-Hooks.on("updateCombat", D);
-Hooks.on("deleteCombat", D);
-Hooks.on("updateActor", D);
-Hooks.on("createActiveEffect", D);
-Hooks.on("updateActiveEffect", D);
-Hooks.on("deleteActiveEffect", D);
-Hooks.on("userConnected", D);
-Hooks.on("deleteToken", (t) => {
-  var s;
-  if ((s = H.get(t.uuid)) == null || s.close(), H.delete(t.uuid), !!E())
-    for (const i of game.journal.contents)
-      i.getFlag(f, "tokenUuid") === t.uuid && i.delete().catch(console.warn);
+Hooks.on("createToken", Ue);
+Hooks.on("createCombatant", P);
+Hooks.on("updateCombatant", P);
+Hooks.on("deleteCombatant", P);
+Hooks.on("updateCombat", P);
+Hooks.on("deleteCombat", P);
+Hooks.on("updateActor", P);
+Hooks.on("createActiveEffect", P);
+Hooks.on("updateActiveEffect", P);
+Hooks.on("deleteActiveEffect", P);
+Hooks.on("userConnected", P);
+Hooks.on("deleteToken", (s) => {
+  var i;
+  if ((i = E.get(s.uuid)) == null || i.close(), E.delete(s.uuid), !!D())
+    for (const e of game.journal.contents)
+      e.getFlag(f, "tokenUuid") === s.uuid && e.delete().catch(console.warn);
 });

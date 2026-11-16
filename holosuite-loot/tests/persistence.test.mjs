@@ -6,6 +6,20 @@ import { Dnd5eAdapter, getAdapter } from '../src/adapters.mjs';
 import { BUILD_VERSION } from '../src/model.mjs';
 const ID = 'holosuite-loot';
 
+test('Star Wars numeric rarity leaves the loot row readable', async t => {
+  const compiled = await build({ stdin: { contents: "export {summary} from './persistence';",
+    resolveDir: fileURLToPath(new URL('../src', import.meta.url)), loader: 'ts' }, bundle: true, write: false, format: 'esm' });
+  const { summary } = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputFiles[0].text).toString('base64')}`);
+  const { game, DOMParser } = globalThis;
+  t.after(() => Object.assign(globalThis, { game, DOMParser }));
+  globalThis.game = { i18n: { localize(key) { assert.equal(typeof key, 'string'); return key; } } };
+  globalThis.DOMParser = class { parseFromString() { return { body: { textContent: '' } }; } };
+  const data = { name: 'Blaster', type: 'weapon', system: { quantity: { value: 2 }, rarity: { value: 4 } } };
+  const result = summary({ texture: {} }, { entries: [{ id: 'blaster', data }] });
+  assert.equal(result.entries[0].rarity, '');
+  assert.equal(result.entries[0].quantity, 2);
+});
+
 test('normal Foundry flags persist loot without Web Crypto and protect depletion from token edits', async () => {
   const compiled = await build({ stdin: { contents: `export {loadState,saveState} from './persistence';`,
     resolveDir: fileURLToPath(new URL('../src', import.meta.url)), loader: 'ts' }, bundle: true, write: false, format: 'esm', platform: 'browser' });

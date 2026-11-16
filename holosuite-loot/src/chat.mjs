@@ -1,4 +1,4 @@
-import { MODULE_ID } from "./model.mjs";
+import { itemQuantity, MODULE_ID } from "./model.mjs";
 
 const escape = value => String(value ?? "").replace(/[&<>"']/g, char => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -29,7 +29,7 @@ export async function postLootChat({ token, actor, entry, adapter }) {
   const item = adapter.preview ? adapter.preview(entry) : entry.data;
   const text = game.i18n.format("HL.ChatLooted", {
     actor: escape(actor.name), source: escape(token.name), item: escape(item.name),
-    quantity: escape(entry.wholeItem ? 1 : entry.currency?.amount ?? item.system?.quantity ?? 1)
+    quantity: escape(entry.wholeItem ? 1 : entry.currency?.amount ?? itemQuantity(item))
   });
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),

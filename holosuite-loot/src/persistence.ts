@@ -1,4 +1,4 @@
-import { MODULE_ID, LootError, canonical, configFor, SerialQueue } from "./model.mjs";
+import { MODULE_ID, LootError, canonical, itemQuantity, setItemQuantity, configFor, SerialQueue } from "./model.mjs";
 import { RULE_SETTING, isDiceRule, parseRule, ruleKeys, resolveRule, resolveQuantity, withRule } from "./rules.mjs";
 import { isAuthority } from "./permissions";
 declare const game: any;
@@ -30,7 +30,7 @@ const mirrorState = (token: any, state: any) => token.setFlag(MODULE_ID, "state"
   })
 });
 const generatesLoot = (item: any, adapter: any, rule: any) =>
-  isDiceRule(rule) && adapter.sourceClaim && adapter.removeSource && !item.balance && !adapter.entryMetadata?.(item)?.currency;
+  isDiceRule(rule) && item.system?.quantity != null && adapter.sourceClaim && adapter.removeSource && !item.balance && !adapter.entryMetadata?.(item)?.currency;
 
 export async function rollLootQuantity(formula: string) {
   const rule = parseRule("quantity", formula);
@@ -53,8 +53,8 @@ async function inventoryEntry(item: any, adapter: any, key: string, rule: any,
   { original, previousRoll, legacyRollCeiling, onRoll }: InventoryEntryOptions = {}) {
   const data = item.balance ? structuredClone(item.balance.data) : adapter.snapshot(item);
   if (adapter.manual) return { id: foundry.utils.randomID(), data, wholeItem: true, source: { itemId: item.id, ruleKey: key } };
-  const originalQuantity = original ?? data.system.quantity;
-  const available = Math.min(originalQuantity, data.system.quantity);
+  const originalQuantity = original ?? itemQuantity(data);
+  const available = Math.min(originalQuantity, itemQuantity(data));
   const formula = previousRoll === undefined && legacyRollCeiling === undefined && generatesLoot(item, adapter, rule)
     ? rule.quantity : undefined;
   let rolledQuantity: number | undefined;
@@ -73,7 +73,7 @@ async function inventoryEntry(item: any, adapter: any, key: string, rule: any,
     }
     return rolledQuantity;
   });
-  data.system.quantity = quantity;
+  setItemQuantity(data, quantity);
   return { id: foundry.utils.randomID(), data, originalQuantity, limit: limitKey(rule), hidden: quantity === 0,
     ...(formula ? { formula } : {}),
     ...(rolledQuantity === undefined ? {} : { rolledQuantity }),
@@ -119,7 +119,7 @@ export function ruleRows(token: any, adapter: any) {
     const tokenUnavailable = locked ? "RuleLocked" : !keys.token || (state && !entry) ? "RuleMissingSnapshot"
       : entry?.taken ? "RuleCollected" : entry?.claim ? "RuleReserved" : "";
     return {
-      id: item.id, name: item.name, img: item.img, quantity: item.system.quantity, entry,
+      id: item.id, name: item.name, img: item.img, quantity: itemQuantity(item), entry,
       effective: resolveRule(keys, corpse, shared),
       overrides: { token: corpse[keys.token], actor: shared.actor?.[keys.actor], global: shared.global?.[keys.global] },
       canToken: !tokenUnavailable, tokenUnavailable,
@@ -169,10 +169,10 @@ export async function editRules(token: any, adapter: any, scope: string, ids: st
     if (entry.limit !== limitKey(effective) || (!entry.formula && generatesLoot(item, adapter, effective))) {
       let roll;
       const replacement = await inventoryEntry(item, adapter, key, effective, {
-        original: entry.originalQuantity ?? entry.data.system.quantity, onRoll: result => { roll = result; }
+        original: entry.originalQuantity ?? itemQuantity(entry.data), onRoll: result => { roll = result; }
       });
       replacements.set(entry.id, replacement);
-      if (roll) rolls.push({ roll, itemName: item.name, quantity: replacement.data.system.quantity });
+      if (roll) rolls.push({ roll, itemName: item.name, quantity: itemQuantity(replacement.data) });
     }
   }
   if (!isAuthority()) throw new LootError("RuleGM");
@@ -280,7 +280,7 @@ export async function refreshInventory(token: any, adapter: any, selection?: Man
       : parseRule(limit === "allow" || limit === "never" ? limit : "quantity", limit);
     // Old records only stored the clamped result. Keep it as the roll ceiling.
     const previousRoll = prior?.saved.rolledQuantity;
-    const legacyRollCeiling = limit === undefined || prior.saved.formula ? undefined : prior.saved.rollCeiling ?? prior.saved.data.system.quantity;
+    const legacyRollCeiling = limit === undefined || prior.saved.formula ? undefined : prior.saved.rollCeiling ?? itemQuantity(prior.saved.data);
     entries.push(reuseId(await inventoryEntry(item, adapter, keys.token, rule, { previousRoll, legacyRollCeiling }), prior));
   }
   if (!isAuthority()) throw new LootError("RuleGM");
@@ -359,12 +359,11 @@ export async function loadState(token: any, adapter: any, selection?: ManualSele
     if (entry.taken) return [{ ...entry, data: null }];
     const saved = payload.find((item: any) => item.id === entry.id);
     const data = saved?.data;
-    const swade = adapter.id === "swade";
-    if (!data || (!swade && !!saved.wholeItem !== !!adapter.manual)) throw new LootError("RecoveryRequired");
+    if (!data || (!adapter.acceptsLegacyWholeItems && !!saved.wholeItem !== !!adapter.manual)) throw new LootError("RecoveryRequired");
     let source = saved.source;
-    const liveItem = swade && source?.itemId ? token.actor?.items.get(source.itemId) : null;
+    const liveItem = adapter.allowsStoredItem && source?.itemId ? token.actor?.items.get(source.itemId) : null;
     // Keep pending claims available for transaction recovery, even if the source changed.
-    const excluded = swade && saved.currency?.storage !== "balance"
+    const excluded = adapter.allowsStoredItem && saved.currency?.storage !== "balance"
       && (!adapter.allowsStoredItem(data) || (liveItem && !adapter.allowsStoredItem(liveItem)));
     if (excluded && !entry.claim) return [];
     // Upgrade old inventory snapshots only when one exact source can be identified.
@@ -397,17 +396,20 @@ export function summary(token: any, state: any) {
       const unidentified = data.system.identified === false || data.system.identification?.status === "unidentified";
       const description = unidentified ? data.system.unidentified?.description
         : typeof data.system.description === "string" ? data.system.description : data.system.description?.value;
+      const rarity = typeof data.system.rarity === "string" ? data.system.rarity
+        : typeof data.system.traits?.rarity === "string" ? data.system.traits.rarity : "";
+      const rarityLabel = (globalThis as any).CONFIG?.DND5E?.itemRarity?.[rarity]
+        ?? (globalThis as any).CONFIG?.PF2E?.rarityTraits?.[rarity];
       return {
-        id: entry.id, name: entry.currency ? (entry.currency.unit === "swade" ? data.name : game.i18n.localize(`HL.Currency.${entry.currency.unit}`))
+        id: entry.id, name: entry.currency ? (game.i18n.has?.(`HL.Currency.${entry.currency.unit}`) ? game.i18n.localize(`HL.Currency.${entry.currency.unit}`) : data.name)
           : unidentified ? (data.system.unidentified?.name || data.system.identification?.unidentified?.name || game.i18n.localize("HL.Unidentified")) : data.name,
         currency: !!entry.currency,
         img: unidentified ? data.system.identification?.unidentified?.img || data.img : data.img,
-        quantity: entry.wholeItem ? 1 : entry.currency?.amount ?? data.system.quantity,
+        quantity: entry.wholeItem ? 1 : entry.currency?.amount ?? itemQuantity(data),
         ...(entry.wholeItem ? { wholeItem: true } : {}),
         ...(entry.formula ? { formula: entry.formula } : {}),
         type: entry.currency ? game.i18n.localize("HL.CurrencyLabel") : game.i18n.localize(`TYPES.Item.${data.type}`),
-        rarity: unidentified ? "" : game.i18n.localize((globalThis as any).CONFIG?.DND5E?.itemRarity?.[data.system.rarity]
-          ?? (globalThis as any).CONFIG?.PF2E?.rarityTraits?.[data.system.traits?.rarity] ?? data.system.rarity ?? ""),
+        rarity: unidentified || !rarity ? "" : game.i18n.localize(typeof rarityLabel === "string" ? rarityLabel : rarity),
         tooltip: new DOMParser().parseFromString(description ?? "", "text/html").body.textContent?.slice(0, 1500) ?? "",
         pending: !!entry.claim
       };

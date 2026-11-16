@@ -105,5 +105,7 @@ export function environment(adapter?: any) {
   const automatic = game.settings.get(MODULE_ID, "zeroHP");
   const feet = adapter ? lootRange() : 0;
   return { combats: game.combats.contents, automatic, zeroHP: automatic, manual: !!adapter?.manual, visible,
+    sourceActor: adapter?.sourceActor?.bind(adapter), hitPoints: adapter?.hitPoints?.bind(adapter),
+    defeated: adapter?.defeated?.bind(adapter),
     inRange: feet > 0 ? (token: any, user: any, recipient?: any) => withinLootRange(token, user, adapter, feet, recipient) : undefined };
 }
