@@ -1,7 +1,7 @@
-<section class="security-camera-manager">
+<section data-holosuite-branding="security-cameras" class="security-camera-manager">
   <aside class="security-camera-monitor-list">
     <header>
-      <h2><span class="security-camera-network-icon" aria-hidden="true"></span> Camera Network</h2>
+      <h2><span data-holosuite-brand-icon><span class="security-camera-network-icon" aria-hidden="true"></span></span> <span data-holosuite-brand-name>Camera Network</span></h2>
       <span class="security-camera-count" aria-label="Registered cameras">{{cameras.length}}</span>
     </header>
 
@@ -53,6 +53,10 @@
         <dd>{{selectedCamera.location}}</dd>
         <dt>Scene</dt>
         <dd>{{selectedCamera.sceneName}}</dd>
+        {{#if selectedCamera.levelName}}
+        <dt>Level</dt>
+        <dd>{{selectedCamera.levelName}}</dd>
+        {{/if}}
         <dt>Source</dt>
         <dd>{{selectedCamera.feedSource}}</dd>
         <dt>Region</dt>
@@ -106,6 +110,15 @@
       Scene
       <select name="sceneId" {{#unless editorCamera.isLive}}disabled{{/unless}}>
         {{#each sceneChoices}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label {{#unless hasSceneLevels}}hidden{{/unless}}>
+      Level
+      <select name="levelId" {{#unless editorCamera.isLive}}disabled{{/unless}}>
+        {{#each levelChoices}}
           <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
         {{/each}}
       </select>

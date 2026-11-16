@@ -14,8 +14,8 @@ Supports Foundry v12-v14. Requires **HoloSuite Core**.
 
 1. Click **New** and enter a camera name and location.
 2. Choose a **Feed Source**:
-   - **Live Canvas:** Select a Scene and, optionally, a Scene Region to crop the view. Scene Regions require Foundry v13 or later.
-   - **Static Image:** Choose an image with **Browse**. Scene and Scene Region are disabled for this source.
+   - **Live Canvas:** Select a Scene. In Foundry v14, choose a **Level** to show that floor. **Automatic** uses the scene's starting level or a level assigned to the linked region. Optionally choose a **Scene Region** to crop the view. Scene Regions require Foundry v13 or later.
+   - **Static Image:** Choose an image with **Browse**. The scene connection fields are disabled for this source.
 3. Choose a status and display mode: **Window** or **Picture-in-Picture**.
 4. Click **Save Camera**. The manager shows a preview automatically.
 5. Click **Show Saved Feed** to broadcast it to players, or **Save & Show** to save your changes and broadcast together.
