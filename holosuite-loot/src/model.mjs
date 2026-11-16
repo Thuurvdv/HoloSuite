@@ -1,8 +1,15 @@
 export const MODULE_ID = "holosuite-loot";
-export const BUILD_VERSION = "1.2.1";
+export const BUILD_VERSION = "1.3.0";
 export const REQUEST_FLAG = "commandV3";
 export const RESPONSE_FLAG = "replyV3";
 export const clone = value => structuredClone(value);
+export const itemQuantity = item => item?.system?.quantity?.value ?? item?.system?.quantity ?? 1;
+export const quantityPath = item => typeof item?.system?.quantity === "object" && item.system.quantity !== null
+  ? "system.quantity.value" : "system.quantity";
+export function setItemQuantity(item, quantity) {
+  if (quantityPath(item) === "system.quantity.value") item.system.quantity.value = quantity;
+  else if (item.system.quantity !== undefined) item.system.quantity = quantity;
+}
 export function authenticatedRequest(user, change, senderId, flag = "request") {
   if (senderId !== user.id || !user.active || !change.flags?.[MODULE_ID]?.[flag]) return null;
   return clone(user.getFlag(MODULE_ID, flag));
@@ -27,7 +34,7 @@ export const canonical = value => JSON.stringify(value, (_key, part) => part && 
   ? Object.fromEntries(Object.entries(part).sort(([a], [b]) => a.localeCompare(b))) : part);
 export function canReceiveLoot(actor, user, adapter, source = undefined) {
   if (!actor || !adapter.destination(actor) || !actor.testUserPermission(user, "OWNER")) return false;
-  return !adapter.manual || !source || (actorKey(actor) !== actorKey(source.actor)
+  return !(adapter.manual || adapter.acceptsLegacyWholeItems) || !source || (actorKey(actor) !== actorKey(source.actor)
     && (actor.isToken || actor.id !== source.actorId));
 }
 export function resolveCharacter(user, actors, tokens, adapter, source = undefined) {
@@ -41,8 +48,8 @@ export function resolveCharacter(user, actors, tokens, adapter, source = undefin
   if (candidates.length === 1) return candidates[0];
   throw new LootError(candidates.length ? "AmbiguousActor" : "NoActor");
 }
-export function eligible(token, { combats = [], zeroHP = false, automatic = true, manual = false } = {}) {
-  if (!token?.actor || (manual ? !token.actor.items : token.actor.type !== "npc")) return false;
+export function eligible(token, { combats = [], zeroHP = false, automatic = true, manual = false, sourceActor, hitPoints, defeated } = {}) {
+  if (!token?.actor || (manual ? !token.actor.items : !(sourceActor?.(token.actor) ?? token.actor.type === "npc"))) return false;
   if (manual) return token.getFlag(MODULE_ID, "config")?.mode === "enabled";
   const config = configFor(token);
   if (config.mode === "disabled") return false;
@@ -52,9 +59,9 @@ export function eligible(token, { combats = [], zeroHP = false, automatic = true
     && (c.sceneId ?? combat.scene?.id) === token.parent?.id
     && (c.isDefeated || c.defeated)))) return true;
   const statuses = token.actor.statuses;
-  if (statuses?.has("dead")) return true;
+  if (statuses?.has("dead") || defeated?.(token.actor)) return true;
   // Unconsciousness and player-style death saves are not death.
-  const hp = token.actor.system?.attributes?.hp;
+  const hp = hitPoints ? hitPoints(token.actor) : token.actor.system?.attributes?.hp;
   return zeroHP && Number(hp?.max) > 0 && hp?.value === 0
     && !token.actor.system?.attributes?.death?.success;
 }

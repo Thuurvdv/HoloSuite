@@ -1,9 +1,9 @@
-import { clone, LootError, SerialQueue, validateAccess, validateActor, validLootRequest, actorKey } from "./model.mjs";
+import { clone, LootError, SerialQueue, setItemQuantity, validateAccess, validateActor, validLootRequest, actorKey } from "./model.mjs";
 
 function awardEntry(entry) {
   if (!entry.claim.quantityRoll) return entry;
   const data = clone(entry.data);
-  data.system.quantity = entry.claim.quantityRoll.quantity;
+  setItemQuantity(data, entry.claim.quantityRoll.quantity);
   return { ...entry, data };
 }
 
@@ -100,7 +100,7 @@ export class LootTransactions {
           adapter.validateSourcePlan?.(token, entry, entry.claim);
           if (entry.claim.quantityRoll?.quantity !== 0) {
             await adapter.create(actor, awardEntry(entry), entry.claim, async () => {
-              const attempt = entry.wholeItem ? "itemAttempted" : "currencyAttempted";
+              const attempt = entry.currency?.storage === "balance" ? "currencyAttempted" : "itemAttempted";
               const next = clone(state);
               next.entries.find(e => e.id === entry.id).claim[attempt] = true;
               await io.save(token, next); state = next;

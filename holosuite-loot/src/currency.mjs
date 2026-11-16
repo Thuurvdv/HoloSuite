@@ -81,3 +81,25 @@ export const swadeCurrency = balanceCurrency({
   valid: value => Number.isFinite(value) && value >= 0 && value <= Number.MAX_SAFE_INTEGER,
   name: () => globalThis.game?.settings?.get("swade", "currencyName")?.trim() || "Currency"
 });
+
+export const starWarsCurrency = balanceCurrency({
+  units: ["credits"],
+  amountOf: actor => actor?.system?.stats?.credits?.value,
+  path: () => "system.stats.credits.value",
+  valid: value => Number.isSafeInteger(value) && value >= 0,
+  name: () => "Credits"
+});
+
+const dragonbaneCoinLabels = { gc: "gold", sc: "silver", cc: "copper" };
+export const dragonbaneCurrency = balanceCurrency({
+  units: Object.keys(dragonbaneCoinLabels),
+  amountOf: (actor, unit) => actor?.system?.currency?.[unit],
+  path: unit => `system.currency.${unit}`,
+  valid: value => Number.isSafeInteger(value) && value >= 0,
+  name: unit => {
+    const name = dragonbaneCoinLabels[unit];
+    const key = `DoD.currency.${name}`;
+    const label = globalThis.game?.i18n?.localize(key);
+    return label && label !== key ? label : name[0].toUpperCase() + name.slice(1);
+  }
+});
