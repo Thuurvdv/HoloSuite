@@ -1,26 +1,15 @@
-<form data-holosuite-branding="holosuite-critical-cutin" class="hcci-config">
-  <header class="hcci-config-header">
-    <div class="hcci-brand">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 2 12 7v14l-12 7-12-7V9Zm0 0v14l12 7M4 9l12 7 12-7M16 16v14" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-      <strong>HoloSuite</strong>
-    </div>
-    <div class="hcci-config-title">
-      <span data-holosuite-brand-icon><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
-      <h2><span data-holosuite-brand-name>Critical Cut-In</span></h2>
-    </div>
-    <svg class="hcci-header-trace" viewBox="0 0 440 40" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M0 2h71l21 18h137l12 12h97l17-16h85M108 14h107l13-12h96m-66 23h74l18-17h54" fill="none" stroke="currentColor"/>
-    </svg>
-  </header>
-
-  <nav class="hcci-player-tabs" role="tablist" aria-label="Players">
-    {{#each players}}
-      <button type="button" role="tab" id="hcci-player-{{id}}" aria-controls="hcci-characters-{{id}}" aria-selected="false" tabindex="-1" data-hcci-player="{{id}}">
-        <img src="{{avatar}}" alt="">
-        <span>{{name}}<small>{{tabDetail}}</small></span>
-      </button>
-    {{/each}}
-  </nav>
+<form data-holosuite-branding="holosuite-critical-cutin" class="hcci-config" aria-label="Critical Cut-In Configuration">
+  <div class="hcci-player-bar">
+    <div class="hcci-window-grip" data-hcci-window-drag title="Drag to move window" aria-hidden="true"></div>
+    <nav class="hcci-player-tabs" role="tablist" aria-label="Players">
+      {{#each players}}
+        <button type="button" role="tab" id="hcci-player-{{id}}" aria-controls="hcci-characters-{{id}}" aria-selected="false" tabindex="-1" data-hcci-player="{{id}}">
+          <img src="{{avatar}}" alt="">
+          <span>{{name}}<small>{{tabDetail}}</small></span>
+        </button>
+      {{/each}}
+    </nav>
+  </div>
 
   <main class="hcci-config-main">
     {{#each players}}
@@ -172,6 +161,7 @@
     </details>
     <div class="hcci-config-actions">
       <span class="hcci-unsaved" data-hcci-dirty role="status" hidden>Unsaved changes</span>
+      <button type="button" data-hcci-action="close"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Close</button>
       <button type="button" data-hcci-action="reset" title="Reset all character and GM overrides"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset</button>
       <button type="submit" class="hcci-primary"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save Configuration</button>
     </div>

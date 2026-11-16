@@ -6,21 +6,43 @@
   --hcci-muted: #d9c5ee;
   --hcci-magenta: #ff61da;
   --hcci-pink: #ff73a8;
+  --hcci-control: #291947;
+  --hcci-control-hover: #4c2b70;
+  --hcci-field: #24163f;
   --hcci-frame: url("../assets/ui/config-frame.svg");
+  --hcci-window-frame: url("../assets/ui/config-window-frame.svg");
   min-width: min(360px, 100vw);
   min-height: min(420px, 100vh);
   max-width: 100vw;
   max-height: 100vh;
 }
 
-.hcci-config-window .window-content {
+.hcci-config-window:not(.window-content) {
+  border-color: var(--hcci-line) !important;
+  background: var(--hcci-bg) !important;
+  box-shadow: 0 4px 28px #13091d, 0 0 16px #ff61da40 !important;
+}
+
+.hcci-config-window:not(.window-content)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 12px solid transparent;
+  border-image: var(--hcci-window-frame) 24 / 12px stretch;
+  pointer-events: none;
+}
+
+.hcci-config-window > .window-content {
   display: flex;
   min-height: 0;
-  padding: 0;
+  padding: 9px;
   overflow: hidden;
-  background: var(--hcci-bg);
-  color: var(--hcci-text);
+  background: var(--hcci-bg) !important;
+  color: var(--hcci-text) !important;
 }
+
+.hcci-config-window > .window-header { display: none !important; }
 
 .hcci-config-window .hcci-config {
   position: relative;
@@ -41,81 +63,61 @@
 
 .hcci-config-window .hcci-config [hidden] { display: none !important; }
 
-.hcci-config-window .hcci-config-header {
-  position: relative;
+.hcci-config-window .hcci-player-bar {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  padding-inline-start: 8px;
   flex: none;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  min-height: 62px;
-  padding: 0 18px;
-  gap: 20px;
-  border-bottom: 1px solid var(--hcci-line);
-  background: #2b1b4c;
 }
 
-.hcci-config-window :is(.hcci-brand, .hcci-config-title) {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 10px;
-  color: var(--hcci-text);
-  text-transform: uppercase;
-  letter-spacing: .07em;
+.hcci-config-window .hcci-window-grip {
+  display: grid;
+  place-items: center;
+  cursor: grab;
+  touch-action: none;
 }
 
-.hcci-config-window .hcci-brand {
-  min-height: 42px;
-  padding-inline: 10px 24px;
-  border-right: 1px solid var(--hcci-line);
-  font-size: 15px;
+.hcci-config-window .hcci-window-grip:active { cursor: grabbing; }
+.hcci-config-window .hcci-window-grip::before {
+  content: "";
+  width: 12px;
+  height: 24px;
+  background: radial-gradient(circle, var(--hcci-muted) 1px, transparent 1.5px) 0 0 / 6px 6px;
 }
-
-.hcci-config-window .hcci-brand svg { width: 28px; color: var(--hcci-magenta); }
-.hcci-config-window .hcci-config-title i { color: var(--hcci-magenta); font-size: 24px; }
-.hcci-config-window .hcci-config-title h2 {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  color: inherit;
-  font: 800 clamp(18px, 3cqi, 28px)/1.1 var(--hs-font-ui, system-ui, sans-serif);
-  letter-spacing: inherit;
-}
-
-.hcci-config-window .hcci-header-trace {
-  flex: 1;
-  min-width: 0;
-  max-width: 540px;
-  height: 40px;
-  color: #ce79e3;
+.hcci-config-window .hcci-window-grip:hover::before {
+  background-image: radial-gradient(circle, var(--hcci-magenta) 1px, transparent 1.5px);
 }
 
 .hcci-config-window .hcci-player-tabs {
   display: flex;
   gap: 10px;
-  padding: 12px 16px;
+  padding: 12px 16px 12px 0;
   overflow-x: auto;
   flex: none;
 }
 
-.hcci-config-window .hcci-config :is(button, input, select, summary) {
+/* Shared HoloSuite and system styles can set control colors with !important. */
+:is(#hcci-player-config, .hcci-config-window) .hcci-config :is(button, input, select, summary) {
   box-sizing: border-box;
   min-width: 0;
   margin: 0;
-  border: 1px solid var(--hcci-line);
+  border: 1px solid var(--hcci-control-border, var(--hcci-line)) !important;
   border-radius: 4px;
-  background: #291947;
-  color: var(--hcci-text);
-  box-shadow: none;
+  background: var(--hcci-control-fill, var(--hcci-control)) !important;
+  color: var(--hcci-control-text, var(--hcci-text)) !important;
+  box-shadow: var(--hcci-control-shadow, none) !important;
   font: inherit;
   transition: background-color 130ms ease, border-color 130ms ease, color 130ms ease;
 }
 
 .hcci-config-window .hcci-config :is(button, summary) { cursor: pointer; }
-.hcci-config-window .hcci-config :is(button, summary):hover { background: #4c2b70; border-color: var(--hcci-magenta); }
-.hcci-config-window .hcci-config :is(button, input, select, summary):focus-visible {
-  outline: 2px solid var(--hcci-magenta);
-  outline-offset: -3px;
+.hcci-config-window .hcci-config :is(button, summary):hover {
+  --hcci-control-fill: var(--hcci-control-hover);
+  --hcci-control-border: var(--hcci-magenta);
+}
+:is(#hcci-player-config, .hcci-config-window) .hcci-config :is(button, input, select, summary):focus-visible {
+  outline: 2px solid var(--hcci-focus, var(--hcci-magenta)) !important;
+  outline-offset: -3px !important;
 }
 .hcci-config-window .hcci-config button:is(:disabled, [aria-disabled="true"]) { cursor: wait; opacity: .58; }
 
@@ -291,7 +293,7 @@
   --hcci-selected-text: #151015;
   min-height: 40px;
   padding: 5px 4px;
-  color: var(--hcci-tab-accent);
+  --hcci-control-text: var(--hcci-tab-accent);
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
@@ -300,22 +302,22 @@
 
 .hcci-config-window .hcci-config :is(button[aria-pressed="true"], button[aria-selected="true"], .hcci-primary) {
   --hcci-selected: var(--hcci-tab-accent, var(--hcci-outcome, var(--hcci-magenta)));
-  border-color: var(--hcci-selected);
-  background: var(--hcci-selected-fill, color-mix(in srgb, var(--hcci-selected) 16%, var(--hcci-bg)));
-  color: var(--hcci-selected-text, var(--hcci-text));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hcci-selected) 25%, transparent);
+  --hcci-control-border: var(--hcci-selected);
+  --hcci-control-fill: var(--hcci-selected-fill, color-mix(in srgb, var(--hcci-selected) 16%, var(--hcci-bg)));
+  --hcci-control-text: var(--hcci-selected-text, var(--hcci-text));
+  --hcci-control-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hcci-selected) 25%, transparent);
 }
 
 .hcci-config-window .hcci-config .hcci-outcomes button[aria-selected="true"] {
-  box-shadow: inset 0 -4px 0 rgb(0 0 0 / 40%);
+  --hcci-control-shadow: inset 0 -4px 0 rgb(0 0 0 / 40%);
 }
 
 .hcci-config-window .hcci-config .hcci-outcomes button[aria-selected="true"]:focus-visible {
-  outline-color: var(--hcci-selected-text);
+  --hcci-focus: var(--hcci-selected-text);
 }
 
 .hcci-config-window .hcci-config .hcci-player-tabs [aria-selected="true"] {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hcci-magenta) 55%, transparent),
+  --hcci-control-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hcci-magenta) 55%, transparent),
     0 0 7px color-mix(in srgb, var(--hcci-magenta) 40%, transparent);
 }
 .hcci-config-window .hcci-config button.hcci-primary:hover {
@@ -329,7 +331,7 @@
   --hcci-selected-fill: #ff98e7;
 }
 .hcci-config-window .hcci-config button.hcci-primary[type="submit"]:focus-visible {
-  outline-color: var(--hcci-selected-text);
+  --hcci-focus: var(--hcci-selected-text);
 }
 .hcci-config-window .hcci-config .hcci-test {
   display: flex;
@@ -363,7 +365,35 @@
 }
 .hcci-config-window .hcci-path-field > div { display: flex; gap: 4px; min-width: 0; }
 .hcci-config-window .hcci-path-field button { flex: 0 0 31px; padding: 0; }
-.hcci-config-window .hcci-config :is(input, select) { width: 100%; min-height: 31px; padding: 3px 6px; background: #24163f; }
+.hcci-config-window .hcci-config :is(input, select) {
+  --hcci-control-fill: var(--hcci-field);
+  width: 100%;
+  min-height: 31px;
+  padding: 3px 6px;
+  accent-color: var(--hcci-magenta);
+}
+:is(#hcci-player-config, .hcci-config-window) .hcci-config input::placeholder { color: var(--hcci-muted) !important; opacity: .8; }
+:is(#hcci-player-config, .hcci-config-window) .hcci-config option {
+  background-color: var(--hcci-field) !important;
+  color: var(--hcci-text) !important;
+}
+:is(#hcci-player-config, .hcci-config-window) .hcci-config option:checked { background-color: var(--hcci-control-hover) !important; }
+
+@supports (appearance: base-select) {
+  .hcci-config-window .hcci-config select,
+  .hcci-config-window .hcci-config select::picker(select) { appearance: base-select; }
+  .hcci-config-window .hcci-config select::picker(select) {
+    background: var(--hcci-field);
+    color: var(--hcci-text);
+    border: 1px solid var(--hcci-line);
+    border-radius: 4px;
+  }
+  .hcci-config-window .hcci-config option { padding: 5px 8px; }
+  :is(#hcci-player-config, .hcci-config-window) .hcci-config option:is(:hover, :focus-visible) {
+    background-color: var(--hcci-control-hover) !important;
+  }
+  .hcci-config-window .hcci-config option::checkmark { color: var(--hcci-magenta); }
+}
 .hcci-config-window .hcci-config input[type="color"] { width: 62px; padding: 2px; cursor: pointer; }
 
 .hcci-config-window .hcci-config .hcci-toggle input {
@@ -386,8 +416,8 @@
 }
 .hcci-config-window .hcci-config .hcci-toggle input:checked {
   justify-items: end;
-  border-color: var(--hcci-outcome);
-  background: color-mix(in srgb, var(--hcci-outcome) 28%, #24163f);
+  --hcci-control-border: var(--hcci-outcome);
+  --hcci-control-fill: color-mix(in srgb, var(--hcci-outcome) 28%, var(--hcci-field));
 }
 .hcci-config-window .hcci-toggle input:checked::before { background: var(--hcci-outcome); }
 .hcci-config-window .hcci-effect-description { margin: 5px 0 0; color: var(--hcci-muted); font-size: 12px; }
@@ -439,22 +469,3 @@
 .hcci-config-window .hcci-config-actions button { width: auto; padding: 6px 12px; font-weight: 750; text-transform: uppercase; }
 .hcci-config-window .hcci-unsaved { color: #ffd183; font-size: 11px; text-transform: uppercase; }
 .hcci-config-window .hcci-unsaved::before { content: "●"; margin-right: 5px; }
-/* Foundry v12's shared theme gives these controls important declarations. */
-:root[data-holosuite-foundry-generation="12"] .hcci-config-window .hcci-config button {
-  border-color: var(--hcci-line) !important;
-  background: #291947 !important;
-  color: var(--hcci-tab-accent, var(--hcci-text)) !important;
-}
-:root[data-holosuite-foundry-generation="12"] .hcci-config-window .hcci-config button:hover {
-  border-color: var(--hcci-magenta) !important;
-  background: #4c2b70 !important;
-}
-:root[data-holosuite-foundry-generation="12"] .hcci-config-window .hcci-config :is(button[aria-pressed="true"], button[aria-selected="true"], button.hcci-primary) {
-  border-color: var(--hcci-selected) !important;
-  background: var(--hcci-selected-fill, color-mix(in srgb, var(--hcci-selected) 16%, var(--hcci-bg))) !important;
-  color: var(--hcci-selected-text, var(--hcci-text)) !important;
-}
-:root[data-holosuite-foundry-generation="12"] .hcci-config-window .hcci-config .hcci-toggle input:checked {
-  border-color: var(--hcci-outcome) !important;
-  background: color-mix(in srgb, var(--hcci-outcome) 28%, #24163f) !important;
-}

@@ -19,7 +19,7 @@ HoloSuite Critical Cut-In adds critical hit animations to your Foundry VTT game.
 
 ### Animation choices
 
-Both Success and Failure have nine complete presets. Each includes its own reveal, surrounding effects, portrait treatment, and exit. Existing saved choices keep their IDs.
+Both Success and Failure can use any animation preset. Existing saved choices keep their IDs.
 
 | Preset | Presentation |
 | --- | --- |
@@ -32,6 +32,7 @@ Both Success and Failure have nine complete presets. Each includes its own revea
 | Railgun Salvo | Converging sights, horizontal energy lance, and ballistic arrival |
 | Astral Eclipse | Celestial crown, crescent, star field, and orbital rings |
 | Cyber Overdrive | Expanding data tunnel and segmented portrait assembly |
+| Crosshair Sever | A crosshair locks on, plasma cuts along both axes, and the four portrait pieces scatter into glowing fragments |
 
 Two flagship presets are choreographed as full cinematic sequences and are suited to either outcome:
 
@@ -54,6 +55,8 @@ For development, `npm run test` in this module checks the preset registry. `npm 
 4. Changing the die or positive roll direction asks for confirmation before resetting the global thresholds and both Success and Failure tabs for every listed player/GM entry. For d100/high, success resets to 100 and failure to 1; for d100/low, success resets to 1 and failure to 100. Cancel keeps the previous die, direction, and thresholds. Confirm stages the changes; click **Save** to persist them.
 
 ### Configuring Player Cut-Ins
+
+To customize the popup's outer border, replace `assets/ui/config-window-frame.svg` with your own SVG. Keep the 96 × 96 canvas, the center transparent, and the corner artwork within 24 units of the edges so the sides can stretch as the window resizes.
 
 1. Each player-owned actor in the world gets a row in the configuration panel.
 2. For each actor, you can set:

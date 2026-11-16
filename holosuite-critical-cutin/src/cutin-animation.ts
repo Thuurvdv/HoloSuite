@@ -6,6 +6,7 @@ import { startRiftExit, startRiftIntro } from "./rift-slash";
 import { FATE_EXIT, FATE_STYLE, prepareFatePortrait, startFateExit, startFateIntro } from "./shattered-fate";
 import { OVERRIDE_EXIT, OVERRIDE_STYLE, prepareOverride, startOverrideExit, startOverrideIntro } from "./reality-override";
 import { COLLAPSE_EXIT, COLLAPSE_STYLE, prepareCollapse, startCollapseExit, startCollapseIntro } from "./system-collapse";
+import { CROSSHAIR_STYLE, prepareCrosshairPortrait } from "./crosshair-sever";
 
 declare const foundry: any;
 declare const game: any;
@@ -168,6 +169,7 @@ export function createOverlay(payload: CutinPayload) {
     if (fracturePortrait) prepareFatePortrait(overlay);
     if (isOverride && motionMode === "full") prepareOverride(overlay);
     if (isCollapse) prepareCollapse(overlay, motionMode === "full");
+    if (animationStyle === CROSSHAIR_STYLE && motionMode === "full") prepareCrosshairPortrait(overlay, detail);
   };
   rebuildArt();
   const portrait = overlay.querySelector<HTMLImageElement>("img.hcci-portrait");

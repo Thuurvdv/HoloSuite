@@ -74,6 +74,18 @@ try {
     assert.equal(await evaluate(`getComputedStyle(document.querySelector('.hcci-portrait-frame')).opacity`),'1');
     results.push({id,kind,...geometry});
   }
+  for (const [phase, at] of [['lock', 360], ['cut', 610], ['dust', 1000]]) {
+    await evaluate(`studio.mount('crosshair-sever','success',${at})`);
+    await screenshot(`crosshair-sever-${phase}.png`);
+  }
+  await evaluate(`studio.mount('crosshair-sever','success',610)`);
+  assert.equal(await evaluate(`document.querySelectorAll('.hcci-sever-quadrant').length`), 4);
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.hcci-portrait-frame')).visibility`), 'hidden');
+  assert.ok(await evaluate(`Number(getComputedStyle(document.querySelector('.hcci-sever-cut')).opacity) > 0.7`));
+  await evaluate(`studio.mount('crosshair-sever','failure',1000)`);
+  assert.ok(await evaluate(`[...document.querySelectorAll('.hcci-sever-tile')].some(tile => Number(getComputedStyle(tile).opacity) > 0.5)`));
+  await evaluate(`studio.mount('crosshair-sever','failure',1400)`);
+  assert.ok(await evaluate(`[...document.querySelectorAll('.hcci-sever-tile')].every(tile => getComputedStyle(tile).opacity === '0')`));
   await evaluate('document.fonts.ready.then(()=>true)');
   assert.equal(await evaluate(`document.fonts.check('24px "HCCI AICON"')`),true);
   // Actor-only labels and the removed capsule apply to every preset and font.
@@ -297,9 +309,16 @@ try {
       return Promise.resolve({ stop() {} });
     };
     document.querySelector('header').remove();
+    const chromeStyles = document.createElement('style');
+    chromeStyles.textContent = ${JSON.stringify(fs.readFileSync(path.join(root,'styles/holosuite-tokens.css'),'utf8'))};
+    document.head.append(chromeStyles);
     const shell = document.createElement('div');
-    shell.className = 'hcci-config-window';
-    shell.innerHTML = ${JSON.stringify(renderConfig(configData))};
+    shell.id = 'hcci-player-config';
+    shell.className = 'window-app hcci-config-window';
+    shell.style.position = 'relative';
+    shell.innerHTML = '<header class="window-header">Foundry title bar</header><div class="window-content">'
+      + ${JSON.stringify(renderConfig(configData))} + '</div>';
+    configApp.setPosition = position => { window.configPosition = position; };
     document.body.append(shell);
     window.form = shell.querySelector('form');
     window.pick = selector => form.querySelector(selector);
@@ -317,6 +336,30 @@ try {
   await size(1280,720);
   for (const generation of ['12', '14']) {
     await evaluate(`document.documentElement.dataset.holosuiteFoundryGeneration = '${generation}'`);
+    assert.deepEqual(await evaluate(`(() => {
+      const fieldStyle = getComputedStyle(pick(field('threshold')));
+      const dropdown = pick(field('animationStyle'));
+      const shell = form.closest('.window-app');
+      return {
+        field: fieldStyle.backgroundColor,
+        fieldText: fieldStyle.color,
+        fieldBorder: fieldStyle.borderTopColor,
+        select: getComputedStyle(dropdown).backgroundColor,
+        option: getComputedStyle([...dropdown.options].find(option => !option.selected)).backgroundColor,
+        selectedOption: getComputedStyle(dropdown.selectedOptions[0]).backgroundColor,
+        frame: getComputedStyle(shell, '::after').borderImageSource.endsWith('/assets/ui/config-window-frame.svg")'),
+        frameClickThrough: getComputedStyle(shell, '::after').pointerEvents
+      };
+    })()`), {
+      field: 'rgb(36, 22, 63)',
+      fieldText: 'rgb(246, 236, 255)',
+      fieldBorder: 'rgb(151, 96, 176)',
+      select: 'rgb(36, 22, 63)',
+      option: 'rgb(36, 22, 63)',
+      selectedOption: 'rgb(76, 43, 112)',
+      frame: true,
+      frameClickThrough: 'none'
+    });
     for (const [kind, fill] of [['success', 'rgb(99, 245, 140)'], ['failure', 'rgb(255, 86, 93)']]) {
       await evaluate(`pick('[data-hcci-tab="${kind}"]').click()`);
       await delay(150);
@@ -341,8 +384,24 @@ try {
   assert.equal(await evaluate(`pick('[data-hcci-style="rift"]').getAttribute('aria-pressed')`), 'true');
   assert.equal(await evaluate(`pick('[data-hcci-dirty]').hidden`), false);
   await size(1280,720);
-  assert.equal(await evaluate(`pick('.hcci-config-header').getBoundingClientRect().bottom <=
-    pick('.hcci-player-tabs').getBoundingClientRect().top`), true);
+  assert.equal(await evaluate(`getComputedStyle(form.closest('.window-app').querySelector('.window-header')).display`), 'none');
+  const grip = await evaluate(`(() => {
+    const bounds = pick('[data-hcci-window-drag]').getBoundingClientRect();
+    return { x: Math.round(bounds.x + bounds.width / 2), y: Math.round(bounds.y + bounds.height / 2) };
+  })()`);
+  await call('Input.dispatchMouseEvent', { type: 'mousePressed', ...grip, button: 'left', buttons: 1, clickCount: 1 });
+  const destination = { x: grip.x + 90, y: grip.y + 40 };
+  await call('Input.dispatchMouseEvent', { type: 'mouseMoved', ...destination, button: 'left', buttons: 1 });
+  await call('Input.dispatchMouseEvent', { type: 'mouseReleased', ...destination, button: 'left', clickCount: 1 });
+  assert.deepEqual(await evaluate('window.configPosition'), { left: 90, top: 40 });
+  assert.deepEqual(await evaluate(`(() => {
+    let closed = 0, submitted = 0;
+    configApp.close = () => { closed++; };
+    form.addEventListener('submit', event => { event.preventDefault(); submitted++; });
+    const close = pick('.hcci-config-actions [data-hcci-action="close"]');
+    close.click();
+    return { closed, submitted };
+  })()`), { closed: 1, submitted: 0 });
   await screenshot('config-desktop.png');
   await size(390,844);
   assert.equal(await evaluate(`form.scrollWidth <= form.clientWidth + 1`), true);

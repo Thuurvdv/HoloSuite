@@ -55,11 +55,6 @@
 @container hcci (max-width: 660px) {
   .hcci-config-window .hcci-workspace { grid-template-columns: 1fr; }
   .hcci-config-window .hcci-footer { grid-template-columns: 1fr; }
-  .hcci-config-window .hcci-config-header { gap: 8px; padding: 0 8px; }
-  .hcci-config-window .hcci-brand { padding-inline: 2px 8px; font-size: 11px; }
-  .hcci-config-window .hcci-brand svg { width: 21px; }
-  .hcci-config-window .hcci-config-title i { font-size: 16px; }
-  .hcci-config-window .hcci-header-trace { display: none; }
 }
 
 @container hcci (max-width: 390px) {

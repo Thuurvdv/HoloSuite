@@ -1,0 +1,133 @@
+.hcci-style-crosshair-sever {
+  --hcci-sever-time: min(1250ms, calc(var(--hcci-duration, 2500ms) - 180ms));
+}
+
+.hcci-style-crosshair-sever .hcci-portrait-frame {
+  box-sizing: border-box;
+  border: 0;
+  clip-path: none;
+}
+
+.hcci-style-crosshair-sever.hcci-motion-full .hcci-visual { animation: none; }
+.hcci-style-crosshair-sever.hcci-motion-full :is(.hcci-portrait-frame, .hcci-frame-accent) {
+  animation: hcci-sever-portrait var(--hcci-sever-time) linear both;
+}
+.hcci-style-crosshair-sever .hcci-copy {
+  animation-delay: calc(var(--hcci-sever-time) * .41);
+  animation-duration: calc(var(--hcci-sever-time) * .28);
+}
+.hcci-style-crosshair-sever .hcci-flash {
+  animation-delay: calc(var(--hcci-sever-time) * .37);
+  animation-duration: calc(var(--hcci-sever-time) * .14);
+}
+
+.hcci-style-crosshair-sever .hcci-effects { z-index: 2; }
+.hcci-sever-crosshair, .hcci-sever-cut { position: absolute; }
+.hcci-sever-crosshair {
+  inset: 0;
+  color: var(--fx-hot);
+  filter: drop-shadow(0 0 5px var(--hcci-accent));
+  animation: hcci-sever-lock var(--hcci-sever-time) both;
+}
+.hcci-sever-crosshair::before, .hcci-sever-crosshair::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.hcci-sever-crosshair::before {
+  width: 100%;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, currentColor 0 7px, transparent 7px 12px);
+}
+.hcci-sever-crosshair::after {
+  width: 1px;
+  height: 100%;
+  background: repeating-linear-gradient(0deg, currentColor 0 7px, transparent 7px 12px);
+}
+.hcci-sever-crosshair i {
+  position: absolute;
+  inset: 34%;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  box-shadow: 0 0 0 5px var(--fx-dim);
+}
+
+.hcci-sever-cut {
+  --axis: 0deg;
+  top: 50%;
+  left: 50%;
+  width: 116%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--hcci-accent) 10%, var(--fx-hot) 35% 65%, var(--hcci-accent) 90%, transparent);
+  box-shadow: 0 0 8px var(--hcci-accent), 0 0 20px var(--hcci-accent);
+  animation: hcci-sever-beam var(--hcci-sever-time) linear both;
+}
+.hcci-sever-cut-vertical { --axis: 90deg; }
+.hcci-sever-cut::after {
+  content: "";
+  position: absolute;
+  inset: -18px 4%;
+  background:
+    radial-gradient(circle at 24% 21%, var(--fx-hot) 0 1px, transparent 2px) 0 0 / 11% 100%,
+    radial-gradient(circle at 69% 76%, var(--hcci-accent) 0 1px, transparent 2px) 0 0 / 16% 100%;
+  animation: hcci-sever-embers var(--hcci-sever-time) both;
+}
+.hcci-flash-off .hcci-sever-cut { box-shadow: 0 0 5px var(--hcci-accent); }
+
+.hcci-sever-pieces, .hcci-sever-quadrant, .hcci-sever-solid, .hcci-sever-tile {
+  position: absolute;
+  inset: 0;
+}
+.hcci-sever-quadrant {
+  animation: hcci-sever-separate var(--hcci-sever-time) both;
+}
+.hcci-sever-solid {
+  animation: hcci-sever-solid var(--hcci-sever-time) linear both;
+}
+.hcci-sever-tile {
+  --tile-start: calc(.59 + var(--lag) * .009);
+  animation: hcci-sever-dust calc(var(--hcci-sever-time) * (1 - var(--tile-start)))
+    calc(var(--hcci-sever-time) * var(--tile-start)) cubic-bezier(.2,.7,.35,1) both;
+}
+
+@keyframes hcci-sever-portrait {
+  0% { visibility: visible; filter: brightness(.4); }
+  17%, 41% { visibility: visible; filter: none; }
+  42%, 100% { visibility: hidden; }
+}
+@keyframes hcci-sever-lock {
+  0% { opacity: 0; transform: translate(-15%, -12%) scale(1.36); }
+  9% { opacity: .6; }
+  22%, 37% { opacity: 1; transform: none; }
+  45%, 100% { opacity: 0; transform: none; }
+}
+@keyframes hcci-sever-beam {
+  0%, 37% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--axis)) scaleX(.03); }
+  43% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--axis)) scaleX(1); }
+  50% { opacity: .8; transform: translate(-50%, -50%) rotate(var(--axis)) scaleX(1.05); }
+  62%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--axis)) scaleX(1.15); }
+}
+@keyframes hcci-sever-embers {
+  0%, 41% { transform: scaleY(.05); }
+  61%, 100% { transform: scaleY(2); }
+}
+@keyframes hcci-sever-separate {
+  0%, 42% { transform: none; }
+  60%, 100% { transform: translate(calc(var(--qx) * 6%), calc(var(--qy) * 6%)); }
+}
+@keyframes hcci-sever-solid {
+  0%, 41% { opacity: 0; }
+  42%, 59% { opacity: 1; }
+  69%, 100% { opacity: 0; }
+}
+@keyframes hcci-sever-dust {
+  0% { opacity: 0; transform: none; }
+  13% { opacity: 1; }
+  45% { opacity: .9; filter: brightness(1.5); }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--qx) * var(--drift-x) * 36%), calc(var(--qy) * var(--drift-y) * 30%)) rotate(var(--spin)) scale(.11);
+  }
+}

@@ -7,6 +7,7 @@ import { EFFECT_PRESETS, normalizeEffectId, getEffectPreset } from "./effect-pre
 import { MANGA_ACCENT, MANGA_STYLE } from "./manga-overdrive";
 import { OVERRIDE_STYLE } from "./reality-override";
 import { COLLAPSE_STYLE } from "./system-collapse";
+import { CROSSHAIR_STYLE } from "./crosshair-sever";
 
 declare const foundry: any;
 declare const game: any;
@@ -156,7 +157,7 @@ export class PlayerConfigApp extends BaseFormApplication {
         characterHeading: player.id === "gm" ? "GM Configuration" : `${player.name}’s Characters`,
         tabDetail: player.id === "gm" ? "Global" : `${player.targets.length} ${player.targets.length === 1 ? "character" : "characters"}`
       })),
-      featuredStyles: ["strike", "breach", "signal", "rift", MANGA_STYLE, FATE_STYLE, OVERRIDE_STYLE, COLLAPSE_STYLE].map(getEffectPreset),
+      featuredStyles: ["strike", "breach", "signal", "rift", MANGA_STYLE, FATE_STYLE, OVERRIDE_STYLE, COLLAPSE_STYLE, CROSSHAIR_STYLE].map(getEffectPreset),
       dieSides: getDieSides(),
       dice: getDieOptions(getDieSides()),
       lowRollsGood: lowRollsAreGood(),
@@ -173,6 +174,8 @@ export class PlayerConfigApp extends BaseFormApplication {
     const form = root.matches(".hcci-config") ? root as HTMLFormElement : root.querySelector<HTMLFormElement>(".hcci-config")!;
     const query = <T extends HTMLElement = HTMLElement>(selector: string) => form.querySelector<T>(selector)!;
     const all = <T extends HTMLElement = HTMLElement>(selector: string) => Array.from(form.querySelectorAll<T>(selector));
+    query("[data-hcci-action='close']").addEventListener("click", () => this.close());
+    this.activateWindowDrag(query("[data-hcci-window-drag]"), form.closest(".window-app, .application"));
     const playerTabs = all<HTMLButtonElement>("[data-hcci-player]");
     const lists = all("[data-hcci-characters]");
     const characters = all<HTMLButtonElement>("[data-hcci-character]");
@@ -407,6 +410,34 @@ export class PlayerConfigApp extends BaseFormApplication {
       await savePlayerConfigs({});
       ui.notifications?.info("Critical Cut-In player configuration reset.");
       this.render(false);
+    });
+  }
+
+  private activateWindowDrag(grip: HTMLElement, frame: HTMLElement | null) {
+    if (!frame) return;
+    let drag: { pointerId: number; offsetX: number; offsetY: number } | null = null;
+
+    grip.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || drag) return;
+      const bounds = frame.getBoundingClientRect();
+      (this.bringToFront ?? this.bringToTop)?.call(this);
+      grip.setPointerCapture(event.pointerId);
+      drag = {
+        pointerId: event.pointerId,
+        offsetX: event.clientX - bounds.left,
+        offsetY: event.clientY - bounds.top
+      };
+      event.preventDefault();
+    });
+    grip.addEventListener("pointermove", (event) => {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+      this.setPosition({
+        left: Math.max(0, Math.min(window.innerWidth - 48, event.clientX - drag.offsetX)),
+        top: Math.max(0, Math.min(window.innerHeight - 48, event.clientY - drag.offsetY))
+      });
+    });
+    grip.addEventListener("lostpointercapture", (event) => {
+      if (event.pointerId === drag?.pointerId) drag = null;
     });
   }
 
