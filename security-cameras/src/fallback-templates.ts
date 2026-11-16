@@ -29,6 +29,7 @@ export function renderFallbackMonitor(data: any, escapeHTML: EscapeHTML) {
       <dl>
         <dt>Location</dt><dd>${escapeHTML(camera.location)}</dd>
         <dt>Scene</dt><dd>${escapeHTML(camera.sceneName)}</dd>
+        ${camera.levelName ? `<dt>Level</dt><dd>${escapeHTML(camera.levelName)}</dd>` : ""}
         <dt>Source</dt><dd>${escapeHTML(camera.feedSource)}</dd>
         <dt>Region</dt><dd>${escapeHTML(camera.regionName)}</dd>
         <dt>Mode</dt><dd>${escapeHTML(camera.displayMode)}</dd>
@@ -43,6 +44,7 @@ export function renderFallbackMonitor(data: any, escapeHTML: EscapeHTML) {
 
   const editor = data.editorCamera;
   const sceneOptions = data.sceneChoices.map((scene: any) => `<option value="${escapeHTML(scene.id)}" ${scene.selected ? "selected" : ""}>${escapeHTML(scene.name)}</option>`).join("");
+  const levelOptions = data.levelChoices.map((level: any) => `<option value="${escapeHTML(level.id)}" ${level.selected ? "selected" : ""}>${escapeHTML(level.name)}</option>`).join("");
   const regionOptions = data.regionChoices.map((region: any) => `<option value="${escapeHTML(region.id)}" ${region.selected ? "selected" : ""}>${escapeHTML(region.name)}</option>`).join("");
   const sourceOptions = data.feedSourceChoices.map((source: any) => `<option value="${escapeHTML(source.value)}" ${source.selected ? "selected" : ""}>${escapeHTML(source.label)}</option>`).join("");
   const statusOptions = data.statusChoices.map((status: any) => `<option value="${escapeHTML(status.value)}" ${status.selected ? "selected" : ""}>${escapeHTML(status.label)}</option>`).join("");
@@ -73,6 +75,7 @@ export function renderFallbackMonitor(data: any, escapeHTML: EscapeHTML) {
         </fieldset>
         <fieldset class="security-camera-field-group"><legend>Scene connection</legend>
         <label>Scene <select name="sceneId" ${editor.isLive ? "" : "disabled"}>${sceneOptions}</select></label>
+        <label ${data.hasSceneLevels ? "" : "hidden"}>Level <select name="levelId" ${editor.isLive ? "" : "disabled"}>${levelOptions}</select></label>
         <label>Scene Region <select name="regionId" ${editor.isLive ? "" : "disabled"}>${regionOptions}</select></label>
         </fieldset>
         <fieldset class="security-camera-field-group"><legend>Feed settings</legend>

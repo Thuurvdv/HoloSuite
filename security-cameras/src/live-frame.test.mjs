@@ -7,7 +7,7 @@ const { createLiveFrameController } = await import(`data:text/javascript;base64,
 const helper = await build({ stdin: { contents: 'export * from "./scene-compositor.ts"; export * from "./frame-cache.ts"; export * from "./camera-access.ts";', resolveDir: new URL(".", import.meta.url).pathname.replace(/^\/([A-Z]:)/i, "$1") }, bundle: true, write: false, format: "esm", platform: "node" });
 const { getTileGeometry, getSceneDrawOrder, createFrameCache, canUserAccessCamera } = await import(`data:text/javascript;base64,${Buffer.from(helper.outputFiles[0].text).toString("base64")}`);
 
-function setup({ background = "", active = false, deferred = false, getPerformance = undefined, generation = 13 } = {}) {
+function setup({ background = "", active = false, deferred = false, getPerformance = undefined, generation = 13, linkedRegion } = {}) {
   const draws = [], transforms = [], translations = [], pending = [], intervals = new Map();
   let timerId = 0, encoded = 0;
   const scene = { id: "scene", width: 800, height: 600, grid: { size: 100 }, dimensions: { sceneX: 100, sceneY: 200, sceneWidth: 800, sceneHeight: 600 }, tiles: [], tokens: [] };
@@ -27,7 +27,7 @@ function setup({ background = "", active = false, deferred = false, getPerforman
     get src() { return this._src; }
   };
   const broadcasts = [];
-  const controller = createLiveFrameController({ normalizeCamera: camera => camera, applyLinkedRegionBounds: camera => camera, getSceneById: id => id && id !== scene.id ? { ...scene, id } : scene, getSceneBackgroundPath: () => background, moduleId: "test", isFrameProducer: () => true, getPerformance, broadcastLiveFrame: (...args) => broadcasts.push(args) });
+  const controller = createLiveFrameController({ normalizeCamera: camera => camera, applyLinkedRegionBounds: camera => camera, getSceneById: id => id && id !== scene.id ? { ...scene, id } : scene, getRegionDocument: id => id === linkedRegion?.id ? linkedRegion : null, getSceneBackgroundPath: () => background, moduleId: "test", isFrameProducer: () => true, getPerformance, broadcastLiveFrame: (...args) => broadcasts.push(args) });
   const camera = { id: "camera", sceneId: "scene", feedSource: "live", status: "online", regionX: 100, regionY: 200, regionWidth: 400, regionHeight: 300 };
   return { scene, controller, camera, draws, transforms, translations, pending, broadcasts, intervals, canvases, get encoded() { return encoded; } };
 }
@@ -165,6 +165,38 @@ test("v14 tiles overlapping a camera region are not culled using the old coordin
   await env.controller.captureLiveFrame(env.camera);
   assert.deepEqual(env.draws.map(draw => draw.src), ["edge.png"]);
   assert.deepEqual(env.translations, [[500, 300]]);
+});
+
+test("v14 cameras render the selected floor independently of the viewed floor", async () => {
+  const linkedRegion = { id: "lab", levels: new Set(["upper"]) };
+  const { scene, camera, controller, draws } = setup({ active: true, generation: 14, linkedRegion });
+  const lower = { id: "lower", background: { src: "lower.png" } };
+  const upper = { id: "upper", background: { src: "upper.png" }, foreground: { src: "roof.png" }, elevation: { top: 20 } };
+  scene.levels = new Map([[lower.id, lower], [upper.id, upper]]);
+  scene.initialLevel = lower;
+  globalThis.canvas.level = lower;
+  const tile = { x: 170, y: 260, width: 100, height: 100 };
+  scene.tiles = [
+    { ...tile, levels: new Set(["lower"]), texture: { src: "lower-tile.png" } },
+    { ...tile, levels: ["upper"], texture: { src: "upper-tile.png" } },
+    { ...tile, levels: [], texture: { src: "shared.png" } }
+  ];
+  const token = { x: 150, y: 250, width: 1, height: 1 };
+  scene.tokens = [
+    { ...token, level: "lower", texture: { src: "lower-token.png" } },
+    { ...token, level: "upper", texture: { src: "upper-token.png" } }
+  ];
+
+  await controller.captureLiveFrame({ ...camera, levelId: "upper" });
+  assert.deepEqual(draws.splice(0).map(draw => draw.src), ["upper.png", "upper-tile.png", "shared.png", "upper-token.png", "roof.png"]);
+  await controller.captureLiveFrame(camera);
+  assert.deepEqual(draws.splice(0).map(draw => draw.src), ["lower.png", "lower-tile.png", "shared.png", "lower-token.png"]);
+  await controller.captureLiveFrame({ ...camera, regionId: linkedRegion.id });
+  assert.equal(draws[0].src, "upper.png");
+  assert.equal(await controller.captureLiveFrame({ ...camera, regionId: linkedRegion.id, levelId: "lower" }), "");
+  scene.levels.delete("upper");
+  controller.invalidateFrames(scene.id);
+  assert.equal(await controller.captureLiveFrame({ ...camera, levelId: "upper" }), "");
 });
 
 test("access checks use the requester, not the GM executing the handler", () => {

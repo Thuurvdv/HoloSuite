@@ -6,6 +6,7 @@ export interface SecurityCamera {
   id: string;
   name: string;
   sceneId: string;
+  levelId: string;
   location: string;
   image: string;
   feedSource: SecurityCameraFeedSource;
@@ -64,6 +65,7 @@ export const DEFAULT_CAMERA: SecurityCamera = {
   id: "",
   name: "Unnamed Camera",
   sceneId: "",
+  levelId: "",
   location: "Unknown Location",
   image: "",
   feedSource: "image",
@@ -111,6 +113,7 @@ export function normalizeCamera(cameraData: unknown = {}, options: SecurityCamer
     id,
     name: String(data.name ?? DEFAULT_CAMERA.name).trim() || DEFAULT_CAMERA.name,
     sceneId: String(data.sceneId ?? "").trim(),
+    levelId: String(data.levelId ?? "").trim(),
     location: String(data.location ?? DEFAULT_CAMERA.location).trim() || DEFAULT_CAMERA.location,
     image: String(data.image ?? "").trim(),
     feedSource,
