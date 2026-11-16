@@ -146,6 +146,10 @@ export function normalizeRoute(route: any = {}) {
     type: ROUTE_TYPES.includes(route.type) ? route.type : "unknown", travelTime: String(route.travelTime || ""),
     fuelCost: normalizeNumber(route.fuelCost, 0), visibility: normalizeVisibility(route.visibility, "players"), notes: String(route.notes || "") };
 }
+export function isFactionPercent(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 100;
+}
+
 export function normalizeFaction(faction: Partial<GalaxyFaction> = {}): GalaxyFaction {
   const kind = faction.kind === "minor" ? "minor" : "major";
   const systemProminence = Object.fromEntries(Object.entries(faction.systemProminence ?? {})
@@ -166,7 +170,11 @@ export function normalizeFaction(faction: Partial<GalaxyFaction> = {}): GalaxyFa
     parentFactionId: kind === "minor" ? String(faction.parentFactionId || "") : "",
     prominence: typeof faction.prominence === "string" && faction.prominence ? faction.prominence : "Unrated",
     systemProminence,
-    reputation: typeof faction.reputation === "string" && faction.reputation ? faction.reputation : "Neutral"
+    prominencePercent: isFactionPercent(faction.prominencePercent) ? faction.prominencePercent : null,
+    systemProminencePercent: Object.fromEntries(Object.entries(faction.systemProminencePercent ?? {})
+      .filter(([, value]) => isFactionPercent(value))),
+    reputation: typeof faction.reputation === "string" && faction.reputation ? faction.reputation : "Neutral",
+    reputationPercent: isFactionPercent(faction.reputationPercent) ? faction.reputationPercent : null
   };
 }
 
@@ -282,6 +290,7 @@ export function normalizeMap(input: any = {}) {
   for (const faction of factions) {
     if (!majorFactionIds.has(faction.parentFactionId) || faction.parentFactionId === faction.id) faction.parentFactionId = "";
     faction.systemProminence = Object.fromEntries(Object.entries(faction.systemProminence).filter(([id]) => systemIds.has(id)));
+    faction.systemProminencePercent = Object.fromEntries(Object.entries(faction.systemProminencePercent).filter(([id]) => systemIds.has(id)));
   }
   const requestedSystemId = String(map.currentLocation?.systemId || map.currentSystemId || systems[0]?.id || "");
   const currentSystemId = systems.some((system: any) => system.id === requestedSystemId) ? requestedSystemId : systems[0]?.id ?? "";

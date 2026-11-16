@@ -59,7 +59,10 @@ export interface GalaxyFaction {
   parentFactionId: string;
   prominence: string;
   systemProminence: Record<string, string>;
+  prominencePercent: number | null;
+  systemProminencePercent: Record<string, number>;
   reputation: string;
+  reputationPercent: number | null;
 }
 
 export interface GalaxySystem {
