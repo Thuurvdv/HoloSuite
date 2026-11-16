@@ -18,24 +18,40 @@
             <strong><span class="gmf-color-dot" style="--gmf-faction-color: {{color}};"></span>{{name}}</strong>
             {{#if (gmfEq visibility "gm")}}<small>GM only</small>{{/if}}
           </button>
-          {{#if ../panel.canEdit}}
+          {{#if ../panel.showRatingControls}}
             <div class="gmf-faction-panel__controls">
-              <details class="gmf-faction-panel__rating" data-faction-standing="{{id}}" data-prominence-system-id="{{../panel.systemId}}" data-reputation="{{../panel.reputation}}">
-                <summary aria-label="{{name}} {{#if ../panel.reputation}}reputation{{else}}prominence{{/if}}: {{value}}">{{value}}</summary>
-                <div class="gmf-faction-panel__choices">
-                  {{#each ../panel.choices}}
-                    <button type="button" data-faction-rating="{{id}}" aria-pressed="{{#if (gmfEq id ../ratingId)}}true{{else}}false{{/if}}">{{label}}</button>
-                  {{else}}
-                    <p>No reputation ratings configured.</p>
-                  {{/each}}
-                </div>
-              </details>
+              {{#if ../panel.showLabels}}
+                <details class="gmf-faction-panel__rating" data-faction-standing="{{id}}" data-prominence-system-id="{{../panel.systemId}}" data-reputation="{{../panel.reputation}}">
+                  <summary aria-label="{{name}} {{../panel.scale}}: {{value}}">{{value}}</summary>
+                  <div class="gmf-faction-panel__choices">
+                    {{#each ../panel.choices}}
+                      <button type="button" data-faction-rating="{{id}}" aria-pressed="{{#if (gmfEq id ../ratingId)}}true{{else}}false{{/if}}">{{label}}</button>
+                    {{else}}
+                      <p>No ratings configured.</p>
+                    {{/each}}
+                  </div>
+                </details>
+              {{/if}}
               {{#if ../panel.canManage}}
                 <button type="button" class="gmf-icon-button" data-edit-inline-faction="{{id}}" title="Edit {{name}}" aria-label="Edit {{name}}"><i class="fa-solid fa-pen"></i></button>
               {{/if}}
             </div>
-          {{else}}
+          {{else if ../panel.showLabels}}
             <span class="gmf-faction-panel__standing">{{value}}</span>
+          {{/if}}
+          {{#if ../panel.showPercentages}}
+            {{#if hasPercentage}}
+              <div class="gmf-faction-panel__meter">
+                <meter min="0" max="100" value="{{percentage}}" aria-label="{{name}} {{../panel.scale}} percentage">{{percentage}}%</meter>
+                <span aria-hidden="true">{{percentage}}%</span>
+              </div>
+            {{/if}}
+            {{#if ../panel.canEdit}}
+              <form class="gmf-faction-panel__percent" data-faction-percentage="{{id}}" data-prominence-system-id="{{../panel.systemId}}" data-reputation="{{../panel.reputation}}">
+                <label>{{../panel.title}} % <input type="number" min="0" max="100" step="1" value="{{percentage}}" aria-label="{{name}} {{../panel.scale}} percentage" /></label>
+                <button type="submit" class="gmf-icon-button" aria-label="Save {{name}} {{../panel.scale}} percentage" title="Save percentage"><i class="fa-solid fa-check" aria-hidden="true"></i></button>
+              </form>
+            {{/if}}
           {{/if}}
         </li>
       {{else}}

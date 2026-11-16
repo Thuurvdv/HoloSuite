@@ -337,7 +337,20 @@ Hooks.once("init", async () => {
     onChange: () => refreshOpenApps()
   });
   for (const scale of ["reputation", "prominence"] as const) {
-    const { setting, title, icon } = FACTION_RATING_SCALES[scale];
+    const { setting, title, icon, labelsSetting, percentagesSetting } = FACTION_RATING_SCALES[scale];
+    for (const [key, display, defaultValue] of [[labelsSetting, "Labels", true], [percentagesSetting, "Percentages", false]] as const) {
+      game.settings.register(MODULE_ID, key, {
+        name: `Show ${title} ${display}`,
+        hint: defaultValue
+          ? `Show the named rating in the ${title} tab.`
+          : `Show a bar and numeric percentage in the ${title} tab.`,
+        scope: "world",
+        config: areFactionsEnabled(),
+        type: Boolean,
+        default: defaultValue,
+        onChange: () => refreshOpenApps()
+      });
+    }
     game.settings.register(MODULE_ID, setting, {
       scope: "world",
       config: false,

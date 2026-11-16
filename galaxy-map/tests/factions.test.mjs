@@ -60,7 +60,8 @@ test("legacy factions keep their IDs and receive additive defaults", () => {
   assert.deepEqual(factions, [{
     id: "alliance", name: "Alliance", color: "#cc8800", visibility: "players", description: "",
     tagline: "", type: "", emblem: "", headquartersSystemId: "", gmNotes: "",
-    kind: "major", parentFactionId: "", prominence: "Unrated", systemProminence: {}, reputation: "Neutral"
+    kind: "major", parentFactionId: "", prominence: "Unrated", systemProminence: {},
+    prominencePercent: null, systemProminencePercent: {}, reputation: "Neutral", reputationPercent: null
   }]);
   assert.equal(systems[0].factionId, "alliance");
 });
@@ -70,7 +71,8 @@ test("faction edits and JSON import/export round-trip the expanded data", async 
   const edited = await store.upsertFaction("map", { id: "alliance", tagline: "Hold together" });
   assert.deepEqual(edited, {
     ...alliance, tagline: "Hold together",
-    kind: "major", parentFactionId: "", prominence: "Unrated", systemProminence: {}, reputation: "Neutral"
+    kind: "major", parentFactionId: "", prominence: "Unrated", systemProminence: {},
+    prominencePercent: null, systemProminencePercent: {}, reputation: "Neutral", reputationPercent: null
   });
   store.exportMap("map");
   const imported = await store.importMapData(downloads[0]);
@@ -256,4 +258,67 @@ test("disabling factions hides the viewport feature without changing saved assig
   assert.equal(store.getRawMap("map").systems[0].factionId, "alliance");
   enabled = true;
   assert.equal((await app._prepareContext({})).map.systems[0].factionColor, alliance.color);
+});
+
+test("prominence percentages are optional, scoped, and editable only by a GM", async t => {
+  const { store } = setup();
+  const errors = [];
+  const readSetting = game.settings.get;
+  let enabled = false;
+  t.mock.method(game.settings, "get", (moduleId, key) => key === "showProminencePercentages" ? enabled : readSetting(moduleId, key));
+  const View = createGalaxyMapViewClass({
+    getRawMap: store.getRawMap, prepareMapForDisplay, upsertFaction: store.upsertFaction,
+    notifyError: error => errors.push(error)
+  });
+  const app = new View({ mapId: "map" });
+  app.factionPanelOpen = true;
+  assert.equal((await app._prepareContext({})).factionPanel.showPercentages, false);
+  enabled = true;
+  await app._saveFactionPercentage("alliance", "", 0, false);
+  await app._saveFactionPercentage("alliance", "sol", 80, false);
+  await app._saveFactionPercentage("alliance", "custom", 100, false);
+  await app._saveFactionPercentage("alliance", "sol", 101, false);
+  assert.equal(errors.length, 1);
+  const galaxy = (await app._prepareContext({})).factionPanel;
+  assert.equal(galaxy.showPercentages, true);
+  assert.equal(galaxy.rows[0].hasPercentage, true);
+  assert.equal(galaxy.rows[0].percentage, 0);
+  app.activeSystemId = "sol";
+  assert.equal((await app._prepareContext({})).factionPanel.rows[0].percentage, 80);
+  game.user.isGM = false;
+  await app._saveFactionPercentage("alliance", "sol", 50, false);
+  assert.equal(store.getRawMap("map").factions[0].systemProminencePercent.sol, 80);
+  assert.equal((await app._prepareContext({})).factionPanel.canEdit, false);
+  game.user.isGM = true;
+  await app._saveFactionPercentage("alliance", "sol", null, false);
+  assert.deepEqual(store.getRawMap("map").factions[0].systemProminencePercent, { custom: 100 });
+  assert.equal((await app._prepareContext({})).factionPanel.rows[0].hasPercentage, false);
+  app.factionPanelTab = "reputation";
+  assert.equal((await app._prepareContext({})).factionPanel.showPercentages, false);
+});
+
+test("reputation percentages apply across the map and display independently of labels", async t => {
+  const { store } = setup();
+  const readSetting = game.settings.get;
+  const preferences = { showReputationLabels: false, showReputationPercentages: true, showProminencePercentages: false };
+  t.mock.method(game.settings, "get", (moduleId, key) => preferences[key] ?? readSetting(moduleId, key));
+  const View = createGalaxyMapViewClass({
+    getRawMap: store.getRawMap, prepareMapForDisplay, upsertFaction: store.upsertFaction
+  });
+  const app = new View({ mapId: "map" });
+  app.factionPanelOpen = true;
+  app.activeSystemId = "sol";
+  app.factionPanelTab = "reputation";
+  await app._saveFactionPercentage("alliance", "sol", 65, true);
+  const systemPanel = (await app._prepareContext({})).factionPanel;
+  assert.equal(systemPanel.showLabels, false);
+  assert.equal(systemPanel.showPercentages, true);
+  assert.equal(systemPanel.rows[0].percentage, 65);
+  app.activeSystemId = null;
+  assert.equal((await app._prepareContext({})).factionPanel.rows[0].percentage, 65);
+  assert.deepEqual(store.getRawMap("map").factions[0].systemProminencePercent, {});
+  app.factionPanelTab = "prominence";
+  const prominence = (await app._prepareContext({})).factionPanel;
+  assert.equal(prominence.showLabels, true);
+  assert.equal(prominence.showPercentages, false);
 });
