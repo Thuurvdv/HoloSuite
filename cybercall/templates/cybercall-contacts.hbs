@@ -1,26 +1,35 @@
-<section class="cybercall-contacts">
+<section data-holosuite-branding="cybercall" class="cybercall-contacts">
+  {{#if isSettingsMode}}
+    <h2>Sound settings</h2>
+  {{else}}
   <header class="cybercall-contacts-header">
     <div>
-      <div class="cybercall-contacts-kicker">Personal Comms Directory</div>
-      <h2>CyberCall Contacts{{#if hasUnreadMessages}} <span class="cybercall-unread-label">{{unreadMessageCount}}</span>{{/if}}</h2>
+      <h2><span data-holosuite-brand-text="contactsHeading">Contacts</span>{{#unless inPhone}}{{#if hasUnreadMessages}} <span class="cybercall-unread-label">{{unreadMessageCount}}</span>{{/if}}{{/unless}}</h2>
     </div>
   </header>
 
+  {{#unless inPhone}}
   <nav class="cybercall-mode-tabs">
     <button type="button" class="active" data-cybercall-mode-tab="calls">Calls</button>
     <button type="button" data-cybercall-open-messages data-cybercall-mode-tab="messages">Messages</button>
   </nav>
+  {{/unless}}
 
-  <nav class="cybercall-contact-tabs">
+  <nav class="cybercall-contact-tabs{{#if canEditContactImages}} cybercall-contact-tabs-gm{{/if}}" aria-label="Contact lists">
     <button type="button" class="{{#if isPersonalTab}}active{{/if}}" data-cybercall-contact-tab="personal">Personal</button>
-    <button type="button" class="{{#if isGroupTab}}active{{/if}}" data-cybercall-contact-tab="group">Group</button>
+    <button type="button" class="{{#if isGroupTab}}active{{/if}}" data-cybercall-contact-tab="group">Global</button>
+    {{#if canEditContactImages}}
+      <button type="button" class="{{#if isPlayerTab}}active{{/if}}" data-cybercall-contact-tab="player">Player Lists</button>
+    {{/if}}
   </nav>
+
+  <label class="cybercall-contact-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" data-cybercall-contact-search aria-label="Search contacts" placeholder="Search name or number"></label>
 
   <section data-cybercall-contact-panel="personal" {{#unless isPersonalTab}}hidden{{/unless}}>
     <ul class="cybercall-contacts-list">
       {{#if hasContacts}}
         {{#each contacts}}
-          <li>
+          <li data-cybercall-contact-row="{{id}}">
             <div class="cybercall-contact-avatar">
               {{#if image}}
                 <img src="{{image}}" alt="">
@@ -30,12 +39,14 @@
             </div>
             <div class="cybercall-contact-id">
               <strong>{{name}}</strong>
-              <span>{{number}}</span>
+              <span>{{number}}{{#if assignedToPlayer}} · GM assigned{{/if}}</span>
             </div>
             <div class="cybercall-contact-actions">
-              <button type="button" data-cybercall-contact-action="call" data-contact-scope="personal" data-contact-id="{{id}}">Call</button>
-              <button type="button" data-cybercall-contact-action="message" data-contact-scope="personal" data-contact-id="{{id}}">Message</button>
-              <button type="button" data-cybercall-contact-action="remove" data-contact-scope="personal" data-contact-id="{{id}}">Remove</button>
+              <button type="button" data-cybercall-contact-action="call" data-contact-scope="personal" data-contact-id="{{id}}" aria-label="Call {{name}}" title="Call"><i class="fa-solid fa-phone" aria-hidden="true"></i></button>
+              <button type="button" data-cybercall-contact-action="message" data-contact-scope="personal" data-contact-id="{{id}}" aria-label="Message {{name}}" title="Message"><i class="fa-solid fa-comment" aria-hidden="true"></i></button>
+              {{#unless assignedToPlayer}}
+              <button type="button" data-cybercall-contact-action="remove" data-contact-scope="personal" data-contact-id="{{id}}" aria-label="Remove {{name}}" title="Remove"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+              {{/unless}}
             </div>
           </li>
         {{/each}}
@@ -44,6 +55,7 @@
           <span>No personal contacts stored.</span>
         </li>
       {{/if}}
+      <li class="cybercall-contacts-empty" data-cybercall-empty-search hidden>No matching contacts.</li>
     </ul>
   </section>
 
@@ -51,7 +63,7 @@
     <ul class="cybercall-contacts-list">
       {{#if hasGroupContacts}}
         {{#each groupContacts}}
-          <li>
+          <li data-cybercall-contact-row="{{id}}">
             <div class="cybercall-contact-avatar">
               {{#if image}}
                 <img src="{{image}}" alt="">
@@ -64,22 +76,62 @@
               <span>{{number}}</span>
             </div>
             <div class="cybercall-contact-actions">
-              <button type="button" data-cybercall-contact-action="call" data-contact-scope="group" data-contact-id="{{id}}">Call</button>
-              <button type="button" data-cybercall-contact-action="message" data-contact-scope="group" data-contact-id="{{id}}">Message</button>
-              <button type="button" data-cybercall-contact-action="remove" data-contact-scope="group" data-contact-id="{{id}}">Remove</button>
+              <button type="button" data-cybercall-contact-action="call" data-contact-scope="group" data-contact-id="{{id}}" aria-label="Call {{name}}" title="Call"><i class="fa-solid fa-phone" aria-hidden="true"></i></button>
+              <button type="button" data-cybercall-contact-action="message" data-contact-scope="group" data-contact-id="{{id}}" aria-label="Message {{name}}" title="Message"><i class="fa-solid fa-comment" aria-hidden="true"></i></button>
+              {{#if ../canEditContactImages}}
+                <button type="button" data-cybercall-contact-action="edit" data-contact-scope="group" data-contact-id="{{id}}" aria-label="Edit {{name}}" title="Edit"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+              {{/if}}
+              <button type="button" data-cybercall-contact-action="remove" data-contact-scope="group" data-contact-id="{{id}}" aria-label="Remove {{name}}" title="Remove"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
             </div>
           </li>
         {{/each}}
       {{else}}
         <li class="cybercall-contacts-empty">
-          <span>No group contacts stored.</span>
+          <span>No global contacts stored.</span>
         </li>
       {{/if}}
+      <li class="cybercall-contacts-empty" data-cybercall-empty-search hidden>No matching contacts.</li>
     </ul>
   </section>
 
+  {{#if canEditContactImages}}
+    <section data-cybercall-contact-panel="player" {{#unless isPlayerTab}}hidden{{/unless}}>
+      {{#if players}}
+        <label class="cybercall-contacts-player-picker">
+          <span>Player contact list</span>
+          <select data-cybercall-contact-player>
+            {{#each players}}
+              <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}{{#unless active}} (offline){{/unless}}</option>
+            {{/each}}
+          </select>
+        </label>
+        <ul class="cybercall-contacts-list">
+          {{#each playerContacts}}
+            <li data-cybercall-contact-row="{{id}}">
+              <div class="cybercall-contact-avatar">
+                {{#if image}}<img src="{{image}}" alt="">{{else}}<span>{{initials}}</span>{{/if}}
+              </div>
+              <div class="cybercall-contact-id"><strong>{{name}}</strong><span>{{number}}</span></div>
+              <div class="cybercall-contact-actions">
+                <button type="button" data-cybercall-contact-action="edit" data-contact-scope="player" data-contact-id="{{id}}" aria-label="Edit {{name}}" title="Edit"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+                <button type="button" data-cybercall-contact-action="remove" data-contact-scope="player" data-contact-id="{{id}}" aria-label="Remove {{name}}" title="Remove"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+              </div>
+            </li>
+          {{else}}
+            <li class="cybercall-contacts-empty">No contacts synced for this player yet. Existing personal contacts sync when the player connects.</li>
+          {{/each}}
+          <li class="cybercall-contacts-empty" data-cybercall-empty-search hidden>No matching contacts.</li>
+        </ul>
+      {{else}}
+        <p>No player users found.</p>
+      {{/if}}
+    </section>
+  {{/if}}
+
+  <details class="cybercall-contact-add" {{#if hideContactEditor}}hidden{{/if}}><summary>Add contact</summary>
   <form class="cybercall-contacts-form" data-cybercall-contacts-form>
     <input type="hidden" name="scope" value="{{activeTab}}">
+    <input type="hidden" name="contactId">
 
     <label>
       <span>Name</span>
@@ -104,7 +156,10 @@
 
       <label>
         <span>Picture</span>
-        <input type="text" name="image" autocomplete="off" placeholder="icons/...">
+        <div class="cybercall-contact-picture-row">
+          <input type="text" name="image" autocomplete="off" placeholder="icons/...">
+          <button type="button" data-cybercall-contact-browse aria-label="Browse contact picture" title="Browse contact picture"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></button>
+        </div>
       </label>
 
       <label class="cybercall-contact-toggle">
@@ -113,9 +168,15 @@
       </label>
     {{/if}}
 
-    <button type="submit">Add Contact</button>
+    <div class="cybercall-contacts-editor-actions">
+      <button type="submit">Add Contact</button>
+      {{#if canEditContactImages}}<button type="button" data-cybercall-cancel-contact>Cancel</button>{{/if}}
+    </div>
   </form>
+  </details>
+  {{/if}}
 
+  {{#unless isContactsMode}}
   <footer class="cybercall-contacts-footer">
     <label class="cybercall-ringtone-select">
       <span>Ringtone</span>
@@ -136,4 +197,5 @@
       </label>
     {{/if}}
   </footer>
+  {{/unless}}
 </section>

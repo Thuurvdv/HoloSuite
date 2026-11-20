@@ -4,16 +4,6 @@
     inset 0 0 34px rgba(94, 255, 187, 0.14);
 }
 
-@keyframes cybercall-flicker {
-  0%, 100% { opacity: 1; }
-  31% { opacity: 0.96; }
-  32% { opacity: 0.78; }
-  33% { opacity: 0.98; }
-  74% { opacity: 0.92; }
-  75% { opacity: 0.72; }
-  76% { opacity: 1; }
-}
-
 @keyframes cybercall-scan {
   from { transform: translateY(-55%); }
   to { transform: translateY(55%); }
@@ -22,21 +12,6 @@
 @keyframes cybercall-static {
   from { transform: translate(0, 0); }
   to { transform: translate(3px, -2px); }
-}
-
-@keyframes cybercall-ring-pulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow:
-      0 0 24px rgba(94, 231, 255, 0.32),
-      inset 0 0 34px rgba(94, 231, 255, 0.14);
-  }
-  50% {
-    transform: scale(1.012);
-    box-shadow:
-      0 0 42px var(--cybercall-blue),
-      inset 0 0 44px rgba(94, 231, 255, 0.2);
-  }
 }
 
 @media (max-width: 520px) {

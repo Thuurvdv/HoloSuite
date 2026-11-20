@@ -122,8 +122,7 @@
     0 0 24px rgba(0, 167, 255, 0.34),
     inset 0 0 34px rgba(94, 231, 255, 0.12);
   backdrop-filter: blur(10px);
-  text-shadow: 0 0 10px rgba(94, 231, 255, 0.55);
-  animation: cybercall-flicker 5.5s infinite;
+
 }
 
 .cybercall-broadcast {
@@ -221,13 +220,6 @@
     linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) left bottom / 1px 42px no-repeat,
     linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right bottom / 42px 1px no-repeat,
     linear-gradient(var(--cybercall-cyan), var(--cybercall-cyan)) right bottom / 1px 42px no-repeat;
-}
-
-.cybercall-ringing .cybercall-panel,
-.cybercall-ringing-panel {
-  animation:
-    cybercall-flicker 5.5s infinite,
-    cybercall-ring-pulse 1.45s ease-in-out infinite;
 }
 
 .cybercall-header,
