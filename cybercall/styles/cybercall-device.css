@@ -1,0 +1,605 @@
+/* Slice the casing at fixed-size corners so Foundry can resize the window. */
+.cybercall-phone-app,
+.cybercall-app:not(.cybercall-fullscreen),
+.cybercall-composer-app {
+  --cc-screen: #09121d;
+  --cc-surface: #111f2e;
+  --cc-line: #2d4456;
+  --cc-muted: #a2bdcb;
+  --cc-accent: var(--cybercall-cyan);
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 8px 10px 16px;
+  box-shadow: none !important;
+  filter: drop-shadow(0 12px 18px #0009);
+  isolation: isolate;
+}
+
+:is(.cybercall-phone-app, .cybercall-app:not(.cybercall-fullscreen), .cybercall-composer-app)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  border: 34px solid transparent;
+  border-image: url("../assets/ui/device-frame.svg") 34 fill stretch;
+}
+
+:is(.cybercall-phone-app, .cybercall-app:not(.cybercall-fullscreen), .cybercall-composer-app) .window-header {
+  position: relative;
+  margin-inline: 15px;
+  padding-inline: 6px !important;
+  flex: 0 0 37px;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+:is(.cybercall-phone-app, .cybercall-app:not(.cybercall-fullscreen), .cybercall-composer-app) .window-header::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: calc(50% - 20px);
+  width: 40px;
+  height: 4px;
+  border-bottom: 1px solid #466071;
+  border-radius: 6px;
+  background: #05080d;
+  pointer-events: none;
+}
+
+:is(.cybercall-phone-app, .cybercall-app:not(.cybercall-fullscreen), .cybercall-composer-app) .window-content {
+  min-height: 0;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid var(--cc-line);
+  border-radius: 9px !important;
+  background: var(--cc-screen) !important;
+  box-shadow: none !important;
+}
+
+.cybercall-phone-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  color: var(--cybercall-text);
+  font-family: var(--hs-font-ui, system-ui, sans-serif);
+}
+
+.cybercall-phone-shell:has(> .cybercall-panel) {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.cybercall-device-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  background: #101c29;
+  border-bottom: 1px solid var(--cc-line);
+  letter-spacing: .08em;
+}
+
+.cybercall-device-status-icon { color: var(--cc-accent); }
+
+.cybercall-device-screen {
+  overflow: auto;
+  min-height: 0;
+  container-type: inline-size;
+}
+
+.cybercall-device-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 5px;
+  gap: 3px;
+  background: #101c29;
+  border-top: 1px solid var(--cc-line);
+}
+
+.cybercall-phone-app .cybercall-device-nav button[data-cybercall-screen] {
+  position: relative;
+  display: grid !important;
+  justify-items: center;
+  align-content: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 50px;
+  padding: 4px 1px !important;
+  margin: 0;
+  font-size: 11px !important;
+  background: transparent !important;
+  color: var(--cc-muted) !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+.cybercall-phone-app .cybercall-device-nav button[aria-current="page"] {
+  background: #142a3a !important;
+  color: var(--cc-accent) !important;
+  border-color: #305465 !important;
+}
+
+.cybercall-device-nav i { font-size: 15px; }
+.cybercall-device-nav .cybercall-unread-label { position: absolute; top: 1px; right: 2px; }
+.cybercall-phone-page { padding: 16px; }
+.cybercall-phone-page h2 { margin: 0 0 14px; font-size: 21px; }
+.cybercall-history-list { list-style: none; margin: 0; padding: 0; }
+.cybercall-history-list li { display: flex; gap: 12px; align-items: center; padding: 12px 4px; border-bottom: 1px solid var(--cc-line); }
+.cybercall-history-list time { display: block; color: var(--cc-muted); font-size: 11px; margin-top: 4px; }
+
+:is(.cybercall-phone-app, .cybercall-app, .cybercall-composer-app) .window-content button:focus-visible {
+  outline: 2px solid var(--cybercall-cyan) !important;
+  outline-offset: -2px;
+}
+
+.cybercall-phone-app,
+.cybercall-app:not(.cybercall-fullscreen) {
+  min-width: min(315px, calc(100vw - 16px)) !important;
+  min-height: min(365px, calc(100vh - 24px)) !important;
+  max-width: calc(100vw - 8px);
+  max-height: calc(100vh - 8px);
+}
+
+.cybercall-phone-app .cybercall-device-screen > :is(.cybercall-contacts, .cybercall-messages) {
+  background: var(--cc-screen);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  min-width: 0;
+  min-height: 0;
+}
+.cybercall-phone-app :is(.cybercall-contacts, .cybercall-messages)::before,
+.cybercall-phone-app :is(.cybercall-contacts, .cybercall-messages)::after { display: none; }
+.cybercall-phone-app .cybercall-contacts { padding: 14px; }
+.cybercall-phone-app .cybercall-contacts-header { padding: 0; margin-bottom: 12px; }
+.cybercall-phone-app .cybercall-contacts-header h2 { margin: 0; font-size: 22px; }
+.cybercall-phone-app .cybercall-contacts-kicker { color: var(--cc-muted); }
+.cybercall-phone-app .cybercall-contact-tabs { margin-bottom: 10px; }
+.cybercall-phone-app .cybercall-contacts-list { margin-top: 10px; gap: 6px; }
+.cybercall-phone-app .cybercall-contacts-list li {
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 8px;
+  gap: 8px;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-line);
+  border-radius: 4px;
+  box-shadow: none;
+}
+.cybercall-phone-app .cybercall-contacts-list li[hidden] { display: none; }
+.cybercall-phone-app .cybercall-contacts-list li:is(.selected, :focus-within) {
+  border-color: var(--cc-accent);
+  box-shadow: inset 3px 0 var(--cc-accent);
+}
+.cybercall-phone-app .cybercall-contact-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 5px;
+  box-shadow: none;
+}
+.cybercall-phone-app .cybercall-contact-actions {
+  gap: 4px;
+  width: 104px;
+  grid-column: auto;
+  flex-wrap: nowrap;
+}
+.cybercall-phone-app .cybercall-contact-actions button[data-contact-id] {
+  flex: 0 0 32px;
+  min-width: 32px;
+  width: 32px !important;
+  min-height: 32px;
+  padding: 0 !important;
+}
+.cybercall-contact-search { display: flex; align-items: center; gap: 8px; color: var(--cc-accent); }
+.cybercall-contact-search input { flex: 1; min-height: 36px; min-width: 0; }
+.cybercall-contact-add { margin-top: 12px; }
+.cybercall-contact-add summary { width: fit-content; cursor: pointer; padding: 7px 0; color: var(--cc-accent); }
+.cybercall-phone-settings .cybercall-contacts-footer { display: grid; gap: 10px; }
+
+.cybercall-phone-app .cybercall-messages {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.cybercall-phone-app .cybercall-messages > [hidden] { display: none !important; }
+.cybercall-phone-app .cybercall-thread-list { background: transparent; border: 0; }
+.cybercall-phone-app .cybercall-thread-list h2 { margin: 0; font-size: 22px; }
+.cybercall-phone-app .cybercall-thread {
+  min-height: 60px !important;
+  flex: none;
+  border-color: var(--cc-line);
+  background: var(--cc-surface);
+  box-shadow: none;
+}
+.cybercall-phone-app .cybercall-thread-avatar { width: 38px; height: 38px; border-radius: 6px; }
+.cybercall-phone-app .cybercall-conversation { overflow: auto; }
+.cybercall-phone-app .cybercall-conversation:has(.cybercall-group-form) { grid-template-rows: auto minmax(0, 1fr); }
+.cybercall-phone-app .cybercall-conversation-identity { gap: 7px; }
+.cybercall-phone-app .cybercall-conversation-identity .cybercall-message-back {
+  flex: 0 0 30px;
+  min-width: 0;
+  padding: 0 !important;
+}
+.cybercall-phone-app .cybercall-delete-thread { font-size: 10px !important; padding-inline: 5px !important; }
+.cybercall-phone-app .cybercall-delete-thread:not(.confirming) { width: 34px !important; }
+.cybercall-phone-app .cybercall-delete-thread:not(.confirming) span { display: none; }
+.cybercall-phone-app .cybercall-conversation-identity h3 { font-size: 19px; }
+.cybercall-phone-app .cybercall-conversation-identity .cybercall-contacts-kicker {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+.cybercall-phone-app .cybercall-npc-link-panel { grid-template-columns: 36px minmax(0, 1fr); }
+.cybercall-phone-app .cybercall-npc-link-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; }
+.cybercall-phone-app .cybercall-message-log {
+  border: 0;
+  padding: 6px 0;
+  background: transparent;
+}
+.cybercall-phone-app .cybercall-message {
+  padding: 8px 10px;
+  background: #162638;
+  border-color: #344d60;
+  border-radius: 9px 9px 9px 2px;
+  box-shadow: none;
+  overflow-wrap: anywhere;
+}
+.cybercall-phone-app .cybercall-message.mine { background: #123546; border-color: #377082; border-radius: 9px 9px 2px 9px; }
+.cybercall-phone-app .cybercall-message.event { background: #19212a; color: var(--cc-muted); border: 0; border-radius: 5px; font-size: 11px; }
+.cybercall-phone-app .cybercall-message-form {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+}
+.cybercall-phone-app .cybercall-message-form label { grid-column: 1 / -1; }
+.cybercall-phone-app .cybercall-thread-reply-target { display: none; }
+.cybercall-phone-app .cybercall-message-form textarea { grid-area: auto; min-height: 48px; max-height: 115px; }
+.cybercall-phone-app .cybercall-message-form button[type="submit"] { grid-area: auto; align-self: stretch; }
+
+.cybercall-phone-app .cybercall-contacts-list li.cybercall-contacts-empty { grid-template-columns: 1fr; }
+
+.cybercall-panel {
+  --cc-channel: var(--cybercall-cyan);
+  --cc-frame: #345363;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px;
+  background: #09131f;
+  border: 1px solid var(--cc-frame);
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+  overflow: hidden;
+}
+.cybercall-panel::before,
+.cybercall-panel::after,
+.cybercall-panel > :is(.cybercall-static, .cybercall-reticle) { display: none; }
+
+.cybercall-panel.cybercall-emergency { --cc-channel: #ff7787; --cc-frame: #854051; background: #1a121c; }
+.cybercall-panel.cybercall-corrupted { --cc-channel: #a6e9b5; --cc-frame: #427451; background: #101b1c; }
+.cybercall-panel.cybercall-connected-panel { --cc-channel: #87e7aa; }
+.cybercall-panel .cybercall-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px;
+  gap: 10px;
+  padding: 0 0 11px;
+  border-bottom: 1px solid var(--cc-frame);
+  align-items: start;
+}
+.cybercall-panel .cybercall-kicker {
+  color: var(--cc-channel);
+  font-size: 11px;
+  letter-spacing: .08em;
+  margin: 0 0 5px;
+}
+.cybercall-panel .cybercall-header h2 { margin: 0; font-size: clamp(21px, 7cqi, 33px); overflow-wrap: anywhere; }
+.cybercall-panel .cybercall-header p { margin: 4px 0 0; overflow-wrap: anywhere; }
+.cybercall-panel .cybercall-signal { width: auto; color: var(--cc-channel); text-align: right; }
+.cybercall-panel .cybercall-signal-bar {
+  background: #273341;
+  margin-top: 6px;
+  height: 4px;
+}
+.cybercall-panel .cybercall-signal-bar i { background: var(--cc-channel); box-shadow: none; }
+.cybercall-panel .cybercall-body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: safe center;
+  gap: 10px;
+  min-height: 0;
+  margin: 0;
+  overflow: auto;
+  overflow-x: hidden;
+}
+.cybercall-panel .cybercall-portrait {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  position: relative;
+  flex: 1 0 auto;
+  box-sizing: border-box;
+  max-height: 310px;
+  min-height: 100px;
+  width: 100%;
+  padding: 8px;
+  overflow: hidden;
+  border: 16px solid transparent;
+  border-image: url("../assets/ui/screen-inset.svg") 16 fill stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.cybercall-panel .cybercall-portrait img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 0;
+  box-shadow: none;
+}
+.cybercall-panel .cybercall-initials { color: var(--cc-channel); font-size: clamp(34px, 12cqi, 76px); }
+.cybercall-panel .cybercall-body blockquote {
+  margin: 0;
+  min-height: 0;
+  padding: 10px;
+  color: #e5f3fa;
+  overflow-wrap: anywhere;
+  border: 0;
+  border-left: 2px solid var(--cc-frame);
+  background: #132332;
+  box-shadow: none;
+  font-size: 14px;
+}
+.cybercall-panel .cybercall-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+.cybercall-panel .cybercall-actions > * {
+  flex: 1 1 auto;
+  text-align: center;
+  margin: 0;
+  min-width: 0;
+}
+.cybercall-panel .cybercall-actions button[data-cybercall-action] { min-height: 43px; }
+.cybercall-panel .cybercall-actions :is([data-cybercall-action="accept"], .cybercall-preview-answer) {
+  color: #ccffe0 !important;
+  background: #184636 !important;
+  border-color: #529779 !important;
+}
+.cybercall-panel .cybercall-actions :is([data-cybercall-action="decline"], [data-cybercall-action="end"], .cybercall-preview-decline) {
+  color: #ffdee4 !important;
+  background: #49232d !important;
+  border-color: #a35c69 !important;
+}
+
+.cybercall-composer-app {
+  min-width: min(350px, calc(100vw - 20px)) !important;
+  max-width: calc(100vw - 8px);
+  max-height: calc(100vh - 8px);
+}
+
+.cybercall-composer-app .window-content { container-type: inline-size; }
+.cybercall-composer-app .cybercall-composer {
+  padding: 16px;
+  background: var(--cc-screen);
+  border: 0;
+  box-shadow: none;
+}
+.cybercall-composer-app .cybercall-composer-header { margin-bottom: 10px; }
+.cybercall-composer-app .cybercall-composer-header h2 { text-transform: none; }
+.cybercall-console-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 13px; }
+.cybercall-console-nav button { width: auto; }
+.cybercall-console-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.12fr) minmax(240px, 1fr) minmax(182px, .86fr);
+  align-items: start;
+  gap: 12px;
+}
+.cybercall-console-layout > section {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  min-width: 0;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-line);
+  border-radius: 5px;
+}
+.cybercall-console-layout h3 { margin: 0; color: var(--cc-accent); font-size: 15px; }
+.cybercall-console-layout .cybercall-composer-toggles { grid-template-columns: 1fr; margin: 0; gap: 6px; }
+.cybercall-console-layout textarea { min-height: 75px; resize: vertical; }
+.cybercall-console-layout .cybercall-composer-targets,
+.cybercall-console-layout .cybercall-composer-ringtone,
+.cybercall-console-layout .cybercall-composer-actions { margin: 0; }
+.cybercall-console-layout .cybercall-composer-targets small { display: block; margin-block: 4px; color: var(--cc-muted); text-transform: none; }
+.cybercall-console-layout .cybercall-recipient-grid,
+.cybercall-console-layout .cybercall-composer-actions { display: grid; grid-template-columns: 1fr; gap: 5px; }
+.cybercall-console-layout .cybercall-recipient-grid { max-height: 180px; overflow: auto; }
+.cybercall-preview-device {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  justify-self: center;
+  height: 384px;
+  padding: 12px 8px;
+  isolation: isolate;
+}
+.cybercall-preview-device::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 22px solid transparent;
+  border-image: url("../assets/ui/device-frame.svg") 34 fill stretch;
+}
+.cybercall-preview-device .cybercall-panel { padding: 10px; gap: 7px; border-radius: 6px; }
+.cybercall-preview-device .cybercall-panel .cybercall-header { grid-template-columns: minmax(0, 1fr) 42px; }
+.cybercall-preview-device .cybercall-panel .cybercall-header h2 { font-size: 18px; }
+.cybercall-preview-device .cybercall-portrait { min-height: 75px; }
+.cybercall-preview-device .cybercall-initials { font-size: 38px; }
+.cybercall-preview-device .cybercall-panel .cybercall-body blockquote { font-size: 12px; }
+.cybercall-preview-device .cybercall-actions span { padding: 6px; border: 1px solid; border-radius: 4px; font-size: 11px; }
+.cybercall-preview-device.cybercall-preview-wide { height: 240px; max-width: none; padding: 4px; }
+.cybercall-preview-device.cybercall-preview-wide .cybercall-panel { width: 100%; height: 100%; min-height: 0; }
+.cybercall-preview-device.cybercall-preview-wide .cybercall-panel .cybercall-body { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+.cybercall-preview-device.cybercall-preview-wide .cybercall-portrait { height: 100%; }
+
+@container (max-width: 755px) {
+  .cybercall-console-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .cybercall-console-dispatch { grid-column: 1 / -1; }
+}
+
+@container (max-width: 475px) {
+  .cybercall-console-layout { grid-template-columns: minmax(0, 1fr); }
+  .cybercall-console-dispatch { grid-row: 2; }
+}
+
+/* Override the legacy chrome shims for the redesigned surfaces. */
+.cybercall-phone-app .cybercall-device-screen > :is(.cybercall-contacts, .cybercall-messages),
+.cybercall-composer-app .cybercall-composer {
+  background: var(--cc-screen) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.cybercall-app.cybercall-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  max-height: none !important;
+  backdrop-filter: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.cybercall-app.cybercall-fullscreen :is(.window-resize-handle, .window-resizable-handle) { display: none; }
+.cybercall-app.cybercall-fullscreen .window-header {
+  background: #0a121b !important;
+  border-color: #2b4455 !important;
+  flex: 0 0 auto;
+}
+.cybercall-app.cybercall-fullscreen .window-content {
+  min-height: 0;
+  max-height: none;
+  padding: 12px !important;
+  background: #03080dd9 !important;
+}
+.cybercall-fullscreen .cybercall-panel.cybercall-broadcast {
+  width: min(100%, 1050px);
+  height: min(100%, 660px);
+  align-content: stretch;
+  padding: clamp(12px, 3vw, 32px);
+  border: 26px solid transparent;
+  border-image: url("../assets/ui/device-frame.svg") 34 fill stretch;
+}
+.cybercall-fullscreen .cybercall-panel .cybercall-header {
+  grid-template-columns: minmax(0, 1fr) min(22%, 110px);
+}
+.cybercall-fullscreen .cybercall-panel .cybercall-header h2 { font-size: clamp(21px, 4vw, 44px); }
+.cybercall-fullscreen .cybercall-panel .cybercall-body {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  align-items: center;
+}
+.cybercall-fullscreen .cybercall-panel .cybercall-portrait { height: 100%; max-height: 420px; }
+.cybercall-fullscreen .cybercall-panel.cybercall-connected-panel .cybercall-body { grid-template-columns: 1fr; justify-items: center; }
+.cybercall-fullscreen .cybercall-panel.cybercall-connected-panel .cybercall-portrait { max-width: 480px; }
+.cybercall-fullscreen .cybercall-panel .cybercall-body blockquote { font-size: clamp(14px, 2vw, 21px); }
+.cybercall-fullscreen .cybercall-panel .cybercall-actions { justify-content: end; }
+.cybercall-fullscreen .cybercall-panel .cybercall-actions > button { flex: 0 1 160px; }
+
+.cybercall-panel { backdrop-filter: none; text-shadow: none; container-type: inline-size; }
+.cybercall-panel .cybercall-actions button { clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px); }
+.cybercall-panel .cybercall-signal span { color: var(--cc-channel); }
+.cybercall-panel .cybercall-kicker span { display: inline; }
+.cybercall-panel.cybercall-emergency .cybercall-header { border-bottom: 2px solid var(--cc-frame); }
+.cybercall-panel.cybercall-emergency .cybercall-portrait { outline: 1px solid var(--cc-frame); clip-path: polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px); }
+.cybercall-panel.cybercall-connected-panel .cybercall-portrait { flex: 1 0 100px; }
+
+@media (max-width: 540px) {
+  .cybercall-fullscreen .cybercall-panel.cybercall-broadcast { border-width: 16px; }
+  .cybercall-fullscreen .cybercall-panel .cybercall-body { grid-template-columns: 1fr; grid-auto-rows: minmax(90px, auto); }
+  .cybercall-fullscreen .cybercall-panel .cybercall-actions > button { flex: 1 1 auto; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(.cybercall-app, .cybercall-phone-app) .cybercall-panel { animation: cybercall-display-on 240ms ease-out both; }
+  :is(.cybercall-app, .cybercall-phone-app) .cybercall-panel .cybercall-signal { animation: cybercall-resolve 220ms 55ms ease-out both; }
+  :is(.cybercall-app, .cybercall-phone-app) .cybercall-panel .cybercall-portrait { animation: cybercall-resolve 220ms 105ms ease-out both; }
+  :is(.cybercall-app, .cybercall-phone-app) .cybercall-panel .cybercall-actions { animation: cybercall-resolve 190ms 140ms ease-out both; }
+  :is(.cybercall-app, .cybercall-phone-app) .cybercall-emergency .cybercall-portrait { animation-name: cybercall-emergency-lock; }
+  :is(.cybercall-app, .cybercall-phone-app) .cybercall-corrupted .cybercall-portrait { animation-name: cybercall-signal-lock; }
+  .cybercall-panel.cybercall-ringing-panel .cybercall-signal-bar i { animation: cybercall-channel-pulse 1.6s ease-in-out 3; }
+}
+
+@keyframes cybercall-display-on {
+  from { opacity: .45; }
+  to { opacity: 1; }
+}
+@keyframes cybercall-resolve {
+  from { opacity: .25; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes cybercall-emergency-lock {
+  from { opacity: .5; transform: translateY(-5px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes cybercall-signal-lock {
+  0% { opacity: .4; transform: translateX(-4px); }
+  38% { transform: translateX(3px); }
+  65%, 100% { opacity: 1; transform: none; }
+}
+@keyframes cybercall-channel-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .55; }
+}
+
+
+.cybercall-call-channel { display: block; margin-top: 6px; color: var(--cc-channel); }
+.cybercall-phone-app .cybercall-contact-id strong { text-transform: none; }
+.cybercall-composer-app .cybercall-console-layout :is(input[type="text"], select) { min-height: 32px; }
+.cybercall-phone-app .cybercall-thread.active,
+.cybercall-phone-app .cybercall-thread:focus-visible {
+  border-left: 3px solid var(--cc-accent);
+}
+
+
+:is(.cybercall-phone-app, .cybercall-composer-app, .cybercall-app) .window-content :is(h2, h3) {
+  font-family: var(--hs-font-ui, system-ui, sans-serif);
+}
+.cybercall-panel .cybercall-body blockquote { font-style: normal; }
+
+
+.cybercall-phone-app .cybercall-contact-tabs-gm {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: none;
+}
+.cybercall-contacts-player-picker {
+  display: grid;
+  gap: 5px;
+  margin-block: 12px;
+}
+.cybercall-contacts-player-picker select { min-height: 34px; }
+.cybercall-phone-app .cybercall-contact-actions:has([data-cybercall-contact-action="edit"]) { width: auto; }
+.cybercall-contacts-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  grid-column: 1 / -1;
+}
+.cybercall-contacts-editor-actions button { flex: 1; }

@@ -1,107 +1,122 @@
-<form class="cybercall-composer" data-cybercall-composer>
+<form data-holosuite-branding="cybercall" class="cybercall-composer" data-cybercall-composer>
   <header class="cybercall-composer-header">
     <div>
-      <div class="cybercall-composer-kicker">Transmission Console</div>
-      <h2>CyberCall Composer</h2>
+      <div class="cybercall-composer-kicker"><span data-holosuite-brand-text="transmissionSubtitle">Transmission Console</span></div>
+      <h2><span data-holosuite-brand-icon></span><span data-holosuite-brand-text="composerHeading"><span data-holosuite-brand-name>CyberCall</span> Composer</span></h2>
     </div>
     <output data-cybercall-signal-output>{{call.signal}}%</output>
   </header>
 
-  <nav class="cybercall-mode-tabs">
-    <button type="button" class="active" data-cybercall-mode-tab="calls">Calls</button>
-    <button type="button" data-cybercall-compose-action="open-messages" data-cybercall-mode-tab="messages">Messages</button>
+  <nav class="cybercall-console-nav" aria-label="CyberCall applications">
+    <button type="button" data-cybercall-compose-action="open-messages"><i class="fa-solid fa-comment" aria-hidden="true"></i> Messages</button>
+    <button type="button" data-cybercall-compose-action="open-contacts"><i class="fa-solid fa-address-book" aria-hidden="true"></i> Manage Contacts</button>
   </nav>
 
-  <section class="cybercall-composer-grid">
-    <label>
-      <span>Actor Portrait</span>
-      <select name="actorId">
-        <option value="">Manual / no actor</option>
-        {{#each actors}}
-          <option value="{{id}}">{{name}}</option>
-        {{/each}}
-      </select>
-    </label>
-
-    <label>
-      <span>Variant</span>
-      <select name="variant">
-        <option value="standard" {{#if call.isStandard}}selected{{/if}}>Standard Blue</option>
-        <option value="emergency" {{#if call.isEmergency}}selected{{/if}}>Emergency Red</option>
-        <option value="corrupted" {{#if call.isCorrupted}}selected{{/if}}>Corrupted Green</option>
-      </select>
-    </label>
-
-    <label>
-      <span>Caller Name</span>
-      <input type="text" name="callerName" value="{{call.callerName}}" placeholder="UNKNOWN CALLER">
-    </label>
-
-    <label>
-      <span>Subtitle / Faction</span>
-      <input type="text" name="subtitle" value="{{call.subtitle}}" placeholder="ATLAS Corporation">
-    </label>
-
-    <label class="cybercall-composer-wide">
-      <span>Portrait Image Path</span>
-      <div class="cybercall-composer-path-row">
-        <input type="text" name="image" value="{{call.image}}" placeholder="path/to/image.webp">
-        <button type="button" data-cybercall-compose-action="browse-image" title="Browse portrait image"><i class="fa-solid fa-folder-open"></i></button>
-      </div>
-    </label>
-
-    <label class="cybercall-composer-wide">
-      <span>Message</span>
-      <textarea name="message" rows="5" placeholder="Officer, we have a situation.">{{call.message}}</textarea>
-    </label>
-
-    <label class="cybercall-composer-wide cybercall-composer-range">
-      <span>Signal Strength</span>
-      <input type="range" name="signal" min="0" max="100" step="1" value="{{call.signal}}">
-    </label>
-  </section>
-
-  <section class="cybercall-composer-toggles">
-    <label>
-      <input type="checkbox" name="fullscreen" {{#if call.fullscreen}}checked{{/if}}>
-      <span>Fullscreen broadcast mode</span>
-    </label>
-
-    <label>
-      <input type="checkbox" name="ringing" {{#if call.ringing}}checked{{/if}}>
-      <span>Incoming ringing animation and sound</span>
-    </label>
-  </section>
-
-  <section class="cybercall-composer-targets">
-    <span>Recipients</span>
-    <div class="cybercall-recipient-grid">
-      {{#each players as |player|}}
+  <div class="cybercall-console-layout">
+    <section class="cybercall-console-config" aria-label="Transmission configuration">
+      <h3>Transmission</h3>
+      <section class="cybercall-composer-grid">
         <label>
-          <input type="checkbox" name="targetUserIds" value="{{player.id}}">
-          <span>{{player.name}}{{#unless player.active}} (offline){{/unless}}</span>
+          <span>Actor Portrait</span>
+          <select name="actorId">
+            <option value="">Manual / no actor</option>
+            {{#each actors}}
+              <option value="{{id}}">{{name}}</option>
+            {{/each}}
+          </select>
         </label>
-      {{else}}
-        <p>No player users found.</p>
-      {{/each}}
-    </div>
-  </section>
 
-  <section class="cybercall-composer-ringtone">
-    <label class="cybercall-ringtone-select">
-      <span>Ringtone</span>
-      <select data-cybercall-ringtone>
-        {{#each ringtoneChoices}}
-          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-        {{/each}}
-      </select>
-    </label>
-  </section>
+        <label>
+          <span>Variant</span>
+          <select name="variant">
+            <option value="standard" {{#if call.isStandard}}selected{{/if}}>Standard Blue</option>
+            <option value="emergency" {{#if call.isEmergency}}selected{{/if}}>Emergency Red</option>
+            <option value="corrupted" {{#if call.isCorrupted}}selected{{/if}}>Corrupted Green</option>
+          </select>
+        </label>
 
-  <footer class="cybercall-composer-actions">
-    <button type="button" data-cybercall-compose-action="preview">Preview Locally</button>
-    <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>
-    <button type="button" data-cybercall-compose-action="close-active">Close Active Call</button>
-    <button type="button" data-cybercall-compose-action="reset">Reset Form</button>
-  </footer>
+        <label>
+          <span>Caller Name</span>
+          <input type="text" name="callerName" value="{{call.callerName}}" placeholder="UNKNOWN CALLER">
+        </label>
+
+        <label>
+          <span>Subtitle / Faction</span>
+          <input type="text" name="subtitle" value="{{call.subtitle}}" placeholder="ATLAS Corporation">
+        </label>
+
+        <label class="cybercall-composer-wide">
+          <span>Portrait Image Path</span>
+          <div class="cybercall-composer-path-row">
+            <input type="text" name="image" value="{{call.image}}" placeholder="path/to/image.webp">
+            <button type="button" data-cybercall-compose-action="browse-image" title="Browse portrait image"><i class="fa-solid fa-folder-open"></i></button>
+          </div>
+        </label>
+
+        <label class="cybercall-composer-wide">
+          <span>Message</span>
+          <textarea name="message" rows="5" placeholder="Officer, we have a situation.">{{call.message}}</textarea>
+        </label>
+
+        <label class="cybercall-composer-wide cybercall-composer-range">
+          <span>Signal Strength</span>
+          <input type="range" name="signal" min="0" max="100" step="1" value="{{call.signal}}">
+        </label>
+      </section>
+
+      <section class="cybercall-composer-toggles">
+        <label>
+          <input type="checkbox" name="fullscreen" {{#if call.fullscreen}}checked{{/if}}>
+          <span>Fullscreen broadcast mode</span>
+        </label>
+
+        <label>
+          <input type="checkbox" name="ringing" {{#if call.ringing}}checked{{/if}}>
+          <span>Incoming ringing animation and sound</span>
+        </label>
+      </section>
+    </section>
+
+    <section class="cybercall-console-monitor" aria-label="Live recipient preview">
+      <h3>Recipient preview</h3>
+      <div class="cybercall-preview-device" data-cybercall-live-preview>
+        {{> "modules/cybercall/templates/cybercall.hbs" call=previewCall isPreview=true}}
+      </div>
+    </section>
+
+    <section class="cybercall-console-dispatch" aria-label="Recipients and actions">
+      <h3>Dispatch</h3>
+      <section class="cybercall-composer-targets">
+        <span>Recipients <small>Leave empty to reach all players</small></span>
+        <div class="cybercall-recipient-grid">
+          {{#each players as |player|}}
+            <label>
+              <input type="checkbox" name="targetUserIds" value="{{player.id}}">
+              <span>{{player.name}}{{#unless player.active}} (offline){{/unless}}</span>
+            </label>
+          {{else}}
+            <p>No player users found.</p>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="cybercall-composer-ringtone">
+        <label class="cybercall-ringtone-select">
+          <span>Ringtone</span>
+          <select data-cybercall-ringtone>
+            {{#each ringtoneChoices}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </label>
+      </section>
+
+      <footer class="cybercall-composer-actions">
+        <button type="button" data-cybercall-compose-action="preview">Preview Locally</button>
+        <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>
+        <button type="button" data-cybercall-compose-action="close-active">Close Active Call</button>
+        <button type="button" data-cybercall-compose-action="reset">Reset Form</button>
+      </footer>
+    </section>
+  </div>
 </form>

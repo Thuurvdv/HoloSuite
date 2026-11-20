@@ -103,7 +103,7 @@ export async function sendMessageToContact(contactSource: any, bodySource: any, 
     ? uniqueStrings(options.recipientUserIds)
     : getRecipientUserIds(contactSource);
   const routesToGMManagedContact = !hasExplicitUserRecipient(contactSource);
-  const threadId = String(options.threadId ?? createThreadIdForContact(contactSource, senderUser?.id));
+  const threadId = String(options.threadId ?? createThreadIdForContact(contactSource, senderUser?.id, options));
   const senderName = String(options.senderName ?? "").trim() || getUserDisplayName(senderUser, "Unknown Sender");
   const senderActorId = String(options.senderActorId ?? senderUser?.character?.id ?? "").trim();
   const senderNumber = String(options.senderNumber ?? "").trim();

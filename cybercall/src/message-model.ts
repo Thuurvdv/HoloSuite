@@ -90,13 +90,17 @@ export function createGroupThreadId(groupId = createCallId()) {
   return `group:${normalizeString(groupId)}`;
 }
 
-export function createThreadIdForContact(contact: any, userId = game?.user?.id) {
+export function createThreadIdForContact(contact: any, userId = game?.user?.id, senderIdentity: any = {}) {
   const normalized = normalizeContact(contact);
+  const senderContactKey = normalizeString(senderIdentity.senderNumber) || normalizeString(senderIdentity.senderActorId);
+  const senderKey = senderContactKey
+    ? `contact:${senderContactKey}`
+    : `user:${normalizeString(userId, "unknown")}`;
   if (contact?.userId) {
-    return createPairThreadId(`user:${normalizeString(userId, "unknown")}`, `user:${normalizeString(contact.userId)}`);
+    return createPairThreadId(senderKey, `user:${normalizeString(contact.userId)}`);
   }
-  const contactKey = normalized.number || normalized.id || normalized.name;
-  return createPairThreadId(`user:${normalizeString(userId, "unknown")}`, `contact:${contactKey}`);
+  const contactKey = normalized.number || normalized.actorId || normalized.id || normalized.name;
+  return createPairThreadId(senderKey, `contact:${contactKey}`);
 }
 
 export function normalizeMessage(source: Partial<CyberCallMessage> & Record<string, any> = {}): CyberCallMessage {
@@ -198,6 +202,21 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
           initials: getInitials(lastMessage.contactName)
         }
         : null;
+      // Keep the NPC available for GM replies even before the player has answered.
+      const npcSentMessage = [...sorted].reverse().find((message) =>
+        game.users?.get?.(message.senderUserId)?.isGM === true
+        && message.contactIsNpc && message.senderNumber
+        && message.senderName === message.contactName && message.contactUserId
+      );
+      const npcSenderContact = npcSentMessage ? normalizeContact({
+          id: `contact-${npcSentMessage.senderNumber}`,
+          name: npcSentMessage.senderName,
+          number: npcSentMessage.senderNumber,
+          image: npcSentMessage.senderImage,
+          actorId: npcSentMessage.senderActorId,
+          managedByGM: true,
+          isNpc: true
+        }) : null;
       const groupContact = isGroup ? {
         id: `group-${groupId || threadId}`,
         name: groupName,
@@ -211,7 +230,7 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
         isGroup: true,
         initials: getInitials(groupName)
       } : null;
-      const contact = groupContact ?? routedContactIdentity ?? senderIdentityContact ?? contactsByUserId.get(otherUserId) ?? contactsByNumber.get(contactNumber) ?? {
+      const contact = groupContact ?? routedContactIdentity ?? npcSenderContact ?? senderIdentityContact ?? contactsByUserId.get(otherUserId) ?? contactsByNumber.get(contactNumber) ?? {
         id: `contact-${contactNumber || threadId}`,
         name: lastMessage?.contactName || (lastMessage?.senderUserId === game?.user?.id
           ? contactNumber || "Unknown Contact"
@@ -237,11 +256,15 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
           && (message.contactIsNpc || message.contactManagedByGM);
       }) ?? null;
       const routedPlayerMessage = game?.user?.isGM === true ? npcRoutedMessage : null;
-      const routeLabel = routedPlayerMessage ? `TO: ${routedPlayerMessage.contactName}` : "";
+      const outgoingNpcPlayerId = game?.user?.isGM === true ? npcSentMessage?.contactUserId : "";
+      const outgoingNpcPlayer = contactsByUserId.get(outgoingNpcPlayerId);
+      const routeLabel = routedPlayerMessage || outgoingNpcPlayerId ? `TO: ${contact.name}` : "";
       const routedSenderContact = routedPlayerMessage
         ? contactsByUserId.get(routedPlayerMessage.senderUserId)
         : null;
-      const displayTitle = routedPlayerMessage?.senderName || routedSenderContact?.name || contact.name || lastMessage?.senderName || "Unknown Contact";
+      const displayTitle = routedPlayerMessage?.senderName || routedSenderContact?.name
+        || outgoingNpcPlayer?.name || (outgoingNpcPlayerId ? getUserDisplayName(game.users?.get?.(outgoingNpcPlayerId)) : "")
+        || contact.name || lastMessage?.senderName || "Unknown Contact";
       const displaySubtitle = routedPlayerMessage
         ? routedSenderContact?.number || `@${routedPlayerMessage.senderName}`
         : contact.number || lastMessage?.senderNumber || "";
@@ -267,7 +290,7 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
         avatarTone: getAvatarTone(isGroup ? groupId || threadId : routedPlayerMessage?.senderUserId || contact.userId || contact.number || threadId),
         routeLabel,
         hasRouteLabel: Boolean(routeLabel),
-        isNpcRouted: Boolean(npcRoutedMessage),
+        isNpcRouted: Boolean(npcRoutedMessage || npcSentMessage),
         contact,
         messages: sorted.map((message) => ({
           ...message,

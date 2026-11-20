@@ -1,33 +1,25 @@
 <div class="cybercall-panel cybercall-{{call.variant}}{{#if call.fullscreen}} cybercall-broadcast{{/if}}{{#if call.ringing}} cybercall-ringing-panel{{/if}}{{#if call.accepted}} cybercall-connected-panel{{/if}}" style="--cybercall-signal: {{call.signal}}%;">
-  <div class="cybercall-static" aria-hidden="true"></div>
-  <div class="cybercall-reticle" aria-hidden="true"></div>
-
-  {{#unless call.accepted}}
-    <header class="cybercall-header">
-      <div>
-        <div class="cybercall-kicker">
-          {{call.kicker}}
-        </div>
-        <h2>{{call.callerName}}</h2>
-        <p>{{call.subtitle}}</p>
+  <header class="cybercall-header">
+    <div>
+      <div class="cybercall-kicker" data-cybercall-preview-status>
+        <i class="fa-solid {{#if call.accepted}}fa-link{{else}}{{#if call.isEmergency}}fa-triangle-exclamation{{else}}fa-satellite-dish{{/if}}{{/if}}" aria-hidden="true"></i>
+        <span>{{#if call.accepted}}Connected{{else}}{{call.kicker}}{{/if}}</span>
       </div>
+      <h2 data-cybercall-preview-name>{{call.callerName}}</h2>
+      <p data-cybercall-preview-subtitle>{{call.subtitle}}</p>
+      {{#if call.contactNumber}}<small class="cybercall-call-channel">Channel {{call.contactNumber}}</small>{{/if}}
+    </div>
 
-      <div class="cybercall-signal" title="Signal strength">
-        <span>{{call.signal}}%</span>
-        <div class="cybercall-signal-bar" aria-hidden="true">
-          <i></i>
-        </div>
+    <div class="cybercall-signal" title="Signal strength">
+      <span data-cybercall-preview-signal>{{call.signal}}%</span>
+      <div class="cybercall-signal-bar" aria-hidden="true">
+        <i></i>
       </div>
-    </header>
-  {{/unless}}
-
-  <section class="cybercall-context">
-    <span>{{call.directionLabel}}</span>
-    {{#if call.contactNumber}}<span>Channel {{call.contactNumber}}</span>{{/if}}
-  </section>
+    </div>
+  </header>
 
   <main class="cybercall-body">
-    <div class="cybercall-portrait">
+    <div class="cybercall-portrait" data-cybercall-preview-portrait>
       {{#if call.image}}
         <img src="{{call.image}}" alt="{{call.callerName}}">
       {{else}}
@@ -38,23 +30,27 @@
     </div>
 
     {{#unless call.accepted}}
-      <blockquote>{{call.message}}</blockquote>
+      <blockquote data-cybercall-preview-message>{{call.message}}</blockquote>
     {{/unless}}
   </main>
 
   <footer class="cybercall-actions">
-    {{#if call.accepted}}
-      <button type="button" data-cybercall-action="end">End Call</button>
+    {{#if isPreview}}
+      <span class="cybercall-preview-answer">Accept</span><span class="cybercall-preview-decline">Decline</span>
     {{else}}
-      {{#if call.outgoing}}
+      {{#if call.accepted}}
         <button type="button" data-cybercall-action="end">End Call</button>
       {{else}}
-        {{#if call.canAccept}}
-          <button type="button" data-cybercall-action="accept">Accept</button>
-        {{/if}}
-        <button type="button" data-cybercall-action="decline">Decline</button>
-        {{#if call.showBroadcast}}
-          <button type="button" data-cybercall-action="broadcast">Broadcast</button>
+        {{#if call.outgoing}}
+          <button type="button" data-cybercall-action="end">End Call</button>
+        {{else}}
+          {{#if call.canAccept}}
+            <button type="button" data-cybercall-action="accept">Accept</button>
+          {{/if}}
+          <button type="button" data-cybercall-action="decline">Decline</button>
+          {{#if call.showBroadcast}}
+            <button type="button" data-cybercall-action="broadcast">Broadcast</button>
+          {{/if}}
         {{/if}}
       {{/if}}
     {{/if}}

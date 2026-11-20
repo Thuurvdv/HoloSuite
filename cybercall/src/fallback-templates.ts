@@ -15,12 +15,10 @@ export function renderFallbackTemplate(call: any, escapeHTML: EscapeHTML) {
   const broadcastButton = call.showBroadcast
     ? '<button type="button" data-cybercall-action="broadcast">Broadcast</button>'
     : "";
-  const headerMarkup = call.accepted
-    ? ""
-    : `
+  const headerMarkup = `
       <header class="cybercall-header">
         <div>
-          <div class="cybercall-kicker">${escapeHTML(call.kicker)}</div>
+          <div class="cybercall-kicker">${escapeHTML(call.accepted ? "Connected" : call.kicker)}</div>
           <h2>${escapeHTML(call.callerName)}</h2>
           <p>${escapeHTML(call.subtitle)}</p>
         </div>

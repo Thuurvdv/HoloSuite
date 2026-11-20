@@ -18,7 +18,8 @@
   ],
   "styles": [
     "styles/holosuite-tokens.css",
-    "styles/cybercall.css"
+    "styles/cybercall.css",
+    "styles/cybercall-device.css"
   ],
   "packs": [],
   "languages": [],

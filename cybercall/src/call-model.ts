@@ -75,7 +75,9 @@ export function normalizeCallData(data: any = {}) {
   call.hasTargets = call.targetUserIds.length > 0;
   call.recipientLabel = call.hasTargets ? call.targetUserNames.join(", ") : "All players";
   call.directionLabel = call.outgoing ? `Calling ${call.recipientLabel}` : `From ${call.callerName}`;
-  call.kicker = call.outgoing ? "Outgoing CyberCall" : call.fullscreen ? "System-wide Broadcast" : "Incoming CyberCall";
+  call.kicker = call.outgoing ? "Calling" : call.isEmergency ? "Emergency transmission"
+    : call.isCorrupted ? "Unstable transmission"
+    : call.fullscreen ? "Incoming broadcast" : "Incoming transmission";
   return call;
 }
 
