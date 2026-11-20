@@ -47,7 +47,7 @@ export function createCyberCallAppClasses(deps: any) {
     getActiveContactsTab,
     getContactsPlayerChoices,
     getSelectedContactsPlayerId,
-    getAssignedContacts,
+    getPlayerContacts,
     canEditContactImages,
     bindCallControls,
     bindComposerControls,
@@ -81,7 +81,7 @@ export function createCyberCallAppClasses(deps: any) {
       isPersonalTab: activeContactsTab === "personal",
       isPlayerTab: activeContactsTab === "player",
       players: getContactsPlayerChoices(),
-      assignedContacts: game.user?.isGM ? getAssignedContacts(playerId) : [],
+      playerContacts: game.user?.isGM ? getPlayerContacts(playerId) : [],
       hideContactEditor: activeContactsTab === "player" && !playerId,
       isGroupTab: activeContactsTab === "group",
       canEditContactImages: canEditContactImages(),
@@ -90,7 +90,7 @@ export function createCyberCallAppClasses(deps: any) {
       unreadMessageCount: unreadCount,
       hasUnreadMessages: unreadCount > 0,
       ringtoneChoices: getRingtoneChoices(),
-      messageSoundOptions: game.user?.isGM ? [] : getMessageSoundOptions(),
+      messageSoundOptions: getMessageSoundOptions(),
       currentRingtone: getSoundPath()
     };
   }
@@ -102,7 +102,9 @@ export function createCyberCallAppClasses(deps: any) {
       previewCall: normalizeCallData({ ...call, fullscreen: false }),
       actors: getActorChoices(),
       players: getPlayerChoices(),
-      ringtoneChoices: getRingtoneChoices()
+      ringtoneChoices: getRingtoneChoices(),
+      phoneNumberFormat: game.settings.get(moduleId, "phoneNumberFormat"),
+      deviceEmblem: game.settings.get(moduleId, "deviceEmblem")
     };
   }
 

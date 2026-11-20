@@ -22,6 +22,16 @@ export function clampSignal(value: unknown) {
   return Math.min(100, Math.max(0, Math.round(number)));
 }
 
+export function getSignalInterference(value: unknown) {
+  const signal = clampSignal(value);
+  const loss = (100 - signal) / 100;
+  return {
+    signalQuality: signal >= 90 ? "clear" : signal >= 65 ? "weak" : signal >= 35 ? "poor" : "critical",
+    glitchShift: Math.round(loss * 7 * 100) / 100,
+    glitchInterval: Math.round((1.4 + 6.6 * (1 - loss)) * 100) / 100
+  };
+}
+
 export function getInitials(name: unknown) {
   return String(name)
     .split(/\s+/)
@@ -67,6 +77,7 @@ export function normalizeCallData(data: any = {}) {
     targetUserNames
   };
   call.initials = getInitials(call.callerName);
+  Object.assign(call, getSignalInterference(call.signal));
   call.showBroadcast = Boolean(game?.user?.isGM && call.allowBroadcast);
   call.isStandard = call.variant === "standard";
   call.isEmergency = call.variant === "emergency";

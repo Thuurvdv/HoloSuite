@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 globalThis.foundry = {};
 globalThis.FormApplication = class {};
 const source = buildSync({ entryPoints: [fileURLToPath(new URL("./message-sound-settings.ts", import.meta.url))], bundle: true, write: false, format: "esm", platform: "node" }).outputFiles[0].text;
-const { getMessageSoundChoices, getMessageSoundPath, getMessageSoundOptions, setMessageSoundPath, canChooseMessageSoundFile, MessageSoundSettingsApp } = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
+const { getMessageSoundChoices, getMessageSoundPath, getMessageSoundOptions, setMessageSoundPath, canChooseMessageSoundFile, MessageSoundSettingsApp, MessageSoundLibrarySettingsApp } = await import(`data:text/javascript;base64,${Buffer.from(source + "\n//# sourceURL=message-sound-settings-test.mjs").toString("base64")}`);
 
 test("the Calls dropdown saves available sounds and preserves previously uploaded audio", async () => {
   let personal = { path: "personal.ogg", label: "Personal", selected: "shared.ogg" };
@@ -76,4 +76,28 @@ test("GM uploads enter the shared library and the sharing checkbox is persisted"
   assert.deepEqual(settings.customMessageSounds, [{ label: "My Tone", path: "worlds/test/My%20Tone.ogg" }]);
   assert.equal(settings.shareMessageSounds, false);
   assert.equal(saved.selected, "worlds/test/My%20Tone.ogg");
+});
+
+test("the ringtone-style notification library preserves personal choices and publishes named GM sounds", async () => {
+  const settings = { shareMessageSounds: true, customMessageSounds: [] };
+  globalThis.ui = { notifications: {} };
+  globalThis.game = {
+    settings: { get: (_, key) => settings[key], set: async (_, key, value) => { settings[key] = value; } },
+    user: { isGM: true, getFlag: () => ({ path: "personal.ogg", selected: "personal.ogg" }), setFlag: () => assert.fail("library editor changed personal selection") }
+  };
+  const app = new MessageSoundLibrarySettingsApp();
+  assert.equal(app.getData().managesNotificationSounds, true);
+  assert.equal(app.getData().heading, "Additional Message Notification Sounds");
+  const form = {
+    querySelectorAll: () => [{ querySelector: (selector) => ({ value: selector.includes("label") ? "Incoming packet" : "worlds/test/packet.ogg" }) }],
+    querySelector: () => ({ checked: true })
+  };
+  await app._updateObject({ currentTarget: form });
+  assert.deepEqual(settings.customMessageSounds, [{ label: "Incoming packet", path: "worlds/test/packet.ogg" }]);
+  game.user = { isGM: false, getFlag: () => ({}), setFlag: async (_, key, value) => { game.user.getFlag = () => value; } };
+  assert.ok(getMessageSoundOptions().some((option) => option.label === "Incoming packet"));
+  await setMessageSoundPath("worlds/test/packet.ogg");
+  assert.equal(getMessageSoundPath(), "worlds/test/packet.ogg");
+  game.settings.set = () => assert.fail("player edited GM library");
+  await app._updateObject({ currentTarget: form });
 });

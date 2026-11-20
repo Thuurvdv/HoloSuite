@@ -39,7 +39,7 @@
             </div>
             <div class="cybercall-contact-id">
               <strong>{{name}}</strong>
-              <span>{{number}}{{#if assignedToPlayer}} · GM assigned{{/if}}</span>
+              <span>{{number}}{{#if assignedToPlayer}} Â· GM assigned{{/if}}</span>
             </div>
             <div class="cybercall-contact-actions">
               <button type="button" data-cybercall-contact-action="call" data-contact-scope="personal" data-contact-id="{{id}}" aria-label="Call {{name}}" title="Call"><i class="fa-solid fa-phone" aria-hidden="true"></i></button>
@@ -98,7 +98,7 @@
     <section data-cybercall-contact-panel="player" {{#unless isPlayerTab}}hidden{{/unless}}>
       {{#if players}}
         <label class="cybercall-contacts-player-picker">
-          <span>Assign contacts to</span>
+          <span>Player contact list</span>
           <select data-cybercall-contact-player>
             {{#each players}}
               <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}{{#unless active}} (offline){{/unless}}</option>
@@ -106,7 +106,7 @@
           </select>
         </label>
         <ul class="cybercall-contacts-list">
-          {{#each assignedContacts}}
+          {{#each playerContacts}}
             <li data-cybercall-contact-row="{{id}}">
               <div class="cybercall-contact-avatar">
                 {{#if image}}<img src="{{image}}" alt="">{{else}}<span>{{initials}}</span>{{/if}}
@@ -118,7 +118,7 @@
               </div>
             </li>
           {{else}}
-            <li class="cybercall-contacts-empty">No GM-assigned contacts for this player.</li>
+            <li class="cybercall-contacts-empty">No contacts synced for this player yet. Existing personal contacts sync when the player connects.</li>
           {{/each}}
           <li class="cybercall-contacts-empty" data-cybercall-empty-search hidden>No matching contacts.</li>
         </ul>
@@ -156,7 +156,10 @@
 
       <label>
         <span>Picture</span>
-        <input type="text" name="image" autocomplete="off" placeholder="icons/...">
+        <div class="cybercall-contact-picture-row">
+          <input type="text" name="image" autocomplete="off" placeholder="icons/...">
+          <button type="button" data-cybercall-contact-browse aria-label="Browse contact picture" title="Browse contact picture"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></button>
+        </div>
       </label>
 
       <label class="cybercall-contact-toggle">

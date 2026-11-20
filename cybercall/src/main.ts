@@ -1,4 +1,6 @@
 import { createCyberCallAppClasses } from "./apps";
+import { bindComposerConfiguration } from "./composer-configuration";
+import { readComposerForm, updateComposerPreview } from "./composer-preview";
 import {
   DEFAULT_CALL,
   clampSignal,
@@ -22,10 +24,14 @@ import {
   TEMPLATE_PATH
 } from "./constants";
 import { getFilePickerClass, normalizeCustomRingtones, RingtoneSettingsApp } from "./ringtone-settings";
-import { getMessageSoundOptions, getMessageSoundPath, MessageSoundSettingsApp, setMessageSoundPath } from "./message-sound-settings";
+import { getMessageSoundOptions, getMessageSoundPath, MessageSoundLibrarySettingsApp, setMessageSoundPath } from "./message-sound-settings";
 import { escapeHTML } from "./dom-utils";
+import { mountDeviceHardware } from "./device-shell";
+import { refreshDeviceEmblems } from "./device-branding";
+import { isCallHistoryEvent, pruneCallHistory } from "./history-retention";
 import { createGroupThreadId, createThreadIdForContact, getAvatarTone, prepareThreads } from "./message-model";
-import { getAssignedContacts, isPlayerContactDirectory, writeAssignedContact } from "./player-contacts";
+import { ensurePersonalContactDirectories, getAssignedContacts, getPlayerContacts, getSyncedPersonalContacts, isPlayerContactDirectory, savePersonalContacts, writeAssignedContact, writePersonalContact } from "./player-contacts";
+import { bindPhoneNumberInputs, getPhoneNumberFormat, matchesPhoneNumberFormat } from "./phone-format";
 import { createMessageEvent, getStoredMessages, sendMessageToContact } from "./message-service";
 
 let activeCall = null;
@@ -118,6 +124,10 @@ function getContactsStore() {
 }
 
 function getPersonalContacts() {
+  if (!game.user?.isGM) {
+    const synced = getSyncedPersonalContacts(game.user?.id);
+    if (synced !== null) return synced;
+  }
   const contacts = getContactsStore()[getWorldContactsKey()];
   if (!Array.isArray(contacts)) return [];
 
@@ -147,7 +157,7 @@ function getSelectedContactsPlayerId() {
 }
 
 function getContactsForScope(scope: string) {
-  if (scope === "player") return getAssignedContacts(getSelectedContactsPlayerId());
+  if (scope === "player") return getPlayerContacts(getSelectedContactsPlayerId());
   return scope === "group" ? getGroupContacts() : getContacts();
 }
 
@@ -178,10 +188,20 @@ function getAllMessageContacts() {
 }
 
 async function saveContacts(contacts) {
+  if (!game.user?.isGM) await savePersonalContacts(game.user.id, contacts);
   await game.settings.set(MODULE_ID, "contacts", {
     ...getContactsStore(),
     [getWorldContactsKey()]: contacts.map(normalizeContact)
   });
+}
+
+let personalContactSync: Promise<unknown> | null = null;
+async function synchronizePersonalContacts() {
+  if (game.user?.isGM || personalContactSync || getSyncedPersonalContacts(game.user?.id) !== null) return;
+  const legacy = getContactsStore()[getWorldContactsKey()];
+  personalContactSync = savePersonalContacts(game.user.id, Array.isArray(legacy) ? legacy : []);
+  try { await personalContactSync; }
+  finally { personalContactSync = null; }
 }
 
 async function saveGroupContacts(contacts) {
@@ -278,11 +298,18 @@ async function saveContact(name: any, number: any, scope = "personal", image: an
     ui.notifications?.warn?.("Contact name and number are required.");
     return false;
   }
+  if (!matchesPhoneNumberFormat(contact.number, getPhoneNumberFormat())) {
+    ui.notifications?.warn?.(`Enter a phone number matching ${getPhoneNumberFormat()} (# = digit, A = letter, * = letter or digit).`);
+    return false;
+  }
 
   if (scope === "player") {
     const playerId = getSelectedContactsPlayerId();
     if (!playerId) return false;
-    await writeAssignedContact(playerId, contact.id, contact);
+    const personal = getSyncedPersonalContacts(playerId) ?? [];
+    const isAssigned = getAssignedContacts(playerId).some((entry) => entry.id === contact.id);
+    if (!isAssigned && personal.some((entry) => entry.id === contact.id)) await writePersonalContact(playerId, contact.id, contact);
+    else await writeAssignedContact(playerId, contact.id, contact);
     return true;
   }
 
@@ -313,7 +340,12 @@ async function saveContact(name: any, number: any, scope = "personal", image: an
 
 async function removeContact(contactId, scope = "personal") {
   if (scope === "player") {
-    await writeAssignedContact(getSelectedContactsPlayerId(), contactId);
+    const playerId = getSelectedContactsPlayerId();
+    const isAssigned = getAssignedContacts(playerId).some((entry) => entry.id === contactId);
+    const isPersonal = (getSyncedPersonalContacts(playerId) ?? []).some((entry) => entry.id === contactId);
+    if (!isAssigned && isPersonal) {
+      await writePersonalContact(playerId, contactId);
+    } else await writeAssignedContact(playerId, contactId);
     return;
   } else if (scope === "group") {
     if (!game.user.isGM) {
@@ -500,6 +532,7 @@ function bindCallControls(app: any, html: any = null) {
   if (!element) return;
   const windowElement = element.closest(".cybercall-app, .cybercall-phone-app") ?? getElement(app);
   windowElement?.classList.toggle("cybercall-fullscreen", app.callData.fullscreen);
+  mountDeviceHardware(windowElement);
   windowElement?.classList.toggle("cybercall-ringing", app.callData.ringing && !app.callData.accepted);
   windowElement?.classList.toggle("cybercall-connected", app.callData.accepted);
 
@@ -532,72 +565,26 @@ function getComposerForm(element) {
   return element?.matches?.(selector) ? element : element?.querySelector?.(selector);
 }
 
-function readComposerForm(form) {
-  const formData = new FormData(form);
-  const actor = game.actors?.get(formData.get("actorId"));
-  const image = String(formData.get("image") ?? "").trim() || actor?.img || "";
-  const callerName = String(formData.get("callerName") ?? "").trim() || actor?.name || "UNKNOWN CALLER";
-  const targetUserIds = formData.getAll("targetUserIds").map((id) => String(id)).filter(Boolean);
-  const usersById = new Map<string, any>((game.users?.contents ?? []).map((user) => [user.id, user]));
-  const targetUserNames = targetUserIds.map((id) => getUserDisplayName(usersById.get(id)) || id);
-
-  return normalizeCallData({
-    callerName,
-    subtitle: String(formData.get("subtitle") ?? "").trim(),
-    image,
-    message: String(formData.get("message") ?? "").trim(),
-    signal: formData.get("signal"),
-    variant: String(formData.get("variant") ?? DEFAULT_CALL.variant),
-    fullscreen: formData.get("fullscreen") === "on",
-    ringing: formData.get("ringing") === "on",
-    targetUserIds,
-    targetUserNames
-  });
-}
-
-function updateComposerPreview(form) {
-  const call = readComposerForm(form);
-  const output = form.querySelector("[data-cybercall-signal-output]");
-  if (output) output.textContent = `${call.signal}%`;
-  const device = form.querySelector("[data-cybercall-live-preview]");
-  const panel = device?.querySelector(".cybercall-panel");
-  if (!panel) return;
-
-  device.classList.toggle("cybercall-preview-wide", call.fullscreen);
-  for (const variant of ["standard", "emergency", "corrupted"]) {
-    panel.classList.toggle(`cybercall-${variant}`, call.variant === variant);
-  }
-  panel.classList.toggle("cybercall-broadcast", call.fullscreen);
-  panel.classList.toggle("cybercall-ringing-panel", call.ringing);
-  panel.style.setProperty("--cybercall-signal", `${call.signal}%`);
-
-  panel.querySelector("[data-cybercall-preview-name]").textContent = call.callerName;
-  panel.querySelector("[data-cybercall-preview-subtitle]").textContent = call.subtitle;
-  panel.querySelector("[data-cybercall-preview-message]").textContent = call.message;
-  panel.querySelector("[data-cybercall-preview-signal]").textContent = `${call.signal}%`;
-  const status = panel.querySelector("[data-cybercall-preview-status]");
-  status.querySelector("span").textContent = call.kicker;
-  status.querySelector("i").className = `fa-solid ${call.isEmergency ? "fa-triangle-exclamation" : "fa-satellite-dish"}`;
-
-  const portrait = panel.querySelector("[data-cybercall-preview-portrait]");
-  const currentImage = portrait.querySelector("img");
-  if (call.image) {
-    const image = currentImage ?? document.createElement("img");
-    if (image.getAttribute("src") !== call.image) image.setAttribute("src", call.image);
-    image.alt = call.callerName;
-    if (!currentImage) portrait.replaceChildren(image);
-  } else {
-    const initials = portrait.querySelector(".cybercall-initials") ?? document.createElement("span");
-    initials.className = "cybercall-initials";
-    initials.textContent = call.initials;
-    if (initials.parentNode !== portrait) portrait.replaceChildren(initials);
-  }
-}
-
 function bindComposerControls(app: any, html: any = null) {
   const element = getElement(app, html);
   const form = getComposerForm(element);
   if (!element || !form) return;
+  mountDeviceHardware(element.closest(".cybercall-composer-app"));
+
+  function selectConsoleTab(tab) {
+    app._cybercallConsoleTab = tab;
+    element.querySelectorAll("[data-cybercall-console-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.cybercallConsolePanel !== tab;
+    });
+    element.querySelectorAll("[data-cybercall-console-tab]").forEach((button) => {
+      button.setAttribute("aria-selected", String(button.dataset.cybercallConsoleTab === tab));
+    });
+  }
+  element.querySelectorAll("[data-cybercall-console-tab]").forEach((button) => {
+    button.addEventListener("click", () => selectConsoleTab(button.dataset.cybercallConsoleTab));
+  });
+  selectConsoleTab(app._cybercallConsoleTab ?? "transmission");
+  bindComposerConfiguration(element, form);
 
   updateComposerPreview(form);
 
@@ -620,6 +607,10 @@ function bindComposerControls(app: any, html: any = null) {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+    if (app._cybercallConsoleTab === "configuration") {
+      element.querySelector("[data-cybercall-save-configuration]")?.click();
+      return;
+    }
     openCall(readComposerForm(form));
   });
 
@@ -698,6 +689,20 @@ function bindContactsControls(app: any, html: any = null) {
   });
 
   if (!form) return;
+
+  bindPhoneNumberInputs(element);
+  form.querySelector("[data-cybercall-contact-browse]")?.addEventListener("click", () => {
+    if (!game.user?.isGM) return;
+    const input = form.elements.image;
+    const Picker = getFilePickerClass();
+    if (!input || !Picker) return;
+    const picker = new Picker({
+      type: "image", current: input.value,
+      callback: (path) => { input.value = path; input.dispatchEvent(new Event("change", { bubbles: true })); }
+    });
+    if (typeof picker.browse === "function") picker.browse();
+    else picker.render?.(true);
+  });
 
   const selectContact = (selected) => {
     element.querySelectorAll("[data-cybercall-contact-row]").forEach((row) => {
@@ -1344,6 +1349,17 @@ function bindMessagesControls(app: any, html: any = null) {
       groupMemberNames: activeThread?.groupMemberNames ?? []
     });
     if (!document) return;
+    if (game.user?.isGM && !activeThread && messageIdentity.senderActorId && !getNpcThreadBindings()[threadId]) {
+      const actor = game.actors?.get?.(messageIdentity.senderActorId);
+      if (actor) await updateNpcThreadBinding(threadId, {
+        actorId: actor.id,
+        actorUuid: actor.uuid ?? `Actor.${actor.id}`,
+        actorName: actor.name,
+        image: messageIdentity.senderImage || actor.prototypeToken?.texture?.src || actor.img || "",
+        revealPortrait: false,
+        linkedAt: new Date().toISOString()
+      });
+    }
     activeMessageThreadId = threadId;
     if (app) app.contact = contact;
     if (activePhone?.mode === "messages") activePhone.contact = contact;
@@ -1365,12 +1381,14 @@ function getCallHistory() {
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
     .map((message) => ({
       body: message.body,
+      eventType: message.eventType,
       createdAtLabel: timestamps ? formatMessageTimestamp(message.createdAt) : ""
     }));
 }
 
 function bindPhoneNavigation(app, html = null) {
   const element = getElement(app, html);
+  mountDeviceHardware(element?.closest(".cybercall-phone-app"));
   element?.querySelectorAll("[data-cybercall-screen]").forEach((button) => {
     button.addEventListener("click", () => {
       const screen = button.dataset.cybercallScreen;
@@ -1403,7 +1421,7 @@ const { CyberCallApplication, CyberCallComposer, CyberCallPhone } = createCyberC
   getActiveContactsTab: () => activeContactsTab,
   getContactsPlayerChoices,
   getSelectedContactsPlayerId,
-  getAssignedContacts,
+  getPlayerContacts,
   canEditContactImages,
   bindCallControls,
   bindComposerControls,
@@ -1771,6 +1789,10 @@ async function broadcastCall(callData: any = {}) {
 }
 
 async function handleSocketMessage(message) {
+  if (message.action === "personalContactDirectories") {
+    if (game.user?.isGM) await ensurePersonalContactDirectories();
+    return;
+  }
   if (!message) return;
   if (Array.isArray(message.targetUserIds) && message.targetUserIds.length && !message.targetUserIds.includes(game.user?.id)) {
     return;
@@ -2135,6 +2157,16 @@ function registerWithHoloSuite() {
 }
 
 function registerSettings() {
+  game.settings.register(MODULE_ID, "deviceEmblem", {
+    name: "Device emblem", scope: "world", config: false, type: String, default: "",
+    onChange: () => refreshDeviceEmblems(document)
+  });
+  game.settings.register(MODULE_ID, "phoneNumberFormat", {
+    name: "Phone number format",
+    hint: "Use # for digits, A for letters, or * for letters or digits. Other characters are fixed text. Leave blank for unrestricted numbers.",
+    scope: "world", config: false, type: String, default: "",
+    onChange: () => bindPhoneNumberInputs(document)
+  });
   const roles = CONST.USER_ROLES;
   const roleChoices = {};
   for (const [key, label] of [
@@ -2277,7 +2309,8 @@ function registerSettings() {
     scope: "world",
     config: false,
     type: Object,
-    default: []
+    default: [],
+    onChange: () => { if (activePhone?.mode === "settings") refreshContacts(); }
   });
 
   game.settings.register(MODULE_ID, "shareMessageSounds", {
@@ -2286,15 +2319,16 @@ function registerSettings() {
     scope: "world",
     config: true,
     type: Boolean,
-    default: true
+    default: true,
+    onChange: () => { if (activePhone?.mode === "settings") refreshContacts(); }
   });
 
   game.settings.registerMenu(MODULE_ID, "messageSoundMenu", {
     name: "Message Notification Sound",
-    label: "Choose or Upload Sound",
+    label: "Manage Notification Sounds",
     hint: "Add one or more audio files to the notification list for this world.",
     icon: "fa-solid fa-music",
-    type: MessageSoundSettingsApp,
+    type: MessageSoundLibrarySettingsApp,
     restricted: true
   });
 
@@ -2397,12 +2431,27 @@ Hooks.once("ready", async () => {
   registerApi();
   registerWithHoloSuite();
   game.socket.on(SOCKET_NAME, handleSocketMessage);
+  await ensurePersonalContactDirectories();
+  await synchronizePersonalContacts();
+  await pruneCallHistory();
+  if (!game.user?.isGM) game.socket.emit(SOCKET_NAME, { action: "personalContactDirectories" });
   refreshRenderedCyberCallChatCards();
   console.log(`${MODULE_ID} | Ready. Use game.modules.get("${MODULE_ID}").api.openCall({...})`);
 });
 
 Hooks.on("renderChatMessage", (message, html) => {
   applyCyberCallChatCardVisibility(message, html);
+});
+
+Hooks.on("createUser", () => ensurePersonalContactDirectories());
+Hooks.on("holosuite-core.brandingChanged", () => refreshDeviceEmblems(document));
+
+Hooks.on("renderJournalDirectory", (app, html) => {
+  const root = getElement(app, html);
+  root?.querySelectorAll("[data-document-id], [data-entry-id]").forEach((row) => {
+    const entry = game.journal?.get?.(row.dataset.documentId ?? row.dataset.entryId);
+    if (entry?.getFlag(MODULE_ID, "playerPersonalContactDirectory")) row.hidden = true;
+  });
 });
 
 Hooks.on("renderChatMessageHTML", (message, html) => {
@@ -2412,12 +2461,14 @@ Hooks.on("renderChatMessageHTML", (message, html) => {
 for (const action of ["create", "update", "delete"]) {
   Hooks.on(`${action}JournalEntry`, (entry) => {
     if (!isPlayerContactDirectory(entry)) return;
+    if (action === "create") synchronizePersonalContacts();
     refreshContacts();
     refreshMessages();
   });
 }
 
 Hooks.on("createChatMessage", async (message) => {
+  if (isCallHistoryEvent(message)) await pruneCallHistory();
   const flag = message?.flags?.[MODULE_ID];
   if (flag?.kind !== MESSAGE_FLAG_KIND) return;
   const currentUserId = String(game.user?.id ?? "");
@@ -2443,4 +2494,10 @@ document.addEventListener("click", (event) => {
   if (!button) return;
   event.preventDefault();
   openMessagesThread(button.dataset.cybercallThreadId);
+});
+
+Hooks.on("deleteChatMessage", (message) => {
+  if (!isCallHistoryEvent(message)) return;
+  refreshMessages();
+  refreshContacts();
 });

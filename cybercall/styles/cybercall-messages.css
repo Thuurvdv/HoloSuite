@@ -31,6 +31,10 @@
   box-sizing: border-box;
 }
 
+.cybercall-messages button {
+  margin: 0;
+}
+
 .cybercall-messages > .cybercall-mode-tabs {
   grid-column: 1 / -1;
   margin: 14px 14px 0;
@@ -150,12 +154,6 @@
   white-space: nowrap;
 }
 
-.cybercall-group-hint {
-  margin: 0;
-  color: rgba(229, 251, 255, 0.65);
-  font-size: 12px;
-}
-
 .cybercall-group-form > button[type="submit"] {
   align-self: flex-end;
   min-width: 132px;
@@ -248,10 +246,11 @@
   outline: none;
 }
 
-.cybercall-thread {
+.cybercall-messages .cybercall-thread {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   align-items: center;
+  justify-content: stretch;
   gap: 10px;
   width: 100%;
   max-width: 100%;

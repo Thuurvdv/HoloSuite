@@ -1,5 +1,5 @@
 import { MESSAGE_SCHEMA_VERSION } from "./constants";
-import { createCallId, getInitials, getUserDisplayName, normalizeContact } from "./call-model";
+import { createCallId, getInitials, getUserDisplayName, getUserTokenImage, normalizeContact } from "./call-model";
 
 declare const game: any;
 
@@ -258,7 +258,7 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
       const routedPlayerMessage = game?.user?.isGM === true ? npcRoutedMessage : null;
       const outgoingNpcPlayerId = game?.user?.isGM === true ? npcSentMessage?.contactUserId : "";
       const outgoingNpcPlayer = contactsByUserId.get(outgoingNpcPlayerId);
-      const routeLabel = routedPlayerMessage || outgoingNpcPlayerId ? `TO: ${contact.name}` : "";
+      const routeLabel = routedPlayerMessage || outgoingNpcPlayerId ? `Replying as: ${contact.name}` : "";
       const routedSenderContact = routedPlayerMessage
         ? contactsByUserId.get(routedPlayerMessage.senderUserId)
         : null;
@@ -268,10 +268,14 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
       const displaySubtitle = routedPlayerMessage
         ? routedSenderContact?.number || `@${routedPlayerMessage.senderName}`
         : contact.number || lastMessage?.senderNumber || "";
-      const displayInitials = routedPlayerMessage
+      const npcPlayerId = !isGroup && game?.user?.isGM ? routedPlayerMessage?.senderUserId || outgoingNpcPlayerId : "";
+      const displayInitials = npcPlayerId
         ? getInitials(displayTitle)
         : contact.initials || getInitials(contact.name || lastMessage?.senderName);
-      const displayImage = routedPlayerMessage?.senderImage
+      const displayImage = npcPlayerId
+        ? routedPlayerMessage?.senderImage || routedSenderContact?.image || outgoingNpcPlayer?.image
+          || getUserTokenImage(game.users?.get?.(npcPlayerId)) || ""
+        : routedPlayerMessage?.senderImage
         || routedSenderContact?.image
         || participantMessage?.senderImage
         || contact.image
@@ -284,10 +288,10 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
       return {
         id: threadId,
         title: displayTitle,
-        subtitle: displaySubtitle,
+        subtitle: /^NPC:/i.test(displaySubtitle) ? "Direct message" : displaySubtitle,
         initials: displayInitials,
         image: displayImage,
-        avatarTone: getAvatarTone(isGroup ? groupId || threadId : routedPlayerMessage?.senderUserId || contact.userId || contact.number || threadId),
+        avatarTone: getAvatarTone(isGroup ? groupId || threadId : npcPlayerId || contact.userId || contact.number || threadId),
         routeLabel,
         hasRouteLabel: Boolean(routeLabel),
         isNpcRouted: Boolean(npcRoutedMessage || npcSentMessage),

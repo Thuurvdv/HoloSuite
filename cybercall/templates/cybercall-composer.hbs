@@ -2,17 +2,20 @@
   <header class="cybercall-composer-header">
     <div>
       <div class="cybercall-composer-kicker"><span data-holosuite-brand-text="transmissionSubtitle">Transmission Console</span></div>
-      <h2><span data-holosuite-brand-icon></span><span data-holosuite-brand-text="composerHeading"><span data-holosuite-brand-name>CyberCall</span> Composer</span></h2>
+      <h2><span data-holosuite-brand-icon></span><span data-holosuite-brand-name>CyberCall</span></h2>
     </div>
     <output data-cybercall-signal-output>{{call.signal}}%</output>
   </header>
 
   <nav class="cybercall-console-nav" aria-label="CyberCall applications">
+    <button type="button" data-cybercall-console-tab="transmission" aria-selected="true">Transmission</button>
     <button type="button" data-cybercall-compose-action="open-messages"><i class="fa-solid fa-comment" aria-hidden="true"></i> Messages</button>
     <button type="button" data-cybercall-compose-action="open-contacts"><i class="fa-solid fa-address-book" aria-hidden="true"></i> Manage Contacts</button>
+    <button type="button" data-cybercall-console-tab="configuration" aria-selected="false"><i class="fa-solid fa-gear" aria-hidden="true"></i> Configuration</button>
+    <span data-cybercall-window-controls></span>
   </nav>
 
-  <div class="cybercall-console-layout">
+  <div class="cybercall-console-layout" data-cybercall-console-panel="transmission">
     <section class="cybercall-console-config" aria-label="Transmission configuration">
       <h3>Transmission</h3>
       <section class="cybercall-composer-grid">
@@ -119,4 +122,22 @@
       </footer>
     </section>
   </div>
+  <section class="cybercall-console-configuration" data-cybercall-console-panel="configuration" hidden>
+    <h3>Configuration</h3>
+    <label>
+      <span>Phone number format</span>
+      <input type="text" name="phoneNumberFormat" value="{{phoneNumberFormat}}" placeholder="###-###-####" maxlength="64" aria-describedby="cybercall-phone-format-hint">
+    </label>
+    <p id="cybercall-phone-format-hint">Use # for a digit, A for a letter (A–Z), or * for a letter or digit. Examples: AAA-####, ***-###, or FED-### for a fixed prefix. Separators and fixed text are inserted automatically. Use \A, \#, or \* for literal placeholder characters. Leave blank for unrestricted numbers. Applies to all contact number inputs.</p>
+    <label>
+      <span>Device emblem</span>
+      <span class="cybercall-composer-path-row">
+        <input type="text" name="deviceEmblem" value="{{deviceEmblem}}" placeholder="Path to an emblem image" maxlength="2048" aria-describedby="cybercall-device-emblem-hint">
+        <button type="button" data-cybercall-emblem-browse aria-label="Browse or upload device emblem" title="Browse or upload device emblem"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></button>
+      </span>
+    </label>
+    <p id="cybercall-device-emblem-hint">Browse to choose or upload an image. HoloSuite Branding’s app or device artwork takes priority when configured. Otherwise this image is used. Leave blank for the standard emblem.</p>
+    <button type="button" data-cybercall-save-configuration>Save configuration</button>
+    <output data-cybercall-configuration-status role="status"></output>
+  </section>
 </form>

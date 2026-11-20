@@ -59,13 +59,14 @@ test("two NPC conversations and replies stay separate for both participants", as
     assert.ok(thread);
     assert.equal(thread.contact.actorId, npc.actorId);
     assert.equal(thread.title, pc.name);
-    assert.equal(thread.routeLabel, `TO: ${npc.name}`);
+    assert.equal(thread.routeLabel, `Replying as: ${npc.name}`);
     assert.equal(thread.contact.userId, "");
   }
 
   game.user = player;
   threads = prepareThreads(getStoredMessages(), [pc]);
   assert.deepEqual(new Set(threads.map((thread) => thread.title)), new Set([npcA.name, npcB.name]));
+  assert.ok(threads.every((thread) => thread.subtitle === "Direct message"));
   const fixerThread = threads.find((entry) => entry.contact.name === npcA.name);
   await sendMessageToContact(fixerThread.contact, "Player reply", { threadId: fixerThread.id });
   // A fresh message addressed to this NPC must join the same conversation.
@@ -95,4 +96,22 @@ test("explicit thread IDs preserve group conversations", async () => {
   });
   assert.equal(document.flags.cybercall.threadId, "group:existing");
   assert.equal(prepareThreads(getStoredMessages())[0].isGroup, true);
+});
+
+test("GM NPC routes show the player's portrait before a reply, while players still see the NPC", async () => {
+  setup();
+  await sendMessageToContact(pc, "NPC portrait test", { ...identity(npcA), senderImage: "npc.webp", contactImage: "npc.webp" });
+  const contact = { ...pc, image: "player.webp" };
+  const gmThread = prepareThreads(getStoredMessages(), [contact])[0];
+  assert.equal(gmThread.image, "player.webp");
+  assert.equal(gmThread.initials, "P");
+  assert.equal(gmThread.contact.name, npcA.name);
+  assert.equal(gmThread.contact.image, "npc.webp");
+  assert.equal(prepareThreads(getStoredMessages(), [pc])[0].image, "");
+  game.user = player;
+  assert.equal(prepareThreads(getStoredMessages(), [contact])[0].image, "npc.webp");
+  const playerThread = prepareThreads(getStoredMessages(), [contact])[0];
+  await sendMessageToContact(playerThread.contact, "Player reply", { threadId: playerThread.id, senderImage: "player-reply.webp" });
+  game.user = gm;
+  assert.equal(prepareThreads(getStoredMessages(), [contact])[0].image, "player-reply.webp");
 });

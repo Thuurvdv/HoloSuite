@@ -85,8 +85,13 @@ export class RingtoneSettingsApp extends BaseFormApplication {
     });
   }
 
-  getData() {
+  getData(): Record<string, any> {
     return {
+      heading: "Additional Ringtones",
+      description: "Add audio files that everyone can select as their personal CyberCall ringtone. The three built-in ringtones remain available.",
+      emptyHeading: "No additional ringtones yet",
+      addLabel: "Add another ringtone",
+      footerDescription: "Saved ringtones become available to all users in this world.",
       ringtones: normalizeCustomRingtones(game.settings.get(MODULE_ID, "customRingtones"))
     };
   }

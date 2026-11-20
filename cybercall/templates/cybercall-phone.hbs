@@ -4,7 +4,7 @@
   {{else}}
     <header class="cybercall-device-status">
       <span><span data-holosuite-brand-icon></span><strong data-holosuite-brand-name>CyberCall</strong></span>
-      <span class="cybercall-device-status-icon" title="Communications terminal"><i class="fa-solid fa-satellite-dish" aria-hidden="true"></i></span>
+      <span class="cybercall-device-status-actions"><span class="cybercall-device-status-icon"><i class="fa-solid fa-satellite-dish" aria-hidden="true"></i></span><span data-cybercall-window-controls></span></span>
     </header>
     <div class="cybercall-device-screen">
       {{#if isContactsMode}}{{> "modules/cybercall/templates/cybercall-contacts.hbs"}}{{/if}}
@@ -14,7 +14,7 @@
           <h2>Call history</h2>
           <ul class="cybercall-history-list">
             {{#each history}}
-              <li><i class="fa-solid fa-phone" aria-hidden="true"></i><div>{{body}}{{#if createdAtLabel}}<time>{{createdAtLabel}}</time>{{/if}}</div></li>
+              <li class="cybercall-history-{{eventType}}"><i class="fa-solid fa-phone" aria-hidden="true"></i><div>{{body}}{{#if createdAtLabel}}<time>{{createdAtLabel}}</time>{{/if}}</div></li>
             {{else}}<li>No recorded calls.</li>{{/each}}
           </ul>
         </section>
