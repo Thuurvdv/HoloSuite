@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="22"
+   height="170"
+   viewBox="0 0 22 170"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="device-side.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview8"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="4.8540801"
+     inkscape:cx="-55.932328"
+     inkscape:cy="78.181652"
+     inkscape:window-width="3440"
+     inkscape:window-height="1369"
+     inkscape:window-x="2552"
+     inkscape:window-y="156"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg8" />
+  <defs
+     id="defs4">
+    <linearGradient
+       id="side">
+      <stop
+         stop-color="#0a1118"
+         id="stop1" />
+      <stop
+         offset=".4"
+         stop-color="#667a88"
+         id="stop2" />
+      <stop
+         offset=".65"
+         stop-color="#263c4a"
+         id="stop3" />
+      <stop
+         offset="1"
+         stop-color="#070e15"
+         id="stop4" />
+    </linearGradient>
+  </defs>
+  <path
+     d="m5 1 11 8 5 14v126l-5 14-11 6-4-10V12Z"
+     fill="url(#side)"
+     stroke="#061019"
+     id="path4" />
+  <path
+     d="m6 14 6 5v133l-6 5Z"
+     fill="#030a10"
+     stroke="#243e4d"
+     id="path5" />
+  <circle
+     cx="9"
+     cy="7"
+     r="1.4"
+     fill="#b4bfc7"
+     id="circle7" />
+  <circle
+     cx="9"
+     cy="162"
+     r="1.4"
+     fill="#9caab4"
+     id="circle8"
+     style="display:inline" />
+</svg>

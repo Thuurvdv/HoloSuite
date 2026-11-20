@@ -1,13 +1,14 @@
-<section class="cybercall-messages {{#if isFoundryV13Plus}}cybercall-modern-messages{{/if}}" data-cybercall-active-thread="{{activeThreadId}}">
+<section data-holosuite-branding="cybercall" class="cybercall-messages {{#if isFoundryV13Plus}}cybercall-modern-messages{{/if}}" data-cybercall-active-thread="{{activeThreadId}}">
+  {{#unless inPhone}}
   <nav class="cybercall-mode-tabs">
     <button type="button" data-cybercall-message-action="open-calls" data-cybercall-mode-tab="calls">Calls</button>
     <button type="button" class="active" data-cybercall-mode-tab="messages">Messages</button>
   </nav>
+  {{/unless}}
 
-  <aside class="cybercall-thread-list">
+  <aside class="cybercall-thread-list" {{#if inPhone}}{{#if showConversation}}hidden{{/if}}{{/if}}>
     <header>
-      <h2>
-        Messages
+      <h2><span data-holosuite-brand-icon></span><span data-holosuite-brand-text="messagesHeading"><span data-holosuite-brand-name></span> Messages</span>
         {{#if gmViewPlayerMessagesEnabled}}
           <span class="cybercall-gm-visibility" title="GM visibility is enabled: GMs can view player conversations." aria-label="GM visibility is enabled: GMs can view player conversations." tabindex="0">
             <i class="fa-solid fa-eye" aria-hidden="true"></i>
@@ -57,9 +58,10 @@
     {{/if}}
   </aside>
 
-  <main class="cybercall-conversation {{#if activeThread.showNpcLinkPanel}}has-npc-link{{/if}}">
+  <main class="cybercall-conversation {{#if activeThread.showNpcLinkPanel}}has-npc-link{{/if}}" {{#if inPhone}}{{#unless showConversation}}hidden{{/unless}}{{/if}}>
     <header>
       <div class="cybercall-conversation-identity">
+        {{#if inPhone}}<button type="button" class="cybercall-message-back" data-cybercall-message-action="back" aria-label="Back to conversations" title="Back to conversations"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>{{/if}}
         {{#if activeThread}}
           <span class="cybercall-conversation-avatar {{activeThread.avatarTone}} {{#if activeThread.isGroup}}group{{/if}}">
             {{#if activeThread.image}}
@@ -75,7 +77,7 @@
         </div>
       </div>
       {{#if canDeleteThread}}
-        <button type="button" class="cybercall-delete-thread" data-cybercall-message-action="delete-thread">Delete Thread</button>
+        <button type="button" class="cybercall-delete-thread" data-cybercall-message-action="delete-thread" aria-label="Delete thread" title="Delete thread"><i class="fa-solid fa-trash" aria-hidden="true"></i> <span>Delete Thread</span></button>
       {{/if}}
     </header>
 
@@ -126,7 +128,6 @@
             {{/each}}
           </div>
         </fieldset>
-        <p class="cybercall-group-hint">Members can read the full conversation and every reply is sent privately to the whole group.</p>
         <button type="submit" {{#unless hasGroupMemberChoices}}disabled{{/unless}}>Create Group</button>
       </form>
     {{else}}
@@ -180,7 +181,7 @@
           </select>
         </label>
       {{/if}}
-      <textarea name="body" rows="3" placeholder="Type message..." required></textarea>
+      <textarea name="body" rows="2" aria-label="Message" placeholder="Type message..." required></textarea>
       <button type="submit" {{#unless hasContacts}}disabled{{/unless}}>Send</button>
       </form>
     {{/if}}

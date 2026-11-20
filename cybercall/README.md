@@ -1,98 +1,68 @@
 # CyberCall
 
-CyberCall adds sci-fi holographic communication overlays to your Foundry VTT sessions. Whether you are running a cyberpunk heist, a space opera, or a futuristic detective story, CyberCall lets the GM place incoming transmissions directly on every player's screen, complete with caller portraits, signal static, and ringing animations.
+Calls, messages, and NPC conversations on a sci-fi commlink for Foundry VTT. Requires **HoloSuite Core** and supports **Foundry 12–14**.
 
-Players can also call the GM using a built-in contacts directory, making two-way in-character communication part of the game.
-
-![CyberCall](../images/Cybercall.jpg)
+![CyberCall](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/images/Cybercall.jpg)
 
 ## What Does It Do?
 
-- The GM composes and broadcasts holographic calls to all connected players.
-- Calls display a caller portrait, name, faction, message, and signal strength bar.
-- Three visual styles are available: standard blue, emergency red, and corrupted green.
-- Calls can ring with a looping sci-fi ringtone until someone picks up. GMs can add multiple world-wide ringtone choices from Module Settings.
-- Players can accept or end calls, and the state syncs across all connected clients.
-- Fullscreen mode turns a call into a dramatic table-wide broadcast.
-- Players can keep a personal contacts list for each world and a shared group contacts list, and place calls to the GM from those contacts.
-- Players can send persistent private CyberCall messages to other players or to contacts handled by the GM.
-- Players can create named private group chats, invite other player users, and message every member in one thread.
-- Incoming messages briefly show the sender's portrait and message preview with a short notification tone; each user can disable these alerts in CyberCall settings.
-- Players choose **Notification sound** below **Ringtone** in the **Calls** tab. GMs manage uploads and shared sounds in **Message Notification Sound → Choose or Upload Sound** in module settings. **Allow uploaded notification sounds to be used by players** is enabled by default. Selections are saved per user and world. Unavailable sounds fall back to the built-in tone.
-- CyberCall cards are hidden from Foundry's standard chat log by default and can be restored per client with **Show CyberCall Chat Cards**.
-- Message timestamps are hidden by default and can be enabled per client with the **Show Message Timestamps** CyberCall setting.
-- GMs can link contacts to Actors and reply in message threads as that NPC/contact.
-- In the GM message list, player messages routed to a managed NPC show a compact **TO: NPC NAME** destination label.
-- GMs can drag an Actor or Actor-backed Token onto an NPC conversation to link that specific player route to a canonical NPC without merging private threads.
-- Linked NPC conversations support changing or removing the link and optionally sharing the linked token portrait with that player; portraits remain GM-only by default.
-- Private player-to-player conversations are hidden from GMs by default. A GM can opt in for the world with **GM: View Player Conversations** in CyberCall settings.
-- When GM player-conversation visibility is enabled, everyone sees an eye indicator beside the Messages heading with an explanatory tooltip.
-- Direct calls now leave lightweight history events in the related message thread.
+- Send calls to selected players or broadcast to everyone, including fullscreen transmissions.
+- Choose standard, emergency, or corrupted visuals. Lower signal strength adds portrait glitches.
+- Keep personal and shared contacts, send private messages, and create group chats.
+- Reply as an NPC, with separate conversations for each NPC and player.
+- Choose ringtones and message sounds, including audio added by the GM.
 
 ## Tutorial: Using CyberCall as a DM
 
 ### Sending a Call
 
-1. Enable **CyberCall** & **Holosuite-core** in your Foundry world.
-2. Open the **CyberCall Composer** from the HoloSuite launcher.
-3. Fill in the caller's name, faction or subtitle, portrait image path, and message text.
-4. Set the signal strength (0 to 100). Lower values add more static to the display.
-5. Pick a variant: **Standard** (blue), **Emergency** (red), or **Corrupted** (green).
-6. Toggle **Fullscreen** if you want the call to fill the entire screen.
-7. Toggle **Ringing** if you want the incoming call animation to play before the message appears.
-8. Click **Preview Locally** to see how it looks on your own screen first.
-9. Click **Broadcast to Players** to push it to everyone.
+1. Enable **CyberCall** and **HoloSuite Core** in your world.
+2. Open CyberCall from the HoloSuite launcher.
+3. Choose an Actor or enter the caller's name, portrait, subtitle, and message.
+4. Set the signal, visual style, recipients, and whether to use ringing or fullscreen mode.
+5. Use **Preview Locally**, then **Broadcast to Players** when ready.
 
 ### During the Call
 
-- When a player clicks **Accept**, the call transitions to a connected state for everyone. The message collapses and only the caller portrait remains visible with an **End Call** button.
-- Clicking **End Call** from any client closes the call for everyone.
+Click **Accept** to connect, or **Decline** to dismiss an incoming call. **End Call** closes the call for everyone involved.
 
 ### Handling Player Calls
 
-- When a player calls you from their contacts, an incoming call screen appears on your client.
-- Click **Accept** to connect. Both you and the player see the connected call view.
-- Use the conversation to roleplay the exchange in character, then end the call when you are done.
+Calls to NPC contacts arrive on the GM's screen. Accept the call to play out the conversation, then end it when finished.
 
 ## Tutorial: Using CyberCall as a Player
 
 ### Receiving Calls
 
-1. When the GM broadcasts a CyberCall, it appears as an overlay on your screen.
-2. If the call is ringing, you will hear a ringtone and see an incoming call animation. Click **Accept** to pick up.
-3. Read the caller's message once the call connects.
-4. Click **End Call** when you are finished. This closes the call for everyone.
+Incoming calls appear on your screen. Click **Accept** to answer or **Decline** to dismiss them.
 
 ### Making Calls
 
-1. Make sure no call is currently active.
-2. Open the **CyberCall Contacts** from the HoloSuite launcher.
-3. Add contacts to your personal list by entering a name and number, then clicking **Add**.
-4. Switch to the **Group** tab to see contacts shared across all players. You can add group contacts too (a GM must be connected for group edits to save).
-5. Click **Call** next to any contact to send a call request to the GM.
-6. Wait for the GM to accept. Once they do, you both enter the connected call view.
+Open CyberCall from the HoloSuite launcher. Add a contact to your personal list, or choose one from the shared **Group** list, then click **Call**. A GM must be connected to save changes to shared contacts.
 
 ### Choosing a Ringtone
 
-- Open **Configure Settings** and find the **CyberCall** section.
-- Pick a ringtone from the dropdown, or choose **Silent** if you prefer no sound. New clients default to Ringtone 1.
-- Set **Incoming Call Volume** in Module Settings to adjust CyberCall relative to Foundry's Interface volume.
-- GMs can open **Additional Ringtones** in Module Settings to add named audio files for everyone in the world.
-- Your personal contacts and ringtone choice are saved per browser, so they only affect your own client. Personal contacts are separated per world.
+Choose your ringtone and notification sound in CyberCall's **Settings**. The GM can add audio through **Additional Ringtones** and **Manage Notification Sounds** in Foundry's module settings. Call volume and message alerts can also be adjusted in settings.
 
 ### Sending Messages
 
-- Open **CyberCall Contacts** and click **Messages** to open the message console.
-- Use the **Calls** and **Messages** tabs to switch between call/contact tools and message threads.
-- Click **New** in the message console to start a new conversation.
-- Click **New Group**, enter a group name, select the players to invite, and click **Create Group**. Offline players can be included and will see the thread when they return.
-- Use the **To** dropdown to message another player, GM, personal contact, or group contact directly, or click **Message** beside a saved contact.
-- Messages to saved contacts without a linked player are whispered to the GM users, so the GM can answer in character.
-- When a GM opens an NPC/contact thread, the **Reply As** dropdown can send the reply under the contact identity instead of the GM name.
-- NPC threads show an identity panel to the GM. Drop an Actor or token onto the thread row or panel to link it, then use **Share Portrait**, **Change**, or **Unlink** as needed.
-- When a GM starts a new conversation, **Send As** can send from a GM-managed contact or Actor/NPC identity.
-- Replies inside an existing thread automatically go back to the current conversation partner; the **To** picker is only used for starting a new thread.
-- CyberCall message history is stored as private Foundry chat messages with CyberCall flags. Read state is saved locally per client.
-- CyberCall chat cards in Foundry chat include an **Open CyberCall** button that opens the related message thread.
-- **Delete Thread** clears a conversation from your local CyberCall message list. Newer messages in that thread can appear again later.
-- Outgoing, connected, ended, and missed direct-call events appear in the same thread as message history.
+Click **Message** beside a contact, or open **Messages → New**. Use **New Group** to start a group chat; offline players can join the conversation when they return.
+
+GMs can select **Send As** to message as an NPC. Choosing an Actor links it immediately; existing conversations can also be linked by dragging an Actor or token onto them. Use **Share Portrait** to show the NPC's portrait to that player.
+
+Player conversations are private from GMs unless **GM: View Player Conversations** is enabled. An eye indicator shows when this setting is on.
+
+Messages persist between sessions. **Delete Thread** hides a thread only for you. Call history keeps the newest **100 call events per world** and removes older events when a GM is connected; text messages are kept.
+
+## Commlink device shell
+
+Contacts, messages, history, and calls share a resizable commlink interface. Portraits fit inside the display, and lower signal strength adds interference. Reduced-motion preferences turn off these animations.
+
+## GM contact management and configuration
+
+Use **Contacts → Player Lists** to view and edit a player's personal and assigned contacts. Older personal lists become available after that player connects once. Players can edit their own contacts; GM-assigned contacts are read-only for them.
+
+The console's **Configuration** tab includes:
+
+- **Phone number format:** `#` for a digit, `A` for a letter, or `*` for either. For example, `AAA-####` accepts `FED-0071`. Other characters are inserted as fixed text. Leave blank for unrestricted numbers.
+- **Device emblem:** browse or upload a custom image. HoloSuite Branding takes priority when available; older Core versions use this image normally.

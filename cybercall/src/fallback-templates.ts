@@ -8,25 +8,28 @@ function makeFallbackImageMarkup(call: any, escapeHTML: EscapeHTML) {
 }
 
 export function renderFallbackTemplate(call: any, escapeHTML: EscapeHTML) {
-  const signalStyle = `--cybercall-signal: ${call.signal}%;`;
+  const signalStyle = `--cybercall-signal: ${call.signal}%; --cybercall-glitch-shift: ${call.glitchShift}px; --cybercall-glitch-interval: ${call.glitchInterval}s;`;
   const fullscreenClass = call.fullscreen ? "cybercall-broadcast" : "";
   const ringingClass = call.ringing ? "cybercall-ringing-panel" : "";
   const connectedClass = call.accepted ? "cybercall-connected-panel" : "";
   const broadcastButton = call.showBroadcast
     ? '<button type="button" data-cybercall-action="broadcast">Broadcast</button>'
     : "";
-  const headerMarkup = call.accepted
-    ? ""
-    : `
+  const headerMarkup = `
+      <div class="cybercall-call-brand"><strong>CyberCall</strong><span class="cybercall-display-mark" aria-hidden="true">COMMLINK</span><span data-cybercall-window-controls></span></div>
       <header class="cybercall-header">
-        <div>
-          <div class="cybercall-kicker">${escapeHTML(call.kicker)}</div>
-          <h2>${escapeHTML(call.callerName)}</h2>
-          <p>${escapeHTML(call.subtitle)}</p>
+        <div class="cybercall-transmission-state">
+          <div class="cybercall-kicker">${escapeHTML(call.accepted ? "Connected" : call.kicker)}</div>
+          <div class="cybercall-signal">
+            <span>${call.signal}%</span>
+            <div class="cybercall-signal-bar" aria-hidden="true"><i></i></div>
+          </div>
         </div>
-        <div class="cybercall-signal">
-          <span>${call.signal}%</span>
-          <div class="cybercall-signal-bar" aria-hidden="true"><i></i></div>
+        <div class="cybercall-caller-identity">
+          <h2>${escapeHTML(call.callerName)}</h2>
+          ${call.contactNumber
+            ? `<small class="cybercall-call-channel">Channel ${escapeHTML(call.contactNumber)}</small>`
+            : `<p>${escapeHTML(call.subtitle)}</p>`}
         </div>
       </header>
     `;
@@ -41,12 +44,13 @@ export function renderFallbackTemplate(call: any, escapeHTML: EscapeHTML) {
         ${broadcastButton}
       `;
   return `
-    <div class="cybercall-panel cybercall-${call.variant} ${fullscreenClass} ${ringingClass} ${connectedClass}" style="${signalStyle}">
+    <div data-cybercall-signal-quality="${call.signalQuality}" class="cybercall-panel cybercall-${call.variant} ${fullscreenClass} ${ringingClass} ${connectedClass}" style="${signalStyle}">
       <div class="cybercall-static" aria-hidden="true"></div>
       <div class="cybercall-reticle" aria-hidden="true"></div>
       ${headerMarkup}
       <main class="cybercall-body">
         <div class="cybercall-portrait">${makeFallbackImageMarkup(call, escapeHTML)}</div>
+        <div class="cybercall-waveform" aria-hidden="true"></div>
         ${messageMarkup}
       </main>
       <footer class="cybercall-actions">
@@ -65,9 +69,12 @@ export function renderComposerFallbackTemplate(data: any, escapeHTML: EscapeHTML
   return `
     <form class="cybercall-composer" data-cybercall-composer>
       <nav class="cybercall-mode-tabs">
-        <button type="button" class="active" data-cybercall-mode-tab="calls">Calls</button>
+        <button type="button" data-cybercall-console-tab="transmission" aria-selected="true">Transmission</button>
         <button type="button" data-cybercall-compose-action="open-messages" data-cybercall-mode-tab="messages">Messages</button>
+        <button type="button" data-cybercall-console-tab="configuration" aria-selected="false">Configuration</button>
+        <span data-cybercall-window-controls></span>
       </nav>
+      <section data-cybercall-console-panel="transmission">
       <label>Actor Portrait
         <select name="actorId">
           <option value="">Manual / no actor</option>
@@ -103,6 +110,16 @@ export function renderComposerFallbackTemplate(data: any, escapeHTML: EscapeHTML
         <button type="button" data-cybercall-compose-action="broadcast">Broadcast to Players</button>
         <button type="button" data-cybercall-compose-action="close-active">Close Active Call</button>
       </div>
+      </section>
+      <section class="cybercall-console-configuration" data-cybercall-console-panel="configuration" hidden>
+        <h3>Configuration</h3>
+        <label>Phone number format <input type="text" name="phoneNumberFormat" value="${escapeHTML(data.phoneNumberFormat ?? "")}" placeholder="###-###-####" maxlength="64"></label>
+        <p>Use # for a digit, A for a letter, or * for a letter or digit. Examples: AAA-#### or ***-###. Fixed text and separators are inserted automatically. Leave blank for unrestricted numbers.</p>
+        <label>Device emblem <span class="cybercall-composer-path-row"><input type="text" name="deviceEmblem" value="${escapeHTML(data.deviceEmblem ?? "")}" placeholder="Path to an emblem image"><button type="button" data-cybercall-emblem-browse>Browse</button></span></label>
+        <p>HoloSuite Branding’s artwork takes priority when configured. Otherwise this image is used.</p>
+        <button type="button" data-cybercall-save-configuration>Save configuration</button>
+        <output data-cybercall-configuration-status role="status"></output>
+      </section>
     </form>
   `;
 }
@@ -139,7 +156,7 @@ export function renderContactsFallbackTemplate(data: any, escapeHTML: EscapeHTML
             ${actorOptions}
           </select>
         </label>
-        <label>Picture <input type="text" name="image" placeholder="icons/..."></label>
+        <label>Picture <span class="cybercall-contact-picture-row"><input type="text" name="image" placeholder="icons/..."><button type="button" data-cybercall-contact-browse>Browse</button></span></label>
         <label class="cybercall-contact-toggle"><input type="checkbox" name="managedByGM"> <span>GM replies as contact</span></label>
       `
     : "";
@@ -299,7 +316,6 @@ export function renderMessagesFallbackTemplate(data: any, escapeHTML: EscapeHTML
         <legend>Players</legend>
         <div class="cybercall-group-members">${groupMemberMarkup}</div>
       </fieldset>
-      <p class="cybercall-group-hint">Members can read the full conversation and every reply is sent privately to the whole group.</p>
       <button type="submit" ${data.hasGroupMemberChoices ? "" : "disabled"}>Create Group</button>
     </form>
   `;

@@ -1,8 +1,8 @@
 <form class="cybercall-ringtone-config">
   <header class="cybercall-ringtone-config-header">
     <p class="cybercall-kicker">World Configuration</p>
-    <h2>Additional Ringtones</h2>
-    <p>Add audio files that everyone can select as their personal CyberCall ringtone. The three built-in ringtones remain available.</p>
+    <h2>{{heading}}</h2>
+    <p>{{description}}</p>
   </header>
 
   <div class="cybercall-ringtone-config-columns" aria-hidden="true">
@@ -30,15 +30,19 @@
     {{/each}}
     <div class="cybercall-ringtone-config-empty" data-ringtone-empty>
       <i class="fa-solid fa-bell-slash" aria-hidden="true"></i>
-      <strong>No additional ringtones yet</strong>
+      <strong>{{emptyHeading}}</strong>
       <span>Use the button below to add your first audio file.</span>
     </div>
   </div>
 
-  <button type="button" class="cybercall-ringtone-add" data-ringtone-add><i class="fa-solid fa-plus"></i> Add another ringtone</button>
+  <button type="button" class="cybercall-ringtone-add" data-ringtone-add><i class="fa-solid fa-plus"></i> {{addLabel}}</button>
+
+  {{#if managesNotificationSounds}}
+    <label class="cybercall-sound-sharing"><input type="checkbox" data-share-message-sounds {{#if shareSounds}}checked{{/if}}> Make these notification sounds available to players</label>
+  {{/if}}
 
   <footer>
-    <span>Saved ringtones become available to all users in this world.</span>
+    <span>{{footerDescription}}</span>
     <button type="submit" class="cybercall-ringtone-save"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
   </footer>
 </form>

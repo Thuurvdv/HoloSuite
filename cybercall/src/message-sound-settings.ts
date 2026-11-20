@@ -37,6 +37,37 @@ export function canChooseMessageSoundFile() {
   return game.user?.isGM || game.user?.can?.("FILES_BROWSE") === true;
 }
 
+export class MessageSoundLibrarySettingsApp extends RingtoneSettingsApp {
+  static get defaultOptions() {
+    return { ...super.defaultOptions, id: "cybercall-message-sound-library", title: "CyberCall Message Notification Sounds" };
+  }
+
+  getData() {
+    return {
+      heading: "Additional Message Notification Sounds",
+      description: "Browse or upload audio files, give them names, and save the library. Players choose their notification sound in CyberCall’s Settings screen.",
+      emptyHeading: "No additional notification sounds yet",
+      addLabel: "Add another notification sound",
+      footerDescription: "The built-in notification tone remains available.",
+      managesNotificationSounds: true,
+      shareSounds: game.settings.get(MODULE_ID, "shareMessageSounds") !== false,
+      ringtones: normalizeCustomRingtones(game.settings.get(MODULE_ID, "customMessageSounds"))
+    };
+  }
+
+  async _updateObject(event: Event) {
+    if (!game.user?.isGM) return;
+    const form = event.currentTarget as HTMLFormElement;
+    const sounds = [...form.querySelectorAll<HTMLElement>("[data-ringtone-row]")].map((row) => ({
+      label: row.querySelector<HTMLInputElement>("[data-ringtone-label]")?.value ?? "",
+      path: row.querySelector<HTMLInputElement>("[data-ringtone-path]")?.value ?? ""
+    }));
+    await game.settings.set(MODULE_ID, "customMessageSounds", normalizeCustomRingtones(sounds));
+    await game.settings.set(MODULE_ID, "shareMessageSounds", form.querySelector<HTMLInputElement>("[data-share-message-sounds]")?.checked === true);
+    ui.notifications?.info?.("CyberCall notification sound library saved.");
+  }
+}
+
 export class MessageSoundSettingsApp extends RingtoneSettingsApp {
   static get defaultOptions() {
     return {
