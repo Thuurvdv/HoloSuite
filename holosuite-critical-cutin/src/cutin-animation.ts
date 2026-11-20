@@ -116,11 +116,12 @@ export function createOverlay(payload: CutinPayload) {
     : `<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>`;
   const titleLength = Math.max(1, String(payload.overlayText ?? "").length);
   const words = String(payload.overlayText ?? "").trim().split(/\s+/);
+  const fateTitleSize = isFate ? `; --hcci-title-longest-word: ${Math.max(1, ...words.map(word => word.length))}` : "";
   const title = isFate && words.length > 1
     ? `${escapeHtml(words.slice(0, -1).join(" "))} <span>${escapeHtml(words.at(-1))}</span>`
     : escapeHtml(payload.overlayText);
   const text = payload.textEnabled && payload.overlayText
-    ? `<div class="hcci-title" style="--hcci-title-chars: ${titleLength}">${title}</div>`
+    ? `<div class="hcci-title" style="--hcci-title-chars: ${titleLength}${fateTitleSize}">${title}</div>`
     : "";
   const actorName = payload.actorName || "";
   const configuredMotion = String(setting(SETTINGS.motionMode) ?? "system");

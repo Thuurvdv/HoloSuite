@@ -16,12 +16,12 @@ export const EFFECT_PRESETS = [
   { id: "void", label: "Void Collapse", description: "An accretion disk contracts into an eclipse before releasing the portrait.", shake: 0.4 },
   { id: "railgun", label: "Railgun Salvo", description: "Targeting rails converge into a horizontal lance with a ballistic reveal.", shake: 1 },
   { id: "eclipse", label: "Astral Eclipse", description: "An orbital crown and star field frame a slow celestial reveal.", shake: 0 },
-  { id: MANGA_STYLE, label: "Manga Overdrive", description: "A burst of ink cuts to a halftone portrait and a full-color manga impact.", shake: 0.7 },
-  { id: FATE_STYLE, label: "Shattered Fate", description: "The portrait breaks into eighteen shards, exposing a fractured title behind it.", shake: 0.65 },
+  { id: MANGA_STYLE, label: "COMIC", description: "A burst of ink cuts to a halftone portrait and a full-color manga impact.", shake: 0.7 },
+  { id: FATE_STYLE, label: "SHATTER", description: "The portrait breaks into eighteen shards, exposing a fractured title behind it.", shake: 0.65 },
   { id: "overdrive", label: "Cyber Overdrive", description: "A perspective data tunnel accelerates into a segmented hologram.", shake: 0.45 },
   { id: OVERRIDE_STYLE, label: "Reality Override", description: "The scene freezes and is cut into slanted louvers that flip open on the portrait, then lock under a title band.", shake: 0.8 },
   { id: COLLAPSE_STYLE, label: "System Collapse", description: "The portrait loses sync and resolution row by row, freezes, then pancakes to the floor before powering off.", shake: 0.6 },
-  { id: CROSSHAIR_STYLE, label: "Crosshair Sever", description: "A crosshair locks onto the portrait. Plasma cuts along both axes, splitting the image into four pieces that disintegrate.", shake: 0.55 }
+  { id: CROSSHAIR_STYLE, label: "SPLIT", description: "A crosshair locks onto the portrait. Plasma cuts along both axes, splitting the image into four pieces that disintegrate.", shake: 0.55 }
 ] as const;
 
 export type EffectId = typeof EFFECT_PRESETS[number]["id"];

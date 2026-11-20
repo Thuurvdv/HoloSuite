@@ -42,6 +42,14 @@
   background: var(--manga-paper) url("../assets/manga/panel-speed-lines.svg") center / 100% 100% no-repeat;
 }
 
+.hcci-style-manga-overdrive.hcci-motion-full .hcci-portrait-frame::before {
+  animation: hcci-manga-speed-lines 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes hcci-manga-speed-lines {
+  to { background-size: 112% 112%; }
+}
+
 .hcci-style-manga-overdrive .hcci-manga-artwork { width: 100%; height: 100%; }
 
 .hcci-style-manga-overdrive .hcci-portrait {

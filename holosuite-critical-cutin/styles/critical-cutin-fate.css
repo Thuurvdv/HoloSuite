@@ -79,6 +79,7 @@
 .hcci-style-shattered-fate.hcci-flash-off .hcci-fate-flash { display: none; }
 
 .hcci-style-shattered-fate .hcci-copy {
+  container-type: inline-size;
   grid-area: 1 / 1;
   z-index: 1;
   display: grid;
@@ -91,8 +92,6 @@
   text-align: center;
   transform: rotate(-7deg);
   isolation: isolate;
-  background: #0b070e;
-  clip-path: polygon(2% 16%, 16% 12%, 12% 4%, 49% 9%, 74% 0, 75% 8%, 99% 5%, 94% 30%, 100% 39%, 96% 62%, 99% 78%, 80% 84%, 75% 96%, 47% 92%, 20% 100%, 24% 91%, 0 94%, 5% 66%, 0 54%);
 }
 .hcci-style-shattered-fate .hcci-copy:not(:has(.hcci-title, .hcci-subtitle)) { visibility: hidden; }
 .hcci-style-shattered-fate .hcci-copy::before,
@@ -103,10 +102,10 @@
 }
 .hcci-style-shattered-fate .hcci-copy::before {
   inset: 0;
-  opacity: .65;
+  clip-path: polygon(2% 16%, 16% 12%, 12% 4%, 49% 9%, 74% 0, 75% 8%, 99% 5%, 94% 30%, 100% 39%, 96% 62%, 99% 78%, 80% 84%, 75% 96%, 47% 92%, 20% 100%, 24% 91%, 0 94%, 5% 66%, 0 54%);
   background:
-    radial-gradient(circle, transparent 48%, #08050b 56%) 0 0 / 5px 5px,
-    linear-gradient(158deg, var(--hcci-accent), transparent 25% 67%, var(--hcci-accent));
+    radial-gradient(circle, transparent 48%, #08050ba6 56%) 0 0 / 5px 5px,
+    linear-gradient(158deg, var(--hcci-accent), transparent 25% 67%, var(--hcci-accent)) #0b070e;
 }
 .hcci-style-shattered-fate .hcci-copy::after {
   left: 13%;
@@ -117,10 +116,13 @@
   clip-path: polygon(0 73%, 25% 46%, 20% 32%, 100% 0, 81% 44%, 88% 42%, 39% 80%, 9% 100%);
 }
 .hcci-style-shattered-fate .hcci-title {
+  --fate-word-size: calc(94cqi / var(--hcci-title-longest-word, 8));
+  width: 100%;
+  overflow-wrap: break-word;
   color: #fff8f8;
   font-style: italic;
   font-weight: 900;
-  font-size: clamp(18px, min(11vw, 15vh, calc(157vw / max(8, var(--hcci-title-chars)))), 166px);
+  font-size: clamp(16px, min(11vw, 15vh, var(--fate-word-size), calc(157vw / max(8, var(--hcci-title-chars)))), 166px);
   line-height: .93;
   text-shadow: .04em .055em #10050b, .07em .085em var(--fate-dark);
 }
@@ -156,12 +158,12 @@
   padding-block: 2.5vh;
   margin-bottom: 6vh;
 }
-.hcci-style-shattered-fate:is(.hcci-motion-reduced, .hcci-motion-still) .hcci-title {
-  font-size: clamp(16px, min(6vw, 7vh), 70px);
-}
-
 @media (orientation: portrait) {
   .hcci-style-shattered-fate .hcci-visual { width: 94vw; height: min(72vh, 122vw); }
   .hcci-style-shattered-fate .hcci-copy { width: 91vw; min-height: 33vh; }
-  .hcci-style-shattered-fate .hcci-title { font-size: clamp(16px, min(13vw, calc(152vw / max(8, var(--hcci-title-chars)))), 104px); }
+  .hcci-style-shattered-fate .hcci-title { font-size: clamp(16px, min(13vw, var(--fate-word-size), calc(152vw / max(8, var(--hcci-title-chars)))), 104px); }
+}
+
+.hcci-style-shattered-fate:is(.hcci-motion-reduced, .hcci-motion-still) .hcci-title {
+  font-size: clamp(16px, min(6vw, 7vh, var(--fate-word-size)), 70px);
 }

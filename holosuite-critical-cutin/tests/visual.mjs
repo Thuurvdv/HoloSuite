@@ -221,6 +221,25 @@ try {
   assert.equal(await evaluate(`!!document.querySelector('.hcci-portrait-fallback') && !document.querySelector('.hcci-title') &&
     document.querySelector('.hcci-overlay').getAnimations({subtree:true}).length === 0`), true);
   await evaluate(`studio.values.motionMode='full'`);
+  for (const [width, height] of [[320, 568], [1440, 900], [2560, 1080]]) {
+    await size(width, height);
+    for (const font of ['aicon', 'classic']) {
+      const lines = await evaluate(`(async () => {
+        studio.values.animationFont = '${font}';
+        studio.mount('shattered-fate', 'failure', 1300, { overlayText: 'CRITICAL FAILURE' });
+        await document.fonts.ready;
+        const title = document.querySelector('.hcci-title');
+        const range = document.createRange();
+        return [title.firstChild, title.querySelector('span').firstChild].map(word => {
+          range.setStart(word, 0);
+          range.setEnd(word, word.textContent.trimEnd().length);
+          return range.getClientRects().length;
+        });
+      })()`);
+      assert.deepEqual(lines, [1, 1], `SHATTER split a word at ${width}px with ${font}`);
+    }
+  }
+  await evaluate(`studio.values.animationFont='aicon'`);
   for (const [width,height] of [[1440,810], [1440,900], [2560,1080], [390,844]]) {
     await size(width,height);
     for (const [phase,time] of [['reveal',170], ['cracks',380], ['handoff',450], ['shatter',600], ['impact',980], ['hold',1300], ['exit',2385]]) {
@@ -332,6 +351,24 @@ try {
     configApp.render = () => {};
     pick('[data-hcci-player="one"]').click();
   })()`);
+  // Every saved preset must be available through the icon picker for both outcomes.
+  const iconIds = [...fs.readFileSync(path.join(root, 'assets/ui/style-icons.svg'), 'utf8').matchAll(/<symbol id="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(iconIds.slice().sort(), ids.slice().sort(), 'preset icons must cover the registry');
+  assert.deepEqual(await evaluate(`[...form.querySelectorAll('[data-hcci-style]')].map(button => button.dataset.hcciStyle)`), ids);
+  for (const kind of ['success', 'failure']) {
+    await evaluate(`pick('[data-hcci-tab="${kind}"]').click()`);
+    for (const id of ids) {
+      const selection = await evaluate(`(() => {
+        pick('[data-hcci-style="${id}"]').click();
+        return {
+          value: pick(field('animationStyle')).value,
+          pressed: [...form.querySelectorAll('[data-hcci-style][aria-pressed="true"]')].map(button => button.dataset.hcciStyle)
+        };
+      })()`);
+      assert.deepEqual(selection, { value: id, pressed: [id] }, `icon selection failed for ${id}/${kind}`);
+    }
+  }
+  await evaluate(`pick('[data-hcci-tab="success"]').click();pick('[data-hcci-style="overdrive"]').click()`);
   assert.equal(await evaluate(`pick(field('animationStyle')).value`), 'overdrive');
   await size(1280,720);
   for (const generation of ['12', '14']) {

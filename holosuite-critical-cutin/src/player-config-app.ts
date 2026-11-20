@@ -7,7 +7,6 @@ import { EFFECT_PRESETS, normalizeEffectId, getEffectPreset } from "./effect-pre
 import { MANGA_ACCENT, MANGA_STYLE } from "./manga-overdrive";
 import { OVERRIDE_STYLE } from "./reality-override";
 import { COLLAPSE_STYLE } from "./system-collapse";
-import { CROSSHAIR_STYLE } from "./crosshair-sever";
 
 declare const foundry: any;
 declare const game: any;
@@ -157,7 +156,7 @@ export class PlayerConfigApp extends BaseFormApplication {
         characterHeading: player.id === "gm" ? "GM Configuration" : `${player.name}’s Characters`,
         tabDetail: player.id === "gm" ? "Global" : `${player.targets.length} ${player.targets.length === 1 ? "character" : "characters"}`
       })),
-      featuredStyles: ["strike", "breach", "signal", "rift", MANGA_STYLE, FATE_STYLE, OVERRIDE_STYLE, COLLAPSE_STYLE, CROSSHAIR_STYLE].map(getEffectPreset),
+      animationStyles: EFFECT_PRESETS,
       dieSides: getDieSides(),
       dice: getDieOptions(getDieSides()),
       lowRollsGood: lowRollsAreGood(),

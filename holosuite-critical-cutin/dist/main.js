@@ -3,9 +3,9 @@ var We = (t, e, i) => e in t ? Ue(t, e, { enumerable: !0, configurable: !0, writ
 var gt = (t, e, i) => We(t, typeof e != "symbol" ? e + "" : e, i);
 const Qe = [4, 6, 8, 10, 12, 20, 100];
 function Ce(t = 20) {
-  var a, o, n;
-  const e = ae(t), i = /* @__PURE__ */ new Set([...Qe, e]), r = ((n = (o = (a = globalThis.CONFIG) == null ? void 0 : a.Dice) == null ? void 0 : o.fulfillment) == null ? void 0 : n.dice) ?? {};
-  for (const c of Object.keys(r)) {
+  var a, r, n;
+  const e = ee(t), i = /* @__PURE__ */ new Set([...Qe, e]), o = ((n = (r = (a = globalThis.CONFIG) == null ? void 0 : a.Dice) == null ? void 0 : r.fulfillment) == null ? void 0 : n.dice) ?? {};
+  for (const c of Object.keys(o)) {
     const l = /^d([1-9]\d*)$/i.exec(c);
     if (!l) continue;
     const s = Number(l[1]);
@@ -13,18 +13,18 @@ function Ce(t = 20) {
   }
   return [...i].sort((c, l) => c - l).map((c) => ({ value: c, label: `d${c}`, selected: c === e }));
 }
-function Ut(t, e) {
-  const i = ae(t), r = ke(e) === "low";
-  return { success: r ? 1 : i, failure: r ? i : 1 };
+function Kt(t, e) {
+  const i = ee(t), o = ke(e) === "low";
+  return { success: o ? 1 : i, failure: o ? i : 1 };
 }
-function ae(t) {
+function ee(t) {
   const e = Number(t);
   return Number.isInteger(e) && e >= 2 && e <= 1e4 ? e : 20;
 }
 function ke(t) {
   return t === "low" ? "low" : "high";
 }
-const C = "holosuite-critical-cutin", Me = "HoloSuite Critical Cut-In", qt = `module.${C}`, Je = `modules/${C}/templates/player-config.hbs`, m = {
+const C = "holosuite-critical-cutin", Me = "HoloSuite Critical Cut-In", Ft = `module.${C}`, Je = `modules/${C}/templates/player-config.hbs`, g = {
   enabled: "enabled",
   dieSides: "dieSides",
   rollDirection: "rollDirection",
@@ -45,13 +45,13 @@ const C = "holosuite-critical-cutin", Me = "HoloSuite Critical Cut-In", qt = `mo
   suppressCutins: "suppressCutins",
   debug: "debug",
   playerConfigs: "playerConfigs"
-}, ct = {
+}, st = {
   everyone: "everyone",
   gm: "gm",
   triggeringPlayer: "triggeringPlayer"
 };
 function ta(t) {
-  game.settings.register(C, m.effectIntensity, {
+  game.settings.register(C, g.effectIntensity, {
     name: "Local Effect Detail",
     hint: "Choose the density of decorative particles and the strength of glow on this device.",
     scope: "client",
@@ -59,7 +59,7 @@ function ta(t) {
     type: String,
     default: "standard",
     choices: { low: "Low", standard: "Standard", high: "High" }
-  }), game.settings.register(C, m.shakeIntensity, {
+  }), game.settings.register(C, g.shakeIntensity, {
     name: "Local Impact Shake",
     hint: "Shake the cut-in at impact. Reduced and still motion always disable shake.",
     scope: "client",
@@ -67,21 +67,21 @@ function ta(t) {
     type: Number,
     default: 0.5,
     range: { min: 0, max: 1, step: 0.1 }
-  }), game.settings.register(C, m.enabled, {
+  }), game.settings.register(C, g.enabled, {
     name: "Enable Critical Cut-In",
     hint: "Play a configured cut-in when a qualifying natural result is rolled on the selected die.",
     scope: "world",
     config: !0,
     type: Boolean,
     default: !0
-  }), game.settings.register(C, m.dieSides, {
+  }), game.settings.register(C, g.dieSides, {
     name: "Check Die",
     hint: "Configured in Configure Player Cut-Ins, where changes confirm the reset of all listed roll thresholds.",
     scope: "world",
     config: !1,
     type: Number,
     default: 20
-  }), game.settings.register(C, m.rollDirection, {
+  }), game.settings.register(C, g.rollDirection, {
     name: "Positive Rolls",
     hint: "Configured in Configure Player Cut-Ins, together with the check die and roll thresholds.",
     scope: "world",
@@ -89,21 +89,21 @@ function ta(t) {
     type: String,
     default: "high",
     choices: { high: "High rolls are positive", low: "Low rolls are positive" }
-  }), game.settings.register(C, m.threshold, {
+  }), game.settings.register(C, g.threshold, {
     name: "Default Trigger Threshold",
     hint: "0 automatically uses the best die face. Otherwise success triggers at or above this value for high rolls, or at or below it for low rolls.",
     scope: "world",
     config: !0,
     type: Number,
     default: 0
-  }), game.settings.register(C, m.failureThreshold, {
+  }), game.settings.register(C, g.failureThreshold, {
     name: "Default Failure Trigger",
     hint: "0 automatically uses the worst die face. Otherwise failure triggers at or below this value for high rolls, or at or above it for low rolls.",
     scope: "world",
     config: !0,
     type: Number,
     default: 0
-  }), game.settings.register(C, m.duration, {
+  }), game.settings.register(C, g.duration, {
     name: "Animation Duration",
     hint: "How long the cut-in remains visible, in milliseconds.",
     scope: "world",
@@ -111,7 +111,7 @@ function ta(t) {
     type: Number,
     range: { min: 800, max: 8e3, step: 100 },
     default: 2500
-  }), game.settings.register(C, m.volume, {
+  }), game.settings.register(C, g.volume, {
     name: "Cut-In Audio Volume",
     hint: "Volume multiplier for configured cut-in audio samples.",
     scope: "world",
@@ -119,19 +119,19 @@ function ta(t) {
     type: Number,
     range: { min: 0, max: 1, step: 0.05 },
     default: 0.8
-  }), game.settings.register(C, m.audience, {
+  }), game.settings.register(C, g.audience, {
     name: "Show Animation To",
     hint: "Choose who sees synchronized cut-in playback.",
     scope: "world",
     config: !0,
     type: String,
     choices: {
-      [ct.everyone]: "Everyone",
-      [ct.gm]: "GM only",
-      [ct.triggeringPlayer]: "Triggering player only"
+      [st.everyone]: "Everyone",
+      [st.gm]: "GM only",
+      [st.triggeringPlayer]: "Triggering player only"
     },
-    default: ct.everyone
-  }), game.settings.register(C, m.animationFont, {
+    default: st.everyone
+  }), game.settings.register(C, g.animationFont, {
     name: "Animation Font",
     hint: "Typeface for the cut-in label and actor name.",
     scope: "world",
@@ -139,28 +139,28 @@ function ta(t) {
     type: String,
     default: "aicon",
     choices: { aicon: "AICON", classic: "Classic (Orbitron / system fallback)" }
-  }), game.settings.register(C, m.textEnabled, {
+  }), game.settings.register(C, g.textEnabled, {
     name: "Enable Text Overlay",
     hint: "Show the configured label during the cut-in.",
     scope: "world",
     config: !0,
     type: Boolean,
     default: !0
-  }), game.settings.register(C, m.defaultText, {
+  }), game.settings.register(C, g.defaultText, {
     name: "Default Overlay Text",
     hint: "Fallback label used when no player-specific label is configured.",
     scope: "world",
     config: !0,
     type: String,
     default: "CRITICAL"
-  }), game.settings.register(C, m.defaultFailureText, {
+  }), game.settings.register(C, g.defaultFailureText, {
     name: "Default Failure Overlay Text",
     hint: "Fallback label used when no failure-specific label is configured.",
     scope: "world",
     config: !0,
     type: String,
     default: "CRITICAL FAILURE"
-  }), game.settings.register(C, m.motionMode, {
+  }), game.settings.register(C, g.motionMode, {
     name: "Local Motion",
     hint: "Control cut-in motion on this device. System follows your operating-system reduced-motion preference.",
     scope: "client",
@@ -173,7 +173,7 @@ function ta(t) {
       still: "Still presentation"
     },
     default: "system"
-  }), game.settings.register(C, m.flashMode, {
+  }), game.settings.register(C, g.flashMode, {
     name: "Local Flash Intensity",
     hint: "Reduce or disable the bright opening flash on this device.",
     scope: "client",
@@ -181,7 +181,7 @@ function ta(t) {
     type: String,
     choices: { full: "Full", soft: "Soft", off: "Off" },
     default: "soft"
-  }), game.settings.register(C, m.localVolume, {
+  }), game.settings.register(C, g.localVolume, {
     name: "Local Cut-In Volume",
     hint: "Personal volume multiplier applied after the GM's cut-in volume setting.",
     scope: "client",
@@ -189,21 +189,21 @@ function ta(t) {
     type: Number,
     range: { min: 0, max: 1, step: 0.05 },
     default: 1
-  }), game.settings.register(C, m.suppressCutins, {
+  }), game.settings.register(C, g.suppressCutins, {
     name: "Hide Cut-Ins On This Device",
     hint: "Do not show or play critical cut-ins for this client.",
     scope: "client",
     config: !0,
     type: Boolean,
     default: !1
-  }), game.settings.register(C, m.debug, {
+  }), game.settings.register(C, g.debug, {
     name: "Debug Logging",
     hint: "Log roll detection and playback decisions to the console.",
     scope: "world",
     config: !0,
     type: Boolean,
     default: !1
-  }), game.settings.register(C, m.playerConfigs, {
+  }), game.settings.register(C, g.playerConfigs, {
     name: "Per-Player Cut-In Configuration",
     scope: "world",
     config: !1,
@@ -221,84 +221,84 @@ function ta(t) {
 function S(t) {
   return game.settings.get(C, t);
 }
-async function Q(t, e) {
+async function tt(t, e) {
   return game.settings.set(C, t, e);
 }
-function Lt(t) {
+function xt(t) {
   if (typeof t != "number" && typeof t != "string") return;
   const e = Number(t);
   return Number.isInteger(e) && e >= 800 && e <= 8e3 ? e : void 0;
 }
-function ie() {
-  return xe(S(m.threshold), "success");
+function ae() {
+  return xe(S(g.threshold), "success");
 }
 function Te() {
-  return xe(S(m.failureThreshold), "failure");
+  return xe(S(g.failureThreshold), "failure");
 }
-function tt() {
-  return ae(S(m.dieSides));
+function at() {
+  return ee(S(g.dieSides));
 }
-function Ht() {
-  return ke(S(m.rollDirection)) === "low";
+function qt() {
+  return ke(S(g.rollDirection)) === "low";
 }
 function xe(t, e) {
   const i = Number(t);
-  return Number.isInteger(i) && i >= 1 && i <= tt() ? i : e === "success" === Ht() ? 1 : tt();
+  return Number.isInteger(i) && i >= 1 && i <= at() ? i : e === "success" === qt() ? 1 : at();
 }
 function Ae(t, e, i) {
-  return i === "success" === Ht() ? t <= e : t >= e;
+  return i === "success" === qt() ? t <= e : t >= e;
 }
-function Wt() {
-  const t = S(m.playerConfigs);
+function Ut() {
+  const t = S(g.playerConfigs);
   return foundry.utils.deepClone(t && typeof t == "object" ? t : {});
 }
 async function se(t) {
-  return Q(m.playerConfigs, t && typeof t == "object" ? t : {});
+  return tt(g.playerConfigs, t && typeof t == "object" ? t : {});
 }
-function kt(...t) {
-  S(m.debug) && console.log(`${C} |`, ...t);
+function wt(...t) {
+  S(g.debug) && console.log(`${C} |`, ...t);
 }
-const re = "boxOfDoom", ht = "boxOfDoomState", ea = 850, aa = 5200, ia = 500;
-let J = !1, Xt = !1, ot, Vt;
-function ra() {
+const ie = "boxOfDoom", ft = "boxOfDoomState", ea = 850, aa = 5200, ia = 500;
+let et = !1, Bt = !1, nt, Xt;
+function oa() {
   var e;
-  return (e = Array.from(game.users ?? []).filter((i) => i.isGM && i.active).sort((i, r) => i.id.localeCompare(r.id))[0]) == null ? void 0 : e.id;
+  return (e = Array.from(game.users ?? []).filter((i) => i.isGM && i.active).sort((i, o) => i.id.localeCompare(o.id))[0]) == null ? void 0 : e.id;
 }
 function bt() {
   var t;
-  return ((t = game.user) == null ? void 0 : t.isGM) && (ra() ?? game.user.id) === game.user.id;
+  return ((t = game.user) == null ? void 0 : t.isGM) && (oa() ?? game.user.id) === game.user.id;
 }
-function pt() {
-  const t = S(ht);
+function ht() {
+  const t = S(ft);
   return t != null && t.id && (t.phase !== "revealed" || t.expires > Date.now()) ? t : void 0;
 }
 function Ee(t) {
   return t.target === null ? "" : `Target ${t.low ? "≤" : "≥"} ${t.target}`;
 }
-function Qt(t) {
+function Wt(t) {
   return t.target === null ? "" : (t.low ? t.total <= t.target : t.total >= t.target) ? "Success" : "Failure";
 }
-function oa(t) {
+function ra(t) {
   const e = document.createElement("span");
   return e.textContent = t, e.innerHTML;
 }
-function nt() {
+function ct() {
   var u;
-  clearTimeout(Vt);
-  const t = pt(), e = ((u = game.user) == null ? void 0 : u.isGM) === !0, i = bt(), r = !e && S(m.suppressCutins) === !0;
-  if (!t || r) {
-    ot == null || ot.remove(), ot = void 0;
+  clearTimeout(Xt);
+  const t = ht(), e = ((u = game.user) == null ? void 0 : u.isGM) === !0, i = bt(), o = !e && S(g.suppressCutins) === !0;
+  if (!t || o) {
+    nt == null || nt.remove(), nt = void 0;
     return;
   }
-  const a = `${t.id}:${t.phase}:${i}:${J}`;
-  if ((ot == null ? void 0 : ot.dataset.state) === a) {
-    t.phase === "revealed" && (Vt = setTimeout(nt, Math.max(1, t.expires - Date.now())));
+  const a = `${t.id}:${t.phase}:${i}:${et}`;
+  if ((nt == null ? void 0 : nt.dataset.state) === a) {
+    t.phase === "revealed" && (Xt = setTimeout(ct, Math.max(1, t.expires - Date.now())));
     return;
   }
-  const o = ot, n = i && (!o || o.contains(document.activeElement));
-  o == null || o.remove();
+  const r = nt, n = i && (!r || r.contains(document.activeElement));
+  r == null || r.remove();
   const c = document.createElement("section");
-  c.className = "hcci-doom", c.dataset.holosuiteBranding = `${C}-box-of-doom`, c.dataset.state = a, c.dataset.phase = t.phase, c.dataset.animate = String((o == null ? void 0 : o.dataset.boxId) !== t.id || o.dataset.phase !== t.phase), c.dataset.boxId = t.id, c.dataset.control = String(i), c.dataset.motion = String(S(m.motionMode) ?? "system"), t.phase === "revealed" && (c.dataset.outcome = Qt(t).toLowerCase()), c.setAttribute("aria-label", "Box of Doom"), c.innerHTML = `
+  c.className = "hcci-doom", c.dataset.holosuiteBranding = `${C}-box-of-doom`, c.dataset.state = a, c.dataset.phase = t.phase, c.dataset.animate = String((r == null ? void 0 : r.dataset.boxId) !== t.id || r.dataset.phase !== t.phase), c.dataset.boxId = t.id, c.dataset.control = String(i), c.dataset.motion = String(S(g.motionMode) ?? "system"), t.phase === "revealed" && (c.dataset.outcome = Wt(t).toLowerCase()), c.setAttribute("aria-label", "Box of Doom"), c.innerHTML = `
     <div class="hcci-doom-stage">
       <h2><span data-holosuite-brand-icon></span><span data-holosuite-brand-name>Box of Doom</span></h2>
       <p class="hcci-doom-stakes"></p>
@@ -323,17 +323,17 @@ function nt() {
     </div>`, c.querySelector(".hcci-doom-stakes").textContent = t.stakes, c.querySelector(".hcci-doom-target").textContent = [`d${t.sides}`, Ee(t)].filter(Boolean).join(" · ");
   const l = c.querySelector(".hcci-doom-status");
   if (t.phase === "revealed") {
-    const f = l.appendChild(document.createElement("strong"));
-    f.textContent = String(t.total);
+    const h = l.appendChild(document.createElement("strong"));
+    h.textContent = String(t.total);
     const d = l.appendChild(document.createElement("span"));
-    d.textContent = Qt(t) || "Result", Vt = setTimeout(nt, Math.max(1, t.expires - Date.now()));
+    d.textContent = Wt(t) || "Result", Xt = setTimeout(ct, Math.max(1, t.expires - Date.now()));
   } else
     l.textContent = t.phase === "sealed" ? "Sealed" : "Opening…";
-  const s = (f, d) => {
-    const g = c.querySelector(".hcci-doom-controls").appendChild(document.createElement("button"));
-    g.type = "button", g.textContent = f, g.addEventListener("click", () => void d().catch(Le));
+  const s = (h, d) => {
+    const m = c.querySelector(".hcci-doom-controls").appendChild(document.createElement("button"));
+    m.type = "button", m.textContent = h, m.addEventListener("click", () => void d().catch(Le));
   };
-  i && !J && t.phase === "sealed" && s("Roll & Reveal", () => na(t.id)), i && !J && t.phase !== "revealed" && s("Cancel", () => le(t.id)), i && !J && t.phase === "revealed" && s("Close", () => le(t.id)), ot = c, document.body.append(c), Hooks.callAll("holosuite-core.renderBranding", c), n && (c.tabIndex = -1, (c.querySelector("button") ?? c).focus({ preventScroll: !0 }));
+  i && !et && t.phase === "sealed" && s("Roll & Reveal", () => na(t.id)), i && !et && t.phase !== "revealed" && s("Cancel", () => le(t.id)), i && !et && t.phase === "revealed" && s("Close", () => le(t.id)), nt = c, document.body.append(c), Hooks.callAll("holosuite-core.renderBranding", c), n && (c.tabIndex = -1, (c.querySelector("button") ?? c).focus({ preventScroll: !0 }));
 }
 function Le(t) {
   var e;
@@ -341,44 +341,44 @@ function Le(t) {
 }
 async function le(t) {
   var e;
-  if (!(!bt() || J || ((e = pt()) == null ? void 0 : e.id) !== t)) {
-    J = !0, nt();
+  if (!(!bt() || et || ((e = ht()) == null ? void 0 : e.id) !== t)) {
+    et = !0, ct();
     try {
-      await Q(ht, {});
+      await tt(ft, {});
     } finally {
-      J = !1, nt();
+      et = !1, ct();
     }
   }
 }
 const ue = (t) => new Promise((e) => setTimeout(e, t));
 async function na(t) {
-  var i, r;
-  const e = pt();
-  if (!(!bt() || J || (e == null ? void 0 : e.id) !== t || e.phase !== "sealed")) {
-    J = !0, nt();
+  var i, o;
+  const e = ht();
+  if (!(!bt() || et || (e == null ? void 0 : e.id) !== t || e.phase !== "sealed")) {
+    et = !0, ct();
     try {
       const a = ((i = foundry.dice) == null ? void 0 : i.Roll) ?? globalThis.Roll;
-      await Q(ht, { ...e, phase: "opening" });
-      const o = await new a(`1d${e.sides}`).evaluate({ allowInteractive: !1 }), n = Number(o.total);
+      await tt(ft, { ...e, phase: "opening" });
+      const r = await new a(`1d${e.sides}`).evaluate({ allowInteractive: !1 }), n = Number(r.total);
       if (!Number.isInteger(n) || n < 1 || n > e.sides) throw new Error("Unexpected die result.");
       await ue(ea);
-      const c = pt();
+      const c = ht();
       if ((c == null ? void 0 : c.id) !== t || c.phase !== "opening") return;
       const l = { ...e, phase: "revealed", total: n, expires: Date.now() + aa };
-      await Q(ht, l), await ue(ia);
-      const s = ((r = foundry.documents) == null ? void 0 : r.ChatMessage) ?? globalThis.ChatMessage, u = [`d${e.sides}: ${n}`, Ee(e), Qt(l)].filter(Boolean).join(" · ");
+      await tt(ft, l), await ue(ia);
+      const s = ((o = foundry.documents) == null ? void 0 : o.ChatMessage) ?? globalThis.ChatMessage, u = [`d${e.sides}: ${n}`, Ee(e), Wt(l)].filter(Boolean).join(" · ");
       await s.create({
         speaker: s.getSpeaker(),
-        content: `<h3>Box of Doom</h3>${e.stakes ? `<p>${oa(e.stakes)}</p>` : ""}<p><strong>${u}</strong></p>`,
+        content: `<h3>Box of Doom</h3>${e.stakes ? `<p>${ra(e.stakes)}</p>` : ""}<p><strong>${u}</strong></p>`,
         whisper: [],
         blind: !1,
-        flags: { [C]: { [re]: t } }
+        flags: { [C]: { [ie]: t } }
       });
     } catch (a) {
-      const o = pt();
-      throw bt() && (o == null ? void 0 : o.phase) === "opening" && o.id === t && await Q(ht, e), a;
+      const r = ht();
+      throw bt() && (r == null ? void 0 : r.phase) === "opening" && r.id === t && await tt(ft, e), a;
     } finally {
-      J = !1, nt();
+      et = !1, ct();
     }
   }
 }
@@ -388,17 +388,17 @@ async function $e() {
     (t = game.user) != null && t.isGM && ((e = ui.notifications) == null || e.warn("The active GM controls Box of Doom."));
     return;
   }
-  if (!(J || Xt || pt())) {
-    Xt = !0;
+  if (!(et || Bt || ht())) {
+    Bt = !0;
     try {
-      const r = foundry.applications.api.DialogV2, a = Ce(tt()), o = Ht(), n = await r.prompt({
+      const o = foundry.applications.api.DialogV2, a = Ce(at()), r = qt(), n = await o.prompt({
         window: { title: "Box of Doom" },
         modal: !0,
         rejectClose: !1,
         content: `<div class="hcci-doom-form" data-holosuite-branding="${C}-box-of-doom">
         <label>What’s at stake?<input name="stakes" type="text" maxlength="180" placeholder="Optional"></label>
         <label>Die<select name="sides">${a.map(({ value: c, label: l, selected: s }) => `<option value="${c}" ${s ? "selected" : ""}>${l}</option>`).join("")}</select></label>
-        <label>Success target (${o ? "roll at or below" : "roll at or above"})<input name="target" type="number" min="1" max="10000" step="1" placeholder="Optional"></label>
+        <label>Success target (${r ? "roll at or below" : "roll at or above"})<input name="target" type="number" min="1" max="10000" step="1" placeholder="Optional"></label>
       </div>`,
         ok: {
           label: "Show Box to Table",
@@ -412,29 +412,29 @@ async function $e() {
           }
         }
       });
-      if (!n || !bt() || pt() || !a.some((c) => c.value === n.sides)) return;
+      if (!n || !bt() || ht() || !a.some((c) => c.value === n.sides)) return;
       if (n.target !== null && (!Number.isInteger(n.target) || n.target < 1 || n.target > n.sides)) {
         (i = ui.notifications) == null || i.warn(`Choose a target between 1 and ${n.sides}, or leave it blank.`);
         return;
       }
-      await Q(ht, { ...n, id: foundry.utils.randomID(), phase: "sealed", low: o });
-    } catch (r) {
-      Le(r);
+      await tt(ft, { ...n, id: foundry.utils.randomID(), phase: "sealed", low: r });
+    } catch (o) {
+      Le(o);
     } finally {
-      Xt = !1;
+      Bt = !1;
     }
   }
 }
 function ca() {
-  game.settings.register(C, ht, {
+  game.settings.register(C, ft, {
     scope: "world",
     config: !1,
     type: Object,
     default: {},
-    onChange: nt
+    onChange: ct
   });
 }
-const wt = "shattered-fate", Pe = [53, 48], Rt = [
+const Lt = "shattered-fate", Pe = [53, 48], Rt = [
   [[49, 34], [43, 25], [41, 0]],
   [[64, 39], [69, 23], [100, 0]],
   [[68, 49], [79, 45], [100, 36]],
@@ -444,13 +444,13 @@ const wt = "shattered-fate", Pe = [53, 48], Rt = [
   [[41, 60], [29, 70], [0, 100]],
   [[34, 52], [22, 56], [0, 52]],
   [[43, 40], [31, 28], [0, 0]]
-], de = Rt.flatMap(([t, e, i], r) => {
-  const [a, o, n] = Rt[(r + 1) % Rt.length], c = [(t[0] + a[0]) / 2 + (r % 2 ? 1.5 : -2), (t[1] + a[1]) / 2 + (r % 3 - 1) * 2];
+], de = Rt.flatMap(([t, e, i], o) => {
+  const [a, r, n] = Rt[(o + 1) % Rt.length], c = [(t[0] + a[0]) / 2 + (o % 2 ? 1.5 : -2), (t[1] + a[1]) / 2 + (o % 3 - 1) * 2];
   return [
     [Pe, t, c, a],
-    [t, e, i, ...r === 3 ? [[100, 100]] : [], n, o, a, c]
+    [t, e, i, ...o === 3 ? [[100, 100]] : [], n, r, a, c]
   ];
-}), Ie = (t) => `polygon(${t.map(([e, i]) => `${e}% ${i}%`).join(",")})`, Jt = (t) => t.map((e) => e.join(",")).join(" "), jt = [
+}), Ie = (t) => `polygon(${t.map(([e, i]) => `${e}% ${i}%`).join(",")})`, Qt = (t) => t.map((e) => e.join(",")).join(" "), Vt = [
   [[0, 0], [100, 0]],
   [[0, 16], [21, 23], [37, 15], [58, 29], [72, 20], [100, 26]],
   [[0, 42], [25, 48], [44, 37], [65, 49], [86, 42], [100, 50]],
@@ -466,21 +466,21 @@ function sa() {
   </svg><div class="hcci-fate-flash"></div>`;
 }
 function la(t) {
-  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polygon points="${Jt(t)}"/></svg>`;
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polygon points="${Qt(t)}"/></svg>`;
 }
 function ua(t) {
-  const e = t.querySelector(".hcci-visual"), i = e.querySelector(".hcci-portrait"), r = e.querySelectorAll(".hcci-fate-shard");
-  if (r.length) {
-    for (const a of r) a.firstElementChild.replaceWith(i.cloneNode(!0));
+  const e = t.querySelector(".hcci-visual"), i = e.querySelector(".hcci-portrait"), o = e.querySelectorAll(".hcci-fate-shard");
+  if (o.length) {
+    for (const a of o) a.firstElementChild.replaceWith(i.cloneNode(!0));
     return;
   }
   for (const a of de) {
-    const o = document.createElement("div");
-    o.className = "hcci-fate-shard", o.style.clipPath = Ie(a), o.append(i.cloneNode(!0)), o.insertAdjacentHTML("beforeend", la(a)), e.append(o);
+    const r = document.createElement("div");
+    r.className = "hcci-fate-shard", r.style.clipPath = Ie(a), r.append(i.cloneNode(!0)), r.insertAdjacentHTML("beforeend", la(a)), e.append(r);
   }
   e.insertAdjacentHTML("beforeend", `<svg class="hcci-fate-cracks" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-    <g class="hcci-fate-branches">${de.filter((a, o) => o % 2 === 0).map((a) => `<polyline points="${Jt(a.slice(1))}"/>`).join("")}</g>
-    <g class="hcci-fate-rays">${Rt.map((a) => `<polyline points="${Jt([Pe, ...a])}"/>`).join("")}</g>
+    <g class="hcci-fate-branches">${de.filter((a, r) => r % 2 === 0).map((a) => `<polyline points="${Qt(a.slice(1))}"/>`).join("")}</g>
+    <g class="hcci-fate-rays">${Rt.map((a) => `<polyline points="${Qt([Pe, ...a])}"/>`).join("")}</g>
     <path class="hcci-fate-spark" d="m53 45 1 2 3 1-3 1-1 3-1-3-3-1 3-1Z"/>
   </svg>`);
 }
@@ -498,75 +498,75 @@ const B = { fracture: 250, shatter: 450, impact: 740, settle: 1050 }, da = 280, 
 function ha(t, e) {
   const i = [];
   if (!t.classList.contains("hcci-motion-full") || !t.animate) return { animations: i, audioDelay: 0 };
-  const r = Math.min(1, (e - 140) / B.settle), a = (u, f, d, g, p = "linear") => {
-    u && i.push(u.animate(f, {
-      delay: d * r,
-      duration: (g - d) * r,
+  const o = Math.min(1, (e - 140) / B.settle), a = (u, h, d, m, p = "linear") => {
+    u && i.push(u.animate(h, {
+      delay: d * o,
+      duration: (m - d) * o,
       easing: p,
       fill: "both"
     }));
-  }, o = (u) => t.querySelector(u);
-  a(o(".hcci-visual"), [
+  }, r = (u) => t.querySelector(u);
+  a(r(".hcci-visual"), [
     { transform: "translate(-3vw, 2vh) scale(1.09)", opacity: 0.42 },
     { transform: "none", opacity: 1 }
-  ], 0, B.fracture, Nt), a(o(".hcci-portrait-frame"), [{ visibility: "visible" }, { visibility: "hidden" }], 0, B.shatter, It);
-  for (const [u, f] of [[".hcci-fate-rays", 250], [".hcci-fate-branches", 310], [".hcci-fate-spark", 250]])
-    a(o(u), [
+  ], 0, B.fracture, Nt), a(r(".hcci-portrait-frame"), [{ visibility: "visible" }, { visibility: "hidden" }], 0, B.shatter, It);
+  for (const [u, h] of [[".hcci-fate-rays", 250], [".hcci-fate-branches", 310], [".hcci-fate-spark", 250]])
+    a(r(u), [
       { opacity: 0 },
       { opacity: 1, offset: 0.06, easing: It },
       { opacity: 0 }
-    ], f, B.shatter);
-  for (const [u, f] of Array.from(t.querySelectorAll(".hcci-fate-shard")).entries()) {
-    const d = u % 2 === 0, [g, p, v] = fa[Math.floor(u / 2)], b = d ? 40 : 55, w = d ? 33 + u % 3 * 12 : u % 3 * 8;
-    a(f, [{ visibility: "hidden" }, { visibility: "visible" }], 0, B.shatter, It);
-    const A = B.shatter + w, E = d ? 819 : 756;
-    a(f, [
+    ], h, B.shatter);
+  for (const [u, h] of Array.from(t.querySelectorAll(".hcci-fate-shard")).entries()) {
+    const d = u % 2 === 0, [m, p, v] = fa[Math.floor(u / 2)], b = d ? 40 : 55, w = d ? 33 + u % 3 * 12 : u % 3 * 8;
+    a(h, [{ visibility: "hidden" }, { visibility: "visible" }], 0, B.shatter, It);
+    const E = B.shatter + w, L = d ? 819 : 756;
+    a(h, [
       { transform: "none", opacity: 1, easing: Nt },
-      { transform: `perspective(850px) translate3d(${g * b * 0.52}vw,${p * b * 0.47}vh,${d ? 96 : -80}px) rotate(${v * 0.53}deg) rotateY(${g * 32}deg)`, opacity: 1, offset: (E - A) / (B.settle - A) },
-      { transform: `perspective(850px) translate3d(${g * b}vw,${p * b}vh,${d ? 190 : -145}px) rotate(${v}deg) rotateY(${g * 62}deg)`, opacity: 0 }
-    ], A, B.settle);
+      { transform: `perspective(850px) translate3d(${m * b * 0.52}vw,${p * b * 0.47}vh,${d ? 96 : -80}px) rotate(${v * 0.53}deg) rotateY(${m * 32}deg)`, opacity: 1, offset: (L - E) / (B.settle - E) },
+      { transform: `perspective(850px) translate3d(${m * b}vw,${p * b}vh,${d ? 190 : -145}px) rotate(${v}deg) rotateY(${m * 62}deg)`, opacity: 0 }
+    ], E, B.settle);
   }
-  a(o(".hcci-copy"), [
+  a(r(".hcci-copy"), [
     { opacity: 0, transform: "translate(13vw,3vh) rotate(-13deg) scale(1.3)" },
     { opacity: 1, transform: "translate(-1vw,0) rotate(-8deg) scale(1.035)", offset: 0.35, easing: It },
     { opacity: 1, transform: "translate(-1vw,0) rotate(-8deg) scale(1.035)", offset: 0.51, easing: Nt },
     { opacity: 1, transform: "rotate(-7deg)" }
   ], B.impact, B.settle, Nt);
-  const n = o(".hcci-fate-flash"), c = [54, B.fracture, B.impact], l = B.impact + 50, s = c.flatMap((u, f) => [
+  const n = r(".hcci-fate-flash"), c = [54, B.fracture, B.impact], l = B.impact + 50, s = c.flatMap((u, h) => [
     { offset: u / l, opacity: 0 },
     {
       offset: (u + 7) / l,
-      opacity: `calc(var(--flash-peak, .14) * ${f === 0 ? 0.55 : 1})`,
-      backgroundColor: f === 0 ? "var(--hcci-accent)" : "#fff"
+      opacity: `calc(var(--flash-peak, .14) * ${h === 0 ? 0.55 : 1})`,
+      backgroundColor: h === 0 ? "var(--hcci-accent)" : "#fff"
     },
     { offset: (u + 50) / l, opacity: 0 }
   ]);
-  return a(n, [{ opacity: 0, offset: 0 }, ...s], 0, l), a(o(".hcci-stage"), [
+  return a(n, [{ opacity: 0, offset: 0 }, ...s], 0, l), a(r(".hcci-stage"), [
     { transform: "none" },
     { transform: "translateX(var(--hcci-shake))", offset: 0.2 },
     { transform: "translateX(calc(-.45 * var(--hcci-shake)))", offset: 0.51 },
     { transform: "none" }
-  ], B.impact, B.impact + 75), { animations: i, audioDelay: B.shatter * r };
+  ], B.impact, B.impact + 75), { animations: i, audioDelay: B.shatter * o };
 }
 function pa(t, e) {
   var a;
   if (!t.classList.contains("hcci-motion-full") || !t.animate) return [];
-  const i = [], r = t.querySelector(".hcci-copy");
-  if (Number(getComputedStyle(r).opacity) > 0.8 && ((a = r.textContent) != null && a.trim())) {
-    const o = r.parentElement.appendChild(document.createElement("div"));
-    o.className = "hcci-fate-exit-pieces";
-    for (let n = 0; n < jt.length - 1; n++) {
-      const c = r.cloneNode(!0), l = o.appendChild(document.createElement("div"));
-      l.style.clipPath = Ie([...jt[n], ...jt[n + 1].slice().reverse()]), l.append(c), i.push(l.animate([
+  const i = [], o = t.querySelector(".hcci-copy");
+  if (Number(getComputedStyle(o).opacity) > 0.8 && ((a = o.textContent) != null && a.trim())) {
+    const r = o.parentElement.appendChild(document.createElement("div"));
+    r.className = "hcci-fate-exit-pieces";
+    for (let n = 0; n < Vt.length - 1; n++) {
+      const c = o.cloneNode(!0), l = r.appendChild(document.createElement("div"));
+      l.style.clipPath = Ie([...Vt[n], ...Vt[n + 1].slice().reverse()]), l.append(c), i.push(l.animate([
         { transform: "none", opacity: 1 },
         { transform: `translate(${(n - 2) * 9 + (n % 2 ? 11 : -8)}vw,${7 + n * 6}vh) rotate(${(n - 2) * 12}deg)`, opacity: 0 }
       ], { duration: e - n * 9, delay: n * 9, easing: "cubic-bezier(.55,.04,.89,.54)", fill: "both" }));
     }
-    r.style.visibility = "hidden";
+    o.style.visibility = "hidden";
   }
   return i.push(t.animate([{ opacity: 1 }, { opacity: 1, offset: 0.61 }, { opacity: 0 }], { duration: e, fill: "both" })), i;
 }
-const st = "manga-overdrive", oe = "#ec2846";
+const mt = "manga-overdrive", oe = "#ec2846";
 function ma(t) {
   return `<svg class="hcci-manga-ink" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
     <g class="hcci-manga-page">
@@ -592,74 +592,74 @@ function ma(t) {
   </svg>
   <div class="hcci-manga-flash"></div>`;
 }
-const k = { blackout: 0, ink: 80, silhouette: 180, halftone: 320, impact: 520, hold: 760 }, dt = "cubic-bezier(.12,.76,.18,1)", X = "steps(1, end)", ga = "grayscale(1) brightness(.40) contrast(1.8)", ya = "grayscale(1) contrast(1.55)";
+const M = { blackout: 0, ink: 80, silhouette: 180, halftone: 320, impact: 520, hold: 760 }, ut = "cubic-bezier(.12,.76,.18,1)", j = "steps(1, end)", ga = "grayscale(1) brightness(.40) contrast(1.8)", ya = "grayscale(1) contrast(1.55)";
 function va(t, e) {
   const i = [];
   if (!t.classList.contains("hcci-motion-full") || !t.animate) return { animations: i, audioDelay: 0 };
-  const r = Math.min(1, (e - 160) / k.hold), a = (n, c, l, s, u = "linear") => {
-    for (const f of t.querySelectorAll(n))
-      i.push(f.animate(c, { delay: l * r, duration: (s - l) * r, easing: u, fill: "both" }));
-  }, o = (n) => n / k.impact;
+  const o = Math.min(1, (e - 160) / M.hold), a = (n, c, l, s, u = "linear") => {
+    for (const h of t.querySelectorAll(n))
+      i.push(h.animate(c, { delay: l * o, duration: (s - l) * o, easing: u, fill: "both" }));
+  }, r = (n) => n / M.impact;
   return a(".hcci-manga-page", [
-    { opacity: 0, transform: "scale(.65)", easing: X },
-    { opacity: 1, transform: "scale(.73)", offset: o(k.ink), easing: dt },
-    { opacity: 1, transform: "scale(1.03)", offset: o(k.silhouette) },
-    { opacity: 1, transform: "scale(1)", offset: o(k.halftone), easing: X },
+    { opacity: 0, transform: "scale(.65)", easing: j },
+    { opacity: 1, transform: "scale(.73)", offset: r(M.ink), easing: ut },
+    { opacity: 1, transform: "scale(1.03)", offset: r(M.silhouette) },
+    { opacity: 1, transform: "scale(1)", offset: r(M.halftone), easing: j },
     { opacity: 0, transform: "scale(1)" }
-  ], k.blackout, k.impact), a(".hcci-manga-panel-glint", [
+  ], M.blackout, M.impact), a(".hcci-manga-panel-glint", [
     { opacity: 0, transform: "scaleX(.1)" },
-    { opacity: 1, transform: "scaleX(1)", offset: 0.32, easing: X },
+    { opacity: 1, transform: "scaleX(1)", offset: 0.32, easing: j },
     { opacity: 0, transform: "scaleX(1)" }
-  ], 19, k.ink), a(".hcci-visual", [
-    { opacity: 1, transform: "none", easing: X },
-    { opacity: 0, transform: "none", offset: k.ink / k.hold, easing: X },
-    { opacity: 1, transform: "translate(-16vw, 4vh) rotate(-12deg) scale(.84)", offset: k.silhouette / k.hold, easing: dt },
-    { opacity: 1, transform: "translate(1.2vw,-.6vh) rotate(2deg) scale(.94)", offset: 255 / k.hold },
-    { opacity: 1, transform: "scale(.92)", offset: k.halftone / k.hold, easing: dt },
-    { opacity: 1, transform: "translate(-.3vw,.15vh) scale(.96)", offset: 352 / k.hold, easing: dt },
-    { opacity: 1, transform: "none", offset: k.impact / k.hold },
+  ], 19, M.ink), a(".hcci-visual", [
+    { opacity: 1, transform: "none", easing: j },
+    { opacity: 0, transform: "none", offset: M.ink / M.hold, easing: j },
+    { opacity: 1, transform: "translate(-16vw, 4vh) rotate(-12deg) scale(.84)", offset: M.silhouette / M.hold, easing: ut },
+    { opacity: 1, transform: "translate(1.2vw,-.6vh) rotate(2deg) scale(.94)", offset: 255 / M.hold },
+    { opacity: 1, transform: "scale(.92)", offset: M.halftone / M.hold, easing: ut },
+    { opacity: 1, transform: "translate(-.3vw,.15vh) scale(.96)", offset: 352 / M.hold, easing: ut },
+    { opacity: 1, transform: "none", offset: M.impact / M.hold },
     { opacity: 1, transform: "none" }
-  ], k.blackout, k.hold), a(".hcci-portrait-frame", [
-    { opacity: 0.065, easing: X },
+  ], M.blackout, M.hold), a(".hcci-portrait-frame", [
+    { opacity: 0.065, easing: j },
     { opacity: 1 }
-  ], k.blackout, k.silhouette), a(".hcci-manga-artwork", [
-    { filter: "brightness(.16)", easing: X },
-    { filter: ga, offset: o(k.silhouette), easing: X },
-    { filter: ya, offset: o(k.halftone), easing: X },
+  ], M.blackout, M.silhouette), a(".hcci-manga-artwork", [
+    { filter: "brightness(.16)", easing: j },
+    { filter: ga, offset: r(M.silhouette), easing: j },
+    { filter: ya, offset: r(M.halftone), easing: j },
     { filter: "none" }
-  ], k.blackout, k.impact), a(".hcci-manga-reveal-lines", [
-    { opacity: 0, easing: X },
+  ], M.blackout, M.impact), a(".hcci-manga-reveal-lines", [
+    { opacity: 0, easing: j },
     { opacity: 1 }
-  ], k.blackout, k.halftone), a(".hcci-manga-dots", [
-    { opacity: 0, easing: X },
-    { opacity: 0.27, offset: o(k.halftone), easing: X },
+  ], M.blackout, M.halftone), a(".hcci-manga-dots", [
+    { opacity: 0, easing: j },
+    { opacity: 0.27, offset: r(M.halftone), easing: j },
     { opacity: 0 }
-  ], k.blackout, k.impact), a(".hcci-manga-impact", [
-    { opacity: 0, easing: X },
-    { opacity: 1, offset: 0.01, transform: "scale(1.06)", easing: X },
-    { opacity: 1, transform: "scale(1.06)", offset: 0.29, easing: dt },
+  ], M.blackout, M.impact), a(".hcci-manga-impact", [
+    { opacity: 0, easing: j },
+    { opacity: 1, offset: 0.01, transform: "scale(1.06)", easing: j },
+    { opacity: 1, transform: "scale(1.06)", offset: 0.29, easing: ut },
     { opacity: 1, transform: "scale(1)" }
-  ], k.impact, k.hold), a(".hcci-copy", [
+  ], M.impact, M.hold), a(".hcci-copy", [
     { opacity: 0, transform: "translate(12vw, -4vh) rotate(4deg) scale(1.16)" },
-    { opacity: 1, transform: "translate(-.8vw, .4vh) rotate(-6deg) scale(1.035)", offset: 0.31, easing: X },
-    { opacity: 1, transform: "translate(-.8vw, .4vh) rotate(-6deg) scale(1.035)", offset: 0.48, easing: dt },
+    { opacity: 1, transform: "translate(-.8vw, .4vh) rotate(-6deg) scale(1.035)", offset: 0.31, easing: j },
+    { opacity: 1, transform: "translate(-.8vw, .4vh) rotate(-6deg) scale(1.035)", offset: 0.48, easing: ut },
     { opacity: 1, transform: "rotate(-4deg)" }
-  ], k.impact, k.hold, dt), a(".hcci-manga-flash", [
+  ], M.impact, M.hold, ut), a(".hcci-manga-flash", [
     { opacity: 0 },
     { opacity: "var(--flash-peak, .14)", offset: 0.1 },
     { opacity: 0 }
-  ], k.impact, k.impact + 38), a(".hcci-stage", [
+  ], M.impact, M.impact + 38), a(".hcci-stage", [
     { transform: "none" },
     { transform: "translateX(var(--hcci-shake))", offset: 0.18 },
     { transform: "translateX(calc(-.5 * var(--hcci-shake)))", offset: 0.44 },
     { transform: "none" }
-  ], k.impact, k.impact + 66), { animations: i, audioDelay: k.impact * r };
+  ], M.impact, M.impact + 66), { animations: i, audioDelay: M.impact * o };
 }
 function ba(t, e) {
-  return !t.classList.contains("hcci-motion-full") || !t.animate ? [] : Array.from(t.querySelectorAll(".hcci-manga-exit"), (i, r) => i.animate([
-    { transform: r === 0 ? "translate(-85%, -36%)" : "translate(85%, 36%)", opacity: 1 },
-    { transform: r === 0 ? "translate(11%, 7%)" : "translate(-11%, -7%)", opacity: 1 }
-  ], { duration: e - r * 17, delay: r * 17, easing: "cubic-bezier(.48,.05,.82,.71)", fill: "both" }));
+  return !t.classList.contains("hcci-motion-full") || !t.animate ? [] : Array.from(t.querySelectorAll(".hcci-manga-exit"), (i, o) => i.animate([
+    { transform: o === 0 ? "translate(-85%, -36%)" : "translate(85%, 36%)", opacity: 1 },
+    { transform: o === 0 ? "translate(11%, 7%)" : "translate(-11%, -7%)", opacity: 1 }
+  ], { duration: e - o * 17, delay: o * 17, easing: "cubic-bezier(.48,.05,.82,.71)", fill: "both" }));
 }
 function wa(t) {
   return `<svg class="hcci-rift-geometry" viewBox="0 0 960 540" preserveAspectRatio="none" aria-hidden="true">
@@ -693,7 +693,7 @@ function wa(t) {
     </g>`}
   </svg>`;
 }
-const G = {
+const z = {
   anticipation: 0,
   slash: 100,
   rupture: 245,
@@ -701,7 +701,7 @@ const G = {
   title: 505,
   hold: 695
 }, Sa = "cubic-bezier(.68,0,.88,.45)", Dt = "cubic-bezier(.12,.78,.24,1)", fe = "cubic-bezier(.15,.78,.18,1)", Ca = "cubic-bezier(.62,.02,.86,.45)";
-function Mt(t) {
+function St(t) {
   const e = 91 - 0.74 * t;
   return `polygon(-10% 0, ${t - 12}% 0, ${t - 11}% ${e - 6}%, ${t}% ${e}%, ${t - 12}% ${e + 8}%, ${t - 15}% 100%, -10% 100%) view-box`;
 }
@@ -709,185 +709,185 @@ function ka(t, e) {
   const i = [];
   if (!t.classList.contains("hcci-motion-full") || !t.animate)
     return { animations: i, audioDelay: 0 };
-  const r = Math.min(1, (e - 100) / G.hold), a = (o, n, c, l, s = "linear") => {
-    for (const u of t.querySelectorAll(o))
+  const o = Math.min(1, (e - 100) / z.hold), a = (r, n, c, l, s = "linear") => {
+    for (const u of t.querySelectorAll(r))
       i.push(u.animate(n, {
-        delay: c * r,
-        duration: (l - c) * r,
+        delay: c * o,
+        duration: (l - c) * o,
         easing: s,
         fill: "both"
       }));
   };
-  return a(".hcci-rift-geometry", [{ opacity: 0.62 }, { opacity: 1 }], G.anticipation, G.slash), a(".hcci-rift-edge, .hcci-rift-edge-light", [{ opacity: 0 }, { opacity: 1 }], G.slash + 82, G.rupture), a(".hcci-rift-upper", [{ transform: "none" }, { transform: "translate(8vw, -38vh) rotate(-3deg)" }], G.rupture, 535, Dt), a(".hcci-rift-lower", [{ transform: "none" }, { transform: "translate(-5vw, 40vh) rotate(-2deg)" }], G.rupture + 18, 585, Dt), a(".hcci-rift-slash", [
-    { clipPath: Mt(1), opacity: 0.28 },
-    { clipPath: Mt(13), opacity: 0.65, offset: 0.21, easing: Sa },
-    { clipPath: Mt(126), opacity: 1, offset: 0.62 },
-    { clipPath: Mt(126), opacity: 0.76, offset: 0.72 },
-    { clipPath: Mt(126), opacity: 0 }
-  ], G.anticipation, 340), a(".hcci-rift-splinters-top", [
+  return a(".hcci-rift-geometry", [{ opacity: 0.62 }, { opacity: 1 }], z.anticipation, z.slash), a(".hcci-rift-edge, .hcci-rift-edge-light", [{ opacity: 0 }, { opacity: 1 }], z.slash + 82, z.rupture), a(".hcci-rift-upper", [{ transform: "none" }, { transform: "translate(8vw, -38vh) rotate(-3deg)" }], z.rupture, 535, Dt), a(".hcci-rift-lower", [{ transform: "none" }, { transform: "translate(-5vw, 40vh) rotate(-2deg)" }], z.rupture + 18, 585, Dt), a(".hcci-rift-slash", [
+    { clipPath: St(1), opacity: 0.28 },
+    { clipPath: St(13), opacity: 0.65, offset: 0.21, easing: Sa },
+    { clipPath: St(126), opacity: 1, offset: 0.62 },
+    { clipPath: St(126), opacity: 0.76, offset: 0.72 },
+    { clipPath: St(126), opacity: 0 }
+  ], z.anticipation, 340), a(".hcci-rift-splinters-top", [
     { opacity: 0 },
     { opacity: 1, offset: 0.025 },
     { opacity: 0, transform: "translate(6vw, -16vh) rotate(5deg)" }
-  ], G.rupture, 465, Dt), a(".hcci-rift-splinters-bottom", [
+  ], z.rupture, 465, Dt), a(".hcci-rift-splinters-bottom", [
     { opacity: 0 },
     { opacity: 1, offset: 0.025 },
     { opacity: 0, transform: "translate(-4vw, 12vh) rotate(-4deg)" }
-  ], G.rupture + 15, 485, Dt), a(".hcci-visual", [
+  ], z.rupture + 15, 485, Dt), a(".hcci-visual", [
     { transform: "translate(-6vw, 5vh) rotate(-5deg)", opacity: 0 },
     { transform: "translate(1.2vw, -1vh) rotate(1deg)", opacity: 1, offset: 0.58, easing: "steps(1, end)" },
     { transform: "translate(1.2vw, -1vh) rotate(1deg)", opacity: 1, offset: 0.69 },
     { transform: "none", opacity: 1 }
-  ], G.reveal, 625, fe), a(".hcci-copy", [
+  ], z.reveal, 625, fe), a(".hcci-copy", [
     { opacity: 0, transform: "translate(8vw, -3vh) skewX(-12deg)" },
     { opacity: 1, transform: "translate(-1vw, .5vh) skewX(2deg)", offset: 0.6 },
     { opacity: 1, transform: "none" }
-  ], G.title, G.hold, fe), a(".hcci-rift-flash", [
+  ], z.title, z.hold, fe), a(".hcci-rift-flash", [
     { opacity: 0 },
     { opacity: "var(--flash-peak, .14)", offset: 0.08 },
     { opacity: 0 }
-  ], G.slash + 82, G.rupture + 33), a(".hcci-stage", [
+  ], z.slash + 82, z.rupture + 33), a(".hcci-stage", [
     { transform: "none" },
     { transform: "translateX(var(--hcci-shake))", offset: 0.28 },
     { transform: "translateX(calc(-.5 * var(--hcci-shake)))", offset: 0.58 },
     { transform: "none" }
-  ], G.title + 38, 640), { animations: i, audioDelay: G.slash * r };
+  ], z.title + 38, 640), { animations: i, audioDelay: z.slash * o };
 }
 function Ma(t, e) {
   if (!t.classList.contains("hcci-motion-full") || !t.animate) return [];
   const i = [];
-  for (const [r, a] of [
+  for (const [o, a] of [
     [".hcci-visual", "translate(62vw, -43vh) rotate(-9deg)"],
     [".hcci-copy", "translate(75vw, -40vh) skewX(-12deg)"],
     [".hcci-rift-upper", "translate(20vw, -105vh) rotate(-6deg)"],
     [".hcci-rift-lower", "translate(-24vw, 100vh) rotate(-5deg)"]
   ]) {
-    const o = t.querySelector(r);
-    o && i.push(o.animate([{ transform: a }], { duration: e, easing: Ca, fill: "forwards" }));
+    const r = t.querySelector(o);
+    r && i.push(r.animate([{ transform: a }], { duration: e, easing: Ca, fill: "forwards" }));
   }
   return i;
 }
-const St = "reality-override", Ta = 300, te = 5, N = { cut: 20, flip: 150, wind: 520, impact: 640, settle: 820 }, Tt = "cubic-bezier(.14,.82,.2,1)", $t = "steps(1, end)", he = [1, -0.7, 0.5, -1, 0.8];
+const $t = "reality-override", Ta = 300, Jt = 5, I = { cut: 20, flip: 150, wind: 520, impact: 640, settle: 820 }, Ct = "cubic-bezier(.14,.82,.2,1)", At = "steps(1, end)", he = [1, -0.7, 0.5, -1, 0.8];
 function xa(t) {
   const e = t === "low" ? 0 : t === "high" ? 8 : 4;
   return `<div class="hcci-ovr-freeze"></div>
     <div class="hcci-ovr-slab"></div>
-    <div class="hcci-ovr-chips">${Array.from({ length: e }, (i, r) => `<i style="--k:${r}"></i>`).join("")}</div>
+    <div class="hcci-ovr-chips">${Array.from({ length: e }, (i, o) => `<i style="--k:${o}"></i>`).join("")}</div>
     <div class="hcci-ovr-flash"></div>`;
 }
 function Aa(t) {
   const e = t.querySelector(".hcci-visual"), i = t.querySelector(".hcci-portrait-frame > .hcci-portrait");
   if (!e || !i) return;
   e.querySelectorAll(".hcci-ovr-echo, .hcci-ovr-panel, .hcci-ovr-cuts, .hcci-ovr-band").forEach((l) => l.remove());
-  const r = (l) => {
+  const o = (l) => {
     const s = i.cloneNode(!0);
     return s.classList.remove("hcci-portrait"), s.classList.add(l), s;
   }, a = (l, s) => {
     const u = document.createElement(l.startsWith("i.") ? "i" : "div");
     return u.className = l.replace(/^i\./, ""), s !== void 0 && u.style.setProperty("--i", String(s)), u;
-  }, o = a("hcci-ovr-echo");
-  o.append(r("hcci-ovr-echo-art"));
+  }, r = a("hcci-ovr-echo");
+  r.append(o("hcci-ovr-echo-art"));
   const n = a("hcci-ovr-panel");
-  for (let l = 0; l < te; l++) {
+  for (let l = 0; l < Jt; l++) {
     const s = a("hcci-ovr-louver", l);
-    s.append(r("hcci-ovr-art"), a("i.hcci-ovr-tint"), a("i.hcci-ovr-face"), a("i.hcci-ovr-neg")), n.append(s);
+    s.append(o("hcci-ovr-art"), a("i.hcci-ovr-tint"), a("i.hcci-ovr-face"), a("i.hcci-ovr-neg")), n.append(s);
   }
   const c = a("hcci-ovr-cuts");
-  for (let l = 0; l <= te; l++) c.append(a("i.hcci-ovr-cut", l));
-  e.append(o, n, c, a("hcci-ovr-band"));
+  for (let l = 0; l <= Jt; l++) c.append(a("i.hcci-ovr-cut", l));
+  e.append(r, n, c, a("hcci-ovr-band"));
 }
 function Ea(t, e) {
-  var L;
+  var k;
   const i = [];
   if (!t.classList.contains("hcci-motion-full") || !t.animate) return { animations: i, audioDelay: 0 };
-  const r = Math.min(1, (e - 100) / N.settle), a = (y, O, R, $, et = "linear", at = "both") => {
-    y && i.push(y.animate(O, { delay: R * r, duration: Math.max(1, ($ - R) * r), easing: et, fill: at }));
-  }, o = (y, O, R) => {
-    const $ = R * r;
-    y && e > $ && i.push(y.animate(O, { delay: $, duration: e - $, fill: "forwards" }));
-  }, n = (y) => t.querySelector(y), c = (y) => Array.from(t.querySelectorAll(y)), l = c(".hcci-ovr-cut"), s = t.clientHeight || 1, u = Math.max(0, (((L = l[0]) == null ? void 0 : L.getBoundingClientRect().width) ?? 3) - 3), f = Math.hypot(u, s), d = u / f, g = -s / f, p = (y) => `rotate3d(${d.toFixed(4)},${g.toFixed(4)},0,${y}deg)`, v = (y) => `translate(${(d * y * s).toFixed(1)}px,${(g * y * s).toFixed(1)}px) scale(1.07)`;
+  const o = Math.min(1, (e - 100) / I.settle), a = (y, O, R, F, Z = "linear", ot = "both") => {
+    y && i.push(y.animate(O, { delay: R * o, duration: Math.max(1, (F - R) * o), easing: Z, fill: ot }));
+  }, r = (y, O, R) => {
+    const F = R * o;
+    y && e > F && i.push(y.animate(O, { delay: F, duration: e - F, fill: "forwards" }));
+  }, n = (y) => t.querySelector(y), c = (y) => Array.from(t.querySelectorAll(y)), l = c(".hcci-ovr-cut"), s = t.clientHeight || 1, u = Math.max(0, (((k = l[0]) == null ? void 0 : k.getBoundingClientRect().width) ?? 3) - 3), h = Math.hypot(u, s), d = u / h, m = -s / h, p = (y) => `rotate3d(${d.toFixed(4)},${m.toFixed(4)},0,${y}deg)`, v = (y) => `translate(${(d * y * s).toFixed(1)}px,${(m * y * s).toFixed(1)}px) scale(1.07)`;
   a(n(".hcci-ovr-freeze"), [{ opacity: 0 }, { opacity: 1 }], 0, 45);
-  const b = "polygon(var(--ovr-lean) 0, calc(var(--ovr-lean) + 3px) 0, calc(var(--ovr-lean) + 3px) 0, var(--ovr-lean) 0)", w = "polygon(0 100%, 3px 100%, 3px 100%, 0 100%)", A = "polygon(var(--ovr-lean) 0, calc(var(--ovr-lean) + 3px) 0, 3px 100%, 0 100%)";
+  const b = "polygon(var(--ovr-lean) 0, calc(var(--ovr-lean) + 3px) 0, calc(var(--ovr-lean) + 3px) 0, var(--ovr-lean) 0)", w = "polygon(0 100%, 3px 100%, 3px 100%, 0 100%)", E = "polygon(var(--ovr-lean) 0, calc(var(--ovr-lean) + 3px) 0, 3px 100%, 0 100%)";
   for (const [y, O] of l.entries()) {
-    const R = N.cut + y * 14;
-    a(O, [{ clipPath: y % 2 ? w : b }, { clipPath: A }], R, R + 95, "cubic-bezier(.7,0,.3,1)"), y > 0 && y < te && a(O, [{ opacity: 1 }, { opacity: 1 }], 0, N.impact, "linear", "backwards");
+    const R = I.cut + y * 14;
+    a(O, [{ clipPath: y % 2 ? w : b }, { clipPath: E }], R, R + 95, "cubic-bezier(.7,0,.3,1)"), y > 0 && y < Jt && a(O, [{ opacity: 1 }, { opacity: 1 }], 0, I.impact, "linear", "backwards");
   }
   a(n(".hcci-ovr-slab"), [
     { transform: "translate(calc(var(--ovr-lean) * 1.15), -115vh)" },
     { transform: "none" }
-  ], N.flip, N.flip + 230, Tt), a(n(".hcci-ovr-echo"), [
+  ], I.flip, I.flip + 230, Ct), a(n(".hcci-ovr-echo"), [
     { transform: "translate(calc(var(--ovr-lean) * -1.15), 115vh)" },
     { transform: "none" }
-  ], N.flip + 40, N.flip + 300, Tt);
+  ], I.flip + 40, I.flip + 300, Ct);
   for (const [y, O] of c(".hcci-ovr-louver").entries()) {
-    const R = N.flip + y * 38;
+    const R = I.flip + y * 38;
     a(O, [
       { opacity: 0, transform: p(-98) },
       { opacity: 1, transform: p(-98), offset: 0.02 },
       { opacity: 1, transform: p(10), offset: 0.68 },
       { opacity: 1, transform: p(0) }
-    ], R, R + 230, Tt), a(O.querySelector(".hcci-ovr-face"), [{ opacity: 1 }, { opacity: 1, offset: 0.42 }, { opacity: 0 }], R, R + 230, "linear", "backwards");
-    const $ = O.querySelector(".hcci-ovr-art");
-    a($, [
+    ], R, R + 230, Ct), a(O.querySelector(".hcci-ovr-face"), [{ opacity: 1 }, { opacity: 1, offset: 0.42 }, { opacity: 0 }], R, R + 230, "linear", "backwards");
+    const F = O.querySelector(".hcci-ovr-art");
+    a(F, [
       { transform: v(he[y] * 0.055) },
-      { transform: v(he[y] * 0.024), offset: 0.97, easing: $t },
+      { transform: v(he[y] * 0.024), offset: 0.97, easing: At },
       { transform: "none" }
-    ], R, N.impact, "linear", "backwards"), a(O.querySelector(".hcci-ovr-tint"), [{ opacity: 1 }, { opacity: 1 }], 0, N.impact, "linear", "backwards"), t.classList.contains("hcci-flash-off") || a(O.querySelector(".hcci-ovr-neg"), [{ opacity: 1 }, { opacity: 1 }], N.impact, N.impact + 48, "linear", "none"), o($, [{ transform: "none" }, { transform: "scale(1.04)" }], N.impact);
+    ], R, I.impact, "linear", "backwards"), a(O.querySelector(".hcci-ovr-tint"), [{ opacity: 1 }, { opacity: 1 }], 0, I.impact, "linear", "backwards"), t.classList.contains("hcci-flash-off") || a(O.querySelector(".hcci-ovr-neg"), [{ opacity: 1 }, { opacity: 1 }], I.impact, I.impact + 48, "linear", "none"), r(F, [{ transform: "none" }, { transform: "scale(1.04)" }], I.impact);
   }
-  const E = n(".hcci-ovr-band");
-  a(E, [
+  const L = n(".hcci-ovr-band");
+  a(L, [
     { clipPath: "inset(49% 100% 49% 0)", backgroundColor: "#fff" },
     { clipPath: "inset(49% 0 49% 0)", backgroundColor: "#fff" }
-  ], N.wind, N.impact, "cubic-bezier(.6,0,.9,.4)", "backwards"), a(E, [
+  ], I.wind, I.impact, "cubic-bezier(.6,0,.9,.4)", "backwards"), a(L, [
     { clipPath: "inset(49% 0 49% 0)", backgroundColor: "#fff" },
     { clipPath: "inset(0 0 0 0)", backgroundColor: "#fff", offset: 0.55 },
     { clipPath: "inset(0 0 0 0)" }
-  ], N.impact, N.impact + 110, Tt, "none"), a(n(".hcci-copy"), [{ opacity: 0, easing: $t }, { opacity: 1 }], 0, N.impact + 14), a(n(".hcci-title"), [
+  ], I.impact, I.impact + 110, Ct, "none"), a(n(".hcci-copy"), [{ opacity: 0, easing: At }, { opacity: 1 }], 0, I.impact + 14), a(n(".hcci-title"), [
     { transform: "skewX(-9deg) scale(1.55)" },
-    { transform: "skewX(-9deg) scale(.96)", offset: 0.4, easing: $t },
+    { transform: "skewX(-9deg) scale(.96)", offset: 0.4, easing: At },
     { transform: "skewX(-9deg) scale(.96)", offset: 0.62 },
     { transform: "skewX(-9deg)" }
-  ], N.impact + 14, N.impact + 150, Tt, "none"), a(n(".hcci-ovr-flash"), [
+  ], I.impact + 14, I.impact + 150, Ct, "none"), a(n(".hcci-ovr-flash"), [
     { opacity: 0 },
     { opacity: "var(--flash-peak, .14)", offset: 0.1 },
     { opacity: 0 }
-  ], N.impact, N.impact + 140), a(n(".hcci-stage"), [
+  ], I.impact, I.impact + 140), a(n(".hcci-stage"), [
     { transform: "none" },
     { transform: "translate(calc(var(--hcci-shake) * 1.4), calc(var(--hcci-shake) * -.5))", offset: 0.16 },
     { transform: "none" }
-  ], N.impact, N.impact + 180, "ease-out", "none");
+  ], I.impact, I.impact + 180, "ease-out", "none");
   for (const [y, O] of c(".hcci-ovr-chips i").entries()) {
     const R = y % 2 ? 1 : -1;
     a(O, [
       { opacity: 1, transform: "rotate(var(--ovr-tilt)) translateX(0)" },
       { opacity: 1, offset: 0.65 },
       { opacity: 0, transform: `rotate(var(--ovr-tilt)) translateX(${R * (34 + y * 5)}vw) rotate(${R * 160}deg)` }
-    ], N.impact, N.impact + 300 + y * 12, "cubic-bezier(.1,.7,.3,1)", "none");
+    ], I.impact, I.impact + 300 + y * 12, "cubic-bezier(.1,.7,.3,1)", "none");
   }
-  return o(n(".hcci-ovr-echo-art"), [{ transform: "scale(1.45)" }, { transform: "scale(1.45) translateX(-1.6vw)" }], N.flip + 300), o(n(".hcci-ovr-slab"), [{ transform: "none" }, { transform: "translate(calc(var(--ovr-lean) * -.05), 5vh)" }], N.flip + 230), { animations: i, audioDelay: N.cut * r };
+  return r(n(".hcci-ovr-echo-art"), [{ transform: "scale(1.45)" }, { transform: "scale(1.45) translateX(-1.6vw)" }], I.flip + 300), r(n(".hcci-ovr-slab"), [{ transform: "none" }, { transform: "translate(calc(var(--ovr-lean) * -.05), 5vh)" }], I.flip + 230), { animations: i, audioDelay: I.cut * o };
 }
 function La(t, e) {
   var s;
   if (!t.classList.contains("hcci-motion-full") || !t.animate) return [];
-  const i = [], r = (u, f, d, g, p = "cubic-bezier(.6,.02,.9,.5)") => {
-    u && i.push(u.animate(f, { delay: d * e, duration: (g - d) * e, easing: p, fill: "forwards" }));
+  const i = [], o = (u, h, d, m, p = "cubic-bezier(.6,.02,.9,.5)") => {
+    u && i.push(u.animate(h, { delay: d * e, duration: (m - d) * e, easing: p, fill: "forwards" }));
   }, a = (u) => t.querySelector(u);
-  r(a(".hcci-copy"), [{ opacity: 0, transform: "rotate(var(--ovr-tilt)) translateX(7vw)" }], 0, 0.28), r(a(".hcci-ovr-band"), [
+  o(a(".hcci-copy"), [{ opacity: 0, transform: "rotate(var(--ovr-tilt)) translateX(7vw)" }], 0, 0.28), o(a(".hcci-ovr-band"), [
     { clipPath: "inset(0 0 0 0)" },
     { clipPath: "inset(49% 0 49% 0)", backgroundColor: "#fff", offset: 0.5 },
     { clipPath: "inset(49% 0 49% 100%)", backgroundColor: "#fff" }
   ], 0, 0.6, "linear");
-  const o = Array.from(t.querySelectorAll(".hcci-ovr-louver")), n = t.clientHeight || 1, c = Math.max(0, (((s = t.querySelector(".hcci-ovr-cut")) == null ? void 0 : s.getBoundingClientRect().width) ?? 3) - 3), l = Math.hypot(c, n);
-  for (const [u, f] of o.entries()) {
-    const d = 0.08 + (o.length - 1 - u) * 0.07;
-    r(f, [
-      { opacity: 1, transform: `rotate3d(${(c / l).toFixed(4)},${(-n / l).toFixed(4)},0,96deg)`, offset: 0.98, easing: $t },
+  const r = Array.from(t.querySelectorAll(".hcci-ovr-louver")), n = t.clientHeight || 1, c = Math.max(0, (((s = t.querySelector(".hcci-ovr-cut")) == null ? void 0 : s.getBoundingClientRect().width) ?? 3) - 3), l = Math.hypot(c, n);
+  for (const [u, h] of r.entries()) {
+    const d = 0.08 + (r.length - 1 - u) * 0.07;
+    o(h, [
+      { opacity: 1, transform: `rotate3d(${(c / l).toFixed(4)},${(-n / l).toFixed(4)},0,96deg)`, offset: 0.98, easing: At },
       { opacity: 0, transform: `rotate3d(${(c / l).toFixed(4)},${(-n / l).toFixed(4)},0,96deg)` }
     ], d, d + 0.42);
   }
-  for (const u of t.querySelectorAll(".hcci-ovr-cut")) r(u, [{ opacity: 0 }], 0.08, 0.2, $t);
-  return r(a(".hcci-ovr-slab"), [{ transform: "translate(calc(var(--ovr-lean) * -1.15), 115vh)" }], 0.12, 0.82), r(a(".hcci-ovr-echo"), [{ transform: "translate(calc(var(--ovr-lean) * 1.15), -115vh)" }], 0.06, 0.76), r(a(".hcci-ovr-freeze"), [{ opacity: 0 }], 0.62, 1, "linear"), i;
+  for (const u of t.querySelectorAll(".hcci-ovr-cut")) o(u, [{ opacity: 0 }], 0.08, 0.2, At);
+  return o(a(".hcci-ovr-slab"), [{ transform: "translate(calc(var(--ovr-lean) * -1.15), 115vh)" }], 0.12, 0.82), o(a(".hcci-ovr-echo"), [{ transform: "translate(calc(var(--ovr-lean) * 1.15), -115vh)" }], 0.06, 0.76), o(a(".hcci-ovr-freeze"), [{ opacity: 0 }], 0.62, 1, "linear"), i;
 }
-const Ct = "system-collapse", $a = 420, yt = 12, Pa = 0.1, Ia = 0.07, x = { boot: 170, fault: 350, title: 560, freeze: 770, collapse: 880, impact: 1240, settle: 1400 }, W = "steps(1, end)", pe = "cubic-bezier(.14,.82,.2,1)", Na = [
+const Pt = "system-collapse", $a = 420, yt = 12, Pa = 0.1, Ia = 0.07, A = { boot: 170, fault: 350, title: 560, freeze: 770, collapse: 880, impact: 1240, settle: 1400 }, J = "steps(1, end)", pe = "cubic-bezier(.14,.82,.2,1)", Na = [
   [250, 4, 1.5, 0],
   [284, 4, 0, 0],
   [350, 7, -4, 0],
@@ -931,23 +931,23 @@ function Oa(t) {
     <div class="hcci-col-flash"></div>`;
 }
 function Fa(t, e) {
-  const i = t.naturalWidth, r = t.naturalHeight;
-  if (!i || !r) return !1;
+  const i = t.naturalWidth, o = t.naturalHeight;
+  if (!i || !o) return !1;
   try {
     const a = document.createElement("canvas");
     a.width = 80, a.height = yt * 8;
-    const o = a.getContext("2d");
-    if (!o) return !1;
-    const n = Math.min(i, r * 0.8), c = Math.min(r, i / 0.8);
-    o.imageSmoothingQuality = "high";
+    const r = a.getContext("2d");
+    if (!r) return !1;
+    const n = Math.min(i, o * 0.8), c = Math.min(o, i / 0.8);
+    r.imageSmoothingQuality = "high";
     const l = a.width / n, s = a.height / c;
-    o.drawImage(t, (n - i) / 2 * l, (c - r) * 0.25 * s, i * l, r * s);
-    for (const [u, f] of e.entries()) {
-      const [d, g] = Array.from(f.querySelectorAll("canvas"));
+    r.drawImage(t, (n - i) / 2 * l, (c - o) * 0.25 * s, i * l, o * s);
+    for (const [u, h] of e.entries()) {
+      const [d, m] = Array.from(h.querySelectorAll("canvas"));
       d.width = 40, d.height = 4;
       const p = d.getContext("2d");
-      p.imageSmoothingQuality = "high", p.drawImage(a, 0, u * 8, 80, 8, 0, 0, 40, 4), g.width = 10, g.height = 1;
-      const v = g.getContext("2d");
+      p.imageSmoothingQuality = "high", p.drawImage(a, 0, u * 8, 80, 8, 0, 0, 40, 4), m.width = 10, m.height = 1;
+      const v = m.getContext("2d");
       v.imageSmoothingQuality = "high", v.drawImage(d, 0, 0, 40, 4, 0, 0, 10, 1);
     }
     return !0;
@@ -956,26 +956,26 @@ function Fa(t, e) {
   }
 }
 function qa(t, e) {
-  var u, f;
+  var u, h;
   const i = (((u = t.querySelector(".hcci-title")) == null ? void 0 : u.textContent) ?? "").trim().split(/\s+/).filter(Boolean);
   t.style.setProperty("--col-word", String(Math.max(6, ...i.map((d) => d.length)))), t.style.setProperty("--col-lines", String(Math.max(1, i.length)));
-  const r = t.querySelector(".hcci-visual"), a = t.querySelector(".hcci-portrait-frame > .hcci-portrait");
-  if (!e || !r || !a) return;
-  r.querySelectorAll(".hcci-col-backing, .hcci-col-rows, .hcci-col-brackets, .hcci-col-floor, .hcci-col-beam").forEach((d) => d.remove()), (f = t.querySelector(".hcci-col-cursor")) == null || f.remove();
-  const o = (d, g) => {
+  const o = t.querySelector(".hcci-visual"), a = t.querySelector(".hcci-portrait-frame > .hcci-portrait");
+  if (!e || !o || !a) return;
+  o.querySelectorAll(".hcci-col-backing, .hcci-col-rows, .hcci-col-brackets, .hcci-col-floor, .hcci-col-beam").forEach((d) => d.remove()), (h = t.querySelector(".hcci-col-cursor")) == null || h.remove();
+  const r = (d, m) => {
     const p = document.createElement(d);
-    return p.className = g, p;
-  }, n = o("div", "hcci-col-rows hcci-col-plain"), c = [];
+    return p.className = m, p;
+  }, n = r("div", "hcci-col-rows hcci-col-plain"), c = [];
   for (let d = 0; d < yt; d++) {
-    const g = o("div", "hcci-col-row");
-    g.style.setProperty("--r", String(d));
-    const p = o("div", "hcci-col-fall"), v = o("div", "hcci-col-band"), b = a.cloneNode(!0);
-    b.classList.remove("hcci-portrait"), b.classList.add("hcci-col-art"), v.append(b, o("canvas", "hcci-col-lod"), o("canvas", "hcci-col-lod"), o("i", "hcci-col-dead")), p.append(v), g.append(p), n.append(g), c.push(g);
+    const m = r("div", "hcci-col-row");
+    m.style.setProperty("--r", String(d));
+    const p = r("div", "hcci-col-fall"), v = r("div", "hcci-col-band"), b = a.cloneNode(!0);
+    b.classList.remove("hcci-portrait"), b.classList.add("hcci-col-art"), v.append(b, r("canvas", "hcci-col-lod"), r("canvas", "hcci-col-lod"), r("i", "hcci-col-dead")), p.append(v), m.append(p), n.append(m), c.push(m);
   }
-  const l = o("div", "hcci-col-brackets");
-  l.innerHTML = "<i></i><i></i><i></i><i></i>", r.append(o("div", "hcci-col-backing"), n, l, o("div", "hcci-col-floor"), o("div", "hcci-col-beam"));
+  const l = r("div", "hcci-col-brackets");
+  l.innerHTML = "<i></i><i></i><i></i><i></i>", o.append(r("div", "hcci-col-backing"), n, l, r("div", "hcci-col-floor"), r("div", "hcci-col-beam"));
   const s = t.querySelector(".hcci-copy");
-  if (s != null && s.children.length && s.append(o("i", "hcci-col-cursor")), a instanceof HTMLImageElement) {
+  if (s != null && s.children.length && s.append(r("i", "hcci-col-cursor")), a instanceof HTMLImageElement) {
     const d = () => n.classList.toggle("hcci-col-plain", !Fa(a, c));
     a.complete && d(), a.addEventListener("load", d, { once: !0 });
   }
@@ -983,102 +983,102 @@ function qa(t, e) {
 function Ha(t, e) {
   const i = [];
   if (!t.classList.contains("hcci-motion-full") || !t.animate) return { animations: i, audioDelay: 0 };
-  const r = Math.min(1, (e - 100) / x.settle), a = (p, v, b, w, A = "linear", E = "both") => {
-    p && i.push(p.animate(v, { delay: b * r, duration: Math.max(1, (w - b) * r), easing: A, fill: E }));
-  }, o = (p) => t.querySelector(p), n = (p) => Array.from(t.querySelectorAll(p)), c = (p, v, b = v) => [
-    { ...v, offset: 0, easing: W },
-    ...p.map(([w, A]) => ({ ...A, offset: w / x.freeze, easing: W })),
+  const o = Math.min(1, (e - 100) / A.settle), a = (p, v, b, w, E = "linear", L = "both") => {
+    p && i.push(p.animate(v, { delay: b * o, duration: Math.max(1, (w - b) * o), easing: E, fill: L }));
+  }, r = (p) => t.querySelector(p), n = (p) => Array.from(t.querySelectorAll(p)), c = (p, v, b = v) => [
+    { ...v, offset: 0, easing: J },
+    ...p.map(([w, E]) => ({ ...E, offset: w / A.freeze, easing: J })),
     { ...b, offset: 1 }
   ];
-  a(o(".hcci-col-freeze"), [{ opacity: 0 }, { opacity: 1 }], 0, x.boot);
-  const l = [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }], s = o(".hcci-col-rows");
-  a(s, l, 40, x.boot, "steps(6, end)", "backwards"), a(o(".hcci-col-brackets"), [{ opacity: 0, transform: "scale(.9)" }, { opacity: 1, transform: "none" }], 0, 120, pe);
+  a(r(".hcci-col-freeze"), [{ opacity: 0 }, { opacity: 1 }], 0, A.boot);
+  const l = [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }], s = r(".hcci-col-rows");
+  a(s, l, 40, A.boot, "steps(6, end)", "backwards"), a(r(".hcci-col-brackets"), [{ opacity: 0, transform: "scale(.9)" }, { opacity: 1, transform: "none" }], 0, 120, pe);
   for (const [p, v] of n(".hcci-col-row").entries()) {
-    const b = Na.filter((L) => L[1] === p);
-    a(v, c(b.map(([L, , y]) => [L, { transform: `translateX(${y}%)` }]), { transform: "none" }), 0, x.freeze);
-    const [w, A] = Array.from(v.querySelectorAll("canvas"));
-    a(w, c(b.map(([L, , , y]) => [L, { opacity: y >= 1 ? 1 : 0 }]), { opacity: 0 }, { opacity: 1 }), 0, x.freeze), a(A, c(b.map(([L, , , y]) => [L, { opacity: y === 2 ? 1 : 0 }]), { opacity: 0 }, { opacity: 1 }), 0, x.freeze);
-    const E = Da.filter((L) => L[2] === p);
-    E.length && a(v.querySelector(".hcci-col-dead"), c(E.flatMap(([L, y]) => [[L, { opacity: 1 }], [y, { opacity: 0 }]]), { opacity: 0 }), 0, x.freeze);
+    const b = Na.filter((k) => k[1] === p);
+    a(v, c(b.map(([k, , y]) => [k, { transform: `translateX(${y}%)` }]), { transform: "none" }), 0, A.freeze);
+    const [w, E] = Array.from(v.querySelectorAll("canvas"));
+    a(w, c(b.map(([k, , , y]) => [k, { opacity: y >= 1 ? 1 : 0 }]), { opacity: 0 }, { opacity: 1 }), 0, A.freeze), a(E, c(b.map(([k, , , y]) => [k, { opacity: y === 2 ? 1 : 0 }]), { opacity: 0 }, { opacity: 1 }), 0, A.freeze);
+    const L = Da.filter((k) => k[2] === p);
+    L.length && a(v.querySelector(".hcci-col-dead"), c(L.flatMap(([k, y]) => [[k, { opacity: 1 }], [y, { opacity: 0 }]]), { opacity: 0 }), 0, A.freeze);
   }
-  a(s, c([[706, { transform: "translateY(2.5%)" }], [734, { transform: "none" }]], { transform: "none" }), 0, x.freeze);
+  a(s, c([[706, { transform: "translateY(2.5%)" }], [734, { transform: "none" }]], { transform: "none" }), 0, A.freeze);
   for (const [p, v] of n(".hcci-col-tears i").entries())
-    a(v, c(Ra[p].flatMap(([b, w]) => [[b, { opacity: 1 }], [w, { opacity: 0 }]]), { opacity: 0 }), 0, x.freeze);
+    a(v, c(Ra[p].flatMap(([b, w]) => [[b, { opacity: 1 }], [w, { opacity: 0 }]]), { opacity: 0 }), 0, A.freeze);
   const u = n(".hcci-col-brackets i");
   for (const [p, v] of u.entries()) {
-    const { drift: b, fall: w, exit: A } = Za[p], E = { transform: b[b.length - 1][1] };
-    a(v, c(b.map(([L, y]) => [L, { transform: y }]), { transform: "none" }, E), 0, x.freeze), a(v, [E, { transform: A }], x.collapse + w, x.collapse + w + 420, "cubic-bezier(.5,0,1,.6)", "forwards");
+    const { drift: b, fall: w, exit: E } = Za[p], L = { transform: b[b.length - 1][1] };
+    a(v, c(b.map(([k, y]) => [k, { transform: y }]), { transform: "none" }, L), 0, A.freeze), a(v, [L, { transform: E }], A.collapse + w, A.collapse + w + 420, "cubic-bezier(.5,0,1,.6)", "forwards");
   }
-  a(o(".hcci-copy"), [
-    { opacity: 0, clipPath: "inset(0 0 100% 0)", easing: W },
-    { opacity: 1, clipPath: "inset(0 0 66% 0)", offset: 0.34, easing: W },
-    { opacity: 1, clipPath: "inset(0 0 33% 0)", offset: 0.67, easing: W },
+  a(r(".hcci-copy"), [
+    { opacity: 0, clipPath: "inset(0 0 100% 0)", easing: J },
+    { opacity: 1, clipPath: "inset(0 0 66% 0)", offset: 0.34, easing: J },
+    { opacity: 1, clipPath: "inset(0 0 33% 0)", offset: 0.67, easing: J },
     { opacity: 1, clipPath: "inset(-30%)" }
-  ], x.title, x.title + 90);
-  const f = x.impact - x.collapse;
-  a(o(".hcci-col-backing"), [{ opacity: 1, easing: W }, { opacity: 0 }], 0, x.collapse);
+  ], A.title, A.title + 90);
+  const h = A.impact - A.collapse;
+  a(r(".hcci-col-backing"), [{ opacity: 1, easing: J }, { opacity: 0 }], 0, A.collapse);
   for (const [p, v] of n(".hcci-col-row").entries()) {
     const b = Math.sqrt(p / yt), w = Math.sqrt((p + 1) / yt);
     if (a(
       v.querySelector(".hcci-col-band"),
       [{ transform: "none" }, { transform: `scaleY(${Ia})` }],
-      x.collapse + b * f,
-      x.collapse + w * f,
+      A.collapse + b * h,
+      A.collapse + w * h,
       "ease-in",
       "both"
     ), p === yt - 1) continue;
-    const A = `cubic-bezier(.3333,${(2 * w / (1 + w) / 3).toFixed(4)},.6667,${(1 - 2 / (1 + w) / 3).toFixed(4)})`;
+    const E = `cubic-bezier(.3333,${(2 * w / (1 + w) / 3).toFixed(4)},.6667,${(1 - 2 / (1 + w) / 3).toFixed(4)})`;
     a(v.querySelector(".hcci-col-fall"), [
       { transform: "none" },
       { transform: `translateY(${((yt - 1 - p) * (1 - Pa) * 100).toFixed(2)}%)` }
-    ], x.collapse + w * f, x.impact, A, "both");
+    ], A.collapse + w * h, A.impact, E, "both");
   }
-  const d = o(".hcci-portrait-frame");
-  a(d, [{ filter: "brightness(.45)" }, { filter: "brightness(.45)" }], 0, x.impact, "linear", "backwards"), a(d, [{ filter: "brightness(1.7)" }, { filter: "brightness(1)" }], x.impact, x.impact + 240, "ease-out", "none"), a(
-    o(".hcci-col-floor"),
+  const d = r(".hcci-portrait-frame");
+  a(d, [{ filter: "brightness(.45)" }, { filter: "brightness(.45)" }], 0, A.impact, "linear", "backwards"), a(d, [{ filter: "brightness(1.7)" }, { filter: "brightness(1)" }], A.impact, A.impact + 240, "ease-out", "none"), a(
+    r(".hcci-col-floor"),
     [{ transform: "scaleX(0)", opacity: 1 }, { transform: "scaleX(1)", opacity: 1, offset: 0.5 }, { transform: "scaleX(1)", opacity: 0.55 }],
-    x.impact,
-    x.impact + 280,
+    A.impact,
+    A.impact + 280,
     pe
-  ), a(o(".hcci-col-flash"), [
+  ), a(r(".hcci-col-flash"), [
     { opacity: 0 },
     { opacity: "var(--flash-peak, .14)", offset: 0.1 },
     { opacity: 0 }
-  ], x.impact, x.impact + 160), a(o(".hcci-stage"), [{ transform: "translateY(var(--hcci-shake))" }, { transform: "none" }], x.impact, x.impact + 170, "ease-out", "none"), a(s, [{ transform: "translateY(.5vh)" }, { transform: "none" }], x.impact, x.impact + 90, "ease-out", "none"), a(o(".hcci-copy"), [{ transform: "translateY(1.4vh)" }, { transform: "none" }], x.impact, x.impact + 110, "ease-out", "none");
-  const g = x.settle * r;
-  if (e > g) {
-    const p = o(".hcci-portrait-frame > .hcci-portrait");
+  ], A.impact, A.impact + 160), a(r(".hcci-stage"), [{ transform: "translateY(var(--hcci-shake))" }, { transform: "none" }], A.impact, A.impact + 170, "ease-out", "none"), a(s, [{ transform: "translateY(.5vh)" }, { transform: "none" }], A.impact, A.impact + 90, "ease-out", "none"), a(r(".hcci-copy"), [{ transform: "translateY(1.4vh)" }, { transform: "none" }], A.impact, A.impact + 110, "ease-out", "none");
+  const m = A.settle * o;
+  if (e > m) {
+    const p = r(".hcci-portrait-frame > .hcci-portrait");
     p && i.push(p.animate(
       [{ transform: "none" }, { transform: "scale(1.035)" }],
-      { delay: x.impact * r, duration: e - x.impact * r, fill: "forwards" }
+      { delay: A.impact * o, duration: e - A.impact * o, fill: "forwards" }
     ));
-    const v = o(".hcci-col-cursor");
+    const v = r(".hcci-col-cursor");
     v && i.push(v.animate([
-      { opacity: 1, easing: W },
-      { opacity: 0, offset: 0.5, easing: W },
+      { opacity: 1, easing: J },
+      { opacity: 0, offset: 0.5, easing: J },
       { opacity: 1 }
-    ], { delay: g, duration: 560, iterations: Math.max(1, Math.round((e - g) / 560)), fill: "forwards" }));
+    ], { delay: m, duration: 560, iterations: Math.max(1, Math.round((e - m) / 560)), fill: "forwards" }));
   }
-  return { animations: i, audioDelay: x.fault * r };
+  return { animations: i, audioDelay: A.fault * o };
 }
-function _a(t, e) {
+function za(t, e) {
   if (!t.classList.contains("hcci-motion-full") || !t.animate) return [];
-  const i = [], r = (o, n, c, l, s = "linear") => {
-    o && i.push(o.animate(n, { delay: c * e, duration: (l - c) * e, easing: s, fill: "forwards" }));
-  }, a = (o) => t.querySelector(o);
-  r(a(".hcci-copy"), [
-    { clipPath: "inset(-30% -30% 0 -30%)", easing: W },
-    { clipPath: "inset(-30% -30% 34% -30%)", offset: 0.33, easing: W },
-    { clipPath: "inset(-30% -30% 67% -30%)", offset: 0.66, easing: W },
+  const i = [], o = (r, n, c, l, s = "linear") => {
+    r && i.push(r.animate(n, { delay: c * e, duration: (l - c) * e, easing: s, fill: "forwards" }));
+  }, a = (r) => t.querySelector(r);
+  o(a(".hcci-copy"), [
+    { clipPath: "inset(-30% -30% 0 -30%)", easing: J },
+    { clipPath: "inset(-30% -30% 34% -30%)", offset: 0.33, easing: J },
+    { clipPath: "inset(-30% -30% 67% -30%)", offset: 0.66, easing: J },
     { clipPath: "inset(-30% -30% 100% -30%)", opacity: 0 }
-  ], 0, 0.3), r(a(".hcci-col-floor"), [{ transform: "scaleX(0)" }], 0, 0.36, "cubic-bezier(.6,0,.9,.4)");
-  for (const o of t.querySelectorAll(".hcci-col-brackets")) r(o, [{ opacity: 0 }], 0, 0.05);
-  for (const o of [".hcci-portrait-frame", ".hcci-col-rows", ".hcci-col-backing"])
-    r(a(o), [
-      { transform: "scaleY(.004)", opacity: 1, offset: 0.97, easing: W },
+  ], 0, 0.3), o(a(".hcci-col-floor"), [{ transform: "scaleX(0)" }], 0, 0.36, "cubic-bezier(.6,0,.9,.4)");
+  for (const r of t.querySelectorAll(".hcci-col-brackets")) o(r, [{ opacity: 0 }], 0, 0.05);
+  for (const r of [".hcci-portrait-frame", ".hcci-col-rows", ".hcci-col-backing"])
+    o(a(r), [
+      { transform: "scaleY(.004)", opacity: 1, offset: 0.97, easing: J },
       { transform: "scaleY(.004)", opacity: 0 }
     ], 0, 0.34, "cubic-bezier(.6,0,.9,.3)");
-  return r(a(".hcci-col-beam"), [
+  return o(a(".hcci-col-beam"), [
     { opacity: 0, transform: "scaleX(.9)" },
     { opacity: 0, transform: "scaleX(.9)", offset: 0.26 },
     { opacity: 1, transform: "scaleX(1)", offset: 0.34 },
@@ -1086,37 +1086,37 @@ function _a(t, e) {
     { opacity: 1, transform: "scaleX(.012)", offset: 0.8 },
     { opacity: 1, transform: "scaleX(.012)", offset: 0.88 },
     { opacity: 0, transform: "scaleX(0)" }
-  ], 0, 1), r(a(".hcci-col-tears"), [{ opacity: 0 }], 0, 0.05), r(a(".hcci-col-freeze"), [{ opacity: 0 }], 0.6, 1), i;
+  ], 0, 1), o(a(".hcci-col-tears"), [{ opacity: 0 }], 0, 0.05), o(a(".hcci-col-freeze"), [{ opacity: 0 }], 0.6, 1), i;
 }
-const _t = "crosshair-sever";
-function za() {
+const re = "crosshair-sever";
+function _a() {
   return '<div class="hcci-sever-crosshair"><i></i></div><div class="hcci-sever-cut hcci-sever-cut-horizontal"></div><div class="hcci-sever-cut hcci-sever-cut-vertical"></div>';
 }
 function Ga(t, e) {
-  const i = t.querySelector(".hcci-visual"), r = i.querySelector(".hcci-portrait-frame .hcci-portrait"), a = i.querySelector(".hcci-sever-pieces");
+  const i = t.querySelector(".hcci-visual"), o = i.querySelector(".hcci-portrait-frame .hcci-portrait"), a = i.querySelector(".hcci-sever-pieces");
   if (a) {
-    for (const s of a.querySelectorAll(".hcci-portrait")) s.replaceWith(r.cloneNode(!0));
+    for (const s of a.querySelectorAll(".hcci-portrait")) s.replaceWith(o.cloneNode(!0));
     return;
   }
-  const o = document.createElement("div");
-  o.className = "hcci-sever-pieces";
-  const n = e === "low" ? 2 : e === "high" ? 4 : 3, c = 50 / n, l = (s, u, f, d) => {
-    const g = document.createElement("div");
-    return g.className = s, g.style.clipPath = `inset(${f}% ${100 - u - d}% ${100 - f - d}% ${u}%)`, g.append(r.cloneNode(!0)), g;
+  const r = document.createElement("div");
+  r.className = "hcci-sever-pieces";
+  const n = e === "low" ? 2 : e === "high" ? 4 : 3, c = 50 / n, l = (s, u, h, d) => {
+    const m = document.createElement("div");
+    return m.className = s, m.style.clipPath = `inset(${h}% ${100 - u - d}% ${100 - h - d}% ${u}%)`, m.append(o.cloneNode(!0)), m;
   };
   for (const [s, u] of [[0, 0], [50, 0], [0, 50], [50, 50]]) {
-    const f = document.createElement("div");
-    f.className = "hcci-sever-quadrant", f.style.setProperty("--qx", s === 0 ? "-1" : "1"), f.style.setProperty("--qy", u === 0 ? "-1" : "1"), f.append(l("hcci-sever-solid", s, u, 50));
+    const h = document.createElement("div");
+    h.className = "hcci-sever-quadrant", h.style.setProperty("--qx", s === 0 ? "-1" : "1"), h.style.setProperty("--qy", u === 0 ? "-1" : "1"), h.append(l("hcci-sever-solid", s, u, 50));
     for (let d = 0; d < n; d++)
-      for (let g = 0; g < n; g++) {
-        const p = d * n + g, v = l("hcci-sever-tile", s + g * c, u + d * c, c);
-        v.style.setProperty("--drift-x", String(0.25 + (p * 7 + s) % 13 / 12)), v.style.setProperty("--drift-y", String(0.25 + (p * 11 + u) % 17 / 16)), v.style.setProperty("--lag", String((p * 7 + s + u) % 11)), v.style.setProperty("--spin", `${(p % 5 - 2) * 14}deg`), v.style.transformOrigin = `${s + (g + 0.5) * c}% ${u + (d + 0.5) * c}%`, f.append(v);
+      for (let m = 0; m < n; m++) {
+        const p = d * n + m, v = l("hcci-sever-tile", s + m * c, u + d * c, c);
+        v.style.setProperty("--drift-x", String(0.25 + (p * 7 + s) % 13 / 12)), v.style.setProperty("--drift-y", String(0.25 + (p * 11 + u) % 17 / 16)), v.style.setProperty("--lag", String((p * 7 + s + u) % 11)), v.style.setProperty("--spin", `${(p % 5 - 2) * 14}deg`), v.style.transformOrigin = `${s + (m + 0.5) * c}% ${u + (d + 0.5) * c}%`, h.append(v);
       }
-    o.append(f);
+    r.append(h);
   }
-  i.append(o);
+  i.append(r);
 }
-const ne = [
+const Ht = [
   { id: "strike", label: "Neon Strike", description: "A diagonal energy slash, speed trails and an impact wave.", shake: 0.7 },
   { id: "breach", label: "Panel Breach", description: "An energized seam opens to reveal the portrait between blast doors.", shake: 0.5 },
   { id: "signal", label: "Signal Bloom", description: "A holographic portrait resolves inside a precision targeting array.", shake: 0.15 },
@@ -1126,75 +1126,75 @@ const ne = [
   { id: "void", label: "Void Collapse", description: "An accretion disk contracts into an eclipse before releasing the portrait.", shake: 0.4 },
   { id: "railgun", label: "Railgun Salvo", description: "Targeting rails converge into a horizontal lance with a ballistic reveal.", shake: 1 },
   { id: "eclipse", label: "Astral Eclipse", description: "An orbital crown and star field frame a slow celestial reveal.", shake: 0 },
-  { id: st, label: "Manga Overdrive", description: "A burst of ink cuts to a halftone portrait and a full-color manga impact.", shake: 0.7 },
-  { id: wt, label: "Shattered Fate", description: "The portrait breaks into eighteen shards, exposing a fractured title behind it.", shake: 0.65 },
+  { id: mt, label: "COMIC", description: "A burst of ink cuts to a halftone portrait and a full-color manga impact.", shake: 0.7 },
+  { id: Lt, label: "SHATTER", description: "The portrait breaks into eighteen shards, exposing a fractured title behind it.", shake: 0.65 },
   { id: "overdrive", label: "Cyber Overdrive", description: "A perspective data tunnel accelerates into a segmented hologram.", shake: 0.45 },
-  { id: St, label: "Reality Override", description: "The scene freezes and is cut into slanted louvers that flip open on the portrait, then lock under a title band.", shake: 0.8 },
-  { id: Ct, label: "System Collapse", description: "The portrait loses sync and resolution row by row, freezes, then pancakes to the floor before powering off.", shake: 0.6 },
-  { id: _t, label: "Crosshair Sever", description: "A crosshair locks onto the portrait. Plasma cuts along both axes, splitting the image into four pieces that disintegrate.", shake: 0.55 }
+  { id: $t, label: "Reality Override", description: "The scene freezes and is cut into slanted louvers that flip open on the portrait, then lock under a title band.", shake: 0.8 },
+  { id: Pt, label: "System Collapse", description: "The portrait loses sync and resolution row by row, freezes, then pancakes to the floor before powering off.", shake: 0.6 },
+  { id: re, label: "SPLIT", description: "A crosshair locks onto the portrait. Plasma cuts along both axes, splitting the image into four pieces that disintegrate.", shake: 0.55 }
 ];
 function zt(t) {
   var e;
-  return ((e = ne.find((i) => i.id === t)) == null ? void 0 : e.id) ?? "strike";
+  return ((e = Ht.find((i) => i.id === t)) == null ? void 0 : e.id) ?? "strike";
 }
-function Ot(t) {
-  return ne.find((e) => e.id === zt(t));
+function ne(t) {
+  return Ht.find((e) => e.id === zt(t));
 }
-const Z = (t, e = 1) => Array.from({ length: e }, (i, r) => `<i class="hcci-fx hcci-fx-${t}" style="--i:${r};--n:${e};--v:${r % 4};--d:${r % 5};--s:${r % 3}"></i>`).join("");
+const D = (t, e = 1) => Array.from({ length: e }, (i, o) => `<i class="hcci-fx hcci-fx-${t}" style="--i:${o};--n:${e};--v:${o % 4};--d:${o % 5};--s:${o % 3}"></i>`).join("");
 function Ba(t, e = "standard") {
-  const i = zt(t), r = e === "low" ? 8 : e === "high" ? 28 : 16, a = Z("particle", r), o = Z("wave", 2);
+  const i = zt(t), o = e === "low" ? 8 : e === "high" ? 28 : 16, a = D("particle", o), r = D("wave", 2);
   switch (i) {
     case "strike":
-      return Z("slash", 2) + Z("speed", 7) + o + a;
+      return D("slash", 2) + D("speed", 7) + r + a;
     case "breach":
-      return '<div class="hcci-tear hcci-tear-top"><span></span></div><div class="hcci-tear hcci-tear-bottom"><span></span></div>' + Z("door", 2) + a;
+      return '<div class="hcci-tear hcci-tear-top"><span></span></div><div class="hcci-tear hcci-tear-bottom"><span></span></div>' + D("door", 2) + a;
     case "signal":
-      return Z("reticle", 3) + Z("tick", 12) + Z("sweep") + o;
-    case wt:
+      return D("reticle", 3) + D("tick", 12) + D("sweep") + r;
+    case Lt:
       return sa();
-    case st:
+    case mt:
       return ma(e);
     case "rift":
       return wa(e);
-    case St:
+    case $t:
       return xa(e);
-    case Ct:
+    case Pt:
       return Oa(e);
-    case _t:
-      return za();
+    case re:
+      return _a();
     case "shatter":
-      return Z("shard", r) + Z("prism", 2) + o;
+      return D("shard", o) + D("prism", 2) + r;
     case "reactor":
-      return Z("rail", 6) + Z("column") + Z("corona", 2) + a;
+      return D("rail", 6) + D("column") + D("corona", 2) + a;
     case "void":
-      return Z("disk", 2) + Z("horizon") + Z("infall", r) + o;
+      return D("disk", 2) + D("horizon") + D("infall", o) + r;
     case "railgun":
-      return Z("sight", 4) + Z("lance") + Z("wake", 7) + a;
+      return D("sight", 4) + D("lance") + D("wake", 7) + a;
     case "eclipse":
-      return Z("moon") + Z("crown", 2) + Z("star", r) + Z("orbit", 3);
+      return D("moon") + D("crown", 2) + D("star", o) + D("orbit", 3);
     case "overdrive":
-      return Z("gate", 5) + Z("data", r) + Z("sweep") + o;
+      return D("gate", 5) + D("data", o) + D("sweep") + r;
   }
 }
-const vt = [], xt = /* @__PURE__ */ new Set();
+const vt = [], kt = /* @__PURE__ */ new Set();
 let Zt = !1;
-function At(t) {
+function Mt(t) {
   const e = document.createElement("div");
   return e.textContent = String(t ?? ""), e.innerHTML.replace(/"/g, "&quot;");
 }
 function Xa(t) {
-  var i, r, a, o, n;
-  if (!t.preview && S(m.suppressCutins) === !0 || t != null && t.blind && !((i = game.user) != null && i.isGM) || Array.isArray(t == null ? void 0 : t.whisper) && t.whisper.length && !t.whisper.includes((r = game.user) == null ? void 0 : r.id) && !((a = game.user) != null && a.isGM))
+  var i, o, a, r, n;
+  if (!t.preview && S(g.suppressCutins) === !0 || t != null && t.blind && !((i = game.user) != null && i.isGM) || Array.isArray(t == null ? void 0 : t.whisper) && t.whisper.length && !t.whisper.includes((o = game.user) == null ? void 0 : o.id) && !((a = game.user) != null && a.isGM))
     return !1;
-  const e = (t == null ? void 0 : t.audience) ?? S(m.audience);
-  return e === ct.everyone ? !0 : e === ct.gm ? ((o = game.user) == null ? void 0 : o.isGM) === !0 : e === ct.triggeringPlayer ? ((n = game.user) == null ? void 0 : n.id) === (t == null ? void 0 : t.userId) : !0;
+  const e = (t == null ? void 0 : t.audience) ?? S(g.audience);
+  return e === st.everyone ? !0 : e === st.gm ? ((r = game.user) == null ? void 0 : r.isGM) === !0 : e === st.triggeringPlayer ? ((n = game.user) == null ? void 0 : n.id) === (t == null ? void 0 : t.userId) : !0;
 }
 async function Va(t, e) {
-  var i, r;
+  var i, o;
   if (t)
     try {
-      const a = Math.min(1, Math.max(0, Number(e ?? S(m.volume) ?? 0.8))), o = Math.min(1, Math.max(0, Number(S(m.localVolume) ?? 1))), n = a * o;
-      if ((r = (i = foundry.audio) == null ? void 0 : i.AudioHelper) != null && r.play)
+      const a = Math.min(1, Math.max(0, Number(e ?? S(g.volume) ?? 0.8))), r = Math.min(1, Math.max(0, Number(S(g.localVolume) ?? 1))), n = a * r;
+      if ((o = (i = foundry.audio) == null ? void 0 : i.AudioHelper) != null && o.play)
         return foundry.audio.AudioHelper.play({ src: t, volume: n, autoplay: !0, loop: !1 }, !1);
       const c = globalThis.AudioHelper;
       if (c != null && c.play)
@@ -1202,10 +1202,10 @@ async function Va(t, e) {
       const l = Number(game.settings.get("core", "globalInterfaceVolume") ?? 0.5), s = new Audio(t);
       return s.volume = n * l, await s.play(), s;
     } catch (a) {
-      return kt("Audio playback failed.", { src: t, error: a }), null;
+      return wt("Audio playback failed.", { src: t, error: a }), null;
     }
 }
-function Yt(t) {
+function jt(t) {
   try {
     if (!t) return;
     if (typeof t.stop == "function") {
@@ -1214,44 +1214,44 @@ function Yt(t) {
     }
     typeof t.pause == "function" && (t.pause(), t.currentTime = 0);
   } catch (e) {
-    kt("Audio stop failed.", e);
+    wt("Audio stop failed.", e);
   }
 }
 function ja(t) {
-  var it, rt;
-  const e = Ot(t.animationStyle), i = e.id, r = t.triggerKind === "failure" ? "failure" : "success", a = i === "rift", o = i === st, n = i === wt, c = i === St, l = i === Ct, s = a || o || n || c || l, u = t.accentColor || (o ? oe : (a || n || c || l) && r === "failure" ? "#ff4d7d" : "#69e8ff"), f = t.imagePath ? `<img class="hcci-portrait" src="${At(t.imagePath)}" alt="">` : '<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>', d = Math.max(1, String(t.overlayText ?? "").length), g = String(t.overlayText ?? "").trim().split(/\s+/), p = n && g.length > 1 ? `${At(g.slice(0, -1).join(" "))} <span>${At(g.at(-1))}</span>` : At(t.overlayText), v = t.textEnabled && t.overlayText ? `<div class="hcci-title" style="--hcci-title-chars: ${d}">${p}</div>` : "", b = t.actorName || "", w = String(S(m.motionMode) ?? "system"), A = ((rt = (it = globalThis.matchMedia) == null ? void 0 : it.call(globalThis, "(prefers-reduced-motion: reduce)")) == null ? void 0 : rt.matches) === !0, E = w === "system" || s && A && w === "full" ? A ? "reduced" : "full" : ["full", "reduced", "still"].includes(w) ? w : "full", L = String(S(m.flashMode) ?? "soft"), y = ["full", "soft", "off"].includes(L) ? L : "soft", O = S(m.effectIntensity), R = ["low", "standard", "high"].includes(O) ? O : "standard", $ = document.createElement("div");
-  $.className = `hcci-overlay hcci-style-${i} hcci-kind-${r} hcci-motion-${E} hcci-flash-${y} hcci-detail-${R}`, $.style.setProperty("--hcci-accent", u);
-  const et = S(m.animationFont);
-  $.style.setProperty("--hcci-font", et === "classic" ? '"Orbitron", "Eurostile", "Agency FB", Impact, sans-serif' : '"HCCI AICON", "Orbitron", sans-serif');
-  const at = Number(S(m.shakeIntensity) ?? 0.5);
-  $.style.setProperty("--hcci-shake", `${e.shake * (Number.isFinite(at) ? Math.max(0, Math.min(1, at)) : 0.5) * 9}px`), $.setAttribute("aria-hidden", "true");
-  const Y = E === "full" || o ? Ba(i, R) : "";
-  $.innerHTML = `
-    ${o || n || c || l ? "" : `<div class="${a ? "hcci-rift-flash" : "hcci-flash"}"></div>`}
-    ${s ? Y : ""}
+  var rt, Y;
+  const e = ne(t.animationStyle), i = e.id, o = t.triggerKind === "failure" ? "failure" : "success", a = i === "rift", r = i === mt, n = i === Lt, c = i === $t, l = i === Pt, s = a || r || n || c || l, u = t.accentColor || (r ? oe : (a || n || c || l) && o === "failure" ? "#ff4d7d" : "#69e8ff"), h = t.imagePath ? `<img class="hcci-portrait" src="${Mt(t.imagePath)}" alt="">` : '<div class="hcci-portrait hcci-portrait-fallback"><i class="fa-solid fa-user-astronaut"></i></div>', d = Math.max(1, String(t.overlayText ?? "").length), m = String(t.overlayText ?? "").trim().split(/\s+/), p = n ? `; --hcci-title-longest-word: ${Math.max(1, ...m.map((_) => _.length))}` : "", v = n && m.length > 1 ? `${Mt(m.slice(0, -1).join(" "))} <span>${Mt(m.at(-1))}</span>` : Mt(t.overlayText), b = t.textEnabled && t.overlayText ? `<div class="hcci-title" style="--hcci-title-chars: ${d}${p}">${v}</div>` : "", w = t.actorName || "", E = String(S(g.motionMode) ?? "system"), L = ((Y = (rt = globalThis.matchMedia) == null ? void 0 : rt.call(globalThis, "(prefers-reduced-motion: reduce)")) == null ? void 0 : Y.matches) === !0, k = E === "system" || s && L && E === "full" ? L ? "reduced" : "full" : ["full", "reduced", "still"].includes(E) ? E : "full", y = String(S(g.flashMode) ?? "soft"), O = ["full", "soft", "off"].includes(y) ? y : "soft", R = S(g.effectIntensity), F = ["low", "standard", "high"].includes(R) ? R : "standard", Z = document.createElement("div");
+  Z.className = `hcci-overlay hcci-style-${i} hcci-kind-${o} hcci-motion-${k} hcci-flash-${O} hcci-detail-${F}`, Z.style.setProperty("--hcci-accent", u);
+  const ot = S(g.animationFont);
+  Z.style.setProperty("--hcci-font", ot === "classic" ? '"Orbitron", "Eurostile", "Agency FB", Impact, sans-serif' : '"HCCI AICON", "Orbitron", sans-serif');
+  const U = Number(S(g.shakeIntensity) ?? 0.5);
+  Z.style.setProperty("--hcci-shake", `${e.shake * (Number.isFinite(U) ? Math.max(0, Math.min(1, U)) : 0.5) * 9}px`), Z.setAttribute("aria-hidden", "true");
+  const W = k === "full" || r ? Ba(i, F) : "";
+  Z.innerHTML = `
+    ${r || n || c || l ? "" : `<div class="${a ? "hcci-rift-flash" : "hcci-flash"}"></div>`}
+    ${s ? W : ""}
     <div class="hcci-atmosphere"></div>
     <section class="hcci-stage">
       <div class="hcci-visual">
-      <div class="hcci-effects">${s ? "" : Y}</div>
+      <div class="hcci-effects">${s ? "" : W}</div>
       <div class="hcci-portrait-frame">
-        ${o ? `<div class="hcci-manga-artwork">${f}</div><div class="hcci-manga-dots"></div>` : f}
+        ${r ? `<div class="hcci-manga-artwork">${h}</div><div class="hcci-manga-dots"></div>` : h}
       </div>
-      ${o ? '<div class="hcci-manga-panel-glint"></div>' : ""}
+      ${r ? '<div class="hcci-manga-panel-glint"></div>' : ""}
       <div class="hcci-frame-accent"></div>
       </div>
       <div class="hcci-copy">
-        ${v}
-        ${b ? `<div class="hcci-subtitle">${At(b)}</div>` : ""}
+        ${b}
+        ${w ? `<div class="hcci-subtitle">${Mt(w)}</div>` : ""}
       </div>
     </section>
   `;
-  const K = n && E === "full", U = () => {
-    K && ua($), c && E === "full" && Aa($), l && qa($, E === "full"), i === _t && E === "full" && Ga($, R);
+  const it = n && k === "full", Q = () => {
+    it && ua(Z), c && k === "full" && Aa(Z), l && qa(Z, k === "full"), i === re && k === "full" && Ga(Z, F);
   };
-  U();
-  const _ = $.querySelector("img.hcci-portrait");
-  if (_ && E === "full" && (i === "shatter" || i === "overdrive")) {
-    const H = [
+  Q();
+  const X = Z.querySelector("img.hcci-portrait");
+  if (X && k === "full" && (i === "shatter" || i === "overdrive")) {
+    const _ = [
       "polygon(0 0,50% 0,50% 50%)",
       "polygon(50% 0,100% 0,50% 50%)",
       "polygon(100% 0,100% 100%,50% 50%)",
@@ -1259,60 +1259,60 @@ function ja(t) {
       "polygon(50% 100%,0 100%,50% 50%)",
       "polygon(0 100%,0 0,50% 50%)"
     ];
-    for (let q = 0; q < 6; q++) {
-      const V = document.createElement("div");
-      V.className = "hcci-portrait-echo", V.style.setProperty("--piece", String(q)), V.style.setProperty("--dx", `${q % 2 ? 1 : -1}`), V.style.setProperty("--dy", `${q < 3 ? -1 : 1}`), V.style.clipPath = i === "shatter" ? H[q] : `inset(${q * 100 / 6}% 0 ${100 - (q + 1) * 100 / 6}% 0)`;
-      const lt = _.cloneNode();
-      lt.className = "", V.appendChild(lt), $.querySelector(".hcci-visual").appendChild(V);
+    for (let V = 0; V < 6; V++) {
+      const G = document.createElement("div");
+      G.className = "hcci-portrait-echo", G.style.setProperty("--piece", String(V)), G.style.setProperty("--dx", `${V % 2 ? 1 : -1}`), G.style.setProperty("--dy", `${V < 3 ? -1 : 1}`), G.style.clipPath = i === "shatter" ? _[V] : `inset(${V * 100 / 6}% 0 ${100 - (V + 1) * 100 / 6}% 0)`;
+      const f = X.cloneNode();
+      f.className = "", G.appendChild(f), Z.querySelector(".hcci-visual").appendChild(G);
     }
   }
-  return _ == null || _.addEventListener("error", () => {
-    const H = t.preview ? t.fallbackImagePath : void 0;
-    if (H && _.getAttribute("src") !== H) {
-      _.src = H, $.querySelectorAll(".hcci-portrait-echo img").forEach((V) => {
-        V.src = H;
-      }), U();
+  return X == null || X.addEventListener("error", () => {
+    const _ = t.preview ? t.fallbackImagePath : void 0;
+    if (_ && X.getAttribute("src") !== _) {
+      X.src = _, Z.querySelectorAll(".hcci-portrait-echo img").forEach((G) => {
+        G.src = _;
+      }), Q();
       return;
     }
-    $.querySelectorAll(".hcci-portrait-echo").forEach((V) => V.remove());
-    const q = document.createElement("div");
-    q.className = "hcci-portrait hcci-portrait-fallback", q.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>', _.replaceWith(q), U();
-  }), $;
+    Z.querySelectorAll(".hcci-portrait-echo").forEach((G) => G.remove());
+    const V = document.createElement("div");
+    V.className = "hcci-portrait hcci-portrait-fallback", V.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>', X.replaceWith(V), Q();
+  }), Z;
 }
 async function Ya(t) {
   if (!Xa(t)) return;
-  const e = Number(t.duration ?? S(m.duration) ?? 2500), i = Math.min(8e3, Math.max(800, Number.isFinite(e) ? e : 2500)), r = ja(t);
-  r.style.setProperty("--hcci-duration", `${i}ms`), r.style.setProperty("--hcci-intro", `${Math.min(1e3, (i - 180) * 0.85)}ms`);
-  let a = !1, o, n, c, l = [], s;
+  const e = Number(t.duration ?? S(g.duration) ?? 2500), i = Math.min(8e3, Math.max(800, Number.isFinite(e) ? e : 2500)), o = ja(t);
+  o.style.setProperty("--hcci-duration", `${i}ms`), o.style.setProperty("--hcci-intro", `${Math.min(1e3, (i - 180) * 0.85)}ms`);
+  let a = !1, r, n, c, l = [], s;
   try {
-    document.body.appendChild(r);
-    const u = r.classList.contains(`hcci-style-${wt}`), f = r.classList.contains(`hcci-style-${St}`), d = r.classList.contains(`hcci-style-${Ct}`), g = u ? da : f ? Ta : d ? $a : 180, p = i - g, v = r.classList.contains("hcci-style-rift"), b = r.classList.contains(`hcci-style-${st}`), w = f ? Ea(r, p) : d ? Ha(r, p) : u ? ha(r, p) : b ? va(r, p) : v ? ka(r, p) : void 0;
+    document.body.appendChild(o);
+    const u = o.classList.contains(`hcci-style-${Lt}`), h = o.classList.contains(`hcci-style-${$t}`), d = o.classList.contains(`hcci-style-${Pt}`), m = u ? da : h ? Ta : d ? $a : 180, p = i - m, v = o.classList.contains("hcci-style-rift"), b = o.classList.contains(`hcci-style-${mt}`), w = h ? Ea(o, p) : d ? Ha(o, p) : u ? ha(o, p) : b ? va(o, p) : v ? ka(o, p) : void 0;
     w && (l = w.animations);
-    const A = () => {
-      Va(t.audioPath, t.volume).then((E) => {
-        a ? Yt(E) : o = E;
+    const E = () => {
+      Va(t.audioPath, t.volume).then((L) => {
+        a ? jt(L) : r = L;
       });
     };
-    t.audioPath && (w != null && w.audioDelay) ? c = window.setTimeout(A, w.audioDelay) : A(), await new Promise((E) => {
-      n = window.setTimeout(L, p);
-      function L() {
-        window.clearTimeout(n), globalThis.removeEventListener("keydown", s), E();
+    t.audioPath && (w != null && w.audioDelay) ? c = window.setTimeout(E, w.audioDelay) : E(), await new Promise((L) => {
+      n = window.setTimeout(k, p);
+      function k() {
+        window.clearTimeout(n), globalThis.removeEventListener("keydown", s), L();
       }
       s = (y) => {
-        y.key === "Escape" && L();
+        y.key === "Escape" && k();
       }, globalThis.addEventListener("keydown", s);
-    }), a = !0, window.clearTimeout(c), Yt(o), o = null, r.classList.add("hcci-exiting"), f ? l.push(...La(r, g)) : d ? l.push(..._a(r, g)) : u ? l.push(...pa(r, g)) : b ? l.push(...ba(r, g)) : v && l.push(...Ma(r, g)), await new Promise((E) => window.setTimeout(E, g));
+    }), a = !0, window.clearTimeout(c), jt(r), r = null, o.classList.add("hcci-exiting"), h ? l.push(...La(o, m)) : d ? l.push(...za(o, m)) : u ? l.push(...pa(o, m)) : b ? l.push(...ba(o, m)) : v && l.push(...Ma(o, m)), await new Promise((L) => window.setTimeout(L, m));
   } finally {
-    a = !0, window.clearTimeout(n), window.clearTimeout(c), l.forEach((u) => u.cancel()), s && globalThis.removeEventListener("keydown", s), Yt(o), r.remove();
+    a = !0, window.clearTimeout(n), window.clearTimeout(c), l.forEach((u) => u.cancel()), s && globalThis.removeEventListener("keydown", s), jt(r), o.remove();
   }
 }
 async function Ka(t) {
   var e, i;
-  return !((e = game.user) != null && e.isGM) || Zt ? !1 : (await mt({
+  return !((e = game.user) != null && e.isGM) || Zt ? !1 : (await pt({
     ...t,
     id: foundry.utils.randomID(),
     userId: ((i = game.user) == null ? void 0 : i.id) ?? null,
-    audience: ct.gm,
+    audience: st.gm,
     preview: !0
   }), !0);
 }
@@ -1325,7 +1325,7 @@ async function Ua() {
         try {
           await Ya(t);
         } catch (e) {
-          kt("Cut-in playback failed; continuing queue.", e);
+          wt("Cut-in playback failed; continuing queue.", e);
         }
       }
     } finally {
@@ -1333,63 +1333,63 @@ async function Ua() {
     }
   }
 }
-function mt(t) {
+function pt(t) {
   if (t) {
     if (t.id) {
-      if (xt.has(t.id)) return;
-      xt.add(t.id);
-      const e = xt.values().next().value;
-      xt.size > 100 && e && xt.delete(e);
+      if (kt.has(t.id)) return;
+      kt.add(t.id);
+      const e = kt.values().next().value;
+      kt.size > 100 && e && kt.delete(e);
     }
     return vt.push(t), vt.length > 3 && vt.splice(1, vt.length - 3), Ua();
   }
 }
-const ft = /* @__PURE__ */ new Set(), ee = /* @__PURE__ */ new Set();
+const dt = /* @__PURE__ */ new Set(), te = /* @__PURE__ */ new Set();
 function Wa(t) {
-  return !!(t != null && t.id) && ee.has(t.id);
+  return !!(t != null && t.id) && te.has(t.id);
 }
-function j(t) {
+function K(t) {
   return t ? Array.isArray(t) ? t : [t] : [];
 }
 function Qa(t) {
-  var r, a, o, n;
+  var o, a, r, n;
   const e = [
-    ...j(t == null ? void 0 : t.rolls),
-    ...j(t == null ? void 0 : t.roll),
-    ...j(t == null ? void 0 : t._rolls),
-    ...j((a = (r = t == null ? void 0 : t.flags) == null ? void 0 : r.dnd5e) == null ? void 0 : a.roll),
-    ...j((n = (o = t == null ? void 0 : t.flags) == null ? void 0 : o.dnd5e) == null ? void 0 : n.rolls)
+    ...K(t == null ? void 0 : t.rolls),
+    ...K(t == null ? void 0 : t.roll),
+    ...K(t == null ? void 0 : t._rolls),
+    ...K((a = (o = t == null ? void 0 : t.flags) == null ? void 0 : o.dnd5e) == null ? void 0 : a.roll),
+    ...K((n = (r = t == null ? void 0 : t.flags) == null ? void 0 : r.dnd5e) == null ? void 0 : n.rolls)
   ], i = /* @__PURE__ */ new Set();
   return e.filter((c) => !c || i.has(c) ? !1 : (i.add(c), !0));
 }
 function Ja(t) {
-  const e = [], i = [...j(t == null ? void 0 : t.terms), ...j(t == null ? void 0 : t.dice), ...j(t == null ? void 0 : t._terms), ...j(t == null ? void 0 : t._dice)], r = /* @__PURE__ */ new Set();
+  const e = [], i = [...K(t == null ? void 0 : t.terms), ...K(t == null ? void 0 : t.dice), ...K(t == null ? void 0 : t._terms), ...K(t == null ? void 0 : t._dice)], o = /* @__PURE__ */ new Set();
   for (; i.length; ) {
     const a = i.shift();
-    !a || r.has(a) || (r.add(a), e.push(a), i.push(
-      ...j(a.terms),
-      ...j(a.dice),
-      ...j(a.rolls),
-      ...j(a._terms),
-      ...j(a._dice)
+    !a || o.has(a) || (o.add(a), e.push(a), i.push(
+      ...K(a.terms),
+      ...K(a.dice),
+      ...K(a.rolls),
+      ...K(a._terms),
+      ...K(a._dice)
     ));
   }
   return e;
 }
 function Ne(t, e) {
-  var o, n, c, l, s, u, f, d;
-  const i = (t == null ? void 0 : t.flags) ?? {}, r = ((n = (o = i.dnd5e) == null ? void 0 : o.roll) == null ? void 0 : n.type) ?? ((l = (c = i.dnd5e) == null ? void 0 : c.roll) == null ? void 0 : l.rollType), a = (u = (s = i.pf2e) == null ? void 0 : s.context) == null ? void 0 : u.type;
-  return [(f = e == null ? void 0 : e.options) == null ? void 0 : f.type, (d = e == null ? void 0 : e.options) == null ? void 0 : d.rollType, r, a].some((g) => String(g ?? "").toLowerCase().includes("damage"));
+  var r, n, c, l, s, u, h, d;
+  const i = (t == null ? void 0 : t.flags) ?? {}, o = ((n = (r = i.dnd5e) == null ? void 0 : r.roll) == null ? void 0 : n.type) ?? ((l = (c = i.dnd5e) == null ? void 0 : c.roll) == null ? void 0 : l.rollType), a = (u = (s = i.pf2e) == null ? void 0 : s.context) == null ? void 0 : u.type;
+  return [(h = e == null ? void 0 : e.options) == null ? void 0 : h.type, (d = e == null ? void 0 : e.options) == null ? void 0 : d.rollType, o, a].some((m) => String(m ?? "").toLowerCase().includes("damage"));
 }
 function ti(t) {
   const e = [];
   for (const i of Ja(t)) {
-    const r = Number((i == null ? void 0 : i.faces) ?? (i == null ? void 0 : i._faces));
-    if (!(r !== tt() || !Array.isArray(i.results)))
+    const o = Number((i == null ? void 0 : i.faces) ?? (i == null ? void 0 : i._faces));
+    if (!(o !== at() || !Array.isArray(i.results)))
       for (const a of i.results) {
         if (a.active === !1 || a.discarded === !0 || a.rerolled === !0) continue;
-        const o = Number(a.result ?? a.value ?? a.total);
-        Number.isInteger(o) && o >= 1 && o <= r && e.push(o);
+        const r = Number(a.result ?? a.value ?? a.total);
+        Number.isInteger(r) && r >= 1 && r <= o && e.push(r);
       }
   }
   return e;
@@ -1401,19 +1401,19 @@ function ai(t) {
   var n;
   const e = ei(t);
   if (!e) return [];
-  const i = [], r = `d${tt()}`, a = [
-    `.dice-rolls .roll.${r}`,
-    `.dice-rolls .roll.die.${r}`,
-    `.dice-tooltip .roll.${r}`,
-    `.dice-tooltip .dice.${r} .roll`
-  ], o = /* @__PURE__ */ new Set();
+  const i = [], o = `d${at()}`, a = [
+    `.dice-rolls .roll.${o}`,
+    `.dice-rolls .roll.die.${o}`,
+    `.dice-tooltip .roll.${o}`,
+    `.dice-tooltip .dice.${o} .roll`
+  ], r = /* @__PURE__ */ new Set();
   for (const c of a)
-    e.querySelectorAll(c).forEach((l) => o.add(l));
-  for (const c of o) {
+    e.querySelectorAll(c).forEach((l) => r.add(l));
+  for (const c of r) {
     if (c.classList.contains("discarded") || c.classList.contains("rerolled") || c.classList.contains("ignored") || c.classList.contains("inactive"))
       continue;
     const l = Number((n = c.textContent) == null ? void 0 : n.trim());
-    Number.isInteger(l) && l >= 1 && l <= tt() && i.push(l);
+    Number.isInteger(l) && l >= 1 && l <= at() && i.push(l);
   }
   return i;
 }
@@ -1423,65 +1423,65 @@ function De(t, e) {
 function ii() {
   return De("gm", "default");
 }
-function ri(t) {
+function oi(t) {
   return zt(t);
 }
 function Re(t, e) {
-  var r, a, o, n;
+  var o, a, r, n;
   if (!t || !e) return !1;
-  const i = ((a = (r = globalThis.CONST) == null ? void 0 : r.DOCUMENT_OWNERSHIP_LEVELS) == null ? void 0 : a.OWNER) ?? 3;
-  return Number(((o = t.ownership) == null ? void 0 : o[e]) ?? ((n = t.ownership) == null ? void 0 : n.default) ?? 0) >= i;
+  const i = ((a = (o = globalThis.CONST) == null ? void 0 : o.DOCUMENT_OWNERSHIP_LEVELS) == null ? void 0 : a.OWNER) ?? 3;
+  return Number(((r = t.ownership) == null ? void 0 : r[e]) ?? ((n = t.ownership) == null ? void 0 : n.default) ?? 0) >= i;
 }
 function Ze(t) {
   var i;
   const e = (t == null ? void 0 : t.speaker) ?? {};
   return e.actor ? ((i = game.actors) == null ? void 0 : i.get(e.actor)) ?? null : t != null && t.actor ? t.actor : null;
 }
-function oi(t) {
-  var r, a, o;
+function ri(t) {
+  var o, a, r;
   const e = (t == null ? void 0 : t.author) ?? (t == null ? void 0 : t.user);
-  if (e && typeof e == "object") return e.id ? ((r = game.users) == null ? void 0 : r.get(e.id)) ?? e : null;
+  if (e && typeof e == "object") return e.id ? ((o = game.users) == null ? void 0 : o.get(e.id)) ?? e : null;
   const i = e ?? ((a = t == null ? void 0 : t._source) == null ? void 0 : a.author) ?? (t == null ? void 0 : t.userId);
-  return i ? ((o = game.users) == null ? void 0 : o.get(i)) ?? null : null;
+  return i ? ((r = game.users) == null ? void 0 : r.get(i)) ?? null : null;
 }
 function Oe(t, e) {
-  var r;
-  const i = oi(t);
+  var o;
+  const i = ri(t);
   if (i && !i.isGM) return i;
   if (e) {
-    const a = (r = game.users) == null ? void 0 : r.find((o) => !o.isGM && Re(e, o.id));
+    const a = (o = game.users) == null ? void 0 : o.find((r) => !r.isGM && Re(e, r.id));
     if (a) return a;
   }
   return i ?? null;
 }
-function me(t = {}, e, i, r = !1) {
-  const a = e === "failure" ? Te() : ie(), o = S(e === "failure" ? m.defaultFailureText : m.defaultText), n = e === "failure" ? t.failure ?? {} : t, c = ri(n.animationStyle), l = c === st ? oe : e === "failure" ? "#ff4d7d" : "#69e8ff", s = Number(n.threshold);
+function me(t = {}, e, i, o = !1) {
+  const a = e === "failure" ? Te() : ae(), r = S(e === "failure" ? g.defaultFailureText : g.defaultText), n = e === "failure" ? t.failure ?? {} : t, c = oi(n.animationStyle), l = c === mt ? oe : e === "failure" ? "#ff4d7d" : "#69e8ff", s = Number(n.threshold);
   return {
     kind: e,
     enabled: n.enabled !== !1,
-    threshold: Number.isInteger(s) && s >= 1 && s <= tt() ? s : a,
-    duration: Lt(n.duration) ?? S(m.duration),
+    threshold: Number.isInteger(s) && s >= 1 && s <= at() ? s : a,
+    duration: xt(n.duration) ?? S(g.duration),
     animationStyle: c,
-    imagePath: (r ? i == null ? void 0 : i.img : "") || n.imagePath || (i == null ? void 0 : i.img) || "",
+    imagePath: (o ? i == null ? void 0 : i.img : "") || n.imagePath || (i == null ? void 0 : i.img) || "",
     audioPath: n.audioPath || "",
-    overlayText: n.overlayText || o,
+    overlayText: n.overlayText || r,
     accentColor: n.accentColor || l
   };
 }
-function Pt(t, e, i = "success") {
-  const r = Wt(), a = e ? r[De("actor", e.id)] : null, o = (t == null ? void 0 : t.isGM) === !0, n = o ? r[ii()] : null;
-  if (!e && !o && !a)
+function Et(t, e, i = "success") {
+  const o = Ut(), a = e ? o[De("actor", e.id)] : null, r = (t == null ? void 0 : t.isGM) === !0, n = r ? o[ii()] : null;
+  if (!e && !r && !a)
     return me({ enabled: !1 }, i, e);
-  const c = o && !a && !!(e != null && e.img);
+  const c = r && !a && !!(e != null && e.img);
   return me(a ?? n ?? {}, i, e, c);
 }
-function Fe(t, e, i, r, a) {
+function Fe(t, e, i, o, a) {
   return a.enabled ? {
     id: foundry.utils.randomID(),
     messageId: t.id,
-    userId: (r == null ? void 0 : r.id) ?? null,
+    userId: (o == null ? void 0 : o.id) ?? null,
     actorId: (i == null ? void 0 : i.id) ?? null,
-    userName: (r == null ? void 0 : r.name) ?? "",
+    userName: (o == null ? void 0 : o.name) ?? "",
     actorName: (i == null ? void 0 : i.name) ?? "",
     triggerKind: a.kind ?? "success",
     naturalResult: e,
@@ -1493,123 +1493,123 @@ function Fe(t, e, i, r, a) {
     audioPath: a.audioPath || "",
     overlayText: a.overlayText || "",
     accentColor: a.accentColor || "#69e8ff",
-    textEnabled: S(m.textEnabled),
+    textEnabled: S(g.textEnabled),
     duration: a.duration,
-    volume: S(m.volume),
-    audience: S(m.audience)
-  } : (kt("Cut-in disabled for target.", { userId: r == null ? void 0 : r.id, actorId: i == null ? void 0 : i.id }), null);
+    volume: S(g.volume),
+    audience: S(g.audience)
+  } : (wt("Cut-in disabled for target.", { userId: o == null ? void 0 : o.id, actorId: i == null ? void 0 : i.id }), null);
 }
 function ge(t, e, i = "success") {
-  const r = Qa(t);
-  if (!(t != null && t.isRoll) && !r.length) return null;
-  for (const a of r) {
+  const o = Qa(t);
+  if (!(t != null && t.isRoll) && !o.length) return null;
+  for (const a of o) {
     if (Ne(t, a)) continue;
-    const o = ti(a).find((n) => Ae(n, e, i));
-    if (o) return o;
+    const r = ti(a).find((n) => Ae(n, e, i));
+    if (r) return r;
   }
   return null;
 }
-function ye(t, e, i, r = "success") {
+function ye(t, e, i, o = "success") {
   const a = ai(e);
-  return !a.length || Ne(t, {}) ? null : a.find((o) => Ae(o, i, r)) ?? null;
+  return !a.length || Ne(t, {}) ? null : a.find((r) => Ae(r, i, o)) ?? null;
 }
 function ve() {
-  var i, r;
-  const e = (((i = game.users) == null ? void 0 : i.filter((a) => a.active && a.isGM)) ?? []).sort((a, o) => a.id.localeCompare(o.id))[0];
-  return ((r = game.user) == null ? void 0 : r.isGM) && (!e || e.id === game.user.id);
+  var i, o;
+  const e = (((i = game.users) == null ? void 0 : i.filter((a) => a.active && a.isGM)) ?? []).sort((a, r) => a.id.localeCompare(r.id))[0];
+  return ((o = game.user) == null ? void 0 : o.isGM) && (!e || e.id === game.user.id);
 }
-function Ft(t) {
-  ft.add(t);
-  const e = ft.values().next().value;
-  ft.size > 200 && e && ft.delete(e);
+function Ot(t) {
+  dt.add(t);
+  const e = dt.values().next().value;
+  dt.size > 200 && e && dt.delete(e);
 }
 function qe(t) {
-  var u, f, d;
-  if (!(t != null && t.id) || (f = (u = t.flags) == null ? void 0 : u[C]) != null && f[re] || ft.has(t.id)) return !0;
-  const e = Ze(t), i = Oe(t, e), r = Pt(i, e, "success"), a = Pt(i, e, "failure"), o = ge(t, a.threshold, "failure"), n = o ? null : ge(t, r.threshold, "success"), c = o ?? n;
+  var u, h, d;
+  if (!(t != null && t.id) || (h = (u = t.flags) == null ? void 0 : u[C]) != null && h[ie] || dt.has(t.id)) return !0;
+  const e = Ze(t), i = Oe(t, e), o = Et(i, e, "success"), a = Et(i, e, "failure"), r = ge(t, a.threshold, "failure"), n = r ? null : ge(t, o.threshold, "success"), c = r ?? n;
   if (!c) return !1;
-  const s = Fe(t, c, e, i, o ? a : r);
-  return s ? (Ft(t.id), kt("Triggering cut-in.", s), (d = game.socket) == null || d.emit(qt, { type: "play", payload: s }), mt(s), !0) : (Ft(t.id), !0);
+  const s = Fe(t, c, e, i, r ? a : o);
+  return s ? (Ot(t.id), wt("Triggering cut-in.", s), (d = game.socket) == null || d.emit(Ft, { type: "play", payload: s }), pt(s), !0) : (Ot(t.id), !0);
 }
 function ni(t, e) {
-  var f, d, g;
-  if (!(t != null && t.id) || (d = (f = t.flags) == null ? void 0 : f[C]) != null && d[re] || ft.has(t.id)) return !0;
-  const i = Ze(t), r = Oe(t, i), a = Pt(r, i, "success"), o = Pt(r, i, "failure"), n = ye(t, e, o.threshold, "failure"), c = n ? null : ye(t, e, a.threshold, "success"), l = n ?? c;
+  var h, d, m;
+  if (!(t != null && t.id) || (d = (h = t.flags) == null ? void 0 : h[C]) != null && d[ie] || dt.has(t.id)) return !0;
+  const i = Ze(t), o = Oe(t, i), a = Et(o, i, "success"), r = Et(o, i, "failure"), n = ye(t, e, r.threshold, "failure"), c = n ? null : ye(t, e, a.threshold, "success"), l = n ?? c;
   if (!l) return !1;
-  const u = Fe(t, l, i, r, n ? o : a);
-  return u ? (Ft(t.id), kt("Triggering cut-in from rendered chat card.", u), (g = game.socket) == null || g.emit(qt, { type: "play", payload: u }), mt(u), !0) : (Ft(t.id), !0);
+  const u = Fe(t, l, i, o, n ? r : a);
+  return u ? (Ot(t.id), wt("Triggering cut-in from rendered chat card.", u), (m = game.socket) == null || m.emit(Ft, { type: "play", payload: u }), pt(u), !0) : (Ot(t.id), !0);
 }
-function Kt(t, e) {
+function Yt(t, e) {
   t != null && t.id && globalThis.setTimeout(() => {
-    var r;
-    if (ft.has(t.id)) return;
-    const i = ((r = game.messages) == null ? void 0 : r.get(t.id)) ?? t;
+    var o;
+    if (dt.has(t.id)) return;
+    const i = ((o = game.messages) == null ? void 0 : o.get(t.id)) ?? t;
     qe(i);
   }, e);
 }
 function ci() {
   var e;
-  ee.clear();
+  te.clear();
   for (const i of game.messages ?? [])
-    i != null && i.id && ee.add(i.id);
+    i != null && i.id && te.add(i.id);
   Hooks.on("createChatMessage", (i) => {
-    S(m.enabled) && ve() && (qe(i) || (Kt(i, 100), Kt(i, 500), Kt(i, 1500)));
+    S(g.enabled) && ve() && (qe(i) || (Yt(i, 100), Yt(i, 500), Yt(i, 1500)));
   });
-  const t = (i, r) => {
-    S(m.enabled) && (Wa(i) || ve() && ni(i, r));
+  const t = (i, o) => {
+    S(g.enabled) && (Wa(i) || ve() && ni(i, o));
   };
-  Hooks.on("renderChatMessage", t), Hooks.on("renderChatMessageHTML", t), (e = game.socket) == null || e.on(qt, (i) => {
-    (i == null ? void 0 : i.type) === "play" && S(m.enabled) && mt(i.payload);
+  Hooks.on("renderChatMessage", t), Hooks.on("renderChatMessageHTML", t), (e = game.socket) == null || e.on(Ft, (i) => {
+    (i == null ? void 0 : i.type) === "play" && S(g.enabled) && pt(i.payload);
   });
 }
 function He(t, e = {}) {
   var n, c;
-  const i = (n = game.users) == null ? void 0 : n.get(t), r = e.actorId ? (c = game.actors) == null ? void 0 : c.get(e.actorId) : (i == null ? void 0 : i.character) ?? null, a = e.triggerKind === "failure" ? "failure" : "success", o = Pt(i, r, a);
+  const i = (n = game.users) == null ? void 0 : n.get(t), o = e.actorId ? (c = game.actors) == null ? void 0 : c.get(e.actorId) : (i == null ? void 0 : i.character) ?? null, a = e.triggerKind === "failure" ? "failure" : "success", r = Et(i, o, a);
   return {
     id: foundry.utils.randomID(),
     userId: t,
-    actorId: (r == null ? void 0 : r.id) ?? null,
+    actorId: (o == null ? void 0 : o.id) ?? null,
     userName: (i == null ? void 0 : i.name) ?? "",
-    actorName: (r == null ? void 0 : r.name) ?? "",
-    naturalResult: e.naturalResult ?? o.threshold,
+    actorName: (o == null ? void 0 : o.name) ?? "",
+    naturalResult: e.naturalResult ?? r.threshold,
     triggerKind: a,
-    threshold: e.threshold ?? o.threshold ?? ie(),
-    animationStyle: e.animationStyle ?? o.animationStyle ?? "strike",
-    imagePath: e.imagePath ?? o.imagePath ?? "",
-    audioPath: e.audioPath ?? o.audioPath ?? "",
-    overlayText: e.overlayText ?? o.overlayText ?? S(m.defaultText),
-    accentColor: e.accentColor ?? o.accentColor ?? "#69e8ff",
-    textEnabled: e.textEnabled ?? S(m.textEnabled),
-    duration: e.duration ?? o.duration,
-    volume: e.volume ?? S(m.volume),
-    audience: e.audience ?? S(m.audience)
+    threshold: e.threshold ?? r.threshold ?? ae(),
+    animationStyle: e.animationStyle ?? r.animationStyle ?? "strike",
+    imagePath: e.imagePath ?? r.imagePath ?? "",
+    audioPath: e.audioPath ?? r.audioPath ?? "",
+    overlayText: e.overlayText ?? r.overlayText ?? S(g.defaultText),
+    accentColor: e.accentColor ?? r.accentColor ?? "#69e8ff",
+    textEnabled: e.textEnabled ?? S(g.textEnabled),
+    duration: e.duration ?? r.duration,
+    volume: e.volume ?? S(g.volume),
+    audience: e.audience ?? S(g.audience)
   };
 }
 function si(t, e = {}) {
-  var a, o;
-  const i = (a = game.actors) == null ? void 0 : a.get(t), r = ((o = game.users) == null ? void 0 : o.find((n) => !n.isGM && Re(i, n.id))) ?? game.user;
-  return He(r == null ? void 0 : r.id, { ...e, actorId: t });
+  var a, r;
+  const i = (a = game.actors) == null ? void 0 : a.get(t), o = ((r = game.users) == null ? void 0 : r.find((n) => !n.isGM && Re(i, n.id))) ?? game.user;
+  return He(o == null ? void 0 : o.id, { ...e, actorId: t });
 }
 function be(t) {
   var e;
-  (e = game.socket) == null || e.emit(qt, { type: "play", payload: t }), mt(t);
+  (e = game.socket) == null || e.emit(Ft, { type: "play", payload: t }), pt(t);
 }
-function _e() {
+function ze() {
   var t, e, i;
   return ((e = (t = globalThis.foundry) == null ? void 0 : t.applications) == null ? void 0 : e.api) ?? ((i = foundry == null ? void 0 : foundry.applications) == null ? void 0 : i.api) ?? null;
 }
-function ze() {
+function _e() {
   var t, e, i;
   return ((e = (t = globalThis.foundry) == null ? void 0 : t.appv1) == null ? void 0 : e.api) ?? ((i = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : i.api) ?? null;
 }
 function li(t = {}, e = {}) {
-  var r, a, o;
-  const i = ((a = (r = globalThis.foundry) == null ? void 0 : r.utils) == null ? void 0 : a.mergeObject) ?? ((o = foundry == null ? void 0 : foundry.utils) == null ? void 0 : o.mergeObject);
+  var o, a, r;
+  const i = ((a = (o = globalThis.foundry) == null ? void 0 : o.utils) == null ? void 0 : a.mergeObject) ?? ((r = foundry == null ? void 0 : foundry.utils) == null ? void 0 : r.mergeObject);
   return typeof i == "function" ? i(t, e, { inplace: !1 }) : { ...t, ...e };
 }
 function di() {
-  var t, e, i, r, a;
-  return ((i = (e = (t = globalThis.foundry) == null ? void 0 : t.utils) == null ? void 0 : e.randomID) == null ? void 0 : i.call(e, 8)) ?? ((a = (r = foundry == null ? void 0 : foundry.utils) == null ? void 0 : r.randomID) == null ? void 0 : a.call(r, 8)) ?? Math.random().toString(36).slice(2, 10);
+  var t, e, i, o, a;
+  return ((i = (e = (t = globalThis.foundry) == null ? void 0 : t.utils) == null ? void 0 : e.randomID) == null ? void 0 : i.call(e, 8)) ?? ((a = (o = foundry == null ? void 0 : foundry.utils) == null ? void 0 : o.randomID) == null ? void 0 : a.call(o, 8)) ?? Math.random().toString(36).slice(2, 10);
 }
 function we(t = {}) {
   return {
@@ -1629,8 +1629,8 @@ function we(t = {}) {
 }
 function Ge(t) {
   return class extends t {
-    constructor(r = {}) {
-      const a = li(new.target.defaultOptions ?? {}, r);
+    constructor(o = {}) {
+      const a = li(new.target.defaultOptions ?? {}, o);
       super(we(a));
       gt(this, "_v1Options");
       this._v1Options = a;
@@ -1641,19 +1641,19 @@ function Ge(t) {
     static get DEFAULT_OPTIONS() {
       return we(this.defaultOptions ?? {});
     }
-    activateListeners(r) {
+    activateListeners(o) {
     }
-    async _renderHTML(r, a) {
-      var s, u, f;
-      const o = typeof this.getData == "function" ? await this.getData() : {}, n = ((s = this._v1Options) == null ? void 0 : s.template) ?? ((u = this.options) == null ? void 0 : u.template) ?? ((f = this.constructor.defaultOptions) == null ? void 0 : f.template);
+    async _renderHTML(o, a) {
+      var s, u, h;
+      const r = typeof this.getData == "function" ? await this.getData() : {}, n = ((s = this._v1Options) == null ? void 0 : s.template) ?? ((u = this.options) == null ? void 0 : u.template) ?? ((h = this.constructor.defaultOptions) == null ? void 0 : h.template);
       if (!n) return document.createDocumentFragment();
-      const c = await globalThis.renderTemplate(n, o), l = document.createElement("template");
+      const c = await globalThis.renderTemplate(n, r), l = document.createElement("template");
       return l.innerHTML = c.trim(), l.content;
     }
-    _activateV1Form(r) {
-      var o, n;
+    _activateV1Form(o) {
+      var r, n;
       if (typeof this._updateObject != "function") return;
-      const a = (o = r.matches) != null && o.call(r, "form") ? r : (n = r.querySelector) == null ? void 0 : n.call(r, "form");
+      const a = (r = o.matches) != null && r.call(o, "form") ? o : (n = o.querySelector) == null ? void 0 : n.call(o, "form");
       a instanceof HTMLFormElement && a.addEventListener("submit", async (c) => {
         var s;
         c.preventDefault(), c.stopPropagation();
@@ -1661,9 +1661,9 @@ function Ge(t) {
         await this._updateObject(c, l), ((s = this._v1Options) == null ? void 0 : s.closeOnSubmit) === !0 && await this.close();
       });
     }
-    _replaceHTML(r, a, o) {
-      var u, f, d, g;
-      a.replaceChildren(r);
+    _replaceHTML(o, a, r) {
+      var u, h, d, m;
+      a.replaceChildren(o);
       const n = globalThis.jQuery ?? globalThis.$, c = ((u = a.closest) == null ? void 0 : u.call(a, ".window-app, .app, .application")) ?? a, l = n ? n(c) : c;
       try {
         Object.defineProperty(this, "element", {
@@ -1677,42 +1677,42 @@ function Ge(t) {
         } catch {
         }
       }
-      const s = (f = this._v1Options) == null ? void 0 : f.classes;
-      Array.isArray(s) && s.length && (a.classList.add(...s), (g = (d = a.closest) == null ? void 0 : d.call(a, ".window-app, .app, .application")) == null || g.classList.add(...s)), this._activateV1Form(a), typeof this.activateListeners == "function" && this.activateListeners(n ? n(a) : a);
+      const s = (h = this._v1Options) == null ? void 0 : h.classes;
+      Array.isArray(s) && s.length && (a.classList.add(...s), (m = (d = a.closest) == null ? void 0 : d.call(a, ".window-app, .app, .application")) == null || m.classList.add(...s)), this._activateV1Form(a), typeof this.activateListeners == "function" && this.activateListeners(n ? n(a) : a);
     }
   };
 }
 function fi() {
-  const t = _e(), e = ze(), i = globalThis.Application ?? (e == null ? void 0 : e.Application) ?? (t == null ? void 0 : t.ApplicationV1) ?? globalThis.FormApplication ?? (e == null ? void 0 : e.FormApplication) ?? (t == null ? void 0 : t.FormApplication);
+  const t = ze(), e = _e(), i = globalThis.Application ?? (e == null ? void 0 : e.Application) ?? (t == null ? void 0 : t.ApplicationV1) ?? globalThis.FormApplication ?? (e == null ? void 0 : e.FormApplication) ?? (t == null ? void 0 : t.FormApplication);
   if (i) return i;
-  const r = t == null ? void 0 : t.ApplicationV2;
-  return r ? Ge(r) : null;
+  const o = t == null ? void 0 : t.ApplicationV2;
+  return o ? Ge(o) : null;
 }
 function hi() {
-  const t = _e(), e = ze(), i = globalThis.FormApplication ?? (e == null ? void 0 : e.FormApplication) ?? (t == null ? void 0 : t.FormApplication) ?? globalThis.Application ?? (e == null ? void 0 : e.Application) ?? (t == null ? void 0 : t.ApplicationV1);
+  const t = ze(), e = _e(), i = globalThis.FormApplication ?? (e == null ? void 0 : e.FormApplication) ?? (t == null ? void 0 : t.FormApplication) ?? globalThis.Application ?? (e == null ? void 0 : e.Application) ?? (t == null ? void 0 : t.ApplicationV1);
   if (i) return i;
-  const r = t == null ? void 0 : t.ApplicationV2;
-  return r ? Ge(r) : fi();
+  const o = t == null ? void 0 : t.ApplicationV2;
+  return o ? Ge(o) : fi();
 }
-const Et = "icons/svg/mystery-man.svg", pi = hi();
+const Tt = "icons/svg/mystery-man.svg", pi = hi();
 async function mi(t, e, i) {
-  var l, s, u, f;
-  const { success: r, failure: a } = Ut(t, e), o = `<p>Change to <strong>d${t}</strong> with <strong>${e === "low" ? "low" : "high"} rolls positive</strong>?</p>
+  var l, s, u, h;
+  const { success: o, failure: a } = Kt(t, e), r = `<p>Change to <strong>d${t}</strong> with <strong>${e === "low" ? "low" : "high"} rolls positive</strong>?</p>
     <p>This resets the roll configuration for all ${i} listed character and GM entries, for both outcomes, and the global thresholds:</p>
-    <ul><li>Success: <strong>${r}</strong></li><li>Failure: <strong>${a}</strong></li></ul>
+    <ul><li>Success: <strong>${o}</strong></li><li>Failure: <strong>${a}</strong></li></ul>
     <p>Images, audio, animation, labels, colors, and enabled states stay unchanged. Click Save afterward to apply these changes.</p>`, n = (s = (l = foundry == null ? void 0 : foundry.applications) == null ? void 0 : l.api) == null ? void 0 : s.DialogV2;
   if (n != null && n.confirm)
     return await n.confirm({
       window: { title: "Reset Critical Cut-In Roll Configuration?" },
-      content: o,
+      content: r,
       modal: !0,
       rejectClose: !1,
       yes: { label: "Change and Reset Rolls" },
       no: { label: "Cancel", default: !0 }
     }) === !0;
-  const c = globalThis.Dialog ?? ((f = (u = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : u.api) == null ? void 0 : f.Dialog);
+  const c = globalThis.Dialog ?? ((h = (u = foundry == null ? void 0 : foundry.appv1) == null ? void 0 : u.api) == null ? void 0 : h.Dialog);
   if (!(c != null && c.confirm)) throw new Error("Foundry confirmation dialog is unavailable.");
-  return await c.confirm({ title: "Reset Critical Cut-In Roll Configuration?", content: o, defaultYes: !1, rejectClose: !1 }) === !0;
+  return await c.confirm({ title: "Reset Critical Cut-In Roll Configuration?", content: r, defaultYes: !1, rejectClose: !1 }) === !0;
 }
 function Be(t, e) {
   return `${t}:${e}`;
@@ -1721,23 +1721,23 @@ function gi() {
   return Be("gm", "default");
 }
 function Xe(t, e) {
-  var r, a, o, n;
-  const i = ((a = (r = globalThis.CONST) == null ? void 0 : r.DOCUMENT_OWNERSHIP_LEVELS) == null ? void 0 : a.OWNER) ?? 3;
-  return Number(((o = e == null ? void 0 : e.ownership) == null ? void 0 : o[t.id]) ?? ((n = e == null ? void 0 : e.ownership) == null ? void 0 : n.default) ?? 0) >= i;
+  var o, a, r, n;
+  const i = ((a = (o = globalThis.CONST) == null ? void 0 : o.DOCUMENT_OWNERSHIP_LEVELS) == null ? void 0 : a.OWNER) ?? 3;
+  return Number(((r = e == null ? void 0 : e.ownership) == null ? void 0 : r[t.id]) ?? ((n = e == null ? void 0 : e.ownership) == null ? void 0 : n.default) ?? 0) >= i;
 }
 function Se(t = {}, { defaultAccent: e = "#69e8ff" } = {}) {
-  const i = Number(t.threshold), r = zt(t.animationStyle);
+  const i = Number(t.threshold), o = zt(t.animationStyle);
   return {
     enabled: t.enabled !== !1,
-    threshold: Number.isInteger(i) && i >= 1 && i <= tt() ? i : "",
-    duration: Lt(t.duration),
-    animationStyle: r,
-    effectDescription: Ot(r).description,
-    animationStyles: ne.map((a) => ({ value: a.id, label: a.label, description: a.description, selected: r === a.id })),
+    threshold: Number.isInteger(i) && i >= 1 && i <= at() ? i : "",
+    duration: xt(t.duration),
+    animationStyle: o,
+    effectDescription: ne(o).description,
+    animationStyles: Ht.map((a) => ({ value: a.id, label: a.label, description: a.description, selected: o === a.id })),
     imagePath: String(t.imagePath ?? ""),
     audioPath: String(t.audioPath ?? ""),
     overlayText: String(t.overlayText ?? ""),
-    accentColor: String(t.accentColor ?? (r === st ? oe : e))
+    accentColor: String(t.accentColor ?? (o === mt ? oe : e))
   };
 }
 function yi(t = {}) {
@@ -1747,8 +1747,8 @@ function yi(t = {}) {
   };
 }
 function vi() {
-  var i, r, a;
-  const t = ((i = game.users) == null ? void 0 : i.find((o) => o.isGM && o.active)) ?? ((r = game.users) == null ? void 0 : r.find((o) => o.isGM)) ?? game.user, e = [{
+  var i, o, a;
+  const t = ((i = game.users) == null ? void 0 : i.find((r) => r.isGM && r.active)) ?? ((o = game.users) == null ? void 0 : o.find((r) => r.isGM)) ?? game.user, e = [{
     key: gi(),
     type: "gm",
     typeLabel: "GM",
@@ -1756,16 +1756,16 @@ function vi() {
     name: "GM Cut-In",
     portrait: (t == null ? void 0 : t.avatar) || "icons/svg/mystery-man.svg"
   }];
-  for (const o of game.actors ?? [])
-    (a = game.users) != null && a.some((n) => !n.isGM && Xe(n, o)) && e.push({
-      key: Be("actor", o.id),
+  for (const r of game.actors ?? [])
+    (a = game.users) != null && a.some((n) => !n.isGM && Xe(n, r)) && e.push({
+      key: Be("actor", r.id),
       type: "actor",
       typeLabel: "Actor",
-      id: o.id,
-      name: o.name,
-      portrait: o.img || "icons/svg/mystery-man.svg"
+      id: r.id,
+      name: r.name,
+      portrait: r.img || "icons/svg/mystery-man.svg"
     });
-  return e.sort((o, n) => o.type === "gm" ? -1 : n.type === "gm" ? 1 : o.name.localeCompare(n.name));
+  return e.sort((r, n) => r.type === "gm" ? -1 : n.type === "gm" ? 1 : r.name.localeCompare(n.name));
 }
 class Ve extends pi {
   constructor(i = {}) {
@@ -1790,23 +1790,23 @@ class Ve extends pi {
     });
   }
   async getData() {
-    const i = Wt(), r = vi(), a = [
-      { id: "gm", name: "GM", avatar: r[0].portrait, targets: [r[0]] },
+    const i = Ut(), o = vi(), a = [
+      { id: "gm", name: "GM", avatar: o[0].portrait, targets: [o[0]] },
       ...Array.from(game.users ?? []).filter((n) => !n.isGM).map((n) => ({
         id: n.id,
         name: n.name,
-        avatar: n.avatar || Et,
-        targets: r.filter((c) => c.type === "actor" && Xe(n, game.actors.get(c.id)))
+        avatar: n.avatar || Tt,
+        targets: o.filter((c) => c.type === "actor" && Xe(n, game.actors.get(c.id)))
       }))
-    ], o = r.map((n) => {
+    ], r = o.map((n) => {
       const c = yi(i[n.key]);
       return {
         ...n,
         ...c,
         actorId: n.type === "actor" ? n.id : "",
         outcomes: [
-          { ...c.success, kind: "success", defaultText: S(m.defaultText) },
-          { ...c.failure, kind: "failure", defaultText: S(m.defaultFailureText) }
+          { ...c.success, kind: "success", defaultText: S(g.defaultText) },
+          { ...c.failure, kind: "failure", defaultText: S(g.defaultFailureText) }
         ]
       };
     });
@@ -1816,226 +1816,226 @@ class Ve extends pi {
         characterHeading: n.id === "gm" ? "GM Configuration" : `${n.name}’s Characters`,
         tabDetail: n.id === "gm" ? "Global" : `${n.targets.length} ${n.targets.length === 1 ? "character" : "characters"}`
       })),
-      featuredStyles: ["strike", "breach", "signal", "rift", st, wt, St, Ct, _t].map(Ot),
-      dieSides: tt(),
-      dice: Ce(tt()),
-      lowRollsGood: Ht(),
-      threshold: S(m.threshold) ?? 0,
-      failureThreshold: S(m.failureThreshold) ?? 0,
-      duration: S(m.duration),
-      rows: o
+      animationStyles: Ht,
+      dieSides: at(),
+      dice: Ce(at()),
+      lowRollsGood: qt(),
+      threshold: S(g.threshold) ?? 0,
+      failureThreshold: S(g.failureThreshold) ?? 0,
+      duration: S(g.duration),
+      rows: r
     };
   }
   activateListeners(i) {
     super.activateListeners(i);
-    const r = i instanceof HTMLElement ? i : i[0], a = r.matches(".hcci-config") ? r : r.querySelector(".hcci-config"), o = (h) => a.querySelector(h), n = (h) => Array.from(a.querySelectorAll(h));
-    o("[data-hcci-action='close']").addEventListener("click", () => this.close()), this.activateWindowDrag(o("[data-hcci-window-drag]"), a.closest(".window-app, .application"));
-    const c = n("[data-hcci-player]"), l = n("[data-hcci-characters]"), s = n("[data-hcci-character]"), u = n("[data-hcci-tab]"), f = n("[data-hcci-row]"), d = n("[data-hcci-panel]"), g = o("[data-hcci-workspace]"), p = o("[data-hcci-art]"), v = n("[data-hcci-style]");
-    let b, w, A = "success", E = "", L = "";
-    const y = (h) => w == null ? void 0 : w.querySelector(`[data-hcci-field="${h}"]`), O = () => {
+    const o = i instanceof HTMLElement ? i : i[0], a = o.matches(".hcci-config") ? o : o.querySelector(".hcci-config"), r = (f) => a.querySelector(f), n = (f) => Array.from(a.querySelectorAll(f));
+    r("[data-hcci-action='close']").addEventListener("click", () => this.close()), this.activateWindowDrag(r("[data-hcci-window-drag]"), a.closest(".window-app, .application"));
+    const c = n("[data-hcci-player]"), l = n("[data-hcci-characters]"), s = n("[data-hcci-character]"), u = n("[data-hcci-tab]"), h = n("[data-hcci-row]"), d = n("[data-hcci-panel]"), m = r("[data-hcci-workspace]"), p = r("[data-hcci-art]"), v = n("[data-hcci-style]");
+    let b, w, E = "success", L = "", k = "";
+    const y = (f) => w == null ? void 0 : w.querySelector(`[data-hcci-field="${f}"]`), O = () => {
       if (!b || !w) return;
-      const h = y("imagePath").value.trim(), M = b.dataset.hcciPortrait || Et;
-      (h !== E || M !== L) && (E = h, L = M, p.src = h || M), p.parentElement.style.setProperty("--hcci-preview-accent", y("accentColor").value), o("[data-hcci-caption]").textContent = y("overlayText").value.trim() || y("overlayText").placeholder;
-      const P = Ot(y("animationStyle").value);
-      o("[data-hcci-effect-description]").textContent = P.description, v.forEach((I) => I.setAttribute("aria-pressed", String(I.dataset.hcciStyle === P.id)));
+      const f = y("imagePath").value.trim(), T = b.dataset.hcciPortrait || Tt;
+      (f !== L || T !== k) && (L = f, k = T, p.src = f || T), p.parentElement.style.setProperty("--hcci-preview-accent", y("accentColor").value), r("[data-hcci-caption]").textContent = y("overlayText").value.trim() || y("overlayText").placeholder;
+      const $ = ne(y("animationStyle").value);
+      r("[data-hcci-effect-description]").textContent = $.description, v.forEach((P) => P.setAttribute("aria-pressed", String(P.dataset.hcciStyle === $.id)));
     };
     p.addEventListener("error", () => {
-      const h = p.getAttribute("src");
-      h !== L && h !== Et ? p.src = L : h !== Et && (p.src = Et);
+      const f = p.getAttribute("src");
+      f !== k && f !== Tt ? p.src = k : f !== Tt && (p.src = Tt);
     });
-    const R = (h, M) => {
-      h.setAttribute("aria-selected", String(M)), h.tabIndex = M ? 0 : -1;
-    }, $ = (h, M = this.selectedCharacters.get(h), P) => {
-      this.selectedPlayer = h;
-      const I = l.find((T) => T.dataset.hcciCharacters === h), D = s.filter((T) => I == null ? void 0 : I.contains(T)), F = D.find((T) => T.dataset.hcciCharacter === M) ?? D[0], z = F == null ? void 0 : F.dataset.hcciCharacter;
-      A = P ?? this.activeTabs.get(z) ?? "success", z && (this.selectedCharacters.set(h, z), this.activeTabs.set(z, A)), b = f.find((T) => T.dataset.hcciRow === z), w = b == null ? void 0 : b.querySelector(`[data-hcci-panel="${A}"]`), c.forEach((T) => R(T, T.dataset.hcciPlayer === h)), l.forEach((T) => {
-        T.hidden = T !== I;
-      }), s.forEach((T) => T.setAttribute("aria-pressed", String(T === F))), u.forEach((T) => R(T, T.dataset.hcciTab === A)), f.forEach((T) => {
-        T.hidden = T !== b;
-      }), d.forEach((T) => {
-        T.hidden = T !== w;
-      }), o("#hcci-settings-panel").setAttribute("aria-labelledby", `hcci-${A}-tab`), g.hidden = !b, g.dataset.hcciKind = A, o("[data-hcci-preview-kind]").textContent = A === "failure" ? "Critical Failure" : "Critical Success", O();
+    const R = (f, T) => {
+      f.setAttribute("aria-selected", String(T)), f.tabIndex = T ? 0 : -1;
+    }, F = (f, T = this.selectedCharacters.get(f), $) => {
+      this.selectedPlayer = f;
+      const P = l.find((x) => x.dataset.hcciCharacters === f), N = s.filter((x) => P == null ? void 0 : P.contains(x)), q = N.find((x) => x.dataset.hcciCharacter === T) ?? N[0], H = q == null ? void 0 : q.dataset.hcciCharacter;
+      E = $ ?? this.activeTabs.get(H) ?? "success", H && (this.selectedCharacters.set(f, H), this.activeTabs.set(H, E)), b = h.find((x) => x.dataset.hcciRow === H), w = b == null ? void 0 : b.querySelector(`[data-hcci-panel="${E}"]`), c.forEach((x) => R(x, x.dataset.hcciPlayer === f)), l.forEach((x) => {
+        x.hidden = x !== P;
+      }), s.forEach((x) => x.setAttribute("aria-pressed", String(x === q))), u.forEach((x) => R(x, x.dataset.hcciTab === E)), h.forEach((x) => {
+        x.hidden = x !== b;
+      }), d.forEach((x) => {
+        x.hidden = x !== w;
+      }), r("#hcci-settings-panel").setAttribute("aria-labelledby", `hcci-${E}-tab`), m.hidden = !b, m.dataset.hcciKind = E, r("[data-hcci-preview-kind]").textContent = E === "failure" ? "Critical Failure" : "Critical Success", O();
     };
-    c.forEach((h) => h.addEventListener("click", () => $(h.dataset.hcciPlayer))), s.forEach((h) => h.addEventListener("click", () => $(this.selectedPlayer, h.dataset.hcciCharacter))), u.forEach((h) => h.addEventListener("click", () => $(this.selectedPlayer, void 0, h.dataset.hcciTab)));
-    for (const h of [c, u]) for (const [M, P] of h.entries())
-      P.addEventListener("keydown", (I) => {
-        const D = {
+    c.forEach((f) => f.addEventListener("click", () => F(f.dataset.hcciPlayer))), s.forEach((f) => f.addEventListener("click", () => F(this.selectedPlayer, f.dataset.hcciCharacter))), u.forEach((f) => f.addEventListener("click", () => F(this.selectedPlayer, void 0, f.dataset.hcciTab)));
+    for (const f of [c, u]) for (const [T, $] of f.entries())
+      $.addEventListener("keydown", (P) => {
+        const N = {
           Home: 0,
-          End: h.length - 1,
-          ArrowLeft: (M - 1 + h.length) % h.length,
-          ArrowRight: (M + 1) % h.length
-        }[I.key];
-        D !== void 0 && (I.preventDefault(), h[D].focus(), h[D].click());
+          End: f.length - 1,
+          ArrowLeft: (T - 1 + f.length) % f.length,
+          ArrowRight: (T + 1) % f.length
+        }[P.key];
+        N !== void 0 && (P.preventDefault(), f[N].focus(), f[N].click());
       });
-    v.forEach((h) => h.addEventListener("click", () => {
-      const M = y("animationStyle");
-      M.value = h.dataset.hcciStyle, M.dispatchEvent(new Event("change", { bubbles: !0 }));
-    })), $(c.some((h) => h.dataset.hcciPlayer === this.selectedPlayer) ? this.selectedPlayer : "gm");
-    let et = !1;
-    a.addEventListener("invalid", (h) => {
-      var T, ut, Gt;
-      if (et) return;
-      et = !0, queueMicrotask(() => {
-        et = !1;
+    v.forEach((f) => f.addEventListener("click", () => {
+      const T = y("animationStyle");
+      T.value = f.dataset.hcciStyle, T.dispatchEvent(new Event("change", { bubbles: !0 }));
+    })), F(c.some((f) => f.dataset.hcciPlayer === this.selectedPlayer) ? this.selectedPlayer : "gm");
+    let Z = !1;
+    a.addEventListener("invalid", (f) => {
+      var x, lt, _t;
+      if (Z) return;
+      Z = !0, queueMicrotask(() => {
+        Z = !1;
       });
-      const M = h.target, P = M.closest("details");
-      P && (P.open = !0);
-      const I = (T = M.closest("[data-hcci-row]")) == null ? void 0 : T.dataset.hcciRow;
-      if (!I) return;
-      const D = s.filter((Bt) => Bt.dataset.hcciCharacter === I), F = D.find((Bt) => {
+      const T = f.target, $ = T.closest("details");
+      $ && ($.open = !0);
+      const P = (x = T.closest("[data-hcci-row]")) == null ? void 0 : x.dataset.hcciRow;
+      if (!P) return;
+      const N = s.filter((Gt) => Gt.dataset.hcciCharacter === P), q = N.find((Gt) => {
         var ce;
-        return ((ce = Bt.closest("[data-hcci-characters]")) == null ? void 0 : ce.dataset.hcciCharacters) === this.selectedPlayer;
-      }) ?? D[0], z = (ut = F == null ? void 0 : F.closest("[data-hcci-characters]")) == null ? void 0 : ut.dataset.hcciCharacters;
-      z && $(z, I, (Gt = M.closest("[data-hcci-panel]")) == null ? void 0 : Gt.dataset.hcciPanel);
+        return ((ce = Gt.closest("[data-hcci-characters]")) == null ? void 0 : ce.dataset.hcciCharacters) === this.selectedPlayer;
+      }) ?? N[0], H = (lt = q == null ? void 0 : q.closest("[data-hcci-characters]")) == null ? void 0 : lt.dataset.hcciCharacters;
+      H && F(H, P, (_t = T.closest("[data-hcci-panel]")) == null ? void 0 : _t.dataset.hcciPanel);
     }, !0);
-    const at = () => {
-      o("[data-hcci-dirty]").hidden = !1;
-    }, Y = o('[name="dieSides"]'), K = o('[name="rollDirection"]'), U = o('[name="threshold"]'), _ = o('[name="failureThreshold"]'), it = n('[data-hcci-field="threshold"]'), rt = () => {
-      const h = Number(Y.value), M = K.value === "low";
-      if (n("[data-hcci-success-label]").forEach((D) => {
-        D.textContent = M ? "Success ≤" : "Success ≥";
-      }), n("[data-hcci-failure-label]").forEach((D) => {
-        D.textContent = M ? "Failure ≥" : "Failure ≤";
-      }), !Number.isInteger(h) || h < 2 || h > 1e4) return;
-      const P = Number(U.value) || (M ? 1 : h), I = Number(_.value) || (M ? h : 1);
-      for (const D of [U, _, ...it]) D.max = String(h);
-      for (const D of it)
-        D.placeholder = String(D.closest('[data-hcci-panel="success"]') ? P : I);
+    const ot = () => {
+      r("[data-hcci-dirty]").hidden = !1;
+    }, U = r('[name="dieSides"]'), W = r('[name="rollDirection"]'), it = r('[name="threshold"]'), Q = r('[name="failureThreshold"]'), X = n('[data-hcci-field="threshold"]'), rt = () => {
+      const f = Number(U.value), T = W.value === "low";
+      if (n("[data-hcci-success-label]").forEach((N) => {
+        N.textContent = T ? "Success ≤" : "Success ≥";
+      }), n("[data-hcci-failure-label]").forEach((N) => {
+        N.textContent = T ? "Failure ≥" : "Failure ≤";
+      }), !Number.isInteger(f) || f < 2 || f > 1e4) return;
+      const $ = Number(it.value) || (T ? 1 : f), P = Number(Q.value) || (T ? f : 1);
+      for (const N of [it, Q, ...X]) N.max = String(f);
+      for (const N of X)
+        N.placeholder = String(N.closest('[data-hcci-panel="success"]') ? $ : P);
     };
     rt();
-    let H = Number(Y.value), q = K.value;
+    let Y = Number(U.value), _ = W.value;
     const V = () => {
       if (this.rollRuleChange) return;
-      const h = Number(Y.value), M = K.value;
-      if (h === H && M === q) return;
-      const P = [Y, K, o('[type="submit"]')];
-      P.forEach((I) => {
-        I.disabled = !0;
+      const f = Number(U.value), T = W.value;
+      if (f === Y && T === _) return;
+      const $ = [U, W, r('[type="submit"]')];
+      $.forEach((P) => {
+        P.disabled = !0;
       }), this.rollRuleChange = (async () => {
-        var I, D;
+        var P, N;
         try {
-          if (!await mi(h, M, f.length)) return;
-          const { success: F, failure: z } = Ut(h, M);
-          U.value = String(F), _.value = String(z);
-          for (const T of it)
-            T.value = String(T.closest('[data-hcci-panel="success"]') ? F : z);
-          H = h, q = M, at();
-        } catch (F) {
-          console.error(`${C} | Could not confirm dice change.`, F), (D = (I = ui.notifications) == null ? void 0 : I.error) == null || D.call(I, "Could not confirm the dice change. Your roll configuration has not changed.");
+          if (!await mi(f, T, h.length)) return;
+          const { success: q, failure: H } = Kt(f, T);
+          it.value = String(q), Q.value = String(H);
+          for (const x of X)
+            x.value = String(x.closest('[data-hcci-panel="success"]') ? q : H);
+          Y = f, _ = T, ot();
+        } catch (q) {
+          console.error(`${C} | Could not confirm dice change.`, q), (N = (P = ui.notifications) == null ? void 0 : P.error) == null || N.call(P, "Could not confirm the dice change. Your roll configuration has not changed.");
         } finally {
-          Y.value = String(H), K.value = q, rt(), P.forEach((F) => {
-            F.disabled = !1;
+          U.value = String(Y), W.value = _, rt(), $.forEach((q) => {
+            q.disabled = !1;
           }), this.rollRuleChange = null;
         }
       })();
     };
-    Y.addEventListener("change", V), K.addEventListener("change", V);
-    for (const h of ["input", "change"]) a.addEventListener(h, (M) => {
-      const P = M.target;
-      !P.matches("input, select") || P === Y || P === K || (at(), (P === U || P === _) && rt(), w != null && w.contains(P) && O());
+    U.addEventListener("change", V), W.addEventListener("change", V);
+    for (const f of ["input", "change"]) a.addEventListener(f, (T) => {
+      const $ = T.target;
+      !$.matches("input, select") || $ === U || $ === W || (ot(), ($ === it || $ === Q) && rt(), w != null && w.contains($) && O());
     });
-    for (const h of n("[data-hcci-browse]")) h.addEventListener("click", () => {
-      var F, z, T;
-      const M = h.dataset.hcciBrowse, P = y(M);
-      if (!P) return;
-      const I = ((T = (z = (F = foundry == null ? void 0 : foundry.applications) == null ? void 0 : F.apps) == null ? void 0 : z.FilePicker) == null ? void 0 : T.implementation) ?? globalThis.FilePicker;
-      new I({
-        type: M === "audioPath" ? "audio" : "image",
-        current: P.value,
-        callback: (ut) => {
-          P.value = ut, P.dispatchEvent(new Event("change", { bubbles: !0 }));
+    for (const f of n("[data-hcci-browse]")) f.addEventListener("click", () => {
+      var q, H, x;
+      const T = f.dataset.hcciBrowse, $ = y(T);
+      if (!$) return;
+      const P = ((x = (H = (q = foundry == null ? void 0 : foundry.applications) == null ? void 0 : q.apps) == null ? void 0 : H.FilePicker) == null ? void 0 : x.implementation) ?? globalThis.FilePicker;
+      new P({
+        type: T === "audioPath" ? "audio" : "image",
+        current: $.value,
+        callback: (lt) => {
+          $.value = lt, $.dispatchEvent(new Event("change", { bubbles: !0 }));
         }
       }).browse();
     });
-    const lt = o("[data-hcci-test]");
-    lt.addEventListener("click", async () => {
-      var D, F, z, T, ut;
-      if (!((D = game.user) != null && D.isGM) || !b || !w || lt.getAttribute("aria-disabled") === "true") return;
-      const h = Ut(H, q), M = A === "failure" ? "failure" : "success", P = M === "failure" ? _.value : U.value, I = y("animationStyle").value;
-      lt.setAttribute("aria-disabled", "true");
+    const G = r("[data-hcci-test]");
+    G.addEventListener("click", async () => {
+      var N, q, H, x, lt;
+      if (!((N = game.user) != null && N.isGM) || !b || !w || G.getAttribute("aria-disabled") === "true") return;
+      const f = Kt(Y, _), T = E === "failure" ? "failure" : "success", $ = T === "failure" ? Q.value : it.value, P = y("animationStyle").value;
+      G.setAttribute("aria-disabled", "true");
       try {
         await Ka({
           actorId: b.dataset.hcciActorId || null,
           actorName: b.dataset.hcciActorId ? b.dataset.hcciName : "",
-          triggerKind: M,
-          naturalResult: h[M],
-          threshold: Number((F = y("threshold")) == null ? void 0 : F.value) || Number(P) || h[M],
-          animationStyle: I,
-          imagePath: y("imagePath").value.trim() || L,
-          fallbackImagePath: L,
+          triggerKind: T,
+          naturalResult: f[T],
+          threshold: Number((q = y("threshold")) == null ? void 0 : q.value) || Number($) || f[T],
+          animationStyle: P,
+          imagePath: y("imagePath").value.trim() || k,
+          fallbackImagePath: k,
           audioPath: y("audioPath").value.trim(),
           overlayText: y("overlayText").value.trim() || y("overlayText").placeholder,
           accentColor: y("accentColor").value,
-          textEnabled: !["rift", st, wt, St, Ct].includes(I) || S(m.textEnabled) !== !1,
-          duration: Lt((z = y("duration")) == null ? void 0 : z.value) ?? Lt(o('[name="duration"]').value) ?? S(m.duration),
-          volume: S(m.volume)
-        }) || (ut = (T = ui.notifications) == null ? void 0 : T.info) == null || ut.call(T, "A cut-in is already playing.");
+          textEnabled: !["rift", mt, Lt, $t, Pt].includes(P) || S(g.textEnabled) !== !1,
+          duration: xt((H = y("duration")) == null ? void 0 : H.value) ?? xt(r('[name="duration"]').value) ?? S(g.duration),
+          volume: S(g.volume)
+        }) || (lt = (x = ui.notifications) == null ? void 0 : x.info) == null || lt.call(x, "A cut-in is already playing.");
       } finally {
-        lt.removeAttribute("aria-disabled");
+        G.removeAttribute("aria-disabled");
       }
-    }), o("[data-hcci-action='reset']").addEventListener("click", async () => {
-      var P, I, D;
-      const h = (I = (P = foundry == null ? void 0 : foundry.applications) == null ? void 0 : P.api) == null ? void 0 : I.DialogV2;
-      (h != null && h.confirm ? await h.confirm({
+    }), r("[data-hcci-action='reset']").addEventListener("click", async () => {
+      var $, P, N;
+      const f = (P = ($ = foundry == null ? void 0 : foundry.applications) == null ? void 0 : $.api) == null ? void 0 : P.DialogV2;
+      (f != null && f.confirm ? await f.confirm({
         window: { title: "Reset All Character Cut-Ins?" },
         content: "<p>This removes every GM and actor override. Global roll and presentation settings stay unchanged.</p>",
         modal: !0,
         rejectClose: !1,
         yes: { label: "Reset Overrides" },
         no: { label: "Cancel", default: !0 }
-      }) === !0 : globalThis.confirm("Reset every GM and actor cut-in override?")) && (await se({}), (D = ui.notifications) == null || D.info("Critical Cut-In player configuration reset."), this.render(!1));
+      }) === !0 : globalThis.confirm("Reset every GM and actor cut-in override?")) && (await se({}), (N = ui.notifications) == null || N.info("Critical Cut-In player configuration reset."), this.render(!1));
     });
   }
-  activateWindowDrag(i, r) {
-    if (!r) return;
+  activateWindowDrag(i, o) {
+    if (!o) return;
     let a = null;
-    i.addEventListener("pointerdown", (o) => {
+    i.addEventListener("pointerdown", (r) => {
       var c;
-      if (o.button !== 0 || a) return;
-      const n = r.getBoundingClientRect();
-      (c = this.bringToFront ?? this.bringToTop) == null || c.call(this), i.setPointerCapture(o.pointerId), a = {
-        pointerId: o.pointerId,
-        offsetX: o.clientX - n.left,
-        offsetY: o.clientY - n.top
-      }, o.preventDefault();
-    }), i.addEventListener("pointermove", (o) => {
-      !a || o.pointerId !== a.pointerId || this.setPosition({
-        left: Math.max(0, Math.min(window.innerWidth - 48, o.clientX - a.offsetX)),
-        top: Math.max(0, Math.min(window.innerHeight - 48, o.clientY - a.offsetY))
+      if (r.button !== 0 || a) return;
+      const n = o.getBoundingClientRect();
+      (c = this.bringToFront ?? this.bringToTop) == null || c.call(this), i.setPointerCapture(r.pointerId), a = {
+        pointerId: r.pointerId,
+        offsetX: r.clientX - n.left,
+        offsetY: r.clientY - n.top
+      }, r.preventDefault();
+    }), i.addEventListener("pointermove", (r) => {
+      !a || r.pointerId !== a.pointerId || this.setPosition({
+        left: Math.max(0, Math.min(window.innerWidth - 48, r.clientX - a.offsetX)),
+        top: Math.max(0, Math.min(window.innerHeight - 48, r.clientY - a.offsetY))
       });
-    }), i.addEventListener("lostpointercapture", (o) => {
-      o.pointerId === (a == null ? void 0 : a.pointerId) && (a = null);
+    }), i.addEventListener("lostpointercapture", (r) => {
+      r.pointerId === (a == null ? void 0 : a.pointerId) && (a = null);
     });
   }
   async _updateObject(i) {
-    var f, d, g, p, v, b, w;
-    if (!((f = game.user) != null && f.isGM) || this.rollRuleChange) return;
-    const r = i.currentTarget;
-    if (!r.reportValidity()) return;
-    const a = Number(((d = r.querySelector('[name="dieSides"]')) == null ? void 0 : d.value) ?? tt()), o = ((g = r.querySelector('[name="rollDirection"]')) == null ? void 0 : g.value) === "low" ? "low" : "high", n = Wt(), c = (A, E) => {
-      var R, $, et, at, Y, K, U, _, it, rt;
-      const L = A.querySelector(`[data-hcci-panel="${E}"]`), y = (H) => L == null ? void 0 : L.querySelector(`[data-hcci-field="${H}"]`), O = Lt((R = y("duration")) == null ? void 0 : R.value);
+    var h, d, m, p, v, b, w;
+    if (!((h = game.user) != null && h.isGM) || this.rollRuleChange) return;
+    const o = i.currentTarget;
+    if (!o.reportValidity()) return;
+    const a = Number(((d = o.querySelector('[name="dieSides"]')) == null ? void 0 : d.value) ?? at()), r = ((m = o.querySelector('[name="rollDirection"]')) == null ? void 0 : m.value) === "low" ? "low" : "high", n = Ut(), c = (E, L) => {
+      var R, F, Z, ot, U, W, it, Q, X, rt;
+      const k = E.querySelector(`[data-hcci-panel="${L}"]`), y = (Y) => k == null ? void 0 : k.querySelector(`[data-hcci-field="${Y}"]`), O = xt((R = y("duration")) == null ? void 0 : R.value);
       return {
         ...O === void 0 ? {} : { duration: O },
-        enabled: (($ = L == null ? void 0 : L.querySelector('[data-hcci-field="enabled"]')) == null ? void 0 : $.checked) === !0,
+        enabled: ((F = k == null ? void 0 : k.querySelector('[data-hcci-field="enabled"]')) == null ? void 0 : F.checked) === !0,
         threshold: (() => {
-          var q;
-          const H = Number((q = y("threshold")) == null ? void 0 : q.value);
-          return Number.isInteger(H) && H >= 1 && H <= a ? H : "";
+          var _;
+          const Y = Number((_ = y("threshold")) == null ? void 0 : _.value);
+          return Number.isInteger(Y) && Y >= 1 && Y <= a ? Y : "";
         })(),
-        animationStyle: ((et = y("animationStyle")) == null ? void 0 : et.value) || "strike",
-        imagePath: ((Y = (at = y("imagePath")) == null ? void 0 : at.value) == null ? void 0 : Y.trim()) ?? "",
-        audioPath: ((U = (K = y("audioPath")) == null ? void 0 : K.value) == null ? void 0 : U.trim()) ?? "",
-        overlayText: ((it = (_ = y("overlayText")) == null ? void 0 : _.value) == null ? void 0 : it.trim()) ?? "",
-        accentColor: ((rt = y("accentColor")) == null ? void 0 : rt.value) || (E === "failure" ? "#ff4d7d" : "#69e8ff")
+        animationStyle: ((Z = y("animationStyle")) == null ? void 0 : Z.value) || "strike",
+        imagePath: ((U = (ot = y("imagePath")) == null ? void 0 : ot.value) == null ? void 0 : U.trim()) ?? "",
+        audioPath: ((it = (W = y("audioPath")) == null ? void 0 : W.value) == null ? void 0 : it.trim()) ?? "",
+        overlayText: ((X = (Q = y("overlayText")) == null ? void 0 : Q.value) == null ? void 0 : X.trim()) ?? "",
+        accentColor: ((rt = y("accentColor")) == null ? void 0 : rt.value) || (L === "failure" ? "#ff4d7d" : "#69e8ff")
       };
     };
-    for (const A of r.querySelectorAll("[data-hcci-row]")) {
-      const E = A.dataset.hcciRow;
-      n[E] = c(A, "success"), n[E].failure = c(A, "failure");
+    for (const E of o.querySelectorAll("[data-hcci-row]")) {
+      const L = E.dataset.hcciRow;
+      n[L] = c(E, "success"), n[L].failure = c(E, "failure");
     }
-    const l = Number(((p = r.querySelector('[name="threshold"]')) == null ? void 0 : p.value) ?? ie()), s = Number(((v = r.querySelector('[name="failureThreshold"]')) == null ? void 0 : v.value) ?? Te()), u = Number(((b = r.querySelector('[name="duration"]')) == null ? void 0 : b.value) ?? S(m.duration));
-    await Q(m.dieSides, a), await Q(m.rollDirection, o), await Q(m.threshold, Math.min(a, Math.max(0, l))), await Q(m.failureThreshold, Math.min(a, Math.max(0, s))), await Q(m.duration, Math.min(8e3, Math.max(800, u))), await se(n), (w = ui.notifications) == null || w.info("Critical Cut-In configuration saved."), this.render(!1);
+    const l = Number(((p = o.querySelector('[name="threshold"]')) == null ? void 0 : p.value) ?? ae()), s = Number(((v = o.querySelector('[name="failureThreshold"]')) == null ? void 0 : v.value) ?? Te()), u = Number(((b = o.querySelector('[name="duration"]')) == null ? void 0 : b.value) ?? S(g.duration));
+    await tt(g.dieSides, a), await tt(g.rollDirection, r), await tt(g.threshold, Math.min(a, Math.max(0, l))), await tt(g.failureThreshold, Math.min(a, Math.max(0, s))), await tt(g.duration, Math.min(8e3, Math.max(800, u))), await se(n), (w = ui.notifications) == null || w.info("Critical Cut-In configuration saved."), this.render(!1);
   }
 }
 function je() {
@@ -2043,8 +2043,8 @@ function je() {
   return (t = game.user) != null && t.isGM ? new Ve().render(!0) : ((e = ui.notifications) == null || e.warn("Only the GM can configure Critical Cut-In."), null);
 }
 function bi() {
-  var i, r, a, o;
-  const t = (i = game.modules.get("holosuite")) != null && i.active ? (r = game.modules.get("holosuite")) == null ? void 0 : r.api : null, e = (a = game.modules.get("holosuite-core")) != null && a.active ? (o = game.modules.get("holosuite-core")) == null ? void 0 : o.api : null;
+  var i, o, a, r;
+  const t = (i = game.modules.get("holosuite")) != null && i.active ? (o = game.modules.get("holosuite")) == null ? void 0 : o.api : null, e = (a = game.modules.get("holosuite-core")) != null && a.active ? (r = game.modules.get("holosuite-core")) == null ? void 0 : r.api : null;
   return t ?? e ?? game.holosuite ?? null;
 }
 function Ye() {
@@ -2058,7 +2058,7 @@ function Ye() {
     premium: !1,
     playerVisible: !1,
     description: "JRPG-style critical hit cut-in animation for natural d20 results.",
-    enabled: S(m.enabled),
+    enabled: S(g.enabled),
     open: () => je()
   }), t.registerApp({
     brandingInApp: !0,
@@ -2068,7 +2068,7 @@ function Ye() {
     premium: !1,
     playerVisible: !1,
     description: "Reveal a high-stakes roll to the whole table.",
-    enabled: S(m.enabled),
+    enabled: S(g.enabled),
     open: () => $e()
   }), (e = t.registerWhatsNew) == null || e.call(t, {
     moduleId: C,
@@ -2092,15 +2092,15 @@ function Ye() {
 }
 function Ke() {
   const t = {
-    playCutinForUser(i, r = {}) {
-      var o;
-      const a = He(i, r);
-      return (o = game.user) != null && o.isGM ? be(a) : mt(a), a;
+    playCutinForUser(i, o = {}) {
+      var r;
+      const a = He(i, o);
+      return (r = game.user) != null && r.isGM ? be(a) : pt(a), a;
     },
-    playCutinForActor(i, r = {}) {
-      var o;
-      const a = si(i, r);
-      return (o = game.user) != null && o.isGM ? be(a) : mt(a), a;
+    playCutinForActor(i, o = {}) {
+      var r;
+      const a = si(i, o);
+      return (r = game.user) != null && r.isGM ? be(a) : pt(a), a;
     },
     openConfig: je,
     openBoxOfDoom: $e
@@ -2111,7 +2111,7 @@ Hooks.once("init", async () => {
   ta(Ve), ca(), Ke(), await loadTemplates([`modules/${C}/templates/player-config.hbs`]);
 });
 Hooks.once("ready", () => {
-  Ke(), ci(), nt(), Hooks.on("userConnected", nt), Ye(), console.log(`${C} | Ready. API available at game.modules.get("${C}").api`);
+  Ke(), ci(), ct(), Hooks.on("userConnected", ct), Ye(), console.log(`${C} | Ready. API available at game.modules.get("${C}").api`);
 });
 Hooks.on("hotReload", () => {
   Ye();

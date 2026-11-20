@@ -51,6 +51,15 @@
     100% 80%, 86% 87%, 80% 87%, 69% 96%, 52% 94%, 40% 100%, 0 100%);
 }
 
+.hcci-style-rift.hcci-motion-full .hcci-frame-accent {
+  background: linear-gradient(145deg, var(--hcci-accent) 40%, color-mix(in srgb, var(--hcci-accent) 55%, white) 50%, var(--hcci-accent) 60%) 100% 100% / 240% 240%;
+  animation: hcci-rift-edge-sweep 1.6s linear infinite;
+}
+
+@keyframes hcci-rift-edge-sweep {
+  to { background-position: 0 0; }
+}
+
 .hcci-style-rift .hcci-copy {
   align-content: center;
   gap: 5px;

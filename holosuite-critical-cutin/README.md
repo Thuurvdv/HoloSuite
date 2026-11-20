@@ -32,7 +32,9 @@ Both Success and Failure can use any animation preset. Existing saved choices ke
 | Railgun Salvo | Converging sights, horizontal energy lance, and ballistic arrival |
 | Astral Eclipse | Celestial crown, crescent, star field, and orbital rings |
 | Cyber Overdrive | Expanding data tunnel and segmented portrait assembly |
-| Crosshair Sever | A crosshair locks on, plasma cuts along both axes, and the four portrait pieces scatter into glowing fragments |
+| COMIC | Ink and halftone give way to a full-color portrait framed by moving speed lines |
+| SHATTER | The portrait breaks into eighteen shards and exposes a fractured title |
+| SPLIT | A crosshair locks on, plasma cuts along both axes, and the four portrait pieces scatter into glowing fragments |
 
 Two flagship presets are choreographed as full cinematic sequences and are suited to either outcome:
 
