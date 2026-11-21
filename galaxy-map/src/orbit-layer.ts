@@ -1,10 +1,14 @@
 import { createOrbitLayout, DEFAULT_ORBIT_ASPECT, orbitAngleAt, orbitRadii, orbitTime } from "./orbits";
 import type { OrbitDrag } from "./orbits";
+import { buildTerritories } from "./territories";
 
 type OrbitLayout = ReturnType<typeof createOrbitLayout>;
 type Point = { x: number; y: number };
 
-export function mountOrbitLayer(viewport: HTMLElement, layout: OrbitLayout) {
+export function mountOrbitLayer(viewport: HTMLElement, layout: OrbitLayout, territories?: {
+  members: (Parameters<typeof buildTerritories>[0][number] & { id: string })[];
+  factions: Parameters<typeof buildTerritories>[1];
+}) {
   const svg = viewport.querySelector(".gmf-orbits");
   const rings = svg ? layout.rings.map(ring => {
     const ellipse = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
@@ -14,6 +18,8 @@ export function mountOrbitLayer(viewport: HTMLElement, layout: OrbitLayout) {
   }) : [];
   const markers = Array.from(viewport.querySelectorAll<HTMLElement>(".gmf-system[data-system-id]"));
   const routes = Array.from(viewport.querySelectorAll<SVGLineElement>("[data-route-from][data-route-to]"));
+  const outlines = Array.from(viewport.querySelectorAll<SVGPolygonElement>("[data-territory-faction]"));
+  const labels = Array.from(viewport.querySelectorAll<HTMLElement>("[data-territory-label]"));
   const reducedMotion = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
   let aspect = DEFAULT_ORBIT_ASPECT;
   let frame: number | null = null;
@@ -47,6 +53,20 @@ export function mountOrbitLayer(viewport: HTMLElement, layout: OrbitLayout) {
       setNumber(ellipse, "cy", center.y);
       setNumber(ellipse, "rx", radii.x);
       setNumber(ellipse, "ry", radii.y);
+    }
+    if (territories && outlines.length) {
+      const regions = buildTerritories(territories.members.map(member => ({
+        ...member, ...positions.get(member.id)
+      })), territories.factions, { cluster: false });
+      for (const region of regions) {
+        const outline = outlines.find(element => element.dataset.territoryFaction === region.id);
+        if (outline && outline.getAttribute("points") !== region.points) outline.setAttribute("points", region.points);
+        const label = labels.find(element => element.dataset.territoryLabel === region.id);
+        if (label) {
+          label.style.left = `${region.labelX}%`;
+          label.style.top = `${region.labelY}%`;
+        }
+      }
     }
   }
 

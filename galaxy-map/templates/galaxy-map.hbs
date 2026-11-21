@@ -56,11 +56,11 @@
             <div class="gmf-territories" aria-hidden="true">
               <svg viewBox="0 0 100 100" preserveAspectRatio="none">
                 {{#each territories}}
-                  <polygon class="{{#if ../highlightedFactionId}}{{#if (gmfEq id ../highlightedFactionId)}}is-faction-highlighted{{else}}is-faction-muted{{/if}}{{/if}}" points="{{points}}" style="--gmf-territory-color: {{color}};" />
+                  <polygon class="{{#if ../highlightedFactionId}}{{#if (gmfEq id ../highlightedFactionId)}}is-faction-highlighted{{else}}is-faction-muted{{/if}}{{/if}}" points="{{points}}" data-territory-faction="{{id}}" style="--gmf-territory-color: {{color}};" />
                 {{/each}}
               </svg>
               {{#each territories}}
-                <span class="gmf-territory-label {{#if ../highlightedFactionId}}{{#if (gmfEq id ../highlightedFactionId)}}is-faction-highlighted{{else}}is-faction-muted{{/if}}{{/if}}" style="left: {{labelX}}%; top: {{labelY}}%; --gmf-territory-color: {{color}};">{{name}}</span>
+                <span data-territory-label="{{id}}" class="gmf-territory-label {{#if ../highlightedFactionId}}{{#if (gmfEq id ../highlightedFactionId)}}is-faction-highlighted{{else}}is-faction-muted{{/if}}{{/if}}" style="left: {{labelX}}%; top: {{labelY}}%; --gmf-territory-color: {{color}};">{{name}}</span>
               {{/each}}
             </div>
           {{/if}}{{/if}}
