@@ -1,5 +1,5 @@
 export const MODULE_ID = "holosuite-loot";
-export const BUILD_VERSION = "1.3.0";
+export const BUILD_VERSION = "1.4.0";
 export const REQUEST_FLAG = "commandV3";
 export const RESPONSE_FLAG = "replyV3";
 export const clone = value => structuredClone(value);
@@ -28,6 +28,11 @@ export function validLootRequest(request) {
 export function configFor(token) {
   return token.getFlag(MODULE_ID, "config") ?? token.actor?.getFlag(MODULE_ID, "config")
     ?? { mode: "automatic", source: "inventory" };
+}
+export function keepLinkedActor(token) {
+  const configured = configFor(token).keepLinkedActor;
+  return typeof configured === "boolean" ? configured
+    : globalThis.game?.settings?.get(MODULE_ID, "keepLinkedActor") === true;
 }
 export const actorKey = actor => actor?.uuid ?? actor?.id;
 export const canonical = value => JSON.stringify(value, (_key, part) => part && typeof part === "object" && !Array.isArray(part)

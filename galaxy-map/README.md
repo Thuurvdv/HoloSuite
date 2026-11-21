@@ -4,6 +4,10 @@ Galaxy Map turns a Foundry world into a navigable star chart. Build a galaxy, op
 
 ![Galaxy Map Manager](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/images/Galaxy%20Map%20Manager.png)
 
+## What's New in 2.3.1
+
+- Fixed faction territory outlines for locations attached to orbits. Outlines now follow their current orbital positions during animation, resizing, and dragging.
+
 ## What's New in 2.3.0
 
 - GMs can assign 0–100% prominence separately for the galaxy and each system, and set a reputation percentage for each faction's standing toward the party across the map.

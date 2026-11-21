@@ -8,6 +8,7 @@ import { LootPanel, LootConfig, report, t } from "./ui";
 import { LootMarkers } from "./markers";
 import { postLootChat, postPickupRoll } from "./chat.mjs";
 import { RULE_SETTING } from "./rules.mjs";
+import { LootRightClick } from "./right-click.mjs";
 declare const Hooks: any;
 declare const game: any;
 declare const canvas: any;
@@ -18,7 +19,7 @@ const panels = new Map<string, LootPanel>();
 let markers: LootMarkers | null = null;
 let started = false;
 let openAttempt = 0;
-const adapter = () => getAdapter(game.system.id);
+const adapter = (): any => getAdapter(game.system.id);
 const lootEnvironment = () => environment(adapter());
 const configurable = (token: any) => token?.actor && (adapter().manual ? !!token.actor.items : (adapter().sourceActor?.(token.actor) ?? token.actor.type === "npc"));
 const defaultRecipient = (user: any, system: any, token: any) =>
@@ -118,13 +119,9 @@ function register() {
 
 let canvasElement: HTMLElement | null;
 let hovered: any;
-let pointerToken = "";
-let pointerTime = 0;
-function contextLoot(event: MouseEvent) {
-  // Native HUD permission checks exclude non-owned NPCs. Observe the browser
-  // gesture in capture phase and hit-test visible tokens independently of HUD ownership.
-  // Do not cancel the event or change native GM controls.
-  if (game.user.isGM || !started || (event.type === "pointerdown" && event.button !== 2)) return;
+let rightClick: LootRightClick | null = null;
+function lootTokenAt(event: MouseEvent) {
+  if (game.user.isGM || !started) return null;
   const rect = canvasElement?.getBoundingClientRect();
   const screen = canvas.app?.renderer?.screen;
   if (!rect?.width || !rect.height || !screen || !canvas.stage) return;
@@ -137,12 +134,9 @@ function contextLoot(event: MouseEvent) {
       && point.x <= token.document.x + token.w && point.y <= token.document.y + token.h));
   const target = contains(hovered) ? hovered : [...canvas.tokens.placeables].reverse().find(contains);
   const token = target?.document;
-  if (!canOffer(token)) {
-    for (const panel of panels.values()) if (!panel.disposed) void panel.close();
-    return;
-  }
-  if (event.type === "contextmenu" && pointerToken === token.uuid && Date.now() - pointerTime < 1000) return;
-  if (event.type === "pointerdown") { pointerToken = token.uuid; pointerTime = Date.now(); }
+  return canOffer(token) ? token : null;
+}
+function toggleLoot(token: any) {
   const panel = panels.get(token.uuid);
   if (panel && !panel.disposed) void panel.close();
   else void open(token);
@@ -150,14 +144,17 @@ function contextLoot(event: MouseEvent) {
 function bindCanvas() {
   markers?.destroy();
   markers = started ? new LootMarkers(token => eligible(token, lootEnvironment())) : null;
-  canvasElement?.removeEventListener("contextmenu", contextLoot, true);
-  canvasElement?.removeEventListener("pointerdown", contextLoot, true);
+  rightClick?.destroy();
   canvasElement = canvas.app?.canvas ?? canvas.app?.view;
-  canvasElement?.addEventListener("contextmenu", contextLoot, true);
-  canvasElement?.addEventListener("pointerdown", contextLoot, true);
+  // Window capture runs before document capture, including DAS's pointer handlers.
+  rightClick = new LootRightClick(window, { canvas: canvasElement, tokenAt: lootTokenAt, toggle: toggleLoot,
+    dismiss: () => { if (!game.user.isGM && started) for (const panel of panels.values()) if (!panel.disposed) void panel.close(); } });
 }
 
 Hooks.once("init", () => {
+  game.settings.register(MODULE_ID, "keepLinkedActor", {
+    name: "HL.KeepLinkedActorDefault", hint: "HL.KeepLinkedActorDefaultHint", scope: "world", config: true, type: Boolean, default: false
+  });
   game.settings.register(MODULE_ID, RULE_SETTING, { scope: "world", config: false, type: Object, default: {} });
   game.settings.register(MODULE_ID, "zeroHP", {
     name: "HL.ZeroHP", hint: "HL.ZeroHPHint", scope: "world", config: true, type: Boolean, default: true,
@@ -199,8 +196,7 @@ Hooks.on("canvasReady", () => { bindCanvas(); scanScene(); });
 Hooks.on("hoverToken", (token: any, hover: boolean) => { if (hover) hovered = token; else if (hovered === token) hovered = null; });
 Hooks.on("canvasTearDown", () => {
   markers?.destroy(); markers = null;
-  hovered = null; canvasElement?.removeEventListener("contextmenu", contextLoot, true);
-  canvasElement?.removeEventListener("pointerdown", contextLoot, true); canvasElement = null;
+  hovered = null; rightClick?.destroy(); rightClick = null; canvasElement = null;
   for (const panel of panels.values()) void panel.close(); panels.clear();
 });
 Hooks.on("renderTokenHUD", (hud: any, html: any) => {

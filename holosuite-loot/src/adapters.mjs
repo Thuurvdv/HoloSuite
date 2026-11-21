@@ -1,5 +1,5 @@
-import { actorKey, canonical, clone, itemQuantity, quantityPath, MODULE_ID, LootError, SerialQueue } from "./model.mjs";
-import { dndCurrency, dragonbaneCurrency, starWarsCurrency, swadeCurrency } from "./currency.mjs";
+import { actorKey, canonical, clone, itemQuantity, quantityPath, MODULE_ID, LootError, SerialQueue, keepLinkedActor } from "./model.mjs";
+import { dndCurrency, dragonbaneCurrency, moshCurrency, pf1Currency, starWarsCurrency, swadeCurrency } from "./currency.mjs";
 
 function snapshotItem(item) {
   const data = clone(item.toObject());
@@ -14,8 +14,38 @@ async function detachSource(token) {
   if (token.actorLink) throw new LootError("SourceChanged");
 }
 
+function validateSourceActor(token, source) {
+  if (source?.actorUuid && (!token.actorLink || actorKey(token.actor) !== source.actorUuid)) throw new LootError("SourceChanged");
+}
+
+async function prepareSource(token, source) {
+  if (source?.actorUuid) { validateSourceActor(token, source); return source; }
+  // Existing claims without an actor binding retain the original unlink policy.
+  if (!source && token.actorLink && keepLinkedActor(token)) return { actorUuid: actorKey(token.actor) };
+  await detachSource(token);
+  return {};
+}
+
 class EmbeddedItemAdapter {
   manual = false;
+  async reserveSource(token, _entry, claim) {
+    if (!claim.source?.actorUuid) return;
+    validateSourceActor(token, claim.source);
+    // Persist on the shared Actor so failed transfers also exclude other tokens
+    // after a reload or a GM authority change, until the original claim resumes.
+    const actor = token.actor;
+    const reserved = actor.getFlag(MODULE_ID, "linkedLootClaim");
+    if (reserved && (reserved.id !== claim.id || reserved.tokenUuid !== token.uuid)) throw new LootError("RecoveryRequired");
+    if (!reserved) await actor.setFlag(MODULE_ID, "linkedLootClaim", { id: claim.id, tokenUuid: token.uuid });
+    const stored = actor.getFlag(MODULE_ID, "linkedLootClaim");
+    if (stored?.id !== claim.id || stored.tokenUuid !== token.uuid) throw new LootError("RecoveryRequired");
+  }
+  async releaseSource(token, _entry, claim) {
+    if (!claim.source?.actorUuid) return;
+    validateSourceActor(token, claim.source);
+    const reserved = token.actor.getFlag(MODULE_ID, "linkedLootClaim");
+    if (reserved?.id === claim.id && reserved.tokenUuid === token.uuid) await token.actor.unsetFlag(MODULE_ID, "linkedLootClaim");
+  }
   received(actor, _entry, claim) {
     return actor.items.get(claim.itemId)?.getFlag(MODULE_ID, "claim") === claim.id;
   }
@@ -86,19 +116,20 @@ export class Dnd5eAdapter extends EmbeddedItemAdapter {
     if (entry.source?.ruleKey && entry.source.ruleKey !== `${token.actorId ?? token.actor?.id ?? ""}:${entry.source.itemId}`) {
       throw new LootError("SourceChanged");
     }
-    await detachSource(token);
-    if (entry.currency?.storage === "balance") return this.balanceCurrency.sourcePlan(token, entry);
+    const binding = await prepareSource(token);
+    if (entry.currency?.storage === "balance") return { ...this.balanceCurrency.sourcePlan(token, entry), ...binding };
     const item = token.actor.items.get(entry.source.itemId);
     const quantity = itemQuantity(item);
     const awarded = itemQuantity(entry.data);
     if (!this.eligible(item ?? {}) || quantity < awarded
       || (entry.source.ruleKey && item.type !== entry.data.type)) throw new LootError("SourceChanged");
-    return { itemId: item.id, before: quantity, after: quantity - awarded };
+    return { itemId: item.id, before: quantity, after: quantity - awarded, ...binding };
   }
   validateSourcePlan(token, entry, claim) {
+    validateSourceActor(token, claim.source);
     if (!entry.source?.ruleKey) return;
     const item = token.actor?.items.get(claim.source?.itemId);
-    if (token.actorLink || entry.source.ruleKey !== `${token.actorId ?? token.actor?.id ?? ""}:${item?.id}`
+    if ((token.actorLink && !claim.source?.actorUuid) || entry.source.ruleKey !== `${token.actorId ?? token.actor?.id ?? ""}:${item?.id}`
       || !this.eligible(item ?? {}) || item.type !== entry.data.type || itemQuantity(item) !== claim.source.before) {
       throw new LootError("SourceChanged");
     }
@@ -111,8 +142,7 @@ export class Dnd5eAdapter extends EmbeddedItemAdapter {
   async removeSource(token, entry, claim) {
     const source = claim.source;
     if (!source) return;
-    // A GM may have relinked the corpse since reservation; never edit a shared Actor.
-    await detachSource(token);
+    await prepareSource(token, source);
     if (source.currency) return this.balanceCurrency.debit(token, entry, claim);
     const item = token.actor.items.get(source.itemId);
     if (!item) return; // A completed deletion is idempotent across a failed ledger write.
@@ -147,22 +177,22 @@ class ManualLootAdapter extends EmbeddedItemAdapter {
   }
 
   async sourceClaim(token, entry) {
-    await detachSource(token);
-    const source = { itemId: entry.source?.itemId };
+    const source = { itemId: entry.source?.itemId, ...await prepareSource(token) };
     this.validateSourcePlan(token, entry, { source });
     return source;
   }
   validateSourcePlan(token, entry, claim) {
+    validateSourceActor(token, claim.source);
     const id = claim.source?.itemId;
     const item = token.actor?.items.get(id);
-    if (token.actorLink || !entry.wholeItem || id !== entry.source?.itemId
+    if ((token.actorLink && !claim.source?.actorUuid) || !entry.wholeItem || id !== entry.source?.itemId
       || entry.source?.ruleKey !== `${token.actorId ?? token.actor?.id ?? ""}:${id}`
       || !this.eligible(item) || canonical(this.snapshot(item)) !== canonical(entry.data)) {
       throw new LootError("SourceChanged");
     }
   }
   async removeSource(token, entry, claim) {
-    await detachSource(token);
+    await prepareSource(token, claim.source);
     const id = claim.source?.itemId;
     if (!id || !entry.wholeItem || entry.source?.ruleKey !== `${token.actorId ?? token.actor?.id ?? ""}:${id}`) {
       throw new LootError("RecoveryRequired");
@@ -409,9 +439,58 @@ class CallOfCthulhuAdapter extends InventoryAdapter {
   allowsStoredItem(item) { return ["armor", "book", "item", "weapon"].includes(item?.type); }
 }
 
+class MothershipAdapter extends InventoryAdapter {
+  id = "mosh";
+  balanceCurrency = moshCurrency;
+  currencySnapshotVersion = 2;
+  sourceActor(actor) { return actor.type === "creature" || (actor.type === "character" && !actor.hasPlayerOwner); }
+  hitPoints() { return null; }
+  defeated(actor) {
+    const { health, hits, netHP } = actor.system ?? {};
+    if (globalThis.game?.settings?.get("mosh", "firstEdition") === false) {
+      return health?.max > 0 && Number.isFinite(health.value) && health.value <= 0;
+    }
+    return (hits?.max > 0 && hits.value >= hits.max)
+      || (netHP?.max > 0 && Number.isFinite(netHP.value) && netHP.value <= 0);
+  }
+  allowsStoredItem(item) { return ["item", "weapon", "armor"].includes(item?.type); }
+  carriedData(data) {
+    if ("equipped" in data.system) data.system.equipped = false;
+    return data;
+  }
+}
+
+class Pathfinder1Adapter extends InventoryAdapter {
+  id = "pf1";
+  balanceCurrency = pf1Currency;
+  currencySnapshotVersion = 2;
+  hitPoints() { return null; } // Zero HP is disabled. Negative HP can still be dying.
+  defeated(actor) {
+    const hp = actor.system?.attributes?.hp;
+    const constitution = actor.system?.abilities?.con?.total;
+    return hp?.max > 0 && Number.isFinite(hp.value) && constitution > 0 && hp.value <= -constitution;
+  }
+  allowsStoredItem(item) {
+    return ["weapon", "equipment", "consumable", "loot", "implant", "container"].includes(item?.type)
+      && item.isPhysical !== false && item.system?.weaponSubtype !== "unarmed" && item.system?.weaponType !== "natural";
+  }
+  carriedData(data) {
+    if ("equipped" in data.system) data.system.equipped = false;
+    if ("carried" in data.system) data.system.carried = true;
+    if (data.system.links?.children) data.system.links.children = [];
+    return data;
+  }
+  preview(entry) {
+    const data = entry.data;
+    if (data.system.identified !== false) return super.preview(entry);
+    return { name: data.system.unidentified?.name || "Unidentified Item", img: data.img, type: "loot",
+      system: { quantity: itemQuantity(data), description: { value: data.system.description?.unidentified ?? "" } } };
+  }
+}
+
 const adapters = new Map([
   new Dnd5eAdapter(), new Pf2eAdapter(), new Sf2eAdapter(), new SwadeAdapter(), new DragonbaneAdapter(),
-  new WarhammerAdapter(), new StarWarsAdapter(), new CallOfCthulhuAdapter()
+  new WarhammerAdapter(), new StarWarsAdapter(), new CallOfCthulhuAdapter(), new MothershipAdapter(), new Pathfinder1Adapter()
 ].map(adapter => [adapter.id, adapter]));
 export function registerAdapter(id, adapter) { adapters.set(id, adapter); }
 export function getAdapter(id) { return adapters.get(id) ?? manualAdapter; }
