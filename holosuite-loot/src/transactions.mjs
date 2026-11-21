@@ -10,6 +10,7 @@ function awardEntry(entry) {
 /** Injected document operations keep ordering and crash recovery testable without Foundry. */
 export class LootTransactions {
   queue = new SerialQueue();
+  sourceQueue = new SerialQueue();
   constructor(io) { this.io = io; }
   async collected(token, actor, entry, adapter) {
     const awarded = awardEntry(entry);
@@ -24,9 +25,14 @@ export class LootTransactions {
   async execute(request, user) {
     if (!validLootRequest(request)) throw new LootError("InvalidRequest");
     return this.queue.run(request.tokenUuid, async () => {
-      const io = this.io;
-      const token = await io.token(request.tokenUuid);
+      const token = await this.io.token(request.tokenUuid);
       if (!token) throw new LootError("Unavailable");
+      // Linked tokens have separate ledgers but mutate the same inventory.
+      return this.sourceQueue.run(actorKey(token.actor) ?? token.uuid, () => this.executeToken(request, user, token));
+    });
+  }
+  async executeToken(request, user, token) {
+      const io = this.io;
       const check = (actor, environment = io.environment()) => {
         if (!io.authority()) throw new LootError("NoGM");
         validateAccess(token, user, environment, actor);
@@ -40,6 +46,19 @@ export class LootTransactions {
       const adapter = io.adapter();
       if (!adapter) throw new LootError("Unsupported");
       let state = await io.load(token, adapter);
+      // A crash after the ledger commit can leave the shared Actor reserved.
+      // Release only after checking the authoritative ledger of its owner.
+      const reserved = token.actorLink && token.actor.getFlag?.(io.moduleId, "linkedLootClaim");
+      if (reserved) {
+        const owner = reserved.tokenUuid === token.uuid ? token : await io.token(reserved.tokenUuid);
+        if (owner?.actorLink && actorKey(owner.actor) === actorKey(token.actor)) {
+          const ownerState = owner === token ? state : await io.load(owner, adapter);
+          if (ownerState.entries.some(e => e.claim?.id === reserved.id && e.taken
+            && e.claim.source?.actorUuid === actorKey(token.actor))) {
+            await token.actor.unsetFlag(io.moduleId, "linkedLootClaim");
+          }
+        }
+      }
       // Resume persisted claims before displaying or granting anything new.
       for (const entry of state.entries.filter(e => e.claim && !e.taken)) {
         check();
@@ -49,10 +68,12 @@ export class LootTransactions {
           ? adapter.received(actor, entry, entry.claim)
           : actor.items.get(entry.claim.itemId)?.getFlag(io.moduleId, "claim") === entry.claim.id);
         if (received) {
+          await adapter.reserveSource?.(token, entry, entry.claim);
           await adapter.removeSource?.(token, entry, entry.claim);
           const next = clone(state);
           next.entries.find(e => e.id === entry.id).taken = true;
           await io.save(token, next); state = next;
+          await adapter.releaseSource?.(token, entry, entry.claim);
           await this.collected(token, actor, entry, adapter);
           await adapter.cleanup?.(token, actor, entry, entry.claim);
         }
@@ -98,6 +119,7 @@ export class LootTransactions {
           }
           check(actor);
           adapter.validateSourcePlan?.(token, entry, entry.claim);
+          await adapter.reserveSource?.(token, entry, entry.claim);
           if (entry.claim.quantityRoll?.quantity !== 0) {
             await adapter.create(actor, awardEntry(entry), entry.claim, async () => {
               const attempt = entry.currency?.storage === "balance" ? "currencyAttempted" : "itemAttempted";
@@ -111,6 +133,7 @@ export class LootTransactions {
           const next = clone(state);
           next.entries.find(e => e.id === entry.id).taken = true;
           await io.save(token, next); state = next;
+          await adapter.releaseSource?.(token, entry, entry.claim);
           await this.collected(token, actor, entry, adapter);
           await adapter.cleanup?.(token, actor, entry, entry.claim);
         } catch (error) {
@@ -121,6 +144,5 @@ export class LootTransactions {
         }
       }
       return { ...io.summary(token, state), failures };
-    });
   }
 }

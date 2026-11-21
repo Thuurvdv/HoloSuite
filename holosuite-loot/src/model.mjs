@@ -29,6 +29,11 @@ export function configFor(token) {
   return token.getFlag(MODULE_ID, "config") ?? token.actor?.getFlag(MODULE_ID, "config")
     ?? { mode: "automatic", source: "inventory" };
 }
+export function keepLinkedActor(token) {
+  const configured = configFor(token).keepLinkedActor;
+  return typeof configured === "boolean" ? configured
+    : globalThis.game?.settings?.get(MODULE_ID, "keepLinkedActor") === true;
+}
 export const actorKey = actor => actor?.uuid ?? actor?.id;
 export const canonical = value => JSON.stringify(value, (_key, part) => part && typeof part === "object" && !Array.isArray(part)
   ? Object.fromEntries(Object.entries(part).sort(([a], [b]) => a.localeCompare(b))) : part);

@@ -98,6 +98,8 @@ test('Star Wars FFG detects its defeat status and wounds above the threshold', (
 test('native inventory adapters exclude actor abilities while accepting physical loot', () => {
   const cases = [
     ['pf2e', ['armor', 'consumable', 'treasure'], ['action', 'feat', 'lore', 'melee', 'spell']],
+    ['pf1', ['equipment', 'consumable', 'loot', 'container'], ['attack', 'buff', 'class', 'feat', 'race', 'spell']],
+    ['mosh', ['item', 'weapon', 'armor'], ['skill', 'class', 'ability', 'condition', 'crew']],
     ['dragonbane', ['item', 'material', 'weapon'], ['skill', 'spell', 'ability', 'recipe']],
     ['wfrp4e', ['money', 'trapping', 'armour'], ['skill', 'talent', 'trait', 'spell', 'prayer']],
     ['starwarsffg', ['gear', 'armour', 'itemattachment'], ['ability', 'talent', 'forcepower']],
@@ -108,6 +110,23 @@ test('native inventory adapters exclude actor abilities while accepting physical
     for (const type of physical) assert.equal(adapter.eligible({ type, system: { quantity: 1 } }), true, `${system} ${type}`);
     for (const type of excluded) assert.equal(adapter.eligible({ type, system: { quantity: 1 } }), false, `${system} ${type}`);
   }
+});
+
+test('Mothership waits for the final wound and Pathfinder 1e distinguishes dying from dead', () => {
+  const mosh = getAdapter('mosh');
+  const creature = { type: 'creature', system: { health: { value: 0, max: 10 }, hits: { value: 1, max: 3 },
+    netHP: { value: 10, max: 30 } } };
+  assert.equal(mosh.sourceActor(creature), true);
+  assert.equal(mosh.sourceActor({ type: 'character', hasPlayerOwner: true }), false);
+  assert.equal(mosh.defeated(creature), false);
+  creature.system.netHP.value = 0;
+  assert.equal(mosh.defeated(creature), true);
+  const pf1 = getAdapter('pf1');
+  const npc = { system: { attributes: { hp: { value: -5, max: 15 } }, abilities: { con: { total: 12 } } } };
+  assert.equal(pf1.defeated(npc), false);
+  npc.system.attributes.hp.value = -12;
+  assert.equal(pf1.defeated(npc), true);
+  assert.equal(pf1.eligible({ type: 'weapon', system: { quantity: 1, weaponSubtype: 'unarmed' } }), false);
 });
 
 test('Pathfinder auto loot distinguishes defeated NPCs from dying or unconscious creatures', () => {

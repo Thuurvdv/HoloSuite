@@ -63,6 +63,8 @@ test('manual loot only transfers GM-selected whole items and recovers a failed s
     const request = (user, action = 'view') => service.execute({ action, tokenUuid: token.uuid, actorId: user.id }, user);
 
     await save('enabled', ['gear']);
+    await saveManualLoot(token, adapter, 'enabled', ['gear'], true);
+    assert.equal(token.flags.config.keepLinkedActor, true);
     assert.deepEqual(manualLootRows(token, adapter).map(row => [row.id, row.selected]), [['gear', true], ['skill', false]]);
     assert.deepEqual((await request(players[0])).entries.map(entry => entry.data.name), ['Tool']);
     assert.equal((await request(players[0], 'all')).failures.length, 1);
@@ -75,6 +77,7 @@ test('manual loot only transfers GM-selected whole items and recovers a failed s
     assert.deepEqual([...source.items.keys()], ['skill']);
 
     await save('disabled', ['skill']);
+    assert.equal(token.flags.config.keepLinkedActor, true);
     token.flags.config.mode = 'enabled';
     await assert.rejects(request(players[0]), { code: 'Unavailable' });
     game.user = players[0];

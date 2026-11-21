@@ -1,5 +1,5 @@
 import { getLegacyApplicationBase } from "../../shared/src/application-base";
-import { MODULE_ID, resolveCharacter, actorKey, canReceiveLoot, configFor, itemQuantity } from "./model.mjs";
+import { MODULE_ID, resolveCharacter, actorKey, canReceiveLoot, configFor, itemQuantity, keepLinkedActor } from "./model.mjs";
 declare const canvas: any;
 import { LootPopupPresentation, OutsideDismissal } from "./popup";
 import { canRefreshInventory, editRules, manualLootRows, refreshInventory, ruleRows, saveManualLoot } from "./persistence";
@@ -165,6 +165,7 @@ export class LootConfig extends Base {
   constructor(token: any, adapter: any, queue: any) {
     super({ id: `hololoot-config-${token.id}` }); this.token = token; this.adapter = adapter; this.queue = queue;
     this.config = structuredClone(configFor(token));
+    this.config.keepLinkedActor = keepLinkedActor(token);
   }
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, { title: t("Title"), classes: ["holosuite-loot-window", "holosuite-loot-config"],
@@ -187,6 +188,7 @@ export class LootConfig extends Base {
     }));
     const canEdit = isAuthority();
     return { name: this.token.name, theme: game.settings.get(MODULE_ID, "panelTheme"), busy: this.busy, automatic, rows, canEdit, manual,
+      keepLinkedActor: this.config.keepLinkedActor,
       saveDisabled: this.busy || (manual && !canEdit), canRefresh: !manual && canEdit && canRefreshInventory(this.token, this.adapter),
       scopes: ["token", "actor", "global"].map(value => ({ value, label: t(`Scope.${value}`), selected: this.scope === value })),
       modes: (automatic ? ["automatic", "enabled", "disabled"] : ["enabled", "disabled"])
@@ -197,6 +199,7 @@ export class LootConfig extends Base {
     this.dismissal?.destroy();
     this.dismissal = new OutsideDismissal(root.closest<HTMLElement>(".window-app, .application") ?? root, () => { if (!this.busy) void this.close(); });
     root.querySelector<HTMLSelectElement>('[name="mode"]')?.addEventListener("change", (event: any) => { this.config.mode = event.target.value; });
+    root.querySelector<HTMLInputElement>('[name="keepLinkedActor"]')?.addEventListener("change", (event: any) => { this.config.keepLinkedActor = event.target.checked; });
     root.querySelector("[data-save]")?.addEventListener("click", () => {
       const selected = Array.from(root.querySelectorAll<HTMLInputElement>("[data-manual-item]:checked"), input => input.value);
       void this.save(selected);
@@ -277,8 +280,8 @@ export class LootConfig extends Base {
     try {
       const mode = this.config.mode === "automatic" && (this.adapter.manual || !game.settings.get(MODULE_ID, "zeroHP"))
         ? "disabled" : this.config.mode;
-      await this.queue.run(this.token.uuid, () => this.adapter.manual ? saveManualLoot(this.token, this.adapter, mode, selected)
-        : this.token.setFlag(MODULE_ID, "config", { ...configFor(this.token), mode }));
+      await this.queue.run(this.token.uuid, () => this.adapter.manual ? saveManualLoot(this.token, this.adapter, mode, selected, this.config.keepLinkedActor)
+        : this.token.setFlag(MODULE_ID, "config", { ...configFor(this.token), mode, keepLinkedActor: this.config.keepLinkedActor }));
       await this.close();
     } catch (error) { report(error); }
     finally { this.busy = false; if (this.rendered) this.render(true); }

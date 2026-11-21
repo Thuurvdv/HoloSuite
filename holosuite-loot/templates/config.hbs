@@ -3,6 +3,8 @@
     <div class="hl-config-content">
       <h2 class="hl-config-title">{{localize 'HL.Title'}}{{#if automatic}} <span class="hl-auto-warning" tabindex="0" title="{{localize 'HL.AutoWarning'}}" aria-label="{{localize 'HL.AutoWarning'}}"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span>{{/if}}</h2>
       <label class="hl-destination">{{localize 'HL.Lootable'}}<select name="mode">{{#each modes}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+      <label class="hl-destination"><input type="checkbox" name="keepLinkedActor" {{#if keepLinkedActor}}checked{{/if}} {{#if busy}}disabled{{/if}}> {{localize 'HL.KeepLinkedActor'}}</label>
+      <p class="hl-message">{{localize 'HL.KeepLinkedActorHint'}}</p>
       {{#if manual}}
       <section class="hl-rules" aria-label="{{localize 'HL.ManualItems'}}">
         <h3>{{localize 'HL.ManualItems'}}</h3>

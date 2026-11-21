@@ -89,6 +89,33 @@ test('Dragonbane credits and debits the three native coin balances', async () =>
   assert.equal(f.destination.items.size, 0);
 });
 
+test('Mothership transfers formatted credit balances as text and Pathfinder 1e transfers carried coins', async () => {
+  for (const id of ['mosh', 'pf1']) {
+    const f = fixture();
+    const adapter = getAdapter(id);
+    if (id === 'mosh') {
+      f.source.type = 'character';
+      f.source.system = { credits: { value: '1,200' } };
+      f.destination.system = { credits: { value: '' } };
+      assert.deepEqual(adapter.currencyEntries({ type: 'character', system: { credits: { value: '50 plus vouchers' } } }), []);
+    } else {
+      f.source.system.currency.gp = 16;
+      assert.deepEqual(adapter.currencyEntries(f.source).map(entry => entry.currency.unit), ['gp']);
+    }
+    f.io.adapter = () => adapter;
+    f.io.environment = () => ({ sourceActor: actor => adapter.sourceActor?.(actor), visible: () => true });
+    await f.io.save(f.token, { entries: adapter.currencyEntries(f.source).map(entry => ({ ...entry, id: 'money0' })) });
+    assert.deepEqual((await f.service.execute(f.request(), f.user)).failures, []);
+    if (id === 'mosh') {
+      assert.equal(f.source.system.credits.value, '0');
+      assert.equal(f.destination.system.credits.value, '1200');
+    } else {
+      assert.equal(f.source.system.currency.gp, 0);
+      assert.equal(f.destination.system.currency.gp, 19);
+    }
+  }
+});
+
 test('Star Wars credits transfer to the native balance once, including after a failed commit', async () => {
   const f = fixture();
   const adapter = getAdapter('starwarsffg');

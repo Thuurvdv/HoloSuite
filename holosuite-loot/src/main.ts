@@ -18,7 +18,7 @@ const panels = new Map<string, LootPanel>();
 let markers: LootMarkers | null = null;
 let started = false;
 let openAttempt = 0;
-const adapter = () => getAdapter(game.system.id);
+const adapter = (): any => getAdapter(game.system.id);
 const lootEnvironment = () => environment(adapter());
 const configurable = (token: any) => token?.actor && (adapter().manual ? !!token.actor.items : (adapter().sourceActor?.(token.actor) ?? token.actor.type === "npc"));
 const defaultRecipient = (user: any, system: any, token: any) =>
@@ -158,6 +158,9 @@ function bindCanvas() {
 }
 
 Hooks.once("init", () => {
+  game.settings.register(MODULE_ID, "keepLinkedActor", {
+    name: "HL.KeepLinkedActorDefault", hint: "HL.KeepLinkedActorDefaultHint", scope: "world", config: true, type: Boolean, default: false
+  });
   game.settings.register(MODULE_ID, RULE_SETTING, { scope: "world", config: false, type: Object, default: {} });
   game.settings.register(MODULE_ID, "zeroHP", {
     name: "HL.ZeroHP", hint: "HL.ZeroHPHint", scope: "world", config: true, type: Boolean, default: true,

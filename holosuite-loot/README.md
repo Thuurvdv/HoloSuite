@@ -22,6 +22,10 @@ Warhammer Fantasy Roleplay 4e
 Star Wars FFG
 Call of Cthulhu 7e 
 
+Mothership (MoSh 0.6.1) supports Foundry V13–V14. It handles gear, the final wound, and numeric credit balances on NPCs built with the character sheet.
+
+Pathfinder 1e supports Foundry V13. It handles physical gear and carried coins, and distinguishes dying NPCs from NPCs at their lethal HP threshold.
+
 Install using the [Foundry manifest](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/holosuite-loot/module.json), then enable HoloSuite Core and HoloSuite Loot in your world.
 
 ## Using HoloSuite Loot
@@ -29,6 +33,10 @@ Install using the [Foundry manifest](https://raw.githubusercontent.com/Thuurvdv/
 **Players** right-click a lootable NPC, click an item to inspect it, then click **Loot** or **Loot All** to collect. Stay within loot range and make sure a GM is connected.
 
 **GMs** open **Loot** from the NPC's token HUD. Set when the NPC becomes lootable, or select items under **Inventory loot rules** to adjust what drops. If you edit the NPC's inventory after loot has been prepared, click the refresh icon to sync the corpse.
+
+The GM's Loot panel includes **Keep linked actor**. When checked, looting a linked token removes items and currency from its world actor and keeps the token linked. Every token linked to that actor shares the depleted inventory. When unchecked, looting unlinks the token and depletes its synthetic inventory, preserving the world actor. Already unlinked tokens are unaffected.
+
+Use **Keep linked actor by default** in the module's world settings to choose the default for tokens without a saved preference. It starts disabled to preserve existing behavior. Saving a token's Loot panel stores its own preference. Changing either option does not redirect transfers already in progress or relink tokens that were previously unlinked.
 
 **In other systems**, open **Loot**, set the token to **Always lootable**, check the items players can take, and click **Save**. Items transfer whole, with their system data intact. To update the selection or sync changed items, reopen **Loot** and save again.
 

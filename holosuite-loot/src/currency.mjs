@@ -7,7 +7,7 @@ const received = (actor, entry, claim, source = false) =>
 
 /** Coin balances and their receipts are written together on the same Actor.
  * The Actor queue also prevents two different corpses overwriting one balance. */
-function balanceCurrency({ units, amountOf, path, valid, name }) {
+function balanceCurrency({ units, amountOf, path, valid, name, encode = value => value }) {
   return {
     entries(actor) {
       return units.filter(unit => valid(amountOf(actor, unit)) && amountOf(actor, unit) > 0).map(unit => {
@@ -30,7 +30,7 @@ function balanceCurrency({ units, amountOf, path, valid, name }) {
         const { unit, amount } = entry.currency;
         const before = amountOf(actor, unit);
         if (!units.includes(unit) || !valid(amount) || !amount || !valid(before) || !valid(before + amount)) throw new LootError("CurrencyChanged");
-        await actor.update({ [path(unit)]: before + amount,
+        await actor.update({ [path(unit)]: encode(before + amount),
           [`flags.${MODULE_ID}.currencyReceipts.${claim.id}`]: receipt(entry) });
         if (!received(actor, entry, claim)) throw new LootError("TransferFailed");
       });
@@ -47,7 +47,7 @@ function balanceCurrency({ units, amountOf, path, valid, name }) {
         if (received(actor, entry, claim, true)) return;
         const plan = claim.source;
         if (amountOf(actor, plan.currency) !== plan.before) throw new LootError("CurrencyChanged");
-        await actor.update({ [path(plan.currency)]: plan.after,
+        await actor.update({ [path(plan.currency)]: encode(plan.after),
           [`flags.${MODULE_ID}.currencyDebits.${claim.id}`]: receipt(entry) });
         if (!received(actor, entry, claim, true)) throw new LootError("CurrencyChanged");
       });
@@ -88,6 +88,30 @@ export const starWarsCurrency = balanceCurrency({
   path: () => "system.stats.credits.value",
   valid: value => Number.isSafeInteger(value) && value >= 0,
   name: () => "Credits"
+});
+
+export const moshCurrency = balanceCurrency({
+  units: ["credits"],
+  amountOf: actor => {
+    const value = actor?.system?.credits?.value;
+    if (actor?.type !== "character" || (typeof value !== "number" && typeof value !== "string")) return undefined;
+    if (typeof value === "number") return value;
+    const text = value.trim();
+    if (!text) return 0;
+    if (/^(?:\d+|\d{1,3}(?:,\d{3})+)$/.test(text)) return Number(text.replaceAll(",", ""));
+  },
+  path: () => "system.credits.value",
+  valid: value => Number.isSafeInteger(value) && value >= 0,
+  name: () => "Credits",
+  encode: String
+});
+
+export const pf1Currency = balanceCurrency({
+  units: ["cp", "sp", "gp", "pp"],
+  amountOf: (actor, unit) => actor?.system?.currency?.[unit],
+  path: unit => `system.currency.${unit}`,
+  valid: value => Number.isSafeInteger(value) && value >= 0,
+  name: unit => unit.toUpperCase()
 });
 
 const dragonbaneCoinLabels = { gc: "gold", sc: "silver", cc: "copper" };
