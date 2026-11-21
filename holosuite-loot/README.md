@@ -32,6 +32,8 @@ Install using the [Foundry manifest](https://raw.githubusercontent.com/Thuurvdv/
 
 **Players** right-click a lootable NPC, click an item to inspect it, then click **Loot** or **Loot All** to collect. Stay within loot range and make sure a GM is connected.
 
+Right-clicking a lootable NPC opens or closes the Loot popup and consumes the complete gesture, preventing another module's token menu from opening alongside it. GM right-click controls and clicks on other tokens remain available.
+
 **GMs** open **Loot** from the NPC's token HUD. Set when the NPC becomes lootable, or select items under **Inventory loot rules** to adjust what drops. If you edit the NPC's inventory after loot has been prepared, click the refresh icon to sync the corpse.
 
 The GM's Loot panel includes **Keep linked actor**. When checked, looting a linked token removes items and currency from its world actor and keeps the token linked. Every token linked to that actor shares the depleted inventory. When unchecked, looting unlinks the token and depletes its synthetic inventory, preserving the world actor. Already unlinked tokens are unaffected.
