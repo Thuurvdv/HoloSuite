@@ -1,4 +1,4 @@
-import { MODULE_ID, LootError, canonical, itemQuantity, setItemQuantity, configFor, SerialQueue } from "./model.mjs";
+import { MODULE_ID, LootError, canonical, itemQuantity, setItemQuantity, configFor, SerialQueue, actorKey } from "./model.mjs";
 import { RULE_SETTING, isDiceRule, parseRule, ruleKeys, resolveRule, resolveQuantity, withRule } from "./rules.mjs";
 import { isAuthority } from "./permissions";
 declare const game: any;
@@ -224,11 +224,12 @@ export function manualLootRows(token: any, adapter: any) {
   }));
 }
 
-export async function saveManualLoot(token: any, adapter: any, mode: string, ids: string[]) {
+export async function saveManualLoot(token: any, adapter: any, mode: string, ids: string[], keepLinkedActor?: boolean) {
   if (!isAuthority()) throw new LootError("RuleGM");
   if (!adapter.manual || !["enabled", "disabled"].includes(mode)) throw new LootError("InvalidRequest");
   await refreshInventory(token, adapter, { mode, ids: new Set(ids) });
-  await token.setFlag(MODULE_ID, "config", { mode, source: "inventory" });
+  await token.setFlag(MODULE_ID, "config", { ...configFor(token), mode, source: "inventory",
+    ...(typeof keepLinkedActor === "boolean" ? { keepLinkedActor } : {}) });
 }
 
 /** Called inside the pickup queue. Preserve the authoritative claim ledger and
@@ -247,7 +248,8 @@ export async function refreshInventory(token: any, adapter: any, selection?: Man
   const retained = state.entries.filter((entry: any) => entry.claim || entry.taken);
   const sourceKey = (entry: any) => entry.claim?.source?.itemId
     || (entry.claim?.source?.currency && `currency:${entry.claim.source.currency}`);
-  if ((retained.length && token.actorLink) || retained.some((entry: any) => !sourceKey(entry))) {
+  if ((token.actorLink && retained.some((entry: any) => entry.claim?.source?.actorUuid !== actorKey(token.actor)))
+    || retained.some((entry: any) => !sourceKey(entry))) {
     throw new LootError("RefreshUntracked");
   }
   const reserved = new Set(retained.filter((entry: any) => !entry.taken).map(sourceKey));
@@ -394,7 +396,7 @@ export function summary(token: any, state: any) {
     entries: state.entries.filter((entry: any) => !entry.taken && !entry.hidden).map((entry: any) => {
       const data = { ...entry.data, system: entry.data.system ?? {} };
       const unidentified = data.system.identified === false || data.system.identification?.status === "unidentified";
-      const description = unidentified ? data.system.unidentified?.description
+      const description = unidentified ? data.system.unidentified?.description ?? data.system.description?.unidentified
         : typeof data.system.description === "string" ? data.system.description : data.system.description?.value;
       const rarity = typeof data.system.rarity === "string" ? data.system.rarity
         : typeof data.system.traits?.rarity === "string" ? data.system.traits.rarity : "";

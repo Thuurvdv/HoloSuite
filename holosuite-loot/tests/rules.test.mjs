@@ -255,6 +255,21 @@ test('scoped bulk rules persist rolls and protect configured loot through collec
     assert.deepEqual(afterPending[0].claim, quest.claim);
     assert.equal(afterPending[0].data.system.quantity, 1);
 
+    // A ledger bound to this linked actor can refresh without unlinking it.
+    const kept = token('kept', other, true);
+    kept.flags.config = { mode: 'enabled', keepLinkedActor: true };
+    const keptState = await loadState(kept, adapter);
+    keptState.entries[0].claim = { id: 'linked-pending', actorId: players[0].id,
+      source: { itemId: 'ammo-copy', before: 7, after: 5, actorUuid: other.id } };
+    await saveState(kept, keptState);
+    await refresh(kept);
+    assert.deepEqual((await loadState(kept, adapter)).entries.find(e => e.claim)?.claim, keptState.entries[0].claim);
+    keptState.entries[0].taken = true;
+    await saveState(kept, keptState);
+    await refresh(kept);
+    assert.equal(kept.actorLink, true);
+    assert.equal((await loadState(kept, adapter)).entries.filter(e => e.taken).length, 1);
+
     original.actorLink = true;
     await assert.rejects(refresh(original), { code: 'RefreshUntracked' });
     original.actorLink = false;

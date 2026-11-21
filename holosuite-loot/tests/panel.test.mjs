@@ -3,6 +3,38 @@ import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
 
+test('GM loot configuration inherits the default and saves explicit per-token preferences', async () => {
+  const original = { game: globalThis.game, foundry: globalThis.foundry, Application: globalThis.Application, ui: globalThis.ui };
+  let worldDefault = true;
+  globalThis.game = { user: { isGM: true }, settings: { get: (_module, key) => key === 'keepLinkedActor' ? worldDefault : true },
+    i18n: { localize: key => key } };
+  globalThis.foundry = {};
+  globalThis.Application = class { render() {} async close() {} };
+  globalThis.ui = { notifications: { warn(message) { assert.fail(message); } } };
+  try {
+    const compiled = await build({ entryPoints: [fileURLToPath(new URL('../src/ui.ts', import.meta.url))],
+      bundle: true, write: false, format: 'esm', platform: 'browser' });
+    const { LootConfig } = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputFiles[0].text).toString('base64')}#linked-config`);
+    let config = { mode: 'enabled', source: 'inventory', customField: 'preserved' };
+    const token = { id: 'corpse', uuid: 'Scene.scene.Token.corpse', getFlag: () => structuredClone(config),
+      async setFlag(_module, key, value) { assert.equal(key, 'config'); config = structuredClone(value); } };
+    const queue = { run: async (_key, work) => work() };
+    const inherited = new LootConfig(token, {}, queue);
+    assert.equal(inherited.config.keepLinkedActor, true);
+    inherited.config.keepLinkedActor = false;
+    await inherited.save();
+    assert.equal(config.keepLinkedActor, false); assert.equal(config.customField, 'preserved');
+    assert.equal(new LootConfig(token, {}, queue).config.keepLinkedActor, false);
+    const enabled = new LootConfig(token, {}, queue);
+    enabled.config.keepLinkedActor = true;
+    await enabled.save(); worldDefault = false;
+    assert.equal(new LootConfig(token, {}, queue).config.keepLinkedActor, true);
+    game.user.isGM = false;
+    enabled.busy = false; enabled.config.keepLinkedActor = false;
+    await enabled.save(); assert.equal(config.keepLinkedActor, true);
+  } finally { Object.assign(globalThis, original); }
+});
+
 test('an invalidation during a pending view or transfer fetches the latest state instead of leaving stale loot visible', async () => {
   const original = { game: globalThis.game, foundry: globalThis.foundry, Application: globalThis.Application };
   globalThis.game = { settings: { get: () => true }, actors: { contents: [{ id: "hero", testUserPermission: () => true }] }, user: {}, i18n: { localize: key => key } };
