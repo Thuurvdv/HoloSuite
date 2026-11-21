@@ -491,7 +491,9 @@ export function createGalaxyMapViewClass(deps: any) {
         this._attachPartListeners("main", html, options);
         this._observeViewport(html);
         const viewport = html.querySelector(".gmf-map-viewport");
-        if (viewport && context.hasOrbits) this._orbitLayer = mountOrbitLayer(viewport, context.orbitLayout);
+        if (viewport && context.hasOrbits) this._orbitLayer = mountOrbitLayer(viewport, context.orbitLayout, {
+          members: context.map.systems, factions: context.map.factions
+        });
         // Part listeners run before Foundry has mounted the application window.
         // A cached background can already have dimensions, so size it only here.
         this._applyViewportTransform(html);
