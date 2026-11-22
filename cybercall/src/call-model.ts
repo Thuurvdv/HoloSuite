@@ -130,15 +130,12 @@ function isDefaultIdentityImage(source: string) {
 
 export function getUserTokenImage(user: any) {
   if (!user) return "";
-  const globalGame = (globalThis as any).game;
-  const globalCanvas = (globalThis as any).canvas;
+  const globalGame = typeof game !== "undefined" ? game : (globalThis as any).game;
+  const globalCanvas = typeof canvas !== "undefined" ? canvas : (globalThis as any).canvas;
   const userAvatar = String(user.avatar ?? user._source?.avatar ?? "").trim();
   if (user.isGM === true) return isDefaultIdentityImage(userAvatar) ? "" : userAvatar;
-  const characterReference = user.character ?? user.characterId ?? user._source?.character;
-  const characterId = typeof characterReference === "string"
-    ? characterReference
-    : String(characterReference?.id ?? characterReference?._id ?? "");
   const actor = getUserCharacter(user);
+  const characterId = String(actor?.id ?? actor?._id ?? "");
   const placeables = Array.isArray(globalCanvas?.tokens?.placeables) ? globalCanvas.tokens.placeables : [];
   const controlled = String(globalGame?.user?.id ?? "") === String(user.id ?? "")
     ? (globalCanvas?.tokens?.controlled ?? [])
@@ -152,7 +149,10 @@ export function getUserTokenImage(user: any) {
     const tokenActor = token?.actor ?? token?.document?.actor;
     return Number(tokenActor?.ownership?.[user.id] ?? 0) >= 3;
   });
-  const tokenImage = [...controlled, ...activeTokens, actorToken, ownedToken]
+  const controlledCharacterTokens = actor ? controlled.filter((token: any) =>
+    String(token?.actor?.id ?? token?.document?.actorId ?? token?.actorId ?? "") === characterId
+  ) : controlled;
+  const tokenImage = [...controlledCharacterTokens, ...activeTokens, actorToken, ...(actor ? [] : [ownedToken])]
     .filter(Boolean)
     .map(getTokenImage)
     .find(Boolean) ?? "";
@@ -173,17 +173,34 @@ export function getUserTokenImage(user: any) {
 
 export function getUserCharacter(user: any) {
   if (!user) return null;
-  const globalGame = (globalThis as any).game;
-  const characterReference = user.character ?? user.characterId ?? user._source?.character;
-  const characterId = typeof characterReference === "string"
-    ? characterReference
-    : String(characterReference?.id ?? characterReference?._id ?? "");
-  return (characterId ? globalGame?.actors?.get?.(characterId) : null)
-    ?? (typeof characterReference === "object" ? characterReference : null);
+  const globalGame = typeof game !== "undefined" ? game : (globalThis as any).game;
+  const references = [user.character, user.characterId, user._source?.character];
+  for (const reference of references) {
+    const id = typeof reference === "string" ? reference : reference?.id ?? reference?._id;
+    const actor = id ? globalGame?.actors?.get?.(id) : null;
+    if (actor) return actor;
+    if (reference && typeof reference === "object" && reference.name) return reference;
+  }
+  return null;
 }
 
 export function getUserDisplayName(user: any, fallback = "") {
   const characterName = String(getUserCharacter(user)?.name ?? "").trim();
   if (characterName) return characterName;
   return String(user?.name ?? "").trim() || fallback;
+}
+
+export function createUserContact(user: any, fallbackName = "Player") {
+  const name = getUserDisplayName(user, fallbackName);
+  const userId = String(user?.id ?? "");
+  return {
+    id: `user-${userId}`,
+    name,
+    number: `@${String(user?.name ?? "").trim() || name}`,
+    image: getUserTokenImage(user),
+    userId,
+    userIds: userId ? [userId] : [],
+    isNpc: false,
+    managedByGM: false
+  };
 }
