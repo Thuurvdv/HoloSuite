@@ -22,6 +22,7 @@
       </div>
     </header>
 
+    {{#if pendingCount}}<p role="status">Awaiting delivery: {{pendingCount}}</p>{{/if}}
     {{#if hasThreads}}
       {{#each threads}}
         <button type="button" class="cybercall-thread {{#if active}}active{{/if}} {{#if hasRouteLabel}}routed{{/if}} {{#if hasNpcBinding}}npc-linked{{/if}}" data-cybercall-thread-id="{{id}}" {{#if canLinkNpc}}data-cybercall-npc-link-drop data-cybercall-npc-thread-id="{{id}}"{{/if}}>

@@ -8,7 +8,7 @@ Calls, messages, and NPC conversations on a sci-fi commlink for Foundry VTT. Req
 
 - Send calls to selected players or broadcast to everyone, including fullscreen transmissions.
 - Choose standard, emergency, or corrupted visuals. Lower signal strength adds portrait glitches.
-- Keep personal and shared contacts, send private messages, and create group chats.
+- Keep personal and shared contacts, send direct messages, and create group chats.
 - Reply as an NPC, with separate conversations for each NPC and player.
 - Choose ringtones and message sounds, including audio added by the GM.
 
@@ -50,9 +50,13 @@ Click **Message** beside a contact, or open **Messages → New**. Use **New Grou
 
 GMs can select **Send As** to message as an NPC. Choosing an Actor links it immediately; existing conversations can also be linked by dragging an Actor or token onto them. Use **Share Portrait** to show the NPC's portrait to that player.
 
-Player conversations are private from GMs unless **GM: View Player Conversations** is enabled. An eye indicator shows when this setting is on.
+Enable **GM: View Player Conversations** to show player-to-player conversations in the GM's CyberCall inbox. An eye indicator shows when this setting is on.
 
-Messages persist between sessions. **Delete Thread** hides a thread only for you. Call history keeps the newest **100 call events per world** and removes older events when a GM is connected; text messages are kept.
+CyberCall saves conversations in world journals. Clearing Foundry chat removes the chat cards and leaves the inbox intact. If no GM is connected, your message stays in your world-saved outbox. The next connected GM delivers it, even if you have logged out. **Delete Thread** hides a conversation only for you. Call history keeps the newest **100 call events per world**. Text messages are kept.
+
+An active GM imports surviving CyberCall chat messages on first use. Records with inconsistent author or whisper information stay in chat for GM review. Messages cleared before migration can only be recovered from a backup.
+
+Participants can read their conversation in normal play. Foundry sends world journal data to player clients, so a player deliberately inspecting their client can read the underlying records. GMs retain world access.
 
 ## Commlink device shell
 

@@ -1,21 +1,9 @@
-import { MESSAGE_FLAG_KIND, MESSAGE_SCHEMA_VERSION, MODULE_ID } from "./constants";
-import { escapeHTML } from "./dom-utils";
+import { MESSAGE_SCHEMA_VERSION, MODULE_ID } from "./constants";
+import { archivedMessages, legacyMessage, MIGRATED, queueMessage } from "./message-archive";
 import { createThreadIdForContact, CyberCallMessage, normalizeMessage } from "./message-model";
 import { getUserDisplayName, getUserTokenImage, normalizeContact } from "./call-model";
 
-declare const ChatMessage: any;
 declare const game: any;
-
-function getMessageFlag(document: any) {
-  const flag = document?.flags?.[MODULE_ID] ?? document?.getFlag?.(MODULE_ID, "message");
-  if (flag?.kind === MESSAGE_FLAG_KIND) return flag;
-  if (flag?.message?.kind === MESSAGE_FLAG_KIND) return flag.message;
-  return null;
-}
-
-function getChatCreatedAt(document: any) {
-  return String(document?.timestamp ? new Date(document.timestamp).toISOString() : document?.createdTime ?? "");
-}
 
 function getGMUserIds() {
   return (game.users?.contents ?? [])
@@ -27,12 +15,7 @@ function uniqueStrings(values: any[]) {
   return [...new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean))];
 }
 
-function getChatWhisperUserIds(document: any) {
-  const whisper = Array.isArray(document?.whisper) ? document.whisper : [];
-  return uniqueStrings(whisper.map((entry: any) => entry?.id ?? entry));
-}
-
-function canCurrentUserReadMessage(message: CyberCallMessage, document: any) {
+function canCurrentUserReadMessage(message: CyberCallMessage) {
   const currentUserId = String(game.user?.id ?? "").trim();
   if (!currentUserId) return false;
   const isParticipant = message.senderUserId === currentUserId || message.recipientUserIds.includes(currentUserId);
@@ -41,9 +24,6 @@ function canCurrentUserReadMessage(message: CyberCallMessage, document: any) {
     if (!message.contactUserId && (message.contactManagedByGM || message.contactIsNpc)) return true;
     return game.settings.get(MODULE_ID, "gmViewPlayerMessages") === true;
   }
-
-  const whisperUserIds = getChatWhisperUserIds(document);
-  if (whisperUserIds.length && !whisperUserIds.includes(currentUserId)) return false;
 
   return false;
 }
@@ -63,34 +43,17 @@ function hasExplicitUserRecipient(contact: any) {
   return Boolean(contact?.userId || (Array.isArray(contact?.userIds) && contact.userIds.length));
 }
 
-function renderMessageContent(message: CyberCallMessage, contact: any) {
-  const title = message.senderName || "CyberCall";
-  const target = contact?.name ? `<span>${escapeHTML(contact.name)}</span>` : "";
-  const eventClass = message.messageType !== "text" ? " cybercall-chat-card--event" : "";
-  return `
-    <div class="cybercall-chat-card${eventClass}" data-cybercall-thread-id="${escapeHTML(message.threadId)}">
-      <strong>${escapeHTML(title)}</strong>
-      ${target}
-      <p>${escapeHTML(message.body)}</p>
-      <button type="button" data-cybercall-open-thread data-cybercall-thread-id="${escapeHTML(message.threadId)}">Open CyberCall</button>
-    </div>
-  `;
-}
-
 export function getStoredMessages(): CyberCallMessage[] {
-  const messages = game.messages?.contents ?? [];
-  return messages
-    .map((document: any) => {
-      const flag = getMessageFlag(document);
-      if (!flag) return null;
-      const message = normalizeMessage({
-        ...flag,
-        chatMessageId: document.id,
-        createdAt: flag.createdAt || getChatCreatedAt(document)
-      });
-      return canCurrentUserReadMessage(message, document) ? message : null;
-    })
-    .filter(Boolean);
+  const messages = archivedMessages();
+  if (!game.settings.get(MODULE_ID, MIGRATED)) {
+    const migrated = new Set(messages.map(message => message.chatMessageId));
+    for (const document of game.messages.contents) {
+      if (migrated.has(document.id)) continue;
+      const message = legacyMessage(document);
+      if (message) messages.push(message);
+    }
+  }
+  return messages.filter(canCurrentUserReadMessage);
 }
 
 export async function sendMessageToContact(contactSource: any, bodySource: any, options: any = {}) {
@@ -132,19 +95,7 @@ export async function sendMessageToContact(contactSource: any, bodySource: any, 
     groupMemberNames: options.groupMemberNames ?? [],
     schemaVersion: MESSAGE_SCHEMA_VERSION
   });
-  const whisper = [...new Set([senderUser?.id, ...recipientUserIds].filter(Boolean))];
-
-  return ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ alias: message.senderName }),
-    whisper,
-    content: renderMessageContent(message, contact),
-    flags: {
-      [MODULE_ID]: {
-        kind: MESSAGE_FLAG_KIND,
-        ...message
-      }
-    }
-  });
+  return queueMessage(message);
 }
 
 export async function createMessageEvent(contactSource: any, bodySource: any, options: any = {}) {

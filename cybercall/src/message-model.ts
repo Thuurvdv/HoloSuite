@@ -159,12 +159,10 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
       const isGroup = Boolean(groupMessage);
       const groupId = groupMessage?.groupId || (isGroup ? threadId.replace(/^group:/, "") : "");
       const groupName = groupMessage?.groupName || (isGroup ? "Group Chat" : "");
-      const groupMemberUserIds = isGroup ? unique(sorted.flatMap((message) => [
-        ...message.groupMemberUserIds,
-        message.senderUserId,
-        ...message.recipientUserIds
-      ])) : [];
-      const storedGroupMemberNames = isGroup ? unique(sorted.flatMap((message) => message.groupMemberNames)) : [];
+      const groupMemberUserIds = groupMessage ? unique([
+        groupMessage.senderUserId, ...groupMessage.recipientUserIds
+      ]) : [];
+      const storedGroupMemberNames = groupMessage?.groupMemberNames ?? [];
       const groupMemberNames = storedGroupMemberNames.length
         ? storedGroupMemberNames
         : groupMemberUserIds.map((id) => getUserDisplayName(game.users?.get?.(id))).filter(Boolean);
