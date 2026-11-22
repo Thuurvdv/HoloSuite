@@ -365,6 +365,7 @@ export function renderMessagesFallbackTemplate(data: any, escapeHTML: EscapeHTML
             <button type="button" data-cybercall-message-action="refresh">Refresh</button>
           </div>
         </header>
+        ${data.pendingCount ? `<p role="status">Awaiting delivery: ${Number(data.pendingCount)}</p>` : ""}
         ${threadMarkup}
       </aside>
       <main class="cybercall-conversation ${activeThread?.showNpcLinkPanel ? "has-npc-link" : ""}">

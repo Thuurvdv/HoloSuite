@@ -192,6 +192,12 @@ Hooks.once("ready", async () => {
   scanScene();
   console.info(`HoloSuite Loot | ${BUILD_VERSION} ready; Foundry ${game.version}, ${game.system.id} ${game.system.version}`);
 });
+Hooks.on("renderJournalDirectory", (_app: unknown, html: HTMLElement) => {
+  for (const row of html.querySelectorAll<HTMLElement>(".directory-item[data-entry-id]")) {
+    const journal = game.journal?.get(row.dataset.entryId);
+    if (journal?.getFlag(MODULE_ID, "tokenUuid")) row.hidden = true;
+  }
+});
 Hooks.on("canvasReady", () => { bindCanvas(); scanScene(); });
 Hooks.on("hoverToken", (token: any, hover: boolean) => { if (hover) hovered = token; else if (hovered === token) hovered = null; });
 Hooks.on("canvasTearDown", () => {

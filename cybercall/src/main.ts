@@ -5,6 +5,7 @@ import {
   DEFAULT_CALL,
   clampSignal,
   createCallId,
+  createUserContact,
   getInitials,
   getUserDisplayName,
   getUserTokenImage,
@@ -28,7 +29,7 @@ import { getMessageSoundOptions, getMessageSoundPath, MessageSoundLibrarySetting
 import { escapeHTML } from "./dom-utils";
 import { mountDeviceHardware } from "./device-shell";
 import { refreshDeviceEmblems } from "./device-branding";
-import { isCallHistoryEvent, pruneCallHistory } from "./history-retention";
+import { archiveMessage, isArchive, MIGRATED, serviceArchive } from "./message-archive";
 import { createGroupThreadId, createThreadIdForContact, getAvatarTone, prepareThreads } from "./message-model";
 import { ensurePersonalContactDirectories, getAssignedContacts, getPlayerContacts, getSyncedPersonalContacts, isPlayerContactDirectory, savePersonalContacts, writeAssignedContact, writePersonalContact } from "./player-contacts";
 import { bindPhoneNumberInputs, getPhoneNumberFormat, matchesPhoneNumberFormat } from "./phone-format";
@@ -96,19 +97,7 @@ function getGroupMessageMemberChoices() {
 function getUserMessageContacts() {
   return (game.users?.contents ?? [])
     .filter((user) => user.id !== game.user?.id)
-    .map((user) => {
-      const name = getUserDisplayName(user, "Unknown Player");
-      return {
-        id: `user-${user.id}`,
-        name,
-        number: `@${name}`,
-        image: getUserTokenImage(user),
-        userId: user.id,
-        userIds: [user.id],
-        isNpc: false,
-        managedByGM: false
-      };
-    })
+    .map((user) => createUserContact(user, "Unknown Player"))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -928,6 +917,7 @@ function getMessageContext(contact = null) {
   return {
     threads,
     hasThreads: threads.length > 0,
+    pendingCount: Object.keys(game.user.getFlag(MODULE_ID, "pendingMessages") ?? {}).length,
     unreadCount,
     hasUnreadMessages: unreadCount > 0,
     activeThread,
@@ -967,7 +957,8 @@ function getThreadRecipientUserIds(thread, options: any = {}) {
   const currentUserId = String(game.user?.id ?? "");
   const gmIds = new Set((game.users?.contents ?? []).filter((user) => user.isGM).map((user) => String(user.id)));
   const ids = new Set<string>();
-  for (const message of thread.messages) {
+  const messages = thread.isGroup ? thread.messages.slice(-1) : thread.messages;
+  for (const message of messages) {
     if (message.senderUserId && message.senderUserId !== currentUserId && !(options.excludeGMs && gmIds.has(message.senderUserId))) {
       ids.add(message.senderUserId);
     }
@@ -1514,12 +1505,14 @@ async function acceptCall(callId) {
 
 async function acceptCallForEveryone(callId) {
   if (!callId) return;
-  await recordCallHistoryEvent(activeCall?.callData, "connected");
+  const callData = activeCall?.callData;
   game.socket.emit(SOCKET_NAME, {
     action: "acceptCall",
     callId
   });
-  await acceptCall(callId);
+  const updatingCall = acceptCall(callId);
+  recordCallHistoryInBackground(callData, "connected");
+  await updatingCall;
 }
 
 async function endCall(callId) {
@@ -1528,25 +1521,20 @@ async function endCall(callId) {
 }
 
 async function endCallForEveryone(callId) {
-  await recordCallHistoryEvent(activeCall?.callData, activeCall?.callData?.accepted ? "ended" : "missed");
+  const callData = activeCall?.callData;
+  const eventType = callData?.accepted ? "ended" : "missed";
   game.socket.emit(SOCKET_NAME, {
     action: "endCall",
     callId
   });
-  await endCall(callId);
+  const closingCall = endCall(callId);
+  recordCallHistoryInBackground(callData, eventType);
+  await closingCall;
 }
 
 function getUserContact(userId, fallbackName = "Player") {
   const user = game.users?.get?.(userId) ?? game.users?.contents?.find?.((entry) => entry.id === userId);
-  const name = getUserDisplayName(user, fallbackName);
-  return {
-    id: `user-${userId}`,
-    name,
-    number: `@${name}`,
-    image: getUserTokenImage(user),
-    userId,
-    userIds: userId ? [userId] : []
-  };
+  return createUserContact(user ?? { id: userId }, fallbackName);
 }
 
 function getCallHistoryContact(callData) {
@@ -1599,6 +1587,12 @@ async function recordCallHistoryEvent(callData, eventType) {
     senderActorId: contact.actorId,
     recipientUserIds: getCallHistoryRecipientUserIds(callData, contact),
     recipientNumbers: contact.userId ? [] : [contact.number]
+  });
+}
+
+function recordCallHistoryInBackground(callData, eventType) {
+  void recordCallHistoryEvent(callData, eventType).catch((error) => {
+    console.warn(`${MODULE_ID} | Could not save call history for ${eventType}.`, error);
   });
 }
 
@@ -2077,7 +2071,7 @@ function setChatCardElementVisibility(element, visible) {
 }
 
 function applyCyberCallChatCardVisibility(message, html) {
-  if (!getCyberCallMessageFlag(message)) return;
+  if (!message?.flags?.[MODULE_ID]?.archiveNotice && !getCyberCallMessageFlag(message)) return;
   const element = html instanceof HTMLElement ? html : html?.[0] ?? html?.element ?? null;
   setChatCardElementVisibility(element, game.settings.get(MODULE_ID, "showChatCards") === true);
 }
@@ -2157,6 +2151,7 @@ function registerWithHoloSuite() {
 }
 
 function registerSettings() {
+  game.settings.register(MODULE_ID, MIGRATED, { scope: "world", config: false, type: Boolean, default: false });
   game.settings.register(MODULE_ID, "deviceEmblem", {
     name: "Device emblem", scope: "world", config: false, type: String, default: "",
     onChange: () => refreshDeviceEmblems(document)
@@ -2433,7 +2428,8 @@ Hooks.once("ready", async () => {
   game.socket.on(SOCKET_NAME, handleSocketMessage);
   await ensurePersonalContactDirectories();
   await synchronizePersonalContacts();
-  await pruneCallHistory();
+  await serviceArchive();
+  if (game.user.isGM) window.setInterval(serviceArchive, 60000);
   if (!game.user?.isGM) game.socket.emit(SOCKET_NAME, { action: "personalContactDirectories" });
   refreshRenderedCyberCallChatCards();
   console.log(`${MODULE_ID} | Ready. Use game.modules.get("${MODULE_ID}").api.openCall({...})`);
@@ -2450,7 +2446,7 @@ Hooks.on("renderJournalDirectory", (app, html) => {
   const root = getElement(app, html);
   root?.querySelectorAll("[data-document-id], [data-entry-id]").forEach((row) => {
     const entry = game.journal?.get?.(row.dataset.documentId ?? row.dataset.entryId);
-    if (entry?.getFlag(MODULE_ID, "playerPersonalContactDirectory")) row.hidden = true;
+    if (isArchive(entry) || entry?.getFlag(MODULE_ID, "playerPersonalContactDirectory")) row.hidden = true;
   });
 });
 
@@ -2467,10 +2463,16 @@ for (const action of ["create", "update", "delete"]) {
   });
 }
 
-Hooks.on("createChatMessage", async (message) => {
-  if (isCallHistoryEvent(message)) await pruneCallHistory();
-  const flag = message?.flags?.[MODULE_ID];
-  if (flag?.kind !== MESSAGE_FLAG_KIND) return;
+Hooks.on("userConnected", () => serviceArchive());
+Hooks.on("updateUser", (user, changes) => {
+  if (!changes.flags?.[MODULE_ID]?.pendingMessages) return;
+  void serviceArchive();
+  if (user.id === game.user.id) void refreshMessages();
+});
+
+Hooks.on("createJournalEntryPage", async (page, options) => {
+  const flag = archiveMessage(page);
+  if (!flag || options.cybercallMigration) return;
   const currentUserId = String(game.user?.id ?? "");
   const recipientUserIds = Array.isArray(flag.recipientUserIds)
     ? flag.recipientUserIds.map((id) => String(id))
@@ -2496,8 +2498,8 @@ document.addEventListener("click", (event) => {
   openMessagesThread(button.dataset.cybercallThreadId);
 });
 
-Hooks.on("deleteChatMessage", (message) => {
-  if (!isCallHistoryEvent(message)) return;
+Hooks.on("deleteJournalEntryPage", (page) => {
+  if (!isArchive(page.parent)) return;
   refreshMessages();
   refreshContacts();
 });

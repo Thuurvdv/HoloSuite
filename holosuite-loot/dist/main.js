@@ -1,7 +1,7 @@
 var Rt = Object.defineProperty;
 var qt = (s, i, e) => i in s ? Rt(s, i, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[i] = e;
 var y = (s, i, e) => qt(s, typeof i != "symbol" ? i + "" : i, e);
-const f = "holosuite-loot", Re = "1.4.0", st = "commandV3", Ne = "replyV3", O = (s) => structuredClone(s), E = (s) => {
+const f = "holosuite-loot", Re = "1.4.1", st = "commandV3", Ne = "replyV3", O = (s) => structuredClone(s), E = (s) => {
   var i, e, t;
   return ((e = (i = s == null ? void 0 : s.system) == null ? void 0 : i.quantity) == null ? void 0 : e.value) ?? ((t = s == null ? void 0 : s.system) == null ? void 0 : t.quantity) ?? 1;
 }, Ge = (s) => {
@@ -2252,6 +2252,13 @@ Hooks.once("ready", async () => {
       return (i = Ve()) == null ? void 0 : i.id;
     }
   }, tt(), setTimeout(tt, 500), Ct(), U(), console.info(`HoloSuite Loot | ${Re} ready; Foundry ${game.version}, ${game.system.id} ${game.system.version}`);
+});
+Hooks.on("renderJournalDirectory", (s, i) => {
+  var e;
+  for (const t of i.querySelectorAll(".directory-item[data-entry-id]")) {
+    const n = (e = game.journal) == null ? void 0 : e.get(t.dataset.entryId);
+    n != null && n.getFlag(f, "tokenUuid") && (t.hidden = !0);
+  }
 });
 Hooks.on("canvasReady", () => {
   Ct(), U();
