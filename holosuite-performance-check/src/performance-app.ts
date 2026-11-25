@@ -168,8 +168,8 @@ export class PerformanceCheckApp extends BaseApplication {
     const selected = this.selectedReport();
     const history = profiler.history.map((entry) => `<option value="${escapeHtml(entry.id)}" ${entry.id === selected?.id ? "selected" : ""}>${escapeHtml(entry.label)} — ${new Date(entry.startedAt).toLocaleString()}</option>`).join("");
     return `<main class="hspc-shell">
-      <header class="hspc-header">
-        <div><p class="hspc-kicker">LOCAL PROFILER</p><h2>${MODULE_TITLE}</h2><p>Measure one repeatable Foundry action without sending data anywhere.</p></div>
+      <header class="hspc-header" data-holosuite-branding="holosuite-performance-check">
+        <div><p class="hspc-kicker">LOCAL PROFILER</p><h2><span data-holosuite-brand-icon></span><span data-holosuite-brand-name>${MODULE_TITLE}</span></h2><p>Measure one repeatable Foundry action without sending data anywhere.</p></div>
         <div class="hspc-status ${active ? "is-recording" : ""}"><span></span>${active ? `Recording: ${escapeHtml(active.label)}` : "Ready"}</div>
       </header>
       <section class="hspc-controls">

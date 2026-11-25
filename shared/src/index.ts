@@ -2,15 +2,41 @@ export interface HoloSuiteAppRegistration {
   id: string;
   title: string;
   icon: string;
+  brandingInApp?: boolean;
   premium?: boolean;
   playerVisible?: boolean;
   description?: string;
+  brandingHeader?: { taglineLabel?: string; textFields?: Record<string, string | {
+    label: string; hint?: string; placeholder?: string;
+  }> };
   featureId?: string;
   open: () => unknown | Promise<unknown>;
   contextActions?: { label: string; callback: () => unknown | Promise<unknown> }[];
 }
 
 export type HoloSuiteWhatsNewTier = "free" | "premium";
+
+export interface HoloSuiteBranding {
+  name?: string;
+  label?: string;
+  tagline?: string;
+  icon?: string;
+  iconImage?: string;
+  logo?: string;
+  gmTitle?: string;
+  gmHeading?: string;
+  gmScreen?: string;
+  playerTitle?: string;
+  playerHeading?: string;
+  playerScreen?: string;
+  userLabel?: string;
+  linkStatus?: string;
+  backIcon?: string;
+  settingsIcon?: string;
+  updatesIcon?: string;
+  closeIcon?: string;
+  text?: Record<string, string>;
+}
 
 export interface HoloSuiteWhatsNewEntry {
   title: string;
@@ -37,9 +63,12 @@ export interface HoloSuiteLicenseResult {
 }
 
 export interface HoloSuiteApi {
+  registerBrandingTarget?(target: Pick<HoloSuiteAppRegistration, "id" | "title" | "icon">): void;
   registerApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration | null;
   unregisterApp(id: string): boolean;
   getApps(): HoloSuiteAppRegistration[];
+  getBranding?(id: string): HoloSuiteBranding;
+  openBranding?(): unknown;
   getDiagnostics?(): Record<string, unknown>;
   registerWhatsNew(update: HoloSuiteWhatsNewRegistration): HoloSuiteWhatsNewRegistration | null;
   unregisterWhatsNew(moduleId: string): boolean;

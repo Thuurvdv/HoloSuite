@@ -127,3 +127,19 @@ test("keeps What's New conversational and limits badges to Foundry compatibility
   assert.doesNotMatch(source, /escapeHtml\(tierLabel\)/);
   assert.doesNotMatch(source, /installed \? "Installed" : "Not installed"/);
 });
+
+test("shows Buddy 1.0.1 in Releases with its icon and labels the Branding warning", async () => {
+  const [source, css, catalogText, icon] = await Promise.all([
+    readFile(sourceUrl, "utf8"),
+    readFile(stylesheetUrl, "utf8"),
+    readFile(whatsNewUrl, "utf8"),
+    readFile(new URL("../assets/device-styles/space-police/icons/holo-assistant.svg", import.meta.url), "utf8")
+  ]);
+  const buddy = JSON.parse(catalogText).releases.find((entry) => entry.moduleId === "holosuite-buddy");
+  assert.equal(buddy?.version, "1.0.1");
+  assert.equal(buddy.tier, "premium");
+  assert.equal(buddy.entries.length, 1);
+  assert.match(icon, /<svg\b/);
+  assert.match(css, /\.holosuite-whats-new-icon\[data-holosuite-app-icon="holosuite-buddy"\]::before\s*\{[^}]*icons\/holo-assistant\.svg/);
+  assert.match(source, /Open HoloSuite Branding<\/button>\s*<span[^>]+aria-label="Experimental feature"[^>]+data-tooltip="Experimental feature"/);
+});
