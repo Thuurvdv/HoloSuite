@@ -1,7 +1,7 @@
 var ut = Object.defineProperty;
 var pt = (t, n, e) => n in t ? ut(t, n, { enumerable: !0, configurable: !0, writable: !0, value: e }) : t[n] = e;
 var R = (t, n, e) => pt(t, typeof n != "symbol" ? n + "" : n, e);
-const g = "holosuite-performance-check", S = "HoloSuite Performance Check";
+const g = "holosuite-performance-check", $ = "HoloSuite Performance Check";
 function O(t) {
   try {
     return decodeURIComponent(t);
@@ -76,7 +76,7 @@ function ht(t) {
       }
   return s;
 }
-function X(t) {
+function B(t) {
   return Array.isArray(t) ? t.map(String) : t instanceof Set ? [...t].map(String) : t && typeof t[Symbol.iterator] == "function" ? [...t].map(String) : [];
 }
 function bt(t) {
@@ -113,8 +113,8 @@ async function yt() {
     const l = String(c.id ?? "");
     if (!l || l === g) continue;
     const d = c.manifest ?? c, h = [.../* @__PURE__ */ new Set([
-      ...X(c.esmodules ?? (d == null ? void 0 : d.esmodules)),
-      ...X(c.scripts ?? (d == null ? void 0 : d.scripts))
+      ...B(c.esmodules ?? (d == null ? void 0 : d.esmodules)),
+      ...B(c.scripts ?? (d == null ? void 0 : d.scripts))
     ])];
     for (const y of h) {
       let p = "";
@@ -181,7 +181,7 @@ function M(t, n = 3) {
   const e = 10 ** n;
   return Math.round(t * e) / e;
 }
-function B(t, n) {
+function X(t, n) {
   if (!t.length) return 0;
   const e = [...t].sort((r, o) => r - o), s = Math.min(e.length - 1, Math.max(0, Math.ceil(e.length * n) - 1));
   return e[s];
@@ -314,8 +314,8 @@ class St {
       asyncCompletions: o.asyncCompletions,
       asyncWallTotalMs: M(o.asyncWallTotalMs),
       maxMs: M(o.maxMs),
-      p50Ms: M(B(o.samples, 0.5)),
-      p95Ms: M(B(o.samples, 0.95)),
+      p50Ms: M(X(o.samples, 0.5)),
+      p95Ms: M(X(o.samples, 0.95)),
       errors: o.errors
     })).sort((o, i) => i.syncTotalMs - o.syncTotalMs), r = {
       schemaVersion: 1,
@@ -620,7 +620,7 @@ function b(t) {
   const n = document.createElement("div");
   return n.textContent = String(t ?? ""), n.innerHTML;
 }
-function $(t) {
+function S(t) {
   return t < 1 ? `${t.toFixed(3)} ms` : `${t.toFixed(2)} ms`;
 }
 function F(t) {
@@ -636,8 +636,8 @@ function At(t) {
   const e = ot(t).slice(0, 20).map((a) => `<tr>
     <td><code>${b(a.source)}</code></td>
     <td>${a.calls}</td>
-    <td>${$(a.syncTotalMs)}</td>
-    <td>${$(a.maxMs)}</td>
+    <td>${S(a.syncTotalMs)}</td>
+    <td>${S(a.maxMs)}</td>
     <td>${a.asyncCompletions}</td>
     <td>${a.errors}</td>
   </tr>`).join(""), s = t.metrics.slice(0, 40).map((a) => `<tr>
@@ -645,9 +645,9 @@ function At(t) {
     <td>${b(a.kind)}</td>
     <td title="${b(a.label)}">${b(a.label)}</td>
     <td>${a.calls}</td>
-    <td>${$(a.syncTotalMs)}</td>
-    <td>${$(a.maxMs)}</td>
-    <td>${$(a.p95Ms)}</td>
+    <td>${S(a.syncTotalMs)}</td>
+    <td>${S(a.maxMs)}</td>
+    <td>${S(a.p95Ms)}</td>
   </tr>`).join(""), r = t.modules.map((a) => `<tr><td><code>${b(a.id)}</code></td><td>${b(a.version)}</td><td>${b(a.title)}</td></tr>`).join(""), o = /* @__PURE__ */ new Map();
   for (const a of t.stylesheets) {
     const c = o.get(a.source) ?? { sheets: 0, rules: 0, inaccessible: 0 };
@@ -656,7 +656,7 @@ function At(t) {
   const i = [...o.entries()].sort((a, c) => c[1].rules - a[1].rules).map(([a, c]) => `<tr><td><code>${b(a)}</code></td><td>${c.sheets}</td><td>${c.rules}</td><td>${c.inaccessible}</td></tr>`).join("");
   return `<section class="hspc-report">
     <div class="hspc-cards">
-      <article><span>Capture window</span><strong>${$(t.durationMs)}</strong></article>
+      <article><span>Capture window</span><strong>${S(t.durationMs)}</strong></article>
       <article><span>Mode</span><strong>${t.deepMode ? "Deep" : "Normal"}</strong></article>
       <article><span>Active modules</span><strong>${t.modules.length}</strong></article>
       <article><span>Long tasks</span><strong>${t.longTasks.length}</strong></article>
@@ -702,7 +702,7 @@ function xt(t) {
     return o.length % 2 ? o[i] : (o[i - 1] + o[i]) / 2;
   }, s = [...n.entries()].map(([r, o]) => {
     const i = o.map((d) => d.metrics.reduce((h, y) => h + y.syncTotalMs, 0)).sort((d, h) => d - h), a = i[Math.min(i.length - 1, Math.ceil(i.length * 0.95) - 1)], c = o.map((d) => d.durationMs), l = o.map((d) => d.longTasks.reduce((h, y) => h + y.durationMs, 0));
-    return `<tr><td>${b(r)}</td><td>${o.length}</td><td>${$(e(i))}</td><td>${$(a)}</td><td>${$(e(c))}</td><td>${$(e(l))}</td></tr>`;
+    return `<tr><td>${b(r)}</td><td>${o.length}</td><td>${S(e(i))}</td><td>${S(a)}</td><td>${S(e(c))}</td><td>${S(e(l))}</td></tr>`;
   }).join("");
   return `<details ${n.size > 1 || t.length > 1 ? "open" : ""}>
     <summary>Capture comparison by exact label</summary>
@@ -719,7 +719,7 @@ class at extends Et {
   static get defaultOptions() {
     return globalThis.foundry.utils.mergeObject(super.defaultOptions ?? {}, {
       id: g,
-      title: S,
+      title: $,
       classes: ["hspc-window"],
       popOut: !0,
       resizable: !0,
@@ -733,8 +733,8 @@ class at extends Et {
   content() {
     const e = u.liveState, s = this.selectedReport(), r = u.history.map((o) => `<option value="${b(o.id)}" ${o.id === (s == null ? void 0 : s.id) ? "selected" : ""}>${b(o.label)} — ${new Date(o.startedAt).toLocaleString()}</option>`).join("");
     return `<main class="hspc-shell">
-      <header class="hspc-header">
-        <div><p class="hspc-kicker">LOCAL PROFILER</p><h2>${S}</h2><p>Measure one repeatable Foundry action without sending data anywhere.</p></div>
+      <header class="hspc-header" data-holosuite-branding="holosuite-performance-check">
+        <div><p class="hspc-kicker">LOCAL PROFILER</p><h2><span data-holosuite-brand-icon></span><span data-holosuite-brand-name>${$}</span></h2><p>Measure one repeatable Foundry action without sending data anywhere.</p></div>
         <div class="hspc-status ${e ? "is-recording" : ""}"><span></span>${e ? `Recording: ${b(e.label)}` : "Ready"}</div>
       </header>
       <section class="hspc-controls">
@@ -802,7 +802,7 @@ class at extends Et {
         return;
       }
       if (e === "mark") {
-        u.mark("Manual marker"), r(`${S}: marker added.`);
+        u.mark("Manual marker"), r(`${$}: marker added.`);
         return;
       }
       if (e === "clear") {
@@ -816,9 +816,9 @@ class at extends Et {
       const d = this.selectedReport();
       if (!d) return;
       const h = `${kt(d.label)}-${d.id.slice(0, 8)}`;
-      e === "json" && D(`${h}.json`, JSON.stringify(d, null, 2), "application/json"), e === "csv" && D(`${h}.csv`, N(d), "text/csv;charset=utf-8"), e === "copy" && (await navigator.clipboard.writeText(it(d)), r(`${S}: summary copied.`));
+      e === "json" && D(`${h}.json`, JSON.stringify(d, null, 2), "application/json"), e === "csv" && D(`${h}.csv`, N(d), "text/csv;charset=utf-8"), e === "copy" && (await navigator.clipboard.writeText(it(d)), r(`${$}: summary copied.`));
     } catch (d) {
-      console.error(`${g} | Action failed.`, d), (l = (c = (a = globalThis.ui) == null ? void 0 : a.notifications) == null ? void 0 : c.error) == null || l.call(c, `${S}: ${d instanceof Error ? d.message : String(d)}`);
+      console.error(`${g} | Action failed.`, d), (l = (c = (a = globalThis.ui) == null ? void 0 : a.notifications) == null ? void 0 : c.error) == null || l.call(c, `${$}: ${d instanceof Error ? d.message : String(d)}`);
     }
   }
 }
@@ -826,7 +826,7 @@ R(at, "DEFAULT_OPTIONS", {
   id: g,
   tag: "section",
   classes: ["hspc-window"],
-  window: { title: S, resizable: !0 },
+  window: { title: $, resizable: !0 },
   position: { width: 980, height: 760 }
 });
 let P = null;
@@ -892,7 +892,7 @@ function Z() {
 }
 globalThis.Hooks.once("init", () => {
   globalThis.game.keybindings.register(g, "toggle-capture", {
-    name: `${S}: Open / Stop Capture`,
+    name: `${$}: Open / Stop Capture`,
     hint: "Open the profiler when idle, or stop the current capture and show its report.",
     editable: [{ key: "KeyP", modifiers: ["ALT", "SHIFT"] }],
     onDown: () => (u.liveState ? ct() : _(), !0),
@@ -903,7 +903,7 @@ globalThis.Hooks.once("init", () => {
 globalThis.Hooks.on("getSceneControlButtons", (t) => {
   It(t, {
     name: g,
-    title: u.liveState ? `${S}: Stop Capture` : S,
+    title: u.liveState ? `${$}: Stop Capture` : $,
     icon: u.liveState ? "fa-solid fa-stop" : "fa-solid fa-chart-line",
     button: !0,
     visible: !0,
@@ -914,7 +914,10 @@ globalThis.Hooks.on("getSceneControlButtons", (t) => {
   });
 });
 globalThis.Hooks.once("ready", () => {
-  lt(), console.info(`${g} | Ready. Hook instrumentation: ${K.installed ? "active" : "unavailable"}; preexisting callbacks wrapped: ${K.existingWrapped}.`), nt().then((t) => {
-    console.info(`${g} | Preexisting hook attribution: ${t.resolved}/${t.total} resolved, ${t.ambiguous} ambiguous, ${t.unresolved} unresolved across ${t.scriptsScanned} scripts.`);
+  var e, s, r, o;
+  lt();
+  const t = globalThis.game, n = ((r = (s = (e = t.modules) == null ? void 0 : e.get) == null ? void 0 : s.call(e, "holosuite-core")) == null ? void 0 : r.api) ?? t.holosuite;
+  (o = n == null ? void 0 : n.registerBrandingTarget) == null || o.call(n, { id: g, title: $, icon: "fa-solid fa-chart-line" }), console.info(`${g} | Ready. Hook instrumentation: ${K.installed ? "active" : "unavailable"}; preexisting callbacks wrapped: ${K.existingWrapped}.`), nt().then((i) => {
+    console.info(`${g} | Preexisting hook attribution: ${i.resolved}/${i.total} resolved, ${i.ambiguous} ambiguous, ${i.unresolved} unresolved across ${i.scriptsScanned} scripts.`);
   });
 });
