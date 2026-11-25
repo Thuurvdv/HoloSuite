@@ -578,6 +578,19 @@ img.hs-frame-header {
   gap: 14px;
 }
 
+.holosuite-branding-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.holosuite-branding-warning {
+  color: var(--hs-amber);
+  font-size: 13px;
+  padding: 4px;
+  cursor: help;
+}
+
 .holosuite-settings-notice {
   align-items: flex-start;
   background: rgba(255, 207, 106, 0.1);
@@ -838,11 +851,13 @@ img.hs-frame-header {
 }
 
 .holosuite-whats-new-icon[data-holosuite-app-icon="holodock"] i,
+.holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-buddy"] i,
 .holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-terminal"] i {
   display: none;
 }
 
 .holosuite-whats-new-icon[data-holosuite-app-icon="holodock"]::before,
+.holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-buddy"]::before,
 .holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-terminal"]::before {
   background: currentColor;
   content: "";
@@ -854,6 +869,15 @@ img.hs-frame-header {
 .holosuite-whats-new-icon[data-holosuite-app-icon="holodock"]::before {
   mask: url("../assets/device-styles/space-police/icons/holodock.svg") center / contain no-repeat;
   -webkit-mask: url("../assets/device-styles/space-police/icons/holodock.svg") center / contain no-repeat;
+}
+
+.holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-buddy"] {
+  color: #aaff67;
+}
+
+.holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-buddy"]::before {
+  mask: url("../assets/device-styles/space-police/icons/holo-assistant.svg") center / contain no-repeat;
+  -webkit-mask: url("../assets/device-styles/space-police/icons/holo-assistant.svg") center / contain no-repeat;
 }
 
 .holosuite-whats-new-icon[data-holosuite-app-icon="holosuite-terminal"] {
@@ -1257,8 +1281,8 @@ img.hs-frame-header {
 }
 
 .holosuite-app-tile[data-holosuite-app="holo-assistant"] {
-  --hs-app-accent: #74d6ff;
-  --hs-app-accent-rgb: 116, 214, 255;
+  --hs-app-accent: #aaff67ff;
+  --hs-app-accent-rgb: 170, 255, 103;
 }
 
 .holosuite-app-tile[data-holosuite-app="holosuite-galactic-records"] {
@@ -1447,9 +1471,9 @@ img.hs-frame-header {
 }
 
 .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"]::before {
-  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/app.svg");
-  mask-image: url("../assets/device-styles/space-police/icons/app.svg");
-  -webkit-mask-image: url("../assets/device-styles/space-police/icons/app.svg");
+  --hs-device-app-icon: url("../assets/device-styles/space-police/icons/holo-assistant.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/holo-assistant.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holo-assistant.svg");
 }
 
 .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"]::before {
@@ -1909,8 +1933,8 @@ img.hs-frame-header {
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holo-assistant"] {
-  --hs-app-accent: #74d6ff;
-  --hs-app-accent-rgb: 116, 214, 255;
+  --hs-app-accent: #aaff67ff;
+  --hs-app-accent-rgb: 170, 255, 103;
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-galactic-records"] {
@@ -2099,9 +2123,9 @@ img.hs-frame-header {
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"]::before {
-  --hs-space-police-icon: url("../assets/device-styles/space-police/icons/app.svg");
-  mask-image: url("../assets/device-styles/space-police/icons/app.svg");
-  -webkit-mask-image: url("../assets/device-styles/space-police/icons/app.svg");
+  --hs-space-police-icon: url("../assets/device-styles/space-police/icons/holo-assistant.svg");
+  mask-image: url("../assets/device-styles/space-police/icons/holo-assistant.svg");
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holo-assistant.svg");
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"]::before {
@@ -2252,6 +2276,29 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   display: block !important;
   mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg") !important;
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg") !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holo-assistant"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holo-assistant"] {
+  --hs-app-accent: #aaff67ff !important;
+  --hs-app-accent-rgb: 170, 255, 103 !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"],
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"] {
+  color: #aaff67ff !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"] i,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"] i {
+  display: none !important;
+}
+
+:root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"]::before,
+body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"]::before {
+  display: block !important;
+  mask-image: url("../assets/device-styles/space-police/icons/holo-assistant.svg") !important;
+  -webkit-mask-image: url("../assets/device-styles/space-police/icons/holo-assistant.svg") !important;
 }
 
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-blueprint"],
@@ -3175,21 +3222,6 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
 .holosuite-branding-form footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .holosuite-branding-asset { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; margin: 0; padding: 0; border: 0; min-width: 0; }
 .holosuite-branding-asset:disabled { opacity: 0.55; }
-.holosuite-branding-preview {
-  min-height: 80px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px;
-  background: var(--hs-surface-panel);
-  border: 1px solid var(--hs-border-subtle);
-  border-radius: var(--hs-radius);
-}
-.holosuite-branding-preview .holosuite-app-tile { width: min(210px, 100%); }
-.holosuite-branding-device-preview { display: grid; gap: 6px; padding: 10px; border: 1px solid currentColor; border-radius: 8px; }
-.holosuite-branding-device-preview .holosuite-status-bar > span { transform: none; }
-.holosuite-branding-preview-actions { display: flex; gap: 10px; }
 .holosuite-module-brand-logo { width: 40px; height: 40px; object-fit: contain; vertical-align: middle; }
 [data-holosuite-brand-icon] {
   display: contents;

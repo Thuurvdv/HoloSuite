@@ -21,6 +21,10 @@ HoloSuite Core is a launcher, not a data store. Contacts, cases, maps, terminals
 
 Supported app tiles also have a right-click menu. For example, Pulse Scanner offers **Create hotbar macro**. Keyboard users can focus the tile and press **Shift+F10**.
 
+## World branding
+
+As GM, open **Settings → Open HoloSuite Branding** in the launcher, or use the branding button under **Configure Settings → Module Settings → HoloSuite Core**. Choose the device or an installed app, then edit and save its branding. Browse or upload a PNG or WebP using Foundry’s file picker. Use **Reset fields** and save to restore that entry’s defaults.
+
 ## Video
 
 [Watch the HoloSuite Core overview](https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/docs/assets/videos/HoloSuite-clip.mp4).

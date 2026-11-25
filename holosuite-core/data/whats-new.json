@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-09",
+  "updated": "2026-11-25",
   "modules": [
     {
       "moduleId": "holosuite-terminal",
@@ -221,6 +221,21 @@
     }
   ],
   "releases": [
+    {
+      "moduleId": "holosuite-buddy",
+      "title": "HoloSuite Buddy",
+      "tier": "premium",
+      "version": "1.0.1",
+      "updated": "2026-11-25",
+      "icon": "fa-solid fa-robot",
+      "entries": [
+        {
+          "title": "HoloSuite Buddy 1.0.1",
+          "summary": "Give a character or a favourite weapon a Buddy. Pick a portrait, write a few lines, and decide when it should chime in.",
+          "tags": ["Foundry v12-v14"]
+        }
+      ]
+    },
     {
       "moduleId": "holosuite-loot",
       "title": "HoloSuite Loot",
