@@ -1,5 +1,6 @@
 import type {
   HoloSuiteAppRegistration,
+  HoloSuiteBranding,
   HoloSuiteWhatsNewEntry,
   HoloSuiteWhatsNewRegistration,
   HoloSuiteWhatsNewTier
@@ -10,6 +11,8 @@ import {
   setCoreStylesEnabled
 } from "./core-styles";
 import { addSceneControlTool } from "./scene-controls";
+import { BRANDING_ICONS, BRANDING_SETTING, DEVICE_BRANDING_ID, imagePath, normalizeBranding } from "./branding";
+import { refreshModuleBranding } from "./module-branding";
 
 const MODULE_ID = "holosuite-core";
 const SETTING_API_ONLY_FOR_DEBUGGING = "apiOnlyForDebugging";
@@ -73,9 +76,16 @@ type HoloSuiteFormFactor = keyof typeof FORM_FACTOR_CHOICES;
 type HoloSuiteTheme = keyof typeof THEME_CHOICES;
 
 const registeredApps = new Map<string, HoloSuiteAppRegistration>();
+const brandingTargets = new Map<string, HoloSuiteAppRegistration>();
+
+function getBrandingTargets(): HoloSuiteAppRegistration[] {
+  return [...new Map([...brandingTargets, ...registeredApps]).values()]
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
 const registeredWhatsNew = new Map<string, HoloSuiteWhatsNewRegistration>();
 const registeredReleases = new Map<string, HoloSuiteWhatsNewRegistration>();
 let launcherApp: HoloSuiteLauncher | null = null;
+let brandingApp: HoloSuiteBrandingEditor | null = null;
 let launcherOpenPromise: Promise<HoloSuiteLauncher | null> | null = null;
 let launcherCloseInProgress = false;
 let launcherObserver: MutationObserver | null = null;
@@ -110,9 +120,9 @@ function isRenderableLauncher(app: HoloSuiteLauncher | null): app is HoloSuiteLa
 }
 
 function escapeHtml(value: unknown): string {
-  const div = document.createElement("div");
-  div.textContent = String(value ?? "");
-  return div.innerHTML;
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[char]);
 }
 
 function pluralize(count: number, singular: string, plural = `${singular}s`): string {
@@ -261,6 +271,8 @@ function normalizeApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration |
     id,
     title,
     icon,
+    brandingHeader: app.brandingHeader,
+    brandingInApp: app.brandingInApp === true,
     premium: app.premium === true,
     playerVisible: app.playerVisible !== false,
     description: String(app.description ?? "").trim(),
@@ -274,13 +286,38 @@ function appDisplayTitle(title: string): string {
   return title.replace(/^HoloSuite\s*:?\s*/i, "").trim() || title;
 }
 
+function getBranding(id: string): HoloSuiteBranding {
+  const settings = safeGetSetting(MODULE_ID, BRANDING_SETTING);
+  if (!settings || typeof settings !== "object" || !Object.hasOwn(settings, id)) return {};
+  return normalizeBranding(settings[id]);
+}
+
+function launcherTitle(isGM: boolean, branding = getBranding(DEVICE_BRANDING_ID)): string {
+  const name = branding.name || "HoloSuite";
+  return isGM ? branding.gmTitle || `${name} Command Deck` : branding.playerTitle || `${name} Player View`;
+}
+
+function brandedIcon(branding: HoloSuiteBranding, fallback: string): string {
+  const icon = `<i class="${escapeHtml(branding.icon ? `fa-solid ${branding.icon}` : fallback)}" aria-hidden="true"></i>`;
+  if (!branding.iconImage) return icon;
+  return `<img class="holosuite-brand-image" src="${escapeHtml(branding.iconImage)}" alt="">${icon}`;
+}
+
+function bindBrandingImages(root: ParentNode): void {
+  root.querySelectorAll<HTMLImageElement>("img.holosuite-brand-image").forEach(img => {
+    const showFallback = () => { img.hidden = true; };
+    img.addEventListener("error", showFallback, { once: true });
+    if (img.complete && !img.naturalWidth) showFallback();
+  });
+}
+
 function renderOpenLauncherControl(controls: unknown): void {
   if (isApiOnlyMode()) return;
   const isGM = game.user?.isGM === true;
   if (!isGM && isDisabledForPlayers()) return;
   const createTool = () => ({
     name: "holosuite-core-launcher",
-    title: isGM ? "HoloSuite Command Deck" : "HoloSuite Player View",
+    title: launcherTitle(isGM),
     icon: getLauncherIconClass(),
     button: true,
     visible: true,
@@ -297,13 +334,16 @@ function canOpenLauncher(): boolean {
 }
 
 function createLauncherButton(tagName: "a" | "button", className: string): HTMLElement {
+  const branding = getBranding(DEVICE_BRANDING_ID);
+  const name = branding.name || "HoloSuite";
   const button = document.createElement(tagName);
   button.className = className;
   button.dataset.holosuiteLauncher = "true";
-  button.title = "HoloSuite";
-  button.setAttribute("aria-label", "Open HoloSuite");
-  button.setAttribute("data-tooltip", "HoloSuite");
-  button.innerHTML = `<i class="${getLauncherIconClass()}" aria-hidden="true"></i><span>HoloSuite</span>`;
+  button.title = name;
+  button.setAttribute("aria-label", `Open ${name}`);
+  button.setAttribute("data-tooltip", name);
+  button.innerHTML = `${brandedIcon(branding, defaultLauncherIcon())}<span>${escapeHtml(name)}</span>`;
+  bindBrandingImages(button);
   button.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -427,7 +467,17 @@ function injectRenderedLauncherControl(html: unknown): void {
   if (!isGM && isDisabledForPlayers()) return;
 
   const root = unwrapHtmlElement(html) ?? document.querySelector("#controls, #scene-controls");
-  if (!root || root.querySelector("[data-tool='holosuite-core-launcher']")) return;
+  if (!root) return;
+  const branding = getBranding(DEVICE_BRANDING_ID);
+  const nativeTools = root.querySelectorAll<HTMLElement>("[data-tool='holosuite-core-launcher'], [data-action='holosuite-core-launcher']");
+  if (nativeTools.length) {
+    if (branding.iconImage) nativeTools.forEach(tool => {
+      if (tool.querySelector("img.holosuite-brand-image")) return;
+      tool.insertAdjacentHTML("afterbegin", `<img class="holosuite-brand-image" src="${escapeHtml(branding.iconImage)}" alt="">`);
+      bindBrandingImages(tool);
+    });
+    return;
+  }
 
   const controlsList = root.querySelector<HTMLElement>(
     ".control-tools.active, .sub-controls.active, .scene-control-tools.active, .control-tools, .sub-controls, .scene-control-tools"
@@ -437,8 +487,9 @@ function injectRenderedLauncherControl(html: unknown): void {
   const launcher = document.createElement("li");
   launcher.className = "control-tool holosuite-scene-control";
   launcher.dataset.tool = "holosuite-core-launcher";
-  launcher.title = isGM ? "HoloSuite Command Deck" : "HoloSuite Player View";
-  launcher.innerHTML = `<i class="${getLauncherIconClass()}"></i>`;
+  launcher.title = launcherTitle(isGM, branding);
+  launcher.innerHTML = brandedIcon(branding, defaultLauncherIcon());
+  bindBrandingImages(launcher);
   launcher.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -464,6 +515,22 @@ function organizeCoreSettings(_app: unknown, html: unknown): void {
 }
 
 function registerSettings(): void {
+  game.settings.register(MODULE_ID, BRANDING_SETTING, {
+    scope: "world", config: false, type: Object, default: {},
+    onChange: () => {
+      refreshModuleBranding(document, getBranding);
+      Hooks.callAll("holosuite-core.brandingChanged");
+      if (!coreReady || isApiOnlyMode()) return;
+      launcherApp?.refreshCurrentView();
+      removeSidebarLaunchers();
+      void refreshSceneControls();
+    }
+  });
+  game.settings.registerMenu(MODULE_ID, "brandingEditor", {
+    name: "HoloSuite Branding", label: "Open HoloSuite Branding",
+    hint: "Customize the device and app branding for this world.",
+    icon: "fa-solid fa-palette", type: HoloSuiteBrandingEditor, restricted: true
+  });
   game.settings.register(MODULE_ID, SETTING_API_ONLY_FOR_DEBUGGING, {
     name: "Debugging: API-Only Mode (This Browser)",
     hint: "Diagnostic only. Keeps Core's registration API active while disabling its launcher, scene-control UI, sidebar cleanup, and What's New catalog work on this browser.",
@@ -603,7 +670,7 @@ function registerSettings(): void {
   });
 }
 
-async function refreshSceneControlsForDiagnosticMode(): Promise<void> {
+async function refreshSceneControls(): Promise<void> {
   const controls = ui.controls as any;
   if (typeof controls?.render !== "function") return;
   const generation = Number(game.release?.generation ?? 0);
@@ -611,7 +678,7 @@ async function refreshSceneControlsForDiagnosticMode(): Promise<void> {
     if (generation >= 13) await controls.render({ force: true, reset: true });
     else await controls.render(true);
   } catch (error) {
-    console.warn(`${MODULE_ID} | Could not rebuild scene controls after changing API-only mode.`, error);
+    console.warn(`${MODULE_ID} | Could not rebuild scene controls.`, error);
   }
 }
 
@@ -623,14 +690,14 @@ function applyApiOnlySetting(value: unknown = safeGetSetting(MODULE_ID, SETTING_
       "[data-tool='holosuite-core-launcher'], .holosuite-scene-control, .holosuite-sidebar-launcher, .holosuite-floating-launcher"
     ).forEach((element) => element.remove());
     if (launcherApp || hasStaleLauncherWindow()) void requestLauncherClose();
-    if (coreReady) void refreshSceneControlsForDiagnosticMode();
+    if (coreReady) void refreshSceneControls();
     console.warn(`${MODULE_ID} | API-only diagnostic mode is enabled on this browser.`);
     return;
   }
 
   if (coreReady) {
     void loadBundledWhatsNewCatalog();
-    void refreshSceneControlsForDiagnosticMode();
+    void refreshSceneControls();
   }
 }
 
@@ -776,8 +843,13 @@ function applyFoundryGenerationMarker(): void {
   }
 }
 
-function getLauncherIconClass(): string {
+function defaultLauncherIcon(): string {
   return getFoundryGeneration() === 12 ? "fa-solid fa-terminal" : "fa-solid fa-mobile-screen-button";
+}
+
+function getLauncherIconClass(): string {
+  const icon = getBranding(DEVICE_BRANDING_ID).icon;
+  return icon ? `fa-solid ${icon}` : defaultLauncherIcon();
 }
 
 function isDisabledForPlayers(): boolean {
@@ -867,6 +939,7 @@ async function loadBundledWhatsNewCatalog(): Promise<void> {
 }
 
 function renderHeaderActions(view: LauncherView): string {
+  const branding = getBranding(DEVICE_BRANDING_ID);
   const unseenCount = getUnseenWhatsNewCount();
   const badgeLabel = unseenCount > 0 ? `<span>${escapeHtml(unseenCount)}</span>` : "";
   const backButton = view === "apps" ? "" : `
@@ -874,10 +947,10 @@ function renderHeaderActions(view: LauncherView): string {
       type="button"
       class="holosuite-header-action"
       data-holosuite-action="apps"
-      title="Back to HoloSuite apps"
-      aria-label="Back to HoloSuite apps"
+      title="Back to apps"
+      aria-label="Back to apps"
     >
-      <i class="fa-solid fa-arrow-left"></i>
+      ${brandedIcon({ icon: branding.backIcon }, "fa-solid fa-arrow-left")}
     </button>
   `;
 
@@ -888,10 +961,10 @@ function renderHeaderActions(view: LauncherView): string {
         type="button"
         class="holosuite-header-action ${view === "settings" ? "is-active" : ""}"
         data-holosuite-action="settings"
-        title="HoloSuite Settings"
-        aria-label="HoloSuite Settings"
+        title="Settings"
+        aria-label="Settings"
       >
-        <i class="fa-solid fa-gear"></i>
+        ${brandedIcon({ icon: branding.settingsIcon }, "fa-solid fa-gear")}
       </button>
       <button
         type="button"
@@ -900,19 +973,31 @@ function renderHeaderActions(view: LauncherView): string {
         title="What's New"
         aria-label="What's New"
       >
-        <i class="fa-solid fa-star"></i>
+        ${brandedIcon({ icon: branding.updatesIcon }, "fa-solid fa-star")}
         ${badgeLabel}
       </button>
     </div>
   `;
 }
 
-function renderAppIcon(app: HoloSuiteAppRegistration): string {
+function renderAppIcon(app: HoloSuiteAppRegistration, branding = getBranding(app.id)): string {
   return `
-    <span class="holosuite-app-icon" data-holosuite-app-icon="${escapeHtml(app.id)}">
-      <i class="${escapeHtml(app.icon)}"></i>
+    <span class="holosuite-app-icon ${branding.icon ? "holosuite-brand-glyph" : ""}" data-holosuite-app-icon="${escapeHtml(app.id)}">
+      ${brandedIcon(branding, app.icon)}
     </span>
   `;
+}
+
+function brandedTileLabel(app: HoloSuiteAppRegistration, branding = getBranding(app.id)): string {
+  const title = appDisplayTitle(app.title);
+  return branding.label || branding.name || title;
+}
+
+function renderAppTileContent(app: HoloSuiteAppRegistration, branding: HoloSuiteBranding, isGM: boolean): string {
+  const description = app.description;
+  return `${renderAppIcon(app, branding)}
+    <span class="holosuite-app-title">${escapeHtml(brandedTileLabel(app, branding))}</span>
+    ${isGM && description ? `<p>${escapeHtml(description)}</p>` : ""}`;
 }
 
 function renderAppsView(): string {
@@ -931,32 +1016,29 @@ function renderAppsView(): string {
       }
       return left.title.localeCompare(right.title);
     });
-  const deckLabel = isGM ? "GM Command Deck" : "Player Link";
-  const screenTitle = isGM ? "Apps" : "Commlink";
+  const device = getBranding(DEVICE_BRANDING_ID);
+  const deckLabel = isGM ? device.gmHeading || "GM Command Deck" : device.playerHeading || "Player Link";
+  const screenTitle = isGM ? device.gmScreen || "Apps" : device.playerScreen || "Commlink";
   const emptyLabel = isGM
     ? "No HoloSuite apps have registered yet."
     : "No player apps are available yet.";
   const playerSummary = isGM ? "" : `
     <section class="holosuite-player-home">
       <div>
-        <span class="holosuite-kicker">Active User</span>
+        <span class="holosuite-kicker">${escapeHtml(device.userLabel || "Active User")}</span>
         <strong>${escapeHtml(getPlayerDisplayName())}</strong>
       </div>
       <div class="holosuite-player-status">
-        <span>LINK STABLE</span>
+        <span>${escapeHtml(device.linkStatus || "LINK STABLE")}</span>
       </div>
     </section>
   `;
 
   const appCards = apps.map((app) => {
-      const title = appDisplayTitle(app.title);
-      const description = isGM && app.description ? `<p>${escapeHtml(app.description)}</p>` : "";
       const badgeLabel = !isGM ? getAppBadgeLabel(app.id) : "";
       return `
         <button type="button" class="holosuite-app-tile" data-holosuite-app="${escapeHtml(app.id)}">
-          ${renderAppIcon(app)}
-          <span class="holosuite-app-title">${escapeHtml(title)}</span>
-          ${description}
+          ${renderAppTileContent(app, getBranding(app.id), isGM)}
           ${badgeLabel ? `<span class="holosuite-app-count">${escapeHtml(badgeLabel)}</span>` : ""}
         </button>
       `;
@@ -1151,8 +1233,21 @@ function renderSettingsView(): string {
       <div class="holosuite-theme-choices">
         ${options}
       </div>
+      ${game.user?.isGM ? `
+        <div class="holosuite-branding-action">
+          <button type="button" data-holosuite-action="branding">Open HoloSuite Branding</button>
+          <span class="holosuite-branding-warning" tabindex="0" role="img" aria-label="Experimental feature" data-tooltip="Experimental feature">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          </span>
+        </div>
+      ` : ""}
     </section>
   `;
+}
+
+function renderDeviceBrand(branding = getBranding(DEVICE_BRANDING_ID)): string {
+  const mark = branding.logo ? `<img class="holosuite-brand-image" src="${escapeHtml(branding.logo)}" alt="">` : "";
+  return `<span>${mark}${escapeHtml(branding.name || "HoloSuite")}</span>`;
 }
 
 function renderLauncherHtml(
@@ -1171,14 +1266,14 @@ function renderLauncherHtml(
     <section class="holosuite-phone">
       <div class="holosuite-phone-shell">
         <header class="holosuite-status-bar">
-          <span>HoloSuite</span>
+          ${renderDeviceBrand()}
           ${renderHeaderActions(view)}
         </header>
         <main class="holosuite-screen ${screenClass}">
           ${screenContent}
         </main>
         <footer class="holosuite-dock">
-          <button type="button" data-holosuite-action="close" title="Close"><i class="fa-solid fa-circle-xmark"></i></button>
+          <button type="button" data-holosuite-action="close" title="Close" aria-label="Close">${brandedIcon({ icon: getBranding(DEVICE_BRANDING_ID).closeIcon }, "fa-solid fa-circle-xmark")}</button>
         </footer>
       </div>
     </section>
@@ -1376,12 +1471,13 @@ function showAppContextMenu(appId: string, anchor: HTMLElement, x: number, y: nu
   const menu = document.createElement("div");
   menu.className = "holosuite-app-context-menu";
   menu.setAttribute("role", "menu");
-  menu.setAttribute("aria-label", app.title);
+  const title = brandedTileLabel(app);
+  menu.setAttribute("aria-label", title);
   Object.assign(menu.style, { position: "fixed", zIndex: "100000", background: "#091923", border: "1px solid #58c8d5", borderRadius: "5px", padding: "5px", minWidth: "200px", boxShadow: "0 8px 30px #0009" });
   const controller = new AbortController();
   const close = () => { controller.abort(); menu.remove(); closeAppContextMenu = null; };
   closeAppContextMenu = close;
-  const actions = [{ label: `Open ${app.title}`, callback: () => openRegisteredApp(appId) }, ...app.contextActions];
+  const actions = [{ label: `Open ${title}`, callback: () => openRegisteredApp(appId) }, ...app.contextActions];
   for (const action of actions) {
     const button = document.createElement("button");
     button.type = "button";
@@ -1418,12 +1514,13 @@ function showAppContextMenu(appId: string, anchor: HTMLElement, x: number, y: nu
 
 function bindLauncherControls(root: HTMLElement | null): void {
   if (!root) return;
+  bindBrandingImages(root);
   closeAppContextMenu?.();
   root.querySelectorAll<HTMLElement>("[data-holosuite-app]").forEach((button) => {
     const appId = button.dataset.holosuiteApp ?? "";
     if (registeredApps.get(appId)?.contextActions?.length) {
       button.setAttribute("aria-haspopup", "menu");
-      button.title = `${button.title || registeredApps.get(appId)?.title} � Right-click for options`;
+      button.title = `${brandedTileLabel(registeredApps.get(appId)!)} — Right-click for options`;
       button.addEventListener("contextmenu", event => {
         if (launcherReorderMode) return;
         event.preventDefault(); event.stopPropagation();
@@ -1468,6 +1565,7 @@ function bindLauncherControls(root: HTMLElement | null): void {
       launcherApp?.showSettings();
     });
   });
+  root.querySelector("[data-holosuite-action='branding']")?.addEventListener("click", () => openBranding());
   root.querySelectorAll<HTMLElement>("[data-holosuite-device-style]").forEach((button) => {
     button.addEventListener("click", (event) => {
       const style = (event.currentTarget as HTMLElement).dataset.holosuiteDeviceStyle;
@@ -1777,6 +1875,206 @@ class HoloSuiteDiagnostics extends LegacyApplication {
   }
 }
 
+function openBranding(id?: string): unknown {
+  if (!game.user?.isGM) return null;
+  brandingApp ??= new HoloSuiteBrandingEditor();
+  if (typeof id === "string") brandingApp.selectTarget(id);
+  return brandingApp.render(LegacyApplication === (globalThis as any).foundry?.applications?.api?.ApplicationV2
+    ? { force: true } : true);
+}
+
+class HoloSuiteBrandingEditor extends LegacyApplication {
+  static DEFAULT_OPTIONS = {
+    id: "holosuite-branding", tag: "section", classes: ["holosuite-branding-window"],
+    window: { title: "HoloSuite Branding", resizable: true }, position: { width: 660, height: "auto" }
+  };
+
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "holosuite-branding", title: "HoloSuite Branding", classes: ["holosuite-branding-window"],
+      width: 660, height: "auto", resizable: true, closeOnSubmit: false
+    });
+  }
+
+  private selected = DEVICE_BRANDING_ID;
+  private drafts = new Map<string, HoloSuiteBranding>();
+  private saving = false;
+
+  selectTarget(id: string): void {
+    this.selected = id;
+  }
+
+  private renderEditor(): string {
+    const apps = getBrandingTargets();
+    return `<section class="holosuite-branding-editor">
+      <p>Choose a device or app. Blank fields use its defaults. Changes apply to this world.</p>
+      <label>Branding for <select data-branding-select>
+        <option value="${DEVICE_BRANDING_ID}">HoloSuite device</option>
+        <optgroup label="Apps">${apps.map(app => `<option value="${escapeHtml(app.id)}">${escapeHtml(app.title)}</option>`).join("")}</optgroup>
+      </select></label>
+      ${registeredApps.size ? '<details class="holosuite-branding-apps"><summary>Browse app tiles</summary><div class="holosuite-branding-grid" data-branding-grid></div></details>' : ""}
+      <div data-branding-fields></div>
+    </section>`;
+  }
+
+  private bind(root: HTMLElement | null): void {
+    const editor = root?.matches(".holosuite-branding-editor") ? root : root?.querySelector<HTMLElement>(".holosuite-branding-editor");
+    if (!editor || !game.user?.isGM) return;
+    const select = editor.querySelector<HTMLSelectElement>("[data-branding-select]")!;
+    const fields = editor.querySelector<HTMLElement>("[data-branding-fields]")!;
+    if (!registeredApps.has(this.selected) && !brandingTargets.has(this.selected)) this.selected = DEVICE_BRANDING_ID;
+    select.value = this.selected;
+    select.addEventListener("change", () => {
+      this.selected = select.value;
+      this.renderFields(fields);
+      this.renderGrid(editor);
+    });
+    this.renderFields(fields);
+    this.renderGrid(editor);
+  }
+
+  private renderGrid(editor: HTMLElement): void {
+    const grid = editor.querySelector<HTMLElement>("[data-branding-grid]");
+    if (!grid) return;
+    const select = editor.querySelector<HTMLSelectElement>("[data-branding-select]")!;
+    const apps = [...registeredApps.values()].sort((a, b) => a.title.localeCompare(b.title));
+    grid.innerHTML = apps.map(app => `<button type="button" class="holosuite-app-tile" data-holosuite-app="${escapeHtml(app.id)}"
+      aria-pressed="${app.id === this.selected}">${renderAppTileContent(app, getBranding(app.id), false)}</button>`).join("");
+    grid.querySelectorAll<HTMLButtonElement>("[data-holosuite-app]").forEach(tile => {
+      tile.addEventListener("click", () => {
+        select.value = tile.dataset.holosuiteApp!;
+        select.dispatchEvent(new Event("change"));
+        editor.querySelector<HTMLInputElement>('[name="name"]')?.focus();
+      });
+    });
+    bindBrandingImages(grid);
+  }
+
+  private renderFields(container: HTMLElement): void {
+    const id = this.selected;
+    const app = registeredApps.get(id) ?? brandingTargets.get(id);
+    const hasTile = registeredApps.has(id);
+    const hasModuleHeader = app?.brandingInApp === true;
+    const branding = this.drafts.get(id) ?? getBranding(id);
+    const field = (key: string, label: string, placeholder = "", length = 100, value = branding[key], hint = "") =>
+      `<label>${escapeHtml(label)}${hint ? `<small>${escapeHtml(hint)}</small>` : ""}<input name="${escapeHtml(key)}" maxlength="${length}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}"></label>`;
+    const asset = (key: "iconImage" | "logo", label: string) => `
+      <fieldset class="holosuite-branding-asset" ${key === "iconImage" ? "data-custom-icon-image" : ""}>${field(key, label, "PNG or WebP", 2048)}
+        <button type="button" data-branding-pick="${key}" aria-label="Browse or upload ${escapeHtml(label)}"><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Browse / Upload</button>
+      </fieldset>`;
+    const iconMode = this.drafts.has(id) ? branding.icon : branding.iconImage ? "custom" : branding.icon;
+    const iconChoice = (key: keyof HoloSuiteBranding, label: string, selected = branding[key]) =>
+      `<label>${label}<select name="${key}"><option value="">Use default</option>${Object.entries(BRANDING_ICONS).map(([icon, title]) =>
+        `<option value="${icon}" ${selected === icon ? "selected" : ""}>${title}</option>`).join("")}
+        ${key === "icon" ? `<option value="custom" ${selected === "custom" ? "selected" : ""}>Custom image</option>` : ""}</select></label>`;
+    const textFields = Object.entries(app?.brandingHeader?.textFields ?? {});
+    container.innerHTML = `<form class="holosuite-branding-form">
+      ${field("name", app ? "Display name" : "Device name", app?.title || "HoloSuite")}
+      ${hasTile && app ? field("label", "Launcher tile label (optional)", appDisplayTitle(app.title), 48, branding.label,
+        "Only shown on the HoloSuite launcher tile. Leave blank to use the display name.") : ""}
+      ${iconChoice("icon", app ? "App icon" : "Launcher icon", iconMode ?? "")}
+      ${asset("iconImage", hasModuleHeader ? "App icon image" : app ? "Tile icon image" : "Launcher icon image")}
+      ${!app || app.brandingHeader?.taglineLabel || textFields.length ? `<details><summary>Advanced branding</summary>
+        ${!app || app.brandingHeader?.taglineLabel ? asset("logo", app ? "Header logo" : "Device logo") : ""}
+        ${textFields.map(([key, entry]) => {
+          const { label, hint, placeholder } = typeof entry === "string" ? { label: entry } : entry;
+          return field(`text.${key}`, label, placeholder, 160, branding.text?.[key], hint);
+        }).join("")}
+        ${app ? `${app.brandingHeader?.taglineLabel ? field("tagline", app.brandingHeader.taglineLabel, "", 160) : ""}` : `
+          ${field("gmTitle", "GM window title", "HoloSuite Command Deck")}
+          ${field("gmHeading", "GM home header", "GM Command Deck", 60)}
+          ${field("gmScreen", "GM home title", "Apps", 48)}
+          ${field("playerTitle", "Player window title", "HoloSuite Player View")}
+          ${field("playerHeading", "Player home header", "Player Link", 60)}
+          ${field("playerScreen", "Player home title", "Commlink", 48)}
+          ${field("userLabel", "Player name label", "Active User", 48)}
+          ${field("linkStatus", "Player connection label", "LINK STABLE", 48)}
+          ${iconChoice("backIcon", "Back to apps icon")}${iconChoice("settingsIcon", "Settings icon")}
+          ${iconChoice("updatesIcon", "What’s New icon")}${iconChoice("closeIcon", "Close icon")}`}
+      </details>` : ""}
+      <footer><button type="button" data-branding-reset>Reset fields</button><button type="submit"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save branding</button></footer>
+    </form>`;
+
+    const form = container.querySelector("form")!;
+    const iconSelect = form.elements.namedItem("icon") as HTMLSelectElement;
+    const customImage = form.querySelector<HTMLFieldSetElement>("[data-custom-icon-image]")!;
+    const iconImage = form.elements.namedItem("iconImage") as HTMLInputElement;
+    const readForm = (keepInactiveImage = false) => {
+      const data = Object.fromEntries(new FormData(form));
+      if (keepInactiveImage || iconSelect.value === "custom") data.iconImage = iconImage.value;
+      const text = Object.fromEntries(textFields.map(([key]) => [key, data[`text.${key}`]]));
+      return { ...data, text };
+    };
+    const change = () => {
+      customImage.disabled = iconSelect.value !== "custom";
+      this.drafts.set(id, readForm(true) as HoloSuiteBranding);
+    };
+    form.addEventListener("input", change);
+    form.querySelector("[data-branding-reset]")?.addEventListener("click", () => {
+      this.drafts.set(id, {});
+      this.renderFields(container);
+    });
+    form.querySelectorAll<HTMLButtonElement>("[data-branding-pick]").forEach(button => {
+      button.addEventListener("click", () => {
+        const input = form.elements.namedItem(button.dataset.brandingPick!) as HTMLInputElement;
+        const Picker = (globalThis as any).foundry?.applications?.apps?.FilePicker?.implementation
+          ?? (globalThis as any).foundry?.applications?.apps?.FilePicker ?? (globalThis as any).FilePicker;
+        if (!Picker) return ui.notifications?.warn?.("Foundry’s file picker is unavailable.");
+        new Picker({ type: "image", current: input.value, callback: (path: string) => {
+          if (!imagePath(path)) return ui.notifications?.warn?.("Choose a PNG or WebP image.");
+          if (!form.isConnected || input.matches(":disabled")) return;
+          input.value = path;
+          change();
+        } }).browse();
+      });
+    });
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (this.saving || !game.user?.isGM) return;
+      const data = readForm();
+      if ([data["iconImage"], data["logo"]].some(value => typeof value === "string" && value.trim() && !imagePath(value))) {
+        ui.notifications?.warn?.("Use a valid PNG or WebP image for branding.");
+        return;
+      }
+      const saved = { ...safeGetSetting(MODULE_ID, BRANDING_SETTING) as Record<string, unknown> };
+      const draft = normalizeBranding(data);
+      const pending = this.drafts.get(id);
+      if (Object.keys(draft).length) Object.defineProperty(saved, id, { value: draft, enumerable: true, configurable: true });
+      else delete saved[id];
+      this.saving = true;
+      try {
+        await game.settings.set(MODULE_ID, BRANDING_SETTING, saved);
+        if (this.drafts.get(id) === pending) this.drafts.delete(id);
+        const editor = container.closest<HTMLElement>(".holosuite-branding-editor");
+        if (editor) this.renderGrid(editor);
+        ui.notifications?.info?.("HoloSuite branding saved.");
+      } catch (error) {
+        console.error(`${MODULE_ID} | Branding could not be saved.`, error);
+        ui.notifications?.error?.("HoloSuite branding could not be saved. Try again.");
+      } finally {
+        this.saving = false;
+      }
+    });
+    customImage.disabled = iconSelect.value !== "custom";
+  }
+
+  async _renderInner() { return $(this.renderEditor()); }
+  activateListeners(html: unknown) { this.bind(unwrapHtmlElement(html)); }
+  async _renderHTML() {
+    const template = document.createElement("template");
+    template.innerHTML = this.renderEditor();
+    return template.content;
+  }
+  _replaceHTML(result: DocumentFragment, content: unknown) {
+    const root = unwrapHtmlElement(content);
+    if (!root) return;
+    root.replaceChildren(result);
+    this.bind(root);
+  }
+  async _updateObject() { /* The editor handles its own save. */ }
+}
+
 class HoloSuiteLauncher extends LegacyApplication {
   private currentView: LauncherView = "apps";
   private whatsNewFilter: WhatsNewFilter = "all";
@@ -1806,6 +2104,12 @@ class HoloSuiteLauncher extends LegacyApplication {
       width: 483,
       height: "auto"
     });
+  }
+
+  get title() {
+    const branding = getBranding(DEVICE_BRANDING_ID);
+    const isGM = game.user?.isGM === true;
+    return (isGM ? branding.gmTitle : branding.playerTitle) || branding.name || super.title;
   }
 
   render(...args: any[]) {
@@ -1879,9 +2183,13 @@ class HoloSuiteLauncher extends LegacyApplication {
     if (!statusBar || !screen) return false;
 
     statusBar.innerHTML = `
-      <span>HoloSuite</span>
+      ${renderDeviceBrand()}
       ${renderHeaderActions(this.currentView)}
     `;
+    const closeButton = root.querySelector("[data-holosuite-action='close']");
+    if (closeButton) closeButton.innerHTML = brandedIcon({ icon: getBranding(DEVICE_BRANDING_ID).closeIcon }, "fa-solid fa-circle-xmark");
+    const windowTitle = root.closest(".holosuite-launcher-window")?.querySelector(".window-title");
+    if (windowTitle) windowTitle.textContent = this.title;
     screen.innerHTML = this.currentView === "whats-new"
       ? renderWhatsNewView(this.whatsNewFilter, this.whatsNewTab)
       : this.currentView === "settings"
@@ -1960,6 +2268,10 @@ class HoloSuiteLauncher extends LegacyApplication {
 }
 
 const api = {
+  registerBrandingTarget(target: Pick<HoloSuiteAppRegistration, "id" | "title" | "icon">): void {
+    const entry = normalizeApp({ ...target, brandingInApp: true, open: () => undefined });
+    if (entry) brandingTargets.set(entry.id, entry);
+  },
   registerApp(app: HoloSuiteAppRegistration): HoloSuiteAppRegistration | null {
     const normalized = normalizeApp(app);
     if (!normalized) return null;
@@ -1975,6 +2287,21 @@ const api = {
   getApps(): HoloSuiteAppRegistration[] {
     return [...registeredApps.values()];
   },
+  getBranding,
+  hasBrandingMigration(id: string): boolean {
+    const saved = safeGetSetting(MODULE_ID, BRANDING_SETTING) as Record<string, unknown> | undefined;
+    return saved?.[`migration:${id}`] === true;
+  },
+  async migrateBranding(id: string, legacy: HoloSuiteBranding): Promise<void> {
+    if (!game.user?.isGM || this.hasBrandingMigration(id)) return;
+    const saved = { ...safeGetSetting(MODULE_ID, BRANDING_SETTING) as Record<string, unknown> };
+    const current = getBranding(id);
+    const imported = normalizeBranding(legacy);
+    saved[id] = normalizeBranding({ ...current, ...imported, text: { ...current.text, ...imported.text } });
+    saved[`migration:${id}`] = true;
+    await game.settings.set(MODULE_ID, BRANDING_SETTING, saved);
+  },
+  openBranding,
   getDiagnostics(): Record<string, unknown> {
     return collectCoreDiagnostics();
   },
@@ -2058,6 +2385,13 @@ Hooks.on("renderSceneControls", (_app: unknown, html: unknown) => injectRendered
 Hooks.on("renderSidebar", removeSidebarLaunchers);
 Hooks.on("renderSidebarTab", removeSidebarLaunchers);
 Hooks.on("renderSettingsConfig", organizeCoreSettings);
+for (const hook of ["renderApplication", "renderApplicationV1", "renderApplicationV2"]) {
+  Hooks.on(hook, (app: { element?: unknown }, html: unknown) => {
+    const root = unwrapHtmlElement(app.element) ?? unwrapHtmlElement(html);
+    if (root) refreshModuleBranding(root, getBranding);
+  });
+}
+Hooks.on("holosuite-core.renderBranding", (root: HTMLElement) => refreshModuleBranding(root, getBranding));
 
 Hooks.once("ready", () => {
   coreReady = true;
