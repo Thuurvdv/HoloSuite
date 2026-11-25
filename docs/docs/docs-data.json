@@ -45,7 +45,7 @@
       "tier": "free",
       "category": "Comms",
       "compatibility": "Foundry v12-v14",
-      "image": "assets/Cybercall.jpg",
+      "image": "assets/CyberCall_web.webp",
       "summary": "Make calls or send messages to players & npc's",
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for CyberCall, and click Install. Install HoloSuite Core here too if you do not have it.",
@@ -68,7 +68,7 @@
       "tier": "free",
       "category": "Surveillance",
       "compatibility": "Foundry v12-v14",
-      "image": "assets/CameraFeed.jpg",
+      "image": "assets/SecurityCameras_web.webp",
       "summary": "Show players camera feeds taken from live Scene regions or static images.",
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Security Cameras, and click Install. Install HoloSuite Core here too if you do not have it.",
@@ -114,7 +114,7 @@
       "tier": "free",
       "category": "Navigation",
       "compatibility": "Foundry v12-v14",
-      "image": "assets/Galaxy%20Map%20Manager.png",
+      "image": "assets/GalaxyMap_web.webp",
       "summary": "Build a holographic star map with systems, routes, travel, and GM-controlled reveals.",
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Galaxy Map, and click Install. Install HoloSuite Core here too if you do not have it.",
@@ -137,7 +137,7 @@
       "tier": "free",
       "category": "Contracts",
       "compatibility": "Foundry v12-v14",
-      "image": "assets/BountyBoard.jpg",
+      "image": "assets/BountyBoard_web.webp",
       "summary": "Post contracts for players to browse, claim, and complete from a sci-fi job board.",
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for Bounty Board, and click Install. Install HoloSuite Core here too if you do not have it.",
@@ -228,7 +228,7 @@
       "tier": "free",
       "category": "Commerce",
       "compatibility": "Foundry v12-v14",
-      "image": "assets/VendingMachines.webp",
+      "image": "assets/VendingMachinesNew.webp",
       "summary": "Region-linked vending machines with limited stock, baskets, actor currency, and four terminal styles.",
       "installation": [
         "In Foundry's Setup screen, open Add-on Modules > Install Module, search for HoloSuite Vending Machines, and click Install. Install HoloSuite Core here too if you do not have it.",
@@ -266,7 +266,7 @@
       "tier": "premium",
       "category": "Computers",
       "compatibility": "Foundry v12-v14",
-      "image": "assets/TerminalPreview.webp",
+      "image": "assets/Terminal_web.webp",
       "summary": "Create in-world computers with mail, files, cameras, utilities, downloads, and hacking.",
       "installation": [
         "Subscribe to my Mage Tower Studios Patreon at a tier that includes the premium modules.",
