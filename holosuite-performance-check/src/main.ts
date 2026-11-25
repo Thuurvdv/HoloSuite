@@ -76,6 +76,9 @@ function activateControl(): void {
 
 (globalThis as any).Hooks.once("ready", () => {
   exposeApi();
+  const currentGame = (globalThis as any).game;
+  const core = currentGame.modules?.get?.("holosuite-core")?.api ?? currentGame.holosuite;
+  core?.registerBrandingTarget?.({ id: MODULE_ID, title: MODULE_TITLE, icon: "fa-solid fa-chart-line" });
   console.info(`${MODULE_ID} | Ready. Hook instrumentation: ${hookInstrumentation.installed ? "active" : "unavailable"}; preexisting callbacks wrapped: ${hookInstrumentation.existingWrapped}.`);
   void beginPreexistingAttribution().then((result) => {
     console.info(`${MODULE_ID} | Preexisting hook attribution: ${result.resolved}/${result.total} resolved, ${result.ambiguous} ambiguous, ${result.unresolved} unresolved across ${result.scriptsScanned} scripts.`);

@@ -656,6 +656,7 @@ function tryRegisterWithHoloSuite() {
   // TODO: Replace this simple app registration with a richer HoloSuite Core
   // integration once Core exposes player routing and app manifests.
   holosuite.registerApp({
+    brandingInApp: true,
     id: MODULE_ID,
     title: "HoloSuite Hacking",
     icon: "fa-solid fa-terminal",

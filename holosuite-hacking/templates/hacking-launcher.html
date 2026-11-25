@@ -1,4 +1,4 @@
-<section class="hs-application hs-application--hacking hh-shell hh-launcher-shell">
+<section data-holosuite-branding="holosuite-hacking" class="hs-application hs-application--hacking hh-shell hh-launcher-shell">
   <div class="hs-background" aria-hidden="true"></div>
   <div class="hs-frame" aria-hidden="true">
     <img class="hs-frame-piece hs-frame-piece--default hs-frame-corner hs-frame-corner--top-left" src="{{frameAssetBase}}/hs-frame-corner--top-left.svg" alt="">
@@ -18,7 +18,7 @@
   </div>
   <form class="hs-content holosuite-hacking-launcher">
     <header class="holosuite-hacking-launcher-header">
-      <p class="hh-kicker">HoloSuite / hacking deck</p>
+      <p class="hh-kicker"><span data-holosuite-brand-icon></span><span data-holosuite-brand-name>HoloSuite / hacking deck</span></p>
       <div class="hh-launcher-mode-row"><h2 data-launcher-heading>{{#if quickHack}}Quick Hack{{else}}Launch Minigame{{/if}}</h2>
         <button type="button" data-action="quick-toggle" aria-pressed="{{#if quickHack}}true{{else}}false{{/if}}">{{#if quickHack}}Full setup{{else}}Quick Hack{{/if}}</button>
       </div>
