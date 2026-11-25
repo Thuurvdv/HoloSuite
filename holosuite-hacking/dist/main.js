@@ -4251,6 +4251,7 @@ function Xe() {
   var n, e;
   const t = ((n = game.modules.get("holosuite-core")) == null ? void 0 : n.api) ?? game.holosuite;
   return typeof (t == null ? void 0 : t.registerApp) != "function" ? !1 : ((e = t.unregisterApp) == null || e.call(t, "node-intrusion"), t.registerApp({
+    brandingInApp: !0,
     id: R,
     title: "HoloSuite Hacking",
     icon: "fa-solid fa-terminal",
