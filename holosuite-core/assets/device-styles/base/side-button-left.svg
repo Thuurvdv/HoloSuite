@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="8" height="72" viewBox="0 0 8 72">
+  <title>HoloSuite left bezel inlay</title>
+  <g id="inlay">
+    <rect x="1" y="1" width="6" height="70" rx="3" fill="#152a40" stroke="#37647f"/>
+    <path d="M4 17v38" fill="none" stroke="#6bd6ed" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

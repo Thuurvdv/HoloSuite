@@ -1,17 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="132" height="18" viewBox="0 0 132 18">
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="18" viewBox="0 0 320 18">
+  <title>HoloSuite emitter inlay</title>
   <defs>
-    <style>
-      .cls-1 {
-        fill: #081c2e;
-      }
-
-      .cls-2 {
-        fill: #96feff;
-      }
-    </style>
+    <linearGradient id="light-bar">
+      <stop stop-color="#4ed6ef" stop-opacity=".34"/>
+      <stop offset=".2" stop-color="#78eaff"/>
+      <stop offset=".55" stop-color="#bef6ff"/>
+      <stop offset="1" stop-color="#56dfff" stop-opacity=".42"/>
+    </linearGradient>
   </defs>
-  <rect id="Rechthoek_2" data-name="Rechthoek 2" class="cls-1" y="3" width="132" height="11" rx="5.5" ry="5.5"/>
-  <rect id="Rechthoek_1" data-name="Rechthoek 1" class="cls-2" x="39" y="6" width="54" height="5" rx="2.5" ry="2.5"/>
-  <circle id="Ovaal_1" data-name="Ovaal 1" class="cls-2" cx="103.5" cy="8.5" r="2.5"/>
-  <circle id="Ovaal_1-2" data-name="Ovaal 1" class="cls-2" cx="113.5" cy="8.5" r="2.5"/>
+  <g id="flanking-light-bars" fill="url(#light-bar)">
+    <rect x="15" y="12" width="78" height="3" rx="1.5"/>
+    <rect x="227" y="12" width="78" height="3" rx="1.5"/>
+  </g>
+  <g id="emitter">
+    <rect x="119" y="2" width="82" height="11" rx="5.5" fill="#071521" stroke="#417088"/>
+    <path d="M141 7.5h38" stroke="#91eeff" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
 </svg>
