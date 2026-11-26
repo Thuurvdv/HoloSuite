@@ -123,6 +123,46 @@ test("explicit thread IDs preserve group conversations", async () => {
   assert.equal(prepareThreads(getStoredMessages())[0].isGroup, true);
 });
 
+test("NPC group members stay on the roster when a GM replies on their behalf", async () => {
+  const chat = setup();
+  const group = { name: "Crew", userIds: [gm.id] };
+  const groupNpcMembers = [npcA, npcB].map(({ actorId, name, number }) => ({ actorId, name, number }));
+  const options = {
+    threadId: "group:crew",
+    groupId: "crew",
+    groupName: group.name,
+    conversationType: "group",
+    groupMemberUserIds: [player.id],
+    groupMemberNames: [player.name, npcA.name, npcB.name],
+    groupNpcMembers
+  };
+
+  game.user = player;
+  await sendMessageToContact(group, "Player created the group.", {
+    ...options, messageType: "event", eventType: "group-created"
+  });
+  game.user = gm;
+  await serviceArchive();
+  const [thread] = prepareThreads(getStoredMessages());
+  assert.equal(thread.subtitle, "3 members");
+  assert.deepEqual(thread.groupMemberUserIds, [player.id]);
+  assert.deepEqual(thread.groupNpcMembers, groupNpcMembers);
+
+  await sendMessageToContact(thread.contact, "Fixer answers the group", {
+    ...identity(npcA), ...options, recipientUserIds: [player.id]
+  });
+  game.user = player;
+  const [playerThread] = prepareThreads(getStoredMessages());
+  assert.equal(playerThread.title, group.name);
+  assert.equal(playerThread.routeLabel, "");
+  assert.equal(playerThread.subtitle, "3 members");
+  assert.deepEqual(playerThread.groupNpcMembers, groupNpcMembers);
+  assert.equal(playerThread.lastMessage.senderName, npcA.name);
+  assert.deepEqual(chat.map((message) => message.whisper), [[gm.id, player.id], [gm.id, player.id]]);
+  game.user = { id: "bystander" };
+  assert.deepEqual(getStoredMessages(), []);
+});
+
 test("GM NPC routes show the player's portrait before a reply, while players still see the NPC", async () => {
   setup();
   await sendMessageToContact(pc, "NPC portrait test", { ...identity(npcA), senderImage: "npc.webp", contactImage: "npc.webp" });

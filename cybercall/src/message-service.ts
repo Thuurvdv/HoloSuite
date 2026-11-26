@@ -66,6 +66,7 @@ export async function sendMessageToContact(contactSource: any, bodySource: any, 
     ? uniqueStrings(options.recipientUserIds)
     : getRecipientUserIds(contactSource);
   const routesToGMManagedContact = !hasExplicitUserRecipient(contactSource);
+  const isGroup = options.conversationType === "group";
   const threadId = String(options.threadId ?? createThreadIdForContact(contactSource, senderUser?.id, options));
   const senderName = String(options.senderName ?? "").trim() || getUserDisplayName(senderUser, "Unknown Sender");
   const senderActorId = String(options.senderActorId ?? senderUser?.character?.id ?? "").trim();
@@ -83,8 +84,8 @@ export async function sendMessageToContact(contactSource: any, bodySource: any, 
     contactName: String(options.contactName ?? contact.name ?? ""),
     contactImage: String(options.contactImage ?? contact.image ?? ""),
     contactUserId: String(options.contactUserId ?? contact.userId ?? ""),
-    contactManagedByGM: options.contactManagedByGM ?? (contact.managedByGM === true || routesToGMManagedContact),
-    contactIsNpc: options.contactIsNpc ?? (contact.isNpc === true || routesToGMManagedContact),
+    contactManagedByGM: !isGroup && (options.contactManagedByGM ?? (contact.managedByGM === true || routesToGMManagedContact)),
+    contactIsNpc: !isGroup && (options.contactIsNpc ?? (contact.isNpc === true || routesToGMManagedContact)),
     body,
     messageType: String(options.messageType ?? "text"),
     eventType: String(options.eventType ?? ""),
@@ -93,6 +94,7 @@ export async function sendMessageToContact(contactSource: any, bodySource: any, 
     groupName: String(options.groupName ?? ""),
     groupMemberUserIds: options.groupMemberUserIds ?? [],
     groupMemberNames: options.groupMemberNames ?? [],
+    groupNpcMembers: options.groupNpcMembers ?? [],
     schemaVersion: MESSAGE_SCHEMA_VERSION
   });
   return queueMessage(message);

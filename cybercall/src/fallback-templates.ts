@@ -306,6 +306,12 @@ export function renderMessagesFallbackTemplate(data: any, escapeHTML: EscapeHTML
         </label>
       `).join("")
     : "<p>No other player users are available.</p>";
+  const groupNpcMemberMarkup = (data.groupNpcMemberChoices ?? []).map((member: any) => `
+        <label>
+          <input type="checkbox" name="memberActorIds" value="${escapeHTML(member.actorId)}">
+          <span>${escapeHTML(member.name)}</span>
+        </label>
+      `).join("");
   const groupFormMarkup = `
     <form class="cybercall-group-form" data-cybercall-group-form>
       <label class="cybercall-group-name">
@@ -316,6 +322,10 @@ export function renderMessagesFallbackTemplate(data: any, escapeHTML: EscapeHTML
         <legend>Players</legend>
         <div class="cybercall-group-members">${groupMemberMarkup}</div>
       </fieldset>
+      ${groupNpcMemberMarkup ? `<fieldset>
+        <legend>NPCs</legend>
+        <div class="cybercall-group-members">${groupNpcMemberMarkup}</div>
+      </fieldset>` : ""}
       <button type="submit" ${data.hasGroupMemberChoices ? "" : "disabled"}>Create Group</button>
     </form>
   `;
@@ -379,7 +389,7 @@ export function renderMessagesFallbackTemplate(data: any, escapeHTML: EscapeHTML
               </span>
             ` : ""}
             <div>
-              <div class="cybercall-contacts-kicker">${activeThread ? escapeHTML(activeThread.subtitle) : data.isComposingNewGroup ? "Private Player Channel" : "Secure Channel"}</div>
+              <div class="cybercall-contacts-kicker" ${activeThread?.isGroup ? `title="${escapeHTML(activeThread.groupRoster)}"` : ""}>${activeThread ? escapeHTML(activeThread.subtitle) : data.isComposingNewGroup ? "Private Channel" : "Secure Channel"}</div>
               <h3>${activeThread ? escapeHTML(activeThread.title) : data.isComposingNewGroup ? "Create Group Chat" : "New Message"}</h3>
             </div>
           </div>

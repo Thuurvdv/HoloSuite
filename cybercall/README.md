@@ -46,7 +46,7 @@ Choose your ringtone and notification sound in CyberCall's **Settings**. The GM 
 
 ### Sending Messages
 
-Click **Message** beside a contact, or open **Messages → New**. Use **New Group** to start a group chat; offline players can join the conversation when they return.
+Click **Message** beside a contact, or open **Messages → New**. Use **New Group** to select players and NPC contacts linked to Foundry Actors. Offline players can join the conversation when they return. GMs can use **Reply As** to speak as an NPC in the group, and the selection stays active after sending.
 
 GMs can select **Send As** to message as an NPC. Choosing an Actor links it immediately; existing conversations can also be linked by dragging an Actor or token onto them. Use **Share Portrait** to show the NPC's portrait to that player.
 

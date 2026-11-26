@@ -31,6 +31,7 @@ import { mountDeviceHardware } from "./device-shell";
 import { refreshDeviceEmblems } from "./device-branding";
 import { archiveMessage, isArchive, MIGRATED, serviceArchive } from "./message-archive";
 import { createGroupThreadId, createThreadIdForContact, getAvatarTone, prepareThreads } from "./message-model";
+import type { CyberCallThread, GroupNpcMember } from "./message-model";
 import { ensurePersonalContactDirectories, getAssignedContacts, getPlayerContacts, getSyncedPersonalContacts, isPlayerContactDirectory, savePersonalContacts, writeAssignedContact, writePersonalContact } from "./player-contacts";
 import { bindPhoneNumberInputs, getPhoneNumberFormat, matchesPhoneNumberFormat } from "./phone-format";
 import { createMessageEvent, getStoredMessages, sendMessageToContact } from "./message-service";
@@ -92,6 +93,24 @@ function getGroupMessageMemberChoices() {
       active: user.active === true
     }))
     .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function getGroupNpcMemberChoices(contacts: any[], threads: CyberCallThread[]) {
+  const choices = new Map<string, GroupNpcMember>();
+  const bindings = getNpcThreadBindings();
+  const candidates = [...contacts, ...threads
+    .filter((thread) => !thread.isGroup && !thread.contact.userId && (thread.contact.isNpc || thread.isNpcRouted))
+    .map((thread) => ({
+      ...thread.contact,
+      actorId: bindings[thread.id]?.actorId
+    }))];
+  for (const contact of candidates) {
+    const { actorId, name, number } = contact;
+    if (!actorId || !name || contact.userId || choices.has(actorId)) continue;
+    if (game.user?.isGM && !game.actors?.get?.(actorId)) continue;
+    choices.set(actorId, { actorId, name, number });
+  }
+  return [...choices.values()].sort((left, right) => left.name.localeCompare(right.name));
 }
 
 function getUserMessageContacts() {
@@ -453,8 +472,8 @@ function captureMessageComposerState(app: any) {
     return {
       key: getMessageComposerStateKey(element),
       groupName: groupName?.value ?? "",
-      memberUserIds: [...groupForm.querySelectorAll<HTMLInputElement>('input[name="memberUserIds"]:checked')]
-        .map((input) => input.value)
+      groupMembers: [...groupForm.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked')]
+        .map((input) => `${input.name}:${input.value}`)
     };
   }
 
@@ -483,9 +502,9 @@ function restoreMessageComposerState(app: any, element: HTMLElement) {
   if (groupForm) {
     const groupName = groupForm.elements.namedItem("groupName") as HTMLInputElement | null;
     if (groupName) groupName.value = state.groupName ?? "";
-    const selectedMembers = new Set(state.memberUserIds ?? []);
-    groupForm.querySelectorAll<HTMLInputElement>('input[name="memberUserIds"]').forEach((input) => {
-      input.checked = selectedMembers.has(input.value);
+    const selectedMembers = new Set(state.groupMembers ?? []);
+    groupForm.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach((input) => {
+      input.checked = selectedMembers.has(`${input.name}:${input.value}`);
     });
     return;
   }
@@ -888,7 +907,8 @@ function decorateThreadNpcBinding(thread) {
 }
 
 function getMessageContext(contact = null) {
-  let allContacts = getAllMessageContacts();
+  const savedContacts = getAllMessageContacts();
+  let allContacts = savedContacts;
   const selectedContact = contact ?? allContacts[0] ?? null;
   if (selectedContact && !allContacts.some((entry) => entry.id === selectedContact.id || entry.number === selectedContact.number)) {
     allContacts = [...allContacts, normalizeContact(selectedContact)].sort((left, right) => left.name.localeCompare(right.name));
@@ -897,6 +917,7 @@ function getMessageContext(contact = null) {
   const threads = prepareThreads(getVisibleStoredMessages(), allContacts, contextActiveThreadId, getMessageReadState())
     .map((thread) => ({
       ...decorateThreadNpcBinding(thread),
+      groupRoster: thread.groupMemberNames.join(", "),
       messages: thread.messages.map((message) => ({
         ...message,
         createdAtLabel: formatMessageTimestamp(message.createdAt)
@@ -913,6 +934,7 @@ function getMessageContext(contact = null) {
   const sendAsChoices = getSendAsChoices();
   const canSendAs = game.user?.isGM === true && !activeThread && sendAsChoices.length > 1;
   const groupMemberChoices = getGroupMessageMemberChoices();
+  const groupNpcMemberChoices = composingNewGroup ? getGroupNpcMemberChoices(savedContacts, threads) : [];
 
   return {
     threads,
@@ -933,7 +955,8 @@ function getMessageContext(contact = null) {
     isComposingNewMessage: !activeThread && !composingNewGroup,
     isComposingNewGroup: composingNewGroup,
     groupMemberChoices,
-    hasGroupMemberChoices: groupMemberChoices.length > 0,
+    groupNpcMemberChoices,
+    hasGroupMemberChoices: groupMemberChoices.length > 0 || groupNpcMemberChoices.length > 0,
     canDeleteThread: Boolean(activeThread),
     threadReplyLabel: activeThread ? `${activeThread.title}${activeThread.subtitle ? ` (${activeThread.subtitle})` : ""}` : "",
     canReplyAs: replyAsChoices.length > 1,
@@ -984,6 +1007,13 @@ function getReplyAsChoices(thread) {
     selected: !contactReplyDefault
   }];
   if (!game.user?.isGM || !thread?.contact || thread.contact.userId) return choices;
+  if (thread.isGroup) {
+    for (const npc of thread.groupNpcMembers) {
+      if (!game.actors?.get?.(npc.actorId)) continue;
+      choices.push({ id: `npc:${npc.actorId}`, label: npc.name, selected: false });
+    }
+    return choices;
+  }
   choices.push({
     id: "contact",
     label: thread.contact.name,
@@ -1057,6 +1087,13 @@ function getMessageIdentity(form, context) {
   const formData = new FormData(form);
   if (context.activeThread) {
     const mode = String(formData.get("replyAs") ?? "self");
+    if (context.activeThread.isGroup) {
+      const npc = context.activeThread.groupNpcMembers.find((member) => `npc:${member.actorId}` === mode);
+      if (game.user?.isGM && npc && game.actors?.get?.(npc.actorId)) {
+        return { senderName: npc.name, senderNumber: npc.number, senderActorId: npc.actorId, senderImage: "" };
+      }
+      return {};
+    }
     if (mode === "contact" && game.user?.isGM && context.activeThread.contact) {
       return getIdentityFromContact(context.activeThread.contact);
     }
@@ -1139,37 +1176,44 @@ async function linkNpcThreadFromDrop(event, threadId) {
   await refreshMessages();
 }
 
-async function createPlayerGroup(form, app) {
+async function createMessageGroup(form, app) {
   const formData = new FormData(form);
   const groupName = String(formData.get("groupName") ?? "").trim();
-  const selectedUserIds = [...new Set(formData.getAll("memberUserIds").map((id) => String(id)).filter(Boolean))];
+  const context = getMessageContext();
+  const selectedPlayers = new Set(formData.getAll("memberUserIds"));
+  const selectedActors = new Set(formData.getAll("memberActorIds"));
+  const selectedUserIds = context.groupMemberChoices.filter((member) => selectedPlayers.has(member.id)).map((member) => member.id);
+  const groupNpcMembers = context.groupNpcMemberChoices.filter((member) => selectedActors.has(member.actorId));
   if (!groupName) {
     ui.notifications?.warn?.("Enter a name for the group chat.");
     return;
   }
-  if (!selectedUserIds.length) {
-    ui.notifications?.warn?.("Select at least one other player for the group chat.");
+  if (!selectedUserIds.length && !groupNpcMembers.length) {
+    ui.notifications?.warn?.("Select at least one player or linked NPC for the group chat.");
     return;
   }
 
   const senderUserId = String(game.user?.id ?? "");
   const groupMemberUserIds = [...new Set([senderUserId, ...selectedUserIds].filter(Boolean))];
-  const groupMemberNames = groupMemberUserIds
-    .map((id) => getUserDisplayName(game.users?.get?.(id)))
-    .filter(Boolean);
+  const groupMemberNames = [
+    ...groupMemberUserIds.map((id) => getUserDisplayName(game.users?.get?.(id))),
+    ...groupNpcMembers.map((member) => member.name)
+  ].filter(Boolean);
+  const recipientUserIds = [...new Set([...selectedUserIds, ...(groupNpcMembers.length ? getGMUserIds() : [])])]
+    .filter((id) => id !== senderUserId);
   const groupId = createCallId();
   const threadId = createGroupThreadId(groupId);
   const creatorName = getUserDisplayName(game.user, "A player");
   const groupContact = {
     id: `group-${groupId}`,
     name: groupName,
-    number: `${groupMemberUserIds.length} members`,
-    userIds: selectedUserIds,
+    number: `${groupMemberUserIds.length + groupNpcMembers.length} members`,
+    userIds: recipientUserIds,
     isGroup: true
   };
   const document = await sendMessageToContact(groupContact, `${creatorName} created the group.`, {
     threadId,
-    recipientUserIds: selectedUserIds,
+    recipientUserIds,
     recipientNumbers: [],
     messageType: "event",
     eventType: "group-created",
@@ -1177,7 +1221,8 @@ async function createPlayerGroup(form, app) {
     groupId,
     groupName,
     groupMemberUserIds,
-    groupMemberNames
+    groupMemberNames,
+    groupNpcMembers
   });
   if (!document) return;
 
@@ -1308,7 +1353,7 @@ function bindMessagesControls(app: any, html: any = null) {
   const groupForm = element.querySelector("form[data-cybercall-group-form]");
   groupForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    await createPlayerGroup(groupForm, app);
+    await createMessageGroup(groupForm, app);
   });
 
   const form = element.querySelector("form[data-cybercall-message-form]");
@@ -1318,8 +1363,10 @@ function bindMessagesControls(app: any, html: any = null) {
     const activeThread = context.activeThread;
     const contact = activeThread?.contact ?? getSelectedMessageContact(form, context);
     const body = form.elements.body?.value ?? "";
+    const replyAs = activeThread?.isGroup ? form.elements.replyAs?.value : "";
+    const composerState = replyAs ? { key: getMessageComposerStateKey(element), replyAs } : null;
     const messageIdentity = getMessageIdentity(form, context);
-    const preserveGMs = Boolean(activeThread?.contact && !activeThread.contact.userId && (activeThread.contact.managedByGM || activeThread.contact.isNpc));
+    const preserveGMs = activeThread?.isGroup || Boolean(activeThread?.contact && !activeThread.contact.userId && (activeThread.contact.managedByGM || activeThread.contact.isNpc));
     const recipientUserIds = activeThread
       ? getThreadRecipientUserIds(activeThread, { excludeGMs: game.user?.isGM === true && !preserveGMs })
       : null;
@@ -1331,13 +1378,14 @@ function bindMessagesControls(app: any, html: any = null) {
     const document = await sendMessageToContact(contact, body, {
       ...messageIdentity,
       threadId,
-      recipientUserIds: recipientUserIds?.length ? recipientUserIds : undefined,
+      recipientUserIds: activeThread?.isGroup || recipientUserIds?.length ? recipientUserIds : undefined,
       recipientNumbers: messageIdentity.senderNumber ? [] : undefined,
       conversationType: activeThread?.isGroup ? "group" : "direct",
       groupId: activeThread?.groupId ?? "",
       groupName: activeThread?.groupName ?? "",
       groupMemberUserIds: activeThread?.groupMemberUserIds ?? [],
-      groupMemberNames: activeThread?.groupMemberNames ?? []
+      groupMemberNames: activeThread?.groupMemberNames ?? [],
+      groupNpcMembers: activeThread?.groupNpcMembers ?? []
     });
     if (!document) return;
     if (game.user?.isGM && !activeThread && messageIdentity.senderActorId && !getNpcThreadBindings()[threadId]) {
@@ -1358,7 +1406,7 @@ function bindMessagesControls(app: any, html: any = null) {
     composingNewGroup = false;
     form.elements.body.value = "";
     await markActiveThreadRead();
-    await refreshMessages({ scrollToBottom: true, preserveDraft: false });
+    await refreshMessages({ scrollToBottom: true, composerState });
   });
 
   markActiveThreadRead();
@@ -1726,9 +1774,9 @@ async function openCallPanel() {
 
 async function refreshMessages(options: any = {}) {
   if (!activePhone || activePhone.callData || activePhone.mode !== "messages") return;
-  activePhone._cybercallMessageComposerState = options.preserveDraft === false
-    ? null
-    : captureMessageComposerState(activePhone);
+  activePhone._cybercallMessageComposerState = options.composerState === undefined
+    ? captureMessageComposerState(activePhone)
+    : options.composerState;
   activePhone._cybercallMessageScrollState = {
     ...captureMessageScrollState(activePhone),
     scrollToBottom: options.scrollToBottom === true
