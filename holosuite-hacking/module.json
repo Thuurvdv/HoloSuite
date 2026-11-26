@@ -26,8 +26,8 @@
     "styles/prism-lock.css"
   ],
   "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-hacking",
-  "manifest": "",
-  "download": "",
+  "manifest": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/holosuite-hacking/module.json",
+  "download": "https://github.com/Thuurvdv/HoloSuite/releases/download/holosuite-hacking-v1.2.1/holosuite-hacking.zip",
   "license": "GPL-3.0-or-later",
   "readme": "README.md",
   "relationships": {
