@@ -624,7 +624,7 @@ function registerSettings(): void {
 
   game.settings.register(MODULE_ID, SETTING_THEMED_APP_COLORS, {
     name: "Use Themed App Colors",
-    hint: "Use the active device theme’s accent for app icons and buttons. Uploaded branding images keep their original colors.",
+    hint: "Use the active device theme’s accent for app icons and interaction glow. Uploaded branding images keep their original colors.",
     scope: "client",
     config: true,
     type: Boolean,
@@ -799,10 +799,10 @@ function getFormFactor(): HoloSuiteFormFactor {
 
 function getFormFactorDimensions(formFactor = getFormFactor()): { width: number; height: number } {
   const preferred = formFactor === "computer"
-    ? { width: 980, height: 720 }
+    ? { width: 980, height: 700 }
     : formFactor === "datapad"
       ? { width: 760, height: 680 }
-      : { width: 483, height: 736 };
+      : { width: 483, height: 700 };
   return {
     width: Math.min(preferred.width, Math.max(1, window.innerWidth - 32)),
     height: Math.min(preferred.height, Math.max(1, window.innerHeight - 32))
@@ -1006,6 +1006,15 @@ function renderHeaderActions(view: LauncherView): string {
       >
         ${brandedIcon({ icon: branding.updatesIcon }, "fa-solid fa-star")}
         ${badgeLabel}
+      </button>
+      <button
+        type="button"
+        class="holosuite-header-action holosuite-header-close"
+        data-holosuite-action="close"
+        title="Close"
+        aria-label="Close"
+      >
+        ${brandedIcon({ icon: branding.closeIcon }, "fa-solid fa-xmark")}
       </button>
     </div>
   `;
@@ -1333,9 +1342,7 @@ function renderLauncherHtml(
         <main class="holosuite-screen ${screenClass}">
           ${screenContent}
         </main>
-        <footer class="holosuite-dock">
-          <button type="button" data-holosuite-action="close" title="Close" aria-label="Close">${brandedIcon({ icon: getBranding(DEVICE_BRANDING_ID).closeIcon }, "fa-solid fa-circle-xmark")}</button>
-        </footer>
+        <div class="holosuite-device-bottom-trim" aria-hidden="true"></div>
       </div>
     </section>
   `;
@@ -2252,8 +2259,6 @@ class HoloSuiteLauncher extends LegacyApplication {
       ${renderDeviceBrand()}
       ${renderHeaderActions(this.currentView)}
     `;
-    const closeButton = root.querySelector("[data-holosuite-action='close']");
-    if (closeButton) closeButton.innerHTML = brandedIcon({ icon: getBranding(DEVICE_BRANDING_ID).closeIcon }, "fa-solid fa-circle-xmark");
     const windowTitle = root.closest(".holosuite-launcher-window")?.querySelector(".window-title");
     if (windowTitle) windowTitle.textContent = this.title;
     screen.innerHTML = this.currentView === "whats-new"

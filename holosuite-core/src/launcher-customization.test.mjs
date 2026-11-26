@@ -46,6 +46,15 @@ test("keeps original app colors by default and applies the chosen theme on opt-i
   assert.match(source, /data-holosuite-action="whats-new"[\s\S]*?title="What's New"[\s\S]*?fa-solid fa-star/);
 });
 
+test("places the square close button immediately after What's New", async () => {
+  const [source, css] = await Promise.all([readFile(sourceUrl, "utf8"), readFile(stylesheetUrl, "utf8")]);
+  const header = source.slice(source.indexOf("function renderHeaderActions"), source.indexOf("function renderAppIcon"));
+
+  assert.match(header, /data-holosuite-action="whats-new"[^]*?<\/button>\s*<button[^>]+class="holosuite-header-action holosuite-header-close"[^>]+data-holosuite-action="close"/);
+  assert.match(header, /brandedIcon\(\{ icon: branding\.closeIcon \}, "fa-solid fa-xmark"\)/);
+  assert.match(css, /\.holosuite-header-close\s*\{\s*border-radius:\s*0 !important/);
+});
+
 test("supports long-press app ordering with client persistence", async () => {
   const [source, css] = await Promise.all([
     readFile(sourceUrl, "utf8"),
@@ -123,8 +132,6 @@ test("styles RED launcher controls as compact raised panels with readable labels
   assert.match(css, /\.holosuite-theme-choice,[\s\S]*\.holosuite-form-factor-choice[\s\S]*clip-path:\s*polygon/);
   assert.match(css, /border:\s*1px solid rgba\(255, 48, 79, 0\.96\)\s*!important/);
   assert.match(css, /0 4px 0 rgba\(91, 4, 24, 0\.94\)/);
-  assert.match(css, /button\[data-holosuite-action="close"\]\s*\{[^}]*background:\s*transparent\s*!important;[^}]*border-color:\s*transparent\s*!important;[^}]*box-shadow:\s*none\s*!important;[^}]*color:\s*#ff304f\s*!important/s);
-  assert.match(css, /button\[data-holosuite-action="close"\] i\s*\{[^}]*drop-shadow\(0 0 3px rgba\(255, 48, 79, 0\.95\)\)/s);
 });
 
 test("keeps What's New conversational and limits badges to Foundry compatibility", async () => {

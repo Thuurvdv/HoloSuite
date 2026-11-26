@@ -222,6 +222,8 @@ img.hs-frame-header {
 }
 
 .holosuite-phone-shell {
+  /* Preserve room for roughly five and a half rows at the preferred sizes. */
+  --hs-lower-bezel: clamp(36px, calc(var(--hs-launcher-height) - 616px), 84px);
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -233,16 +235,9 @@ img.hs-frame-header {
   height: var(--hs-launcher-height);
   min-height: var(--hs-launcher-min-height, var(--hs-launcher-height));
   overflow: visible;
-  padding: 30px clamp(15px, 5%, 32px) 26px;
+  padding: 30px clamp(15px, 5%, 32px) var(--hs-lower-bezel);
   position: relative;
   width: var(--hs-launcher-width);
-}
-
-.holosuite-status-bar,
-.holosuite-dock {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
 }
 
 .holosuite-status-bar {
@@ -257,11 +252,12 @@ img.hs-frame-header {
 }
 
 .holosuite-header-actions {
+  align-items: center;
   display: inline-flex;
   gap: 6px;
 }
 
-.holosuite-header-action {
+.holosuite-status-bar .holosuite-header-actions .holosuite-header-action {
   align-items: center;
   background: var(--hs-control-bg);
   border: 1px solid var(--hs-line);
@@ -277,6 +273,10 @@ img.hs-frame-header {
   padding: 0;
   position: relative;
   width: 28px;
+}
+
+.holosuite-phone .holosuite-header-close {
+  border-radius: 0 !important;
 }
 
 .holosuite-header-action > i {
@@ -429,8 +429,7 @@ img.hs-frame-header {
   margin: 2px 0 0;
 }
 
-.holosuite-refresh,
-.holosuite-dock button {
+.holosuite-refresh {
   align-items: center;
   background: var(--hs-control-bg);
   border: 1px solid var(--hs-line);
@@ -443,32 +442,6 @@ img.hs-frame-header {
   line-height: 1;
   padding: 0;
   width: 34px;
-}
-
-.holosuite-dock button[data-holosuite-action="close"] {
-  display: grid !important;
-  height: 34px;
-  min-height: 34px;
-  min-width: 34px;
-  padding: 0 !important;
-  place-items: center;
-  text-align: center;
-  width: 34px;
-}
-
-.holosuite-dock button[data-holosuite-action="close"] i {
-  display: grid;
-  height: 100%;
-  line-height: 1;
-  margin: 0 !important;
-  place-items: center;
-  text-align: center;
-  width: 100%;
-}
-
-.holosuite-dock button[data-holosuite-action="close"] i::before {
-  display: block;
-  margin: 0 auto;
 }
 
 .holosuite-app-grid {
@@ -629,17 +602,18 @@ img.hs-frame-header {
   gap: 10px;
 }
 
-.holosuite-theme-choice {
+.holosuite-phone .holosuite-theme-choices > .holosuite-theme-choice {
   align-items: center;
   background: var(--hs-card-bg);
   border: 1px solid var(--hs-line);
   color: var(--hs-text);
   cursor: pointer;
-  display: grid;
+  display: grid !important;
   gap: 10px;
   grid-template-columns: 56px minmax(0, 1fr);
-  min-height: 72px;
-  padding: 12px;
+  height: auto;
+  min-height: 78px;
+  padding: 10px 12px;
   text-align: left;
   white-space: normal;
 }
@@ -657,18 +631,17 @@ img.hs-frame-header {
 }
 
 .holosuite-theme-choice strong {
-  grid-column: 2;
-}
-
-.holosuite-theme-choice strong {
   align-self: center;
   font-size: 15px;
+  grid-column: 2;
+  grid-row: 1;
   line-height: 1.15;
 }
 
 .holosuite-theme-preview {
   align-self: center;
   border: 1px solid var(--hs-line);
+  box-sizing: border-box;
   display: block;
   grid-column: 1;
   grid-row: 1;
@@ -698,9 +671,9 @@ img.hs-frame-header {
 }
 
 .holosuite-theme-preview--cassette-futurism {
-  background: #d8c9ae;
+  background: #a6a393;
   border-radius: 7px;
-  color: #b9e68c;
+  color: #c58d58;
 }
 
 :is(.holosuite-theme-preview--base, .holosuite-theme-preview--space-police, .holosuite-theme-preview--cassette-futurism)::before {
@@ -708,6 +681,11 @@ img.hs-frame-header {
   border: 1px solid currentColor;
   border-radius: inherit;
   inset: 9px 12px;
+}
+
+.holosuite-theme-preview--cassette-futurism::before {
+  background: #111f23;
+  border-color: #547574;
 }
 
 :is(.holosuite-theme-preview--base, .holosuite-theme-preview--space-police, .holosuite-theme-preview--cassette-futurism)::after {
@@ -948,7 +926,7 @@ img.hs-frame-header {
 }
 
 .holosuite-launcher-window {
-  --hs-launcher-height: min(736px, calc(100dvh - 32px));
+  --hs-launcher-height: min(700px, calc(100dvh - 32px));
   --hs-launcher-width: min(483px, calc(100vw - 32px));
   height: var(--hs-launcher-height) !important;
   width: var(--hs-launcher-width) !important;
@@ -1043,8 +1021,7 @@ img.hs-frame-header {
 
 .holosuite-phone-shell::before,
 .holosuite-phone-shell::after,
-.holosuite-phone-shell > .holosuite-status-bar::before,
-.holosuite-phone-shell > .holosuite-dock::after {
+.holosuite-phone-shell > .holosuite-status-bar::before {
   content: "";
   pointer-events: none;
   position: absolute;
@@ -1066,8 +1043,7 @@ img.hs-frame-header {
 }
 
 .holosuite-phone-shell > .holosuite-status-bar,
-.holosuite-phone-shell > .holosuite-screen,
-.holosuite-phone-shell > .holosuite-dock {
+.holosuite-phone-shell > .holosuite-screen {
   position: relative;
   z-index: 3;
 }
@@ -1082,14 +1058,16 @@ img.hs-frame-header {
   z-index: 7;
 }
 
-.holosuite-phone-shell > .holosuite-dock::after {
+.holosuite-device-bottom-trim {
   background: var(--hs-device-bottom-hardware) center / contain no-repeat;
-  bottom: -21px;
+  bottom: min(18px, calc(var(--hs-lower-bezel) * 0.25));
   height: 18px;
   left: 50%;
   transform: translateX(-50%);
+  pointer-events: none;
+  position: absolute;
   width: 140px;
-  z-index: 7;
+  z-index: 3;
 }
 
 .holosuite-status-bar > span {
@@ -1101,7 +1079,7 @@ img.hs-frame-header {
 }
 
 .holosuite-status-bar > span::before {
-  background: currentColor;
+  background: var(--hs-device-mark-color, currentColor);
   content: "";
   flex: none;
   height: 14px;
@@ -1184,10 +1162,6 @@ img.hs-frame-header {
   .holosuite-theme-choices {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-
-  :where(:root, body)[data-holosuite-form-factor]:not([data-holosuite-form-factor="phone"]) .holosuite-app-grid .holosuite-app-tile {
-    min-height: 92px;
-  }
 }
 
 .holosuite-app-tile {
@@ -1208,6 +1182,11 @@ img.hs-frame-header {
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.035),
     inset 0 0 22px rgba(93, 190, 255, 0.055) !important;
+}
+
+.holosuite-phone .holosuite-app-grid > .holosuite-app-tile {
+  min-height: 78px;
+  padding: 10px;
 }
 
 .holosuite-app-tile::before,
@@ -1341,7 +1320,7 @@ img.hs-frame-header {
     inset 0 0 28px rgba(var(--hs-app-accent-rgb), 0.14) !important;
 }
 
-.holosuite-app-tile:hover::after {
+.holosuite-app-tile:is(:hover, :focus-visible, :active)::after {
   opacity: 1;
 }
 
@@ -1356,7 +1335,7 @@ img.hs-frame-header {
 .holosuite-app-icon {
   background:
     linear-gradient(180deg, rgba(var(--hs-app-accent-rgb), 0.16), rgba(255, 255, 255, 0.02)),
-    #05080b;
+    var(--hs-icon-well, #05080b);
   border-color: rgba(var(--hs-app-accent-rgb), 0.42);
   border-radius: 10px;
   box-shadow:
@@ -1517,10 +1496,6 @@ img.hs-frame-header {
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/galactic-records.svg");
 }
 
-.holosuite-dock button[data-holosuite-action="close"] {
-  border-radius: 999px;
-}
-
 @supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
   .holosuite-app-icon i {
     display: none;
@@ -1531,9 +1506,21 @@ img.hs-frame-header {
   }
 }
 
-.holosuite-dock {
-  justify-content: center;
-  padding-top: 14px;
+:root:not([data-holosuite-device-style]) .holosuite-phone {
+  --hs-bezel-width: 36px;
+  --hs-bezel-radius: 34px;
+  --hs-bezel-glow: 0 0 18px #48dcff38, 0 12px 25px #02060bc0;
+}
+
+:root:not([data-holosuite-device-style]) .holosuite-phone-shell::after {
+  background: linear-gradient(154deg, #9de7ff27, #4ac8ff0b 19%, transparent 40%);
+  border-radius: calc(var(--hs-bezel-radius) - 8px);
+  z-index: 2;
+}
+
+:root:not([data-holosuite-device-style]) .holosuite-phone-shell > .holosuite-status-bar::before {
+  width: min(320px, 100%);
+  filter: drop-shadow(0 0 5px #62ddff75);
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone {
@@ -1542,7 +1529,6 @@ img.hs-frame-header {
   --hs-device-bottom-hardware: url("../assets/device-styles/space-police/bottom-hardware.svg");
   --hs-device-side-button-left: url("../assets/device-styles/space-police/side-button-left.svg");
   --hs-device-side-button-right: url("../assets/device-styles/space-police/side-button-right.svg");
-  --hs-device-mark: url("../assets/device-styles/space-police/mark.svg");
   --hs-device-accent-rgb: 246, 238, 25;
   --hs-bezel-radius: 7px;
   --hs-bezel-glow: 0 12px 28px #0009;
@@ -1553,14 +1539,17 @@ img.hs-frame-header {
   --hs-muted: #c1c7ce;
   --hs-panel-bg: #121417;
   --hs-card-bg: #181b1f;
-  --hs-control-bg: #24272c;
-  --hs-control-bg-hover: #31353b;
-  --hs-active-bg: #2b2e30;
+  --hs-control-bg: linear-gradient(#222, #0d0d0d);
+  --hs-control-bg-hover: linear-gradient(#343434, #191919);
+  --hs-active-bg: #101010;
   --hs-button-radius: 2px;
+  --hs-button-border: #494949;
+  --hs-button-label: #f0f0f0;
   --hs-display: linear-gradient(180deg, #101215, #08090b);
   --hs-display-border: #45494f;
   --hs-display-inset: inset 0 0 0 1px #040506;
-  --hs-tile-inset: inset 0 -2px #08090b;
+  --hs-tile-inset: inset 0 1px #ffffff24, inset 0 -2px #050505;
+  --hs-icon-well: #101010;
 }
 
 :where(:root, body)[data-holosuite-device-style="cassette-futurism"] .holosuite-phone {
@@ -1569,28 +1558,37 @@ img.hs-frame-header {
   --hs-device-bottom-hardware: url("../assets/device-styles/cassette-futurism/bottom-hardware.svg");
   --hs-device-side-button-left: none;
   --hs-device-side-button-right: none;
-  --hs-device-mark: url("../assets/device-styles/cassette-futurism/mark.svg");
-  --hs-device-accent-rgb: 185, 230, 140;
+  --hs-device-mark-color: #65472f;
+  /* Match HoloSuite Terminal's Cassette Futurism palette. */
+  --hs-device-accent-rgb: 197, 141, 88;
   --hs-bezel-radius: 20px;
   --hs-bezel-glow: 0 12px 30px #0009;
-  --hs-scrollbar-track: #151b11;
-  --hs-scrollbar-thumb-hover: #e0f5c7;
-  --hs-line: #485d38;
-  --hs-line-strong: #819f66;
-  --hs-text: #e2efd4;
-  --hs-muted: #b4c7a5;
-  --hs-panel-bg: #192218;
-  --hs-card-bg: #20291d;
-  --hs-control-bg: linear-gradient(#343a2c, #22281f);
-  --hs-control-bg-hover: #3c4634;
-  --hs-active-bg: #38472e;
+  --hs-scrollbar-track: #111f23;
+  --hs-scrollbar-thumb-hover: #ddd7c4;
+  --hs-line: #547574;
+  --hs-line-strong: #a8c1bb;
+  --hs-text: #ddd7c4;
+  --hs-muted: #a8c1bb;
+  --hs-panel-bg: #192b30;
+  --hs-card-bg: var(--hs-panel-bg);
+  --hs-control-bg: var(--hs-panel-bg);
+  --hs-control-bg-hover: #243a3e;
+  --hs-active-bg: #304d48;
   --hs-button-radius: 5px;
   --hs-display:
-    repeating-linear-gradient(0deg, #070c061a 0 1px, transparent 1px 4px),
-    radial-gradient(ellipse at 50% 25%, #222c1b, #10170f 82%);
-  --hs-display-border: #313329;
-  --hs-display-inset: inset 0 0 18px #060906bf;
-  --hs-tile-inset: inset 0 1px #c2d6ad19, 0 2px #0b1009;
+    repeating-linear-gradient(0deg, #0a13161a 0 1px, transparent 1px 4px),
+    #111f23;
+  --hs-display-border: #283c3d;
+  --hs-display-inset: inset 0 0 18px #080f12bf;
+  --hs-tile-inset: inset 0 1px #ddd7c429, inset 0 -3px #101c1f, 0 2px #0c1618;
+  --hs-icon-well: #111f23;
+}
+
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"]) .holosuite-phone {
+  --hs-surface-card: var(--hs-card-bg);
+  --hs-surface-control: var(--hs-control-bg);
+  --hs-surface-control-hover: var(--hs-control-bg-hover);
+  --hs-surface-active: var(--hs-active-bg);
 }
 
 :root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"]) .holosuite-screen {
@@ -1601,42 +1599,66 @@ img.hs-frame-header {
   margin-inline: 0;
 }
 
+/* Shared module and Foundry button rules also style the launcher. Keep the
+   released control faces scoped to the launcher so those palettes cannot leak in. */
 :root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
-.holosuite-phone :is(button, .holosuite-app-tile) {
+:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone :is(button, .holosuite-app-tile) {
   background: var(--hs-control-bg) !important;
-  border-color: var(--hs-line) !important;
+  border-color: var(--hs-button-border, var(--hs-line)) !important;
   border-radius: var(--hs-button-radius);
   box-shadow: var(--hs-tile-inset) !important;
-  color: var(--hs-text) !important;
+  color: var(--hs-button-label, var(--hs-text)) !important;
   text-shadow: none !important;
 }
 
 :root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
-.holosuite-phone button:where(:hover, :focus-visible):not(:disabled) {
+:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone button:where(:hover, :focus-visible):not(:disabled) {
   background: var(--hs-control-bg-hover) !important;
   border-color: var(--hs-line-strong) !important;
 }
 
 :root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
-.holosuite-phone button:is(.is-active, [aria-pressed="true"], [aria-selected="true"]) {
+:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone button:is(.is-active, [aria-pressed="true"], [aria-selected="true"]) {
   background: var(--hs-active-bg) !important;
   border-color: var(--hs-device-accent) !important;
 }
 
 :root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
-.holosuite-app-tile .holosuite-app-icon {
+:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-app-tile .holosuite-app-icon {
   border-radius: var(--hs-button-radius);
-  box-shadow: none;
+  box-shadow: inset 0 1px 3px #0008;
+}
+
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
+.holosuite-app-tile .holosuite-app-icon::after {
+  content: none;
+}
+
+:root[data-holosuite-device-style="space-police"] .holosuite-app-tile::before {
+  background: none;
+  border-top: 2px solid #f6ee19;
+  border-right: 2px solid #f6ee19;
+  bottom: auto;
+  height: 9px;
+  left: auto;
+  opacity: 1;
+  right: 7px;
+  top: 7px;
+  width: 17px;
+}
+
+:root[data-holosuite-device-style="cassette-futurism"] .holosuite-app-tile::before {
+  content: none;
 }
 
 :where(:root, body)[data-holosuite-device-style="cassette-futurism"] .holosuite-status-bar {
-  color: #292b21;
+  color: #232f30;
   font-family: var(--hs-font-mono);
 }
 
 :root[data-holosuite-device-style="cassette-futurism"] .holosuite-screen {
   border-width: 4px;
-  outline: 1px solid #8a806b;
+  outline: 1px solid #414f4e;
 }
 
 :where(:root, body)[data-holosuite-device-style="cassette-futurism"] .holosuite-screen :is(h2, .holosuite-kicker) {
@@ -1650,6 +1672,27 @@ img.hs-frame-header {
 
 .holosuite-phone[data-holosuite-app-colors="theme"] .holosuite-app-tile {
   border-color: rgba(var(--hs-app-accent-rgb), 0.42) !important;
+}
+
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
+.holosuite-phone .holosuite-app-tile {
+  transition: none;
+}
+
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
+:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone .holosuite-app-tile:is(:hover, :focus-visible, :active) {
+  border-color: rgba(var(--hs-app-accent-rgb), 0.9) !important;
+  box-shadow:
+    var(--hs-tile-inset),
+    0 0 13px rgba(var(--hs-app-accent-rgb), 0.38) !important;
+}
+
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
+:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone .holosuite-app-tile:active {
+  background: var(--hs-active-bg) !important;
+  box-shadow:
+    inset 0 2px 5px #000a,
+    0 0 14px rgba(var(--hs-app-accent-rgb), 0.48) !important;
 }
 
 .holosuite-phone .holosuite-app-tile:focus-visible,
@@ -1763,11 +1806,6 @@ body[data-holosuite-foundry-generation="12"] .holosuite-header-action > i::befor
   margin: 0 !important;
 }
 
-:root[data-holosuite-foundry-generation="12"] .holosuite-header-action[data-holosuite-action="whats-new"] > i::before,
-body[data-holosuite-foundry-generation="12"] .holosuite-header-action[data-holosuite-action="whats-new"] > i::before {
-  transform: translateX(1px);
-}
-
 :root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-phone,
 body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-phone {
   --hs-control-min-height: 32px;
@@ -1792,28 +1830,6 @@ body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) 
 body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-whats-new-tabs button {
   min-height: 34px;
   padding-block: 0;
-}
-
-:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-dock button,
-:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-dock button[data-holosuite-action="close"],
-body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-dock button,
-body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-dock button[data-holosuite-action="close"] {
-  height: 34px;
-  min-height: 34px;
-  min-width: 34px;
-  width: 34px;
-}
-
-:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-app-tile,
-body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-app-tile {
-  min-height: 78px;
-  padding-block: 10px;
-}
-
-:root[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-app-tile:has(.holosuite-app-count),
-body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) .holosuite-app-tile:has(.holosuite-app-count) {
-  min-height: 78px;
-  padding-bottom: 10px;
 }
 
 /* Foundry v12 can retain its generic button/icon presentation after the
@@ -1975,7 +1991,7 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
 }
 
 :where(:root, body)[data-holosuite-device-style="red"] .holosuite-phone-shell > .holosuite-status-bar::before,
-:where(:root, body)[data-holosuite-device-style="red"] .holosuite-phone-shell > .holosuite-dock::after {
+:where(:root, body)[data-holosuite-device-style="red"] .holosuite-device-bottom-trim {
   background: linear-gradient(90deg, transparent, #ff304f 20% 80%, transparent);
   height: 2px;
 }
@@ -2074,7 +2090,7 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
 }
 
 :where(:root, body)[data-holosuite-device-style="corporate"] .holosuite-phone-shell > .holosuite-status-bar::before,
-:where(:root, body)[data-holosuite-device-style="corporate"] .holosuite-phone-shell > .holosuite-dock::after {
+:where(:root, body)[data-holosuite-device-style="corporate"] .holosuite-device-bottom-trim {
   background: linear-gradient(90deg, transparent, #147dba 24%, #087b8b 76%, transparent);
   height: 2px;
 }
@@ -2153,16 +2169,19 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.holosuite-form-factor-choice {
+.holosuite-phone .holosuite-form-factor-choices > .holosuite-form-factor-choice {
+  align-content: center;
   align-items: center;
   background: var(--hs-card-bg);
   border: 1px solid var(--hs-line);
   color: var(--hs-text);
-  display: grid;
-  gap: 7px;
+  display: grid !important;
+  gap: 8px;
+  height: auto;
   justify-items: center;
+  min-height: 80px;
   min-width: 0;
-  padding: 10px 6px;
+  padding: 12px 6px;
 }
 
 .holosuite-form-factor-choice:is(:hover, :focus-visible, .is-active) {
@@ -2172,6 +2191,7 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
 
 .holosuite-form-factor-choice strong {
   font-size: 11px;
+  line-height: 1.2;
 }
 
 .holosuite-form-factor-preview {
@@ -2434,31 +2454,6 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   box-shadow:
     0 0 8px rgba(var(--hs-app-accent-rgb), 0.58),
     inset 0 0 20px rgba(var(--hs-app-accent-rgb), 0.3) !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="red"]
-:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone .holosuite-dock button[data-holosuite-action="close"] {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  color: #ff304f !important;
-  -webkit-text-fill-color: #ff304f !important;
-  transform: translateY(-4px);
-}
-
-:where(:root, body)[data-holosuite-device-style="red"]
-:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone .holosuite-dock button[data-holosuite-action="close"] i {
-  color: #ff304f !important;
-  filter: drop-shadow(0 0 3px rgba(255, 48, 79, 0.95)) drop-shadow(0 0 8px rgba(255, 24, 61, 0.72));
-  font-size: 20px;
-  -webkit-text-fill-color: #ff304f !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="red"]
-:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone .holosuite-dock button[data-holosuite-action="close"]:where(:hover, :focus-visible) {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
 }
 
 /* RED controls share a bright, readable face with a red illuminated edge. */

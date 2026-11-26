@@ -1,7 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="132" height="18" viewBox="0 0 132 18">
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="18" viewBox="0 0 320 18">
   <title>HoloSuite emitter inlay</title>
+  <defs>
+    <linearGradient id="light-bar">
+      <stop stop-color="#4ed6ef" stop-opacity=".34"/>
+      <stop offset=".2" stop-color="#78eaff"/>
+      <stop offset=".55" stop-color="#bef6ff"/>
+      <stop offset="1" stop-color="#56dfff" stop-opacity=".42"/>
+    </linearGradient>
+  </defs>
+  <g id="flanking-light-bars" fill="url(#light-bar)">
+    <rect x="15" y="12" width="78" height="3" rx="1.5"/>
+    <rect x="227" y="12" width="78" height="3" rx="1.5"/>
+  </g>
   <g id="emitter">
-    <rect x="39" y="5" width="54" height="8" rx="4" fill="#0a1522" stroke="#2d526a"/>
-    <path d="M53 9h26" stroke="#79e5fa" stroke-width="2" stroke-linecap="round"/>
+    <rect x="119" y="2" width="82" height="11" rx="5.5" fill="#071521" stroke="#417088"/>
+    <path d="M141 7.5h38" stroke="#91eeff" stroke-width="2.5" stroke-linecap="round"/>
   </g>
 </svg>

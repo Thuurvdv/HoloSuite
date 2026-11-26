@@ -1,12 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
   <title>HoloSuite rounded glass bezel</title>
   <!-- Slice 48 units in from each edge. Keep corner geometry inside those guides. -->
+  <defs>
+    <linearGradient id="glass" x2="0" y2="1">
+      <stop stop-color="#193246"/>
+      <stop offset=".48" stop-color="#0a1725"/>
+      <stop offset="1" stop-color="#060e17"/>
+    </linearGradient>
+    <linearGradient id="rim-light" x2="0" y2="1">
+      <stop stop-color="#a1efff"/>
+      <stop offset=".42" stop-color="#4da6c3"/>
+      <stop offset="1" stop-color="#54d3ed"/>
+    </linearGradient>
+    <linearGradient id="inner-bevel" x2="0" y2="1">
+      <stop stop-color="#84bfd5" stop-opacity=".56"/>
+      <stop offset=".45" stop-color="#3e788b" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#408da7" stop-opacity=".42"/>
+    </linearGradient>
+  </defs>
   <g id="housing">
-    <rect x="2" y="2" width="156" height="156" rx="40" fill="#0b192a" stroke="#294c66" stroke-width="3"/>
-    <rect x="8" y="8" width="144" height="144" rx="34" fill="none" stroke="#184661" stroke-width="8"/>
+    <rect x="2" y="2" width="156" height="156" rx="44" fill="url(#glass)" stroke="#153347" stroke-width="3"/>
+    <rect x="7" y="7" width="146" height="146" rx="39" fill="none" stroke="#123b52" stroke-width="6"/>
   </g>
   <g id="edge-light" fill="none">
-    <rect x="8" y="8" width="144" height="144" rx="34" stroke="#519bb8" stroke-width="2"/>
-    <rect x="14" y="14" width="132" height="132" rx="28" stroke="#153951" stroke-width="2"/>
+    <rect x="3" y="3" width="154" height="154" rx="43" stroke="url(#rim-light)" stroke-width="2.5"/>
+    <rect x="11" y="11" width="138" height="138" rx="35" stroke="url(#inner-bevel)" stroke-width="2.5"/>
   </g>
 </svg>
