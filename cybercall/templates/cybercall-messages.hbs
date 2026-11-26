@@ -73,7 +73,7 @@
           </span>
         {{/if}}
         <div>
-          <div class="cybercall-contacts-kicker">{{#if activeThread}}{{activeThread.subtitle}}{{else}}{{#if isComposingNewGroup}}Private Player Channel{{else}}Secure Channel{{/if}}{{/if}}</div>
+          <div class="cybercall-contacts-kicker" {{#if activeThread.isGroup}}title="{{activeThread.groupRoster}}"{{/if}}>{{#if activeThread}}{{activeThread.subtitle}}{{else}}{{#if isComposingNewGroup}}Private Channel{{else}}Secure Channel{{/if}}{{/if}}</div>
           <h3>{{#if activeThread}}{{activeThread.title}}{{else}}{{#if isComposingNewGroup}}Create Group Chat{{else}}New Message{{/if}}{{/if}}</h3>
         </div>
       </div>
@@ -129,6 +129,19 @@
             {{/each}}
           </div>
         </fieldset>
+        {{#if groupNpcMemberChoices.length}}
+        <fieldset>
+          <legend>NPCs</legend>
+          <div class="cybercall-group-members">
+            {{#each groupNpcMemberChoices}}
+              <label>
+                <input type="checkbox" name="memberActorIds" value="{{actorId}}">
+                <span>{{name}}</span>
+              </label>
+            {{/each}}
+          </div>
+        </fieldset>
+        {{/if}}
         <button type="submit" {{#unless hasGroupMemberChoices}}disabled{{/unless}}>Create Group</button>
       </form>
     {{else}}
