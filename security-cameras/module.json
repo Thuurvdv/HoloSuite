@@ -25,8 +25,8 @@
   "languages": [],
   "socket": true,
   "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/security-cameras",
-  "manifest": "",
-  "download": "",
+  "manifest": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/security-cameras/module.json",
+  "download": "https://github.com/Thuurvdv/HoloSuite/releases/download/security-cameras-v2.0.2/security-cameras.zip",
   "license": "GPL-3.0-or-later",
   "readme": "README.md",
   "relationships": {

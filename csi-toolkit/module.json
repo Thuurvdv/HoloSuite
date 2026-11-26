@@ -23,8 +23,8 @@
   ],
   "languages": [],
   "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/csi-toolkit",
-  "manifest": "",
-  "download": "",
+  "manifest": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/csi-toolkit/module.json",
+  "download": "https://github.com/Thuurvdv/HoloSuite/releases/download/csi-toolkit-v1.0.6/csi-toolkit.zip",
   "license": "GPL-3.0-or-later",
   "readme": "README.md",
   "relationships": {
