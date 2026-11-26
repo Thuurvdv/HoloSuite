@@ -8,23 +8,25 @@ const redFrameUrl = new URL("../assets/device-styles/red/frame-9slice.svg", impo
 const corporateFrameUrl = new URL("../assets/device-styles/corporate/frame-9slice.svg", import.meta.url);
 const whatsNewUrl = new URL("../data/whats-new.json", import.meta.url);
 
-test("keeps unfinished themes and form factors hidden for this release", async () => {
+test("offers three sizes independently of the three released themes", async () => {
   const [source, css] = await Promise.all([
     readFile(sourceUrl, "utf8"),
     readFile(stylesheetUrl, "utf8")
   ]);
 
   assert.match(source, /red:\s*"RED"/);
-  assert.match(source, /phone:\s*"Phone"/);
+  assert.match(source, /phone:\s*"Compact"/);
   assert.match(source, /datapad:\s*"Datapad"/);
   assert.match(source, /computer:\s*"Computer"/);
   assert.match(source, /corporate:\s*"Corporate"/);
-  assert.match(source, /const RELEASED_DEVICE_STYLE_CHOICES = \{[\s\S]*?base:[\s\S]*?"space-police"[\s\S]*?\} as const/);
+  const released = source.match(/const RELEASED_DEVICE_STYLE_CHOICES = \{([^}]+)\}/)?.[1];
+  assert.match(released, /base:[\s\S]*"space-police":[\s\S]*"cassette-futurism":/);
+  assert.doesNotMatch(released, /\bred:|\bcorporate:/);
   assert.match(source, /SETTING_DEVICE_STYLE[\s\S]*?choices:\s*RELEASED_DEVICE_STYLE_CHOICES/);
   assert.match(source, /SETTING_FORCE_DEVICE_STYLE[\s\S]*?choices:\s*RELEASED_FORCED_DEVICE_STYLE_CHOICES/);
-  assert.match(source, /SETTING_FORM_FACTOR[\s\S]*?config:\s*false/);
-  assert.match(source, /function normalizeFormFactor\(value: unknown\)[\s\S]*?return "phone"/);
-  assert.doesNotMatch(source, /const formFactorOptions =/);
+  assert.match(source, /register\(MODULE_ID, SETTING_FORM_FACTOR, \{[\s\S]*?scope:\s*"client",\s*config:\s*true/);
+  assert.match(source, /return Object\.hasOwn\(FORM_FACTOR_CHOICES, formFactor\) \? formFactor as HoloSuiteFormFactor : "phone"/);
+  assert.match(source, /Object\.entries\(FORM_FACTOR_CHOICES\)\.map/);
   assert.match(css, /data-holosuite-device-style="red"/);
   assert.match(css, /--hs-cyan:\s*#ff304f/);
   assert.match(css, /--hs-bg-deep:\s*#050103/);
@@ -32,6 +34,16 @@ test("keeps unfinished themes and form factors hidden for this release", async (
   assert.match(css, /data-holosuite-form-factor="computer"/);
   assert.match(css, /repeat\(3, minmax\(0, 1fr\)\)/);
   assert.match(css, /repeat\(4, minmax\(0, 1fr\)\)/);
+});
+
+test("keeps original app colors by default and applies the chosen theme on opt-in", async () => {
+  const [source, css] = await Promise.all([readFile(sourceUrl, "utf8"), readFile(stylesheetUrl, "utf8")]);
+
+  assert.match(source, /register\(MODULE_ID, SETTING_THEMED_APP_COLORS, \{[\s\S]*?scope: "client",\s*config: true,\s*type: Boolean,\s*default: false/);
+  assert.match(source, /data-holosuite-app-colors="\$\{getAppColorMode\(\)\}"/);
+  assert.match(css, /data-holosuite-app-colors="theme"[^}]+--hs-app-accent:\s*var\(--hs-device-accent\)/);
+  assert.match(css, /data-holosuite-foundry-generation="12"[^}]+holosuite-terminal[^}]+color:\s*var\(--hs-app-accent, #ffe45c\)/s);
+  assert.match(source, /data-holosuite-action="whats-new"[\s\S]*?title="What's New"[\s\S]*?fa-solid fa-star/);
 });
 
 test("supports long-press app ordering with client persistence", async () => {
@@ -57,7 +69,7 @@ test("supports long-press app ordering with client persistence", async () => {
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
-test("uses a scalable nine-slice frame only for RED", async () => {
+test("uses replaceable nine-slice bezels for the released themes", async () => {
   const [css, frame] = await Promise.all([
     readFile(stylesheetUrl, "utf8"),
     readFile(redFrameUrl, "utf8")
@@ -68,14 +80,19 @@ test("uses a scalable nine-slice frame only for RED", async () => {
   assert.match(css, /data-holosuite-device-style="red"[^}]+border-image-source:\s*url\("\.\.\/assets\/device-styles\/red\/frame-9slice\.svg"\)/s);
   assert.match(css, /border-image-slice:\s*72 fill/);
   assert.match(css, /border-image-width:\s*42px/);
-  assert.doesNotMatch(css, /data-holosuite-device-style="space-police"[^}]+frame-9slice/s);
+  for (const theme of ["base", "space-police", "cassette-futurism"]) {
+    const asset = `../assets/device-styles/${theme}/frame-9slice.svg`;
+    assert.ok(css.includes(`url("${asset}")`));
+    assert.match(await readFile(new URL(asset, import.meta.url), "utf8"), /viewBox="0 0 160 160"/);
+  }
+  assert.match(css, /border-image:\s*var\(--hs-device-frame-shell\) 48 fill/);
 });
 
 test("colors launcher scrollbars from each visual theme", async () => {
   const css = await readFile(stylesheetUrl, "utf8");
 
   assert.match(css, /--hs-scrollbar-thumb:\s*var\(--hs-cyan\)/);
-  assert.match(css, /data-holosuite-device-style="space-police"[^}]+--hs-scrollbar-thumb:\s*#fff15a/s);
+  assert.match(css, /data-holosuite-device-style="space-police"[^}]+--hs-scrollbar-thumb:\s*#f6ee19/s);
   assert.match(css, /data-holosuite-device-style="red"[^}]+--hs-scrollbar-thumb:\s*#ff304f/s);
   assert.match(css, /data-holosuite-device-style="corporate"[^}]+--hs-scrollbar-thumb:\s*#087b8b/s);
   assert.match(css, /scrollbar-color:\s*var\(--hs-scrollbar-thumb\) var\(--hs-scrollbar-track\)/);

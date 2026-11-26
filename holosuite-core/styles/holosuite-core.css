@@ -192,22 +192,24 @@ img.hs-frame-header {
 }
 
 .holosuite-phone {
-  --hs-device-frame-shell: url("../assets/device-styles/base/frame-shell.png");
+  --hs-device-accent-rgb: 105, 232, 255;
+  --hs-device-accent: rgb(var(--hs-device-accent-rgb));
+  --hs-cyan: var(--hs-device-accent);
+  --hs-amber: var(--hs-device-accent);
+  --hs-bezel-width: 30px;
+  --hs-bezel-radius: 26px;
+  --hs-bezel-glow: 0 0 18px rgba(58, 191, 245, 0.2);
+  --hs-device-frame-shell: url("../assets/device-styles/base/frame-9slice.svg");
   --hs-device-top-hardware: url("../assets/device-styles/base/top-hardware.svg");
   --hs-device-bottom-hardware: url("../assets/device-styles/base/bottom-hardware.svg");
-  --hs-device-side-button-left: url("../assets/device-styles/base/side-button-left.png");
-  --hs-device-side-button-right: url("../assets/device-styles/base/side-button-right.png");
+  --hs-device-side-button-left: url("../assets/device-styles/base/side-button-left.svg");
+  --hs-device-side-button-right: url("../assets/device-styles/base/side-button-right.svg");
   --hs-device-mark: url("../assets/device-styles/base/mark.png");
-  --hs-device-frame-inset: -11px -10px;
-  --hs-device-frame-size: 100% 100%;
   --hs-device-app-icon: url("../assets/device-styles/space-police/icons/app.svg");
   --hs-scrollbar-track: rgba(2, 12, 18, 0.92);
   --hs-scrollbar-thumb: var(--hs-cyan);
   --hs-scrollbar-thumb-hover: var(--hs-amber);
   --hs-scrollbar-radius: 6px;
-  --hs-launcher-height: 736px;
-  --hs-launcher-min-height: var(--hs-launcher-height);
-  --hs-launcher-width: 483px;
   color: var(--hs-text);
   display: flex;
   flex: 0 0 var(--hs-launcher-width);
@@ -231,7 +233,7 @@ img.hs-frame-header {
   height: var(--hs-launcher-height);
   min-height: var(--hs-launcher-min-height, var(--hs-launcher-height));
   overflow: visible;
-  padding: 38px 36px 34px;
+  padding: 30px clamp(15px, 5%, 32px) 26px;
   position: relative;
   width: var(--hs-launcher-width);
 }
@@ -593,8 +595,8 @@ img.hs-frame-header {
 
 .holosuite-settings-notice {
   align-items: flex-start;
-  background: rgba(255, 207, 106, 0.1);
-  border: 1px solid rgba(255, 207, 106, 0.36);
+  background: rgba(var(--hs-device-accent-rgb), 0.1);
+  border: 1px solid rgba(var(--hs-device-accent-rgb), 0.36);
   color: var(--hs-amber);
   display: grid;
   font-size: 12px;
@@ -609,8 +611,8 @@ img.hs-frame-header {
 }
 
 .holosuite-settings-field {
-  background: rgba(6, 24, 32, 0.72);
-  border: 1px solid rgba(105, 232, 255, 0.22);
+  background: var(--hs-panel-bg);
+  border: 1px solid var(--hs-line);
   padding: 12px;
 }
 
@@ -646,7 +648,7 @@ img.hs-frame-header {
 .holosuite-theme-choice:focus-visible,
 .holosuite-theme-choice.is-active {
   border-color: var(--hs-amber);
-  box-shadow: inset 0 0 24px rgba(255, 207, 106, 0.13);
+  box-shadow: inset 0 0 24px rgba(var(--hs-device-accent-rgb), 0.13);
 }
 
 .holosuite-theme-choice:disabled {
@@ -685,44 +687,35 @@ img.hs-frame-header {
 }
 
 .holosuite-theme-preview--base {
-  background:
-    linear-gradient(90deg, transparent 48%, rgba(105, 232, 255, 0.35) 50%, transparent 52%),
-    linear-gradient(0deg, transparent 48%, rgba(105, 232, 255, 0.24) 50%, transparent 52%),
-    rgba(2, 12, 18, 0.95);
-}
-
-.holosuite-theme-preview--base::before {
-  border: 1px solid rgba(105, 232, 255, 0.72);
-  inset: 9px;
-}
-
-.holosuite-theme-preview--base::after {
-  background: var(--hs-amber);
-  bottom: 12px;
-  height: 3px;
-  left: 14px;
-  right: 14px;
+  background: #101e31;
+  border-radius: 12px;
+  color: #69e8ff;
 }
 
 .holosuite-theme-preview--space-police {
-  background:
-    radial-gradient(circle at 50% 12%, rgba(255, 241, 90, 0.22), transparent 34px),
-    linear-gradient(180deg, #161711, #030303);
-  border-color: rgba(255, 241, 90, 0.42);
+  background: #16181a;
+  color: #f6ee19;
 }
 
-.holosuite-theme-preview--space-police::before {
-  border: 2px solid rgba(255, 241, 90, 0.8);
-  border-radius: 12px;
-  inset: 8px;
+.holosuite-theme-preview--cassette-futurism {
+  background: #d8c9ae;
+  border-radius: 7px;
+  color: #b9e68c;
 }
 
-.holosuite-theme-preview--space-police::after {
-  background: #56c7ff;
-  bottom: 13px;
-  height: 3px;
-  left: 15px;
-  right: 15px;
+:is(.holosuite-theme-preview--base, .holosuite-theme-preview--space-police, .holosuite-theme-preview--cassette-futurism)::before {
+  background: #080e14;
+  border: 1px solid currentColor;
+  border-radius: inherit;
+  inset: 9px 12px;
+}
+
+:is(.holosuite-theme-preview--base, .holosuite-theme-preview--space-police, .holosuite-theme-preview--cassette-futurism)::after {
+  background: currentColor;
+  bottom: 14px;
+  height: 2px;
+  left: 19px;
+  right: 19px;
 }
 
 .holosuite-whats-new-tabs {
@@ -955,8 +948,10 @@ img.hs-frame-header {
 }
 
 .holosuite-launcher-window {
-  --hs-launcher-height: 736px;
-  --hs-launcher-width: 483px;
+  --hs-launcher-height: min(736px, calc(100dvh - 32px));
+  --hs-launcher-width: min(483px, calc(100vw - 32px));
+  height: var(--hs-launcher-height) !important;
+  width: var(--hs-launcher-width) !important;
   --hs-surface-bg: transparent;
   --hs-surface-window: transparent;
   background: transparent !important;
@@ -964,6 +959,8 @@ img.hs-frame-header {
   background-image: none !important;
   border: 0 !important;
   box-shadow: none !important;
+  min-height: 0;
+  min-width: 0;
   overflow: visible;
 }
 
@@ -1021,7 +1018,7 @@ img.hs-frame-header {
 .holosuite-phone::after {
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 100% 100%;
+  background-size: contain;
   content: "";
   pointer-events: none;
   position: absolute;
@@ -1054,8 +1051,11 @@ img.hs-frame-header {
 }
 
 .holosuite-phone-shell::before {
-  background: var(--hs-device-frame-shell) center / var(--hs-device-frame-size) no-repeat;
-  inset: var(--hs-device-frame-inset);
+  border: var(--hs-bezel-width) solid transparent;
+  border-image: var(--hs-device-frame-shell) 48 fill / var(--hs-bezel-width) stretch;
+  border-radius: var(--hs-bezel-radius);
+  box-shadow: var(--hs-bezel-glow);
+  inset: 0;
   z-index: 2;
 }
 
@@ -1073,18 +1073,18 @@ img.hs-frame-header {
 }
 
 .holosuite-phone-shell > .holosuite-status-bar::before {
-  background: var(--hs-device-top-hardware) center / 100% 100% no-repeat;
+  background: var(--hs-device-top-hardware) center / contain no-repeat;
   height: 18px;
   left: 50%;
-  top: -33px;
+  top: -24px;
   transform: translateX(-50%);
   width: 132px;
   z-index: 7;
 }
 
 .holosuite-phone-shell > .holosuite-dock::after {
-  background: var(--hs-device-bottom-hardware) center / 100% 100% no-repeat;
-  bottom: -23px;
+  background: var(--hs-device-bottom-hardware) center / contain no-repeat;
+  bottom: -21px;
   height: 18px;
   left: 50%;
   transform: translateX(-50%);
@@ -1096,12 +1096,14 @@ img.hs-frame-header {
   align-items: center;
   display: inline-flex;
   gap: 7px;
-  transform: translate(5px, 2px);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .holosuite-status-bar > span::before {
   background: currentColor;
   content: "";
+  flex: none;
   height: 14px;
   mask-image: var(--hs-device-mark);
   mask-position: center;
@@ -1125,6 +1127,7 @@ img.hs-frame-header {
     inset 0 0 0 1px rgba(255, 255, 255, 0.035),
     inset 0 0 30px rgba(105, 232, 255, 0.08);
   flex: 1 1 auto;
+  container-type: inline-size;
   margin-inline: 3px;
   min-height: 0;
   overflow: auto;
@@ -1139,11 +1142,52 @@ img.hs-frame-header {
 }
 
 .holosuite-screen h2 {
+  border-bottom: 0;
   font-size: 24px;
 }
 
 .holosuite-app-grid {
   gap: 8px;
+}
+
+:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-app-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-app-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@container (max-width: 650px) {
+  :where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-app-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 500px) {
+  :where(:root, body)[data-holosuite-form-factor] .holosuite-app-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 285px) {
+  :where(:root, body)[data-holosuite-form-factor] .holosuite-app-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .holosuite-form-factor-choices {
+    grid-template-columns: repeat(auto-fit, minmax(min(78px, 100%), 1fr));
+  }
+}
+
+@container (min-width: 545px) {
+  .holosuite-theme-choices {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  :where(:root, body)[data-holosuite-form-factor]:not([data-holosuite-form-factor="phone"]) .holosuite-app-grid .holosuite-app-tile {
+    min-height: 92px;
+  }
 }
 
 .holosuite-app-tile {
@@ -1336,6 +1380,7 @@ img.hs-frame-header {
   align-self: center;
   font-size: 13px;
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .holosuite-app-icon i {
@@ -1486,557 +1531,131 @@ img.hs-frame-header {
   }
 }
 
-.holosuite-header-action {
-  transform: translate(-25px, 5px);
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone {
-  --hs-cyan: #fff15a;
-  --hs-green: #9fffd1;
-  --hs-amber: #fff15a;
-  --hs-line: rgba(255, 241, 90, 0.34);
-  --hs-line-strong: rgba(255, 241, 90, 0.72);
-  --hs-muted: #c7c1a9;
-  --hs-grid-bg: none;
-  --hs-panel-bg:
-    linear-gradient(180deg, rgba(18, 18, 15, 0.98), rgba(2, 2, 2, 0.96));
-  --hs-card-bg:
-    linear-gradient(180deg, rgba(30, 28, 18, 0.94), rgba(6, 6, 5, 0.97));
-  --hs-control-bg:
-    linear-gradient(180deg, rgba(38, 39, 34, 0.94), rgba(8, 8, 7, 0.98));
-  --hs-control-bg-hover:
-    linear-gradient(180deg, rgba(66, 56, 28, 0.96), rgba(15, 13, 8, 0.98));
-  --hs-active-bg:
-    linear-gradient(135deg, rgba(255, 241, 90, 0.22), rgba(255, 156, 64, 0.12));
-  --hs-danger-bg:
-    linear-gradient(180deg, rgba(74, 28, 22, 0.9), rgba(24, 7, 5, 0.96));
-  --hs-warning-bg:
-    linear-gradient(180deg, rgba(86, 67, 28, 0.9), rgba(31, 23, 8, 0.96));
-  --hs-surface-control: var(--hs-control-bg);
-  --hs-surface-control-hover: var(--hs-control-bg-hover);
-  --hs-surface-active: var(--hs-active-bg);
-  --hs-border-subtle: var(--hs-line);
-  --hs-border-strong: var(--hs-line-strong);
-  --hs-color-accent: #ffb13d;
-  --hs-color-primary: var(--hs-amber);
-  --hs-text-secondary: #c7c1a9;
-  --hs-glow-cyan: 0 0 18px rgba(255, 241, 90, 0.3);
-  --hs-focus-ring: 0 0 0 2px rgba(255, 177, 61, 0.2);
-  --hs-scrollbar-track: rgba(8, 8, 7, 0.96);
-  --hs-scrollbar-thumb: #fff15a;
-  --hs-scrollbar-thumb-hover: #ffb13d;
-  --hs-scrollbar-radius: 999px;
-  --hs-shadow-control:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
-    inset 0 -1px 0 rgba(255, 177, 61, 0.16);
-  --hs-shadow-panel:
-    0 20px 46px rgba(0, 0, 0, 0.48),
-    inset 0 0 32px rgba(255, 241, 90, 0.08);
-}
-
 .holosuite-dock {
   justify-content: center;
   padding-top: 14px;
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone {
-  --hs-device-frame-inset: 0;
-  --hs-device-frame-size: 100% 100%;
-  --hs-launcher-height: 736px;
-  --hs-launcher-min-height: var(--hs-launcher-height);
-  --hs-launcher-width: 483px;
-  --hs-space-police-icon: url("../assets/device-styles/space-police/icons/app.svg");
-  flex: 0 0 var(--hs-launcher-width);
-  height: var(--hs-launcher-height);
-  min-height: var(--hs-launcher-height);
-  overflow: visible;
-  width: var(--hs-launcher-width);
+  --hs-device-frame-shell: url("../assets/device-styles/space-police/frame-9slice.svg");
+  --hs-device-top-hardware: url("../assets/device-styles/space-police/top-hardware.svg");
+  --hs-device-bottom-hardware: url("../assets/device-styles/space-police/bottom-hardware.svg");
+  --hs-device-side-button-left: url("../assets/device-styles/space-police/side-button-left.svg");
+  --hs-device-side-button-right: url("../assets/device-styles/space-police/side-button-right.svg");
+  --hs-device-mark: url("../assets/device-styles/space-police/mark.svg");
+  --hs-device-accent-rgb: 246, 238, 25;
+  --hs-bezel-radius: 7px;
+  --hs-bezel-glow: 0 12px 28px #0009;
+  --hs-scrollbar-thumb: #f6ee19;
+  --hs-scrollbar-thumb-hover: #fff76d;
+  --hs-line: #41454b;
+  --hs-line-strong: #697079;
+  --hs-muted: #c1c7ce;
+  --hs-panel-bg: #121417;
+  --hs-card-bg: #181b1f;
+  --hs-control-bg: #24272c;
+  --hs-control-bg-hover: #31353b;
+  --hs-active-bg: #2b2e30;
+  --hs-button-radius: 2px;
+  --hs-display: linear-gradient(180deg, #101215, #08090b);
+  --hs-display-border: #45494f;
+  --hs-display-inset: inset 0 0 0 1px #040506;
+  --hs-tile-inset: inset 0 -2px #08090b;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-launcher-window .window-content {
-  --hs-surface-bg: transparent;
-  --hs-surface-window: transparent;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  height: var(--hs-launcher-height);
-  min-height: var(--hs-launcher-height);
-  padding: 0;
-  width: var(--hs-launcher-width);
+:where(:root, body)[data-holosuite-device-style="cassette-futurism"] .holosuite-phone {
+  --hs-device-frame-shell: url("../assets/device-styles/cassette-futurism/frame-9slice.svg");
+  --hs-device-top-hardware: url("../assets/device-styles/cassette-futurism/top-hardware.svg");
+  --hs-device-bottom-hardware: url("../assets/device-styles/cassette-futurism/bottom-hardware.svg");
+  --hs-device-side-button-left: none;
+  --hs-device-side-button-right: none;
+  --hs-device-mark: url("../assets/device-styles/cassette-futurism/mark.svg");
+  --hs-device-accent-rgb: 185, 230, 140;
+  --hs-bezel-radius: 20px;
+  --hs-bezel-glow: 0 12px 30px #0009;
+  --hs-scrollbar-track: #151b11;
+  --hs-scrollbar-thumb-hover: #e0f5c7;
+  --hs-line: #485d38;
+  --hs-line-strong: #819f66;
+  --hs-text: #e2efd4;
+  --hs-muted: #b4c7a5;
+  --hs-panel-bg: #192218;
+  --hs-card-bg: #20291d;
+  --hs-control-bg: linear-gradient(#343a2c, #22281f);
+  --hs-control-bg-hover: #3c4634;
+  --hs-active-bg: #38472e;
+  --hs-button-radius: 5px;
+  --hs-display:
+    repeating-linear-gradient(0deg, #070c061a 0 1px, transparent 1px 4px),
+    radial-gradient(ellipse at 50% 25%, #222c1b, #10170f 82%);
+  --hs-display-border: #313329;
+  --hs-display-inset: inset 0 0 18px #060906bf;
+  --hs-tile-inset: inset 0 1px #c2d6ad19, 0 2px #0b1009;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-launcher-window {
-  --hs-surface-bg: transparent;
-  --hs-surface-window: transparent;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  overflow: visible;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] :where(
-  #holosuite-launcher,
-  .holosuite-launcher-window,
-  .holosuite-launcher-window.window-app,
-  .holosuite-launcher-window.application,
-  .holosuite-launcher-window.app
-) {
-  --hs-surface-bg: transparent;
-  --hs-surface-window: transparent;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] :where(
-  #holosuite-launcher,
-  .holosuite-launcher-window
-) :where(.window-content, .window-content.standard-form) {
-  --hs-surface-bg: transparent;
-  --hs-surface-window: transparent;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-launcher-window .window-header {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  height: 18px;
-  left: 50%;
-  min-height: 18px;
-  opacity: 0;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  top: 7px;
-  transform: translateX(-50%);
-  width: 132px;
-  z-index: 5;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-launcher-window .window-header > * {
-  display: none !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-launcher-window .window-content {
-  border: 0;
-  overflow: visible;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone::before,
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone::after {
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  z-index: 3;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone::before {
-  background-image: url("../assets/device-styles/space-police/side-button-left.svg");
-  height: 96px;
-  left: 1px;
-  top: 105px;
-  width: 8px;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone::after {
-  background-image: url("../assets/device-styles/space-police/side-button-right.svg");
-  height: 72px;
-  right: 1px;
-  top: 124px;
-  width: 8px;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell {
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  flex: 0 0 var(--hs-launcher-width);
-  height: var(--hs-launcher-height);
-  min-height: var(--hs-launcher-height);
-  overflow: hidden;
-  padding: 38px 36px 34px;
-  position: relative;
-  width: var(--hs-launcher-width);
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell::before,
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell::after,
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell > .holosuite-status-bar::before,
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell > .holosuite-dock::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell::before {
-  background: url("../assets/device-styles/space-police/frame-shell.svg") center / 100% 100% no-repeat;
-  inset: 0;
-  z-index: 2;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell::after {
-  background: none;
-  inset: 8px;
-  z-index: 1;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell > .holosuite-status-bar,
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell > .holosuite-screen,
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell > .holosuite-dock {
-  position: relative;
-  z-index: 3;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell > .holosuite-status-bar::before {
-  background: url("../assets/device-styles/space-police/top-hardware.svg") center / 100% 100% no-repeat;
-  height: 18px;
-  left: 50%;
-  top: -33px;
-  transform: translateX(-50%);
-  width: 132px;
-  z-index: 7;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone-shell > .holosuite-dock::after {
-  background: url("../assets/device-styles/space-police/bottom-hardware.svg") center / 100% 100% no-repeat;
-  bottom: -23px;
-  height: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 140px;
-  z-index: 7;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-status-bar {
-  color: var(--hs-amber);
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-status-bar > span {
-  align-items: center;
-  display: inline-flex;
-  gap: 7px;
-  transform: none;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-header-action {
-  transform: none;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-status-bar > span::before {
-  background: currentColor;
-  content: "";
-  height: 14px;
-  mask-image: url("../assets/device-styles/space-police/mark.svg");
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: contain;
-  -webkit-mask-image: url("../assets/device-styles/space-police/mark.svg");
-  -webkit-mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  width: 14px;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone :where(button, .dialog-button) {
-  background:
-    linear-gradient(180deg, rgba(44, 45, 39, 0.96), rgba(8, 8, 7, 0.98)) !important;
-  border-color: rgba(255, 241, 90, 0.3) !important;
-  color: #d8d0b0 !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
-    inset 0 -1px 0 rgba(255, 177, 61, 0.16) !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-phone :where(button, .dialog-button):where(:hover, :focus-visible),
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-header-action.is-active,
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-whats-new-tabs button.is-active,
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-whats-new-filters button.is-active {
-  background:
-    linear-gradient(180deg, rgba(72, 61, 29, 0.98), rgba(18, 14, 7, 0.98)) !important;
-  border-color: rgba(255, 241, 90, 0.78) !important;
-  color: var(--hs-amber) !important;
-  box-shadow:
-    0 0 0 1px rgba(255, 241, 90, 0.18),
-    0 0 18px rgba(255, 241, 90, 0.14),
-    inset 0 -2px 0 rgba(255, 177, 61, 0.34) !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-header-action span {
-  background: #ffb13d;
-  color: #090806;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-screen {
-  background:
-    radial-gradient(circle at 50% 0%, rgba(255, 241, 90, 0.1), transparent 16rem),
-    linear-gradient(180deg, rgba(8, 8, 7, 0.98), rgba(2, 2, 2, 0.96));
-  background-clip: padding-box;
-  border-color: rgba(255, 241, 90, 0.46);
-  border-radius: 14px;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
-    inset 0 0 30px rgba(255, 241, 90, 0.07);
-  flex: 1 1 auto;
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"]) .holosuite-screen {
+  background: var(--hs-display);
+  border-color: var(--hs-display-border);
+  border-radius: max(var(--hs-button-radius), calc(var(--hs-bezel-radius) - 8px));
+  box-shadow: var(--hs-display-inset);
   margin-inline: 0;
-  min-height: 0;
-  overflow: auto;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-screen--whats-new {
-  min-height: 0;
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
+.holosuite-phone :is(button, .holosuite-app-tile) {
+  background: var(--hs-control-bg) !important;
+  border-color: var(--hs-line) !important;
+  border-radius: var(--hs-button-radius);
+  box-shadow: var(--hs-tile-inset) !important;
+  color: var(--hs-text) !important;
+  text-shadow: none !important;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-kicker {
-  color: var(--hs-amber);
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
+.holosuite-phone button:where(:hover, :focus-visible):not(:disabled) {
+  background: var(--hs-control-bg-hover) !important;
+  border-color: var(--hs-line-strong) !important;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-screen-heading {
-  margin-bottom: 12px;
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
+.holosuite-phone button:is(.is-active, [aria-pressed="true"], [aria-selected="true"]) {
+  background: var(--hs-active-bg) !important;
+  border-color: var(--hs-device-accent) !important;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-screen h2 {
-  font-size: 24px;
+:root:is([data-holosuite-device-style="space-police"], [data-holosuite-device-style="cassette-futurism"])
+.holosuite-app-tile .holosuite-app-icon {
+  border-radius: var(--hs-button-radius);
+  box-shadow: none;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-grid {
-  gap: 8px;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile {
-  --hs-app-accent: #64d8ff;
-  --hs-app-accent-rgb: 100, 216, 255;
-  background:
-    linear-gradient(180deg, rgba(15, 25, 34, 0.9), rgba(4, 8, 13, 0.98)) !important;
-  border-color: rgba(255, 241, 90, 0.22) !important;
-  border-radius: 8px;
-  color: #dbe8ea !important;
-  display: grid !important;
-  gap: 8px;
-  grid-template-columns: 38px minmax(0, 1fr);
-  min-height: 78px;
-  overflow: hidden;
-  padding: 10px;
-  position: relative;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
-    inset 0 0 22px rgba(93, 190, 255, 0.055) !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile::before,
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile::before {
-  background: linear-gradient(90deg, transparent, rgba(var(--hs-app-accent-rgb), 0.92), transparent);
-  bottom: 0;
-  height: 2px;
-  left: 12px;
-  opacity: 0.42;
-  right: 12px;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile::after {
-  background: radial-gradient(circle at 20% 50%, rgba(var(--hs-app-accent-rgb), 0.28), transparent 64%);
-  inset: 0;
-  opacity: 0;
-  transition: opacity var(--hs-transition-fast);
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile > * {
-  position: relative;
-  z-index: 1;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="cybercall"] {
-  --hs-app-accent: #56c7ff;
-  --hs-app-accent-rgb: 86, 199, 255;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="bounty-board"] {
-  --hs-app-accent: #ff5d6c;
-  --hs-app-accent-rgb: 255, 93, 108;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="csi-toolkit"] {
-  --hs-app-accent: #55f0b5;
-  --hs-app-accent-rgb: 85, 240, 181;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="galaxy-map"] {
-  --hs-app-accent: #9ca8ff;
-  --hs-app-accent-rgb: 156, 168, 255;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-hacking"] {
-  --hs-app-accent: #74ff6a;
-  --hs-app-accent-rgb: 116, 255, 106;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-terminal"] {
-  --hs-app-accent: #ffe45c;
-  --hs-app-accent-rgb: 255, 228, 92;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-vending-machines"] {
-  --hs-app-accent: #d966ff;
-  --hs-app-accent-rgb: 217, 102, 255;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-blueprint"] {
-  --hs-app-accent: #2a46b8;
-  --hs-app-accent-rgb: 42, 70, 184;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holodock"] {
-  --hs-app-accent: #d7dee8;
-  --hs-app-accent-rgb: 215, 222, 232;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="pulse-scanner"] {
-  --hs-app-accent: #35f3ff;
-  --hs-app-accent-rgb: 53, 243, 255;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="security-cameras"],
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="security-camera"] {
-  --hs-app-accent: #ff9b4a;
-  --hs-app-accent-rgb: 255, 155, 74;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-critical-cutin"] {
-  --hs-app-accent: #ff3f7d;
-  --hs-app-accent-rgb: 255, 63, 125;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holo-assistant"] {
-  --hs-app-accent: #aaff67ff;
-  --hs-app-accent-rgb: 170, 255, 103;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile[data-holosuite-app="holosuite-galactic-records"] {
-  --hs-app-accent: #046bdf;
-  --hs-app-accent-rgb: 4, 107, 223;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile:has(.holosuite-app-count) {
-  min-height: 78px;
-  padding-bottom: 10px;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile p {
-  display: none;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile:hover {
-  border-color: rgba(255, 241, 90, 0.86) !important;
-  box-shadow:
-    0 0 0 1px rgba(255, 241, 90, 0.2),
-    0 0 16px rgba(var(--hs-app-accent-rgb), 0.22),
-    inset 0 0 28px rgba(var(--hs-app-accent-rgb), 0.14) !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile:hover::after {
-  opacity: 1;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-tile:where(.is-active, [aria-selected="true"], [data-selected="true"]) {
-  border-color: rgba(255, 241, 90, 0.92) !important;
-  box-shadow:
-    0 0 0 1px rgba(255, 241, 90, 0.28),
-    0 0 18px rgba(255, 241, 90, 0.12),
-    inset 0 0 26px rgba(var(--hs-app-accent-rgb), 0.12) !important;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon {
-  background:
-    linear-gradient(180deg, rgba(var(--hs-app-accent-rgb), 0.16), rgba(255, 255, 255, 0.02)),
-    #05080b;
-  border-color: rgba(var(--hs-app-accent-rgb), 0.42);
-  border-radius: 10px;
-  box-shadow:
-    0 0 13px rgba(var(--hs-app-accent-rgb), 0.14),
-    inset 0 0 18px rgba(var(--hs-app-accent-rgb), 0.12);
-  color: var(--hs-app-accent);
+:where(:root, body)[data-holosuite-device-style="cassette-futurism"] .holosuite-status-bar {
+  color: #292b21;
   font-family: var(--hs-font-mono);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1;
-  margin: 0;
-  overflow: hidden;
-  position: relative;
-  text-align: center;
-  width: 38px;
-  height: 38px;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-title {
-  align-self: center;
-  font-size: 13px;
-  line-height: 1.1;
+:root[data-holosuite-device-style="cassette-futurism"] .holosuite-screen {
+  border-width: 4px;
+  outline: 1px solid #8a806b;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon i {
-  display: inline-block;
+:where(:root, body)[data-holosuite-device-style="cassette-futurism"] .holosuite-screen :is(h2, .holosuite-kicker) {
+  font-family: var(--hs-font-mono);
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon::before {
-  background: currentColor;
-  content: "";
-  display: none;
-  height: 23px;
-  mask-image: var(--hs-space-police-icon);
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: contain;
-  -webkit-mask-image: var(--hs-space-police-icon);
-  -webkit-mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  position: relative;
-  width: 23px;
-  z-index: 1;
+.holosuite-phone[data-holosuite-app-colors="theme"] :is(.holosuite-app-tile, .holosuite-whats-new-icon > .holosuite-app-icon[data-holosuite-app-icon]) {
+  --hs-app-accent: var(--hs-device-accent);
+  --hs-app-accent-rgb: var(--hs-device-accent-rgb);
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon::after {
-  background:
-    linear-gradient(90deg, transparent, rgba(var(--hs-app-accent-rgb), 0.82), transparent);
-  bottom: 6px;
-  content: "";
-  height: 1px;
-  left: 9px;
-  position: absolute;
-  right: 9px;
+.holosuite-phone[data-holosuite-app-colors="theme"] .holosuite-app-tile {
+  border-color: rgba(var(--hs-app-accent-rgb), 0.42) !important;
 }
 
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-count {
-  align-self: end;
-  background: rgba(var(--hs-app-accent-rgb), 0.12);
-  border: 1px solid rgba(var(--hs-app-accent-rgb), 0.34);
-  border-radius: 999px;
-  bottom: auto;
-  color: #f4fbff;
-  font-size: 10px;
-  grid-column: 2;
-  left: auto;
-  justify-self: start;
-  padding: 4px 7px;
-  position: static;
-  right: auto;
+.holosuite-phone .holosuite-app-tile:focus-visible,
+.holosuite-phone :is(.holosuite-theme-choice, .holosuite-form-factor-choice):focus-visible {
+  outline: 2px solid var(--hs-device-accent);
+  outline-offset: -3px;
 }
 
 :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon[data-holosuite-app-icon="cybercall"]::before {
@@ -2124,25 +1743,6 @@ img.hs-frame-header {
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/galactic-records.svg");
 }
 
-@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
-  :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon i {
-    display: none;
-  }
-
-  :where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-icon::before {
-    display: block;
-  }
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-app-count {
-  border-color: rgba(var(--hs-app-accent-rgb), 0.34);
-  color: #f4fbff;
-}
-
-:where(:root, body)[data-holosuite-device-style="space-police"] .holosuite-dock button[data-holosuite-action="close"] {
-  border-radius: 999px;
-}
-
 :root[data-holosuite-foundry-generation="12"] .holosuite-header-action > i,
 body[data-holosuite-foundry-generation="12"] .holosuite-header-action > i {
   display: grid !important;
@@ -2219,15 +1819,9 @@ body[data-holosuite-foundry-generation="12"]:not([data-holosuite-device-style]) 
 /* Foundry v12 can retain its generic button/icon presentation after the
    launcher is rendered through ApplicationV1. Keep Terminal's identity
    explicit in that path instead of relying on the generic mask fallback. */
-:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-terminal"],
-body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-terminal"] {
-  --hs-app-accent: #ffe45c !important;
-  --hs-app-accent-rgb: 255, 228, 92 !important;
-}
-
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"],
 body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"] {
-  color: #ffe45c !important;
+  color: var(--hs-app-accent, #ffe45c) !important;
 }
 
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-terminal"] i,
@@ -2245,15 +1839,9 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
 /* ApplicationV1 in Foundry v12 can preserve the fallback Font Awesome glyph
    after the mask rules are evaluated. Force the custom vending identity in
    that generation; v13 and v14 use the standard @supports path above. */
-:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-vending-machines"],
-body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-vending-machines"] {
-  --hs-app-accent: #d966ff !important;
-  --hs-app-accent-rgb: 217, 102, 255 !important;
-}
-
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"],
 body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"] {
-  color: #d966ff !important;
+  color: var(--hs-app-accent, #d966ff) !important;
 }
 
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-vending-machines"] i,
@@ -2268,15 +1856,9 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-vending-machines.svg") !important;
 }
 
-:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holo-assistant"],
-body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holo-assistant"] {
-  --hs-app-accent: #aaff67ff !important;
-  --hs-app-accent-rgb: 170, 255, 103 !important;
-}
-
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"],
 body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"] {
-  color: #aaff67ff !important;
+  color: var(--hs-app-accent, #aaff67ff) !important;
 }
 
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holo-assistant"] i,
@@ -2291,15 +1873,9 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holo-assistant.svg") !important;
 }
 
-:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-blueprint"],
-body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-blueprint"] {
-  --hs-app-accent: #2a46b8 !important;
-  --hs-app-accent-rgb: 42, 70, 184 !important;
-}
-
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"],
 body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"] {
-  color: #2a46b8 !important;
+  color: var(--hs-app-accent, #2a46b8) !important;
 }
 
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-blueprint"] i,
@@ -2314,15 +1890,9 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   -webkit-mask-image: url("../assets/device-styles/space-police/icons/holosuite-blueprint.svg") !important;
 }
 
-:root[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-galactic-records"],
-body[data-holosuite-foundry-generation="12"] .holosuite-app-tile[data-holosuite-app="holosuite-galactic-records"] {
-  --hs-app-accent: #046bdf !important;
-  --hs-app-accent-rgb: 4, 107, 223 !important;
-}
-
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"],
 body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"] {
-  color: #046bdf !important;
+  color: var(--hs-app-accent, #046bdf) !important;
 }
 
 :root[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-app-icon="holosuite-galactic-records"] i,
@@ -2597,7 +2167,7 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
 
 .holosuite-form-factor-choice:is(:hover, :focus-visible, .is-active) {
   border-color: var(--hs-amber);
-  box-shadow: inset 0 0 18px rgba(255, 207, 106, 0.1);
+  box-shadow: inset 0 0 18px rgba(var(--hs-device-accent-rgb), 0.1);
 }
 
 .holosuite-form-factor-choice strong {
@@ -2605,7 +2175,7 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
 }
 
 .holosuite-form-factor-preview {
-  background: rgba(2, 12, 18, 0.9);
+  background: var(--hs-panel-bg);
   border: 2px solid currentColor;
   color: var(--hs-cyan);
   display: block;
@@ -2625,78 +2195,7 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
 .holosuite-form-factor-preview--datapad { border-radius: 3px; width: 38px; }
 .holosuite-form-factor-preview--computer { border-radius: 1px; width: 48px; }
 
-/* Datapad and computer reshape any visual theme; palette and app identity remain intact. */
-:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-phone,
-:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-phone-shell {
-  --hs-launcher-width: min(760px, calc(100vw - 32px));
-  --hs-launcher-height: min(680px, calc(100vh - 48px));
-  flex-basis: var(--hs-launcher-width);
-  height: var(--hs-launcher-height);
-  min-height: var(--hs-launcher-height);
-  width: var(--hs-launcher-width);
-}
-
-:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-phone,
-:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-phone-shell {
-  --hs-launcher-width: min(980px, calc(100vw - 32px));
-  --hs-launcher-height: min(720px, calc(100vh - 48px));
-  flex-basis: var(--hs-launcher-width);
-  height: var(--hs-launcher-height);
-  min-height: var(--hs-launcher-height);
-  width: var(--hs-launcher-width);
-}
-
-:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-launcher-window .window-content,
-:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-launcher-window .window-content {
-  height: var(--hs-launcher-height);
-  min-height: var(--hs-launcher-height);
-  width: var(--hs-launcher-width);
-}
-
-:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-phone-shell,
-:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-phone-shell {
-  padding: 34px 40px 30px;
-}
-
-:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-phone-shell::before,
-:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-phone-shell::before {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.055), transparent 22%),
-    linear-gradient(155deg, color-mix(in srgb, var(--hs-cyan) 16%, #05070d), #020305 65%);
-  border: 2px solid var(--hs-line-strong);
-  box-shadow: 0 0 30px color-mix(in srgb, var(--hs-cyan) 18%, transparent), inset 0 0 28px color-mix(in srgb, var(--hs-cyan) 8%, transparent);
-  inset: 0;
-}
-
-:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-phone-shell::before {
-  border-radius: 22px;
-}
-
-:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-phone-shell::before {
-  border-radius: 4px;
-  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
-}
-
-:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-phone::before,
-:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-phone::after,
-:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-phone::before,
-:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-phone::after {
-  display: none;
-}
-
-:where(:root, body)[data-holosuite-form-factor="datapad"] .holosuite-app-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-:where(:root, body)[data-holosuite-form-factor="computer"] .holosuite-app-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-/* RED alone uses a true nine-slice border image. The existing HoloSuite and
-   Space Police single-shell assets remain unchanged. */
-:where(:root, body)[data-holosuite-device-style="red"] .holosuite-phone-shell::before,
-:where(:root, body)[data-holosuite-device-style="red"][data-holosuite-form-factor="datapad"] .holosuite-phone-shell::before,
-:where(:root, body)[data-holosuite-device-style="red"][data-holosuite-form-factor="computer"] .holosuite-phone-shell::before {
+:where(:root, body)[data-holosuite-device-style="red"] .holosuite-phone-shell::before {
   background: none;
   border: 42px solid transparent;
   border-image-source: url("../assets/device-styles/red/frame-9slice.svg");
@@ -2709,9 +2208,7 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   inset: 0;
 }
 
-:where(:root, body)[data-holosuite-device-style="corporate"] .holosuite-phone-shell::before,
-:where(:root, body)[data-holosuite-device-style="corporate"][data-holosuite-form-factor="datapad"] .holosuite-phone-shell::before,
-:where(:root, body)[data-holosuite-device-style="corporate"][data-holosuite-form-factor="computer"] .holosuite-phone-shell::before {
+:where(:root, body)[data-holosuite-device-style="corporate"] .holosuite-phone-shell::before {
   background: none;
   border: 38px solid transparent;
   border-image-source: url("../assets/device-styles/corporate/frame-9slice.svg");

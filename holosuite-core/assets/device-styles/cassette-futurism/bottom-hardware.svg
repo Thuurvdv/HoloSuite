@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="18" viewBox="0 0 140 18">
+  <title>Cassette Futurism lower trim</title>
+  <g id="trim">
+    <rect x="27" y="5" width="86" height="8" rx="3" fill="#1b1c18" stroke="#686252"/>
+    <path d="M36 9h68" stroke="#77705d" stroke-linecap="round"/>
+    <path d="M9 8h12m98 0h12" stroke="#c46e46" stroke-width="3"/>
+  </g>
+</svg>

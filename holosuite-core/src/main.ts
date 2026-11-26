@@ -22,6 +22,7 @@ const SETTING_DISABLE_FOR_PLAYERS = "disableForPlayers";
 const SETTING_DEVICE_STYLE = "deviceStyle";
 const SETTING_FORCE_DEVICE_STYLE = "forceDeviceStyle";
 const SETTING_FORM_FACTOR = "formFactor";
+const SETTING_THEMED_APP_COLORS = "themedAppColors";
 const SETTING_APP_ORDER = "appOrder";
 const SETTING_THEME = "theme";
 const SETTING_WHATS_NEW_LAST_SEEN = "whatsNewLastSeen";
@@ -52,14 +53,7 @@ const BUNDLED_NEWS_LAUNCHER_ICONS = new Set([
 const DEVICE_STYLE_CHOICES = {
   base: "HoloSuite",
   "space-police": "Space Police",
-  red: "RED",
-  corporate: "Corporate"
-} as const;
-
-const FORCED_DEVICE_STYLE_CHOICES = {
-  "": "Allow User Choice",
-  base: "HoloSuite",
-  "space-police": "Space Police",
+  "cassette-futurism": "Cassette Futurism",
   red: "RED",
   corporate: "Corporate"
 } as const;
@@ -68,17 +62,17 @@ const FORCED_DEVICE_STYLE_CHOICES = {
 // for later, but expose only the released themes in this version.
 const RELEASED_DEVICE_STYLE_CHOICES = {
   base: DEVICE_STYLE_CHOICES.base,
-  "space-police": DEVICE_STYLE_CHOICES["space-police"]
+  "space-police": DEVICE_STYLE_CHOICES["space-police"],
+  "cassette-futurism": DEVICE_STYLE_CHOICES["cassette-futurism"]
 } as const;
 
 const RELEASED_FORCED_DEVICE_STYLE_CHOICES = {
-  "": FORCED_DEVICE_STYLE_CHOICES[""],
-  base: FORCED_DEVICE_STYLE_CHOICES.base,
-  "space-police": FORCED_DEVICE_STYLE_CHOICES["space-police"]
+  "": "Allow User Choice",
+  ...RELEASED_DEVICE_STYLE_CHOICES
 } as const;
 
 const FORM_FACTOR_CHOICES = {
-  phone: "Phone",
+  phone: "Compact",
   datapad: "Datapad",
   computer: "Computer"
 } as const;
@@ -613,10 +607,10 @@ function registerSettings(): void {
   });
 
   game.settings.register(MODULE_ID, SETTING_FORM_FACTOR, {
-    name: "HoloSuite Form Factor",
-    hint: "Choose the launcher shape for this user: phone, wide datapad, or large computer display.",
+    name: "HoloSuite Size",
+    hint: "Choose a compact, wide datapad, or large computer layout for this user.",
     scope: "client",
-    config: false,
+    config: true,
     type: String,
     choices: FORM_FACTOR_CHOICES,
     default: "phone",
@@ -626,6 +620,17 @@ function registerSettings(): void {
       launcherApp?.refreshCurrentView();
       launcherApp?.resizeForFormFactor();
     }
+  });
+
+  game.settings.register(MODULE_ID, SETTING_THEMED_APP_COLORS, {
+    name: "Use Themed App Colors",
+    hint: "Use the active device theme’s accent for app icons and buttons. Uploaded branding images keep their original colors.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+    restricted: false,
+    onChange: () => launcherApp?.applyAppColors()
   });
 
   game.settings.register(MODULE_ID, SETTING_APP_ORDER, {
@@ -784,8 +789,8 @@ function normalizeTheme(value: unknown): HoloSuiteTheme {
 }
 
 function normalizeFormFactor(value: unknown): HoloSuiteFormFactor {
-  void value;
-  return "phone";
+  const formFactor = String(value ?? "");
+  return Object.hasOwn(FORM_FACTOR_CHOICES, formFactor) ? formFactor as HoloSuiteFormFactor : "phone";
 }
 
 function getFormFactor(): HoloSuiteFormFactor {
@@ -799,9 +804,13 @@ function getFormFactorDimensions(formFactor = getFormFactor()): { width: number;
       ? { width: 760, height: 680 }
       : { width: 483, height: 736 };
   return {
-    width: Math.min(preferred.width, Math.max(420, window.innerWidth - 32)),
-    height: Math.min(preferred.height, Math.max(560, window.innerHeight - 48))
+    width: Math.min(preferred.width, Math.max(1, window.innerWidth - 32)),
+    height: Math.min(preferred.height, Math.max(1, window.innerHeight - 32))
   };
+}
+
+function getAppColorMode(): "theme" | "original" {
+  return safeGetSetting(MODULE_ID, SETTING_THEMED_APP_COLORS) === true ? "theme" : "original";
 }
 
 function getSavedAppOrder(): string[] {
@@ -1225,6 +1234,7 @@ function renderSettingsView(): string {
   const forcedStyle = getForcedDeviceStyle();
   const userStyle = getUserDeviceStyle();
   const effectiveStyle = forcedStyle ?? userStyle;
+  const formFactor = getFormFactor();
   const overrideNotice = forcedStyle ? `
     <div class="holosuite-settings-notice">
       <i class="fa-solid fa-lock"></i>
@@ -1245,6 +1255,18 @@ function renderSettingsView(): string {
     </button>
   `).join("");
 
+  const formFactorOptions = Object.entries(FORM_FACTOR_CHOICES).map(([id, label]) => `
+    <button
+      type="button"
+      class="holosuite-form-factor-choice ${id === formFactor ? "is-active" : ""}"
+      data-holosuite-form-factor-choice="${escapeHtml(id)}"
+      aria-pressed="${id === formFactor ? "true" : "false"}"
+    >
+      <span class="holosuite-form-factor-preview holosuite-form-factor-preview--${escapeHtml(id)}" aria-hidden="true"></span>
+      <strong>${escapeHtml(label)}</strong>
+    </button>
+  `).join("");
+
   return `
     <div class="holosuite-screen-heading">
       <div>
@@ -1260,8 +1282,17 @@ function renderSettingsView(): string {
           <strong>${escapeHtml(RELEASED_DEVICE_STYLE_CHOICES[effectiveStyle as keyof typeof RELEASED_DEVICE_STYLE_CHOICES])}</strong>
         </div>
       </div>
-      <div class="holosuite-theme-choices">
+      <div class="holosuite-theme-choices" role="group" aria-label="Theme">
         ${options}
+      </div>
+      <div class="holosuite-settings-field">
+        <div>
+          <span class="holosuite-kicker">Size</span>
+          <strong>${escapeHtml(FORM_FACTOR_CHOICES[formFactor])}</strong>
+        </div>
+      </div>
+      <div class="holosuite-form-factor-choices" role="group" aria-label="Size">
+        ${formFactorOptions}
       </div>
       ${game.user?.isGM ? `
         <div class="holosuite-branding-action">
@@ -1293,7 +1324,7 @@ function renderLauncherHtml(
       : renderAppsView();
 
   return `
-    <section class="holosuite-phone">
+    <section class="holosuite-phone" data-holosuite-app-colors="${getAppColorMode()}">
       <div class="holosuite-phone-shell">
         <header class="holosuite-status-bar">
           ${renderDeviceBrand()}
@@ -2212,6 +2243,11 @@ class HoloSuiteLauncher extends LegacyApplication {
     const screen = root.querySelector<HTMLElement>(".holosuite-screen");
     if (!statusBar || !screen) return false;
 
+    const focused = document.activeElement;
+    const choice = focused instanceof HTMLElement && screen.contains(focused) ? focused : null;
+    const style = choice?.dataset.holosuiteDeviceStyle;
+    const size = choice?.dataset.holosuiteFormFactorChoice;
+
     statusBar.innerHTML = `
       ${renderDeviceBrand()}
       ${renderHeaderActions(this.currentView)}
@@ -2228,6 +2264,12 @@ class HoloSuiteLauncher extends LegacyApplication {
     screen.classList.toggle("holosuite-screen--whats-new", this.currentView === "whats-new");
     screen.classList.toggle("holosuite-screen--settings", this.currentView === "settings");
     bindLauncherControls(root);
+    if (style || size) {
+      const selector = style ? "[data-holosuite-device-style]" : "[data-holosuite-form-factor-choice]";
+      [...screen.querySelectorAll<HTMLElement>(selector)].find(button =>
+        style ? button.dataset.holosuiteDeviceStyle === style : button.dataset.holosuiteFormFactorChoice === size
+      )?.focus({ preventScroll: true });
+    }
     return true;
   }
 
@@ -2250,30 +2292,34 @@ class HoloSuiteLauncher extends LegacyApplication {
   }
 
   async setDeviceStyle(style: HoloSuiteDeviceStyle): Promise<void> {
-    if (getForcedDeviceStyle()) return;
+    if (getForcedDeviceStyle() || style === getUserDeviceStyle()) return;
     await game.settings.set(MODULE_ID, SETTING_DEVICE_STYLE, style);
-    this.currentView = "settings";
-    applySavedDeviceStyle();
-    this.refreshCurrentView();
   }
 
   async setFormFactor(formFactor: HoloSuiteFormFactor): Promise<void> {
+    if (formFactor === getFormFactor()) return;
     await game.settings.set(MODULE_ID, SETTING_FORM_FACTOR, formFactor);
-    this.currentView = "settings";
-    applySavedFormFactor();
-    this.resizeForFormFactor();
-    this.refreshCurrentView();
+  }
+
+  applyAppColors(): void {
+    const root = this.getLauncherRoot({ includeDocumentFallback: false });
+    if (root) root.dataset.holosuiteAppColors = getAppColorMode();
   }
 
   resizeForFormFactor(): void {
+    const element = this.getLauncherRoot({ includeDocumentFallback: false })
+      ?.closest<HTMLElement>("#holosuite-launcher, .holosuite-launcher-window");
+    if (!element) return;
     const dimensions = getFormFactorDimensions();
-    const element = unwrapHtmlElement((this as any).element)?.closest<HTMLElement>("#holosuite-launcher, .holosuite-launcher-window")
-      ?? unwrapHtmlElement((this as any).element);
-    element?.style.setProperty("--hs-launcher-width", `${dimensions.width}px`);
-    element?.style.setProperty("--hs-launcher-height", `${dimensions.height}px`);
-    element?.style.setProperty("width", `${dimensions.width}px`, "important");
-    element?.style.setProperty("height", `${dimensions.height}px`, "important");
-    try { (this as any).setPosition?.(dimensions); } catch { /* CSS sizing remains the fallback across Foundry generations. */ }
+    const { left, top, width, height } = element.getBoundingClientRect();
+    const position = {
+      ...dimensions,
+      left: Math.max(16, Math.min(left + (width - dimensions.width) / 2, window.innerWidth - dimensions.width - 16)),
+      top: Math.max(16, Math.min(top + (height - dimensions.height) / 2, window.innerHeight - dimensions.height - 16))
+    };
+    element.style.setProperty("--hs-launcher-width", `${dimensions.width}px`);
+    element.style.setProperty("--hs-launcher-height", `${dimensions.height}px`);
+    try { (this as any).setPosition?.(position); } catch { /* CSS sizing remains the fallback across Foundry generations. */ }
   }
 
   refreshCurrentView(): void {
@@ -2408,6 +2454,7 @@ Hooks.once("init", () => {
   applyVisualEffectsSetting();
   registerKeybindings();
   exposeApi();
+  window.addEventListener("resize", () => launcherApp?.resizeForFormFactor());
 });
 
 Hooks.on("getSceneControlButtons", renderOpenLauncherControl);

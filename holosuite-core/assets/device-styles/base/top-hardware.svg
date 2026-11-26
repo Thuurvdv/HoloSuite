@@ -1,17 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="132" height="18" viewBox="0 0 132 18">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #081c2e;
-      }
-
-      .cls-2 {
-        fill: #96feff;
-      }
-    </style>
-  </defs>
-  <rect id="Rechthoek_2" data-name="Rechthoek 2" class="cls-1" y="3" width="132" height="11" rx="5.5" ry="5.5"/>
-  <rect id="Rechthoek_1" data-name="Rechthoek 1" class="cls-2" x="39" y="6" width="54" height="5" rx="2.5" ry="2.5"/>
-  <circle id="Ovaal_1" data-name="Ovaal 1" class="cls-2" cx="103.5" cy="8.5" r="2.5"/>
-  <circle id="Ovaal_1-2" data-name="Ovaal 1" class="cls-2" cx="113.5" cy="8.5" r="2.5"/>
+  <title>HoloSuite emitter inlay</title>
+  <g id="emitter">
+    <rect x="39" y="5" width="54" height="8" rx="4" fill="#0a1522" stroke="#2d526a"/>
+    <path d="M53 9h26" stroke="#79e5fa" stroke-width="2" stroke-linecap="round"/>
+  </g>
 </svg>

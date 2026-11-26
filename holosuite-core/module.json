@@ -1,7 +1,7 @@
 {
   "id": "holosuite-core",
   "title": "HoloSuite Core",
-  "description": "A customizable sci-fi phone launcher and registration API for HoloSuite Foundry VTT modules.",
+  "description": "A customizable sci-fi datapad launcher and registration API for HoloSuite Foundry VTT modules.",
   "version": "1.3.1",
   "authors": [
     {
