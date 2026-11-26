@@ -1,6 +1,32 @@
 {
-  "updated": "2026-11-25",
+  "updated": "2026-11-26",
   "modules": [
+    {
+      "moduleId": "holosuite-galactic-records",
+      "title": "Galactic Records",
+      "tier": "premium",
+      "version": "1.1.0",
+      "updated": "2026-11-26",
+      "icon": "fa-solid fa-database",
+      "url": "https://patreon.com/MageTowerStudios",
+      "entries": [
+        {
+          "title": "Galactic Records 1.1.0 adds multiple databases",
+          "summary": "GMs can create separate databases and share files across them. Players can switch between active databases, and existing records move into the Galactic Registry automatically.",
+          "tags": [
+            "Foundry v12-v14"
+          ]
+        },
+        {
+          "title": "Build records from Journals",
+          "summary": "Drag in a world Journal Entry or text page to create a dossier. Add an optional image and refresh the description from the source. Players also need permission to read that source."
+        },
+        {
+          "title": "Customize the database interface",
+          "summary": "Set the header and footer text with HoloSuite Core branding, or use Foundry’s interface font throughout Galactic Records."
+        }
+      ]
+    },
     {
       "moduleId": "holosuite-terminal",
       "title": "HoloSuite Terminal",
@@ -23,29 +49,21 @@
       "moduleId": "pulse-scanner",
       "title": "Pulse Scanner",
       "tier": "premium",
-      "version": "2.0.0",
-      "updated": "2026-10-20",
+      "version": "2.1.1",
+      "updated": "2026-11-26",
       "icon": "fa-solid fa-wave-square",
       "url": "https://www.magetowerstudios.com/docs/module.html?id=pulse-scanner",
       "entries": [
         {
-          "title": "Pulse Scanner 2.0 is here",
-          "summary": "The manager has a new look and a simpler setup: choose what the target is, place it in a region, and give it a name. Scanners are grouped by character, with quick previews and recharge buttons.",
+          "title": "Pulse Scanner 2.1.1 gives you more control over token outlines",
+          "summary": "Signals other than Token stop outlining nearby tokens by default. Turn on Highlight Tokens on Other Signals to bring those outlines back. The Token Detection setting still controls dedicated Token outlines.",
           "tags": [
             "Foundry v12-v14"
           ]
         },
         {
-          "title": "Pick your scanner and send out a pulse",
-          "summary": "Players now choose scanners from a quick-access wheel. Try five pulse animations, follow scent trails, and spot nearby tokens with temporary outlines. Recharge from the wheel and let the table know through chat."
-        },
-        {
-          "title": "One region can hold several secrets",
-          "summary": "Put three secret doors in one region and link them to one target. A scan only highlights the areas it reaches, so finding one door no longer gives away the others."
-        },
-        {
-          "title": "Open your scanner without digging through menus",
-          "summary": "Set a keyboard shortcut or right-click Pulse Scanner in the HoloSuite launcher to create a hotbar macro. Opening the scanner does not spend a charge."
+          "title": "Give the scanner your HoloSuite look",
+          "summary": "The GM manager and player scanner wheel now support HoloSuite Core branding."
         }
       ]
     },
@@ -122,14 +140,14 @@
       "moduleId": "cybercall",
       "title": "CyberCall",
       "tier": "free",
-      "version": "1.0.11",
-      "updated": "2026-10-03",
-      "icon": "fa-solid fa-phone-volume",
-      "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/cybercall",
+      "version": "2.0.2",
+      "updated": "2026-11-26",
+      "icon": "fa-solid fa-satellite-dish",
+      "url": "https://github.com/Thuurvdv/HoloSuite/releases/tag/cybercall-v2.0.2",
       "entries": [
         {
-          "title": "Keep writing while messages update",
-          "summary": "CyberCall now keeps your unfinished message and cursor position when the conversation refreshes, so an incoming update no longer clears what you were typing.",
+          "title": "CyberCall 2.0.2 brings NPCs into group chats",
+          "summary": "Add NPC contacts linked to Foundry Actors when creating a group. GMs can reply as any linked NPC, and Reply As keeps the selected NPC after each message.",
           "tags": [
             "Foundry v12-v14"
           ]

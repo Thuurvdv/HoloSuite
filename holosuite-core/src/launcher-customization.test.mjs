@@ -140,6 +140,8 @@ test("shows Buddy 1.0.1 in Releases with its icon and labels the Branding warnin
   assert.equal(buddy.tier, "premium");
   assert.equal(buddy.entries.length, 1);
   assert.match(icon, /<svg\b/);
-  assert.match(css, /\.holosuite-whats-new-icon\[data-holosuite-app-icon="holosuite-buddy"\]::before\s*\{[^}]*icons\/holo-assistant\.svg/);
+  assert.match(source, /update\.moduleId === "holosuite-buddy" \? "holo-assistant" : update\.moduleId/);
+  assert.match(source, /if \(app\) return renderAppIcon\(app\)/);
+  assert.match(css, /\.holosuite-app-icon\[data-holosuite-app-icon="holo-assistant"\]::before\s*\{[^}]*icons\/holo-assistant\.svg/);
   assert.match(source, /Open HoloSuite Branding<\/button>\s*<span[^>]+aria-label="Experimental feature"[^>]+data-tooltip="Experimental feature"/);
 });

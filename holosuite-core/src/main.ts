@@ -30,6 +30,24 @@ const FOUNDRY_GENERATION_ATTRIBUTE = "data-holosuite-foundry-generation";
 const REDUCED_EFFECTS_ATTRIBUTE = "data-holosuite-debug-no-effects";
 const WHATS_NEW_CATALOG_PATH = `modules/${MODULE_ID}/data/whats-new.json`;
 const WHATS_NEW_UPDATES_SINCE = Date.UTC(2026, 7, 1);
+const BUNDLED_NEWS_LAUNCHER_ICONS = new Set([
+  "bounty-board",
+  "csi-toolkit",
+  "cybercall",
+  "galaxy-map",
+  "holo-assistant",
+  "holodock",
+  "holosuite-blueprint",
+  "holosuite-critical-cutin",
+  "holosuite-galactic-records",
+  "holosuite-hacking",
+  "holosuite-loot",
+  "holosuite-terminal",
+  "holosuite-vending-machines",
+  "pulse-scanner",
+  "security-camera",
+  "security-cameras"
+]);
 
 const DEVICE_STYLE_CHOICES = {
   base: "HoloSuite",
@@ -888,8 +906,12 @@ function registerWhatsNewInternal(
   const normalized = normalizeWhatsNew(update);
   if (!normalized) return null;
   if (getUpdateTimestamp(normalized) < WHATS_NEW_UPDATES_SINCE) return null;
-  if (options.replace === false && registeredWhatsNew.has(normalized.moduleId)) {
-    return registeredWhatsNew.get(normalized.moduleId) ?? null;
+  const current = registeredWhatsNew.get(normalized.moduleId);
+  if (current) {
+    const currentTimestamp = getUpdateTimestamp(current);
+    const incomingTimestamp = getUpdateTimestamp(normalized);
+    if (incomingTimestamp < currentTimestamp ||
+        (incomingTimestamp === currentTimestamp && options.replace === false)) return current;
   }
   registeredWhatsNew.set(normalized.moduleId, normalized);
   if (!isApiOnlyMode()) launcherApp?.render(false);
@@ -980,7 +1002,7 @@ function renderHeaderActions(view: LauncherView): string {
   `;
 }
 
-function renderAppIcon(app: HoloSuiteAppRegistration, branding = getBranding(app.id)): string {
+function renderAppIcon(app: Pick<HoloSuiteAppRegistration, "id" | "icon">, branding = getBranding(app.id)): string {
   return `
     <span class="holosuite-app-icon ${branding.icon ? "holosuite-brand-glyph" : ""}" data-holosuite-app-icon="${escapeHtml(app.id)}">
       ${brandedIcon(branding, app.icon)}
@@ -1128,10 +1150,18 @@ function getFilteredReleases(filter: WhatsNewFilter): HoloSuiteWhatsNewRegistrat
     .sort(sortWhatsNew);
 }
 
+function renderWhatsNewIcon(update: HoloSuiteWhatsNewRegistration): string {
+  const fallback = update.icon || (update.tier === "premium" ? "fa-solid fa-gem" : "fa-solid fa-cube");
+  const appId = update.moduleId === "holosuite-buddy" ? "holo-assistant" : update.moduleId;
+  const app = registeredApps.get(update.moduleId) ?? registeredApps.get(appId);
+  if (app) return renderAppIcon(app);
+  if (BUNDLED_NEWS_LAUNCHER_ICONS.has(appId)) return renderAppIcon({ id: appId, icon: fallback });
+  return brandedIcon({}, fallback);
+}
+
 function renderWhatsNewCards(items: HoloSuiteWhatsNewRegistration[], emptyLabel: string): string {
   return items.length
     ? items.map((update) => {
-      const icon = update.icon || (update.tier === "premium" ? "fa-solid fa-gem" : "fa-solid fa-cube");
       const entries = update.entries.map((entry) => `
         <li>
           <strong>${escapeHtml(entry.title)}</strong>
@@ -1155,7 +1185,7 @@ function renderWhatsNewCards(items: HoloSuiteWhatsNewRegistration[], emptyLabel:
       return `
         <article class="holosuite-whats-new-card">
           <header>
-            <span class="holosuite-whats-new-icon" data-holosuite-app-icon="${escapeHtml(update.moduleId)}"><i class="${escapeHtml(icon)}"></i></span>
+            <span class="holosuite-whats-new-icon">${renderWhatsNewIcon(update)}</span>
             <div>
               <h3>${escapeHtml(update.title)}</h3>
             </div>
