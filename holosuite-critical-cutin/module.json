@@ -24,8 +24,8 @@
   "languages": [],
   "socket": true,
   "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/holosuite-critical-cutin",
-  "manifest": "",
-  "download": "",
+  "manifest": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/holosuite-critical-cutin/module.json",
+  "download": "https://github.com/Thuurvdv/HoloSuite/releases/download/holosuite-critical-cutin-v1.0.6/holosuite-critical-cutin.zip",
   "license": "GPL-3.0-or-later",
   "readme": "README.md",
   "relationships": {
