@@ -3,6 +3,12 @@ import { createCallId, getInitials, getUserDisplayName, getUserTokenImage, norma
 
 declare const game: any;
 
+export type GroupNpcMember = {
+  actorId: string;
+  name: string;
+  number: string;
+};
+
 export type CyberCallMessage = {
   id: string;
   threadId: string;
@@ -27,6 +33,7 @@ export type CyberCallMessage = {
   groupName: string;
   groupMemberUserIds: string[];
   groupMemberNames: string[];
+  groupNpcMembers: GroupNpcMember[];
   createdAt: string;
   chatMessageId: string;
   schemaVersion: number;
@@ -55,6 +62,7 @@ export type CyberCallThread = {
   groupName: string;
   groupMemberUserIds: string[];
   groupMemberNames: string[];
+  groupNpcMembers: GroupNpcMember[];
 };
 
 function normalizeString(value: unknown, fallback = "") {
@@ -128,6 +136,13 @@ export function normalizeMessage(source: Partial<CyberCallMessage> & Record<stri
     groupName: normalizeString(source.groupName),
     groupMemberUserIds: unique(source.groupMemberUserIds ?? []),
     groupMemberNames: unique(source.groupMemberNames ?? []),
+    groupNpcMembers: Array.isArray(source.groupNpcMembers) ? source.groupNpcMembers
+      .map((member) => ({
+        actorId: normalizeString(member?.actorId),
+        name: normalizeString(member?.name),
+        number: normalizeString(member?.number)
+      }))
+      .filter((member) => member.actorId && member.name) : [],
     createdAt: normalizeString(source.createdAt) || now(),
     chatMessageId: normalizeString(source.chatMessageId),
     schemaVersion: Number(source.schemaVersion ?? MESSAGE_SCHEMA_VERSION)
@@ -159,9 +174,11 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
       const isGroup = Boolean(groupMessage);
       const groupId = groupMessage?.groupId || (isGroup ? threadId.replace(/^group:/, "") : "");
       const groupName = groupMessage?.groupName || (isGroup ? "Group Chat" : "");
-      const groupMemberUserIds = groupMessage ? unique([
-        groupMessage.senderUserId, ...groupMessage.recipientUserIds
-      ]) : [];
+      const groupNpcMembers = groupMessage?.groupNpcMembers ?? [];
+      const groupMemberUserIds = groupNpcMembers.length
+        ? groupMessage.groupMemberUserIds
+        : groupMessage ? unique([groupMessage.senderUserId, ...groupMessage.recipientUserIds]) : [];
+      const groupMemberCount = groupMemberUserIds.length + groupNpcMembers.length;
       const storedGroupMemberNames = groupMessage?.groupMemberNames ?? [];
       const groupMemberNames = storedGroupMemberNames.length
         ? storedGroupMemberNames
@@ -201,7 +218,7 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
         }
         : null;
       // Keep the NPC available for GM replies even before the player has answered.
-      const npcSentMessage = [...sorted].reverse().find((message) =>
+      const npcSentMessage = isGroup ? null : [...sorted].reverse().find((message) =>
         game.users?.get?.(message.senderUserId)?.isGM === true
         && message.contactIsNpc && message.senderNumber
         && message.senderName === message.contactName && message.contactUserId
@@ -218,7 +235,7 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
       const groupContact = isGroup ? {
         id: `group-${groupId || threadId}`,
         name: groupName,
-        number: `${groupMemberUserIds.length} member${groupMemberUserIds.length === 1 ? "" : "s"}`,
+        number: `${groupMemberCount} member${groupMemberCount === 1 ? "" : "s"}`,
         image: "",
         actorId: "",
         userId: "",
@@ -245,7 +262,7 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
       const participantMessage = isGroup ? null : [...sorted].reverse().find((message) =>
         message.senderUserId === otherUserId && message.senderImage
       );
-      const npcRoutedMessage = [...sorted].reverse().find((message) => {
+      const npcRoutedMessage = isGroup ? null : [...sorted].reverse().find((message) => {
         const sender = game.users?.get?.(message.senderUserId);
         return message.senderUserId
           && sender?.isGM !== true
@@ -309,7 +326,8 @@ export function prepareThreads(messages: CyberCallMessage[], contacts: any[] = [
         groupId,
         groupName,
         groupMemberUserIds,
-        groupMemberNames
+        groupMemberNames,
+        groupNpcMembers
       };
     })
     .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
