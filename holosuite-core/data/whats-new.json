@@ -216,24 +216,25 @@
       "moduleId": "holosuite-core",
       "title": "HoloSuite Core",
       "tier": "free",
-      "version": "1.2.1",
-      "updated": "2026-11-09",
-      "icon": "fa-solid fa-mobile-screen",
-      "url": "https://github.com/Thuurvdv/HoloSuite/releases/tag/holosuite-core-v1.2.1",
+      "version": "1.4.0",
+      "updated": "2026-11-26",
+      "icon": "fa-solid fa-tablet-screen-button",
+      "url": "https://github.com/Thuurvdv/HoloSuite/releases/tag/holosuite-core-v1.4.0",
       "entries": [
         {
-          "title": "Find HoloSuite Loot in Releases",
-          "summary": "Open What's New and choose Releases for a quick look at the first HoloSuite Loot release and a link to download it.",
+          "title": "HoloSuite Core 1.4.0 adds Cassette Futurism",
+          "summary": "The new theme brings the dark teal display, cream lettering, and copper accents of HoloSuite Terminal to the launcher. HoloSuite has a new rounded cyan frame, and Space Police uses black buttons with signal-yellow markings.",
           "tags": [
             "Foundry v12-v14"
           ]
         },
         {
-          "title": "More options from the launcher",
-          "summary": "Right-click supported app buttons for useful shortcuts. Pulse Scanner can now create a hotbar macro straight from its launcher button. You can also open the menu with Shift+F10.",
-          "tags": [
-            "Foundry v12-v14"
-          ]
+          "title": "Choose your launcher size",
+          "summary": "Open Settings in the launcher to switch between Compact, Datapad, and Computer. All three themes fit every size, and each user can choose their own layout. Close now sits beside the What's New star."
+        },
+        {
+          "title": "Match app colors to your theme",
+          "summary": "App icons and their glow keep their own colors by default. Enable Use Themed App Colors in HoloSuite Core's module settings to tint them with the current theme."
         }
       ]
     }

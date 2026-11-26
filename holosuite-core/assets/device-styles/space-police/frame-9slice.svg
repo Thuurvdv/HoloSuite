@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <title>Space Police reinforced bezel</title>
+  <!-- Slice 48 units in from each edge. Keep hardware and stripes inside each corner. -->
+  <g id="armor">
+    <path d="M13 2h134l11 11v134l-11 11H13L2 147V13Z" fill="#141619" stroke="#07080a" stroke-width="3"/>
+    <path d="M15 8h130l7 7v130l-7 7H15l-7-7V15Z" fill="none" stroke="#3b3f44" stroke-width="3"/>
+    <rect x="14" y="14" width="132" height="132" rx="3" fill="none" stroke="#272a2e" stroke-width="3"/>
+  </g>
+  <g id="fasteners" fill="#0a0b0c" stroke="#565a60" stroke-width="2">
+    <circle cx="23" cy="23" r="6"/>
+    <circle cx="137" cy="23" r="6"/>
+    <circle cx="23" cy="137" r="6"/>
+    <circle cx="137" cy="137" r="6"/>
+  </g>
+  <path id="registration-mark" d="m15 37 6-6h5l-6 6zm8 0 6-6h5l-6 6z" fill="#f6ee19"/>
+</svg>
