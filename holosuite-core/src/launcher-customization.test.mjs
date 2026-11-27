@@ -8,7 +8,7 @@ const redFrameUrl = new URL("../assets/device-styles/red/frame-9slice.svg", impo
 const corporateFrameUrl = new URL("../assets/device-styles/corporate/frame-9slice.svg", import.meta.url);
 const whatsNewUrl = new URL("../data/whats-new.json", import.meta.url);
 
-test("offers three sizes independently of the three released themes", async () => {
+test("offers three sizes independently of the released themes", async () => {
   const [source, css] = await Promise.all([
     readFile(sourceUrl, "utf8"),
     readFile(stylesheetUrl, "utf8")
@@ -21,6 +21,7 @@ test("offers three sizes independently of the three released themes", async () =
   assert.match(source, /corporate:\s*"Corporate"/);
   const released = source.match(/const RELEASED_DEVICE_STYLE_CHOICES = \{([^}]+)\}/)?.[1];
   assert.match(released, /base:[\s\S]*"space-police":[\s\S]*"cassette-futurism":/);
+  assert.match(released, /waystone:\s*DEVICE_STYLE_CHOICES\.waystone/);
   assert.doesNotMatch(released, /\bred:|\bcorporate:/);
   assert.match(source, /SETTING_DEVICE_STYLE[\s\S]*?choices:\s*RELEASED_DEVICE_STYLE_CHOICES/);
   assert.match(source, /SETTING_FORCE_DEVICE_STYLE[\s\S]*?choices:\s*RELEASED_FORCED_DEVICE_STYLE_CHOICES/);

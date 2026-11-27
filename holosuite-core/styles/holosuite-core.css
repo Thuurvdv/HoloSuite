@@ -2738,3 +2738,563 @@ body[data-holosuite-foundry-generation="12"] .holosuite-app-icon[data-holosuite-
   border: 0;
   object-fit: contain;
 }
+
+/* Waystone is a launcher skin. Its palette and art stay inside the device. */
+@font-face {
+  font-family: "Waystone Marcellus";
+  src: url("../assets/device-styles/waystone/fonts/MarcellusSC-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Waystone Vollkorn";
+  src: url("../assets/device-styles/waystone/fonts/Vollkorn.ttf") format("truetype");
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+:root[data-holosuite-waystone] {
+  --hs-waystone-serif: "Waystone Vollkorn", Georgia, serif;
+  --hs-waystone-stone-base: #627069;
+  --hs-waystone-recess: #35473e;
+  --hs-waystone-inscription: #ecebd9;
+  --hs-waystone-glyph: #b5c9ba;
+  --hs-waystone-shadow: #1e2b25;
+  --hs-waystone-edge-light: #a6b2a1;
+  --hs-waystone-accent: #b9f1dd;
+  --hs-waystone-glow: #a8f3d65e;
+  --hs-waystone-chisel: polygon(7px 0, calc(100% - 11px) 0, 100% 9px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 10px 100%, 0 calc(100% - 10px), 0 7px);
+  --hs-waystone-small-chisel: polygon(5px 0, calc(100% - 6px) 0, 100% 5px, 100% calc(100% - 5px), calc(100% - 5px) 100%, 6px 100%, 0 calc(100% - 6px), 0 5px);
+  --hs-waystone-engraving: 0 -1px 1px #17231eee, 0 1px #d9e7ca47;
+  --hs-waystone-response: 150ms;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] {
+  --hs-waystone-stone: url("../assets/device-styles/waystone/stone.svg");
+  --hs-waystone-rune: url("../assets/device-styles/waystone/rune.svg");
+  --hs-waystone-heading: "Waystone Marcellus", Georgia, serif;
+  --hs-waystone-wake: 540ms;
+  /* Keep the scroll viewport on the flat face before the base tapers. */
+  --hs-waystone-shoulder: clamp(82px, calc(var(--hs-launcher-height) * 0.18), 126px);
+  --hs-waystone-foot: clamp(63px, calc(var(--hs-launcher-height) * 0.19), 133px);
+  --hs-waystone-close-inset: clamp(46px, calc(var(--hs-launcher-height) * 0.146), 102px);
+  --hs-device-accent-rgb: 148, 210, 197;
+  --hs-device-mark: none;
+  --hs-bg: #2b3430;
+  --hs-bg-deep: #1b2521;
+  --hs-text: #fbf9e9;
+  --hs-muted: #f0eddd;
+  --hs-line: #303c35;
+  --hs-line-strong: #a1b3a5;
+  --hs-cyan: #acd6c5;
+  --hs-amber: var(--hs-waystone-accent);
+  --hs-control-bg: linear-gradient(#46534b, #2a3731);
+  --hs-control-bg-hover: linear-gradient(#405f54, #29463e);
+  --hs-scrollbar-track: #35443c;
+  --hs-scrollbar-thumb: #8ec1ae;
+  font-family: system-ui, sans-serif;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"]::before,
+.holosuite-phone[data-holosuite-launcher-style="waystone"]::after,
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-phone-shell::after,
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-device-bottom-trim,
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-status-bar > span:not(:has(img))::before {
+  display: none;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-phone-shell {
+  padding: var(--hs-waystone-shoulder) 21% var(--hs-waystone-foot) 20%;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-phone-shell::before {
+  background: var(--hs-waystone-stone) center / 100% 100% no-repeat;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  filter: drop-shadow(4px 12px 11px #0d1511bf);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-status-bar {
+  z-index: 4;
+  margin: 0 6px 4px;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-status-bar > span {
+  color: var(--hs-waystone-inscription);
+  font-family: var(--hs-waystone-heading);
+  font-size: 14px;
+  letter-spacing: 0.13em;
+  text-shadow: var(--hs-waystone-engraving);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-phone-shell > .holosuite-status-bar::before {
+  background: var(--hs-waystone-rune) center / contain no-repeat;
+  filter: none;
+  height: clamp(36px, calc(var(--hs-waystone-shoulder) * 0.63), 80px);
+  top: calc(var(--hs-waystone-shoulder) * -0.74);
+  width: 138px;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-status-bar .holosuite-header-close {
+  left: 50%;
+  position: absolute;
+  top: calc(var(--hs-launcher-height) - var(--hs-waystone-shoulder) - var(--hs-waystone-close-inset));
+  transform: translateX(-50%);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-screen {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 5px 6px 6px;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container (min-width: 248px) {
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 380px) {
+  :root:is([data-holosuite-form-factor="datapad"], [data-holosuite-form-factor="computer"])
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 520px) {
+  :root[data-holosuite-form-factor="computer"] .holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 265px) {
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-whats-new-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-screen-heading {
+  justify-content: center;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-screen h2 {
+  color: var(--hs-waystone-inscription);
+  font: 400 clamp(26px, 8.8cqi, 42px)/1.1 var(--hs-waystone-heading);
+  overflow-wrap: anywhere;
+  text-shadow: var(--hs-waystone-engraving);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-player-home {
+  background: #26362e;
+  border-color: #3a4940;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] :is(.holosuite-settings-field, .holosuite-settings-notice, .holosuite-whats-new-card) {
+  background: #38493ef2;
+  border-color: #778a7a;
+  box-shadow: inset 2px 3px 7px #1e2b258c;
+  clip-path: var(--hs-waystone-chisel);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] :is(.holosuite-settings-field strong, .holosuite-whats-new-card h3) {
+  border-color: #8a9e8c6b;
+  font-family: var(--hs-waystone-serif);
+  text-shadow: var(--hs-waystone-engraving);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-whats-new-card :is(li, .holosuite-whats-new-tags span),
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-whats-new-tabs strong {
+  border-color: #8a9e8c6b;
+}
+
+:root[data-holosuite-waystone] :is(#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone, .holosuite-app-context-menu, #holosuite-branding .window-content, #holosuite-core-diagnostics .window-content)
+:is(button, .holosuite-whats-new-link, .holosuite-branding-editor summary) {
+  /* Legacy Foundry styles can paint these shared surfaces with !important. */
+  --hs-surface-card: transparent;
+  --hs-surface-control: transparent;
+  --hs-surface-control-hover: transparent;
+  --hs-surface-active: transparent;
+  --hs-border-subtle: transparent;
+  --hs-shadow-control: none;
+  --hs-text-primary: var(--hs-waystone-inscription);
+  --hs-waystone-rim: linear-gradient(139deg, #252d2a96 8%, #30393438 49%, #c8cec170 96%);
+  --hs-waystone-cut: linear-gradient(151deg, #252d2a61, #29322e42 52%, #30383326);
+  --hs-waystone-cut-shadow: inset 2px 3px 7px #20292566, inset -1px -1px #d1d6c528;
+  appearance: none;
+  background: none !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  clip-path: var(--hs-waystone-button-shape, var(--hs-waystone-small-chisel));
+  color: var(--hs-waystone-inscription) !important;
+  font-family: var(--hs-waystone-serif) !important;
+  isolation: isolate;
+  outline: none !important;
+  text-shadow: var(--hs-waystone-engraving) !important;
+}
+
+:root[data-holosuite-waystone] :is(#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone, .holosuite-app-context-menu, #holosuite-branding .window-content, #holosuite-core-diagnostics .window-content)
+:is(button, .holosuite-whats-new-link, .holosuite-branding-editor summary):where(:not(.holosuite-app-tile, .holosuite-header-action)) {
+  position: relative;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile {
+  --hs-waystone-button-shape: var(--hs-waystone-chisel);
+  --hs-waystone-charge-color: color-mix(in srgb, var(--hs-app-accent) 76%, #defce5);
+  align-items: center;
+  gap: 6px;
+  grid-template-columns: 32px minmax(0, 1fr);
+  min-height: 68px;
+}
+
+:root[data-holosuite-waystone] :is(#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone, .holosuite-app-context-menu, #holosuite-branding .window-content, #holosuite-core-diagnostics .window-content)
+:is(button, .holosuite-whats-new-link, .holosuite-branding-editor summary)::before,
+:root[data-holosuite-waystone] :is(#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone, .holosuite-app-context-menu, #holosuite-branding .window-content, #holosuite-core-diagnostics .window-content)
+:is(button, .holosuite-whats-new-link, .holosuite-branding-editor summary)::after {
+  content: "";
+  height: auto;
+  opacity: 1;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+:root[data-holosuite-waystone] :is(#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone, .holosuite-app-context-menu, #holosuite-branding .window-content, #holosuite-core-diagnostics .window-content)
+:is(button, .holosuite-whats-new-link, .holosuite-branding-editor summary)::before {
+  background: var(--hs-waystone-rim) !important;
+  inset: 0;
+  /* Leave the original stone visible through the recess beneath this rim. */
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 2px;
+}
+
+:root[data-holosuite-waystone] :is(#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone, .holosuite-app-context-menu, #holosuite-branding .window-content, #holosuite-core-diagnostics .window-content)
+:is(button, .holosuite-whats-new-link, .holosuite-branding-editor summary)::after {
+  background: var(--hs-waystone-cut) !important;
+  box-shadow: var(--hs-waystone-cut-shadow);
+  clip-path: var(--hs-waystone-button-shape, var(--hs-waystone-small-chisel));
+  inset: 2px;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-whats-new-link {
+  min-height: 30px;
+  padding: 5px 10px;
+}
+
+:root[data-holosuite-waystone] .holosuite-branding-editor summary {
+  padding: 6px 10px;
+}
+
+:root[data-holosuite-waystone] .holosuite-app-context-menu {
+  background: #546158 !important;
+  border-color: #89988b !important;
+  color-scheme: dark;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile .holosuite-app-icon::before,
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile .holosuite-app-icon::after {
+  display: none !important;
+}
+
+:root[data-holosuite-waystone] :is(#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone, .holosuite-app-context-menu, #holosuite-branding .window-content, #holosuite-core-diagnostics .window-content)
+:is(button, .holosuite-whats-new-link, .holosuite-branding-editor summary):not(:disabled):is(:hover, :focus-visible, .is-active, [aria-pressed="true"], [aria-selected="true"]) {
+  --hs-waystone-rim: linear-gradient(137deg, #28342e99, #465a4d55 61%, #b5cfb88c);
+  --hs-waystone-cut: linear-gradient(151deg, #27332d65, #34493f42 64%, #526c5b26);
+}
+
+:root[data-holosuite-waystone] :is(#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone, .holosuite-app-context-menu, #holosuite-branding .window-content, #holosuite-core-diagnostics .window-content)
+:is(button, .holosuite-whats-new-link, .holosuite-branding-editor summary):not(:disabled):active {
+  --hs-waystone-cut: linear-gradient(151deg, #26312b78, #364b3d49 64%, #62847136);
+  --hs-waystone-cut-shadow: inset 3px 4px 7px #20292588, inset 0 0 10px #afe1c633;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile:disabled {
+  opacity: 0.6;
+}
+
+:root[data-holosuite-waystone] :is(#holosuite-launcher .holosuite-phone, .holosuite-launcher-window .holosuite-phone, .holosuite-app-context-menu, #holosuite-branding .window-content, #holosuite-core-diagnostics .window-content)
+:is(button, .holosuite-whats-new-link, .holosuite-branding-editor summary):focus-visible {
+  --hs-waystone-rim: var(--hs-waystone-accent);
+  --hs-waystone-cut-shadow: inset 0 0 0 1px var(--hs-waystone-accent), inset 2px 3px 7px #20292566;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile .holosuite-app-icon {
+  background: none !important;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none !important;
+  color: color-mix(in srgb, var(--hs-waystone-glyph) 78%, var(--hs-waystone-charge-color)) !important;
+  font-size: 21px;
+  grid-row: 1 / span 2;
+  margin: 0;
+  width: 32px;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile .holosuite-app-icon i {
+  color: inherit !important;
+  display: inline-block !important;
+  text-shadow: var(--hs-waystone-engraving), 0 0 5px color-mix(in srgb, var(--hs-waystone-charge-color) 28%, transparent) !important;
+  transition: color var(--hs-waystone-response), text-shadow var(--hs-waystone-response);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile .holosuite-app-icon:has(img:not([hidden])) i {
+  display: none !important;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile .holosuite-app-title {
+  color: var(--hs-waystone-inscription) !important;
+  font: 600 clamp(13px, 4.5cqi, 15px)/1.12 var(--hs-waystone-serif);
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  text-shadow: var(--hs-waystone-engraving) !important;
+  transition: color var(--hs-waystone-response), text-shadow var(--hs-waystone-response);
+  white-space: normal;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile:enabled:is(:hover, :focus-visible, :active) .holosuite-app-icon,
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile:enabled:is(:hover, :focus-visible, :active) .holosuite-app-title {
+  color: color-mix(in srgb, var(--hs-waystone-inscription) 52%, var(--hs-waystone-charge-color)) !important;
+  text-shadow: var(--hs-waystone-engraving), 0 0 6px color-mix(in srgb, var(--hs-waystone-charge-color) 45%, transparent) !important;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile:enabled:is(:hover, :focus-visible, :active) .holosuite-app-icon i {
+  text-shadow: var(--hs-waystone-engraving), 0 0 8px var(--hs-waystone-charge-color) !important;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile > .holosuite-waystone-charge {
+  bottom: 5px;
+  filter: drop-shadow(0 0 3px var(--hs-waystone-charge-color));
+  height: 12px;
+  opacity: 0.68;
+  pointer-events: none;
+  position: absolute;
+  right: 7px;
+  width: 39px;
+}
+
+.holosuite-waystone-charge::before,
+.holosuite-waystone-charge::after {
+  background: var(--hs-waystone-charge-color);
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.holosuite-waystone-charge::before {
+  clip-path: polygon(0 74%, 24% 51%, 36% 69%, 54% 25%, 68% 43%, 84% 30%, 100% 0, 85% 44%, 67% 55%, 55% 38%, 36% 81%, 24% 63%);
+}
+
+.holosuite-waystone-charge::after {
+  clip-path: polygon(54% 35%, 57% 29%, 59% 66%, 75% 100%, 56% 75%);
+  opacity: 0.54;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile:nth-child(even) > .holosuite-waystone-charge {
+  transform: scaleX(-1);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile:enabled:is(:hover, :focus-visible, :active) > .holosuite-waystone-charge {
+  opacity: 1;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile:not(:has(.holosuite-app-count)) .holosuite-app-icon {
+  grid-row: 1;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-count {
+  background: var(--hs-waystone-recess);
+  border-color: var(--hs-waystone-stone-base);
+  color: var(--hs-waystone-accent);
+  text-shadow: var(--hs-waystone-engraving);
+}
+
+:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-header-action {
+  font-size: 17px;
+  min-height: 34px;
+  min-width: 34px;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-header-action > i {
+  color: inherit !important;
+  text-shadow: var(--hs-waystone-engraving) !important;
+  transition: color var(--hs-waystone-response), text-shadow var(--hs-waystone-response);
+}
+
+:is(#holosuite-launcher, .holosuite-launcher-window) .holosuite-phone[data-holosuite-launcher-style="waystone"]
+.holosuite-header-action:enabled:is(:hover, :focus-visible, :active, .is-active) {
+  color: var(--hs-waystone-accent) !important;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-header-action:enabled:is(:hover, :focus-visible, :active, .is-active) > i {
+  text-shadow: var(--hs-waystone-engraving), 0 0 7px var(--hs-waystone-glow) !important;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-header-close > i::after {
+  background: currentColor;
+  clip-path: polygon(50% 0, 100% 48%, 50% 100%, 0 52%, 50% 0, 50% 12%, 12% 52%, 50% 87%, 88% 48%, 50% 12%);
+  content: "";
+  inset: 3px;
+  opacity: 0.55;
+  pointer-events: none;
+  position: absolute;
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-header-action span {
+  background: var(--hs-waystone-recess);
+  border-color: var(--hs-waystone-shadow);
+  border-radius: 3px;
+  color: var(--hs-waystone-accent);
+  font-size: 8px;
+  inset-block-start: 3px;
+  inset-inline-end: 3px;
+  min-width: 13px;
+  padding-inline: 2px;
+  text-shadow: var(--hs-waystone-engraving);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-header-action:has(> span) > i {
+  transform: translate(-4px, 3px);
+}
+
+.holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-screen:focus-visible {
+  outline: 1px dashed var(--hs-waystone-accent);
+  outline-offset: -1px;
+}
+
+/* The browser still owns scrolling, thumb geometry and pointer capture. */
+@supports selector(::-webkit-scrollbar) {
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] :is(.holosuite-screen, .holosuite-whats-new-list) {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] :is(.holosuite-screen, .holosuite-whats-new-list)::-webkit-scrollbar {
+    width: 15px;
+  }
+
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] :is(.holosuite-screen, .holosuite-whats-new-list)::-webkit-scrollbar-track {
+    background:
+      linear-gradient(90deg, var(--hs-waystone-shadow), var(--hs-scrollbar-track) 70%, #abb7a891) center / 5px 100% no-repeat !important;
+    border: 0 !important;
+    box-shadow: none;
+  }
+
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] :is(.holosuite-screen, .holosuite-whats-new-list)::-webkit-scrollbar-thumb {
+    background:
+      url("../assets/device-styles/waystone/scroll-crystal.svg") center / 13px 24px no-repeat,
+      radial-gradient(ellipse, var(--hs-waystone-crystal-halo, transparent), transparent 74%) center / 100% 34px no-repeat,
+      linear-gradient(#92b5a28c, #92b5a28c) center / 2px 100% no-repeat !important;
+    border: 0 !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    min-height: 30px;
+  }
+
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] :is(.holosuite-screen, .holosuite-whats-new-list)::-webkit-scrollbar-thumb:hover {
+    --hs-waystone-crystal-halo: #a7e4ca70;
+  }
+
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] :is(.holosuite-screen, .holosuite-whats-new-list)::-webkit-scrollbar-thumb:active {
+    --hs-waystone-crystal-halo: #b9f1dda0;
+  }
+}
+
+@keyframes holosuite-waystone-wake {
+  0%, 100% { filter: none; }
+  45% { filter: brightness(1.24) drop-shadow(0 0 6px var(--hs-waystone-glow)); }
+}
+
+@keyframes holosuite-waystone-press {
+  0%, 100% { filter: brightness(1); }
+  40% { filter: brightness(1.2); }
+}
+
+@keyframes holosuite-waystone-inscriptions {
+  from { opacity: 0.86; }
+  to { opacity: 1; }
+}
+
+@keyframes holosuite-waystone-crackle {
+  0%, 100% { opacity: 1; }
+  18%, 53% { opacity: 0.31; }
+  36%, 68% { opacity: 0.96; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-holosuite-debug-no-effects="true"]) .holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-status-bar::before {
+    animation: holosuite-waystone-wake var(--hs-waystone-wake) ease-out;
+  }
+
+  :root:not([data-holosuite-debug-no-effects="true"]) .holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-grid {
+    animation: holosuite-waystone-inscriptions 260ms 90ms ease-out backwards;
+  }
+
+  :root:not([data-holosuite-debug-no-effects="true"]) .holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile:enabled:active::after {
+    animation: holosuite-waystone-press 220ms ease-out;
+  }
+
+  :root:not([data-holosuite-debug-no-effects="true"]) .holosuite-phone[data-holosuite-launcher-style="waystone"] .holosuite-app-tile:enabled:is(:hover, :focus-visible) > .holosuite-waystone-charge {
+    animation: holosuite-waystone-crackle 460ms steps(1, end);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holosuite-phone[data-holosuite-launcher-style="waystone"] {
+    --hs-waystone-response: 0ms;
+  }
+}
+
+.holosuite-theme-preview--waystone {
+  background:
+    url("../assets/device-styles/waystone/rune.svg") center / 48% auto no-repeat,
+    url("../assets/device-styles/waystone/stone.svg") center / 100% 100% no-repeat;
+  border: 0;
+}
+.holosuite-branding-form { display: grid; gap: 10px; margin-top: 12px; }
+.holosuite-branding-form details label { margin-top: 8px; }
+.holosuite-branding-form footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.holosuite-branding-asset { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.holosuite-branding-asset:disabled { opacity: 0.55; }
+.holosuite-module-brand-logo { width: 40px; height: 40px; object-fit: contain; vertical-align: middle; }
+[data-holosuite-brand-icon] {
+  display: contents;
+}
+
+.holosuite-module-brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-end: 0.35em;
+  vertical-align: middle;
+}
+
+.holosuite-module-brand-icon > i {
+  flex: none;
+}
+
+:is(h1, h2, h3, p, small, strong) > [data-holosuite-brand-icon]:has(> .holosuite-module-brand-icon) {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:is(h1, h2, h3, p, small, strong) > [data-holosuite-brand-icon]:has(> .holosuite-module-brand-icon) + [data-holosuite-brand-name] {
+  display: inline;
+}
+
+.holosuite-module-brand-icon > img {
+  display: block;
+  width: 1.5em;
+  height: 1.5em;
+  border: 0;
+  object-fit: contain;
+}

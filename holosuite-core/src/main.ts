@@ -54,6 +54,7 @@ const DEVICE_STYLE_CHOICES = {
   base: "HoloSuite",
   "space-police": "Space Police",
   "cassette-futurism": "Cassette Futurism",
+  waystone: "Waystone",
   red: "RED",
   corporate: "Corporate"
 } as const;
@@ -63,7 +64,8 @@ const DEVICE_STYLE_CHOICES = {
 const RELEASED_DEVICE_STYLE_CHOICES = {
   base: DEVICE_STYLE_CHOICES.base,
   "space-police": DEVICE_STYLE_CHOICES["space-police"],
-  "cassette-futurism": DEVICE_STYLE_CHOICES["cassette-futurism"]
+  "cassette-futurism": DEVICE_STYLE_CHOICES["cassette-futurism"],
+  waystone: DEVICE_STYLE_CHOICES.waystone
 } as const;
 
 const RELEASED_FORCED_DEVICE_STYLE_CHOICES = {
@@ -82,6 +84,16 @@ const THEME_CHOICES = {
   ember: "Ember",
   violet: "Violet"
 } as const;
+
+const WAYSTONE_TILES: Readonly<Record<string, { label: string; icon: string }>> = {
+  cybercall: { label: "Sending Stone", icon: "fa-solid fa-envelope" },
+  "security-camera": { label: "Scrying Mirrors", icon: "fa-solid fa-eye" },
+  "security-cameras": { label: "Scrying Mirrors", icon: "fa-solid fa-eye" },
+  "bounty-board": { label: "Guild Board", icon: "fa-solid fa-scroll" },
+  "galaxy-map": { label: "Astral Atlas", icon: "fa-solid fa-compass" },
+  "holosuite-loot": { label: "Loot", icon: "fa-solid fa-box-archive" },
+  "holosuite-security-cards": { label: "Wards", icon: "fa-solid fa-key" }
+};
 
 type HoloSuiteDeviceStyle = keyof typeof DEVICE_STYLE_CHOICES;
 type HoloSuiteFormFactor = keyof typeof FORM_FACTOR_CHOICES;
@@ -821,9 +833,10 @@ function getSavedAppOrder(): string[] {
 
 function applyDeviceStyle(value: unknown): void {
   const style = normalizeDeviceStyle(value);
+  document.documentElement.toggleAttribute("data-holosuite-waystone", style === "waystone");
   const targets = [document.documentElement, document.body].filter(Boolean);
   for (const target of targets) {
-    if (style === "base") target.removeAttribute("data-holosuite-device-style");
+    if (style === "base" || style === "waystone") target.removeAttribute("data-holosuite-device-style");
     else target.setAttribute("data-holosuite-device-style", style);
   }
 }
@@ -1028,20 +1041,22 @@ function renderAppIcon(app: Pick<HoloSuiteAppRegistration, "id" | "icon">, brand
   `;
 }
 
-function brandedTileLabel(app: HoloSuiteAppRegistration, branding = getBranding(app.id)): string {
+function brandedTileLabel(app: HoloSuiteAppRegistration, branding = getBranding(app.id), themeLabel?: string): string {
   const title = appDisplayTitle(app.title);
-  return branding.label || branding.name || title;
+  return branding.label || branding.name || themeLabel || title;
 }
 
-function renderAppTileContent(app: HoloSuiteAppRegistration, branding: HoloSuiteBranding, isGM: boolean): string {
+function renderAppTileContent(app: HoloSuiteAppRegistration, branding: HoloSuiteBranding, isGM: boolean, waystone = false): string {
   const description = app.description;
-  return `${renderAppIcon(app, branding)}
-    <span class="holosuite-app-title">${escapeHtml(brandedTileLabel(app, branding))}</span>
+  const themedTile = waystone && Object.hasOwn(WAYSTONE_TILES, app.id) ? WAYSTONE_TILES[app.id] : undefined;
+  return `${renderAppIcon(themedTile ? { ...app, icon: themedTile.icon } : app, branding)}
+    <span class="holosuite-app-title">${escapeHtml(brandedTileLabel(app, branding, themedTile?.label))}</span>
     ${isGM && description ? `<p>${escapeHtml(description)}</p>` : ""}`;
 }
 
 function renderAppsView(): string {
   const isGM = game.user?.isGM === true;
+  const waystone = getEffectiveDeviceStyle() === "waystone";
   const savedOrder = getSavedAppOrder();
   const orderIndex = new Map(savedOrder.map((id, index) => [id, index]));
   const apps = [...registeredApps.values()]
@@ -1058,7 +1073,8 @@ function renderAppsView(): string {
     });
   const device = getBranding(DEVICE_BRANDING_ID);
   const deckLabel = isGM ? device.gmHeading || "GM Command Deck" : device.playerHeading || "Player Link";
-  const screenTitle = isGM ? device.gmScreen || "Apps" : device.playerScreen || "Commlink";
+  const screenTitle = (isGM ? device.gmScreen : device.playerScreen)
+    || (waystone ? device.name || "Waystone" : isGM ? "Apps" : "Commlink");
   const emptyLabel = isGM
     ? "No HoloSuite apps have registered yet."
     : "No player apps are available yet.";
@@ -1078,8 +1094,9 @@ function renderAppsView(): string {
       const badgeLabel = !isGM ? getAppBadgeLabel(app.id) : "";
       return `
         <button type="button" class="holosuite-app-tile" data-holosuite-app="${escapeHtml(app.id)}">
-          ${renderAppTileContent(app, getBranding(app.id), isGM)}
+          ${renderAppTileContent(app, getBranding(app.id), isGM, waystone)}
           ${badgeLabel ? `<span class="holosuite-app-count">${escapeHtml(badgeLabel)}</span>` : ""}
+          ${waystone ? '<span class="holosuite-waystone-charge" aria-hidden="true"></span>' : ""}
         </button>
       `;
     }).join("");
@@ -1087,7 +1104,7 @@ function renderAppsView(): string {
   return `
     <div class="holosuite-screen-heading">
       <div>
-        <span class="holosuite-kicker">${escapeHtml(deckLabel)}</span>
+        ${waystone && !(isGM ? device.gmHeading : device.playerHeading) ? "" : `<span class="holosuite-kicker">${escapeHtml(deckLabel)}</span>`}
         <h2>${escapeHtml(screenTitle)}</h2>
       </div>
     </div>
@@ -1320,11 +1337,24 @@ function renderDeviceBrand(branding = getBranding(DEVICE_BRANDING_ID)): string {
   return `<span>${mark}${escapeHtml(branding.name || "HoloSuite")}</span>`;
 }
 
+function syncWaystoneMarkup(root: HTMLElement, screen: HTMLElement): void {
+  if (getEffectiveDeviceStyle() === "waystone") {
+    root.dataset.holosuiteLauncherStyle = "waystone";
+    screen.tabIndex = 0;
+    screen.setAttribute("aria-label", "HoloSuite launcher content");
+  } else if (root.hasAttribute("data-holosuite-launcher-style")) {
+    delete root.dataset.holosuiteLauncherStyle;
+    screen.removeAttribute("tabindex");
+    screen.removeAttribute("aria-label");
+  }
+}
+
 function renderLauncherHtml(
   view: LauncherView = "apps",
   activeFilter: WhatsNewFilter = "all",
   activeWhatsNewTab: WhatsNewTab = "releases"
 ): string {
+  const waystone = getEffectiveDeviceStyle() === "waystone";
   const screenClass = view === "whats-new" ? "holosuite-screen--whats-new" : view === "settings" ? "holosuite-screen--settings" : "";
   const screenContent = view === "whats-new"
     ? renderWhatsNewView(activeFilter, activeWhatsNewTab)
@@ -1333,13 +1363,13 @@ function renderLauncherHtml(
       : renderAppsView();
 
   return `
-    <section class="holosuite-phone" data-holosuite-app-colors="${getAppColorMode()}">
+    <section class="holosuite-phone" data-holosuite-app-colors="${getAppColorMode()}"${waystone ? ' data-holosuite-launcher-style="waystone"' : ""}>
       <div class="holosuite-phone-shell">
         <header class="holosuite-status-bar">
           ${renderDeviceBrand()}
           ${renderHeaderActions(view)}
         </header>
-        <main class="holosuite-screen ${screenClass}">
+        <main class="holosuite-screen ${screenClass}"${waystone ? ' tabindex="0" aria-label="HoloSuite launcher content"' : ""}>
           ${screenContent}
         </main>
         <div class="holosuite-device-bottom-trim" aria-hidden="true"></div>
@@ -1539,7 +1569,7 @@ function showAppContextMenu(appId: string, anchor: HTMLElement, x: number, y: nu
   const menu = document.createElement("div");
   menu.className = "holosuite-app-context-menu";
   menu.setAttribute("role", "menu");
-  const title = brandedTileLabel(app);
+  const title = anchor.querySelector(".holosuite-app-title")?.textContent || brandedTileLabel(app);
   menu.setAttribute("aria-label", title);
   Object.assign(menu.style, { position: "fixed", zIndex: "100000", background: "#091923", border: "1px solid #58c8d5", borderRadius: "5px", padding: "5px", minWidth: "200px", boxShadow: "0 8px 30px #0009" });
   const controller = new AbortController();
@@ -1588,7 +1618,7 @@ function bindLauncherControls(root: HTMLElement | null): void {
     const appId = button.dataset.holosuiteApp ?? "";
     if (registeredApps.get(appId)?.contextActions?.length) {
       button.setAttribute("aria-haspopup", "menu");
-      button.title = `${brandedTileLabel(registeredApps.get(appId)!)} — Right-click for options`;
+      button.title = `${button.querySelector(".holosuite-app-title")?.textContent} — Right-click for options`;
       button.addEventListener("contextmenu", event => {
         if (launcherReorderMode) return;
         event.preventDefault(); event.stopPropagation();
@@ -2249,6 +2279,7 @@ class HoloSuiteLauncher extends LegacyApplication {
     const statusBar = root.querySelector<HTMLElement>(".holosuite-status-bar");
     const screen = root.querySelector<HTMLElement>(".holosuite-screen");
     if (!statusBar || !screen) return false;
+    syncWaystoneMarkup(root, screen);
 
     const focused = document.activeElement;
     const choice = focused instanceof HTMLElement && screen.contains(focused) ? focused : null;

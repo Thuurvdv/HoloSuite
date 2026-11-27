@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 700" preserveAspectRatio="none">
+  <defs>
+    <path id="outline" d="M119 30 156 18 322 7l61 16 25 34 13 106-5 48 25 53 25 25-22 46 24 25-11 133-12 98-24 54-37 25-153 21-95-11-47-36-29-60-26-40-12-117 6-54 13-39-17-48 13-57-4-40 30-56 25-70Z"/>
+    <clipPath id="stone"><use href="#outline"/></clipPath>
+    <linearGradient id="rock" x2=".79" y2="1">
+      <stop stop-color="#a1a59c"/>
+      <stop offset=".27" stop-color="#686f69"/>
+      <stop offset=".65" stop-color="#505855"/>
+      <stop offset="1" stop-color="#333a36"/>
+    </linearGradient>
+    <linearGradient id="face" x1=".12" y1="0" x2=".88" y2="1">
+      <stop stop-color="#90988e"/>
+      <stop offset=".32" stop-color="#65716c"/>
+      <stop offset=".72" stop-color="#505b56"/>
+      <stop offset="1" stop-color="#46524b"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency=".32 .26" numOctaves="3" seed="18" stitchTiles="stitch"/>
+    </filter>
+    <pattern id="pits" width="119" height="153" patternUnits="userSpaceOnUse">
+      <path d="m12 28 4-2 3 2-4 3Zm25 42 5-3 4 2-3 2Zm46-53 5-3 1 3-3 2Zm16 74 4-3 4 2-5 2Zm-64 39 3-3 3 1-2 3Zm41-10 2-2 3 1-3 3Zm32 22 5-1 2 2-4 2ZM57 41l4-1 1 3-4 1ZM8 99l3-2 2 4-4 1Z" fill="#252f2b" opacity=".47"/>
+      <path d="m14 31 5-2m20 44 6-2m39-50 4-2m12 75 6-3m-69 41 4-2m35-7 4-3m29 24 5-2" stroke="#d4d4bd" opacity=".26" fill="none"/>
+    </pattern>
+  </defs>
+
+  <use href="#outline" fill="url(#rock)" stroke="#292d29" stroke-width="2"/>
+  <g clip-path="url(#stone)">
+    <path d="M119 30 156 18 322 7l61 16-36 25-120-5-77 15-54 43-36 81 3-52 25-70Z" fill="#a9aa98"/>
+    <path d="m383 23 25 34 13 106-5 48 25 53 25 25-49 19-34-82 5-86-15-63-26-29Z" fill="#535b55"/>
+    <path d="m466 289-22 46 24 25-11 133-12 98-24 54-37 25-153 21 38-35 108-30 28-50 15-123 4-90-17-21 10-32Z" fill="#353e39"/>
+    <path d="m22 429 6-54 13-39-17-48 13-57-4-40 27-9 10 51-14 79 12 47-13 64 11 98 55 89 49 43-34 27-47-36-29-60-26-40Z" fill="#778079"/>
+    <path d="m136 680 34-27 99 3-38 35Z" fill="#424946"/>
+    <path d="m145 65 75-20 95 1 52 24 20 81-8 78 34 81-12 37 22 22-7 105-16 103-28 50-111 33-89-6-52-44-49-93-15-94 15-69-13-43 12-78-6-50 43-82Z" fill="url(#face)"/>
+
+    <path d="M62 182 100 102l46-37 75-20 94 1M27 372l15-37-18-47m261 372 85-26 32-57" fill="none" stroke="#d0caba" stroke-opacity=".25" stroke-width="3"/>
+    <path d="m388 139-21 18-9 30-30 11m93 64-19 14 4 23-24 10m37 158-22 16-7 38-21 9m-289 62 36-15 31 9 43-14m-134-431 29 9 18-9m306 208 11-9 20 7" fill="none" stroke="#303a35" stroke-width="2" stroke-opacity=".65"/>
+    <path d="m390 141-21 18-9 30m61 77-17 12 4 23m12 170-20 16-7 37m-311 71 35-15 30 9" fill="none" stroke="#cad1bb" stroke-width="1" stroke-opacity=".24"/>
+    <path d="m102 95 18-3 21-18 28-8-13 20-27 10-19 19Zm286 59-9 43 13 56-10 24-18-42 7-34Zm-324 362 20 11 24 34-4 21-19-30Zm291 109 35-39-9 32-29 16-24 1Z" fill="#c4c5af" opacity=".12"/>
+    <path d="m66 221 18-31-1 45-14 28-9 49-4-13Zm340 147 18-4-7 62-13 36 5-58Zm-277 242 25 18 60 19-54-8Zm282-354 23 14 10 19-24 6Z" fill="#26312d" opacity=".22"/>
+    <path d="m151 83 16-13 29-2m-106 103 20-23m254-50 9 30M55 439l7 43m24 42 13 26m103 100 43 2m144-60 10-27" fill="none" stroke="#d7d6c1" stroke-opacity=".26" stroke-width="3" stroke-linecap="round"/>
+    <path d="M0 0h480v700H0z" fill="url(#pits)" opacity=".51"/>
+    <path d="M0 0h480v700H0z" fill="#808080" filter="url(#grain)" opacity=".18" style="mix-blend-mode:soft-light"/>
+    <use href="#outline" fill="none" stroke="#d7d6c1" stroke-width="3" opacity=".2"/>
+  </g>
+</svg>
