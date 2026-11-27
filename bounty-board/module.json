@@ -32,8 +32,8 @@
   ],
   "socket": false,
   "url": "https://github.com/Thuurvdv/MageTowerFoundryModules/tree/main/bounty-board",
-  "manifest": "",
-  "download": "",
+  "manifest": "https://raw.githubusercontent.com/Thuurvdv/HoloSuite/main/bounty-board/module.json",
+  "download": "https://github.com/Thuurvdv/HoloSuite/releases/download/bounty-board-v2.0.0/bounty-board.zip",
   "license": "GPL-3.0-or-later",
   "readme": "README.md",
   "relationships": {

@@ -24,6 +24,26 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: Verify release manifest
+        env:
+          MODULE_ID: ${{ steps.meta.outputs.module_id }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          MANIFEST_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/$MODULE_ID/module.json"
+          DOWNLOAD_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/$MODULE_ID.zip"
+
+          if ! jq -e \
+            --arg id "$MODULE_ID" \
+            --arg version "$VERSION" \
+            --arg manifest "$MANIFEST_URL" \
+            --arg download "$DOWNLOAD_URL" \
+            '.id == $id and .version == $version and .manifest == $manifest and .download == $download' \
+            "$MODULE_ID/module.json" > /dev/null; then
+            echo "::error file=$MODULE_ID/module.json::Expected id $MODULE_ID, version $VERSION, manifest $MANIFEST_URL, and download $DOWNLOAD_URL"
+            exit 1
+          fi
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -41,34 +61,12 @@ jobs:
       - name: Build module
         run: npm run build -w ${{ steps.meta.outputs.module_id }}
 
-      - name: Verify version match
-        run: |
-          MODULE_ID="${{ steps.meta.outputs.module_id }}"
-          TAG_VERSION="${{ steps.meta.outputs.version }}"
-          JSON_VERSION=$(jq -r '.version' "$MODULE_ID/module.json")
-          if [ "$TAG_VERSION" != "$JSON_VERSION" ]; then
-            echo "::error::Tag version ($TAG_VERSION) does not match module.json version ($JSON_VERSION)"
-            exit 1
-          fi
-
       - name: Package module
         run: |
           MODULE_ID="${{ steps.meta.outputs.module_id }}"
-          TAG="${{ steps.meta.outputs.tag }}"
-          REPO="${{ github.repository }}"
 
           mkdir -p "staging/$MODULE_ID"
-
-          # Keep the update manifest stable while the archive stays pinned to this release.
-          MANIFEST_URL="https://raw.githubusercontent.com/$REPO/main/$MODULE_ID/module.json"
-          DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$MODULE_ID.zip"
-
-          jq \
-            --arg manifest "$MANIFEST_URL" \
-            --arg download "$DOWNLOAD_URL" \
-            '.manifest = $manifest | .download = $download' \
-            "$MODULE_ID/module.json" > "staging/$MODULE_ID/module.json"
-
+          cp "$MODULE_ID/module.json" "staging/$MODULE_ID/module.json"
           cp -r "$MODULE_ID/dist" "staging/$MODULE_ID/dist"
 
           for dir in styles templates assets audio data lang languages packs samples; do
