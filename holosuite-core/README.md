@@ -14,7 +14,7 @@ HoloSuite Core gives GMs one launcher for opening the other HoloSuite modules.
 1. Reload the world after changing modules so every app can register with Core.
 2. Open HoloSuite from the scene-control button, the configured keybinding, the module settings menu, or a macro that calls `game.holosuite.openLauncher()`.
 3. Choose **Apps** and select a tile. GMs see every registered app; players see only apps that allow player access.
-4. Open **Settings** inside the launcher to choose HoloSuite, Space Police, Cassette Futurism, or Waystone and select the Compact, Datapad, or Computer size.
+4. Open **Settings** inside the launcher to choose HoloSuite, Space Police, Cassette Futurism, or Waystone and select the Compact, Datapad, or Computer size. Waystone uses a carved stone launcher with fantasy tile labels.
 5. Open **Foundry → Configure Settings → Module Settings → HoloSuite Core** and enable **Use Themed App Colors** to use the active theme’s accent for app icons and interaction glow. App colors are used by default. Uploaded branding images keep their own colors.
 6. Use Foundry's module settings for world-wide themes, player access, and debugging options. When the GM forces a theme, each player still controls their own size and app color preference.
 
