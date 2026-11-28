@@ -1,0 +1,248 @@
+/* Reality Override. Every slanted edge shares one lean, so the cuts, louvers and slabs stay parallel
+   at any resolution. The rest state below is the hold frame; the timeline lives in reality-override.ts. */
+.hcci-style-reality-override {
+  --ovr-lean: min(20vh, 12vw);
+  --ovr-w: min(56vw, 108vh);
+  --ovr-x: calc(46vw - (var(--ovr-w) + var(--ovr-lean)) / 2);
+  --ovr-tilt: -6deg;
+  --ovr-band-h: min(25vh, 30vw);
+  --ovr-band-y: 71vh;
+  --ovr-ink: #06080d;
+  --ovr-slant: polygon(var(--ovr-lean) 0, 100% 0, calc(100% - var(--ovr-lean)) 100%, 0 100%);
+  background: linear-gradient(100deg, #06080dd9 30%, color-mix(in srgb, var(--hcci-accent) 22%, #06080dd9) 100%);
+}
+.hcci-style-reality-override:not(:has(.hcci-title, .hcci-subtitle)) { --ovr-band-h: min(6vh, 8vw); }
+/* The frozen backdrop must see the live scene, so the root never fades while motion is on. */
+.hcci-style-reality-override.hcci-motion-full,
+.hcci-style-reality-override.hcci-motion-full.hcci-exiting { animation: none; background: none; }
+.hcci-style-reality-override :is(.hcci-visual, .hcci-portrait-frame, .hcci-copy) { animation: none; }
+.hcci-style-reality-override :is(.hcci-atmosphere, .hcci-frame-accent, .hcci-effects) { display: none; }
+
+.hcci-style-reality-override .hcci-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.hcci-style-reality-override .hcci-visual {
+  position: absolute;
+  inset: 0;
+  justify-self: auto;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+.hcci-style-reality-override .hcci-portrait-frame {
+  position: absolute;
+  top: 0;
+  left: var(--ovr-x);
+  width: calc(var(--ovr-w) + var(--ovr-lean));
+  height: 100%;
+  border: 0;
+  box-shadow: none;
+  background: var(--ovr-ink);
+  filter: none;
+  clip-path: var(--ovr-slant);
+}
+.hcci-style-reality-override.hcci-motion-full .hcci-portrait-frame { visibility: hidden; }
+.hcci-style-reality-override :is(.hcci-portrait, .hcci-ovr-art, .hcci-ovr-echo-art) {
+  display: block;
+  max-width: none;
+  border: 0;
+  object-fit: cover;
+  object-position: 50% 22%;
+  transform: none;
+  filter: none;
+}
+.hcci-style-reality-override .hcci-portrait { width: 100%; height: 100%; }
+.hcci-style-reality-override .hcci-portrait-fallback { display: grid; background: var(--ovr-ink); }
+
+/* Back layer: an oversized two-tone echo of the same artwork. */
+.hcci-style-reality-override .hcci-ovr-echo {
+  position: absolute;
+  top: 0;
+  left: calc(var(--ovr-x) + var(--ovr-w) - 1px);
+  right: -2vw;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ovr-ink);
+  clip-path: polygon(var(--ovr-lean) 0, 100% 0, 100% 100%, 0 100%);
+}
+.hcci-style-reality-override .hcci-ovr-echo-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-position: 50% 18%;
+  transform: scale(1.45);
+  transform-origin: 50% 22%;
+  filter: grayscale(1) contrast(1.5) brightness(.85);
+  opacity: .55;
+}
+.hcci-style-reality-override .hcci-ovr-echo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(101deg, transparent 0 5px, #0005 5px 6px), var(--hcci-accent);
+  mix-blend-mode: multiply;
+}
+
+/* Mid layer: five louvers, each a slanted window onto one shared image position. */
+.hcci-style-reality-override .hcci-ovr-panel {
+  position: absolute;
+  inset: 0;
+  perspective: 130vh;
+}
+.hcci-style-reality-override .hcci-ovr-louver {
+  position: absolute;
+  top: 0;
+  left: calc(var(--ovr-x) + var(--i) * var(--ovr-w) / 5);
+  width: calc(var(--ovr-w) / 5 + var(--ovr-lean) + 1px);
+  height: 100%;
+  background: var(--ovr-ink);
+  clip-path: var(--ovr-slant);
+}
+.hcci-style-reality-override .hcci-ovr-art {
+  position: absolute;
+  top: -6%;
+  left: calc(var(--i) * var(--ovr-w) / -5);
+  width: calc(var(--ovr-w) + var(--ovr-lean));
+  height: 112%;
+}
+.hcci-style-reality-override :is(.hcci-ovr-tint, .hcci-ovr-face, .hcci-ovr-neg) {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.hcci-style-reality-override .hcci-ovr-tint { background: var(--hcci-accent); mix-blend-mode: color; }
+.hcci-style-reality-override .hcci-ovr-face { background: color-mix(in srgb, var(--hcci-accent) 35%, #fff); }
+.hcci-style-reality-override .hcci-ovr-neg { background: #fff; mix-blend-mode: difference; }
+
+.hcci-style-reality-override .hcci-ovr-cut {
+  position: absolute;
+  top: 0;
+  left: calc(var(--ovr-x) + var(--i) * var(--ovr-w) / 5 - 1px);
+  width: calc(var(--ovr-lean) + 3px);
+  height: 100%;
+  background: #fff;
+  clip-path: polygon(var(--ovr-lean) 0, calc(var(--ovr-lean) + 3px) 0, 3px 100%, 0 100%);
+}
+.hcci-style-reality-override .hcci-ovr-cut:not(:first-child, :last-child) { opacity: 0; }
+
+/* Front layer: the title band crosses every other edge at a counter-slant. */
+.hcci-style-reality-override .hcci-ovr-band {
+  position: absolute;
+  top: calc(var(--ovr-band-y) - var(--ovr-band-h) / 2);
+  left: -10vw;
+  width: 120vw;
+  height: var(--ovr-band-h);
+  background-color: var(--ovr-ink);
+  background-image: linear-gradient(90deg, transparent 55%, color-mix(in srgb, var(--hcci-accent) 26%, transparent));
+  border-top: max(2px, .4vh) solid #fff;
+  border-bottom: max(5px, 1.3vh) solid var(--hcci-accent);
+  box-sizing: border-box;
+  transform: rotate(var(--ovr-tilt));
+}
+.hcci-style-reality-override .hcci-copy {
+  position: absolute;
+  z-index: 6;
+  top: calc(var(--ovr-band-y) - var(--ovr-band-h) / 2);
+  left: 8vw;
+  width: 84vw;
+  height: var(--ovr-band-h);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: .5vh;
+  padding: 0 2vw .6vh;
+  box-sizing: border-box;
+  text-align: right;
+  transform: rotate(var(--ovr-tilt));
+}
+.hcci-style-reality-override .hcci-copy:not(:has(.hcci-title, .hcci-subtitle)) { visibility: hidden; }
+.hcci-style-reality-override .hcci-title {
+  font-size: clamp(13px, min(calc(var(--ovr-band-h) * .5), calc(68vw / max(8, var(--hcci-title-chars, 8)))), 170px);
+  line-height: .95;
+  white-space: nowrap;
+  transform: skewX(-9deg);
+  transform-origin: 100% 50%;
+  text-shadow: .055em .055em 0 color-mix(in srgb, var(--hcci-accent) 78%, #000);
+}
+.hcci-style-reality-override .hcci-subtitle {
+  max-width: 100%;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  font-size: clamp(10px, calc(var(--ovr-band-h) * .12), 26px);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Root layers behind and in front of the stage. */
+.hcci-style-reality-override :is(.hcci-ovr-freeze, .hcci-ovr-flash) {
+  position: absolute;
+  inset: 0;
+}
+.hcci-style-reality-override .hcci-ovr-freeze {
+  z-index: 0;
+  background: #05070cb3;
+  -webkit-backdrop-filter: grayscale(1) contrast(1.2) brightness(.55);
+  backdrop-filter: grayscale(1) contrast(1.2) brightness(.55);
+}
+.hcci-style-reality-override.hcci-detail-low .hcci-ovr-freeze {
+  background: #05070ce0;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.hcci-style-reality-override .hcci-ovr-slab {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: calc(var(--ovr-x) - 3.2vw);
+  width: calc(var(--ovr-lean) + 9vw);
+  height: 100%;
+  background: var(--hcci-accent);
+  clip-path: var(--ovr-slant);
+}
+.hcci-style-reality-override .hcci-ovr-chips {
+  position: absolute;
+  z-index: 4;
+  top: var(--ovr-band-y);
+  left: 50%;
+}
+.hcci-style-reality-override .hcci-ovr-chips i {
+  position: absolute;
+  top: calc((var(--k) - 3.5) * 2.1vh);
+  left: -2.5vw;
+  width: calc(3vw + var(--k) * .4vw);
+  height: max(3px, .8vh);
+  background: #fff;
+  opacity: 0;
+  clip-path: polygon(14% 0, 100% 0, 86% 100%, 0 100%);
+}
+.hcci-style-reality-override .hcci-ovr-chips i:nth-child(odd) { background: var(--hcci-accent); }
+.hcci-style-reality-override .hcci-ovr-flash { z-index: 5; background: #fff; opacity: 0; }
+.hcci-style-reality-override.hcci-flash-off .hcci-ovr-flash { display: none; }
+
+/* Reduced and still motion keep the slanted panel and band as one static composition. */
+.hcci-style-reality-override:not(.hcci-motion-full) .hcci-copy { transform: rotate(var(--ovr-tilt)); }
+.hcci-style-reality-override:not(.hcci-motion-full) .hcci-copy::before {
+  content: "";
+  position: absolute;
+  inset: 0 -30vw;
+  z-index: -1;
+  background: var(--ovr-ink);
+  border-top: max(2px, .4vh) solid #fff;
+  border-bottom: max(5px, 1.3vh) solid var(--hcci-accent);
+}
+
+@media (orientation: portrait) {
+  .hcci-style-reality-override {
+    --ovr-w: 82vw;
+    --ovr-x: calc(50vw - (var(--ovr-w) + var(--ovr-lean)) / 2);
+  }
+}

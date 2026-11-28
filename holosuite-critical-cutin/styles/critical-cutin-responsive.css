@@ -21,13 +21,47 @@
     font-size: clamp(22px, min(14vw, calc(88vw / var(--hcci-title-chars, 8) * 1.15)), 88px);
   }
 
-  .hcci-config-header,
-  .hcci-row-title {
-    display: grid;
+  .hcci-result {
+    justify-self: center;
+  }
+}
+
+@media (max-height: 600px) and (min-width: 761px) {
+  .hcci-stage {
+    grid-template-columns: minmax(180px, 44vh) minmax(240px, 1fr);
   }
 
-  .hcci-config-row,
-  .hcci-row-fields {
-    grid-template-columns: 1fr;
+  .hcci-portrait-frame {
+    width: min(44vh, 340px);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hcci-screen-shake #ui-left,
+  .hcci-screen-shake #ui-right,
+  .hcci-screen-shake #ui-top,
+  .hcci-screen-shake #ui-bottom,
+  .hcci-screen-shake #board {
+    animation: none;
+  }
+}
+
+@container hcci (max-width: 970px) {
+  .hcci-config-window .hcci-config-main { grid-template-columns: 1fr; }
+  .hcci-config-window .hcci-character-list { display: flex; flex-wrap: wrap; }
+  .hcci-config-window .hcci-character-list button { width: auto; min-width: 120px; }
+}
+
+@container hcci (max-width: 660px) {
+  .hcci-config-window .hcci-workspace { grid-template-columns: 1fr; }
+  .hcci-config-window .hcci-footer { grid-template-columns: 1fr; }
+}
+
+@container hcci (max-width: 390px) {
+  .hcci-config-window .hcci-preview-actions { grid-template-columns: minmax(0, 1fr); }
+  .hcci-config-window .hcci-config .hcci-test { justify-content: center; min-height: 42px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hcci-config-window .hcci-config :is(button, input, select, summary) { transition: none; }
 }

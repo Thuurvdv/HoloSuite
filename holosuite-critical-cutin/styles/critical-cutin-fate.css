@@ -1,0 +1,169 @@
+.hcci-style-shattered-fate {
+  --fate-dark: color-mix(in srgb, var(--hcci-accent) 21%, #08050b);
+  --fate-hot: color-mix(in srgb, var(--hcci-accent) 50%, #fff);
+  animation: none;
+  background: radial-gradient(ellipse at 52% 49%, var(--fate-dark), #07060a 76%);
+}
+
+.hcci-style-shattered-fate.hcci-exiting,
+.hcci-style-shattered-fate :is(.hcci-visual, .hcci-portrait-frame, .hcci-copy) { animation: none; }
+.hcci-style-shattered-fate :is(.hcci-atmosphere, .hcci-frame-accent) { display: none; }
+
+.hcci-style-shattered-fate .hcci-stage {
+  display: grid;
+  grid-template: 1fr / 1fr;
+  place-items: center;
+  width: 100%;
+  gap: 0;
+  isolation: isolate;
+}
+.hcci-style-shattered-fate .hcci-visual {
+  grid-area: 1 / 1;
+  z-index: 2;
+  justify-self: center;
+  width: min(92vw, 164vh, 1800px);
+  height: min(81vh, 78vw, 900px);
+  aspect-ratio: auto;
+}
+.hcci-style-shattered-fate .hcci-portrait-frame {
+  position: absolute;
+  inset: 0;
+  clip-path: none;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
+}
+.hcci-style-shattered-fate .hcci-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 37%;
+  border: 0;
+  filter: saturate(.75) contrast(1.08) brightness(.84);
+}
+.hcci-style-shattered-fate .hcci-portrait-fallback { background: var(--fate-dark); }
+.hcci-style-shattered-fate :is(.hcci-fate-cracks, .hcci-fate-shard, .hcci-fate-shard svg) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hcci-style-shattered-fate .hcci-fate-shard { visibility: hidden; }
+.hcci-style-shattered-fate :is(.hcci-fate-cracks polyline, .hcci-fate-shard polygon) {
+  fill: none;
+  stroke: var(--fate-hot);
+  stroke-linejoin: bevel;
+  vector-effect: non-scaling-stroke;
+}
+.hcci-style-shattered-fate .hcci-fate-rays polyline {
+  stroke-width: 2.4;
+  stroke: color-mix(in srgb, var(--hcci-accent) 23%, #fff);
+  filter: drop-shadow(0 0 3px var(--hcci-accent));
+}
+.hcci-style-shattered-fate .hcci-fate-branches polyline { stroke-width: 1; }
+.hcci-style-shattered-fate .hcci-fate-shard polygon { stroke-width: 3; }
+.hcci-style-shattered-fate .hcci-fate-spark { fill: #fff; }
+.hcci-style-shattered-fate :is(.hcci-fate-rays, .hcci-fate-branches, .hcci-fate-spark) { opacity: 0; }
+
+.hcci-style-shattered-fate :is(.hcci-fate-backdrop, .hcci-fate-flash) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hcci-style-shattered-fate .hcci-fate-slashes { fill: var(--hcci-accent); opacity: .59; }
+.hcci-style-shattered-fate .hcci-fate-streaks { fill: var(--fate-hot); opacity: .66; }
+.hcci-style-shattered-fate .hcci-fate-debris { fill: var(--fate-dark); stroke: var(--fate-hot); stroke-width: 2px; }
+.hcci-style-shattered-fate .hcci-fate-flash { z-index: 5; opacity: 0; }
+.hcci-style-shattered-fate.hcci-flash-off .hcci-fate-flash { display: none; }
+
+.hcci-style-shattered-fate .hcci-copy {
+  container-type: inline-size;
+  grid-area: 1 / 1;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 1vh;
+  width: min(86vw, 1340px);
+  min-height: 53vh;
+  padding: 4vh 8vw;
+  text-align: center;
+  transform: rotate(-7deg);
+  isolation: isolate;
+}
+.hcci-style-shattered-fate .hcci-copy:not(:has(.hcci-title, .hcci-subtitle)) { visibility: hidden; }
+.hcci-style-shattered-fate .hcci-copy::before,
+.hcci-style-shattered-fate .hcci-copy::after {
+  position: absolute;
+  z-index: -1;
+  content: "";
+}
+.hcci-style-shattered-fate .hcci-copy::before {
+  inset: 0;
+  clip-path: polygon(2% 16%, 16% 12%, 12% 4%, 49% 9%, 74% 0, 75% 8%, 99% 5%, 94% 30%, 100% 39%, 96% 62%, 99% 78%, 80% 84%, 75% 96%, 47% 92%, 20% 100%, 24% 91%, 0 94%, 5% 66%, 0 54%);
+  background:
+    radial-gradient(circle, transparent 48%, #08050ba6 56%) 0 0 / 5px 5px,
+    linear-gradient(158deg, var(--hcci-accent), transparent 25% 67%, var(--hcci-accent)) #0b070e;
+}
+.hcci-style-shattered-fate .hcci-copy::after {
+  left: 13%;
+  right: 11%;
+  bottom: 12%;
+  height: 8%;
+  background: var(--fate-hot);
+  clip-path: polygon(0 73%, 25% 46%, 20% 32%, 100% 0, 81% 44%, 88% 42%, 39% 80%, 9% 100%);
+}
+.hcci-style-shattered-fate .hcci-title {
+  --fate-word-size: calc(94cqi / var(--hcci-title-longest-word, 8));
+  width: 100%;
+  overflow-wrap: break-word;
+  color: #fff8f8;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(16px, min(11vw, 15vh, var(--fate-word-size), calc(157vw / max(8, var(--hcci-title-chars)))), 166px);
+  line-height: .93;
+  text-shadow: .04em .055em #10050b, .07em .085em var(--fate-dark);
+}
+.hcci-style-shattered-fate .hcci-title span {
+  display: block;
+  color: color-mix(in srgb, var(--hcci-accent) 91%, white);
+}
+.hcci-style-shattered-fate .hcci-subtitle {
+  border: 0;
+  padding: .2em .55em;
+  color: #fff8f8;
+  background: #100912;
+  font-size: clamp(10px, 1.55vw, 23px);
+}
+.hcci-style-shattered-fate .hcci-fate-exit-pieces {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: min(99vw, 1540px);
+  height: 80%;
+}
+.hcci-style-shattered-fate .hcci-fate-exit-pieces > div {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.hcci-style-shattered-fate:is(.hcci-motion-reduced, .hcci-motion-still) .hcci-copy {
+  z-index: 3;
+  align-self: end;
+  min-height: 0;
+  padding-block: 2.5vh;
+  margin-bottom: 6vh;
+}
+@media (orientation: portrait) {
+  .hcci-style-shattered-fate .hcci-visual { width: 94vw; height: min(72vh, 122vw); }
+  .hcci-style-shattered-fate .hcci-copy { width: 91vw; min-height: 33vh; }
+  .hcci-style-shattered-fate .hcci-title { font-size: clamp(16px, min(13vw, var(--fate-word-size), calc(152vw / max(8, var(--hcci-title-chars)))), 104px); }
+}
+
+.hcci-style-shattered-fate:is(.hcci-motion-reduced, .hcci-motion-still) .hcci-title {
+  font-size: clamp(16px, min(6vw, 7vh, var(--fate-word-size)), 70px);
+}

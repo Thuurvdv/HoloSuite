@@ -1,373 +1,522 @@
 .hcci-config-window {
-  --hcci-panel: var(--hs-panel);
-  --hcci-line: var(--hs-border-subtle);
-  --hcci-text: var(--hs-text-primary);
-  --hcci-muted: var(--hs-text-secondary);
-  --hcci-accent: var(--hs-color-primary);
-  color: var(--hcci-text);
-  min-width: 1040px;
-  min-height: 520px;
+  --hcci-bg: #211538;
+  --hcci-panel: #32205d;
+  --hcci-line: #9760b0;
+  --hcci-text: #f6ecff;
+  --hcci-muted: #d9c5ee;
+  --hcci-magenta: #ff61da;
+  --hcci-pink: #ff73a8;
+  --hcci-control: #291947;
+  --hcci-control-hover: #4c2b70;
+  --hcci-field: #24163f;
+  --hcci-frame: url("../assets/ui/config-frame.svg");
+  --hcci-window-frame: url("../assets/ui/config-window-frame.svg");
+  min-width: min(360px, 100vw);
+  min-height: min(420px, 100vh);
+  max-width: 100vw;
+  max-height: 100vh;
 }
 
-.hcci-config-window .window-content {
-  background: var(--hs-surface-window);
-  color: var(--hcci-text);
-  box-sizing: border-box;
-  height: 100%;
-  min-height: 100%;
-  overflow: hidden;
-  padding-bottom: 12px;
+.hcci-config-window:not(.window-content) {
+  border-color: var(--hcci-line) !important;
+  background: var(--hcci-bg) !important;
+  --hcci-window-corner: 10px;
+  clip-path: polygon(var(--hcci-window-corner) 0, calc(100% - var(--hcci-window-corner)) 0,
+    100% var(--hcci-window-corner), 100% calc(100% - var(--hcci-window-corner)),
+    calc(100% - var(--hcci-window-corner)) 100%, var(--hcci-window-corner) 100%,
+    0 calc(100% - var(--hcci-window-corner)), 0 var(--hcci-window-corner));
 }
 
-.hcci-config-window :where(.window-resizable-handle, .window-resize-handle) {
-  right: 8px;
-  bottom: 8px;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: 1px solid var(--hs-line);
-  border-radius: var(--hs-radius);
-  background: rgba(2, 13, 24, 0.9);
-  color: var(--hs-cyan);
-  box-shadow: var(--hs-glow-cyan);
-  cursor: nwse-resize;
-  font-size: 0;
-  line-height: 1;
-  overflow: hidden;
-}
-
-.hcci-config-window :where(.window-resizable-handle, .window-resize-handle) > * {
-  display: none !important;
-}
-
-.hcci-config-window :where(.window-resizable-handle, .window-resize-handle)::before {
+.hcci-config-window:not(.window-content)::after {
   content: "";
   position: absolute;
-  right: 4px;
-  bottom: 4px;
-  width: 9px;
-  height: 9px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
+  inset: 0;
+  z-index: 2;
+  border: 12px solid transparent;
+  border-image: var(--hcci-window-frame) 24 / 12px stretch;
+  pointer-events: none;
 }
 
-.hcci-config-window :where(.window-resizable-handle, .window-resize-handle)::after {
-  content: "";
-  position: absolute;
-  right: 4px;
-  bottom: 8px;
-  width: 5px;
-  height: 5px;
-  border-right: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  opacity: 0.72;
-}
-
-.hcci-config-window form,
-.hcci-config {
+.hcci-config-window > .window-content {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
-  height: 100%;
   min-height: 0;
-  padding: 20px;
+  padding: 9px;
+  overflow: hidden;
+  background: var(--hcci-bg) !important;
+  color: var(--hcci-text) !important;
 }
 
-.hcci-config-header {
+.hcci-config-window > .window-header { display: none !important; }
+
+.hcci-config-window .hcci-config {
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  align-items: end;
-  border-bottom: 1px solid var(--hcci-line);
-  padding-bottom: 14px;
-}
-
-.hcci-kicker {
-  margin: 0 0 3px;
-  color: var(--hcci-accent);
-  font-size: 11px;
-  text-transform: uppercase;
-}
-
-.hcci-config-header h2 {
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
   margin: 0;
+  padding: 1px;
+  overflow: auto;
   color: var(--hcci-text);
-  font-size: 28px;
+  color-scheme: dark;
+  container: hcci / inline-size;
+  background: var(--hcci-bg);
+  font: 500 13px/1.4 var(--hs-font-ui, system-ui, sans-serif);
 }
 
-.hcci-unsaved {
-  display: inline-flex;
-  margin-top: 8px;
-  border: 1px solid rgba(255, 209, 102, 0.48);
-  border-radius: 6px;
-  background: rgba(255, 209, 102, 0.1);
-  color: #ffd166;
-  padding: 5px 8px;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
+.hcci-config-window .hcci-config [hidden] { display: none !important; }
+
+:is(#hcci-player-config, .hcci-config-window) :is(.hcci-config, .hcci-player-tabs, .hcci-style-list) {
+  scrollbar-color: var(--hcci-line) var(--hcci-field) !important;
+  scrollbar-width: thin;
 }
 
-.hcci-unsaved[hidden] {
-  display: none;
+.hcci-config-window .hcci-player-bar {
+  flex: none;
 }
 
-.hcci-config-dirty .window-title::after {
-  content: " *";
-  color: #ffd166;
+.hcci-config-window .hcci-window-drag {
+  height: 18px;
+  cursor: grab;
+  touch-action: none;
 }
 
-.hcci-config-dirty .hcci-config-actions {
-  border-color: rgba(255, 209, 102, 0.36);
-  box-shadow: 0 -10px 24px rgba(255, 209, 102, 0.06);
-}
+.hcci-config-window .hcci-window-drag:active { cursor: grabbing; }
 
-.hcci-threshold,
-.hcci-config label {
+.hcci-config-window .hcci-player-row {
+  --hcci-player-button-height: 53px;
   display: grid;
-  gap: 5px;
-  color: var(--hcci-muted);
-  font-size: 12px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding-inline: 12px;
 }
 
-.hcci-threshold input,
-.hcci-config input,
-.hcci-config select {
-  border: 1px solid rgba(143, 181, 191, 0.35);
-  background: #061116;
-  color: var(--hcci-text);
-  border-radius: 5px;
-}
-
-.hcci-config select {
-  appearance: auto;
-  height: 28px;
-}
-
-.hcci-config select option {
-  background: #061116;
-  color: #e7faff;
-}
-
-.hcci-threshold input {
-  width: 96px;
-}
-
-.hcci-top-controls {
+.hcci-config-window .hcci-config .hcci-glory-launch {
+  --hcci-control-fill: linear-gradient(150deg, #ffe4a0, #eab650 62%, #cc8e35);
+  --hcci-control-border: #ffdc86;
+  --hcci-control-text: #31200f;
+  --hcci-control-shadow: inset 0 0 0 1px #fff6cd55;
+  --hcci-focus: #442b15;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: var(--hcci-player-button-height);
+  padding: 5px clamp(8px, 1.1cqi, 18px);
+  font-weight: 850;
+}
+
+.hcci-config-window .hcci-config .hcci-glory-launch:hover { --hcci-control-fill: #ffe498; }
+
+.hcci-config-window .hcci-player-tabs {
+  display: flex;
+  gap: 10px;
+  padding: 0 4px 10px 0;
+  overflow-x: auto;
+  flex: none;
+}
+
+/* Shared HoloSuite and system styles can set control colors with !important. */
+:is(#hcci-player-config, .hcci-config-window) .hcci-config :is(button, input, select, summary) {
+  box-sizing: border-box;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--hcci-control-border, var(--hcci-line)) !important;
+  border-radius: 4px;
+  background: var(--hcci-control-fill, var(--hcci-control)) !important;
+  color: var(--hcci-control-text, var(--hcci-text)) !important;
+  box-shadow: var(--hcci-control-shadow, none) !important;
+  font: inherit;
+  transition: background-color 130ms ease, border-color 130ms ease, color 130ms ease;
+}
+
+.hcci-config-window .hcci-config :is(button, summary) { cursor: pointer; }
+.hcci-config-window .hcci-config :is(button, summary):hover {
+  --hcci-control-fill: var(--hcci-control-hover);
+  --hcci-control-border: var(--hcci-magenta);
+}
+:is(#hcci-player-config, .hcci-config-window) .hcci-config :is(button, input, select, summary):focus-visible {
+  outline: 2px solid var(--hcci-focus, var(--hcci-magenta)) !important;
+  outline-offset: -3px !important;
+}
+.hcci-config-window .hcci-config button:is(:disabled, [aria-disabled="true"]) { cursor: wait; opacity: .58; }
+
+.hcci-config-window :is(.hcci-player-tabs, .hcci-character-list) button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 4px;
+  text-align: start;
+  font-weight: 750;
+}
+
+.hcci-config-window .hcci-player-tabs small {
+  display: block;
+  color: var(--hcci-muted);
+  font-size: 10px;
+  font-weight: 550;
+}
+
+.hcci-config-window .hcci-player-tabs button {
+  flex: 1 0 145px;
+  max-width: 252px;
+  height: var(--hcci-player-button-height);
+  text-transform: uppercase;
+  letter-spacing: .045em;
+}
+
+.hcci-config-window .hcci-player-tabs button span { white-space: nowrap; }
+.hcci-config-window .hcci-player-tabs small { overflow: hidden; text-overflow: ellipsis; }
+
+.hcci-config-window :is(.hcci-player-tabs, .hcci-character-list) img {
+  flex: none;
+  width: 48px;
+  height: 43px;
+  object-fit: cover;
+  object-position: center 30%;
+  border: 0;
+  background: #211538;
+  clip-path: polygon(10% 0, 100% 0, 100% 82%, 90% 100%, 0 100%, 0 18%);
+}
+
+.hcci-config-window :is(.hcci-player-tabs, .hcci-character-list) button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hcci-config-window .hcci-config-main {
+  display: grid;
+  grid-template-columns: minmax(158px, 1fr) minmax(0, 5fr);
+  align-items: stretch;
+  gap: 10px;
+  flex: 1 0 auto;
+  padding: 0 12px 12px;
+}
+
+.hcci-config-window .hcci-workspace {
+  --hcci-outcome: var(--hcci-magenta);
+  display: grid;
+  grid-template-columns: minmax(0, 1.62fr) minmax(265px, 1fr);
   gap: 10px;
 }
 
-.hcci-roll-help {
-  margin: 0;
-  color: var(--hcci-muted);
-  font-size: 12px;
-}
+.hcci-config-window .hcci-workspace[data-hcci-kind="failure"] { --hcci-outcome: var(--hcci-pink); }
 
-.hcci-top-controls .hcci-threshold:last-child input {
-  width: 128px;
-}
-
-.hcci-config-grid {
-  display: grid;
-  flex: 1 1 auto;
-  gap: 14px;
-  min-height: 0;
-  overflow: auto;
-  padding: 2px 6px 2px 0;
-}
-
-.hcci-config-row {
-  display: grid;
-  grid-template-columns: 104px minmax(0, 1fr);
-  gap: 18px;
-  border: 1px solid var(--hcci-line);
-  border-radius: 8px;
-  background: rgba(12, 26, 32, 0.78);
-  padding: 16px;
-}
-
-.hcci-preview-wrap {
-  display: grid;
-  gap: 7px;
-  align-content: start;
-  color: var(--hcci-accent);
-  font-size: 11px;
-  text-transform: uppercase;
-}
-
-.hcci-preview-wrap img {
-  width: 88px;
-  height: 88px;
-  object-fit: cover;
-  border-radius: 6px;
-  border: 1px solid var(--hcci-line);
-  background: rgba(0,0,0,0.35);
-}
-
-.hcci-row-main,
-.hcci-row-fields {
-  display: grid;
-  gap: 12px;
+.hcci-config-window .hcci-frame {
+  position: relative;
   min-width: 0;
+  padding: 10px;
+  background: var(--hcci-panel);
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
 }
 
-.hcci-row-title {
+.hcci-config-window .hcci-frame::after {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border: 18px solid transparent;
+  border-image: var(--hcci-frame) 19 / 18px / 0 stretch;
+  content: "";
+}
+
+.hcci-config-window .hcci-config :is(h3, h4) {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
   align-items: center;
-}
-
-.hcci-row-title h3 {
+  gap: 8px;
+  min-height: 28px;
   margin: 0;
+  padding: 0 4px;
+  border: 0;
   color: var(--hcci-text);
-  font-size: 17px;
+  font: 750 12px/1.3 var(--hs-font-ui, system-ui, sans-serif);
+  text-transform: uppercase;
+  letter-spacing: .055em;
+}
+
+.hcci-config-window .hcci-character-list { display: grid; gap: 7px; margin-top: 8px; }
+.hcci-config-window .hcci-character-list button { width: 100%; }
+.hcci-config-window .hcci-character-grip { margin-inline-start: auto; color: var(--hcci-muted); cursor: grab; }
+.hcci-config-window .hcci-empty { padding: 4px; color: var(--hcci-muted); }
+
+.hcci-config-window .hcci-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hcci-config-window .hcci-preview-art {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 1.94;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  background: #090712;
+}
+
+.hcci-config-window .hcci-preview-art > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 32%;
+  border: 0;
+}
+
+.hcci-config-window .hcci-preview-copy {
+  position: absolute;
+  inset: auto 6% 8%;
+  display: grid;
+  gap: 4px;
+  color: #fff;
+  font-family: "HCCI AICON", var(--hs-font-ui, system-ui, sans-serif);
+  line-height: 1.06;
   overflow-wrap: anywhere;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px #000, 1px 2px 8px #000;
 }
 
-.hcci-row-tabs {
-  display: inline-flex;
+.hcci-config-window .hcci-preview-label { font-size: clamp(19px, 3.2cqi, 51px); }
+.hcci-config-window .hcci-preview-name {
+  color: var(--hcci-preview-accent, var(--hcci-magenta));
+  font-size: clamp(12px, 1.45cqi, 22px);
+}
+.hcci-config-window :is(.hcci-preview-label, .hcci-preview-name):empty { display: none; }
+
+.hcci-config-window .hcci-preview-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  border-top: 1px solid var(--hcci-line);
+}
+
+.hcci-config-window .hcci-styles { min-width: 0; }
+
+.hcci-config-window .hcci-style-list {
+  display: flex;
+  flex-wrap: nowrap;
   gap: 6px;
-  flex: 0 0 auto;
-  padding: 4px;
-  border: 1px solid rgba(143, 181, 191, 0.34);
-  border-radius: 8px;
-  background: rgba(3, 7, 9, 0.55);
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
+.hcci-config-window .hcci-style-list button {
+  display: grid;
+  flex: 0 0 86px;
+  justify-items: center;
+  align-content: center;
+  min-height: 59px;
+  padding: 4px 2px;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-align: center;
+}
+.hcci-config-window .hcci-style-list svg { width: min(100%, 64px); height: 27px; }
 
-.hcci-row-tabs button {
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--hcci-muted);
-  padding: 7px 12px;
-  font-size: 12px;
+.hcci-config-window .hcci-outcomes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.hcci-config-window .hcci-outcomes button {
+  --hcci-tab-accent: #63f58c;
+  --hcci-selected-fill: var(--hcci-tab-accent);
+  --hcci-selected-text: #151015;
+  min-height: 40px;
+  padding: 5px 4px;
+  --hcci-control-text: var(--hcci-tab-accent);
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
 }
+.hcci-config-window .hcci-outcomes [data-hcci-tab="failure"] { --hcci-tab-accent: #ff565d; }
 
-.hcci-row-tabs button.is-active {
-  border-color: color-mix(in srgb, var(--hcci-accent), white 18%);
-  background: linear-gradient(180deg, rgba(105, 232, 255, 0.22), rgba(105, 232, 255, 0.08));
-  color: #ffffff;
-  box-shadow: 0 0 14px rgba(105, 232, 255, 0.22), inset 0 0 12px rgba(255, 255, 255, 0.05);
+.hcci-config-window .hcci-config :is(button[aria-pressed="true"], button[aria-selected="true"], .hcci-primary) {
+  --hcci-selected: var(--hcci-tab-accent, var(--hcci-outcome, var(--hcci-magenta)));
+  --hcci-control-border: var(--hcci-selected);
+  --hcci-control-fill: var(--hcci-selected-fill, color-mix(in srgb, var(--hcci-selected) 16%, var(--hcci-bg)));
+  --hcci-control-text: var(--hcci-selected-text, var(--hcci-text));
+  --hcci-control-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hcci-selected) 25%, transparent);
 }
 
-.hcci-row-tabs button[data-hcci-tab="failure"].is-active {
-  border-color: rgba(255, 77, 125, 0.72);
-  background: linear-gradient(180deg, rgba(255, 77, 125, 0.24), rgba(255, 77, 125, 0.08));
-  box-shadow: 0 0 14px rgba(255, 77, 125, 0.24), inset 0 0 12px rgba(255, 255, 255, 0.05);
+.hcci-config-window .hcci-config .hcci-outcomes button[aria-selected="true"] {
+  --hcci-control-shadow: inset 0 -4px 0 rgb(0 0 0 / 40%);
 }
 
-.hcci-row-panel {
-  display: none;
-  gap: 12px;
-  border: 1px solid rgba(143, 181, 191, 0.18);
-  border-radius: 8px;
-  background: rgba(3, 7, 9, 0.22);
-  padding: 14px;
+.hcci-config-window .hcci-config .hcci-outcomes button[aria-selected="true"]:focus-visible {
+  --hcci-focus: var(--hcci-selected-text);
 }
 
-.hcci-row-panel.is-active {
-  display: grid;
+.hcci-config-window .hcci-config .hcci-player-tabs [aria-selected="true"] {
+  --hcci-control-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hcci-magenta) 55%, transparent),
+    0 0 7px color-mix(in srgb, var(--hcci-magenta) 40%, transparent);
 }
-
-.hcci-row-panel-heading {
+.hcci-config-window .hcci-config button.hcci-primary:hover {
+  --hcci-selected-fill: color-mix(in srgb, var(--hcci-magenta) 28%, var(--hcci-bg));
+}
+.hcci-config-window .hcci-config button.hcci-primary[type="submit"] {
+  --hcci-selected-fill: var(--hcci-magenta);
+  --hcci-selected-text: #24102d;
+}
+.hcci-config-window .hcci-config button.hcci-primary[type="submit"]:hover {
+  --hcci-selected-fill: #ff98e7;
+}
+.hcci-config-window .hcci-config button.hcci-primary[type="submit"]:focus-visible {
+  --hcci-focus: var(--hcci-selected-text);
+}
+.hcci-config-window .hcci-config .hcci-test {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
   align-items: center;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(143, 181, 191, 0.18);
-}
-
-.hcci-row-panel-heading strong {
-  color: var(--hcci-text);
-  font-size: 13px;
+  gap: 8px;
+  min-height: 59px;
+  padding: 6px 10px;
+  font-weight: 800;
   text-transform: uppercase;
 }
-
-.hcci-panel-preview {
-  width: 76px;
-  padding: 4px;
-  border: 1px solid rgba(143, 181, 191, 0.2);
-  border-radius: 7px;
-  background: rgba(0, 0, 0, 0.24);
-}
-
-.hcci-panel-preview img {
+.hcci-config-window .hcci-test i { color: var(--hcci-outcome); font-size: 20px; }
+.hcci-config-window :is(.hcci-test, .hcci-global) small {
   display: block;
-  width: 66px;
-  height: 66px;
-  object-fit: cover;
-  border-radius: 5px;
-  border: 1px solid rgba(105, 232, 255, 0.2);
+  color: var(--hcci-muted);
+  font-weight: 500;
 }
 
-.hcci-row-fields {
-  grid-template-columns: minmax(230px, 1.25fr) minmax(230px, 1.25fr) 88px 140px minmax(170px, 0.9fr) 90px;
-  gap: 14px;
-}
-
-.hcci-path-field div {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px;
-  gap: 6px;
-}
-
-.hcci-path-field button,
-.hcci-config-actions button {
+.hcci-config-window .hcci-settings {
+  padding: 5px 8px 8px;
   border: 1px solid var(--hcci-line);
-  background: rgba(105, 232, 255, 0.08);
-  color: var(--hcci-text);
-  border-radius: 6px;
+  background: #2b1b4c;
 }
-
-.hcci-path-field button:hover,
-.hcci-config-actions button:hover {
-  border-color: var(--hcci-accent);
-  box-shadow: 0 0 12px rgba(105, 232, 255, 0.24);
-}
-
-.hcci-toggle,
-.hcci-fallback {
-  display: flex;
-  grid-template-columns: none;
-  flex-direction: row;
+.hcci-config-window .hcci-field {
+  display: grid;
+  grid-template-columns: minmax(84px, .85fr) minmax(0, 1.5fr);
   align-items: center;
+  min-height: 43px;
   gap: 7px;
-  width: max-content;
-  max-width: 100%;
+  padding: 5px 0;
+  border-top: 1px solid #79499a;
+}
+.hcci-config-window .hcci-path-field > div { display: flex; gap: 4px; min-width: 0; }
+.hcci-config-window .hcci-path-field button { flex: 0 0 31px; padding: 0; }
+.hcci-config-window .hcci-config :is(input, select) {
+  --hcci-control-fill: var(--hcci-field);
+  width: 100%;
+  min-height: 31px;
+  padding: 3px 6px;
+  accent-color: var(--hcci-magenta);
+}
+:is(#hcci-player-config, .hcci-config-window) .hcci-config input::placeholder { color: var(--hcci-muted) !important; opacity: .8; }
+:is(#hcci-player-config, .hcci-config-window) .hcci-config option {
+  background-color: var(--hcci-field) !important;
+  color: var(--hcci-text) !important;
+}
+:is(#hcci-player-config, .hcci-config-window) .hcci-config option:checked { background-color: var(--hcci-control-hover) !important; }
+
+@supports (appearance: base-select) {
+  .hcci-config-window .hcci-config select,
+  .hcci-config-window .hcci-config select::picker(select) { appearance: base-select; }
+  .hcci-config-window .hcci-config select::picker(select) {
+    background: var(--hcci-field);
+    color: var(--hcci-text);
+    border: 1px solid var(--hcci-line);
+    border-radius: 4px;
+  }
+  .hcci-config-window .hcci-config option { padding: 5px 8px; }
+  :is(#hcci-player-config, .hcci-config-window) .hcci-config option:is(:hover, :focus-visible) {
+    background-color: var(--hcci-control-hover) !important;
+  }
+  .hcci-config-window .hcci-config option::checkmark { color: var(--hcci-magenta); }
+}
+.hcci-config-window .hcci-config input[type="color"] { width: 62px; padding: 2px; cursor: pointer; }
+
+.hcci-config-window .hcci-config .hcci-toggle input {
+  appearance: none;
+  justify-self: end;
+  display: grid;
+  align-items: center;
+  width: 40px;
+  min-height: 22px;
+  padding: 2px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+:is(#hcci-player-config, .hcci-config-window) .hcci-config .hcci-toggle input[type="checkbox"]::before {
+  position: static;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #d9c5ee;
+  outline: none;
+  content: "";
+}
+:is(#hcci-player-config, .hcci-config-window) .hcci-config .hcci-toggle input[type="checkbox"]::after {
+  content: none;
+}
+.hcci-config-window .hcci-config .hcci-toggle input:checked {
+  justify-items: end;
+  --hcci-control-border: var(--hcci-outcome);
+  --hcci-control-fill: color-mix(in srgb, var(--hcci-outcome) 28%, var(--hcci-field));
+}
+:is(#hcci-player-config, .hcci-config-window) .hcci-config .hcci-toggle input[type="checkbox"]:checked::before {
+  background: var(--hcci-outcome);
 }
 
-.hcci-row-note {
-  margin: 0;
-  color: var(--hcci-muted);
-  font-size: 12px;
+.hcci-config-window .hcci-footer {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  flex: none;
+  padding: 9px 17px 14px;
+  border-top: 1px solid var(--hcci-line);
+  background: #25163f;
 }
 
-.hcci-toggle input {
-  width: auto;
-}
-
-.hcci-config-actions {
-  flex: 0 0 auto;
+.hcci-config-window .hcci-global { min-width: 0; }
+.hcci-config-window .hcci-global summary {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  max-width: 480px;
+  min-height: 43px;
+  padding: 5px 10px;
+  font-weight: 750;
+  list-style: none;
+}
+.hcci-config-window .hcci-global summary::-webkit-details-marker { display: none; }
+.hcci-config-window .hcci-global summary i:first-child { color: var(--hcci-magenta); font-size: 19px; }
+.hcci-config-window .hcci-global summary i:last-child { margin-left: auto; }
+.hcci-config-window .hcci-global[open] summary i:last-child { transform: rotate(180deg); }
+.hcci-config-window .hcci-global-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
   gap: 8px;
-  border-top: 1px solid rgba(143, 181, 191, 0.18);
-  padding: 12px 22px 6px 0;
+  margin-top: 8px;
 }
-
-.hcci-empty {
-  margin: 0;
-  padding: 24px;
-  border: 1px dashed var(--hcci-line);
-  border-radius: 8px;
-  color: var(--hcci-muted);
-  text-align: center;
+.hcci-config-window .hcci-global-fields label { display: grid; gap: 4px; }
+.hcci-config-window .hcci-global-fields .hcci-global-audio {
+  --hcci-outcome: var(--hcci-magenta);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
+.hcci-config-window .hcci-global-audio input { flex: none; }
+.hcci-config-window .hcci-global-fields p { grid-column: 1 / -1; margin: 0; color: var(--hcci-muted); }
+.hcci-config-window .hcci-footer:has(details[open]) { grid-template-columns: 1fr; }
 
+.hcci-config-window .hcci-config-actions {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-height: 43px;
+}
+.hcci-config-window .hcci-config-actions button { width: auto; padding: 6px 12px; font-weight: 750; text-transform: uppercase; }
+.hcci-config-window .hcci-unsaved { color: #ffd183; font-size: 11px; text-transform: uppercase; }
+.hcci-config-window .hcci-unsaved::before { content: "●"; margin-right: 5px; }

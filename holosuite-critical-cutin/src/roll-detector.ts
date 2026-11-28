@@ -1,5 +1,8 @@
-import { MODULE_ID, SOCKET_NAME, SETTINGS, debugLog, getDieSides, getFailureThreshold, getPlayerConfigs, getThreshold, resultQualifies, setting } from "./settings";
+import { BOX_FLAG } from "./box-of-doom";
+import { MODULE_ID, SOCKET_NAME, SETTINGS, debugLog, getCheckRollRange, getDiceQuantity, getDieSides, getFailureThreshold, getPlayerConfigs, getThreshold, normalizeDurationOverride, resolveCutinAudio, resultQualifies, setting } from "./settings";
 import { playCutin, type CutinPayload } from "./cutin-animation";
+import { normalizeEffectId } from "./effect-presets";
+import { MANGA_ACCENT, MANGA_STYLE } from "./manga-overdrive";
 
 declare const foundry: any;
 declare const game: any;
@@ -53,6 +56,7 @@ function collectDiceTerms(roll: any) {
       ...asArray(term.terms),
       ...asArray(term.dice),
       ...asArray(term.rolls),
+      ...(term.roll && typeof term.roll === "object" ? [term.roll] : []),
       ...asArray(term._terms),
       ...asArray(term._dice)
     );
@@ -68,13 +72,31 @@ function isDamageRoll(message: any, roll: any) {
   return [roll?.options?.type, roll?.options?.rollType, dnd5eRollType, pf2eContextType].some((type) => String(type ?? "").toLowerCase().includes("damage"));
 }
 
-function getActiveDieResults(roll: any) {
+function isInactiveResult(result: any) {
+  return result?.active === false || result?.discarded === true || result?.rerolled === true;
+}
+
+function getActiveDieResults(roll: any, checkPools: boolean) {
   const results: number[] = [];
-  for (const term of collectDiceTerms(roll)) {
+  const sides = getDieSides();
+  const terms = collectDiceTerms(roll);
+  const discardedTerms = new Set();
+  if (checkPools) {
+    // Foundry's flattened dice list also contains dice from dropped pool entries.
+    for (const term of terms) {
+      if (!Array.isArray(term.rolls) || !Array.isArray(term.results)) continue;
+      for (const [index, nestedRoll] of term.rolls.entries()) {
+        if (isInactiveResult(term.results[index])) {
+          for (const die of collectDiceTerms(nestedRoll)) discardedTerms.add(die);
+        }
+      }
+    }
+  }
+  for (const term of terms) {
     const faces = Number(term?.faces ?? term?._faces);
-    if (faces !== getDieSides() || !Array.isArray(term.results)) continue;
+    if (faces !== sides || discardedTerms.has(term) || !Array.isArray(term.results)) continue;
     for (const result of term.results) {
-      if (result.active === false || result.discarded === true || result.rerolled === true) continue;
+      if (!result || isInactiveResult(result)) continue;
       const value = Number(result.result ?? result.value ?? result.total);
       if (Number.isInteger(value) && value >= 1 && value <= faces) results.push(value);
     }
@@ -89,11 +111,10 @@ function getHtmlRoot(html: any): HTMLElement | null {
   return null;
 }
 
-function getRenderedDieResults(html: any) {
-  const root = getHtmlRoot(html);
-  if (!root) return [];
+function getRenderedDieResults(root: HTMLElement) {
   const results: number[] = [];
-  const dieClass = `d${getDieSides()}`;
+  const sides = getDieSides();
+  const dieClass = `d${sides}`;
   const selectors = [
     `.dice-rolls .roll.${dieClass}`,
     `.dice-rolls .roll.die.${dieClass}`,
@@ -115,7 +136,7 @@ function getRenderedDieResults(html: any) {
       continue;
     }
     const value = Number(element.textContent?.trim());
-    if (Number.isInteger(value) && value >= 1 && value <= getDieSides()) results.push(value);
+    if (Number.isInteger(value) && value >= 1 && value <= sides) results.push(value);
   }
 
   return results;
@@ -130,7 +151,7 @@ function gmTargetKey() {
 }
 
 function sanitizeAnimationStyle(value: any) {
-  return ["strike", "breach", "signal"].includes(value) ? value : "strike";
+  return normalizeEffectId(value);
 }
 
 function hasOwner(actor: any, userId: string) {
@@ -139,11 +160,16 @@ function hasOwner(actor: any, userId: string) {
   return Number(actor.ownership?.[userId] ?? actor.ownership?.default ?? 0) >= ownerLevel;
 }
 
-function resolveActor(message: any) {
+function resolveSpeakerToken(message: any) {
+  const { scene, token } = message?.speaker ?? {};
+  if (!token) return null;
+  const speakerScene = scene ? game.scenes?.get(scene) : (globalThis as any).canvas?.scene;
+  return speakerScene?.tokens?.get(token) ?? null;
+}
+
+function resolveActor(message: any, token: any) {
   const speaker = message?.speaker ?? {};
-  if (speaker.actor) return game.actors?.get(speaker.actor) ?? null;
-  if (message?.actor) return message.actor;
-  return null;
+  return (speaker.actor ? game.actors?.get(speaker.actor) : null) ?? token?.actor ?? message?.actor ?? null;
 }
 
 // v12 renamed ChatMessage#user to #author and v14 dropped the deprecated alias,
@@ -169,6 +195,7 @@ type TriggerConfig = {
   kind: "success" | "failure";
   enabled: boolean;
   threshold: number;
+  duration: number;
   animationStyle: string;
   imagePath: string;
   audioPath: string;
@@ -176,27 +203,30 @@ type TriggerConfig = {
   accentColor: string;
 };
 
-function normalizeTriggerConfig(rawConfig: any = {}, kind: "success" | "failure", actor: any, preferActorImage = false): TriggerConfig {
+function normalizeTriggerConfig(rawConfig: any = {}, kind: "success" | "failure", actor: any, preferredImage = ""): TriggerConfig {
   const fallbackThreshold = kind === "failure" ? getFailureThreshold() : getThreshold();
   const defaultText = kind === "failure" ? setting(SETTINGS.defaultFailureText) : setting(SETTINGS.defaultText);
-  const defaultAccent = kind === "failure" ? "#ff4d7d" : "#69e8ff";
   const config = kind === "failure" ? rawConfig.failure ?? {} : rawConfig;
+  const animationStyle = sanitizeAnimationStyle(config.animationStyle);
+  const defaultAccent = animationStyle === MANGA_STYLE ? MANGA_ACCENT : kind === "failure" ? "#ff4d7d" : "#69e8ff";
   const configuredThreshold = Number(config.threshold);
+  const { min, max } = getCheckRollRange();
   return {
     kind,
     enabled: config.enabled !== false,
-    threshold: Number.isInteger(configuredThreshold) && configuredThreshold >= 1 && configuredThreshold <= getDieSides()
+    threshold: Number.isInteger(configuredThreshold) && configuredThreshold >= min && configuredThreshold <= max
       ? configuredThreshold
       : fallbackThreshold,
-    animationStyle: sanitizeAnimationStyle(config.animationStyle),
-    imagePath: (preferActorImage ? actor?.img : "") || config.imagePath || actor?.img || "",
-    audioPath: config.audioPath || "",
+    duration: normalizeDurationOverride(config.duration) ?? setting(SETTINGS.duration),
+    animationStyle,
+    imagePath: preferredImage || config.imagePath || actor?.img || "",
+    audioPath: resolveCutinAudio(kind, config.audioPath),
     overlayText: config.overlayText || defaultText,
     accentColor: config.accentColor || defaultAccent
   };
 }
 
-function resolveConfig(user: any, actor: any, kind: "success" | "failure" = "success"): TriggerConfig {
+function resolveConfig(user: any, actor: any, kind: "success" | "failure", token?: any): TriggerConfig {
   const configs = getPlayerConfigs();
   const actorConfig = actor ? configs[targetKey("actor", actor.id)] : null;
   const isGm = user?.isGM === true;
@@ -205,11 +235,10 @@ function resolveConfig(user: any, actor: any, kind: "success" | "failure" = "suc
     return normalizeTriggerConfig({ enabled: false }, kind, actor);
   }
 
-  // A GM rolling as an unconfigured actor keeps their own animation, audio,
-  // thresholds, label and accent, but shows that actor's portrait so monsters
-  // look like themselves. Rolling as themselves uses the configured GM image.
-  const preferActorImage = isGm && !actorConfig && !!actor?.img;
-  return normalizeTriggerConfig(actorConfig ?? gmConfig ?? {}, kind, actor, preferActorImage);
+  const preferredImage = isGm && !actorConfig && gmConfig?.useTokenPortrait !== false
+    ? token?.texture?.src || actor?.img
+    : "";
+  return normalizeTriggerConfig(actorConfig ?? gmConfig ?? {}, kind, actor, preferredImage);
 }
 
 function buildPayload(message: any, qualifyingResult: number, actor: any, user: any, config: any): CutinPayload | null {
@@ -224,7 +253,7 @@ function buildPayload(message: any, qualifyingResult: number, actor: any, user: 
     userId: user?.id ?? null,
     actorId: actor?.id ?? null,
     userName: user?.name ?? "",
-    actorName: actor?.name ?? user?.name ?? "",
+    actorName: actor?.name ?? "",
     triggerKind: config.kind ?? "success",
     naturalResult: qualifyingResult,
     threshold: config.threshold,
@@ -236,28 +265,50 @@ function buildPayload(message: any, qualifyingResult: number, actor: any, user: 
     overlayText: config.overlayText || "",
     accentColor: config.accentColor || "#69e8ff",
     textEnabled: setting(SETTINGS.textEnabled),
-    duration: setting(SETTINGS.duration),
+    duration: config.duration,
     volume: setting(SETTINGS.volume),
     audience: setting(SETTINGS.audience)
   };
 }
 
+function qualifyingNaturalTotal(results: number[], quantity: number, threshold: number, kind: "success" | "failure") {
+  if (quantity === 1) return results.find(value => resultQualifies(value, threshold, kind)) ?? null;
+  if (results.length !== quantity) return null;
+  const total = results.reduce((sum, value) => sum + value, 0);
+  return resultQualifies(total, threshold, kind) ? total : null;
+}
+
 export function messageHasQualifyingDie(message: any, threshold: number, kind: "success" | "failure" = "success") {
   const rolls = collectRolls(message);
   if (!message?.isRoll && !rolls.length) return null;
+  const quantity = getDiceQuantity();
   for (const roll of rolls) {
     if (isDamageRoll(message, roll)) continue;
-    const qualifying = getActiveDieResults(roll).find((value) => resultQualifies(value, threshold, kind));
-    if (qualifying) return qualifying;
+    const qualifying = qualifyingNaturalTotal(getActiveDieResults(roll, quantity > 1), quantity, threshold, kind);
+    if (qualifying !== null) return qualifying;
   }
   return null;
 }
 
 export function renderedMessageHasQualifyingDie(message: any, html: any, threshold: number, kind: "success" | "failure" = "success") {
-  const results = getRenderedDieResults(html);
-  if (!results.length) return null;
-  if (isDamageRoll(message, {})) return null;
-  return results.find((value) => resultQualifies(value, threshold, kind)) ?? null;
+  const root = getHtmlRoot(html);
+  if (!root || isDamageRoll(message, {})) return null;
+  const quantity = getDiceQuantity();
+  if (quantity === 1) return qualifyingNaturalTotal(getRenderedDieResults(root), quantity, threshold, kind);
+
+  const rolls = collectRolls(message);
+  if (rolls.some(roll => collectDiceTerms(roll).some(term => term.results?.length))) {
+    return messageHasQualifyingDie(message, threshold, kind);
+  }
+  if (rolls.some(roll => isDamageRoll(message, roll))) return null;
+  const rollCards = Array.from(root.querySelectorAll<HTMLElement>(".dice-roll"))
+    .filter(card => !card.querySelector(".dice-roll"));
+  if (!rollCards.length && rolls.length > 1 && !root.matches(".dice-roll")) return null;
+  for (const card of rollCards.length ? rollCards : [root]) {
+    const total = qualifyingNaturalTotal(getRenderedDieResults(card), quantity, threshold, kind);
+    if (total !== null) return total;
+  }
+  return null;
 }
 
 function shouldAuthoritativelyDetect() {
@@ -273,12 +324,13 @@ function rememberProcessedMessage(messageId: string) {
 }
 
 function detectChatMessage(message: any) {
-  if (!message?.id || processedMessages.has(message.id)) return true;
+  if (!message?.id || message.flags?.[MODULE_ID]?.[BOX_FLAG] || processedMessages.has(message.id)) return true;
 
-  const actor = resolveActor(message);
+  const token = resolveSpeakerToken(message);
+  const actor = resolveActor(message, token);
   const user = resolveTriggerUser(message, actor);
-  const successConfig = resolveConfig(user, actor, "success");
-  const failureConfig = resolveConfig(user, actor, "failure");
+  const successConfig = resolveConfig(user, actor, "success", token);
+  const failureConfig = resolveConfig(user, actor, "failure", token);
   const failureNatural = messageHasQualifyingDie(message, failureConfig.threshold, "failure");
   const successNatural = failureNatural ? null : messageHasQualifyingDie(message, successConfig.threshold, "success");
   const natural = failureNatural ?? successNatural;
@@ -299,12 +351,13 @@ function detectChatMessage(message: any) {
 }
 
 function detectRenderedChatMessage(message: any, html: any) {
-  if (!message?.id || processedMessages.has(message.id)) return true;
+  if (!message?.id || message.flags?.[MODULE_ID]?.[BOX_FLAG] || processedMessages.has(message.id)) return true;
 
-  const actor = resolveActor(message);
+  const token = resolveSpeakerToken(message);
+  const actor = resolveActor(message, token);
   const user = resolveTriggerUser(message, actor);
-  const successConfig = resolveConfig(user, actor, "success");
-  const failureConfig = resolveConfig(user, actor, "failure");
+  const successConfig = resolveConfig(user, actor, "success", token);
+  const failureConfig = resolveConfig(user, actor, "failure", token);
   const failureNatural = renderedMessageHasQualifyingDie(message, html, failureConfig.threshold, "failure");
   const successNatural = failureNatural
     ? null
@@ -373,13 +426,16 @@ export function createManualPayloadForUser(userId: string, options: any = {}): C
   const user = game.users?.get(userId);
   const actor = options.actorId ? game.actors?.get(options.actorId) : user?.character ?? null;
   const triggerKind = options.triggerKind === "failure" ? "failure" : "success";
-  const config = resolveConfig(user, actor, triggerKind);
+  const token = actor && user?.isGM && user.id === game.user?.id
+    ? (globalThis as any).canvas?.tokens?.controlled?.find((item: any) => item.actor?.id === actor.id)?.document
+    : null;
+  const config = resolveConfig(user, actor, triggerKind, token);
   return {
     id: foundry.utils.randomID(),
     userId,
     actorId: actor?.id ?? null,
     userName: user?.name ?? "",
-    actorName: actor?.name ?? user?.name ?? "",
+    actorName: actor?.name ?? "",
     naturalResult: options.naturalResult ?? config.threshold,
     triggerKind,
     threshold: options.threshold ?? config.threshold ?? getThreshold(),
@@ -389,7 +445,7 @@ export function createManualPayloadForUser(userId: string, options: any = {}): C
     overlayText: options.overlayText ?? config.overlayText ?? setting(SETTINGS.defaultText),
     accentColor: options.accentColor ?? config.accentColor ?? "#69e8ff",
     textEnabled: options.textEnabled ?? setting(SETTINGS.textEnabled),
-    duration: options.duration ?? setting(SETTINGS.duration),
+    duration: options.duration ?? config.duration,
     volume: options.volume ?? setting(SETTINGS.volume),
     audience: options.audience ?? setting(SETTINGS.audience)
   };

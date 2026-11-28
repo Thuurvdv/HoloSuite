@@ -6,7 +6,9 @@
   overflow: hidden;
   pointer-events: none;
   color: #f3feff;
-  background: transparent;
+  background:
+    radial-gradient(ellipse at 34% 50%, rgba(0, 0, 0, 0.42), transparent 46%),
+    linear-gradient(90deg, transparent 42%, rgba(0, 0, 0, 0.28) 64%, transparent 96%);
   animation: hcci-in 160ms ease-out both;
 }
 
@@ -30,7 +32,15 @@
 }
 
 .hcci-exiting {
-  animation: hcci-out 240ms ease-in both;
+  animation: hcci-out 180ms ease-in both;
+}
+
+.hcci-flash-soft .hcci-flash {
+  animation-name: hcci-flash-soft;
+}
+
+.hcci-flash-off .hcci-flash {
+  display: none;
 }
 
 .hcci-kind-failure .hcci-flash {
@@ -50,7 +60,7 @@
 }
 
 .hcci-kind-failure .hcci-portrait-frame .hcci-portrait {
-  animation: hcci-failure-image-flash var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+  animation: hcci-failure-image-flash 620ms cubic-bezier(.16,.82,.18,1) 80ms both;
 }
 
 .hcci-fracture {
@@ -72,28 +82,28 @@
   left: 0;
   top: 0;
   background-position: 0 0;
-  animation: hcci-fracture-1 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+  animation: hcci-fracture-1 760ms cubic-bezier(.16,.82,.18,1) 80ms both;
 }
 
 .hcci-fracture-2 {
   right: 0;
   top: 0;
   background-position: 100% 0;
-  animation: hcci-fracture-2 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+  animation: hcci-fracture-2 760ms cubic-bezier(.16,.82,.18,1) 80ms both;
 }
 
 .hcci-fracture-3 {
   left: 0;
   bottom: 0;
   background-position: 0 100%;
-  animation: hcci-fracture-3 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+  animation: hcci-fracture-3 760ms cubic-bezier(.16,.82,.18,1) 80ms both;
 }
 
 .hcci-fracture-4 {
   right: 0;
   bottom: 0;
   background-position: 100% 100%;
-  animation: hcci-fracture-4 var(--hcci-duration, 2500ms) cubic-bezier(.16,.82,.18,1) both;
+  animation: hcci-fracture-4 760ms cubic-bezier(.16,.82,.18,1) 80ms both;
 }
 
 .hcci-flash {
@@ -308,6 +318,46 @@
   animation-direction: reverse;
 }
 
+.hcci-style-strike .hcci-ring-a {
+  animation: hcci-ring 920ms cubic-bezier(.16,.82,.18,1) 40ms both;
+}
+
+.hcci-style-strike .hcci-ring-b {
+  animation: hcci-ring 760ms cubic-bezier(.16,.82,.18,1) 120ms both reverse;
+}
+
+.hcci-style-strike .hcci-orbit-glow {
+  animation: hcci-orbit-glow 1100ms cubic-bezier(.16,.82,.18,1) 40ms both;
+}
+
+.hcci-style-strike .hcci-panel-a {
+  animation: hcci-panel-left 720ms cubic-bezier(.12,.88,.18,1) 40ms both;
+}
+
+.hcci-style-strike .hcci-panel-b {
+  animation: hcci-panel-right 720ms cubic-bezier(.12,.88,.18,1) 90ms both;
+}
+
+.hcci-style-strike .hcci-triangle-a {
+  animation: hcci-triangle-a 900ms ease-out 40ms both;
+}
+
+.hcci-style-strike .hcci-triangle-b {
+  animation: hcci-triangle-b 960ms ease-out 90ms both;
+}
+
+.hcci-style-strike .hcci-triangle-c {
+  animation: hcci-triangle-c 1040ms ease-out 140ms both;
+}
+
+.hcci-style-strike .hcci-sparkle-a {
+  animation: hcci-sparkle-a 620ms ease-out 80ms both;
+}
+
+.hcci-style-strike .hcci-sparkle-b {
+  animation: hcci-sparkle-b 720ms ease-out 140ms both;
+}
+
 .hcci-style-breach {
   --hcci-breach-half: min(19vw, 220px);
   background: transparent;
@@ -323,19 +373,19 @@
 }
 
 .hcci-style-breach .hcci-tear-top {
-  animation: hcci-tear-top var(--hcci-duration, 2500ms) cubic-bezier(.13,.86,.18,1) both;
+  animation: hcci-tear-top 720ms cubic-bezier(.13,.86,.18,1) both;
 }
 
 .hcci-style-breach .hcci-tear-bottom {
-  animation: hcci-tear-bottom var(--hcci-duration, 2500ms) cubic-bezier(.13,.86,.18,1) both;
+  animation: hcci-tear-bottom 720ms cubic-bezier(.13,.86,.18,1) both;
 }
 
 .hcci-style-breach .hcci-tear-top span {
-  animation: hcci-orb-left-right var(--hcci-duration, 2500ms) cubic-bezier(.2,.82,.12,1) both;
+  animation: hcci-orb-left-right 720ms cubic-bezier(.2,.82,.12,1) both;
 }
 
 .hcci-style-breach .hcci-tear-bottom span {
-  animation: hcci-orb-right-left var(--hcci-duration, 2500ms) cubic-bezier(.2,.82,.12,1) both;
+  animation: hcci-orb-right-left 720ms cubic-bezier(.2,.82,.12,1) both;
 }
 
 .hcci-style-breach .hcci-flash {
@@ -357,7 +407,7 @@
   clip-path: none;
   border-radius: 4px;
   z-index: 3;
-  animation: hcci-portrait-tear var(--hcci-duration, 2500ms) cubic-bezier(.13,.86,.18,1) both;
+  animation: hcci-portrait-tear 720ms cubic-bezier(.13,.86,.18,1) both;
 }
 
 .hcci-style-breach .hcci-portrait {
@@ -412,5 +462,56 @@
 
 .hcci-style-signal .hcci-title {
   animation-name: hcci-title-signal;
+}
+
+.hcci-motion-reduced,
+.hcci-motion-still {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.24));
+}
+
+.hcci-motion-reduced :is(.hcci-ring, .hcci-orbit-glow, .hcci-panel, .hcci-tear, .hcci-triangle, .hcci-sparkle, .hcci-scan, .hcci-diagonal, .hcci-fracture, .hcci-frame-lightning),
+.hcci-motion-still :is(.hcci-ring, .hcci-orbit-glow, .hcci-panel, .hcci-tear, .hcci-triangle, .hcci-sparkle, .hcci-scan, .hcci-diagonal, .hcci-fracture, .hcci-frame-lightning),
+.hcci-motion-reduced .hcci-flash,
+.hcci-motion-still .hcci-flash {
+  display: none;
+}
+
+.hcci-motion-reduced .hcci-portrait-frame,
+.hcci-motion-reduced .hcci-portrait,
+.hcci-motion-reduced .hcci-title,
+.hcci-motion-reduced .hcci-subtitle,
+.hcci-motion-reduced .hcci-result,
+.hcci-motion-still .hcci-portrait-frame,
+.hcci-motion-still .hcci-portrait,
+.hcci-motion-still .hcci-title,
+.hcci-motion-still .hcci-subtitle,
+.hcci-motion-still .hcci-result {
+  animation: none !important;
+  filter: none;
+  opacity: 1;
+}
+
+.hcci-motion-reduced .hcci-portrait-frame,
+.hcci-motion-still .hcci-portrait-frame {
+  transform: none;
+}
+
+.hcci-motion-reduced .hcci-portrait,
+.hcci-motion-still .hcci-portrait {
+  transform: none;
+}
+
+.hcci-motion-reduced .hcci-title,
+.hcci-motion-reduced .hcci-subtitle,
+.hcci-motion-reduced .hcci-result,
+.hcci-motion-still .hcci-title,
+.hcci-motion-still .hcci-subtitle,
+.hcci-motion-still .hcci-result {
+  transform: none;
+}
+
+.hcci-motion-still {
+  animation: none;
+  opacity: 1;
 }
 

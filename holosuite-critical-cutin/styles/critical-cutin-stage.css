@@ -2,10 +2,10 @@
   position: relative;
   z-index: 3;
   display: grid;
-  grid-template-columns: minmax(220px, 38vw) minmax(240px, 1fr);
+  grid-template-columns: minmax(220px, 38vw) minmax(0, 1fr);
   align-items: center;
   gap: clamp(18px, 4vw, 56px);
-  width: min(1180px, 92vw);
+  width: 96vw;
   height: 100%;
   margin: 0 auto;
 }
@@ -13,7 +13,7 @@
 .hcci-portrait-frame {
   justify-self: end;
   position: relative;
-  width: min(38vw, 440px);
+  width: min(38vw, 48vh, 440px);
   aspect-ratio: 1;
   border: 2px solid color-mix(in srgb, var(--hcci-accent), white 20%);
   background: rgba(0, 0, 0, 0.6);
@@ -25,7 +25,7 @@
   overflow: hidden;
   transform: translateX(-18vw) skewX(-5deg);
   opacity: 0;
-  animation: hcci-portrait 620ms cubic-bezier(.12,.88,.18,1) 220ms both;
+  animation: hcci-portrait 460ms cubic-bezier(.12,.88,.18,1) 100ms both;
 }
 
 .hcci-frame-lightning {
@@ -86,10 +86,10 @@
 }
 
 .hcci-title {
-  max-width: min(820px, 62vw);
+  max-width: 100%;
   color: #ffffff;
-  font-family: "Orbitron", "Eurostile", "Agency FB", Impact, sans-serif;
-  font-size: clamp(24px, min(8vw, calc(54vw / var(--hcci-title-chars, 8) * 1.2)), 118px);
+  font-family: var(--hcci-font, "HCCI AICON"), sans-serif;
+  font-size: clamp(28px, 5vw, 96px);
   line-height: 0.9;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -100,10 +100,11 @@
     5px 5px 0 rgba(0, 0, 0, 0.72);
   transform: translateX(24vw);
   opacity: 0;
-  animation: hcci-title 520ms cubic-bezier(.11,.9,.16,1) 330ms both;
+  animation: hcci-title 420ms cubic-bezier(.11,.9,.16,1) 180ms both;
 }
 
 .hcci-subtitle {
+  font-family: var(--hcci-font, "HCCI AICON"), sans-serif;
   display: block;
   color: var(--hcci-accent);
   border-top: 2px solid var(--hcci-accent);
@@ -114,7 +115,7 @@
   text-transform: uppercase;
   transform: translateY(20px);
   opacity: 0;
-  animation: hcci-subtitle 420ms ease-out 460ms both;
+  animation: hcci-subtitle 300ms ease-out 300ms both;
 }
 
 .hcci-screen-shake #ui-left,
