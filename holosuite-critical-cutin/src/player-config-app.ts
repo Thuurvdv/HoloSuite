@@ -1,18 +1,30 @@
-import { MODULE_ID, MODULE_TITLE, SETTINGS, TEMPLATE_PATH, getDieSides, getFailureThreshold, getPlayerConfigs, getThreshold, lowRollsAreGood, savePlayerConfigs, setSetting, setting } from "./settings";
+import { FATE_STYLE } from "./shattered-fate";
+import { openGloryRoll } from "./box-of-doom";
+import { MAX_DICE_QUANTITY, MODULE_ID, MODULE_TITLE, SETTINGS, TEMPLATE_PATH, getCheckRollRange, getDiceQuantity, getDieSides, getFailureThreshold, getPlayerConfigs, getThreshold, lowRollsAreGood, normalizeDurationOverride, resolveCutinAudio, savePlayerConfigs, setSetting, setting } from "./settings";
 import { getLegacyFormApplicationBase } from "../../shared/src/application-base";
-import { getCriticalRollEndpoints, getDieOptions } from "../../shared/src/dice-checks";
+import { getDieOptions } from "../../shared/src/dice-checks";
+import { previewCutin } from "./cutin-animation";
+import { EFFECT_PRESETS, normalizeEffectId } from "./effect-presets";
+import { MANGA_ACCENT, MANGA_STYLE } from "./manga-overdrive";
+import { OVERRIDE_STYLE } from "./reality-override";
+import { COLLAPSE_STYLE } from "./system-collapse";
 
 declare const foundry: any;
 declare const game: any;
 declare const ui: any;
-declare const FilePicker: any;
+const FALLBACK_PORTRAIT = "icons/svg/mystery-man.svg";
 
 const BaseFormApplication = getLegacyFormApplicationBase();
 
-export async function confirmRollThresholdReset(dieSides: number, rollDirection: string, targetCount: number) {
-  const { success, failure } = getCriticalRollEndpoints(dieSides, rollDirection);
-  const content = `<p>Change to <strong>d${dieSides}</strong> with <strong>${rollDirection === "low" ? "low" : "high"} rolls positive</strong>?</p>
-    <p>This resets the roll configuration for all ${targetCount} listed players/GM entries, in both tabs, and the global thresholds:</p>
+function getRollEndpoints(sides: number, direction: string, quantity: number) {
+  const { min, max } = getCheckRollRange(sides, quantity);
+  return direction === "low" ? { success: min, failure: max } : { success: max, failure: min };
+}
+
+export async function confirmRollThresholdReset(dieSides: number, rollDirection: string, targetCount: number, quantity = 1) {
+  const { success, failure } = getRollEndpoints(dieSides, rollDirection, quantity);
+  const content = `<p>Change to <strong>${quantity === 1 ? "" : quantity}d${dieSides}</strong> with <strong>${rollDirection === "low" ? "low" : "high"} rolls positive</strong>?</p>
+    <p>This resets the roll configuration for all ${targetCount} listed character and GM entries, for both outcomes, and the global thresholds:</p>
     <ul><li>Success: <strong>${success}</strong></li><li>Failure: <strong>${failure}</strong></li></ul>
     <p>Images, audio, animation, labels, colors, and enabled states stay unchanged. Click Save afterward to apply these changes.</p>`;
   const DialogV2 = foundry?.applications?.api?.DialogV2;
@@ -43,20 +55,18 @@ function userOwnsActor(user: any, actor: any) {
 
 function normalizeTriggerConfig(config: any = {}, { defaultAccent = "#69e8ff" } = {}) {
   const threshold = Number(config.threshold);
-  const animationStyle = ["strike", "breach", "signal"].includes(config.animationStyle) ? config.animationStyle : "strike";
+  const { min, max } = getCheckRollRange();
+  const animationStyle = normalizeEffectId(config.animationStyle);
   return {
     enabled: config.enabled !== false,
-    threshold: Number.isInteger(threshold) && threshold >= 1 && threshold <= getDieSides() ? threshold : "",
+    threshold: Number.isInteger(threshold) && threshold >= min && threshold <= max ? threshold : "",
+    duration: normalizeDurationOverride(config.duration),
     animationStyle,
-    animationStyles: [
-      { value: "strike", label: "Neon Strike", selected: animationStyle === "strike" },
-      { value: "breach", label: "Panel Breach", selected: animationStyle === "breach" },
-      { value: "signal", label: "Signal Bloom", selected: animationStyle === "signal" }
-    ],
+    animationStyles: EFFECT_PRESETS.map(preset => ({ value: preset.id, label: preset.label, selected: animationStyle === preset.id })),
     imagePath: String(config.imagePath ?? ""),
     audioPath: String(config.audioPath ?? ""),
     overlayText: String(config.overlayText ?? ""),
-    accentColor: String(config.accentColor ?? defaultAccent)
+    accentColor: String(config.accentColor ?? (animationStyle === MANGA_STYLE ? MANGA_ACCENT : defaultAccent))
   };
 }
 
@@ -75,19 +85,18 @@ function buildTargets() {
     typeLabel: "GM",
     id: "default",
     name: "GM Cut-In",
-    portrait: gm?.avatar || "icons/svg/mystery-man.svg"
+    portrait: gm?.character?.img || gm?.avatar || FALLBACK_PORTRAIT
   }];
 
   for (const actor of game.actors ?? []) {
-    const owners = game.users?.filter((user) => !user.isGM && userOwnsActor(user, actor)).map((user) => user.name) ?? [];
-    if (!owners.length) continue;
+    if (!game.users?.some((user) => !user.isGM && userOwnsActor(user, actor))) continue;
     targets.push({
       key: targetKey("actor", actor.id),
       type: "actor",
       typeLabel: "Actor",
       id: actor.id,
-      name: `${actor.name} (${owners.join(", ")})`,
-      portrait: actor.img || "icons/svg/mystery-man.svg"
+      name: actor.name,
+      portrait: actor.img || FALLBACK_PORTRAIT
     });
   }
 
@@ -100,6 +109,8 @@ function buildTargets() {
 
 export class PlayerConfigApp extends BaseFormApplication {
   activeTabs: Map<string, string>;
+  selectedPlayer = "gm";
+  selectedCharacters = new Map<string, string>();
   rollRuleChange: Promise<void> | null = null;
 
   constructor(options: any = {}) {
@@ -123,164 +134,439 @@ export class PlayerConfigApp extends BaseFormApplication {
 
   async getData() {
     const configs = getPlayerConfigs();
-    const rows = buildTargets().map((target) => {
+    const targets = buildTargets();
+    const characterOrder = setting(SETTINGS.characterOrder) ?? {};
+    const gm = configs[gmTargetKey()];
+    const players = [
+      { id: "gm", name: "GM", avatar: gm?.imagePath || gm?.failure?.imagePath || targets[0].portrait, targets: [targets[0]] },
+      ...Array.from<any>(game.users ?? []).filter(user => !user.isGM).map(user => {
+        const owned = targets.filter(target => target.type === "actor" && userOwnsActor(user, game.actors.get(target.id)));
+        const saved = characterOrder[user.id];
+        const rank = new Map<string, number>(Array.isArray(saved) ? saved.map((key, index) => [key, index]) : []);
+        owned.sort((a, b) => (rank.get(a.key) ?? rank.size) - (rank.get(b.key) ?? rank.size));
+        return { id: user.id, name: user.name, avatar: owned[0]?.portrait || user.avatar || FALLBACK_PORTRAIT, targets: owned };
+      })
+    ];
+    const rows = targets.map(target => {
       const config = normalizeConfig(configs[target.key]);
-      const successPreview = config.success.imagePath || target.portrait;
-      const failurePreview = config.failure.imagePath || target.portrait;
-      const activeTab = this.activeTabs.get(target.key) === "failure" ? "failure" : "success";
       return {
-        ...target,
-        successActive: activeTab === "success",
-        failureActive: activeTab === "failure",
-        success: {
-          ...config.success,
-          preview: successPreview,
-          imageStatus: config.success.imagePath ? "Custom image configured." : "No custom image configured.",
-          audioStatus: config.success.audioPath ? "Audio sample configured." : "No audio sample configured."
-        },
-        failure: {
-          ...config.failure,
-          preview: failurePreview,
-          imageStatus: config.failure.imagePath ? "Custom image configured." : "No custom image configured.",
-          audioStatus: config.failure.audioPath ? "Audio sample configured." : "No audio sample configured."
-        }
+        ...target, ...config,
+        isGm: target.type === "gm",
+        useTokenPortrait: gm?.useTokenPortrait !== false,
+        actorId: target.type === "actor" ? target.id : "",
+        outcomes: [
+          { ...config.success, kind: "success", defaultText: setting(SETTINGS.defaultText) },
+          { ...config.failure, kind: "failure", defaultText: setting(SETTINGS.defaultFailureText) }
+        ]
       };
     });
 
+    const { min, max } = getCheckRollRange();
     return {
-      moduleId: MODULE_ID,
-      dieSides: getDieSides(),
+      players: players.map(player => ({
+        ...player,
+        reorderable: player.targets.length > 1,
+        characterHeading: player.id === "gm" ? "GM Configuration" : `${player.name}’s Characters`,
+        tabDetail: player.id === "gm" ? "Global" : `${player.targets.length} ${player.targets.length === 1 ? "character" : "characters"}`
+      })),
+      animationStyles: EFFECT_PRESETS,
+      diceQuantity: min,
+      maxDiceQuantity: MAX_DICE_QUANTITY,
+      maxRollTotal: max,
       dice: getDieOptions(getDieSides()),
       lowRollsGood: lowRollsAreGood(),
-      threshold: setting(SETTINGS.threshold) ?? 0,
-      failureThreshold: setting(SETTINGS.failureThreshold) ?? 0,
-      effectiveThreshold: getThreshold(),
-      effectiveFailureThreshold: getFailureThreshold(),
+      threshold: setting(SETTINGS.threshold) ? getThreshold() : 0,
+      failureThreshold: setting(SETTINGS.failureThreshold) ? getFailureThreshold() : 0,
       duration: setting(SETTINGS.duration),
-      defaultText: setting(SETTINGS.defaultText),
-      defaultFailureText: setting(SETTINGS.defaultFailureText),
+      defaultSuccessAudio: setting(SETTINGS.defaultSuccessAudio) === true,
+      defaultFailureAudio: setting(SETTINGS.defaultFailureAudio) === true,
       rows
     };
   }
 
   activateListeners(html: any) {
     super.activateListeners(html);
-    const markDirty = () => {
-      html.closest(".app")?.addClass("hcci-config-dirty");
-      html.find("[data-hcci-dirty]").prop("hidden", false);
+    const root: HTMLElement = html instanceof HTMLElement ? html : html[0];
+    const form = root.matches(".hcci-config") ? root as HTMLFormElement : root.querySelector<HTMLFormElement>(".hcci-config")!;
+    const query = <T extends HTMLElement = HTMLElement>(selector: string) => form.querySelector<T>(selector)!;
+    const all = <T extends HTMLElement = HTMLElement>(selector: string) => Array.from(form.querySelectorAll<T>(selector));
+    query("[data-hcci-action='close']").addEventListener("click", () => this.close());
+    query("[data-hcci-glory-roll]").addEventListener("click", () => void openGloryRoll());
+    this.activateWindowDrag(query("[data-hcci-window-drag]"), form.closest(".window-app, .application"));
+    const playerTabs = all<HTMLButtonElement>("[data-hcci-player]");
+    const lists = all("[data-hcci-characters]");
+    const characters = all<HTMLButtonElement>("[data-hcci-character]");
+    const outcomes = all<HTMLButtonElement>("[data-hcci-tab]");
+    const rows = all("[data-hcci-row]");
+    const panels = all("[data-hcci-panel]");
+    const workspace = query("[data-hcci-workspace]");
+    const art = query<HTMLImageElement>("[data-hcci-art]");
+    const previewLabel = query("[data-hcci-caption]");
+    const previewName = query("[data-hcci-preview-name]");
+    const cards = all<HTMLButtonElement>("[data-hcci-style]");
+    const styleList = query(".hcci-style-list");
+    styleList.addEventListener("wheel", event => {
+      if (event.ctrlKey || Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return;
+      const oldPosition = styleList.scrollLeft;
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? styleList.clientWidth : 1;
+      styleList.scrollLeft += event.deltaY * unit;
+      if (styleList.scrollLeft !== oldPosition) event.preventDefault();
+    }, { passive: false });
+    let row: HTMLElement | undefined;
+    let panel: HTMLElement | undefined;
+    let kind = "success";
+    let previewImagePath = "";
+    let previewFallbackPath = "";
+    const field = (name: string) => panel?.querySelector<HTMLInputElement>(`[data-hcci-field="${name}"]`);
+    const preferredImage = () => {
+      const useToken = row?.querySelector<HTMLInputElement>("[data-hcci-gm-token-portrait]")?.checked;
+      const token = useToken ? (globalThis as any).canvas?.tokens?.controlled?.[0] : null;
+      return token?.document?.texture?.src || token?.actor?.img || field("imagePath")!.value.trim();
     };
+
+    const previewArtwork = () => {
+      const fallbackImagePath = row?.dataset.hcciPortrait || FALLBACK_PORTRAIT;
+      const animationStyle = normalizeEffectId(field("animationStyle")!.value);
+      return {
+        animationStyle,
+        actorName: row?.dataset.hcciActorId ? row.dataset.hcciName : "",
+        triggerKind: kind,
+        imagePath: preferredImage() || fallbackImagePath,
+        fallbackImagePath,
+        overlayText: field("overlayText")!.value.trim() || field("overlayText")!.placeholder,
+        accentColor: field("accentColor")!.value,
+        textEnabled: !["rift", MANGA_STYLE, FATE_STYLE, OVERRIDE_STYLE, COLLAPSE_STYLE].includes(animationStyle)
+          || setting(SETTINGS.textEnabled) !== false
+      };
+    };
+    const syncPreview = () => {
+      if (!row || !panel) return;
+      const payload = previewArtwork();
+      if (payload.imagePath !== previewImagePath || payload.fallbackImagePath !== previewFallbackPath) {
+        previewImagePath = payload.imagePath;
+        previewFallbackPath = payload.fallbackImagePath;
+        art.src = previewImagePath;
+      }
+      art.parentElement!.style.setProperty("--hcci-preview-accent", payload.accentColor);
+      previewLabel.textContent = payload.textEnabled ? payload.overlayText : "";
+      previewName.textContent = payload.actorName;
+      cards.forEach(card => card.setAttribute("aria-pressed", String(card.dataset.hcciStyle === payload.animationStyle)));
+    };
+    art.addEventListener("error", () => {
+      const src = art.getAttribute("src");
+      if (src !== previewFallbackPath && src !== FALLBACK_PORTRAIT) art.src = previewFallbackPath;
+      else if (src !== FALLBACK_PORTRAIT) art.src = FALLBACK_PORTRAIT;
+    });
+
+    const selectTab = (tab: HTMLButtonElement, selected: boolean) => {
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+    };
+    const navigate = (player: string, character = this.selectedCharacters.get(player), scope?: string) => {
+      this.selectedPlayer = player;
+      const list = lists.find(item => item.dataset.hcciCharacters === player);
+      const choices = Array.from(list?.querySelectorAll<HTMLButtonElement>("[data-hcci-character]") ?? []);
+      const selected = choices.find(button => button.dataset.hcciCharacter === character) ?? choices[0];
+      const key = selected?.dataset.hcciCharacter;
+      kind = scope ?? this.activeTabs.get(key) ?? "success";
+      if (key) {
+        this.selectedCharacters.set(player, key);
+        this.activeTabs.set(key, kind);
+      }
+      row = rows.find(item => item.dataset.hcciRow === key);
+      panel = row?.querySelector<HTMLElement>(`[data-hcci-panel="${kind}"]`);
+      playerTabs.forEach(tab => selectTab(tab, tab.dataset.hcciPlayer === player));
+      lists.forEach(item => { item.hidden = item !== list; });
+      characters.forEach(button => button.setAttribute("aria-pressed", String(button === selected)));
+      outcomes.forEach(tab => selectTab(tab, tab.dataset.hcciTab === kind));
+      rows.forEach(item => { item.hidden = item !== row; });
+      panels.forEach(item => { item.hidden = item !== panel; });
+      query("#hcci-settings-panel").setAttribute("aria-labelledby", `hcci-${kind}-tab`);
+      workspace.hidden = !row;
+      workspace.dataset.hcciKind = kind;
+      query("[data-hcci-preview-kind]").textContent = kind === "failure" ? "Critical Failure" : "Critical Success";
+      syncPreview();
+    };
+
+    playerTabs.forEach(tab => tab.addEventListener("click", () => navigate(tab.dataset.hcciPlayer!)));
+    characters.forEach(button => button.addEventListener("click", () => navigate(this.selectedPlayer, button.dataset.hcciCharacter)));
+    outcomes.forEach(tab => tab.addEventListener("click", () => navigate(this.selectedPlayer, undefined, tab.dataset.hcciTab)));
+    for (const tabs of [playerTabs, outcomes]) for (const [index, tab] of tabs.entries()) {
+      tab.addEventListener("keydown", event => {
+        const next = { Home: 0, End: tabs.length - 1, ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+          ArrowRight: (index + 1) % tabs.length }[event.key];
+        if (next === undefined) return;
+        event.preventDefault();
+        tabs[next].focus();
+        tabs[next].click();
+      });
+    }
+    cards.forEach(card => card.addEventListener("click", () => {
+      const select = field("animationStyle")!;
+      select.value = card.dataset.hcciStyle!;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    }));
+    navigate(playerTabs.some(tab => tab.dataset.hcciPlayer === this.selectedPlayer) ? this.selectedPlayer : "gm");
+
+    // Reveal the first invalid input before the browser tries to focus it.
+    let revealingInvalid = false;
+    form.addEventListener("invalid", event => {
+      if (revealingInvalid) return;
+      revealingInvalid = true;
+      queueMicrotask(() => { revealingInvalid = false; });
+      const input = event.target as HTMLElement;
+      const drawer = input.closest("details");
+      if (drawer) drawer.open = true;
+      const target = input.closest<HTMLElement>("[data-hcci-row]")?.dataset.hcciRow;
+      if (!target) return;
+      const owners = characters.filter(button => button.dataset.hcciCharacter === target);
+      const owner = owners.find(button => button.closest<HTMLElement>("[data-hcci-characters]")?.dataset.hcciCharacters === this.selectedPlayer) ?? owners[0];
+      const player = owner?.closest<HTMLElement>("[data-hcci-characters]")?.dataset.hcciCharacters;
+      if (player) navigate(player, target, input.closest<HTMLElement>("[data-hcci-panel]")?.dataset.hcciPanel);
+    }, true);
+
+    const markDirty = () => { query("[data-hcci-dirty]").hidden = false; };
+    for (const list of lists) {
+      const tab = playerTabs.find(button => button.dataset.hcciPlayer === list.dataset.hcciCharacters)!;
+      this.activateCharacterOrdering(list.querySelector(".hcci-character-list")!, tab, markDirty);
+    }
+    const die = query<HTMLSelectElement>('[name="dieSides"]');
+    const diceQuantity = query<HTMLInputElement>('[name="diceQuantity"]');
+    const directionInput = query<HTMLSelectElement>('[name="rollDirection"]');
+    const successInput = query<HTMLInputElement>('[name="threshold"]');
+    const failureInput = query<HTMLInputElement>('[name="failureThreshold"]');
+    const thresholds = all<HTMLInputElement>('[data-hcci-field="threshold"]');
     const syncRollControls = () => {
-      const sides = Number(html.find("[name='dieSides']").val());
-      const low = html.find("[name='rollDirection']").val() === "low";
-      html.find("[data-hcci-success-label]").text(low ? "Success ≤" : "Success ≥");
-      html.find("[data-hcci-failure-label]").text(low ? "Failure ≥" : "Failure ≤");
-      if (!Number.isInteger(sides) || sides < 2 || sides > 10000) return;
-      html.find("[name='threshold'], [name='failureThreshold'], [data-hcci-field='threshold']").attr("max", sides);
-      const success = Number(html.find("[name='threshold']").val()) || (low ? 1 : sides);
-      const failure = Number(html.find("[name='failureThreshold']").val()) || (low ? sides : 1);
-      html.find("[data-hcci-panel='success'] [data-hcci-field='threshold']").attr("placeholder", success);
-      html.find("[data-hcci-panel='failure'] [data-hcci-field='threshold']").attr("placeholder", failure);
+      const sides = Number(die.value);
+      const quantity = Number(diceQuantity.value);
+      const low = directionInput.value === "low";
+      all("[data-hcci-success-label]").forEach(label => { label.textContent = low ? "Success ≤" : "Success ≥"; });
+      all("[data-hcci-failure-label]").forEach(label => { label.textContent = low ? "Failure ≥" : "Failure ≤"; });
+      if (!diceQuantity.validity.valid || !Number.isInteger(sides) || sides < 2 || sides > 10000) return;
+      const { min, max } = getCheckRollRange(sides, quantity);
+      const endpoints = getRollEndpoints(sides, directionInput.value, quantity);
+      const success = Number(successInput.value) || endpoints.success;
+      const failure = Number(failureInput.value) || endpoints.failure;
+      for (const input of [successInput, failureInput]) {
+        input.max = String(max);
+        input.setCustomValidity(Number(input.value) > 0 && Number(input.value) < min ? `Enter 0 or a total from ${min} to ${max}.` : "");
+      }
+      for (const input of thresholds) {
+        input.min = String(min);
+        input.max = String(max);
+        input.placeholder = String(input.closest('[data-hcci-panel="success"]') ? success : failure);
+      }
     };
-    html.find("[name='threshold'], [name='failureThreshold']").on("input change", syncRollControls);
     syncRollControls();
 
-    let acceptedSides = Number(html.find("[name='dieSides']").val());
-    let acceptedDirection = String(html.find("[name='rollDirection']").val());
-    html.find("[name='dieSides'], [name='rollDirection']").on("change", () => {
+    let acceptedSides = Number(die.value);
+    let acceptedQuantity = Number(diceQuantity.value);
+    let acceptedDirection = directionInput.value;
+    const changeRollRule = () => {
       if (this.rollRuleChange) return;
-      const sides = Number(html.find("[name='dieSides']").val());
-      const direction = String(html.find("[name='rollDirection']").val());
-      if (sides === acceptedSides && direction === acceptedDirection) return;
-      const controls = html.find("[name='dieSides'], [name='rollDirection'], [type='submit']");
-      controls.prop("disabled", true);
+      const sides = Number(die.value);
+      const quantity = Number(diceQuantity.value);
+      const direction = directionInput.value;
+      if (!diceQuantity.reportValidity() || (sides === acceptedSides && quantity === acceptedQuantity && direction === acceptedDirection)) return;
+      const controls = [die, diceQuantity, directionInput, query<HTMLButtonElement>('[type="submit"]')];
+      controls.forEach(control => { control.disabled = true; });
       this.rollRuleChange = (async () => {
         try {
-          const confirmed = await confirmRollThresholdReset(sides, direction, html.find("[data-hcci-row]").length);
-          if (!confirmed) return;
-          const { success, failure } = getCriticalRollEndpoints(sides, direction);
-          html.find("[name='threshold'], [data-hcci-panel='success'] [data-hcci-field='threshold']").val(success);
-          html.find("[name='failureThreshold'], [data-hcci-panel='failure'] [data-hcci-field='threshold']").val(failure);
+          if (!await confirmRollThresholdReset(sides, direction, rows.length, quantity)) return;
+          const { success, failure } = getRollEndpoints(sides, direction, quantity);
+          successInput.value = String(success);
+          failureInput.value = String(failure);
+          for (const input of thresholds) {
+            input.value = String(input.closest('[data-hcci-panel="success"]') ? success : failure);
+          }
           acceptedSides = sides;
+          acceptedQuantity = quantity;
           acceptedDirection = direction;
           markDirty();
         } catch (error) {
           console.error(`${MODULE_ID} | Could not confirm dice change.`, error);
           ui.notifications?.error?.("Could not confirm the dice change. Your roll configuration has not changed.");
         } finally {
-          html.find("[name='dieSides']").val(acceptedSides);
-          html.find("[name='rollDirection']").val(acceptedDirection);
+          die.value = String(acceptedSides);
+          diceQuantity.value = String(acceptedQuantity);
+          directionInput.value = acceptedDirection;
+          controls.forEach(control => { control.disabled = false; });
           syncRollControls();
-          controls.prop("disabled", false);
           this.rollRuleChange = null;
         }
       })();
-    });
-
-    html.find("input, select").on("input change", (event) => {
-      if (["dieSides", "rollDirection"].includes(event.currentTarget.name)) return;
-      markDirty();
-      if (event.currentTarget.dataset.hcciField !== "imagePath") return;
-      const panel = event.currentTarget.closest("[data-hcci-panel]");
-      const preview = panel?.querySelector("[data-hcci-preview]");
-      if (preview) preview.src = event.currentTarget.value || preview.dataset.fallbackSrc || "icons/svg/mystery-man.svg";
-    });
-
-    html.find("[data-hcci-browse]").on("click", (event) => {
+    };
+    die.addEventListener("change", changeRollRule);
+    diceQuantity.addEventListener("change", changeRollRule);
+    directionInput.addEventListener("change", changeRollRule);
+    form.addEventListener("submit", event => {
+      if (Number(die.value) === acceptedSides && Number(diceQuantity.value) === acceptedQuantity && directionInput.value === acceptedDirection) return;
       event.preventDefault();
-      const button = event.currentTarget;
-      const panel = button.closest("[data-hcci-panel]");
-      const field = button.dataset.hcciBrowse;
-      const input = panel?.querySelector(`[data-hcci-field="${field}"]`);
-      if (!input) return;
+      event.stopImmediatePropagation();
+      changeRollRule();
+    }, true);
 
-      const picker = new FilePicker({
-        type: field === "audioPath" ? "audio" : "image",
+    for (const eventName of ["input", "change"]) form.addEventListener(eventName, event => {
+      const input = event.target as HTMLElement;
+      if (!input.matches("input, select") || input === die || input === diceQuantity || input === directionInput) return;
+      markDirty();
+      if (input === successInput || input === failureInput) syncRollControls();
+      if (row?.contains(input)) syncPreview();
+    });
+
+    for (const button of all<HTMLButtonElement>("[data-hcci-browse]")) button.addEventListener("click", () => {
+      const name = button.dataset.hcciBrowse;
+      const input = field(name);
+      if (!input) return;
+      const Picker = foundry?.applications?.apps?.FilePicker?.implementation ?? (globalThis as any).FilePicker;
+      const picker = new Picker({
+        type: name === "audioPath" ? "audio" : "image",
         current: input.value,
         callback: (path: string) => {
           input.value = path;
           input.dispatchEvent(new Event("change", { bubbles: true }));
-          if (field === "imagePath") {
-            const img = panel.querySelector("[data-hcci-preview]");
-            if (img) img.src = path || img.dataset.fallbackSrc || "icons/svg/mystery-man.svg";
-          }
         }
       });
       picker.browse();
     });
 
-    html.find("[data-hcci-tab]").on("click", (event) => {
-      event.preventDefault();
-      const tab = event.currentTarget.dataset.hcciTab;
-      const row = event.currentTarget.closest("[data-hcci-row]");
-      if (row?.dataset.hcciRow) this.activeTabs.set(row.dataset.hcciRow, tab);
-      row?.querySelectorAll("[data-hcci-tab]").forEach((button) => button.classList.toggle("is-active", button.dataset.hcciTab === tab));
-      row?.querySelectorAll("[data-hcci-panel]").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.hcciPanel === tab));
+    const test = query<HTMLButtonElement>("[data-hcci-test]");
+    const defaultAudio = {
+      success: query<HTMLInputElement>('[name="defaultSuccessAudio"]'),
+      failure: query<HTMLInputElement>('[name="defaultFailureAudio"]')
+    };
+    test.addEventListener("click", async () => {
+      if (!game.user?.isGM || !row || !panel || test.getAttribute("aria-disabled") === "true") return;
+      const endpoints = getRollEndpoints(acceptedSides, acceptedDirection, acceptedQuantity);
+      const scope = kind === "failure" ? "failure" : "success";
+      const threshold = scope === "failure" ? failureInput.value : successInput.value;
+      test.setAttribute("aria-disabled", "true");
+      try {
+        const played = await previewCutin({
+          ...previewArtwork(),
+          actorId: row.dataset.hcciActorId || null,
+          naturalResult: endpoints[scope],
+          threshold: Number(field("threshold")?.value) || Number(threshold) || endpoints[scope],
+          audioPath: resolveCutinAudio(scope, field("audioPath")!.value, defaultAudio[scope].checked),
+          duration: normalizeDurationOverride(field("duration")?.value)
+            ?? normalizeDurationOverride(query<HTMLInputElement>('[name="duration"]').value)
+            ?? setting(SETTINGS.duration),
+          volume: setting(SETTINGS.volume)
+        });
+        if (!played) ui.notifications?.info?.("A cut-in is already playing.");
+      } finally {
+        test.removeAttribute("aria-disabled");
+      }
     });
 
-    html.find("[data-hcci-action='reset']").on("click", async (event) => {
-      event.preventDefault();
+    query("[data-hcci-action='reset']").addEventListener("click", async () => {
+      const DialogV2 = foundry?.applications?.api?.DialogV2;
+      const confirmed = DialogV2?.confirm
+        ? await DialogV2.confirm({
+            window: { title: "Reset All Character Cut-Ins?" },
+            content: "<p>This removes every GM and actor override. Global roll and presentation settings stay unchanged.</p>",
+            modal: true,
+            rejectClose: false,
+            yes: { label: "Reset Overrides" },
+            no: { label: "Cancel", default: true }
+          }) === true
+        : globalThis.confirm("Reset every GM and actor cut-in override?");
+      if (!confirmed) return;
       await savePlayerConfigs({});
       ui.notifications?.info("Critical Cut-In player configuration reset.");
       this.render(false);
     });
   }
 
+  private activateCharacterOrdering(list: HTMLElement, tab: HTMLButtonElement, markDirty: () => void) {
+    const selector = "[data-hcci-character][draggable='true']";
+    const getCharacter = (event: Event) => (event.target as HTMLElement).closest<HTMLButtonElement>(selector);
+    let dragging: HTMLButtonElement | null = null;
+    const move = (character: HTMLButtonElement, target: Element) => {
+      const moveDown = Boolean(character.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING);
+      if (moveDown) target.after(character);
+      else target.before(character);
+      tab.querySelector("img")!.src = list.querySelector("img")!.getAttribute("src")!;
+      character.focus();
+      markDirty();
+    };
+
+    list.addEventListener("dragstart", event => {
+      dragging = getCharacter(event);
+      if (!dragging || !event.dataTransfer) return;
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", dragging.dataset.hcciCharacter!);
+    });
+    list.addEventListener("dragover", event => {
+      if (!dragging || !getCharacter(event)) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+    });
+    list.addEventListener("drop", event => {
+      const target = getCharacter(event);
+      if (!dragging || !target) return;
+      event.preventDefault();
+      if (target !== dragging) move(dragging, target);
+      dragging = null;
+    });
+    list.addEventListener("dragend", () => { dragging = null; });
+    list.addEventListener("keydown", event => {
+      const character = getCharacter(event);
+      if (!character || !event.altKey || !["ArrowUp", "ArrowDown"].includes(event.key)) return;
+      event.preventDefault();
+      const target = event.key === "ArrowUp" ? character.previousElementSibling : character.nextElementSibling;
+      if (target) move(character, target);
+    });
+  }
+
+  private activateWindowDrag(grip: HTMLElement, frame: HTMLElement | null) {
+    if (!frame) return;
+    let drag: { pointerId: number; offsetX: number; offsetY: number } | null = null;
+
+    grip.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || drag) return;
+      const bounds = frame.getBoundingClientRect();
+      (this.bringToFront ?? this.bringToTop)?.call(this);
+      grip.setPointerCapture(event.pointerId);
+      drag = {
+        pointerId: event.pointerId,
+        offsetX: event.clientX - bounds.left,
+        offsetY: event.clientY - bounds.top
+      };
+      event.preventDefault();
+    });
+    grip.addEventListener("pointermove", (event) => {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+      this.setPosition({
+        left: Math.max(0, Math.min(window.innerWidth - 48, event.clientX - drag.offsetX)),
+        top: Math.max(0, Math.min(window.innerHeight - 48, event.clientY - drag.offsetY))
+      });
+    });
+    grip.addEventListener("lostpointercapture", (event) => {
+      if (event.pointerId === drag?.pointerId) drag = null;
+    });
+  }
+
   async _updateObject(event: Event) {
-    if (this.rollRuleChange) return;
+    if (!game.user?.isGM || this.rollRuleChange) return;
     const form = event.currentTarget as HTMLFormElement;
     if (!form.reportValidity()) return;
     const dieSides = Number(form.querySelector<HTMLSelectElement>('[name="dieSides"]')?.value ?? getDieSides());
+    const diceQuantity = Number(form.querySelector<HTMLInputElement>('[name="diceQuantity"]')?.value ?? getDiceQuantity());
+    const { min, max } = getCheckRollRange(dieSides, diceQuantity);
     const rollDirection = form.querySelector<HTMLSelectElement>('[name="rollDirection"]')?.value === "low" ? "low" : "high";
     const configs: Record<string, any> = getPlayerConfigs();
 
     const readPanel = (row: HTMLElement, scope: string) => {
       const panel = row.querySelector<HTMLElement>(`[data-hcci-panel="${scope}"]`);
       const field = (name: string) => panel?.querySelector<HTMLInputElement | HTMLSelectElement>(`[data-hcci-field="${name}"]`);
+      const duration = normalizeDurationOverride(field("duration")?.value);
       return {
+        ...(duration === undefined ? {} : { duration }),
         enabled: panel?.querySelector<HTMLInputElement>('[data-hcci-field="enabled"]')?.checked === true,
         threshold: (() => {
           const value = Number(field("threshold")?.value);
-          return Number.isInteger(value) && value >= 1 && value <= dieSides ? value : "";
+          return Number.isInteger(value) && value >= min && value <= max ? value : "";
         })(),
         animationStyle: field("animationStyle")?.value || "strike",
         imagePath: field("imagePath")?.value?.trim() ?? "",
@@ -292,23 +578,35 @@ export class PlayerConfigApp extends BaseFormApplication {
 
     for (const row of form.querySelectorAll<HTMLElement>("[data-hcci-row]")) {
       const key = row.dataset.hcciRow;
-      const activePanel = row.querySelector<HTMLElement>("[data-hcci-panel].is-active")?.dataset.hcciPanel;
-      if (activePanel) this.activeTabs.set(key, activePanel);
       configs[key] = readPanel(row, "success");
       configs[key].failure = readPanel(row, "failure");
+      const tokenPortrait = row.querySelector<HTMLInputElement>("[data-hcci-gm-token-portrait]");
+      if (tokenPortrait) configs[key].useTokenPortrait = tokenPortrait.checked;
+    }
+
+    const characterOrder = { ...setting(SETTINGS.characterOrder) };
+    for (const list of form.querySelectorAll<HTMLElement>("[data-hcci-characters]")) {
+      const player = list.dataset.hcciCharacters!;
+      if (player === "gm") continue;
+      characterOrder[player] = Array.from(list.querySelectorAll<HTMLElement>("[data-hcci-character]"), item => item.dataset.hcciCharacter);
     }
 
     const threshold = Number(form.querySelector<HTMLInputElement>('[name="threshold"]')?.value ?? getThreshold());
     const failureThreshold = Number(form.querySelector<HTMLInputElement>('[name="failureThreshold"]')?.value ?? getFailureThreshold());
     const duration = Number(form.querySelector<HTMLInputElement>('[name="duration"]')?.value ?? setting(SETTINGS.duration));
+    const defaultSuccessAudio = form.querySelector<HTMLInputElement>('[name="defaultSuccessAudio"]')?.checked === true;
+    const defaultFailureAudio = form.querySelector<HTMLInputElement>('[name="defaultFailureAudio"]')?.checked === true;
     await setSetting(SETTINGS.dieSides, dieSides);
+    await setSetting(SETTINGS.diceQuantity, diceQuantity);
     await setSetting(SETTINGS.rollDirection, rollDirection);
-    await setSetting(SETTINGS.threshold, Math.min(dieSides, Math.max(0, threshold)));
-    await setSetting(SETTINGS.failureThreshold, Math.min(dieSides, Math.max(0, failureThreshold)));
+    await setSetting(SETTINGS.threshold, threshold >= min && threshold <= max ? threshold : 0);
+    await setSetting(SETTINGS.failureThreshold, failureThreshold >= min && failureThreshold <= max ? failureThreshold : 0);
     await setSetting(SETTINGS.duration, Math.min(8000, Math.max(800, duration)));
+    await setSetting(SETTINGS.defaultSuccessAudio, defaultSuccessAudio);
+    await setSetting(SETTINGS.defaultFailureAudio, defaultFailureAudio);
     await savePlayerConfigs(configs);
+    await setSetting(SETTINGS.characterOrder, characterOrder);
     ui.notifications?.info("Critical Cut-In configuration saved.");
-    this.element?.removeClass("hcci-config-dirty");
     this.render(false);
   }
 }

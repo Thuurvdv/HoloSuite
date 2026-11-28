@@ -8,6 +8,7 @@ export const TEMPLATE_PATH = `modules/${MODULE_ID}/templates/player-config.hbs`;
 export const SETTINGS = {
   enabled: "enabled",
   dieSides: "dieSides",
+  diceQuantity: "diceQuantity",
   rollDirection: "rollDirection",
   threshold: "threshold",
   failureThreshold: "failureThreshold",
@@ -15,10 +16,20 @@ export const SETTINGS = {
   volume: "volume",
   audience: "audience",
   textEnabled: "textEnabled",
+  animationFont: "animationFont",
   defaultText: "defaultText",
   defaultFailureText: "defaultFailureText",
+  defaultSuccessAudio: "defaultSuccessAudio",
+  defaultFailureAudio: "defaultFailureAudio",
+  motionMode: "motionMode",
+  flashMode: "flashMode",
+  effectIntensity: "effectIntensity",
+  shakeIntensity: "shakeIntensity",
+  localVolume: "localVolume",
+  suppressCutins: "suppressCutins",
   debug: "debug",
-  playerConfigs: "playerConfigs"
+  playerConfigs: "playerConfigs",
+  characterOrder: "characterOrder"
 };
 
 export const AUDIENCE = {
@@ -31,6 +42,15 @@ declare const foundry: any;
 declare const game: any;
 
 export function registerSettings(configAppClass: any) {
+  game.settings.register(MODULE_ID, SETTINGS.effectIntensity, {
+    name: "Local Effect Detail", hint: "Adjust the particles and glow on this device.",
+    scope: "client", config: true, type: String, default: "standard",
+    choices: { low: "Low", standard: "Standard", high: "High" }
+  });
+  game.settings.register(MODULE_ID, SETTINGS.shakeIntensity, {
+    name: "Local Impact Shake", hint: "Shake the screen when a cut-in hits. Reduced and still motion turn off shake.",
+    scope: "client", config: true, type: Number, default: 0.5, range: { min: 0, max: 1, step: 0.1 }
+  });
   game.settings.register(MODULE_ID, SETTINGS.enabled, {
     name: "Enable Critical Cut-In",
     hint: "Play a configured cut-in when a qualifying natural result is rolled on the selected die.",
@@ -45,6 +65,10 @@ export function registerSettings(configAppClass: any) {
     hint: "Configured in Configure Player Cut-Ins, where changes confirm the reset of all listed roll thresholds.",
     scope: "world", config: false, type: Number, default: 20
   });
+  game.settings.register(MODULE_ID, SETTINGS.diceQuantity, {
+    name: "Amount of Dice",
+    scope: "world", config: false, type: Number, default: 1
+  });
   game.settings.register(MODULE_ID, SETTINGS.rollDirection, {
     name: "Positive Rolls",
     hint: "Configured in Configure Player Cut-Ins, together with the check die and roll thresholds.",
@@ -54,7 +78,7 @@ export function registerSettings(configAppClass: any) {
 
   game.settings.register(MODULE_ID, SETTINGS.threshold, {
     name: "Default Trigger Threshold",
-    hint: "0 automatically uses the best die face. Otherwise success triggers at or above this value for high rolls, or at or below it for low rolls.",
+    hint: "0 uses the best natural total. Otherwise success triggers at or above this value for high rolls, or at or below it for low rolls.",
     scope: "world",
     config: true,
     type: Number,
@@ -63,7 +87,7 @@ export function registerSettings(configAppClass: any) {
 
   game.settings.register(MODULE_ID, SETTINGS.failureThreshold, {
     name: "Default Failure Trigger",
-    hint: "0 automatically uses the worst die face. Otherwise failure triggers at or below this value for high rolls, or at or above it for low rolls.",
+    hint: "0 uses the worst natural total. Otherwise failure triggers at or below this value for high rolls, or at or above it for low rolls.",
     scope: "world",
     config: true,
     type: Number,
@@ -92,7 +116,7 @@ export function registerSettings(configAppClass: any) {
 
   game.settings.register(MODULE_ID, SETTINGS.audience, {
     name: "Show Animation To",
-    hint: "Choose who sees synchronized cut-in playback.",
+    hint: "Choose who sees cut-ins.",
     scope: "world",
     config: true,
     type: String,
@@ -102,6 +126,13 @@ export function registerSettings(configAppClass: any) {
       [AUDIENCE.triggeringPlayer]: "Triggering player only"
     },
     default: AUDIENCE.everyone
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.animationFont, {
+    name: "Animation Font",
+    hint: "Typeface for the cut-in label and actor name.",
+    scope: "world", config: true, type: String, default: "aicon",
+    choices: { aicon: "AICON", classic: "Classic (Orbitron / system fallback)" }
   });
 
   game.settings.register(MODULE_ID, SETTINGS.textEnabled, {
@@ -131,6 +162,60 @@ export function registerSettings(configAppClass: any) {
     default: "CRITICAL FAILURE"
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.defaultSuccessAudio, {
+    name: "Default Success Audio",
+    scope: "world", config: false, type: Boolean, default: false
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.defaultFailureAudio, {
+    name: "Default Failure Audio",
+    scope: "world", config: false, type: Boolean, default: false
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.motionMode, {
+    name: "Local Motion",
+    hint: "Control cut-in motion on this device. System follows your operating-system reduced-motion preference.",
+    scope: "client",
+    config: true,
+    type: String,
+    choices: {
+      system: "Follow system preference",
+      full: "Full cinematic motion",
+      reduced: "Reduced motion",
+      still: "Still presentation"
+    },
+    default: "system"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.flashMode, {
+    name: "Local Flash Intensity",
+    hint: "Reduce or disable the bright opening flash on this device.",
+    scope: "client",
+    config: true,
+    type: String,
+    choices: { full: "Full", soft: "Soft", off: "Off" },
+    default: "soft"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.localVolume, {
+    name: "Local Cut-In Volume",
+    hint: "Personal volume multiplier applied after the GM's cut-in volume setting.",
+    scope: "client",
+    config: true,
+    type: Number,
+    range: { min: 0, max: 1, step: 0.05 },
+    default: 1
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.suppressCutins, {
+    name: "Hide Cut-Ins On This Device",
+    hint: "Do not show or play critical cut-ins for this client.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.debug, {
     name: "Debug Logging",
     hint: "Log roll detection and playback decisions to the console.",
@@ -148,10 +233,18 @@ export function registerSettings(configAppClass: any) {
     default: {}
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.characterOrder, {
+    name: "Cut-In Character Order",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: {}
+  });
+
   game.settings.registerMenu(MODULE_ID, "playerConfigMenu", {
     name: "Configure Player Cut-Ins",
     label: "Open Configuration",
-    hint: "Choose the check die and positive roll direction, and set each user or actor's roll thresholds, portrait, audio, label, accent color, and enable state.",
+    hint: "Set the dice and thresholds, then customize each character's cut-in.",
     icon: "fa-solid fa-bolt",
     type: configAppClass,
     restricted: true
@@ -166,6 +259,20 @@ export async function setSetting(key: string, value: any) {
   return game.settings.set(MODULE_ID, key, value);
 }
 
+export function resolveCutinAudio(kind: "success" | "failure", customPath?: unknown, useDefault?: boolean): string {
+  const custom = typeof customPath === "string" ? customPath.trim() : "";
+  if (custom) return custom;
+  const key = kind === "failure" ? SETTINGS.defaultFailureAudio : SETTINGS.defaultSuccessAudio;
+  const enabled = useDefault ?? (setting(key) === true);
+  return enabled ? `modules/${MODULE_ID}/assets/sounds/critical-${kind}.ogg` : "";
+}
+
+export function normalizeDurationOverride(value: unknown): number | undefined {
+  if (typeof value !== "number" && typeof value !== "string") return undefined;
+  const duration = Number(value);
+  return Number.isInteger(duration) && duration >= 800 && duration <= 8000 ? duration : undefined;
+}
+
 export function getThreshold() {
   return resolveThreshold(setting(SETTINGS.threshold), "success");
 }
@@ -178,15 +285,27 @@ export function getDieSides() {
   return normalizeDieSides(setting(SETTINGS.dieSides));
 }
 
+export const MAX_DICE_QUANTITY = Math.floor(Number.MAX_SAFE_INTEGER / 10000);
+
+export function getDiceQuantity() {
+  const count = Number(setting(SETTINGS.diceQuantity));
+  return Number.isInteger(count) && count >= 1 && count <= MAX_DICE_QUANTITY ? count : 1;
+}
+
+export function getCheckRollRange(sides = getDieSides(), quantity = getDiceQuantity()) {
+  return { min: quantity, max: sides * quantity };
+}
+
 export function lowRollsAreGood() {
   return normalizeRollDirection(setting(SETTINGS.rollDirection)) === "low";
 }
 
 function resolveThreshold(value: any, kind: "success" | "failure") {
   const threshold = Number(value);
-  if (Number.isInteger(threshold) && threshold >= 1 && threshold <= getDieSides()) return threshold;
+  const { min, max } = getCheckRollRange();
+  if (Number.isInteger(threshold) && threshold >= min && threshold <= max) return threshold;
   const useLowFace = (kind === "success") === lowRollsAreGood();
-  return useLowFace ? 1 : getDieSides();
+  return useLowFace ? min : max;
 }
 
 export function resultQualifies(value: number, threshold: number, kind: "success" | "failure") {

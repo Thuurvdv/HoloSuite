@@ -1,0 +1,221 @@
+/* System Collapse. The rest state below is the hold frame: an exposed two-tone portrait with the
+   collapsed rows stacked on the floor line. The timeline lives in system-collapse.ts. */
+.hcci-style-system-collapse {
+  --col-w: min(40vw, 62vh);
+  --col-h: calc(var(--col-w) * 1.25);
+  --col-ink: #07060a;
+  --col-word: 8;
+  --col-lines: 2;
+  background: #07060ad9;
+}
+/* The drained backdrop must see the live scene, so the root never fades while motion is on. */
+.hcci-style-system-collapse.hcci-motion-full,
+.hcci-style-system-collapse.hcci-motion-full.hcci-exiting { animation: none; background: none; }
+.hcci-style-system-collapse :is(.hcci-visual, .hcci-portrait-frame, .hcci-copy) { animation: none; }
+.hcci-style-system-collapse :is(.hcci-atmosphere, .hcci-frame-accent, .hcci-effects) { display: none; }
+
+.hcci-style-system-collapse .hcci-stage {
+  z-index: 3;
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-content: center;
+  gap: 5vw;
+  width: 86vw;
+}
+.hcci-style-system-collapse .hcci-visual {
+  justify-self: end;
+  width: var(--col-w);
+  height: var(--col-h);
+  aspect-ratio: auto;
+}
+.hcci-style-system-collapse .hcci-portrait-frame {
+  position: absolute;
+  inset: 0;
+  justify-self: auto;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border: 0;
+  box-shadow: none;
+  background: var(--col-ink);
+  clip-path: none;
+  filter: none;
+}
+.hcci-style-system-collapse :is(.hcci-portrait, .hcci-col-art) {
+  display: block;
+  max-width: none;
+  border: 0;
+  object-fit: cover;
+  object-position: 50% 25%;
+  transform: none;
+}
+.hcci-style-system-collapse .hcci-portrait {
+  width: 100%;
+  height: 100%;
+  filter: grayscale(1) contrast(1.3) brightness(.92);
+}
+.hcci-style-system-collapse .hcci-portrait-fallback { display: grid; background: var(--col-ink); }
+.hcci-style-system-collapse .hcci-portrait-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, #0006 3px 4px),
+    linear-gradient(color-mix(in srgb, var(--hcci-accent) 82%, #fff), var(--hcci-accent));
+  mix-blend-mode: multiply;
+}
+
+/* Twelve rows, each a window onto the same image position. */
+.hcci-style-system-collapse :is(.hcci-col-backing, .hcci-col-rows) {
+  position: absolute;
+  inset: 0;
+}
+.hcci-style-system-collapse .hcci-col-backing { background: var(--col-ink); opacity: 0; }
+.hcci-style-system-collapse .hcci-col-row {
+  position: absolute;
+  top: calc(var(--r) * var(--col-h) / 12);
+  left: 0;
+  width: 100%;
+  height: calc(var(--col-h) / 12 + .6px);
+}
+.hcci-style-system-collapse :is(.hcci-col-fall, .hcci-col-band) {
+  position: absolute;
+  inset: 0;
+}
+/* Rest state is the landed stack; values match PITCH and THIN in system-collapse.ts. */
+.hcci-style-system-collapse .hcci-col-fall { transform: translateY(calc((11 - var(--r)) * 90%)); }
+.hcci-style-system-collapse .hcci-col-band {
+  overflow: hidden;
+  background: var(--col-ink);
+  transform: scaleY(.07);
+  transform-origin: 50% 100%;
+}
+.hcci-style-system-collapse .hcci-col-art {
+  position: absolute;
+  top: calc(var(--r) * var(--col-h) / -12);
+  left: 0;
+  width: 100%;
+  height: var(--col-h);
+  filter: saturate(.92);
+}
+.hcci-style-system-collapse .hcci-col-lod {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.hcci-style-system-collapse .hcci-col-plain .hcci-col-lod { display: none; }
+.hcci-style-system-collapse .hcci-col-dead {
+  position: absolute;
+  inset: 0;
+  background: var(--hcci-accent);
+  opacity: 0;
+}
+
+.hcci-style-system-collapse .hcci-col-brackets {
+  position: absolute;
+  inset: -1.6vh;
+  opacity: 0;
+}
+.hcci-style-system-collapse .hcci-col-brackets i {
+  position: absolute;
+  width: 4.5vh;
+  height: 4.5vh;
+  border: 0 solid var(--hcci-accent);
+}
+.hcci-style-system-collapse .hcci-col-brackets i:nth-child(1) { top: 0; left: 0; border-width: 3px 0 0 3px; }
+.hcci-style-system-collapse .hcci-col-brackets i:nth-child(2) { top: 0; right: 0; border-width: 3px 3px 0 0; }
+.hcci-style-system-collapse .hcci-col-brackets i:nth-child(3) { bottom: 0; left: 0; border-width: 0 0 3px 3px; }
+.hcci-style-system-collapse .hcci-col-brackets i:nth-child(4) { right: 0; bottom: 0; border-width: 0 3px 3px 0; }
+.hcci-style-system-collapse.hcci-motion-full .hcci-col-brackets { opacity: 1; }
+.hcci-style-system-collapse.hcci-motion-full .hcci-col-brackets i { transform: translateY(130vh); }
+
+.hcci-style-system-collapse .hcci-col-floor {
+  position: absolute;
+  top: 100%;
+  left: -100vw;
+  width: calc(200vw + 100%);
+  height: 2px;
+  background: color-mix(in srgb, var(--hcci-accent) 60%, #fff);
+  opacity: .55;
+}
+.hcci-style-system-collapse .hcci-col-beam {
+  position: absolute;
+  top: calc(50% - 2px);
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #fff;
+  box-shadow: 0 0 12px 2px var(--hcci-accent);
+  opacity: 0;
+}
+
+.hcci-style-system-collapse .hcci-copy {
+  align-content: center;
+  justify-items: start;
+  gap: 1.2vh;
+  padding-top: 1.6vh;
+  border-top: 3px solid var(--hcci-accent);
+  text-align: start;
+}
+.hcci-style-system-collapse .hcci-copy:not(:has(.hcci-title, .hcci-subtitle)) { visibility: hidden; }
+.hcci-style-system-collapse .hcci-title {
+  max-width: 100%;
+  font-size: clamp(15px, min(calc(35vw / var(--col-word)), calc(46vh / var(--col-lines))), 150px);
+  line-height: .98;
+  white-space: normal;
+  overflow-wrap: normal;
+  text-shadow: .05em .05em 0 color-mix(in srgb, var(--hcci-accent) 70%, #000);
+}
+.hcci-style-system-collapse .hcci-subtitle {
+  border: 0;
+  padding: 0;
+  font-size: clamp(10px, 1.5vw, 24px);
+}
+.hcci-style-system-collapse .hcci-col-cursor {
+  width: clamp(10px, 1.6vw, 30px);
+  height: clamp(4px, .7vh, 9px);
+  background: var(--hcci-accent);
+  opacity: 0;
+}
+
+/* Root layers behind and in front of the stage. */
+.hcci-style-system-collapse :is(.hcci-col-freeze, .hcci-col-tears, .hcci-col-flash) {
+  position: absolute;
+  inset: 0;
+}
+.hcci-style-system-collapse .hcci-col-freeze {
+  z-index: 1;
+  background: #07060ab8;
+  -webkit-backdrop-filter: grayscale(.9) brightness(.5);
+  backdrop-filter: grayscale(.9) brightness(.5);
+}
+.hcci-style-system-collapse.hcci-detail-low .hcci-col-freeze {
+  background: #07060ae0;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/* The tears sit under the drained layer, so they disturb the live scene without flashing. */
+.hcci-style-system-collapse .hcci-col-tears { z-index: 0; }
+.hcci-style-system-collapse .hcci-col-tears i {
+  position: absolute;
+  top: 22%;
+  left: 0;
+  width: 100%;
+  height: 5vh;
+  opacity: 0;
+  -webkit-backdrop-filter: invert(1) hue-rotate(180deg);
+  backdrop-filter: invert(1) hue-rotate(180deg);
+}
+.hcci-style-system-collapse .hcci-col-tears i:nth-child(2) { top: 63%; height: 2.4vh; }
+.hcci-style-system-collapse .hcci-col-tears i:nth-child(3) { top: 84%; height: 7vh; }
+.hcci-style-system-collapse .hcci-col-flash { z-index: 5; background: var(--hcci-accent); opacity: 0; }
+.hcci-style-system-collapse.hcci-flash-off .hcci-col-flash { display: none; }
+
+@media (max-width: 760px) and (orientation: portrait) {
+  .hcci-style-system-collapse { --col-w: min(64vw, 40vh); }
+  .hcci-style-system-collapse .hcci-stage { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 4vh; }
+  .hcci-style-system-collapse .hcci-visual { justify-self: center; }
+  .hcci-style-system-collapse .hcci-copy { width: 100%; }
+  .hcci-style-system-collapse .hcci-title { font-size: clamp(15px, min(calc(72vw / var(--col-word)), calc(22vh / var(--col-lines))), 90px); }
+}

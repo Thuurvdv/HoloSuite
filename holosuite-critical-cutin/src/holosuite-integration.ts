@@ -1,4 +1,4 @@
-import { MODULE_ID, MODULE_TITLE, SETTINGS, setting } from "./settings";
+import { MODULE_ID, SETTINGS, setting } from "./settings";
 import { openPlayerConfig } from "./player-config-app";
 
 declare const game: any;
@@ -12,15 +12,16 @@ function getHoloSuiteApi() {
 export function registerHoloSuiteIntegration() {
   const api = getHoloSuiteApi();
   if (!api?.registerApp) return false;
+  api.unregisterApp?.(`${MODULE_ID}-box-of-doom`);
 
-  // HoloSuite integration point: this adds the module to the GM command panel when HoloSuite is active.
   api.registerApp({
+    brandingInApp: true,
     id: MODULE_ID,
     title: "Critical Cut-In",
     icon: "fa-solid fa-bolt-lightning",
     premium: false,
     playerVisible: false,
-    description: "JRPG-style critical hit cut-in animation for natural d20 results.",
+    description: "Set up cut-ins for critical rolls or start a Glory Roll.",
     enabled: setting(SETTINGS.enabled),
     open: () => openPlayerConfig()
   });
@@ -28,18 +29,18 @@ export function registerHoloSuiteIntegration() {
     moduleId: MODULE_ID,
     title: "Critical Cut-In",
     tier: "free",
-    version: "1.0.6",
-    updated: "2026-09-02",
+    version: "2.0.0",
+    updated: "2026-11-28",
     icon: "fa-solid fa-bolt-lightning",
     entries: [
       {
-        title: "More control over critical cut-ins",
-        summary: "Choose the die, decide whether high or low results are good, and give each character their own success and failure thresholds.",
+        title: "New cut-in editor",
+        summary: "Browse 15 animations, reorder characters, and set up criticals for rolls like 2d6.",
         tags: ["Foundry v12-v14"]
       },
       {
-        title: "Fewer accidental cut-ins",
-        summary: "Old chat rolls, damage rolls, discarded dice, and rerolls no longer set off an animation when they should not."
+        title: "Glory Roll",
+        summary: "Pick who rolls, enter a formula, and show the result to the table."
       }
     ]
   });
@@ -50,4 +51,5 @@ export function registerHoloSuiteIntegration() {
 export function unregisterHoloSuiteIntegration() {
   const api = getHoloSuiteApi();
   api?.unregisterApp?.(MODULE_ID);
+  api?.unregisterApp?.(`${MODULE_ID}-box-of-doom`);
 }

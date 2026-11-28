@@ -1,59 +1,41 @@
 # HoloSuite Critical Cut-In
 
-HoloSuite Critical Cut-In adds critical hit animations to your Foundry VTT game. When a player rolls a qualifying natural result on the selected die (d20 by default), a full-screen cut-in flashes across every connected screen with the character's portrait, a custom sound effect, and an overlay label. It turns a lucky roll into a memorable cinematic moment.
+Show a character portrait, text, and sound when a roll hits your success or failure threshold. Works with Foundry V12–V14 and requires **HoloSuite Core**.
 
 ![Critical Success](../images/CriticalSucces.jpg)
 
 ![Critical Failure](../images/CriticalFailure.jpg)
 
-## What Does It Do?
+## Set up your rolls
 
-- Watches the selected die and triggers a visual cut-in animation when a natural result meets the configured success or failure threshold. Choose whether high or low rolls are positive.
-- Each player character can have their own custom cut-in setup: unique image, sound effect, animation style, overlay text, and accent color.
-- The GM can set a global threshold (for example, natural 20 only, or natural 19 and above) and also override the threshold per character.
-- A GM cut-in configuration covers rolls that do not belong to a specific player character.
-- The cut-in duration is adjustable so you can control how long the animation stays on screen.
+1. Enable **HoloSuite Core** and **HoloSuite Critical Cut-In** in your world.
+2. Go to **Configure Settings → Module Settings → HoloSuite Critical Cut-In** and open **Configure Player Cut-Ins**.
+3. Under **Global Settings**, choose your **Check Die**, **Amount of Dice**, and whether high or low rolls are good. Set your success and failure thresholds, then save.
 
-## Tutorial: Using Critical Cut-In as a DM
+With **Check Die** set to d6 and **Amount of Dice** set to 2, the module checks the raw total of exactly two active d6s. With the amount set to 1, it checks each die separately. The check skips modifiers, discarded dice, rerolled dice, and rolls it identifies as damage. A percentile roll must use a d100 term to match the d100 setting.
 
-### Initial Setup
+A global threshold of 0 uses the best or worst possible result. Changing the die, amount, or roll direction asks you to confirm a threshold reset. You can edit the thresholds again before saving.
 
-1. Enable **HoloSuite Critical Cut-In** & **Holosuite-core** in your Foundry world.
-2. Open **Configure Settings**, then go to **Module Settings** and find **HoloSuite Critical Cut-In**.
-3. Click **Configure Player Cut-Ins** to open the configuration panel. Choose the **Check die** dropdown and whether **High rolls are positive** or **Low rolls are positive**. Die options include Foundry's standard d4, d6, d8, d10, d12, d20, and d100, additional registered numbered dice, and any previously saved custom die. Non-numeric dice such as Fate dice are not supported by these numeric checks.
-4. Changing the die or positive roll direction asks for confirmation before resetting the global thresholds and both Success and Failure tabs for every listed player/GM entry. For d100/high, success resets to 100 and failure to 1; for d100/low, success resets to 1 and failure to 100. Cancel keeps the previous die, direction, and thresholds. Confirm stages the changes; click **Save** to persist them.
+## Set up your characters
 
-### Configuring Player Cut-Ins
+- Select a player and character. Set up **Critical Success** and **Critical Failure** separately. Each has its own **Enabled** switch, threshold, animation, duration, portrait, sound, text, and color.
+- Leave the portrait blank to use the actor's portrait. Leave the threshold or duration blank to use the global setting.
+- Drag characters into order, or focus a row and press **Alt + Up/Down**. The first character's portrait appears on the player's tab.
+- Use the **GM** entry for GM cut-ins. Turn on **Use token portrait** to use the rolling token's artwork when available.
+- Scroll the animation row to browse all 15 styles. Click **Test Cut-In** to see and hear the selected animation on your own screen.
 
-1. Each player-owned actor in the world gets a row in the configuration panel.
-2. For each actor, you can set:
-   - **Enable/Disable**: Turn the cut-in on or off for that character.
-   - **Success / Failure Threshold**: Set a custom threshold for this character. Leave it blank to use the global default. The ≥ or ≤ label follows the selected roll direction.
-   - **Animation Style**: Choose how the cut-in animates onto the screen.
-   - **Image**: Pick a custom image for the cut-in. If you leave this blank, the actor's portrait is used automatically.
-   - **Audio**: Select a sound effect that plays during the cut-in.
-   - **Overlay Label**: Set the text that flashes on screen (like "CRITICAL HIT" or a character catchphrase).
-   - **Accent Color**: Choose a color that tints the cut-in border and effects.
-3. The **GM Cut-In** row at the top covers any rolls the GM makes that do not match a configured player actor.
-4. Adjust the **global duration** field to control how many milliseconds the animation stays visible.
+**Default Success Audio** and **Default Failure Audio** are separate switches in **Global Settings**. Both start off. Custom audio takes priority over the default.
 
-The confirmed reset changes only roll thresholds. Images, sounds, animations, labels, colors, and enabled states stay unchanged. You can customize individual thresholds again before saving. Global thresholds of 0 and blank actor thresholds remain available for automatic/inherited values. Only natural results on the selected die are checked; modifiers, discarded/rerolled dice, and identified damage rolls do not trigger cut-ins. Dice pools are checked per active die, not by their sum. A percentile roll must be represented as a d100 term to match a d100 selection.
+## Glory Roll
 
-### Using It in Play
+1. As the active GM, click **Glory Roll** next to the player tabs.
+2. Pick who rolls and enter a Foundry formula such as `2d6 + 3`. Add stakes or a success target if you want.
+3. Click **Show Arena to Table**. The chosen roller clicks **Roll & Reveal**.
 
-Once configured, the module runs automatically. Qualifying rolls trigger the cut-in with no extra input needed. You can also trigger a cut-in manually for testing or dramatic effect by running a macro.
+The target follows your high or low roll setting. Success throws gold confetti, failure shows a red fade, and chat includes the subtotal for each dice term. If Dice So Nice is enabled, 3D dice roll inside the circle and get smaller as the pool grows. The GM can cancel before the roll.
 
-## Tutorial: Using Critical Cut-In as a Player
+## Player settings
 
-### What You See
+Cut-ins play automatically. In **Module Settings**, each player can adjust motion, flash, shake, effect detail, and volume, or hide cut-ins on their client. Reduced and still motion turn off shake.
 
-1. Roll the die selected by the GM as part of normal gameplay (attacks, skill checks, saves, etc.).
-2. If your natural roll meets the success or failure threshold in the configured direction, a cut-in animation fires across the screen.
-3. Your character's portrait (or custom image), sound effect, and overlay text flash on screen for a moment before fading away.
-4. That is it. There is nothing you need to do. The module handles everything automatically based on your rolls.
-
-### Things to Know
-
-- The GM controls the trigger threshold and all visual settings. If you want a custom image or catchphrase for your character's cut-in, talk to your GM about setting it up.
-- The cut-in is purely visual and does not affect game mechanics. It is a celebration of a great roll, nothing more.
-- If your GM has not configured a cut-in for your character, the module will use your actor portrait as a fallback image.
+The GM can use **Animation Font** to choose AICON or Classic. The bundled AICON font by Eko Bimantara comes with its [original license](assets/fonts/AICON-LICENSE.txt).

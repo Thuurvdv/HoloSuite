@@ -1,0 +1,179 @@
+.hcci-glory {
+  --glory-gold: #ffd37b;
+  --glory-ink: #150d20;
+  --glory-accent: var(--glory-gold);
+  position: fixed;
+  inset: 0;
+  z-index: 100100;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: radial-gradient(ellipse at center, #24172f9c, #08050eea 74%);
+  color: #fff3db;
+  font-family: var(--hs-font-ui, system-ui, sans-serif);
+  text-align: center;
+  isolation: isolate;
+}
+
+.hcci-glory[data-control="false"] { pointer-events: none; }
+.hcci-glory[data-outcome="success"] { --glory-accent: #ffe7a7; }
+.hcci-glory[data-outcome="failure"] { --glory-accent: #ff8c7a; }
+
+.hcci-glory-stage {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 42rem);
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  justify-items: center;
+  gap: clamp(.45rem, 2vmin, 1.25rem);
+}
+
+.hcci-glory-heading {
+  align-self: end;
+  display: grid;
+  gap: .35rem;
+  width: 100%;
+}
+
+.hcci-glory h2 {
+  margin: 0;
+  border: 0;
+  color: var(--glory-gold);
+  font: 800 clamp(1.55rem, 5vmin, 3.2rem)/1.05 "HCCI AICON", var(--hs-font-ui, system-ui, sans-serif);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.hcci-glory-stakes,
+.hcci-glory-target { margin: 0; overflow-wrap: anywhere; }
+.hcci-glory-stakes { color: #fff1d7; font-size: clamp(.9rem, 2.5vmin, 1.27rem); }
+.hcci-glory-stakes:empty { display: none; }
+.hcci-glory-target { color: #e8c68f; font-weight: 650; }
+
+.hcci-glory-arena {
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: min(76vw, 54vh, 34rem);
+  aspect-ratio: 1;
+  border: 2px solid var(--glory-accent);
+  border-radius: 50%;
+  padding: clamp(14px, 5vmin, 42px);
+  background:
+    radial-gradient(circle, transparent 60%, #a5703b45 60.3% 60.6%, transparent 61%),
+    radial-gradient(circle, transparent 66%, #eabb664f 66.4% 66.7%, transparent 67%),
+    radial-gradient(circle at 50% 44%, #32233a, #20142b 60%, #100d1a 82%);
+  box-shadow: inset 0 0 35px #d494392e, 0 0 0 5px #1d1226, 0 0 0 6px #a06e44, 0 0 45px #e4a4492f;
+}
+
+.hcci-glory-status {
+  display: grid;
+  gap: .3rem;
+  overflow-wrap: anywhere;
+  color: var(--glory-accent);
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.hcci-glory-status strong {
+  color: #fff8ed;
+  font: 950 clamp(2.8rem, 15vmin, 7rem)/.95 "HCCI AICON", var(--hs-font-ui, system-ui, sans-serif);
+  text-shadow: .04em .045em #000, .073em .078em #a57955;
+}
+
+.hcci-glory[data-dice-active="true"] .hcci-glory-status { opacity: 0; }
+.hcci-glory-dice-canvas { position: fixed !important; z-index: 100101 !important; pointer-events: none !important; }
+
+.hcci-glory-controls {
+  align-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .65rem;
+  margin-top: .4rem;
+}
+
+.hcci-glory-controls button {
+  width: auto;
+  min-height: 2.35rem;
+  padding: .25rem 1rem;
+  border: 1px solid var(--glory-accent);
+  border-radius: .25rem;
+  background: #291c33;
+  color: #fff5e2;
+  font: 750 .9rem/1.2 var(--hs-font-ui, system-ui, sans-serif);
+  cursor: pointer;
+}
+
+.hcci-glory-controls button:first-child { background: var(--glory-gold); color: var(--glory-ink); }
+.hcci-glory-controls button:hover,
+.hcci-glory-controls button:focus-visible { background: #ffe8b7; color: var(--glory-ink); }
+.hcci-glory-controls button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.hcci-glory-controls button:disabled { opacity: .65; cursor: wait; }
+
+.hcci-glory-effect {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hcci-glory-effect-success i {
+  position: absolute;
+  width: var(--glory-size);
+  height: calc(var(--glory-size) * .55);
+  border-radius: 1px;
+  background: #ffcc58;
+  box-shadow: 0 0 7px #f9a52cbb;
+  animation: hcci-glory-spark var(--glory-duration) var(--glory-delay) cubic-bezier(.12,.65,.28,1) both;
+}
+.hcci-glory-effect-success i:nth-child(3n) { background: #ffe7a5; }
+.hcci-glory-effect-success i:nth-child(4n) { background: #f4992d; }
+.hcci-glory-effect-success i[data-edge="top"] { left: var(--glory-spawn); top: 0; }
+.hcci-glory-effect-success i[data-edge="right"] { right: 0; top: var(--glory-spawn); }
+.hcci-glory-effect-success i[data-edge="bottom"] { left: var(--glory-spawn); bottom: 0; }
+.hcci-glory-effect-success i[data-edge="left"] { left: 0; top: var(--glory-spawn); }
+
+.hcci-glory-effect-failure {
+  background: linear-gradient(to bottom, #f32944ad, #bc162b70 30%, #a7172930 65%, transparent 100%);
+  animation: hcci-glory-aura 1550ms ease-out both;
+}
+
+@keyframes hcci-glory-spark {
+  0% { opacity: 0; transform: translate(0, 0) scale(.55); }
+  12%, 58% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--glory-x), var(--glory-y)) rotate(var(--glory-spin)) scale(.65); }
+}
+
+@keyframes hcci-glory-aura {
+  0% { opacity: .2; clip-path: inset(0 0 100% 0); }
+  22% { opacity: 1; }
+  57% { opacity: .76; clip-path: inset(0); }
+  100% { opacity: 0; clip-path: inset(0); }
+}
+
+.hcci-glory[data-phase="opening"][data-animate="true"] .hcci-glory-arena { animation: hcci-glory-rolling 850ms ease-in-out both; }
+.hcci-glory[data-phase="revealed"][data-animate="true"] .hcci-glory-status strong { animation: hcci-glory-result 360ms cubic-bezier(.18,.88,.23,1) both; }
+
+@keyframes hcci-glory-rolling {
+  45% { box-shadow: inset 0 0 48px #d4943966, 0 0 0 5px #1d1226, 0 0 0 6px #ffd37b, 0 0 65px #e4a44966; }
+}
+
+@keyframes hcci-glory-result {
+  0% { transform: scale(.8); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+.hcci-glory:is([data-motion="reduced"], [data-motion="still"]) * { animation: none !important; }
+.hcci-glory:is([data-motion="reduced"], [data-motion="still"]) .hcci-glory-effect { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hcci-glory * { animation: none !important; }
+  .hcci-glory-effect { display: none; }
+}
+
+.hcci-glory-form { display: grid; gap: .7rem; min-width: min(19rem, 70vw); }
+.hcci-glory-form label { display: grid; gap: .25rem; }

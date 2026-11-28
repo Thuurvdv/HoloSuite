@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Critical Cut-In · Effect Studio</title>
+<link rel="stylesheet" href="/styles/critical-cutin.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#070d17;color:#dbe9fa;font:14px system-ui}body::before{content:'';position:fixed;inset:0;background:linear-gradient(#35527525 1px,transparent 1px),linear-gradient(90deg,#35527525 1px,transparent 1px);background-size:64px 64px;transform:perspective(800px) rotateX(20deg) scale(1.2)}
+body > header{position:fixed;z-index:100001;top:16px;left:24px;right:24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#07101ce8;border:1px solid #31445c;padding:12px 16px;border-radius:8px}body > header strong{margin-right:auto;font-size:12px;letter-spacing:.14em;text-transform:uppercase}select,button,input{background:#122238;color:#e9f5ff;border:1px solid #40536a;border-radius:4px;padding:6px}button{cursor:pointer}#description{position:fixed;bottom:22px;left:24px;z-index:100001;color:#97b1c9;max-width:80vw}body.capture > header,body.capture #description{display:none}
+</style></head><body>
+<header><strong>Critical Cut-In / Effect Studio</strong><select id="preset" aria-label="Effect"></select><select id="outcome" aria-label="Outcome"><option value="success">Success</option><option value="failure">Failure</option></select><select id="motion" aria-label="Motion"><option value="full">Full motion</option><option value="reduced">Reduced motion</option><option value="still">Still</option></select><select id="font" aria-label="Animation font"><option value="aicon">AICON</option><option value="classic">Classic</option></select><input id="accent" aria-label="Accent color" type="color" value="#69e8ff"><button id="play">Replay</button></header>
+<p id="description"></p><script src="/preview.js"></script></body></html>

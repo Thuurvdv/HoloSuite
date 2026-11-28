@@ -1,0 +1,152 @@
+.hcci-style-rift {
+  --rift-metal: #0a1322;
+  --rift-tint: color-mix(in srgb, var(--hcci-accent) 18%, #101927);
+  --rift-open-upper: -17vh;
+  --rift-open-lower: 19vh;
+  animation: none;
+  background: #050812bc;
+}
+
+.hcci-style-rift .hcci-atmosphere {
+  opacity: 1;
+  background:
+    linear-gradient(156deg, transparent 43%, var(--rift-tint) 43.2% 47%, transparent 47.2% 51%, #071321 51.2% 57%, transparent 57.2%),
+    radial-gradient(ellipse at 39% 52%, var(--rift-tint), transparent 74%);
+}
+
+.hcci-style-rift :is(.hcci-visual, .hcci-portrait-frame, .hcci-copy) {
+  animation: none;
+}
+
+.hcci-style-rift .hcci-stage {
+  display: block;
+  width: 100%;
+}
+
+.hcci-style-rift .hcci-visual {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  aspect-ratio: auto;
+}
+
+.hcci-style-rift .hcci-portrait-frame {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border: 0;
+  background: radial-gradient(ellipse at center, var(--rift-tint), var(--rift-metal) 78%);
+  box-shadow: none;
+  clip-path: none;
+}
+
+.hcci-style-rift .hcci-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  filter: none;
+}
+
+.hcci-style-rift .hcci-frame-accent { display: none; }
+
+.hcci-style-rift .hcci-copy {
+  position: absolute;
+  right: 4%;
+  bottom: clamp(16px, 7vh, 96px);
+  width: min(62%, 900px);
+  box-sizing: border-box;
+  align-content: center;
+  gap: 5px;
+  padding: clamp(12px, 2.2vw, 34px);
+  background: var(--hcci-accent);
+  clip-path: polygon(2% 15%, 12% 5%, 82% 1%, 85% 6%, 100% 4%, 96% 82%, 86% 84%, 76% 95%, 23% 98%, 19% 93%, 0 100%);
+  isolation: isolate;
+}
+
+.hcci-style-rift .hcci-copy:not(:has(.hcci-title, .hcci-subtitle)) { visibility: hidden; }
+
+.hcci-style-rift .hcci-copy::before {
+  content: "";
+  position: absolute;
+  inset: 2px 4px 3px 4px;
+  z-index: -1;
+  background: linear-gradient(155deg, var(--rift-tint), #0b1220 48%);
+  clip-path: inherit;
+}
+
+.hcci-style-rift .hcci-title {
+  font-size: clamp(12px, min(6vw, calc(77vw / max(8, var(--hcci-title-chars, 8)))), 104px);
+  line-height: 1.03;
+  text-shadow: 2px 3px 0 color-mix(in srgb, var(--hcci-accent) 55%, #050812);
+}
+
+.hcci-style-rift .hcci-subtitle {
+  border: 0;
+  padding-top: 3px;
+  font-size: clamp(10px, 1.35vw, 20px);
+}
+
+.hcci-style-rift :is(.hcci-rift-geometry, .hcci-rift-flash) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hcci-style-rift .hcci-rift-geometry {
+  z-index: 2;
+  color: var(--hcci-accent);
+  fill: currentColor;
+}
+
+.hcci-style-rift .hcci-rift-plate { transform-origin: center; transform-box: view-box; }
+.hcci-style-rift .hcci-rift-upper { transform: translateY(var(--rift-open-upper)); }
+.hcci-style-rift .hcci-rift-lower { transform: translateY(var(--rift-open-lower)); }
+.hcci-style-rift .hcci-rift-metal { fill: var(--rift-metal); }
+.hcci-style-rift .hcci-rift-facet { fill: var(--rift-tint); }
+.hcci-style-rift :is(.hcci-rift-score, .hcci-rift-edge, .hcci-rift-edge-light) {
+  fill: none;
+  stroke: currentColor;
+  vector-effect: non-scaling-stroke;
+}
+.hcci-style-rift .hcci-rift-score { opacity: .28; stroke-width: 1; }
+.hcci-style-rift .hcci-rift-edge {
+  stroke: color-mix(in srgb, var(--hcci-accent), #f4fbff 73%);
+  stroke-width: clamp(4px, .55vw, 9px);
+  stroke-linejoin: bevel;
+}
+.hcci-style-rift .hcci-rift-edge-light { stroke: #f4fbff; stroke-width: 2; }
+.hcci-style-rift .hcci-rift-trail { opacity: .52; }
+.hcci-style-rift .hcci-rift-white { fill: #f4fbff; }
+.hcci-style-rift :is(.hcci-rift-slash, .hcci-rift-splinters, .hcci-rift-flash) { opacity: 0; }
+
+.hcci-style-rift .hcci-rift-flash {
+  z-index: 4;
+  background: #f6fbff;
+}
+.hcci-style-rift.hcci-flash-off .hcci-rift-flash { display: none; }
+
+.hcci-style-rift.hcci-exiting {
+  animation: hcci-rift-release 180ms linear both;
+}
+.hcci-style-rift.hcci-motion-still.hcci-exiting { animation: none; }
+@keyframes hcci-rift-release {
+  0%, 48% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 760px) and (orientation: portrait) {
+  .hcci-style-rift .hcci-rift-geometry {
+    inset-inline-start: -30%;
+    width: 160%;
+  }
+  .hcci-style-rift .hcci-copy { width: 92%; padding-inline: 6%; }
+  .hcci-style-rift .hcci-title { font-size: clamp(13px, min(10vw, calc(127vw / max(8, var(--hcci-title-chars, 8)))), 60px); }
+}
+
+@media (max-width: 760px) and (orientation: landscape) {
+  .hcci-style-rift .hcci-stage { justify-items: stretch; }
+  .hcci-style-rift .hcci-copy { justify-items: start; text-align: start; }
+}

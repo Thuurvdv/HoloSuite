@@ -1,180 +1,188 @@
-<form class="hcci-config">
-  <header class="hcci-config-header">
-    <div>
-      <p class="hcci-kicker">HoloSuite Module</p>
-      <h2>Critical Cut-In</h2>
-      <div class="hcci-unsaved" data-hcci-dirty hidden>Unsaved changes</div>
+<form data-holosuite-branding="holosuite-critical-cutin" class="hcci-config" aria-label="Critical Cut-In Configuration">
+  <div class="hcci-player-bar">
+    <div class="hcci-window-drag" data-hcci-window-drag aria-hidden="true"></div>
+    <div class="hcci-player-row">
+      <button type="button" class="hcci-glory-launch" data-hcci-glory-roll>
+        <i class="fa-solid fa-dice-d20" aria-hidden="true"></i> Glory Roll
+      </button>
+      <nav class="hcci-player-tabs" role="tablist" aria-label="Players">
+        {{#each players}}
+          <button type="button" role="tab" id="hcci-player-{{id}}" aria-controls="hcci-characters-{{id}}" aria-selected="false" tabindex="-1" data-hcci-player="{{id}}">
+            <img src="{{avatar}}" alt="">
+            <span>{{name}}<small>{{tabDetail}}</small></span>
+          </button>
+        {{/each}}
+      </nav>
     </div>
-    <div class="hcci-top-controls">
-      <label class="hcci-threshold">
-        <span>Check die</span>
-        <select name="dieSides" required title="Changing dice asks to reset the listed players' success and failure thresholds.">
-          {{#each dice}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+  </div>
+
+  <main class="hcci-config-main">
+    {{#each players}}
+      <section class="hcci-characters hcci-frame" id="hcci-characters-{{id}}" role="tabpanel" aria-labelledby="hcci-player-{{id}}" data-hcci-characters="{{id}}" hidden>
+        <h3><i class="fa-solid fa-users" aria-hidden="true"></i> {{characterHeading}}</h3>
+        <div class="hcci-character-list">
+          {{#each targets}}
+            <button type="button" aria-pressed="false" data-hcci-character="{{key}}" {{#if ../reorderable}}draggable="true" aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown" title="Drag to reorder, or use Alt and an arrow key"{{/if}}>
+              <img src="{{portrait}}" alt="" draggable="false">
+              <span>{{name}}</span>
+              {{#if ../reorderable}}<i class="fa-solid fa-grip-vertical hcci-character-grip" aria-hidden="true"></i>{{/if}}
+            </button>
+          {{else}}
+            <p class="hcci-empty">This player has no owned characters.</p>
           {{/each}}
-        </select>
-      </label>
-      <label class="hcci-threshold">
-        <span>Positive rolls</span>
-        <select name="rollDirection" title="Changing roll direction asks to reset the listed players' success and failure thresholds.">
-          <option value="high" {{#unless lowRollsGood}}selected{{/unless}}>High rolls are positive</option>
-          <option value="low" {{#if lowRollsGood}}selected{{/if}}>Low rolls are positive</option>
-        </select>
-      </label>
-      <label class="hcci-threshold">
-        <span data-hcci-success-label>Success {{#if lowRollsGood}}≤{{else}}≥{{/if}}</span>
-        <input type="number" name="threshold" min="0" max="{{dieSides}}" step="1" value="{{threshold}}" title="0 = automatic best face. Set a value to customize the threshold.">
-      </label>
-      <label class="hcci-threshold">
-        <span data-hcci-failure-label>Failure {{#if lowRollsGood}}≥{{else}}≤{{/if}}</span>
-        <input type="number" name="failureThreshold" min="0" max="{{dieSides}}" step="1" value="{{failureThreshold}}" title="0 = automatic worst face. Set a value to customize the threshold.">
-      </label>
-      <label class="hcci-threshold">
-        <span>Duration (ms)</span>
-        <input type="number" name="duration" min="800" max="8000" step="100" value="{{duration}}">
-      </label>
-    </div>
-  </header>
-  <p class="hcci-roll-help">Changing the die or positive roll direction asks to reset roll thresholds for every listed entry in both tabs. Global thresholds of 0 use the best/worst face automatically; blank actor thresholds inherit them. Click Save to apply changes.</p>
-
-  <section class="hcci-config-grid">
-    {{#each rows}}
-      <article class="hcci-config-row" data-hcci-row="{{key}}">
-        <div class="hcci-preview-wrap">
-          <img src="{{success.preview}}" alt="">
-          <span>{{typeLabel}}</span>
         </div>
-
-        <div class="hcci-row-main">
-          <div class="hcci-row-title">
-            <h3>{{name}}</h3>
-            <div class="hcci-row-tabs" role="tablist" aria-label="{{name}} cut-in type">
-              <button type="button" class="{{#if successActive}}is-active{{/if}}" data-hcci-tab="success">Success</button>
-              <button type="button" class="{{#if failureActive}}is-active{{/if}}" data-hcci-tab="failure">Failure</button>
-            </div>
-          </div>
-
-          <div class="hcci-row-panel {{#if successActive}}is-active{{/if}}" data-hcci-panel="success">
-            <div class="hcci-row-panel-heading">
-              <strong>Critical success cut-in</strong>
-              <label class="hcci-toggle">
-                <input type="checkbox" data-hcci-field="enabled" {{#if success.enabled}}checked{{/if}}>
-                <span>Enabled</span>
-              </label>
-            </div>
-
-            <div class="hcci-panel-preview">
-              <img data-hcci-preview data-fallback-src="{{portrait}}" src="{{success.preview}}" alt="">
-            </div>
-
-            <div class="hcci-row-fields">
-              <label class="hcci-path-field">
-                <span>Image / Portrait</span>
-                <div>
-                  <input type="text" data-hcci-field="imagePath" value="{{success.imagePath}}" placeholder="modules/holosuite-critical-cutin/assets/images/example.webp">
-                  <button type="button" data-hcci-browse="imagePath" title="Choose image"><i class="fa-solid fa-image"></i></button>
-                </div>
-              </label>
-
-              <label class="hcci-path-field">
-                <span>Audio Sample</span>
-                <div>
-                  <input type="text" data-hcci-field="audioPath" value="{{success.audioPath}}" placeholder="modules/holosuite-critical-cutin/assets/sounds/example.ogg">
-                  <button type="button" data-hcci-browse="audioPath" title="Choose audio"><i class="fa-solid fa-music"></i></button>
-                </div>
-              </label>
-
-              <label>
-                <span data-hcci-success-label>Success {{#if ../lowRollsGood}}≤{{else}}≥{{/if}}</span>
-                <input type="number" data-hcci-field="threshold" min="1" max="{{../dieSides}}" step="1" value="{{success.threshold}}" placeholder="{{../effectiveThreshold}}">
-              </label>
-
-              <label>
-                <span>Animation</span>
-                <select data-hcci-field="animationStyle">
-                  {{#each success.animationStyles}}
-                    <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-                  {{/each}}
-                </select>
-              </label>
-
-              <label>
-                <span>Overlay Text</span>
-                <input type="text" data-hcci-field="overlayText" value="{{success.overlayText}}" placeholder="{{../defaultText}}">
-              </label>
-
-              <label>
-                <span>Accent Color</span>
-                <input type="color" data-hcci-field="accentColor" value="{{success.accentColor}}">
-              </label>
-            </div>
-          </div>
-
-          <div class="hcci-row-panel {{#if failureActive}}is-active{{/if}}" data-hcci-panel="failure">
-            <div class="hcci-row-panel-heading">
-              <strong>Critical failure cut-in</strong>
-              <label class="hcci-toggle">
-                <input type="checkbox" data-hcci-field="enabled" {{#if failure.enabled}}checked{{/if}}>
-                <span>Enabled</span>
-              </label>
-            </div>
-
-            <div class="hcci-panel-preview">
-              <img data-hcci-preview data-fallback-src="{{portrait}}" src="{{failure.preview}}" alt="">
-            </div>
-
-            <div class="hcci-row-fields">
-              <label class="hcci-path-field">
-                <span>Image / Portrait</span>
-                <div>
-                  <input type="text" data-hcci-field="imagePath" value="{{failure.imagePath}}" placeholder="modules/holosuite-critical-cutin/assets/images/failure.webp">
-                  <button type="button" data-hcci-browse="imagePath" title="Choose image"><i class="fa-solid fa-image"></i></button>
-                </div>
-              </label>
-
-              <label class="hcci-path-field">
-                <span>Audio Sample</span>
-                <div>
-                  <input type="text" data-hcci-field="audioPath" value="{{failure.audioPath}}" placeholder="modules/holosuite-critical-cutin/assets/sounds/failure.ogg">
-                  <button type="button" data-hcci-browse="audioPath" title="Choose audio"><i class="fa-solid fa-music"></i></button>
-                </div>
-              </label>
-
-              <label>
-                <span data-hcci-failure-label>Failure {{#if ../lowRollsGood}}≥{{else}}≤{{/if}}</span>
-                <input type="number" data-hcci-field="threshold" min="1" max="{{../dieSides}}" step="1" value="{{failure.threshold}}" placeholder="{{../effectiveFailureThreshold}}">
-              </label>
-
-              <label>
-                <span>Animation</span>
-                <select data-hcci-field="animationStyle">
-                  {{#each failure.animationStyles}}
-                    <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-                  {{/each}}
-                </select>
-              </label>
-
-              <label>
-                <span>Overlay Text</span>
-                <input type="text" data-hcci-field="overlayText" value="{{failure.overlayText}}" placeholder="{{../defaultFailureText}}">
-              </label>
-
-              <label>
-                <span>Accent Color</span>
-                <input type="color" data-hcci-field="accentColor" value="{{failure.accentColor}}">
-              </label>
-            </div>
-          </div>
-
-        </div>
-      </article>
-    {{else}}
-      <p class="hcci-empty">No player-owned actors were found in this world.</p>
+      </section>
     {{/each}}
-  </section>
 
-  <footer class="hcci-config-actions">
-    <button type="button" data-hcci-action="reset"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-    <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    <div class="hcci-workspace" data-hcci-workspace hidden>
+      <section class="hcci-preview hcci-frame" aria-label="Cinematic preview">
+        <h3><i class="fa-solid fa-eye" aria-hidden="true"></i> Preview <span aria-hidden="true">/</span> <span data-hcci-preview-kind></span></h3>
+        <div class="hcci-preview-art">
+          <img data-hcci-art alt="">
+          <div class="hcci-preview-copy">
+            <div class="hcci-preview-label" data-hcci-caption></div>
+            <div class="hcci-preview-name" data-hcci-preview-name></div>
+          </div>
+        </div>
+        <div class="hcci-preview-actions">
+          <div class="hcci-styles">
+            <h4 id="hcci-styles-label"><i class="fa-solid fa-clapperboard" aria-hidden="true"></i> Animation Style</h4>
+            <div class="hcci-style-list" role="group" aria-labelledby="hcci-styles-label">
+              {{#each animationStyles}}
+                <button type="button" aria-pressed="false" data-hcci-style="{{id}}">
+                  <svg viewBox="0 0 72 28" aria-hidden="true"><use href="modules/holosuite-critical-cutin/assets/ui/style-icons.svg#{{id}}"/></svg>
+                  <span>{{label}}</span>
+                </button>
+              {{/each}}
+            </div>
+          </div>
+          <button class="hcci-primary hcci-test" type="button" data-hcci-test>
+            <i class="fa-solid fa-play" aria-hidden="true"></i>
+            <span>Test Cut-In <small>Local only</small></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="hcci-editor hcci-frame" aria-label="Cut-in configuration">
+        <div class="hcci-outcomes" role="tablist" aria-label="Critical outcome">
+          <button type="button" role="tab" id="hcci-success-tab" aria-controls="hcci-settings-panel" aria-selected="true" data-hcci-tab="success">
+            <i class="fa-solid fa-check" aria-hidden="true"></i> Critical Success
+          </button>
+          <button type="button" role="tab" id="hcci-failure-tab" aria-controls="hcci-settings-panel" aria-selected="false" tabindex="-1" data-hcci-tab="failure">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i> Critical Failure
+          </button>
+        </div>
+        <div id="hcci-settings-panel" role="tabpanel" aria-labelledby="hcci-success-tab" class="hcci-settings">
+          <h3><i class="fa-solid fa-sliders" aria-hidden="true"></i> Cut-In Settings</h3>
+          {{#each rows}}
+            <div data-hcci-row="{{key}}" data-hcci-portrait="{{portrait}}" data-hcci-name="{{name}}" {{#if actorId}}data-hcci-actor-id="{{actorId}}"{{/if}} hidden>
+              {{#each outcomes}}
+                <div class="hcci-fields" data-hcci-panel="{{kind}}" hidden>
+                  <label class="hcci-field hcci-toggle">
+                    <span>Enabled</span>
+                    <input type="checkbox" data-hcci-field="enabled" {{#if enabled}}checked{{/if}}>
+                  </label>
+                  <label class="hcci-field">
+                    <span>Overlay Text</span>
+                    <input type="text" data-hcci-field="overlayText" value="{{overlayText}}" placeholder="{{defaultText}}">
+                  </label>
+                  <label class="hcci-field">
+                    <span>Animation Style</span>
+                    <select data-hcci-field="animationStyle">
+                      {{#each animationStyles}}
+                        <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                      {{/each}}
+                    </select>
+                  </label>
+                  <label class="hcci-field">
+                    <span data-hcci-{{kind}}-label>Trigger Threshold</span>
+                    <input type="number" data-hcci-field="threshold" min="{{../../diceQuantity}}" max="{{../../maxRollTotal}}" step="1" value="{{threshold}}" title="Leave blank to inherit the global threshold.">
+                  </label>
+                  <label class="hcci-field">
+                    <span>Duration (ms)</span>
+                    <input type="number" data-hcci-field="duration" min="800" max="8000" step="1" value="{{duration}}" placeholder="Use global duration">
+                  </label>
+                  <label class="hcci-field">
+                    <span>Accent Color</span>
+                    <input type="color" data-hcci-field="accentColor" value="{{accentColor}}">
+                  </label>
+                  <div class="hcci-field hcci-path-field">
+                    <label for="hcci-image-{{../key}}-{{kind}}">Image / Portrait</label>
+                    <div>
+                      <input id="hcci-image-{{../key}}-{{kind}}" type="text" data-hcci-field="imagePath" value="{{imagePath}}" placeholder="Default portrait">
+                      <button type="button" data-hcci-browse="imagePath" aria-label="Choose image" title="Choose image"><i class="fa-solid fa-image" aria-hidden="true"></i></button>
+                    </div>
+                  </div>
+                  <div class="hcci-field hcci-path-field">
+                    <label for="hcci-audio-{{../key}}-{{kind}}">Audio Sample</label>
+                    <div>
+                      <input id="hcci-audio-{{../key}}-{{kind}}" type="text" data-hcci-field="audioPath" value="{{audioPath}}" placeholder="No audio sample">
+                      <button type="button" data-hcci-browse="audioPath" aria-label="Choose audio" title="Choose audio"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></button>
+                    </div>
+                  </div>
+                </div>
+              {{/each}}
+              {{#if isGm}}
+                <label class="hcci-field hcci-toggle" title="When enabled, the GM cut-in uses the rolling token’s artwork when available.">
+                  <span>Use token portrait</span>
+                  <input type="checkbox" data-hcci-gm-token-portrait {{#if useTokenPortrait}}checked{{/if}}>
+                </label>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="hcci-footer">
+    <details class="hcci-global">
+      <summary><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Global Settings <small>Dice, timing and default audio</small></span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></summary>
+      <div class="hcci-global-fields hcci-frame">
+        <label>
+          <span>Check Die</span>
+          <select name="dieSides" required>
+            {{#each dice}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </label>
+        <label>
+          <span>Amount of Dice</span>
+          <input type="number" name="diceQuantity" min="1" max="{{maxDiceQuantity}}" step="1" value="{{diceQuantity}}" required>
+        </label>
+        <label>
+          <span>Positive Rolls</span>
+          <select name="rollDirection">
+            <option value="high" {{#unless lowRollsGood}}selected{{/unless}}>High rolls are positive</option>
+            <option value="low" {{#if lowRollsGood}}selected{{/if}}>Low rolls are positive</option>
+          </select>
+        </label>
+        <label>
+          <span data-hcci-success-label>Success threshold</span>
+          <input type="number" name="threshold" min="0" max="{{maxRollTotal}}" step="1" value="{{threshold}}">
+        </label>
+        <label>
+          <span data-hcci-failure-label>Failure threshold</span>
+          <input type="number" name="failureThreshold" min="0" max="{{maxRollTotal}}" step="1" value="{{failureThreshold}}">
+        </label>
+        <label>
+          <span>Duration (ms)</span>
+          <input type="number" name="duration" min="800" max="8000" step="100" value="{{duration}}">
+        </label>
+        <label class="hcci-toggle hcci-global-audio">
+          <span>Default Success Audio</span>
+          <input type="checkbox" name="defaultSuccessAudio" {{#if defaultSuccessAudio}}checked{{/if}}>
+        </label>
+        <label class="hcci-toggle hcci-global-audio">
+          <span>Default Failure Audio</span>
+          <input type="checkbox" name="defaultFailureAudio" {{#if defaultFailureAudio}}checked{{/if}}>
+        </label>
+      </div>
+    </details>
+    <div class="hcci-config-actions">
+      <span class="hcci-unsaved" data-hcci-dirty role="status" hidden>Unsaved changes</span>
+      <button type="button" data-hcci-action="close"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Close</button>
+      <button type="button" data-hcci-action="reset" title="Reset all character and GM overrides"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset</button>
+      <button type="submit" class="hcci-primary"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save Configuration</button>
+    </div>
   </footer>
 </form>

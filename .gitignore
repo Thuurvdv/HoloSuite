@@ -1,5 +1,6 @@
 node_modules/
 .tmp-tests/
+/work/releases/holosuite-critical-cutin-v*/
 /docs/assets/featured-modules/README.md
 *.log
 *.zip
